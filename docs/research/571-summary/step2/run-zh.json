@@ -1,0 +1,574 @@
+[
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "zh-free-form",
+    "hasEngineOutput" : true,
+    "lang" : "zh",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 1278,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "做产品最难不是写代码，而是决定不做什么。总是有一个想法比当前更好，结果六个月后手里有15个项目，一个都没做完。",
+    "outputChars" : 55,
+    "outputLanguage" : "zh-Hans",
+    "preamble" : false,
+    "ratio" : 0.48672566371681414,
+    "rawChars" : 113,
+    "reportFraming" : [
+
+    ],
+    "run" : 1
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "zh-free-form",
+    "hasEngineOutput" : true,
+    "lang" : "zh",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 1354,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "做产品最难不是写代码，而是决定不做什么，因为总有一个想法比当前更好，结果六个月后手上有15个开了头的项目，一个都没做完。",
+    "outputChars" : 60,
+    "outputLanguage" : "zh-Hans",
+    "preamble" : false,
+    "ratio" : 0.5309734513274337,
+    "rawChars" : 113,
+    "reportFraming" : [
+
+    ],
+    "run" : 2
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "zh-free-form",
+    "hasEngineOutput" : true,
+    "lang" : "zh",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 1301,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "做产品最难不是写代码而是决定不做什么因为总有一个想法比当前更好导致六个月后有15个项目都没完成",
+    "outputChars" : 47,
+    "outputLanguage" : "zh-Hans",
+    "preamble" : false,
+    "ratio" : 0.415929203539823,
+    "rawChars" : 113,
+    "reportFraming" : [
+
+    ],
+    "run" : 3
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "zh-free-form",
+    "hasEngineOutput" : true,
+    "lang" : "zh",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 1346,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "做产品最难的是决定不做什么。一个想法总是比正在做的好，结果六个月后手上有15个开头，一个都没做完。",
+    "outputChars" : 49,
+    "outputLanguage" : "zh-Hans",
+    "preamble" : false,
+    "ratio" : 0.4336283185840708,
+    "rawChars" : 113,
+    "reportFraming" : [
+
+    ],
+    "run" : 4
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "zh-free-form",
+    "hasEngineOutput" : true,
+    "lang" : "zh",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 1325,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "做产品最难不是写代码而是决定不做什么，因为总有一个想法比当前更好，结果六个月后有15个项目都没完成。",
+    "outputChars" : 50,
+    "outputLanguage" : "zh-Hans",
+    "preamble" : false,
+    "ratio" : 0.4424778761061947,
+    "rawChars" : 113,
+    "reportFraming" : [
+
+    ],
+    "run" : 5
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "zh-todo-enumeration",
+    "hasEngineOutput" : true,
+    "lang" : "zh",
+    "languageMatches" : false,
+    "listLines" : 0,
+    "ms" : 2630,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "rejectedGuardrail",
+    "output" : "I need to get the January data from Marion, she says she will have it on Wednesday. I must make a comparison table with last year’s data. I have to call the supplier because their quote rose from 12000 to 15000 euros and no one approved it. I must book the second floor meeting room because another one is occupied all week.",
+    "outputChars" : 324,
+    "outputLanguage" : "en",
+    "preamble" : false,
+    "ratio" : 2.174496644295302,
+    "rawChars" : 149,
+    "rejectedCheck" : "length",
+    "reportFraming" : [
+
+    ],
+    "run" : 1
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "zh-todo-enumeration",
+    "hasEngineOutput" : true,
+    "lang" : "zh",
+    "languageMatches" : false,
+    "listLines" : 0,
+    "ms" : 2706,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "rejectedGuardrail",
+    "output" : "I have to get the January data from Marion, she says she will have it on Wednesday, I must make a comparison table with last year's data, I need to call the supplier because their quote went up from 12000 to 15000 euros and no one approved it, I must book the second floor meeting room because the other one is occupied all week.",
+    "outputChars" : 329,
+    "outputLanguage" : "en",
+    "preamble" : false,
+    "ratio" : 2.208053691275168,
+    "rawChars" : 149,
+    "rejectedCheck" : "length",
+    "reportFraming" : [
+
+    ],
+    "run" : 2
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "zh-todo-enumeration",
+    "hasEngineOutput" : true,
+    "lang" : "zh",
+    "languageMatches" : false,
+    "listLines" : 0,
+    "ms" : 2663,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "rejectedGuardrail",
+    "output" : "I have to get the January data from Marion, she says she will have it on Wednesday, I have to make a comparison table with last year's data, I have to call the supplier because their quote went from 12000 to 15000 euros and no one approved it, I have to book the second floor meeting room because another one is occupied all week.",
+    "outputChars" : 330,
+    "outputLanguage" : "en",
+    "preamble" : false,
+    "ratio" : 2.214765100671141,
+    "rawChars" : 149,
+    "rejectedCheck" : "length",
+    "reportFraming" : [
+
+    ],
+    "run" : 3
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "zh-todo-enumeration",
+    "hasEngineOutput" : true,
+    "lang" : "zh",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 1947,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "rejectedGuardrail",
+    "output" : "我得从Marion那里拿到一月份的数据，她说周三有，我得做一个跟去年数据的对比表，我还得给供应商打电话，因为他们的报价从12000涨到了15000欧元，而且没有人批准过，我还得订二楼的会议室，因为另一间整个星期都被占了。",
+    "outputChars" : 110,
+    "outputLanguage" : "zh-Hans",
+    "preamble" : false,
+    "ratio" : 0.738255033557047,
+    "rawChars" : 149,
+    "rejectedCheck" : "length",
+    "reportFraming" : [
+
+    ],
+    "run" : 4
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "zh-todo-enumeration",
+    "hasEngineOutput" : true,
+    "lang" : "zh",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 1863,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "rejectedGuardrail",
+    "output" : "我得从Marion那里拿到一月份的数据，她说她周三会有，我得做一个跟去年数据的对比表，我得给供应商打电话因为他们的报价从12000涨到了15000欧元而且没有人批准过，我还得记得订二楼的会议室因为另一间整个星期都被占了。",
+    "outputChars" : 110,
+    "outputLanguage" : "zh-Hans",
+    "preamble" : false,
+    "ratio" : 0.738255033557047,
+    "rawChars" : 149,
+    "rejectedCheck" : "length",
+    "reportFraming" : [
+
+    ],
+    "run" : 5
+  },
+  {
+    "arm" : "arm-zh-examples",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "zh-free-form",
+    "hasEngineOutput" : true,
+    "lang" : "zh",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 1227,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "一个人做产品最难不是写代码，而是决定不做什么，因为总有一个想法看起来更好，结果六个月后手上有15个开了头的都没做完。",
+    "outputChars" : 58,
+    "outputLanguage" : "zh-Hans",
+    "preamble" : false,
+    "ratio" : 0.5132743362831859,
+    "rawChars" : 113,
+    "reportFraming" : [
+
+    ],
+    "run" : 1
+  },
+  {
+    "arm" : "arm-zh-examples",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "zh-free-form",
+    "hasEngineOutput" : true,
+    "lang" : "zh",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 1252,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "一个人做产品最难不是写代码，而是决定不做什么，因为总有一个想法看起来更好，结果六个月后手上有15个开了头的项目，一个都没做完。",
+    "outputChars" : 63,
+    "outputLanguage" : "zh-Hans",
+    "preamble" : false,
+    "ratio" : 0.5575221238938053,
+    "rawChars" : 113,
+    "reportFraming" : [
+
+    ],
+    "run" : 2
+  },
+  {
+    "arm" : "arm-zh-examples",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "zh-free-form",
+    "hasEngineOutput" : true,
+    "lang" : "zh",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 1250,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "一个人做产品最难的是决定不做什么。总是有一个想法看起来更好，结果六个月后手上有15个开了头，一个都没做完。",
+    "outputChars" : 53,
+    "outputLanguage" : "zh-Hans",
+    "preamble" : false,
+    "ratio" : 0.4690265486725664,
+    "rawChars" : 113,
+    "reportFraming" : [
+
+    ],
+    "run" : 3
+  },
+  {
+    "arm" : "arm-zh-examples",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "zh-free-form",
+    "hasEngineOutput" : true,
+    "lang" : "zh",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 1356,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "rejectedGuardrail",
+    "output" : "一个人做产品最难不是写代码，而是决定不做什么。总是有一个想法看起来比你正在做的好，你就扑上去，结果六个月后手上有15个开了头的项目，一个都没做完。",
+    "outputChars" : 73,
+    "outputLanguage" : "zh-Hans",
+    "preamble" : false,
+    "ratio" : 0.6460176991150443,
+    "rawChars" : 113,
+    "rejectedCheck" : "length",
+    "reportFraming" : [
+
+    ],
+    "run" : 4
+  },
+  {
+    "arm" : "arm-zh-examples",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "zh-free-form",
+    "hasEngineOutput" : true,
+    "lang" : "zh",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 1380,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "rejectedGuardrail",
+    "output" : "一个人做产品最难不是写代码，而是决定不做什么。因为总有一个想法看起来比正在做的更好，然后扑上去，结果六个月后手上有15个开了头的项目，一个都没做完。",
+    "outputChars" : 74,
+    "outputLanguage" : "zh-Hans",
+    "preamble" : false,
+    "ratio" : 0.6548672566371682,
+    "rawChars" : 113,
+    "rejectedCheck" : "length",
+    "reportFraming" : [
+
+    ],
+    "run" : 5
+  },
+  {
+    "arm" : "arm-zh-examples",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "zh-todo-enumeration",
+    "hasEngineOutput" : true,
+    "lang" : "zh",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 1917,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "rejectedGuardrail",
+    "output" : "我得从Marion那里拿到一月份的数据，她说周三有。我要做一个跟去年数据的对比表。我得给供应商打电话，因为他们的报价从12000涨到了15000欧元，而且没有人批准过。我还得记得订二楼的会议室，因为另一间整个星期都被占了。",
+    "outputChars" : 111,
+    "outputLanguage" : "zh-Hans",
+    "preamble" : false,
+    "ratio" : 0.7449664429530202,
+    "rawChars" : 149,
+    "rejectedCheck" : "length",
+    "reportFraming" : [
+
+    ],
+    "run" : 1
+  },
+  {
+    "arm" : "arm-zh-examples",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "zh-todo-enumeration",
+    "hasEngineOutput" : true,
+    "lang" : "zh",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 1782,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "rejectedGuardrail",
+    "output" : "我得从Marion那里拿到一月份的数据，她说周二会有。我要做一个跟去年数据的对比表，我必须给供应商打电话，因为他们的报价从12000涨到了15000欧元，而且没有人批准过，我还要订二楼的会议室，因为另一间整个星期都被占了。",
+    "outputChars" : 111,
+    "outputLanguage" : "zh-Hans",
+    "preamble" : false,
+    "ratio" : 0.7449664429530202,
+    "rawChars" : 149,
+    "rejectedCheck" : "length",
+    "reportFraming" : [
+
+    ],
+    "run" : 2
+  },
+  {
+    "arm" : "arm-zh-examples",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "zh-todo-enumeration",
+    "hasEngineOutput" : true,
+    "lang" : "zh",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 1907,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "rejectedGuardrail",
+    "output" : "我得从Marion那里拿到一月份的数据，她说周二会有，我得做一个跟去年数据的对比表，我必须给供应商打电话，因为他们的报价从12000涨到了15000欧元，而且没有人批准过，我还得订二楼的会议室，因为另一间整个星期都被占了。",
+    "outputChars" : 111,
+    "outputLanguage" : "zh-Hans",
+    "preamble" : false,
+    "ratio" : 0.7449664429530202,
+    "rawChars" : 149,
+    "rejectedCheck" : "length",
+    "reportFraming" : [
+
+    ],
+    "run" : 3
+  },
+  {
+    "arm" : "arm-zh-examples",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "zh-todo-enumeration",
+    "hasEngineOutput" : true,
+    "lang" : "zh",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 1904,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "rejectedGuardrail",
+    "output" : "我得从Marion那里拿到一月份的数据，她周二有，我得做一个跟去年数据的对比表，我必须给供应商打电话，因为他们的报价从12000涨到了15000欧元，这没有人批准，我还得订二楼的会议室，因为另一间整个星期都被占了。",
+    "outputChars" : 107,
+    "outputLanguage" : "zh-Hans",
+    "preamble" : false,
+    "ratio" : 0.7181208053691275,
+    "rawChars" : 149,
+    "rejectedCheck" : "length",
+    "reportFraming" : [
+
+    ],
+    "run" : 4
+  },
+  {
+    "arm" : "arm-zh-examples",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "zh-todo-enumeration",
+    "hasEngineOutput" : true,
+    "lang" : "zh",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 1915,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "rejectedGuardrail",
+    "output" : "我得从Marion那里拿到一月份的数据，她周二会有。我得做一个跟去年数据的对比表。我得给供应商打电话，因为他们的报价从12000涨到了15000欧元，而且没有人批准过。我还得记得订二楼的会议室，因为另一间整个星期都被占了。",
+    "outputChars" : 111,
+    "outputLanguage" : "zh-Hans",
+    "preamble" : false,
+    "ratio" : 0.7449664429530202,
+    "rawChars" : 149,
+    "rejectedCheck" : "length",
+    "reportFraming" : [
+
+    ],
+    "run" : 5
+  }
+]

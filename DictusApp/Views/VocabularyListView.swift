@@ -29,6 +29,9 @@ struct VocabularyListView: View {
     /// The entry being added or edited, or nil when the sheet is closed.
     @State private var editing: VocabularyEditorSubject?
 
+    /// Whether the suggestions from History are open (#512).
+    @State private var showSuggestions = false
+
     /// Confirmation for the destructive reset, on the model of "Reset learned words".
     @State private var showResetConfirmation = false
 
@@ -37,8 +40,33 @@ struct VocabularyListView: View {
     /// is the second-worst outcome after one that disappears and returns tomorrow.
     @State private var writeFailed = false
 
+    /// The feature's switch, observed so the content dims and unlocks as it moves
+    /// (#216). The same object the switch above writes and the hub row reads.
+    @ObservedObject private var switches = ProFeatureSwitches.shared
+
+    /// Observed so an entitlement that changes while this screen is open (Pro lapsing,
+    /// the DEBUG force flipped) relocks or unlocks it: `FeatureGate` reads the App
+    /// Group, which publishes nothing.
+    @EnvironmentObject private var proStatus: ProStatusManager
+
+    /// Whether the terms below the switch are live: `FeatureGate.isAvailable`, the one
+    /// predicate. Off, they stay visible and cannot be edited, since the replacement
+    /// pass applies none of them (#216 decision 5).
+    private var isAvailable: Bool {
+        _ = switches.isOn(.vocabulary)
+        _ = proStatus.isProActive
+        return FeatureGate.isAvailable(.vocabulary)
+    }
+
     var body: some View {
         List {
+            // The feature's switch, first (#216): this screen is reached from the
+            // Dictus Pro hub's Vocabulary row, which carries no switch of its own.
+            ProFeatureSwitchSection(feature: .vocabulary)
+
+            // What the feature does, and its demo (#686).
+            ProFeatureHowItWorksSection(feature: .vocabulary, isAvailable: isAvailable)
+
             Section {
                 if store.isEmpty {
                     Text("No terms yet. Add the words Dictus gets wrong.")
@@ -68,6 +96,7 @@ struct VocabularyListView: View {
                     Text("When Dictus writes one of these variants, it is replaced by your spelling.")
                 }
             }
+            .proFeatureContent(isAvailable: isAvailable)
 
             Section {
                 Button {
@@ -81,6 +110,20 @@ struct VocabularyListView: View {
                     Text("You have reached the limit of \(VocabularyStore.maxEntries) terms. Delete one to add another.")
                 }
             }
+            .proFeatureContent(isAvailable: isAvailable)
+
+            // The #512 trial: words from History the vocabulary may be missing.
+            // Below **Add a term** because it is another way of adding one.
+            Section {
+                Button {
+                    showSuggestions = true
+                } label: {
+                    Label("Suggestions from History", systemImage: "text.magnifyingglass")
+                }
+            } footer: {
+                Text("Words from your History that Dictus may be getting wrong.")
+            }
+            .proFeatureContent(isAvailable: isAvailable)
 
             if !store.isEmpty {
                 Section {
@@ -88,6 +131,7 @@ struct VocabularyListView: View {
                         showResetConfirmation = true
                     }
                 }
+                .proFeatureContent(isAvailable: isAvailable)
             }
         }
         .navigationTitle("Vocabulary")
@@ -95,11 +139,17 @@ struct VocabularyListView: View {
         .toolbar {
             if !store.isEmpty {
                 EditButton()
+                    .disabled(!isAvailable)
             }
         }
         .sheet(item: $editing) { subject in
             NavigationStack {
                 VocabularyEditorView(subject: subject)
+            }
+        }
+        .sheet(isPresented: $showSuggestions) {
+            NavigationStack {
+                VocabularySuggestionsView()
             }
         }
         .confirmationDialog(
@@ -169,19 +219,37 @@ struct VocabularyListView: View {
 enum VocabularyEditorSubject: Identifiable {
     case new
     case existing(VocabularyEntry)
+    /// A new term started from History (#723): the variant is what the user selected
+    /// in a saved transcript, and the term is theirs to type. A vocabulary suggestion
+    /// anchored on a word the keyboard learned (#512) also passes that word as `term`,
+    /// prefilled; the user can still edit it.
+    case observed(variant: String, term: String = "")
 
     var id: String {
         switch self {
         case .new: return "new"
         case .existing(let entry): return entry.id.uuidString
+        case let .observed(variant, term): return "observed-\(term)-\(variant)"
         }
     }
 
     var entry: VocabularyEntry? {
         switch self {
-        case .new: return nil
+        case .new, .observed: return nil
         case .existing(let entry): return entry
         }
+    }
+
+    /// The variant the sheet opens with, when it was started from History.
+    var observedVariant: String? {
+        if case let .observed(variant, _) = self { return variant }
+        return nil
+    }
+
+    /// The term the sheet opens with, when a suggestion already knows it (#512).
+    var observedTerm: String? {
+        if case let .observed(_, term) = self, !term.isEmpty { return term }
+        return nil
     }
 }
 
@@ -196,6 +264,11 @@ struct VocabularyEditorView: View {
     @State private var term: String
     @State private var variantsLine: String
 
+    /// Focus on the term field, set when the sheet opens from History (#723): the
+    /// variant is already filled in, so the correct spelling is the one thing left to
+    /// type.
+    @FocusState private var termIsFocused: Bool
+
     /// Set when the store refused to write. The sheet then stays open rather than
     /// dismissing over a term that was never stored — losing what the user typed is
     /// the one outcome worse than telling them it failed.
@@ -203,8 +276,8 @@ struct VocabularyEditorView: View {
 
     init(subject: VocabularyEditorSubject) {
         self.subject = subject
-        _term = State(initialValue: subject.entry?.term ?? "")
-        _variantsLine = State(initialValue: subject.entry?.variantsLine ?? "")
+        _term = State(initialValue: subject.entry?.term ?? subject.observedTerm ?? "")
+        _variantsLine = State(initialValue: subject.entry?.variantsLine ?? subject.observedVariant ?? "")
     }
 
     /// What the two fields would produce, or nil when the term is empty or too long.
@@ -225,6 +298,34 @@ struct VocabularyEditorView: View {
         && store.contains(term: term, excluding: subject.entry?.id)
     }
 
+    /// The stored entry the variants will join instead of a new one (#723).
+    ///
+    /// Only for a sheet opened from History. There the user did not come to create a
+    /// term, they came to say "Dictus wrote this": when the spelling they type is one
+    /// they already taught Dictus, refusing it as a duplicate would send them to the
+    /// Vocabulary screen to retype the variant by hand, which is the chore #723
+    /// exists to remove. The plain **Add a term** sheet keeps refusing the duplicate,
+    /// since there the user is creating, and a second entry is a mistake.
+    private var mergeTarget: VocabularyEntry? {
+        guard subject.observedVariant != nil else { return nil }
+        return store.entry(matchingTerm: term)
+    }
+
+    /// The entry Save will store: the stored one with the new variants on a merge,
+    /// the candidate otherwise.
+    private var entryToSave: VocabularyEntry? {
+        guard let candidate else { return nil }
+        guard let mergeTarget else { return candidate }
+        return mergeTarget.addingVariants(candidate.variants)
+    }
+
+    /// Whether Save would need a new entry the store has no room for. The list's own
+    /// **Add a term** button is disabled at the cap; a sheet opened from History is
+    /// not, because a merge still fits, so the refusal is said here.
+    private var exceedsLimit: Bool {
+        subject.entry == nil && mergeTarget == nil && store.isFull
+    }
+
     /// Whether the second field is still empty, on a sheet the user has started
     /// filling. It drives the explanation under that field, so it stays false on an
     /// untouched new-term sheet: telling someone what is missing before they have
@@ -234,11 +335,14 @@ struct VocabularyEditorView: View {
     }
 
     private var canSave: Bool {
-        guard let candidate else { return false }
+        guard let candidate, !exceedsLimit else { return false }
         // `hasEffect` and not `variants.isEmpty` (#536): the rule is "this entry
         // would change a transcript", the model owns it, and a unit test can reach
         // it. A line of nothing but commas is refused here for the same reason —
         // `VocabularyEntry` cleans it away to no variants at all.
+        // A merge needs a variant too: without one Save would store nothing and
+        // close as if it had.
+        if mergeTarget != nil { return candidate.hasEffect }
         return candidate.hasEffect && !duplicatesAnotherTerm
     }
 
@@ -252,10 +356,25 @@ struct VocabularyEditorView: View {
                 TextField("Which term?", text: $term)
                     .autocorrectionDisabled()
                     .textInputAutocapitalization(.never)
+                    .focused($termIsFocused)
             } header: {
                 Text("The correct spelling")
             } footer: {
-                if duplicatesAnotherTerm {
+                if let mergeTarget {
+                    // The merge keeps the entry's switch, as every edit does: the user
+                    // set it on that row and this sheet is not where they set it. So
+                    // a switched-off term says that its new variant will not apply yet,
+                    // rather than letting the next dictation contradict the sheet.
+                    if mergeTarget.isEnabled {
+                        Text("Already in your vocabulary. This variant will be added to it.")
+                    } else {
+                        Text("Already in your vocabulary, switched off. The variant is added but applies only once you switch the term back on.")
+                            .foregroundColor(.orange)
+                    }
+                } else if exceedsLimit {
+                    Text("You have reached the limit of \(VocabularyStore.maxEntries) terms. Delete one to add another.")
+                        .foregroundColor(.red)
+                } else if duplicatesAnotherTerm {
                     Text("This term is already in your vocabulary.")
                         .foregroundColor(.red)
                 } else {
@@ -287,6 +406,9 @@ struct VocabularyEditorView: View {
         }
         .navigationTitle(subject.entry == nil ? "New term" : "Edit term")
         .navigationBarTitleDisplayMode(.inline)
+        .onAppear {
+            if subject.observedVariant != nil { termIsFocused = true }
+        }
         .toolbar {
             ToolbarItem(placement: .cancellationAction) {
                 Button("Cancel") { dismiss() }
@@ -299,8 +421,11 @@ struct VocabularyEditorView: View {
     }
 
     private func save() {
-        guard let candidate else { return }
-        let stored = subject.entry == nil ? store.add(candidate) : store.update(candidate)
+        guard let entry = entryToSave else { return }
+        // A merge is an update of the stored entry: it keeps its place, its date and
+        // its switch, and it cannot grow the file.
+        let isNew = subject.entry == nil && mergeTarget == nil
+        let stored = isNew ? store.add(entry) : store.update(entry)
         // The store only publishes what it managed to write (#80 review). A refusal
         // here means the file was not updated, so dismissing would show a list that
         // disagrees with the disk and lose the entry at the next launch.

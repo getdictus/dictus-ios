@@ -31,6 +31,11 @@ struct PolishDebugExport: Codable {
     /// and the whole point of #466's fourth check is that its rate be countable
     /// after the fact — which needs the split, not the total.
     let guardrailChecks: [String: Int]
+    /// How many dictations each armed mode declined for being under its floor (#587),
+    /// e.g. `{"structured": 3}`. The same number is countable from `outcomes`, which
+    /// carries `smartModeSkippedShortInput`; this splits it per mode, the way
+    /// `guardrailChecks` splits `rejectedGuardrail`.
+    let smartModesSkippedForLength: [String: Int]
     /// The same counts split by writing process, e.g.
     /// `{"<KBD>": {"rateLimited": 0}, "<APP>": {"rateLimited": 21}}` (#361).
     ///
@@ -119,10 +124,19 @@ struct PolishDebugExport: Codable {
         let outcome: String
         /// Why the engine failed (#315) — present on `engineFailed` events only.
         let failureReason: String?
-        /// Which of the four output checks refused (#466) — `length`, `language`,
-        /// `grounding` or `prefixAlignment`. Present on `rejectedGuardrail` events
-        /// only, and absent on every event written before the field existed.
+        /// Which output check refused (#466) — `length`, `language`, `grounding`,
+        /// `prefixAlignment`, `segmentOverlap`, `incompleteness` or `lostWord` (#575).
+        /// Present on `rejectedGuardrail` events only, and absent on every event
+        /// written before the field existed.
         let guardrailCheck: String?
+        /// On a `smartModeSkippedShortInput` event: which mode declined, on how many
+        /// characters, against which floor (#587). Absent on every other event.
+        ///
+        /// The dictation's own result is the **next** event: the Normal polish that ran
+        /// in the mode's place, or a `skippedToggleOff` when the polish toggle is off
+        /// (#747). Before #747 that second case wrote no event at all, which is why
+        /// the skip needed one of its own.
+        let smartModeLengthSkip: PolishMetrics.SmartModeLengthSkip?
         let latencyMs: Int
         /// Latency breakdown — `latencyMs` ≈ preprocess + engine + postprocess.
         /// `engineMs` is the pure LLM cost; the other two are our regex passes.
@@ -182,24 +196,10 @@ enum PolishDebugExporter {
             appleFMState: String(describing: PolishAvailability.state)
         )
 
-        var outcomes: [String: Int] = [
-            "success": 0, "rejectedGuardrail": 0, "skipped": 0,
-            "skippedShort": 0, "skippedAutoMode": 0, "cancelled": 0, "engineFailed": 0,
-            "engineUnavailable": 0, "exceededContextBudget": 0
-        ]
-        var failureReasons: [String: Int] = [:]
-        var failureReasonsByWriter: [String: [String: Int]] = [:]
-        var guardrailChecks: [String: Int] = [:]
-        for e in entries {
-            outcomes[e.metrics.outcome.rawValue, default: 0] += 1
-            if let reason = e.metrics.failureReason {
-                failureReasons[reason.slug, default: 0] += 1
-                failureReasonsByWriter[e.writer ?? "unrecorded", default: [:]][reason.slug, default: 0] += 1
-            }
-            if let check = e.metrics.guardrailCheck {
-                guardrailChecks[check.rawValue, default: 0] += 1
-            }
-        }
+        // The aggregates live in DictusCore since #747, where a test pins that a
+        // dictation the polish toggle stopped counts under its own outcome and in
+        // nothing else.
+        let tally = PolishEventTally(entries: entries)
 
         let events = entries.map { entry in
             PolishDebugExport.Event(
@@ -219,6 +219,7 @@ enum PolishDebugExporter {
                 outcome: entry.metrics.outcome.rawValue,
                 failureReason: entry.metrics.failureReason?.slug,
                 guardrailCheck: entry.metrics.guardrailCheck?.rawValue,
+                smartModeLengthSkip: entry.metrics.smartModeLengthSkip,
                 latencyMs: entry.metrics.latencyMs,
                 preprocessMs: entry.metrics.timings?.preprocessMs,
                 engineMs: entry.metrics.timings?.engineMs,
@@ -238,10 +239,11 @@ enum PolishDebugExporter {
             exportedAt: formatter.string(from: Date()),
             device: device,
             settings: settings,
-            outcomes: outcomes,
-            failureReasons: failureReasons,
-            guardrailChecks: guardrailChecks,
-            failureReasonsByWriter: failureReasonsByWriter,
+            outcomes: tally.outcomes,
+            failureReasons: tally.failureReasons,
+            guardrailChecks: tally.guardrailChecks,
+            smartModesSkippedForLength: tally.smartModesSkippedForLength,
+            failureReasonsByWriter: tally.failureReasonsByWriter,
             events: events
         )
     }

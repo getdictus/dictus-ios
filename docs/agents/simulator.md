@@ -4,7 +4,9 @@ How an agent gets DictusApp running on an iOS Simulator and produces a screensho
 
 Every command below was executed on this machine (Xcode 26.4.1, iOS 26.5 runtime, iPhone 17). The outputs shown are the ones they produced.
 
-**Never bring a Simulator window to the front.** Pierre works on this machine and a foregrounded window steals his focus. `open -a Simulator` is therefore forbidden — but `open -g -a Simulator` is not, and section 5 needs it: `-g` starts the app without foregrounding it. Verified 2026-08-22 by reading the frontmost process before and after; it did not change. If a command foregrounds a window anyway, stop and record it here.
+**To check that the app and keyboard still work end to end, run the smoke test rather than following this file by hand:** `scripts/simulator-smoke-test.sh`. See [`simulator-smoke-test.md`](simulator-smoke-test.md) for when to run it and what a pass does and does not prove.
+
+**Never bring a Simulator window to the front.** Pierre works on this machine and a foregrounded window steals his focus. `open -a Simulator` is therefore forbidden — but `open -g -a Simulator` is not, and section 5 needs it on Xcode 26 (Xcode 27 has no Simulator.app, see section 5): `-g` starts the app without foregrounding it. Verified 2026-08-22 by reading the frontmost process before and after; it did not change. If a command foregrounds a window anyway, stop and record it here.
 
 ## 1. Choose and boot a device
 
@@ -219,11 +221,17 @@ Wrote video to: /…/demo.mp4
 
 `simctl` has no touch injection. **`axe` does** — it is installed on this machine (`/opt/homebrew/bin/axe`, v1.8.0, `brew install cameroncooke/axe/axe`) and it taps, swipes, types and dumps the accessibility tree.
 
-**The catch, and it is the whole section:** every point-based command needs Simulator.app to be running *with the target device attached*. Simulator.app merely being alive is not enough — a device booted after it started is not attached to it. The order matters and so does the wait:
+**Probe first.** Boot, wait for `bootstatus`, then ask `axe` for the tree. If it answers, there is nothing to attach — that is the case on Xcode 27, which ships no Simulator.app (end of this section):
 
 ```bash
 xcrun simctl boot <udid>
 xcrun simctl bootstatus <udid>     # blocks until the device is usable — do not skip
+axe describe-ui --udid <udid> >/dev/null 2>&1 && echo attached
+```
+
+**The catch on Xcode 26, and it is the rest of this section:** there, every point-based command needs Simulator.app to be running *with the target device attached*. Simulator.app merely being alive is not enough — a device booted after it started is not attached to it. Only when the probe fails, and only if the Xcode in use has a Simulator.app, start it in the background:
+
+```bash
 open -g -a Simulator               # -g starts it without foregrounding it
 ```
 
@@ -352,14 +360,16 @@ A menu opened that way **stays open after the release**, so there is no race —
 
 ```bash
 axe describe-ui --udid <udid>
-axe tap --label "Dictus, français" --udid <udid>
+axe tap --label "Dictus, multilingue" --udid <udid>
 ```
+
+The row reads `Dictus, <declared language>` in the device's language. Since #653 the keyboard declares `PrimaryLanguage = mul`, so it is `Dictus, multilingue` on a French device and `Dictus, Multiple languages` on an English one; a build from before #653 still shows `Dictus, français`.
 
 **Never tap the globe to change keyboard.** A tap cycles through the enabled keyboards and skips the third-party ones, so it never lands on Dictus. That single mistake is what produced the wrong conclusion this file carried until 2026-08-23 (section 8).
 
 **A control missing from the accessibility tree needs `--tap-style physical`.** With the default `automatic` style, `axe` falls back to a simulator tap and such a control does not react. Measured 2026-08-23 on the Full Access switch, which `describe-ui` does not report at all (section 8); expect the same wherever a control you can see in a screenshot has no element in the tree.
 
-Xcode 27 replaces this attachment dance with Device Hub and drops the Simulator.app requirement, per AXe's own compatibility notes. Until this machine moves to it, `open -g -a Simulator` is the price of a tap.
+Xcode 27 replaces this attachment dance with Device Hub and drops the Simulator.app requirement, per AXe's own compatibility notes. **Measured 2026-10-14, now that this machine runs Xcode 27.0 (27A266a):** there is no Simulator.app in the Xcode bundle anymore (`Contents/Applications` holds `DeviceHub.app`), and `axe` 1.8.0 taps, long-presses and dumps the tree on a freshly booted device with nothing else running. `open -g -a Simulator` is now only needed on an Xcode 26 machine. Whichever Xcode you have, probe with `axe describe-ui` before deciding; the smoke test does exactly that.
 
 ## 6. Control the frame
 
@@ -460,7 +470,9 @@ d['AppleKeyboards'] = [
 ]
 ```
 
-Then boot, attach Simulator.app (section 5), install, and open any text field. Tapping through Settings → Général → Clavier → Claviers → Ajouter un clavier → Dictus reaches the same state and also works. `defaults write` from the host does not land, and neither does the `com.apple.Preferences` domain — `AppleKeyboards` does not live there; the version of this file before #378 made both mistakes at once and concluded from them that the keyboard could not be enabled at all.
+**On a fresh or erased device, add `AppleKeyboardsExpanded = 1` in the same write.** Without it, iOS ignores `AppleKeyboards` and rebuilds the list from `AppleLanguages`, without Dictus. Measured 2026-10-14 on iOS 26.5: Settings showed Français, Anglais (R.-U.) and Emoji while the plist still held the list above. Reading it back from inside the device works: `xcrun simctl spawn <udid> defaults read -g AppleKeyboards`.
+
+Then boot, probe `axe` and attach Simulator.app only if the probe fails (section 5), install, and open any text field. Tapping through Settings → Général → Clavier → Claviers → Ajouter un clavier → Dictus reaches the same state and also works. `defaults write` from the host does not land, and neither does the `com.apple.Preferences` domain — `AppleKeyboards` does not live there; the version of this file before #378 made both mistakes at once and concluded from them that the keyboard could not be enabled at all.
 
 **Full Access.** Granted by tap, in Réglages → Général → Clavier → Claviers → Dictus. The switch is not in the accessibility tree, so `axe`'s default `automatic` style falls back to a simulator tap and the toggle does not move; `--tap-style physical` moves it:
 
@@ -470,6 +482,8 @@ axe tap --label "Autoriser" --udid <udid>                  # the confirmation al
 ```
 
 The log then carries `fullAccess=true`.
+
+Fired the instant the page or the alert has been pushed, either tap can be swallowed by the transition, and the grant then silently does not happen. The keyboard comes up showing `Accès complet requis` and logs `fullAccess=false` (measured 2026-10-14, the smoke test's second run). Pause before each tap, and check that the alert appears and then goes away.
 
 **What the extension then gives you.** It runs, and it writes: `<KBD> diagnosticProbe` lines carrying `inputBounds`, `keyboardFrame`, `hostingConst`, `heightConst`, `memMB`, `status`, `mode` and `coldStart`. Tapping the mic fires the whole keyboard → app dictation chain, which on a device with no model installed ends where it should:
 
@@ -511,6 +525,8 @@ exits 0 and raises an `Ouvrir dans « Dictus » ?` confirmation alert, which nee
 No transcription model is installed, and installing one means the Models tab — a tap — plus a download. Recording never starts, so nothing is proven about capture. `xcrun simctl privacy <udid> grant microphone com.pivi.dictus` exits 0, but it was never put to use.
 
 Two things to know before trying: the simulator captures the **Mac's** input device, so a recording started here records the room Pierre is sitting in; and transcription runs on Mac silicon, so any timing measured in a simulator says nothing about the phone.
+
+**A host app's spell-check underlines are not a usable probe.** Measured 2026-10-05 for #653 in Reminders' inline title field, typing with the Dictus keyboard: the first session underlined a nonsense word (`xqzvb`) in red. After a reinstall of Dictus, the same field underlined nothing — with the old `fr-FR` build as with the new one, with the simulated hardware keyboard too, and still after a reboot. A missing underline here says nothing about the keyboard; that check belongs on a physical iPhone.
 
 **StoreKit is inert.** The paywall and subscription state cannot be exercised without a StoreKit configuration:
 

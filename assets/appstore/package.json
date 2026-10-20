@@ -1,0 +1,13 @@
+{
+  "name": "dictus-appstore-screenshots",
+  "private": true,
+  "description": "Exports the App Store screenshots from screenshots.html (issue #643).",
+  "type": "module",
+  "scripts": {
+    "bezel": "tools/fetch-bezel.sh",
+    "export": "node tools/export.mjs"
+  },
+  "devDependencies": {
+    "playwright": "1.63.0"
+  }
+}

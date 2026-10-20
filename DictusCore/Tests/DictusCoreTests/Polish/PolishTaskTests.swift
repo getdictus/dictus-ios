@@ -64,8 +64,8 @@ final class PolishTaskTests: XCTestCase {
         XCTAssertTrue(polish.contains("\n\nsalut\n\n"))
 
         let notes = PolishTask.smart(SmartModeCatalogue.notes).userTurn(raw: "salut")
-        XCTAssertTrue(notes.hasPrefix("Condense this text into a bulleted list."))
-        XCTAssertTrue(notes.hasSuffix("Condensed output:"))
+        XCTAssertTrue(notes.hasPrefix("Condense this text into a title line followed by a bulleted list"))
+        XCTAssertTrue(notes.hasSuffix("Title and list:"))
         XCTAssertFalse(notes.contains("Polish this text"))
 
         let translate = PolishTask

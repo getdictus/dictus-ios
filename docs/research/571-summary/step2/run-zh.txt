@@ -1,0 +1,71 @@
+
+
+████ ARM shipping — mode summary, 5 run(s) × 2 fixture(s)
+
+━━ [zh-free-form] 113 chars, lang=zh
+  raw: 嗯那个，我今天早上散步的时候在想一件事，就是说其实一个人做产品的时候，最难的不是写代码，而是决定不做什么。因为总是有一个想法看起来比你正在做的那个更好。然后你就扑上去了，结果六个月以后你手上有15个开了头的东西，一个都没做完。
+  #1 success ratio=0.49 1278ms
+     out: 做产品最难不是写代码，而是决定不做什么。总是有一个想法比当前更好，结果六个月后手里有15个项目，一个都没做完。
+  #2 success ratio=0.53 1354ms
+     out: 做产品最难不是写代码，而是决定不做什么，因为总有一个想法比当前更好，结果六个月后手上有15个开了头的项目，一个都没做完。
+  #3 success ratio=0.42 1301ms
+     out: 做产品最难不是写代码而是决定不做什么因为总有一个想法比当前更好导致六个月后有15个项目都没完成
+  #4 success ratio=0.43 1346ms
+     out: 做产品最难的是决定不做什么。一个想法总是比正在做的好，结果六个月后手上有15个开头，一个都没做完。
+  #5 success ratio=0.44 1325ms
+     out: 做产品最难不是写代码而是决定不做什么，因为总有一个想法比当前更好，结果六个月后有15个项目都没完成。
+
+━━ [zh-todo-enumeration] 149 chars, lang=zh
+  raw: 嗯那个我总结一下开会之前我要做的事情首先我得从Marion那里拿到一月份的数据她说她周二会有哦不是周三然后嗯那我就得做一个跟去年数据的对比表还有你知道吗我一定得给供应商打电话因为他们的报价又从12000涨到了15000欧元而且这个没有人批准过然后嗯我还得记得订二楼的会议室因为另一间整个星期都被占了
+  #1 rejectedGuardrail/length ratio=2.17 OUT-OF-BAND 2630ms  ⚑ LANG=en
+     out: I need to get the January data from Marion, she says she will have it on Wednesday. I must make a comparison table with last year’s data. I have to call the supplier because their quote rose from 12000 to 15000 euros and no one approved it. I must book the second floor meeting room because another one is occupied all week.
+  #2 rejectedGuardrail/length ratio=2.21 OUT-OF-BAND 2706ms  ⚑ LANG=en
+     out: I have to get the January data from Marion, she says she will have it on Wednesday, I must make a comparison table with last year's data, I need to call the supplier because their quote went up from 12000 to 15000 euros and no one approved it, I must book the second floor meeting room because the other one is occupied all week.
+  #3 rejectedGuardrail/length ratio=2.21 OUT-OF-BAND 2663ms  ⚑ LANG=en
+     out: I have to get the January data from Marion, she says she will have it on Wednesday, I have to make a comparison table with last year's data, I have to call the supplier because their quote went from 12000 to 15000 euros and no one approved it, I have to book the second floor meeting room because another one is occupied all week.
+  #4 rejectedGuardrail/length ratio=0.74 OUT-OF-BAND 1947ms
+     out: 我得从Marion那里拿到一月份的数据，她说周三有，我得做一个跟去年数据的对比表，我还得给供应商打电话，因为他们的报价从12000涨到了15000欧元，而且没有人批准过，我还得订二楼的会议室，因为另一间整个星期都被占了。
+  #5 rejectedGuardrail/length ratio=0.74 OUT-OF-BAND 1863ms
+     out: 我得从Marion那里拿到一月份的数据，她说她周三会有，我得做一个跟去年数据的对比表，我得给供应商打电话因为他们的报价从12000涨到了15000欧元而且没有人批准过，我还得记得订二楼的会议室因为另一间整个星期都被占了。
+
+
+████ ARM arm-zh-examples — mode summary, 5 run(s) × 2 fixture(s)
+     prompt: ../docs/research/571-summary/step2/arm-zh-examples.txt
+
+━━ [zh-free-form] 113 chars, lang=zh
+  raw: 嗯那个，我今天早上散步的时候在想一件事，就是说其实一个人做产品的时候，最难的不是写代码，而是决定不做什么。因为总是有一个想法看起来比你正在做的那个更好。然后你就扑上去了，结果六个月以后你手上有15个开了头的东西，一个都没做完。
+  #1 success ratio=0.51 1227ms
+     out: 一个人做产品最难不是写代码，而是决定不做什么，因为总有一个想法看起来更好，结果六个月后手上有15个开了头的都没做完。
+  #2 success ratio=0.56 1252ms
+     out: 一个人做产品最难不是写代码，而是决定不做什么，因为总有一个想法看起来更好，结果六个月后手上有15个开了头的项目，一个都没做完。
+  #3 success ratio=0.47 1250ms
+     out: 一个人做产品最难的是决定不做什么。总是有一个想法看起来更好，结果六个月后手上有15个开了头，一个都没做完。
+  #4 rejectedGuardrail/length ratio=0.65 OUT-OF-BAND 1356ms
+     out: 一个人做产品最难不是写代码，而是决定不做什么。总是有一个想法看起来比你正在做的好，你就扑上去，结果六个月后手上有15个开了头的项目，一个都没做完。
+  #5 rejectedGuardrail/length ratio=0.65 OUT-OF-BAND 1380ms
+     out: 一个人做产品最难不是写代码，而是决定不做什么。因为总有一个想法看起来比正在做的更好，然后扑上去，结果六个月后手上有15个开了头的项目，一个都没做完。
+
+━━ [zh-todo-enumeration] 149 chars, lang=zh
+  raw: 嗯那个我总结一下开会之前我要做的事情首先我得从Marion那里拿到一月份的数据她说她周二会有哦不是周三然后嗯那我就得做一个跟去年数据的对比表还有你知道吗我一定得给供应商打电话因为他们的报价又从12000涨到了15000欧元而且这个没有人批准过然后嗯我还得记得订二楼的会议室因为另一间整个星期都被占了
+  #1 rejectedGuardrail/length ratio=0.74 OUT-OF-BAND 1917ms
+     out: 我得从Marion那里拿到一月份的数据，她说周三有。我要做一个跟去年数据的对比表。我得给供应商打电话，因为他们的报价从12000涨到了15000欧元，而且没有人批准过。我还得记得订二楼的会议室，因为另一间整个星期都被占了。
+  #2 rejectedGuardrail/length ratio=0.74 OUT-OF-BAND 1782ms
+     out: 我得从Marion那里拿到一月份的数据，她说周二会有。我要做一个跟去年数据的对比表，我必须给供应商打电话，因为他们的报价从12000涨到了15000欧元，而且没有人批准过，我还要订二楼的会议室，因为另一间整个星期都被占了。
+  #3 rejectedGuardrail/length ratio=0.74 OUT-OF-BAND 1907ms
+     out: 我得从Marion那里拿到一月份的数据，她说周二会有，我得做一个跟去年数据的对比表，我必须给供应商打电话，因为他们的报价从12000涨到了15000欧元，而且没有人批准过，我还得订二楼的会议室，因为另一间整个星期都被占了。
+  #4 rejectedGuardrail/length ratio=0.72 OUT-OF-BAND 1904ms
+     out: 我得从Marion那里拿到一月份的数据，她周二有，我得做一个跟去年数据的对比表，我必须给供应商打电话，因为他们的报价从12000涨到了15000欧元，这没有人批准，我还得订二楼的会议室，因为另一间整个星期都被占了。
+  #5 rejectedGuardrail/length ratio=0.74 OUT-OF-BAND 1915ms
+     out: 我得从Marion那里拿到一月份的数据，她周二会有。我得做一个跟去年数据的对比表。我得给供应商打电话，因为他们的报价从12000涨到了15000欧元，而且没有人批准过。我还得记得订二楼的会议室，因为另一间整个星期都被占了。
+
+
+══ bars (engine outputs; `acc` = accepted by the pipeline)
+arm | lang | runs | wrong-lang (acc) | refused on language | list lines | in band | report/infinitive/person-lost | preamble | example | figure | accepted
+shipping | zh | 10 | 3 (0) | 0 (0%) | 0 | 5/10 (50%) | 0 | 0 | 0 | 0 | 5/10
+shipping | ALL | 10 | 3 (0) | 0 (0%) | 0 | 5/10 (50%) | 0 | 0 | 0 | 0 | 5/10
+   refusals, shipping: length×5
+arm-zh-examples | zh | 10 | 0 (0) | 0 (0%) | 0 | 3/10 (30%) | 0 | 0 | 0 | 0 | 3/10
+arm-zh-examples | ALL | 10 | 0 (0) | 0 (0%) | 0 | 3/10 (30%) | 0 | 0 | 0 | 0 | 3/10
+   refusals, arm-zh-examples: length×7
+
+capture written: ../docs/research/571-summary/step2/run-zh.json

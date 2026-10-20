@@ -30,26 +30,32 @@ public enum PolishPipeline {
         /// and only there; `nil` on every other outcome, so a caller can key on its
         /// presence exactly as it does on `failureReason`.
         ///
-        /// The four values are `PolishGuardrail.Check`'s slugs. `outcome` alone says
-        /// a check failed and never which one, and the four have four different
-        /// answers — the band is mis-sized for the mode, the prompt drifted out of
-        /// the speaker's language, the model invented a name, or the model wrote
-        /// about its own task. Carrying the word makes the rate of each countable
+        /// The values are `PolishGuardrail.Check`'s slugs. `outcome` alone says a
+        /// check failed and never which one, and each has a different answer — the
+        /// band is mis-sized for the mode, the prompt drifted out of the speaker's
+        /// language, the model invented a name, a line, or the speaker's own memory
+        /// failing, or the model wrote about its own task. Carrying the word makes the rate of each countable
         /// from an export after the fact, which is what #466 asks for.
         public let rejectedCheck: PolishGuardrail.Check?
+        /// The engine that actually wrote `engineOutput` (#648), when one did. Translate
+        /// runs on the Translation framework and falls back to Apple FM, so the engine
+        /// called and the engine that wrote can differ. `nil` when no output came back.
+        public let producedBy: String?
 
         public init(engineOutput: String?,
                     outcome: PolishMetrics.Outcome,
                     engineMs: Int,
                     postprocessMs: Int,
                     failureReason: PolishFailureReason? = nil,
-                    rejectedCheck: PolishGuardrail.Check? = nil) {
+                    rejectedCheck: PolishGuardrail.Check? = nil,
+                    producedBy: String? = nil) {
             self.engineOutput = engineOutput
             self.outcome = outcome
             self.engineMs = engineMs
             self.postprocessMs = postprocessMs
             self.failureReason = failureReason
             self.rejectedCheck = rejectedCheck
+            self.producedBy = producedBy
         }
     }
 
@@ -73,6 +79,10 @@ public enum PolishPipeline {
                                  engine: PolishEngineProtocol,
                                  job: PolishJob,
                                  gate: PolishAvailabilityGate = PolishAvailabilityGate()) async -> Result {
+        // A Smart Mode's worked examples in the transcript's language, when it has
+        // them (#587). Resolved once, here, so the context guard, the engine and its
+        // session cache all price, send and key on the same string.
+        let job = job.resolvingExamples()
         // Polish is in its unavailable state for this engine (#315): two
         // consecutive `rateLimited` refusals said this process is on the wrong
         // side of Apple's background rate limit, and only a fresh process
@@ -121,33 +131,44 @@ public enum PolishPipeline {
         }
         let engineStart = Date()
         do {
-            let polishedRaw = try await engine.polish(
-                raw: engineInput, targetLanguage: job.promptLanguage, task: job.task
+            let labelled = try await engine.polishLabelled(
+                raw: engineInput, targetLanguage: job.promptLanguage, task: job.task,
+                sourceLanguageCode: job.transcriptLanguageCode
             )
+            let polishedRaw = labelled.text
             let engineMs = Int(Date().timeIntervalSince(engineStart) * 1000)
             let postStart = Date()
             // Restore newlines (+ output-language typography, when there is an
             // output language) BEFORE the guardrail so the char-ratio compares
             // apples to apples (both sides use `\n`).
-            let polished = job.typographyLanguage.map {
+            // A closing fence the model appended is dropped before anything judges
+            // the text (#587): it carries no word, so no guardrail would refuse it
+            // and it would reach the document as the last line.
+            let polished = PolishPostpass.stripTrailingFenceLines(job.typographyLanguage.map {
                 PolishPostpass.decodeFromEngine(polishedRaw, language: $0)
-            } ?? PolishPostpass.decodeNewlines(polishedRaw)
+            } ?? PolishPostpass.decodeNewlines(polishedRaw))
             if Task.isCancelled {
                 let postMs = Int(Date().timeIntervalSince(postStart) * 1000)
-                return Result(engineOutput: polished, outcome: .cancelled, engineMs: engineMs, postprocessMs: postMs)
+                return Result(engineOutput: polished, outcome: .cancelled, engineMs: engineMs, postprocessMs: postMs,
+                              producedBy: labelled.engine)
             }
             // Guardrail baseline is the preprocessed text — what the engine
             // actually saw (modulo the newline marker the post-pass undid).
-            // The five output checks, in the order they cost: a character ratio,
-            // then two `NaturalLanguage` passes, then two word-set comparisons. Each
-            // names itself in the result so an export can count the five apart
-            // (#466) — `rejectedGuardrail` is one outcome for five questions.
+            // The seven output checks, in the order they cost: a character ratio,
+            // then two `NaturalLanguage` passes, then four word-set comparisons. Each
+            // names itself in the result so an export can count the seven apart
+            // (#466) — `rejectedGuardrail` is one outcome for seven questions.
             //
-            // The two word-set checks are ordered by SPECIFICITY rather than by cost,
-            // which is the same for both. A chat preamble fails them both, and #466
-            // owns that shape: leaving `segmentOverlap` last keeps every captured
+            // The word-set checks are ordered by SPECIFICITY rather than by cost,
+            // which is the same for all three. A chat preamble fails two of them, and
+            // #466 owns that shape: leaving `segmentOverlap` last keeps every captured
             // preamble counted as `prefixAlignment`, so a seven-day export still
-            // measures the rate #466 shipped against.
+            // measures the rate #466 shipped against. `incompleteness` sits before it
+            // for the same reason: #581's closing sentence often fails the overlap
+            // check too, and it should be counted under the name that says what it is.
+            // `lostWord` (#575) runs last for the same reason, and has the widest reach
+            // of the four: a chat preamble or an invented line also loses the dictation's
+            // words, and each of those is already counted under its own name.
             let refused: PolishGuardrail.Check?
             if !PolishGuardrail.accepts(
                 raw: preprocessed, polished: polished, contract: job.task.contract
@@ -159,8 +180,15 @@ public enum PolishPipeline {
                 refused = .grounding
             } else if !prefixGuardrailPasses(polished: polished, preprocessed: preprocessed, job: job) {
                 refused = .prefixAlignment
+            } else if job.task.contract.refusesFabricatedIncompleteness,
+                      PolishIncompleteness.isFabricated(polished: polished, raw: preprocessed) {
+                // Off the contract, like every other check here: only a mode that keeps a
+                // speaker-flagged incompleteness has been seen inventing one (#587).
+                refused = .incompleteness
             } else if !segmentOverlapGuardrailPasses(polished: polished, preprocessed: preprocessed, job: job) {
                 refused = .segmentOverlap
+            } else if !lostWordGuardrailPasses(polished: polished, preprocessed: preprocessed, job: job) {
+                refused = .lostWord
             } else {
                 refused = nil
             }
@@ -168,7 +196,8 @@ public enum PolishPipeline {
                 let postMs = Int(Date().timeIntervalSince(postStart) * 1000)
                 PolishMetrics.logGuardrailRejection(check: refused, task: job.task)
                 return Result(engineOutput: polished, outcome: .rejectedGuardrail,
-                              engineMs: engineMs, postprocessMs: postMs, rejectedCheck: refused)
+                              engineMs: engineMs, postprocessMs: postMs, rejectedCheck: refused,
+                              producedBy: labelled.engine)
             }
             // Layout only, and only after every check has accepted the model's own
             // output (#572): the guardrails judge what the model wrote, and this pass
@@ -178,7 +207,8 @@ public enum PolishPipeline {
                 PolishPostpass.tightenBlocks(polished, whenShorterThan: $0)
             } ?? polished
             let postMs = Int(Date().timeIntervalSince(postStart) * 1000)
-            return Result(engineOutput: delivered, outcome: .success, engineMs: engineMs, postprocessMs: postMs)
+            return Result(engineOutput: delivered, outcome: .success, engineMs: engineMs, postprocessMs: postMs,
+                          producedBy: labelled.engine)
         } catch is CancellationError {
             let engineMs = Int(Date().timeIntervalSince(engineStart) * 1000)
             return Result(engineOutput: nil, outcome: .cancelled, engineMs: engineMs, postprocessMs: 0)
@@ -243,15 +273,44 @@ public enum PolishPipeline {
                                                  preprocessed: String,
                                                  job: PolishJob) -> Bool {
         guard job.task.contract.requiresGroundedNames else { return true }
-        let outputCode: String?
-        switch job.task.contract.outputLanguage {
-        case .polishTarget: outputCode = job.promptLanguage.rawValue
-        case .fixed(let language): outputCode = language.rawValue
-        case .sameAsInput: outputCode = detectLanguageCode(in: preprocessed)
-        }
         return PolishGrounding.ungroundedAnchors(
-            in: polished, input: preprocessed, languageCode: outputCode
+            in: polished, input: preprocessed,
+            languageCode: expectedOutputLanguageCode(preprocessed: preprocessed, job: job)
         ).isEmpty
+    }
+
+    /// The `NLLanguage` code the output is expected to read as: the prompt's for
+    /// `.polishTarget`, the mode's target for `.fixed`, and the input's own detected
+    /// language for `.sameAsInput` — `nil` when that cannot be read confidently.
+    ///
+    /// Shared by the two checks that need a language to choose their tools with —
+    /// grounding's `NLTagger` hint and the lost-word check's lexicon — so the two can
+    /// never disagree about which language a dictation is in.
+    private static func expectedOutputLanguageCode(preprocessed: String, job: PolishJob) -> String? {
+        switch job.task.contract.outputLanguage {
+        case .polishTarget: return job.promptLanguage.rawValue
+        case .fixed(let language): return language.rawValue
+        case .sameAsInput: return detectLanguageCode(in: preprocessed)
+        }
+    }
+
+    /// Lost-word guardrail (#575): no word the speaker dictated disappears from the
+    /// free polish, apart from what the Natural contract licenses.
+    ///
+    /// Runs only where the task's contract says so — `refusesLostWords`, true on
+    /// Natural and Auto, false on Repair and every Smart Mode. Inside it,
+    /// `PolishLostWords` runs only on French and only on short input; everything else
+    /// passes untested. See that type for the licences and the numbers.
+    ///
+    /// The baseline is `preprocessed` for the reason every other check uses it.
+    private static func lostWordGuardrailPasses(polished: String,
+                                                preprocessed: String,
+                                                job: PolishJob) -> Bool {
+        guard job.task.contract.refusesLostWords else { return true }
+        return PolishLostWords.accepts(
+            polished: polished, raw: preprocessed,
+            languageCode: expectedOutputLanguageCode(preprocessed: preprocessed, job: job)
+        )
     }
 
     /// Worst-segment overlap guardrail (#414): every line of the output has to be
@@ -352,6 +411,13 @@ public enum PolishPipeline {
         if let mode = job.task.smartMode, !degradesToFloor(mode, outcome: result.outcome) {
             return nil
         }
+        return deterministicFloor(preprocessed: preprocessed, job: job)
+    }
+
+    /// The text inserted when no model output can be: the pre-passed transcript, with
+    /// the language's typography decoded on the per-language path. Named so #573's
+    /// declined list can insert the same floor when no second call fits the budget.
+    public static func deterministicFloor(preprocessed: String, job: PolishJob) -> String {
         guard let typography = job.typographyLanguage else { return preprocessed }
         return PolishPostpass.decodeFromEngine(preprocessed, language: typography)
     }

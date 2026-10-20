@@ -1,0 +1,1805 @@
+
+
+████ ARM shipping — 3 run(s) × 90 fixture(s), floor 0.35
+
+━━ [T1-last-transcription.en] 56 chars, lang=en
+  #1 56→55 3056ms success recall=2/2 inversions=0/1
+     engineOut: I'll let you take a look, it's the latest transcription
+  #2 56→56 3042ms success recall=2/2 inversions=0/1
+     engineOut: I'll let you take a look, it's the latest transcription.
+  #3 56→56 3077ms success recall=2/2 inversions=0/1
+     engineOut: I'll let you take a look, it's the latest transcription.
+
+━━ [T2-no-error.en] 153 chars, lang=en
+  #1 153→152 3422ms success recall=4/4 inversions=0/6
+     engineOut: For now I don't have any error message, everything seems to be OK⏎⏎So we're going to keep going for a little while, but for now it's working pretty well
+  #2 153→154 3498ms success recall=4/4 inversions=0/6
+     engineOut: For now I don't have any error message, everything seems to be OK.⏎⏎So we're going to keep going for a little while, but for now it's working pretty well.
+  #3 153→152 2888ms success recall=4/4 inversions=0/6
+     engineOut: For now I don't have any error message, everything seems to be OK⏎⏎So we're going to keep going for a little while, but for now it's working pretty well
+
+━━ [T3-plan-mode.en] 170 chars, lang=en
+  #1 170→171 3047ms success recall=3/3 inversions=0/3
+     engineOut: OK, I'll let you prepare the integration of this issue, please.⏎⏎You can switch to plan mode to do that, and then I'll approve it once you've made the implementation plan.
+  #2 170→169 2968ms success recall=3/3 inversions=0/3
+     engineOut: OK, I'll let you prepare the integration of this issue, please⏎⏎You can switch to plan mode to do that, and then I'll approve it once you've made the implementation plan
+  #3 170→171 3009ms success recall=3/3 inversions=0/3
+     engineOut: OK, I'll let you prepare the integration of this issue, please.⏎⏎You can switch to plan mode to do that, and then I'll approve it once you've made the implementation plan.
+
+━━ [T4-structured-since.en] 249 chars, lang=en
+  #1 249→239 3133ms success recall=5/5 inversions=0/10
+     engineOut: Actually I've been on structured mode for a little while⏎⏎So all the tests I did yesterday, especially the slightly longer tests, worked⏎⏎So I think I'll be able to export the logs as they are⏎⏎But for me it seems to be pretty much correct
+  #2 249→239 3283ms success recall=5/5 inversions=0/10
+     engineOut: Actually I've been on structured mode for a little while⏎⏎So all the tests I did yesterday, especially the slightly longer tests, worked⏎⏎So I think I'll be able to export the logs as they are⏎⏎But for me it seems to be pretty much correct
+  #3 249→248 3324ms success recall=5/5 inversions=0/10
+     engineOut: Actually I've been on structured mode for a little while⏎⏎So actually all the tests I did yesterday, especially the slightly longer tests, worked⏎⏎So I think I'll be able to export the logs as they are⏎⏎But for me it seems to be pretty much correct
+
+━━ [T5-long-test.en] 380 chars, lang=en
+  #1 380→379 3891ms success recall=7/7 inversions=0/21
+     engineOut: And so now we're trying a long message in structured mode to see what's going to happen⏎⏎Knowing that I'm not necessarily in the right conditions audio-wise, because I'm quite far from the phone⏎⏎So the quality of the mic might not be exceptional⏎⏎There's also quite a lot of noise next to me⏎⏎So we'll see what it gives on the test⏎⏎We'll see if the result is interesting or not
+  #2 380→379 3964ms success recall=7/7 inversions=0/21
+     engineOut: And so now we're trying a long message in structured mode to see what's going to happen⏎⏎Knowing that I'm not necessarily in the right conditions audio-wise, because I'm quite far from the phone⏎⏎So the quality of the mic might not be exceptional⏎⏎There's also quite a lot of noise next to me⏎⏎So we'll see what it gives on the test⏎⏎We'll see if the result is interesting or not
+  #3 380→379 3901ms success recall=7/7 inversions=0/21
+     engineOut: And so now we're trying a long message in structured mode to see what's going to happen⏎⏎Knowing that I'm not necessarily in the right conditions audio-wise, because I'm quite far from the phone⏎⏎So the quality of the mic might not be exceptional⏎⏎There's also quite a lot of noise next to me⏎⏎So we'll see what it gives on the test⏎⏎We'll see if the result is interesting or not
+
+━━ [T6-project-update.en] 686 chars, lang=en
+  #1 686→692 5825ms success recall=17/17 inversions=0/136
+     engineOut: So, quick update on the project: we switched over the subscription part last Monday, Thomas finished the StoreKit integration and it works in sandbox.⏎⏎There are two things left. The first one is the transcription history, which hasn't been started at all.⏎⏎And the second one is the custom vocabulary. And on that one we have a spec but no code.⏎⏎On the numbers side, we're at 412 downloads since launch, with a 7-day retention rate of 19%, which is low, but not catastrophic for a first version.⏎⏎The goal is to pass the 1,000 mark before the end of October.⏎⏎I'm seeing Sarah on Thursday at 2 pm to sort out the App Store part.⏎⏎And if everything goes well, we submit the week of the 12th.
+  #2 686→692 5770ms success recall=17/17 inversions=0/136
+     engineOut: So, quick update on the project: we switched over the subscription part last Monday, Thomas finished the StoreKit integration and it works in sandbox.⏎⏎There are two things left. The first one is the transcription history, which hasn't been started at all.⏎⏎And the second one is the custom vocabulary. And on that one we have a spec but no code.⏎⏎On the numbers side, we're at 412 downloads since launch, with a 7-day retention rate of 19%, which is low, but not catastrophic for a first version.⏎⏎The goal is to pass the 1,000 mark before the end of October.⏎⏎I'm seeing Sarah on Thursday at 2 pm to sort out the App Store part.⏎⏎And if everything goes well, we submit the week of the 12th.
+  #3 686→692 5873ms success recall=17/17 inversions=0/136
+     engineOut: So, quick update on the project: we switched over the subscription part last Monday, Thomas finished the StoreKit integration and it works in sandbox.⏎⏎There are two things left. The first one is the transcription history, which hasn't been started at all.⏎⏎And the second one is the custom vocabulary. And on that one we have a spec but no code.⏎⏎On the numbers side, we're at 412 downloads since launch, with a 7-day retention rate of 19%, which is low, but not catastrophic for a first version.⏎⏎The goal is to pass the 1,000 mark before the end of October.⏎⏎I'm seeing Sarah on Thursday at 2 pm to sort out the App Store part.⏎⏎And if everything goes well, we submit the week of the 12th.
+
+━━ [T1-last-transcription.de] 60 chars, lang=de
+  #1 60→60 3079ms success recall=2/2 inversions=0/1
+     engineOut: Ich lasse dich mal schauen, es ist die letzte Transkription.
+  #2 60→58 3102ms success recall=2/2 inversions=0/1
+     engineOut: Ich lasse dich mal schauen⏎Es ist die letzte Transkription
+  #3 60→60 2233ms success recall=2/2 inversions=0/1
+     engineOut: Ich lasse dich mal schauen, es ist die letzte Transkription.
+
+━━ [T2-no-error.de] 158 chars, lang=de
+  #1 158→157 2540ms success recall=4/4 inversions=0/6
+     engineOut: Im Moment habe ich keine Fehlermeldung, alles scheint in Ordnung zu sein⏎⏎Also machen wir noch eine Weile weiter, aber im Moment funktioniert es ziemlich gut
+  #2 158→157 2505ms success recall=4/4 inversions=0/6
+     engineOut: Im Moment habe ich keine Fehlermeldung, alles scheint in Ordnung zu sein⏎⏎Also machen wir noch eine Weile weiter, aber im Moment funktioniert es ziemlich gut
+  #3 158→157 2522ms success recall=4/4 inversions=0/6
+     engineOut: Im Moment habe ich keine Fehlermeldung, alles scheint in Ordnung zu sein⏎⏎Also machen wir noch eine Weile weiter, aber im Moment funktioniert es ziemlich gut
+
+━━ [T3-plan-mode.de] 187 chars, lang=de
+  #1 187→188 2660ms success recall=4/4 inversions=0/6
+     engineOut: Okay, ich lasse dich die Integration dieses Issues vorbereiten, bitte.⏎⏎Du kannst dafür in den Plan-Modus wechseln, und dann bestätige ich, sobald du den Implementierungsplan gemacht hast.
+  #2 187→188 2559ms success recall=4/4 inversions=0/6
+     engineOut: Okay, ich lasse dich die Integration dieses Issues vorbereiten, bitte.⏎⏎Du kannst dafür in den Plan-Modus wechseln, und dann bestätige ich, sobald du den Implementierungsplan gemacht hast.
+  #3 187→188 2556ms success recall=4/4 inversions=0/6
+     engineOut: Okay, ich lasse dich die Integration dieses Issues vorbereiten, bitte.⏎⏎Du kannst dafür in den Plan-Modus wechseln, und dann bestätige ich, sobald du den Implementierungsplan gemacht hast.
+
+━━ [T4-structured-since.de] 288 chars, lang=de
+  #1 288→276 2941ms success recall=7/7 inversions=0/21
+     engineOut: Eigentlich bin ich schon eine Weile im strukturierten Modus⏎⏎Also haben alle Tests, die ich gestern gemacht habe, vor allem die etwas längeren Tests, funktioniert⏎⏎Also denke ich, dass ich die Logs so exportieren kann, wie sie sind⏎⏎Aber für mich sieht es ziemlich korrekt aus
+  #2 288→280 2993ms success recall=7/7 inversions=0/21
+     engineOut: Eigentlich bin ich schon eine Weile im strukturierten Modus.⏎⏎Also haben alle Tests, die ich gestern gemacht habe, vor allem die etwas längeren Tests, funktioniert.⏎⏎Also denke ich, dass ich die Logs so exportieren kann, wie sie sind.⏎⏎Aber für mich sieht es ziemlich korrekt aus.
+  #3 288→291 3039ms success recall=7/7 inversions=0/21
+     engineOut: Eigentlich bin ich schon eine Weile im strukturierten Modus.⏎⏎Also eigentlich haben alle Tests, die ich gestern gemacht habe, vor allem die etwas längeren Tests, funktioniert.⏎⏎Also denke ich, dass ich die Logs so exportieren kann, wie sie sind.⏎⏎Aber für mich sieht es ziemlich korrekt aus.
+
+━━ [T5-long-test.de] 416 chars, lang=de
+  #1 416→421 3522ms success recall=9/9 inversions=0/36
+     engineOut: Und jetzt probieren wir also eine lange Nachricht im strukturierten Modus, um zu sehen, was passiert.⏎⏎Wobei ich audiomäßig nicht unbedingt unter guten Bedingungen bin, weil ich ziemlich weit vom Handy weg bin.⏎⏎Die Qualität des Mikros ist also vielleicht nicht besonders gut.⏎⏎Es gibt auch ziemlich viel Lärm neben mir.⏎⏎Mal sehen, was das beim Test ergibt.⏎⏎Wir werden sehen, ob das Ergebnis interessant ist oder nicht.
+  #2 416→421 3522ms success recall=9/9 inversions=0/36
+     engineOut: Und jetzt probieren wir also eine lange Nachricht im strukturierten Modus, um zu sehen, was passiert.⏎⏎Wobei ich audiomäßig nicht unbedingt unter guten Bedingungen bin, weil ich ziemlich weit vom Handy weg bin.⏎⏎Die Qualität des Mikros ist also vielleicht nicht besonders gut.⏎⏎Es gibt auch ziemlich viel Lärm neben mir.⏎⏎Mal sehen, was das beim Test ergibt.⏎⏎Wir werden sehen, ob das Ergebnis interessant ist oder nicht.
+  #3 416→421 3370ms success recall=9/9 inversions=0/36
+     engineOut: Und jetzt probieren wir also eine lange Nachricht im strukturierten Modus, um zu sehen, was passiert.⏎⏎Wobei ich audiomäßig nicht unbedingt unter guten Bedingungen bin, weil ich ziemlich weit vom Handy weg bin.⏎⏎Die Qualität des Mikros ist also vielleicht nicht besonders gut.⏎⏎Es gibt auch ziemlich viel Lärm neben mir.⏎⏎Mal sehen, was das beim Test ergibt.⏎⏎Wir werden sehen, ob das Ergebnis interessant ist oder nicht.
+
+━━ [T6-project-update.de] 716 chars, lang=de
+  #1 716→721 5406ms success recall=17/17 inversions=0/136
+     engineOut: Also kurzes Update zum Projekt: Wir haben den Abo-Teil letzten Montag umgestellt, Thomas hat die StoreKit-Integration fertig und sie läuft in der Sandbox.⏎⏎Es bleiben noch zwei Sachen. Die erste ist der Transkriptionsverlauf, der noch gar nicht angefangen ist.⏎⏎Und die zweite ist das eigene Vokabular. Und dafür haben wir eine Spezifikation, aber keinen Code.⏎⏎Bei den Zahlen sind wir bei 412 Downloads seit dem Start, mit einer 7-Tage-Retention von 19 %, was wenig ist, aber für eine erste Version nicht katastrophal.⏎⏎Das Ziel ist, die Marke von 1000 vor Ende Oktober zu knacken.⏎⏎Ich sehe Sarah am Donnerstag um 14 Uhr, um den App-Store-Teil zu klären.⏎⏎Und wenn alles gut läuft, reichen wir in der Woche vom 12. ein.
+  #2 716→714 5026ms success recall=17/17 inversions=0/136
+     engineOut: Also kurzes Update zum Projekt: Wir haben den Abo-Teil letzten Montag umgestellt⏎⏎Thomas hat die StoreKit-Integration fertig und sie läuft in der Sandbox⏎⏎Es bleiben noch zwei Sachen⏎⏎Die erste ist der Transkriptionsverlauf, der noch gar nicht angefangen ist⏎⏎Und die zweite ist das eigene Vokabular⏎⏎Und dafür haben wir eine Spezifikation, aber keinen Code⏎⏎Bei den Zahlen sind wir bei 412 Downloads seit dem Start, mit einer 7-Tage-Retention von 19 %, was wenig ist, aber für eine erste Version nicht katastrophal⏎⏎Das Ziel ist, die Marke von 1000 vor Ende Oktober zu knacken⏎⏎Ich sehe Sarah am Donnerstag um 14 Uhr, um den App-Store-Teil zu klären⏎⏎Und wenn alles gut läuft, reichen wir in der Woche vom 12. ein
+  #3 716→714 4939ms success recall=17/17 inversions=0/136
+     engineOut: Also kurzes Update zum Projekt: Wir haben den Abo-Teil letzten Montag umgestellt⏎⏎Thomas hat die StoreKit-Integration fertig und sie läuft in der Sandbox⏎⏎Es bleiben noch zwei Sachen⏎⏎Die erste ist der Transkriptionsverlauf, der noch gar nicht angefangen ist⏎⏎Und die zweite ist das eigene Vokabular⏎⏎Und dafür haben wir eine Spezifikation, aber keinen Code⏎⏎Bei den Zahlen sind wir bei 412 Downloads seit dem Start, mit einer 7-Tage-Retention von 19 %, was wenig ist, aber für eine erste Version nicht katastrophal⏎⏎Das Ziel ist, die Marke von 1000 vor Ende Oktober zu knacken⏎⏎Ich sehe Sarah am Donnerstag um 14 Uhr, um den App-Store-Teil zu klären⏎⏎Und wenn alles gut läuft, reichen wir in der Woche vom 12. ein
+
+━━ [T1-last-transcription.es] 49 chars, lang=es
+  #1 49→47 2028ms success recall=2/2 inversions=0/1
+     engineOut: Te dejo que lo mires⏎Es la última transcripción
+  #2 49→47 1965ms success recall=2/2 inversions=0/1
+     engineOut: Te dejo que lo mires⏎Es la última transcripción
+  #3 49→47 1989ms success recall=2/2 inversions=0/1
+     engineOut: Te dejo que lo mires⏎Es la última transcripción
+
+━━ [T2-no-error.es] 140 chars, lang=es
+  #1 140→141 2127ms success recall=3/3 inversions=0/3
+     engineOut: De momento no tengo ningún mensaje de error, todo parece estar bien.⏎⏎Así que vamos a seguir un rato, pero de momento funciona bastante bien.
+  #2 140→139 2284ms success recall=3/3 inversions=0/3
+     engineOut: De momento no tengo ningún mensaje de error, todo parece estar bien⏎⏎Así que vamos a seguir un rato, pero de momento funciona bastante bien
+  #3 140→141 2203ms success recall=3/3 inversions=0/3
+     engineOut: De momento no tengo ningún mensaje de error, todo parece estar bien.⏎⏎Así que vamos a seguir un rato, pero de momento funciona bastante bien.
+
+━━ [T3-plan-mode.es] 173 chars, lang=es
+  #1 173→174 2408ms success recall=2/2 inversions=0/1
+     engineOut: Vale, te dejo preparar la integración de esta issue, por favor.⏎⏎Puedes pasar al modo plan para hacerlo y luego lo validaré una vez que hayas hecho el plan de implementación.
+  #2 173→174 2335ms success recall=2/2 inversions=0/1
+     engineOut: Vale, te dejo preparar la integración de esta issue, por favor.⏎⏎Puedes pasar al modo plan para hacerlo y luego lo validaré una vez que hayas hecho el plan de implementación.
+  #3 173→174 2349ms success recall=2/2 inversions=0/1
+     engineOut: Vale, te dejo preparar la integración de esta issue, por favor.⏎⏎Puedes pasar al modo plan para hacerlo y luego lo validaré una vez que hayas hecho el plan de implementación.
+
+━━ [T4-structured-since.es] 256 chars, lang=es
+  #1 256→247 2759ms success recall=5/5 inversions=0/10
+     engineOut: En realidad llevo un rato con el modo estructurado.⏎⏎Así que todas las pruebas que hice ayer, sobre todo las pruebas un poco más largas, funcionaron.⏎⏎Así que creo que voy a poder exportar los logs tal cual.⏎⏎Pero para mí parece bastante correcto.
+  #2 256→247 2681ms success recall=5/5 inversions=0/10
+     engineOut: En realidad llevo un rato con el modo estructurado.⏎⏎Así que todas las pruebas que hice ayer, sobre todo las pruebas un poco más largas, funcionaron.⏎⏎Así que creo que voy a poder exportar los logs tal cual.⏎⏎Pero para mí parece bastante correcto.
+  #3 256→247 2671ms success recall=5/5 inversions=0/10
+     engineOut: En realidad llevo un rato con el modo estructurado.⏎⏎Así que todas las pruebas que hice ayer, sobre todo las pruebas un poco más largas, funcionaron.⏎⏎Así que creo que voy a poder exportar los logs tal cual.⏎⏎Pero para mí parece bastante correcto.
+
+━━ [T5-long-test.es] 369 chars, lang=es
+  #1 369→368 3001ms success recall=6/6 inversions=0/15
+     engineOut: Y entonces ahora probamos un mensaje largo en modo estructurado para ver qué pasa⏎⏎Sabiendo que no estoy necesariamente en buenas condiciones de audio porque estoy bastante lejos del teléfono⏎⏎Así que puede que la calidad del micro no sea excepcional⏎⏎También hay bastante ruido a mi lado⏎⏎Así que a ver qué da en la prueba⏎⏎Veremos si el resultado es interesante o no
+  #2 369→368 2916ms success recall=6/6 inversions=0/15
+     engineOut: Y entonces ahora probamos un mensaje largo en modo estructurado para ver qué pasa⏎⏎Sabiendo que no estoy necesariamente en buenas condiciones de audio porque estoy bastante lejos del teléfono⏎⏎Así que puede que la calidad del micro no sea excepcional⏎⏎También hay bastante ruido a mi lado⏎⏎Así que a ver qué da en la prueba⏎⏎Veremos si el resultado es interesante o no
+  #3 369→368 3120ms success recall=6/6 inversions=0/15
+     engineOut: Y entonces ahora probamos un mensaje largo en modo estructurado para ver qué pasa⏎⏎Sabiendo que no estoy necesariamente en buenas condiciones de audio porque estoy bastante lejos del teléfono⏎⏎Así que puede que la calidad del micro no sea excepcional⏎⏎También hay bastante ruido a mi lado⏎⏎Así que a ver qué da en la prueba⏎⏎Veremos si el resultado es interesante o no
+
+━━ [T6-project-update.es] 695 chars, lang=es
+  #1 695→699 4646ms success recall=15/15 inversions=0/105
+     engineOut: Bueno, un repaso rápido del proyecto: el lunes pasado cambiamos la parte de suscripciones, Thomas terminó la integración de StoreKit y funciona en sandbox.⏎⏎Quedan dos cosas. La primera es el historial de transcripciones, que no está empezado para nada.⏎⏎La segunda es el vocabulario personalizado. Y ahí tenemos una especificación pero nada de código.⏎⏎En cuanto a cifras, llevamos 412 descargas desde el lanzamiento, con una retención a 7 días del 19 %, que es baja, pero no catastrófica para una primera versión.⏎⏎El objetivo es superar las 1000 antes de finales de octubre.⏎⏎Veo a Sarah el jueves a las 14 h para cerrar la parte de la App Store.⏎⏎Y si todo va bien, lo enviamos la semana del 12.
+  #2 695→701 4615ms success recall=15/15 inversions=0/105
+     engineOut: Bueno, un repaso rápido del proyecto: el lunes pasado cambiamos la parte de suscripciones, Thomas terminó la integración de StoreKit y funciona en sandbox.⏎⏎Quedan dos cosas. La primera es el historial de transcripciones, que no está empezado para nada.⏎⏎Y la segunda es el vocabulario personalizado. Y ahí tenemos una especificación pero nada de código.⏎⏎En cuanto a cifras, llevamos 412 descargas desde el lanzamiento, con una retención a 7 días del 19 %, que es baja, pero no catastrófica para una primera versión.⏎⏎El objetivo es superar las 1000 antes de finales de octubre.⏎⏎Veo a Sarah el jueves a las 14 h para cerrar la parte de la App Store.⏎⏎Y si todo va bien, lo enviamos la semana del 12.
+  #3 695→699 4600ms success recall=15/15 inversions=0/105
+     engineOut: Bueno, un repaso rápido del proyecto: el lunes pasado cambiamos la parte de suscripciones, Thomas terminó la integración de StoreKit y funciona en sandbox.⏎⏎Quedan dos cosas. La primera es el historial de transcripciones, que no está empezado para nada. Y la segunda es el vocabulario personalizado. Y ahí tenemos una especificación pero nada de código.⏎⏎En cuanto a cifras, llevamos 412 descargas desde el lanzamiento, con una retención a 7 días del 19 %, que es baja, pero no catastrófica para una primera versión.⏎⏎El objetivo es superar las 1000 antes de finales de octubre.⏎⏎Veo a Sarah el jueves a las 14 h para cerrar la parte de la App Store. Y si todo va bien, lo enviamos la semana del 12.
+
+━━ [T1-last-transcription.it] 52 chars, lang=it
+  #1 52→52 1964ms success recall=2/2 inversions=0/1
+     engineOut: Ti lascio dare un'occhiata, è l'ultima trascrizione.
+  #2 52→50 2185ms success recall=2/2 inversions=0/1
+     engineOut: Ti lascio dare un'occhiata⏎È l'ultima trascrizione
+  #3 52→52 2124ms success recall=2/2 inversions=0/1
+     engineOut: Ti lascio dare un'occhiata, è l'ultima trascrizione.
+
+━━ [T2-no-error.it] 137 chars, lang=it
+  #1 137→138 2457ms success recall=4/4 inversions=0/6
+     engineOut: Per ora non ho nessun messaggio di errore, sembra tutto a posto.⏎⏎Quindi andiamo avanti ancora un po', ma per ora funziona piuttosto bene.
+  #2 137→138 2401ms success recall=4/4 inversions=0/6
+     engineOut: Per ora non ho nessun messaggio di errore, sembra tutto a posto.⏎⏎Quindi andiamo avanti ancora un po', ma per ora funziona piuttosto bene.
+  #3 137→136 2405ms success recall=4/4 inversions=0/6
+     engineOut: Per ora non ho nessun messaggio di errore⏎⏎Sembra tutto a posto⏎⏎Quindi andiamo avanti ancora un po', ma per ora funziona piuttosto bene
+
+━━ [T3-plan-mode.it] 177 chars, lang=it
+  #1 177→178 2780ms success recall=3/3 inversions=0/3
+     engineOut: Ok, ti lascio preparare l'integrazione di questa issue, per favore.⏎⏎Puoi passare in modalità piano per farlo e poi lo convaliderò quando avrai fatto il piano di implementazione.
+  #2 177→178 2639ms success recall=3/3 inversions=0/3
+     engineOut: Ok, ti lascio preparare l'integrazione di questa issue, per favore.⏎⏎Puoi passare in modalità piano per farlo e poi lo convaliderò quando avrai fatto il piano di implementazione.
+  #3 177→178 2699ms success recall=3/3 inversions=0/3
+     engineOut: Ok, ti lascio preparare l'integrazione di questa issue, per favore.⏎⏎Puoi passare in modalità piano per farlo e poi lo convaliderò quando avrai fatto il piano di implementazione.
+
+━━ [T4-structured-since.it] 250 chars, lang=it
+  #1 250→249 2970ms success recall=6/6 inversions=0/15
+     engineOut: In realtà sono sulla modalità strutturata da un po'⏎⏎Quindi in realtà tutti i test che ho fatto ieri, soprattutto quelli un po' più lunghi, hanno funzionato⏎⏎Quindi penso che potrò esportare i log così come sono⏎⏎Ma per me sembra abbastanza corretto
+  #2 250→253 3136ms success recall=6/6 inversions=0/15
+     engineOut: In realtà sono sulla modalità strutturata da un po'.⏎⏎Quindi in realtà tutti i test che ho fatto ieri, soprattutto quelli un po' più lunghi, hanno funzionato.⏎⏎Quindi penso che potrò esportare i log così come sono.⏎⏎Ma per me sembra abbastanza corretto.
+  #3 250→253 2841ms success recall=6/6 inversions=0/15
+     engineOut: In realtà sono sulla modalità strutturata da un po'.⏎⏎Quindi in realtà tutti i test che ho fatto ieri, soprattutto quelli un po' più lunghi, hanno funzionato.⏎⏎Quindi penso che potrò esportare i log così come sono.⏎⏎Ma per me sembra abbastanza corretto.
+
+━━ [T5-long-test.it] 382 chars, lang=it
+  #1 382→367 3097ms success recall=7/7 inversions=0/21
+     engineOut: E quindi adesso proviamo un messaggio lungo in modalità strutturata per vedere cosa succede⏎⏎Sapendo che non sono per forza nelle condizioni giuste per l'audio, perché sono abbastanza lontano dal telefono⏎⏎La qualità del microfono forse non sarà eccezionale⏎⏎C'è anche parecchio rumore qui accanto⏎⏎Vedremo cosa dà il test⏎⏎Vedremo se il risultato è interessante o no
+  #2 382→374 3233ms success recall=7/7 inversions=0/21
+     engineOut: E quindi adesso proviamo un messaggio lungo in modalità strutturata per vedere cosa succede⏎⏎Sapendo che non sono per forza nelle condizioni giuste per l'audio, perché sono abbastanza lontano dal telefono⏎⏎La qualità del microfono forse non sarà eccezionale⏎⏎C'è anche parecchio rumore qui accanto⏎⏎Quindi vediamo cosa dà il test⏎⏎Vedremo se il risultato è interessante o no
+  #3 382→381 3182ms success recall=7/7 inversions=0/21
+     engineOut: E quindi adesso proviamo un messaggio lungo in modalità strutturata per vedere cosa succede⏎⏎Sapendo che non sono per forza nelle condizioni giuste per l'audio, perché sono abbastanza lontano dal telefono⏎⏎Quindi la qualità del microfono forse non sarà eccezionale⏎⏎C'è anche parecchio rumore qui accanto⏎⏎Quindi vediamo cosa dà il test⏎⏎Vedremo se il risultato è interessante o no
+
+━━ [T6-project-update.it] 698 chars, lang=it
+  #1 698→697 4686ms success recall=17/17 inversions=0/136
+     engineOut: Allora, aggiornamento veloce sul progetto⏎⏎Lunedì scorso abbiamo passato la parte degli abbonamenti⏎⏎Thomas ha finito l'integrazione di StoreKit e funziona in sandbox⏎⏎Restano due cose⏎⏎La prima è la cronologia delle trascrizioni, che non è stata per niente iniziata⏎⏎E la seconda è il vocabolario personalizzato⏎⏎E su quello abbiamo una specifica ma niente codice⏎⏎Per quanto riguarda i numeri, siamo a 412 download dal lancio⏎⏎Con una retention a 7 giorni del 19%, che è bassa, ma non catastrofica per una prima versione⏎⏎L'obiettivo è superare la soglia dei 1000 entro fine ottobre⏎⏎Vedo Sarah giovedì alle 14 per sistemare la parte App Store⏎⏎E se va tutto bene, lo inviamo la settimana del 12
+  #2 698→704 5656ms success recall=17/17 inversions=0/136
+     engineOut: Allora, aggiornamento veloce sul progetto: lunedì scorso abbiamo passato la parte degli abbonamenti, Thomas ha finito l'integrazione di StoreKit e funziona in sandbox.⏎⏎Restano due cose. La prima è la cronologia delle trascrizioni, che non è stata per niente iniziata.⏎⏎E la seconda è il vocabolario personalizzato. E su quello abbiamo una specifica ma niente codice.⏎⏎Per quanto riguarda i numeri, siamo a 412 download dal lancio, con una retention a 7 giorni del 19%, che è bassa, ma non catastrofica per una prima versione.⏎⏎L'obiettivo è superare la soglia dei 1000 entro fine ottobre.⏎⏎Vedo Sarah giovedì alle 14 per sistemare la parte App Store.⏎⏎E se va tutto bene, lo inviamo la settimana del 12.
+  #3 698→705 5594ms success recall=17/17 inversions=0/136
+     engineOut: Allora, aggiornamento veloce sul progetto: lunedì scorso abbiamo passato la parte degli abbonamenti, Thomas ha finito l'integrazione di StoreKit e funziona in sandbox.⏎⏎Restano due cose. La prima è la cronologia delle trascrizioni, che non è stata per niente iniziata.⏎⏎E la seconda è il vocabolario personalizzato. E su quello abbiamo una specifica ma niente codice.⏎⏎Per quanto riguarda i numeri, siamo a 412 download dal lancio, con una retention a 7 giorni del 19%, che è bassa, ma non catastrofica per una prima versione.⏎⏎L'obiettivo è superare la soglia dei 1000 entro fine ottobre.⏎⏎Vendo Sarah giovedì alle 14 per sistemare la parte App Store.⏎⏎E se va tutto bene, lo inviamo la settimana del 12.
+
+━━ [T1-last-transcription.pt] 55 chars, lang=pt
+  #1 55→53 2773ms success recall=2/2 inversions=0/1
+     engineOut: Vou deixar você dar uma olhada⏎É a última transcrição
+  #2 55→53 2798ms success recall=2/2 inversions=0/1
+     engineOut: Vou deixar você dar uma olhada⏎É a última transcrição
+  #3 55→53 2797ms success recall=2/2 inversions=0/1
+     engineOut: Vou deixar você dar uma olhada⏎É a última transcrição
+
+━━ [T2-no-error.pt] 146 chars, lang=pt
+  #1 146→145 2708ms success recall=4/4 inversions=0/6
+     engineOut: Por enquanto não tenho nenhuma mensagem de erro⏎⏎Tudo parece estar ok⏎⏎Então vamos continuar mais um pouco⏎⏎Mas por enquanto está funcionando bem
+  #2 146→145 2645ms success recall=4/4 inversions=0/6
+     engineOut: Por enquanto não tenho nenhuma mensagem de erro⏎⏎Tudo parece estar ok⏎⏎Então vamos continuar mais um pouco⏎⏎Mas por enquanto está funcionando bem
+  #3 146→145 2632ms success recall=4/4 inversions=0/6
+     engineOut: Por enquanto não tenho nenhuma mensagem de erro⏎⏎Tudo parece estar ok⏎⏎Então vamos continuar mais um pouco⏎⏎Mas por enquanto está funcionando bem
+
+━━ [T3-plan-mode.pt] 185 chars, lang=pt
+  #1 185→186 2788ms success recall=2/2 inversions=0/1
+     engineOut: Ok, vou deixar você preparar a integração desta issue, por favor.⏎⏎Você pode passar para o modo plano para fazer isso.⏎⏎Depois eu valido quando você tiver feito o plano de implementação.
+  #2 185→186 2727ms success recall=2/2 inversions=0/1
+     engineOut: Ok, vou deixar você preparar a integração desta issue, por favor.⏎⏎Você pode passar para o modo plano para fazer isso e depois eu valido quando você tiver feito o plano de implementação.
+  #3 185→186 2879ms success recall=2/2 inversions=0/1
+     engineOut: Ok, vou deixar você preparar a integração desta issue, por favor.⏎⏎Você pode passar para o modo plano para fazer isso e depois eu valido quando você tiver feito o plano de implementação.
+
+━━ [T4-structured-since.pt] 263 chars, lang=pt
+  #1 263→249 3118ms success recall=6/6 inversions=0/15
+     engineOut: Na verdade estou no modo estruturado há um tempinho⏎⏎Então todos os testes que fiz ontem, principalmente os testes um pouco mais longos, funcionaram⏎⏎Então acho que vou poder exportar os logs do jeito que estão⏎⏎Mas para mim parece estar bem correto
+  #2 263→262 3270ms success recall=6/6 inversions=0/15
+     engineOut: Na verdade estou no modo estruturado há um tempinho⏎⏎Então, na verdade, todos os testes que fiz ontem, principalmente os testes um pouco mais longos, funcionaram⏎⏎Então acho que vou poder exportar os logs do jeito que estão⏎⏎Mas para mim parece estar bem correto
+  #3 263→262 3198ms success recall=6/6 inversions=0/15
+     engineOut: Na verdade estou no modo estruturado há um tempinho⏎⏎Então, na verdade, todos os testes que fiz ontem, principalmente os testes um pouco mais longos, funcionaram⏎⏎Então acho que vou poder exportar os logs do jeito que estão⏎⏎Mas para mim parece estar bem correto
+
+━━ [T5-long-test.pt] 389 chars, lang=pt
+  #1 389→394 3690ms success recall=7/7 inversions=0/21
+     engineOut: E então agora estamos testando uma mensagem longa no modo estruturado para ver o que vai acontecer.⏎⏎Sabendo que não estou necessariamente nas melhores condições de áudio, porque estou bem longe do celular.⏎⏎Então a qualidade do microfone talvez não seja excepcional.⏎⏎Também tem bastante barulho do meu lado.⏎⏎Então vamos ver o que dá no teste.⏎⏎Vamos ver se o resultado é interessante ou não.
+  #2 389→388 3991ms success recall=7/7 inversions=0/21
+     engineOut: E então agora estamos testando uma mensagem longa no modo estruturado para ver o que vai acontecer⏎⏎Sabendo que não estou necessariamente nas melhores condições de áudio, porque estou bem longe do celular⏎⏎Então a qualidade do microfone talvez não seja excepcional⏎⏎Também tem bastante barulho do meu lado⏎⏎Então vamos ver o que dá no teste⏎⏎Vamos ver se o resultado é interessante ou não
+  #3 389→388 3971ms success recall=7/7 inversions=0/21
+     engineOut: E então agora estamos testando uma mensagem longa no modo estruturado para ver o que vai acontecer⏎⏎Sabendo que não estou necessariamente nas melhores condições de áudio, porque estou bem longe do celular⏎⏎Então a qualidade do microfone talvez não seja excepcional⏎⏎Também tem bastante barulho do meu lado⏎⏎Então vamos ver o que dá no teste⏎⏎Vamos ver se o resultado é interessante ou não
+
+━━ [T6-project-update.pt] 684 chars, lang=pt
+  #1 684→688 5881ms success recall=18/18 inversions=0/153
+     engineOut: Então, atualização rápida sobre o projeto: na segunda-feira passada migramos a parte de assinaturas, o Thomas terminou a integração do StoreKit e está funcionando no sandbox.⏎⏎Faltam duas coisas. A primeira é o histórico de transcrições, que ainda não foi começado.⏎⏎A segunda é o vocabulário personalizado. E nisso temos uma especificação, mas nenhum código.⏎⏎Em números, estamos com 412 downloads desde o lançamento, com uma retenção de 7 dias de 19%, o que é baixo, mas não catastrófico para uma primeira versão.⏎⏎A meta é passar dos 1000 antes do fim de outubro.⏎⏎Vou ver a Sarah na quinta às 14h para acertar a parte da App Store.⏎⏎E se tudo correr bem, enviamos na semana do dia 12.
+  #2 684→679 5671ms success recall=18/18 inversions=0/153
+     engineOut: Então, atualização rápida sobre o projeto: na segunda-feira passada migramos a parte de assinaturas⏎⏎Thomas terminou a integração do StoreKit e está funcionando no sandbox⏎⏎Faltam duas coisas⏎⏎A primeira é o histórico de transcrições, que ainda não foi começado⏎⏎A segunda é o vocabulário personalizado⏎⏎E nisso temos uma especificação, mas nenhum código⏎⏎Em números, estamos com 412 downloads desde o lançamento, com uma retenção de 7 dias de 19%, o que é baixo, mas não catastrófico para uma primeira versão⏎⏎A meta é passar dos 1000 antes do fim de outubro⏎⏎Vou ver a Sarah na quinta às 14h para acertar a parte da App Store⏎⏎E se tudo correr bem, enviamos na semana do dia 12
+  #3 684→688 5814ms success recall=18/18 inversions=0/153
+     engineOut: Então, atualização rápida sobre o projeto: na segunda-feira passada migramos a parte de assinaturas, o Thomas terminou a integração do StoreKit e está funcionando no sandbox.⏎⏎Faltam duas coisas. A primeira é o histórico de transcrições, que ainda não foi começado.⏎⏎A segunda é o vocabulário personalizado. E nisso temos uma especificação, mas nenhum código.⏎⏎Em números, estamos com 412 downloads desde o lançamento, com uma retenção de 7 dias de 19%, o que é baixo, mas não catastrófico para uma primeira versão.⏎⏎A meta é passar dos 1000 antes do fim de outubro.⏎⏎Vou ver a Sarah na quinta às 14h para acertar a parte da App Store.⏎⏎E se tudo correr bem, enviamos na semana do dia 12.
+
+━━ [T1-last-transcription.nl] 55 chars, lang=nl
+  #1 55→54 1969ms success recall=2/2 inversions=0/1
+     engineOut: Ik laat je even kijken, het is de laatste transcriptie
+  #2 55→55 1961ms success recall=2/2 inversions=0/1
+     engineOut: Ik laat je even kijken, het is de laatste transcriptie.
+  #3 55→54 1967ms success recall=2/2 inversions=0/1
+     engineOut: Ik laat je even kijken, het is de laatste transcriptie
+
+━━ [T2-no-error.nl] 126 chars, lang=nl
+  #1 126→125 2265ms success recall=4/4 inversions=0/6
+     engineOut: Voorlopig heb ik geen foutmelding, alles lijkt in orde te zijn⏎⏎Dus we gaan nog even door, maar voorlopig werkt het best goed
+  #2 126→125 2344ms success recall=4/4 inversions=0/6
+     engineOut: Voorlopig heb ik geen foutmelding⏎⏎Alles lijkt in orde te zijn⏎⏎Dus we gaan nog even door⏎⏎Maar voorlopig werkt het best goed
+  #3 126→127 2173ms success recall=4/4 inversions=0/6
+     engineOut: Voorlopig heb ik geen foutmelding, alles lijkt in orde te zijn.⏎⏎Dus we gaan nog even door, maar voorlopig werkt het best goed.
+
+━━ [T3-plan-mode.nl] 184 chars, lang=nl
+  #1 184→185 2407ms success recall=2/2 inversions=0/1
+     engineOut: Oké, ik laat jou de integratie van deze issue voorbereiden, alsjeblieft.⏎⏎Je kunt daarvoor naar de planmodus gaan en daarna keur ik het goed zodra je het implementatieplan hebt gemaakt.
+  #2 184→185 2420ms success recall=2/2 inversions=0/1
+     engineOut: Oké, ik laat jou de integratie van deze issue voorbereiden, alsjeblieft.⏎⏎Je kunt daarvoor naar de planmodus gaan en daarna keur ik het goed zodra je het implementatieplan hebt gemaakt.
+  #3 184→185 2423ms success recall=2/2 inversions=0/1
+     engineOut: Oké, ik laat jou de integratie van deze issue voorbereiden, alsjeblieft.⏎⏎Je kunt daarvoor naar de planmodus gaan en daarna keur ik het goed zodra je het implementatieplan hebt gemaakt.
+
+━━ [T4-structured-since.nl] 256 chars, lang=nl
+  #1 256→259 2701ms success recall=5/5 inversions=0/10
+     engineOut: Eigenlijk zit ik al een tijdje in de gestructureerde modus.⏎⏎Dus eigenlijk hebben alle tests die ik gisteren heb gedaan, vooral de iets langere tests, gewerkt.⏎⏎Dus ik denk dat ik de logs zo kan exporteren zoals ze zijn.⏎⏎Maar voor mij lijkt het vrij correct.
+  #2 256→255 2754ms success recall=5/5 inversions=0/10
+     engineOut: Eigenlijk zit ik al een tijdje in de gestructureerde modus⏎⏎Dus eigenlijk hebben alle tests die ik gisteren heb gedaan, vooral de iets langere tests, gewerkt⏎⏎Dus ik denk dat ik de logs zo kan exporteren zoals ze zijn⏎⏎Maar voor mij lijkt het vrij correct
+  #3 256→259 2832ms success recall=5/5 inversions=0/10
+     engineOut: Eigenlijk zit ik al een tijdje in de gestructureerde modus.⏎⏎Dus eigenlijk hebben alle tests die ik gisteren heb gedaan, vooral de iets langere tests, gewerkt.⏎⏎Dus ik denk dat ik de logs zo kan exporteren zoals ze zijn.⏎⏎Maar voor mij lijkt het vrij correct.
+
+━━ [T5-long-test.nl] 401 chars, lang=nl
+  #1 401→406 3439ms success recall=7/7 inversions=0/21
+     engineOut: En dus proberen we nu een lang bericht in de gestructureerde modus om te zien wat er gebeurt.⏎⏎Wetende dat ik qua audio niet per se in de goede omstandigheden zit, want ik zit vrij ver van de telefoon.⏎⏎Dus de kwaliteit van de microfoon is misschien niet geweldig.⏎⏎Er is ook best veel lawaai naast me.⏎⏎Dus eens kijken wat het oplevert bij de test.⏎⏎We zullen zien of het resultaat interessant is of niet.
+  #2 401→400 3349ms success recall=7/7 inversions=0/21
+     engineOut: En dus proberen we nu een lang bericht in de gestructureerde modus om te zien wat er gebeurt⏎⏎Wetende dat ik qua audio niet per se in de goede omstandigheden zit, want ik zit vrij ver van de telefoon⏎⏎Dus de kwaliteit van de microfoon is misschien niet geweldig⏎⏎Er is ook best veel lawaai naast me⏎⏎Dus eens kijken wat het oplevert bij de test⏎⏎We zullen zien of het resultaat interessant is of niet
+  #3 401→406 3387ms success recall=7/7 inversions=0/21
+     engineOut: En dus proberen we nu een lang bericht in de gestructureerde modus om te zien wat er gebeurt.⏎⏎Wetende dat ik qua audio niet per se in de goede omstandigheden zit, want ik zit vrij ver van de telefoon.⏎⏎Dus de kwaliteit van de microfoon is misschien niet geweldig.⏎⏎Er is ook best veel lawaai naast me.⏎⏎Dus eens kijken wat het oplevert bij de test.⏎⏎We zullen zien of het resultaat interessant is of niet.
+
+━━ [T6-project-update.nl] 723 chars, lang=nl
+  #1 723→728 4791ms success recall=16/16 inversions=0/120
+     engineOut: Dus, snelle update over het project: we hebben vorige maandag het abonnementsgedeelte omgezet, Thomas heeft de StoreKit-integratie afgerond en het werkt in de sandbox.⏎⏎Er blijven twee dingen over. Het eerste is de transcriptiegeschiedenis, waar nog helemaal niet aan begonnen is. En het tweede is de eigen woordenlijst. En daarvoor hebben we een specificatie maar geen code.⏎⏎Qua cijfers zitten we op 412 downloads sinds de lancering, met een retentie na 7 dagen van 19%, wat laag is, maar niet rampzalig voor een eerste versie.⏎⏎Het doel is om vóór eind oktober de grens van 1000 te halen.⏎⏎Ik zie Sarah donderdag om 14 uur om het App Store-gedeelte te regelen.⏎⏎En als alles goed gaat, dienen we het in de week van de 12e in.
+  #2 723→729 4841ms success recall=16/16 inversions=0/120
+     engineOut: Dus, snelle update over het project: we hebben vorige maandag het abonnementsgedeelte omgezet, Thomas heeft de StoreKit-integratie afgerond en het werkt in de sandbox.⏎⏎Er blijven twee dingen over. Het eerste is de transcriptiegeschiedenis, waar nog helemaal niet aan begonnen is.⏎⏎En het tweede is de eigen woordenlijst. En daarvoor hebben we een specificatie maar geen code.⏎⏎Qua cijfers zitten we op 412 downloads sinds de lancering, met een retentie na 7 dagen van 19%, wat laag is, maar niet rampzalig voor een eerste versie.⏎⏎Het doel is om vóór eind oktober de grens van 1000 te halen.⏎⏎Ik zie Sarah donderdag om 14 uur om het App Store-gedeelte te regelen.⏎⏎En als alles goed gaat, dienen we het in de week van de 12e in.
+  #3 723→729 4805ms success recall=16/16 inversions=0/120
+     engineOut: Dus, snelle update over het project: we hebben vorige maandag het abonnementsgedeelte omgezet, Thomas heeft de StoreKit-integratie afgerond en het werkt in de sandbox.⏎⏎Er blijven twee dingen over. Het eerste is de transcriptiegeschiedenis, waar nog helemaal niet aan begonnen is.⏎⏎En het tweede is de eigen woordenlijst. En daarvoor hebben we een specificatie maar geen code.⏎⏎Qua cijfers zitten we op 412 downloads sinds de lancering, met een retentie na 7 dagen van 19%, wat laag is, maar niet rampzalig voor een eerste versie.⏎⏎Het doel is om vóór eind oktober de grens van 1000 te halen.⏎⏎Ik zie Sarah donderdag om 14 uur om het App Store-gedeelte te regelen.⏎⏎En als alles goed gaat, dienen we het in de week van de 12e in.
+
+━━ [T1-last-transcription.da] 62 chars, lang=da
+  #1 62→62 1914ms success recall=2/2 inversions=0/1
+     engineOut: Jeg lader dig kigge på det, det er den seneste transskription.
+  #2 62→62 1938ms success recall=2/2 inversions=0/1
+     engineOut: Jeg lader dig kigge på det, det er den seneste transskription.
+  #3 62→62 1838ms success recall=2/2 inversions=0/1
+     engineOut: Jeg lader dig kigge på det, det er den seneste transskription.
+
+━━ [T2-no-error.da] 143 chars, lang=da
+  #1 143→144 2294ms success recall=4/4 inversions=0/6
+     engineOut: Indtil videre har jeg ingen fejlmeddelelse, alt ser ud til at være i orden.⏎⏎Så vi fortsætter lidt endnu, men indtil videre virker det ret godt.
+  #2 143→144 2192ms success recall=4/4 inversions=0/6
+     engineOut: Indtil videre har jeg ingen fejlmeddelelse, alt ser ud til at være i orden.⏎⏎Så vi fortsætter lidt endnu, men indtil videre virker det ret godt.
+  #3 143→144 2203ms success recall=4/4 inversions=0/6
+     engineOut: Indtil videre har jeg ingen fejlmeddelelse, alt ser ud til at være i orden.⏎⏎Så vi fortsætter lidt endnu, men indtil videre virker det ret godt.
+
+━━ [T3-plan-mode.da] 177 chars, lang=da
+  #1 177→178 2290ms success recall=4/4 inversions=0/6
+     engineOut: Okay, jeg lader dig forberede integrationen af denne issue, tak.⏎⏎Du kan skifte til plantilstand for at gøre det, og så godkender jeg det, når du har lavet implementeringsplanen.
+  #2 177→178 2391ms success recall=4/4 inversions=0/6
+     engineOut: Okay, jeg lader dig forberede integrationen af denne issue, tak.⏎⏎Du kan skifte til plantilstand for at gøre det, og så godkender jeg det, når du har lavet implementeringsplanen.
+  #3 177→178 2355ms success recall=4/4 inversions=0/6
+     engineOut: Okay, jeg lader dig forberede integrationen af denne issue, tak.⏎⏎Du kan skifte til plantilstand for at gøre det, og så godkender jeg det, når du har lavet implementeringsplanen.
+
+━━ [T4-structured-since.da] 231 chars, lang=da
+  #1 231→227 2644ms success recall=7/7 inversions=0/21 FOREIGN-SENTENCES=1
+     FOREIGN: Jeg tror, jeg kan eksportere loggene, som de er
+     engineOut: Faktisk har jeg brugt den strukturerede tilstand i et stykke tid⏎⏎Så faktisk virkede alle de test, jeg lavede i går, især de lidt længere test⏎⏎Jeg tror, jeg kan eksportere loggene, som de er⏎⏎Men for mig ser det ret korrekt ud
+  #2 231→227 2675ms success recall=7/7 inversions=0/21 FOREIGN-SENTENCES=1
+     FOREIGN: Jeg tror, jeg kan eksportere loggene, som de er
+     engineOut: Faktisk har jeg brugt den strukturerede tilstand i et stykke tid⏎⏎Så faktisk virkede alle de test, jeg lavede i går, især de lidt længere test⏎⏎Jeg tror, jeg kan eksportere loggene, som de er⏎⏎Men for mig ser det ret korrekt ud
+  #3 231→227 2638ms success recall=7/7 inversions=0/21 FOREIGN-SENTENCES=1
+     FOREIGN: Jeg tror, jeg kan eksportere loggene, som de er
+     engineOut: Faktisk har jeg brugt den strukturerede tilstand i et stykke tid⏎⏎Så faktisk virkede alle de test, jeg lavede i går, især de lidt længere test⏎⏎Jeg tror, jeg kan eksportere loggene, som de er⏎⏎Men for mig ser det ret korrekt ud
+
+━━ [T5-long-test.da] 384 chars, lang=da
+  #1 384→383 3245ms success recall=10/10 inversions=0/45
+     engineOut: Og så prøver vi nu en lang besked i struktureret tilstand for at se, hvad der sker⏎⏎Vel vidende at jeg ikke nødvendigvis er under de rette forhold lydmæssigt, fordi jeg er ret langt fra telefonen⏎⏎Så kvaliteten af mikrofonen er måske ikke enestående⏎⏎Der er også en del støj ved siden af mig⏎⏎Så lad os se, hvad det giver i testen⏎⏎Vi får at se, om resultatet er interessant eller ej
+  #2 384→383 3212ms success recall=10/10 inversions=0/45
+     engineOut: Og så prøver vi nu en lang besked i struktureret tilstand for at se, hvad der sker⏎⏎Vel vidende at jeg ikke nødvendigvis er under de rette forhold lydmæssigt, fordi jeg er ret langt fra telefonen⏎⏎Så kvaliteten af mikrofonen er måske ikke enestående⏎⏎Der er også en del støj ved siden af mig⏎⏎Så lad os se, hvad det giver i testen⏎⏎Vi får at se, om resultatet er interessant eller ej
+  #3 384→389 3256ms success recall=10/10 inversions=0/45
+     engineOut: Og så prøver vi nu en lang besked i struktureret tilstand for at se, hvad der sker.⏎⏎Vel vidende at jeg ikke nødvendigvis er under de rette forhold lydmæssigt, fordi jeg er ret langt fra telefonen.⏎⏎Så kvaliteten af mikrofonen er måske ikke enestående.⏎⏎Der er også en del støj ved siden af mig.⏎⏎Så lad os se, hvad det giver i testen.⏎⏎Vi får at se, om resultatet er interessant eller ej.
+
+━━ [T6-project-update.da] 667 chars, lang=da
+  #1 667→674 5078ms success recall=19/19 inversions=0/171
+     engineOut: Så, en hurtig status på projektet: vi skiftede abonnementsdelen over i mandags, Thomas er færdig med StoreKit-integrationen, og den virker i sandbox.⏎⏎Der er to ting tilbage. Den første er transskriptionshistorikken, som slet ikke er påbegyndt.⏎⏎Og den anden er det personlige ordforråd.⏎⏎Og der har vi en specifikation, men ingen kode.⏎⏎Hvad tallene angår, er vi på 412 downloads siden lanceringen, med en fastholdelse efter 7 dage på 19 %, hvilket er lavt, men ikke katastrofalt for en første version.⏎⏎Målet er at runde 1000 inden udgangen af oktober.⏎⏎Jeg ser Sarah torsdag kl. 14 for at få styr på App Store-delen.⏎⏎Og hvis alt går godt, indsender vi i ugen med den 12.
+  #2 667→672 4902ms success recall=19/19 inversions=0/171
+     engineOut: Så, en hurtig status på projektet: vi skiftede abonnementsdelen over i mandags, Thomas er færdig med StoreKit-integrationen, og den virker i sandbox.⏎⏎Der er to ting tilbage. Den første er transskriptionshistorikken, som slet ikke er påbegyndt. Og den anden er det personlige ordforråd. Og der har vi en specifikation, men ingen kode.⏎⏎Hvad tallene angår, er vi på 412 downloads siden lanceringen, med en fastholdelse efter 7 dage på 19 %, hvilket er lavt, men ikke katastrofalt for en første version.⏎⏎Målet er at runde 1000 inden udgangen af oktober.⏎⏎Jeg ser Sarah torsdag kl. 14 for at få styr på App Store-delen.⏎⏎Og hvis alt går godt, indsender vi i ugen med den 12.
+  #3 667→673 5144ms success recall=19/19 inversions=0/171
+     engineOut: Så, en hurtig status på projektet: vi skiftede abonnementsdelen over i mandags, Thomas er færdig med StoreKit-integrationen, og den virker i sandbox.⏎⏎Der er to ting tilbage. Den første er transskriptionshistorikken, som slet ikke er påbegyndt.⏎⏎Og den anden er det personlige ordforråd. Og der har vi en specifikation, men ingen kode.⏎⏎Hvad tallene angår, er vi på 412 downloads siden lanceringen, med en fastholdelse efter 7 dage på 19 %, hvilket er lavt, men ikke katastrofalt for en første version.⏎⏎Målet er at runde 1000 inden udgangen af oktober.⏎⏎Jeg ser Sarah torsdag kl. 14 for at få styr på App Store-delen.⏎⏎Og hvis alt går godt, indsender vi i ugen med den 12.
+
+━━ [T1-last-transcription.nb] 57 chars, lang=nb
+  #1 57→57 2121ms success recall=2/2 inversions=0/1
+     engineOut: Jeg lar deg ta en titt, det er den siste transkripsjonen.
+  #2 57→57 2065ms success recall=2/2 inversions=0/1
+     engineOut: Jeg lar deg ta en titt, det er den siste transkripsjonen.
+  #3 57→55 2055ms success recall=2/2 inversions=0/1
+     engineOut: Jeg lar deg ta en titt⏎Det er den siste transkripsjonen
+
+━━ [T2-no-error.nb] 137 chars, lang=nb
+  #1 137→138 2385ms success recall=4/4 inversions=0/6
+     engineOut: Foreløpig har jeg ingen feilmelding, alt ser ut til å være i orden.⏎⏎Så vi fortsetter en stund til, men foreløpig fungerer det ganske bra.
+  #2 137→138 2727ms success recall=4/4 inversions=0/6
+     engineOut: Foreløpig har jeg ingen feilmelding, alt ser ut til å være i orden.⏎⏎Så vi fortsetter en stund til, men foreløpig fungerer det ganske bra.
+  #3 137→138 2477ms success recall=4/4 inversions=0/6
+     engineOut: Foreløpig har jeg ingen feilmelding, alt ser ut til å være i orden.⏎⏎Så vi fortsetter en stund til, men foreløpig fungerer det ganske bra.
+
+━━ [T3-plan-mode.nb] 167 chars, lang=nb
+  #1 167→168 2645ms success recall=3/3 inversions=0/3
+     engineOut: Ok, jeg lar deg forberede integrasjonen av denne issuen, takk.⏎⏎Du kan bytte til planmodus for å gjøre det, og så godkjenner jeg når du har laget implementasjonsplanen.
+  #2 167→168 2644ms success recall=3/3 inversions=0/3
+     engineOut: Ok, jeg lar deg forberede integrasjonen av denne issuen, takk.⏎⏎Du kan bytte til planmodus for å gjøre det, og så godkjenner jeg når du har laget implementasjonsplanen.
+  #3 167→168 2699ms success recall=3/3 inversions=0/3
+     engineOut: Ok, jeg lar deg forberede integrasjonen av denne issuen, takk.⏎⏎Du kan bytte til planmodus for å gjøre det, og så godkjenner jeg når du har laget implementasjonsplanen.
+
+━━ [T4-structured-since.nb] 231 chars, lang=nb
+  #1 231→221 2922ms success recall=5/5 inversions=0/10
+     engineOut: Egentlig har jeg brukt den strukturerte modusen en stund nå⏎⏎Så fungerte alle testene jeg gjorde i går, særlig de litt lengre testene⏎⏎Så tror jeg jeg kan eksportere loggene som de er⏎⏎Men for meg ser det ganske riktig ut
+  #2 231→222 2776ms success recall=5/5 inversions=0/10
+     engineOut: Egentlig har jeg brukt den strukturerte modusen en stund nå.⏎⏎Så fungerte alle testene jeg gjorde i går, særlig de litt lengre testene.⏎⏎Jeg tror jeg kan eksportere loggene som de er.⏎⏎Men for meg ser det ganske riktig ut.
+  #3 231→225 2829ms success recall=5/5 inversions=0/10
+     engineOut: Egentlig har jeg brukt den strukturerte modusen en stund nå.⏎⏎Så fungerte alle testene jeg gjorde i går, særlig de litt lengre testene.⏎⏎Så tror jeg jeg kan eksportere loggene som de er.⏎⏎Men for meg ser det ganske riktig ut.
+
+━━ [T5-long-test.nb] 397 chars, lang=nb
+  #1 397→396 3288ms success recall=7/7 inversions=0/21
+     engineOut: Og nå prøver vi altså en lang melding i strukturert modus for å se hva som skjer⏎⏎Med tanke på at jeg ikke nødvendigvis har de beste forholdene når det gjelder lyd, fordi jeg er ganske langt unna telefonen⏎⏎Så kvaliteten på mikrofonen blir kanskje ikke enestående⏎⏎Det er også ganske mye støy ved siden av meg⏎⏎Så vi får se hva det gir på testen⏎⏎Vi får se om resultatet er interessant eller ikke
+  #2 397→402 3253ms success recall=7/7 inversions=0/21
+     engineOut: Og nå prøver vi altså en lang melding i strukturert modus for å se hva som skjer.⏎⏎Med tanke på at jeg ikke nødvendigvis har de beste forholdene når det gjelder lyd, fordi jeg er ganske langt unna telefonen.⏎⏎Så kvaliteten på mikrofonen blir kanskje ikke enestående.⏎⏎Det er også ganske mye støy ved siden av meg.⏎⏎Så vi får se hva det gir på testen.⏎⏎Vi får se om resultatet er interessant eller ikke.
+  #3 397→396 2101ms success recall=7/7 inversions=0/21
+     engineOut: Og nå prøver vi altså en lang melding i strukturert modus for å se hva som skjer⏎⏎Med tanke på at jeg ikke nødvendigvis har de beste forholdene når det gjelder lyd, fordi jeg er ganske langt unna telefonen⏎⏎Så kvaliteten på mikrofonen blir kanskje ikke enestående⏎⏎Det er også ganske mye støy ved siden av meg⏎⏎Så vi får se hva det gir på testen⏎⏎Vi får se om resultatet er interessant eller ikke
+
+━━ [T6-project-update.nb] 686 chars, lang=nb
+  #1 686→686 4123ms success recall=19/19 inversions=0/171
+     engineOut: Altså, en rask oppdatering om prosjektet: vi byttet over abonnementsdelen forrige mandag, Thomas er ferdig med StoreKit-integrasjonen, og den fungerer i sandkassen⏎⏎Det gjenstår to ting. Den første er transkripsjonshistorikken, som ikke er påbegynt i det hele tatt⏎⏎Og den andre er det tilpassede ordforrådet. Og der har vi en spesifikasjon, men ingen kode⏎⏎Når det gjelder tallene, er vi på 412 nedlastinger siden lanseringen, med en sjudagers oppbevaring på 19 %, noe som er lavt, men ikke katastrofalt for en første versjon⏎⏎Målet er å passere 1000 før slutten av oktober⏎⏎Jeg møter Sarah torsdag klokken 14 for å ordne App Store-delen⏎⏎Og hvis alt går bra, sender vi inn uka den 12.
+  #2 686→690 4135ms success recall=19/19 inversions=0/171
+     engineOut: Altså, en rask oppdatering om prosjektet: vi byttet over abonnementsdelen forrige mandag, Thomas er ferdig med StoreKit-integrasjonen, og den fungerer i sandkassen.⏎⏎Det gjenstår to ting. Den første er transkripsjonshistorikken, som ikke er påbegynt i det hele tatt. Og den andre er det tilpassede ordforrådet. Og der har vi en spesifikasjon, men ingen kode.⏎⏎Når det gjelder tallene, er vi på 412 nedlastinger siden lanseringen, med en sjudagers oppbevaring på 19 %, noe som er lavt, men ikke katastrofalt for en første versjon.⏎⏎Målet er å passere 1000 før slutten av oktober.⏎⏎Jeg møter Sarah torsdag klokken 14 for å ordne App Store-delen. Og hvis alt går bra, sender vi inn uka den 12.
+  #3 686→690 4166ms success recall=19/19 inversions=0/171
+     engineOut: Altså, en rask oppdatering om prosjektet: vi byttet over abonnementsdelen forrige mandag, Thomas er ferdig med StoreKit-integrasjonen, og den fungerer i sandkassen.⏎⏎Det gjenstår to ting. Den første er transkripsjonshistorikken, som ikke er påbegynt i det hele tatt. Og den andre er det tilpassede ordforrådet. Og der har vi en spesifikasjon, men ingen kode.⏎⏎Når det gjelder tallene, er vi på 412 nedlastinger siden lanseringen, med en sjudagers oppbevaring på 19 %, noe som er lavt, men ikke katastrofalt for en første versjon.⏎⏎Målet er å passere 1000 før slutten av oktober. Jeg møter Sarah torsdag klokken 14 for å ordne App Store-delen.⏎⏎Og hvis alt går bra, sender vi inn uka den 12.
+
+━━ [T1-last-transcription.sv] 57 chars, lang=sv
+  #1 57→57 862ms success recall=2/2 inversions=0/1
+     engineOut: Jag låter dig titta, det är den senaste transkriberingen.
+  #2 57→57 829ms success recall=2/2 inversions=0/1
+     engineOut: Jag låter dig titta, det är den senaste transkriberingen.
+  #3 57→57 827ms success recall=2/2 inversions=0/1
+     engineOut: Jag låter dig titta, det är den senaste transkriberingen.
+
+━━ [T2-no-error.sv] 147 chars, lang=sv
+  #1 147→148 1209ms success recall=4/4 inversions=0/6
+     engineOut: För tillfället har jag inget felmeddelande, allt verkar vara okej.⏎⏎Så vi fortsätter ett litet tag till, men för tillfället fungerar det ganska bra.
+  #2 147→148 1207ms success recall=4/4 inversions=0/6
+     engineOut: För tillfället har jag inget felmeddelande, allt verkar vara okej.⏎⏎Så vi fortsätter ett litet tag till, men för tillfället fungerar det ganska bra.
+  #3 147→148 1212ms success recall=4/4 inversions=0/6
+     engineOut: För tillfället har jag inget felmeddelande, allt verkar vara okej.⏎⏎Så vi fortsätter ett litet tag till, men för tillfället fungerar det ganska bra.
+
+━━ [T3-plan-mode.sv] 181 chars, lang=sv
+  #1 181→182 1316ms success recall=3/3 inversions=0/3
+     engineOut: Okej, jag låter dig förbereda integrationen av det här ärendet, tack.⏎⏎Du kan gå över till planläget för att göra det, och sedan godkänner jag när du har gjort implementeringsplanen.
+  #2 181→182 1307ms success recall=3/3 inversions=0/3
+     engineOut: Okej, jag låter dig förbereda integrationen av det här ärendet, tack.⏎⏎Du kan gå över till planläget för att göra det, och sedan godkänner jag när du har gjort implementeringsplanen.
+  #3 181→182 1383ms success recall=3/3 inversions=0/3
+     engineOut: Okej, jag låter dig förbereda integrationen av det här ärendet, tack.⏎⏎Du kan gå över till planläget för att göra det, och sedan godkänner jag när du har gjort implementeringsplanen.
+
+━━ [T4-structured-since.sv] 253 chars, lang=sv
+  #1 253→256 1779ms success recall=5/5 inversions=0/10
+     engineOut: Faktiskt har jag kört det strukturerade läget ett tag nu.⏎⏎Så faktiskt fungerade alla tester som jag gjorde i går, särskilt de lite längre testerna.⏎⏎Så jag tror att jag kommer att kunna exportera loggarna som de är.⏎⏎Men för mig verkar det ganska korrekt.
+  #2 253→256 1855ms success recall=5/5 inversions=0/10
+     engineOut: Faktiskt har jag kört det strukturerade läget ett tag nu.⏎⏎Så faktiskt fungerade alla tester som jag gjorde i går, särskilt de lite längre testerna.⏎⏎Så jag tror att jag kommer att kunna exportera loggarna som de är.⏎⏎Men för mig verkar det ganska korrekt.
+  #3 253→256 1751ms success recall=5/5 inversions=0/10
+     engineOut: Faktiskt har jag kört det strukturerade läget ett tag nu.⏎⏎Så faktiskt fungerade alla tester som jag gjorde i går, särskilt de lite längre testerna.⏎⏎Så jag tror att jag kommer att kunna exportera loggarna som de är.⏎⏎Men för mig verkar det ganska korrekt.
+
+━━ [T5-long-test.sv] 396 chars, lang=sv
+  #1 396→395 2195ms success recall=7/7 inversions=0/21
+     engineOut: Och nu testar vi alltså ett långt meddelande i strukturerat läge för att se vad som händer⏎⏎Med tanke på att jag inte nödvändigtvis har rätt förhållanden ljudmässigt, eftersom jag är ganska långt från telefonen⏎⏎Så mikrofonens kvalitet kanske inte blir enastående⏎⏎Det är också ganska mycket oväsen bredvid mig⏎⏎Så vi får se vad det ger i testet⏎⏎Vi får se om resultatet är intressant eller inte
+  #2 396→401 2322ms success recall=7/7 inversions=0/21
+     engineOut: Och nu testar vi alltså ett långt meddelande i strukturerat läge för att se vad som händer.⏎⏎Med tanke på att jag inte nödvändigtvis har rätt förhållanden ljudmässigt, eftersom jag är ganska långt från telefonen.⏎⏎Så mikrofonens kvalitet kanske inte blir enastående.⏎⏎Det är också ganska mycket oväsen bredvid mig.⏎⏎Så vi får se vad det ger i testet.⏎⏎Vi får se om resultatet är intressant eller inte.
+  #3 396→395 2229ms success recall=7/7 inversions=0/21
+     engineOut: Och nu testar vi alltså ett långt meddelande i strukturerat läge för att se vad som händer⏎⏎Med tanke på att jag inte nödvändigtvis har rätt förhållanden ljudmässigt, eftersom jag är ganska långt från telefonen⏎⏎Så mikrofonens kvalitet kanske inte blir enastående⏎⏎Det är också ganska mycket oväsen bredvid mig⏎⏎Så vi får se vad det ger i testet⏎⏎Vi får se om resultatet är intressant eller inte
+
+━━ [T6-project-update.sv] 694 chars, lang=sv
+  #1 694→699 4131ms success recall=14/14 inversions=0/91
+     engineOut: Alltså, en snabb lägesrapport om projektet: vi bytte över prenumerationsdelen i måndags, Thomas har gjort klart StoreKit-integrationen och den fungerar i sandlådan.⏎⏎Det återstår två saker. Den första är transkriberingshistoriken, som inte är påbörjad alls. Och den andra är den anpassade ordlistan. Och där har vi en specifikation men ingen kod.⏎⏎När det gäller siffrorna ligger vi på 412 nedladdningar sedan lanseringen, med en kvarhållning efter 7 dagar på 19 %, vilket är lågt men inte katastrofalt för en första version.⏎⏎Målet är att passera 1000 före slutet av oktober.⏎⏎Jag träffar Sarah på torsdag klockan 14 för att fixa App Store-delen.⏎⏎Och om allt går bra skickar vi in veckan den 12:e.
+  #2 694→699 4182ms success recall=14/14 inversions=0/91
+     engineOut: Alltså, en snabb lägesrapport om projektet: vi bytte över prenumerationsdelen i måndags, Thomas har gjort klart StoreKit-integrationen och den fungerar i sandlådan.⏎⏎Det återstår två saker. Den första är transkriberingshistoriken, som inte är påbörjad alls. Och den andra är den anpassade ordlistan. Och där har vi en specifikation men ingen kod.⏎⏎När det gäller siffrorna ligger vi på 412 nedladdningar sedan lanseringen, med en kvarhållning efter 7 dagar på 19 %, vilket är lågt men inte katastrofalt för en första version.⏎⏎Målet är att passera 1000 före slutet av oktober.⏎⏎Jag träffar Sarah på torsdag klockan 14 för att fixa App Store-delen.⏎⏎Och om allt går bra skickar vi in veckan den 12:e.
+  #3 694→698 4148ms success recall=14/14 inversions=0/91
+     engineOut: Alltså, en snabb lägesrapport om projektet: vi bytte över prenumerationsdelen i måndags, Thomas har gjort klart StoreKit-integrationen och den fungerar i sandlådan.⏎⏎Det återstår två saker. Den första är transkriberingshistoriken, som inte är påbörjad alls. Och den andra är den anpassade ordlistan. Och där har vi en specifikation men ingen kod.⏎⏎När det gäller siffrorna ligger vi på 412 nedladdningar sedan lanseringen, med en kvarhållning efter 7 dagar på 19 %, vilket är lågt men inte katastrofalt för en första version.⏎⏎Målet är att passera 1000 före slutet av oktober. Jag träffar Sarah på torsdag klockan 14 för att fixa App Store-delen.⏎⏎Och om allt går bra skickar vi in veckan den 12:e.
+
+━━ [T1-last-transcription.tr] 52 chars, lang=tr
+  #1 52→50 979ms success recall=2/2 inversions=0/1
+     engineOut: Bakman için sana bırakıyorum⏎bu son transkripsiyon
+  #2 52→52 924ms success recall=2/2 inversions=0/1
+     engineOut: Bakman için sana bırakıyorum, bu son transkripsiyon.
+  #3 52→52 926ms success recall=2/2 inversions=0/1
+     engineOut: Bakman için sana bırakıyorum, bu son transkripsiyon.
+
+━━ [T2-no-error.tr] 130 chars, lang=tr
+  #1 130→131 1164ms success recall=3/3 inversions=0/3
+     engineOut: Şimdilik hiçbir hata mesajım yok, her şey yolunda görünüyor.⏎⏎Yani bir süre daha devam edeceğiz ama şimdilik oldukça iyi çalışıyor.
+  #2 130→131 1150ms success recall=3/3 inversions=0/3
+     engineOut: Şimdilik hiçbir hata mesajım yok, her şey yolunda görünüyor.⏎⏎Yani bir süre daha devam edeceğiz ama şimdilik oldukça iyi çalışıyor.
+  #3 130→131 1151ms success recall=3/3 inversions=0/3
+     engineOut: Şimdilik hiçbir hata mesajım yok, her şey yolunda görünüyor.⏎⏎Yani bir süre daha devam edeceğiz ama şimdilik oldukça iyi çalışıyor.
+
+━━ [T3-plan-mode.tr] 154 chars, lang=tr
+  #1 154→155 1271ms success recall=3/3 inversions=0/3
+     engineOut: Tamam, bu issue'nun entegrasyonunu hazırlamayı sana bırakıyorum, lütfen.⏎⏎Bunun için plan moduna geçebilirsin, sonra uygulama planını yaptığında onaylarım.
+  #2 154→155 1284ms success recall=3/3 inversions=0/3
+     engineOut: Tamam, bu issue'nun entegrasyonunu hazırlamayı sana bırakıyorum, lütfen.⏎⏎Bunun için plan moduna geçebilirsin, sonra uygulama planını yaptığında onaylarım.
+  #3 154→155 1314ms success recall=3/3 inversions=0/3
+     engineOut: Tamam, bu issue'nun entegrasyonunu hazırlamayı sana bırakıyorum, lütfen.⏎⏎Bunun için plan moduna geçebilirsin, sonra uygulama planını yaptığında onaylarım.
+
+━━ [T4-structured-since.tr] 227 chars, lang=tr
+  #1 227→200 1523ms success recall=5/5 inversions=0/10
+     engineOut: Aslında bir süredir yapılandırılmış moddayım.⏎⏎Dün yaptığım bütün testler, özellikle biraz daha uzun testler, çalıştı.⏎⏎Günlükleri olduğu gibi dışa aktarabileceğim.⏎⏎Bana göre oldukça doğru görünüyor.
+  #2 227→200 1497ms success recall=5/5 inversions=0/10
+     engineOut: Aslında bir süredir yapılandırılmış moddayım.⏎⏎Dün yaptığım bütün testler, özellikle biraz daha uzun testler, çalıştı.⏎⏎Günlükleri olduğu gibi dışa aktarabileceğim.⏎⏎Bana göre oldukça doğru görünüyor.
+  #3 227→200 1516ms success recall=5/5 inversions=0/10
+     engineOut: Aslında bir süredir yapılandırılmış moddayım.⏎⏎Dün yaptığım bütün testler, özellikle biraz daha uzun testler, çalıştı.⏎⏎Günlükleri olduğu gibi dışa aktarabileceğim.⏎⏎Bana göre oldukça doğru görünüyor.
+
+━━ [T5-long-test.tr] 324 chars, lang=tr
+  #1 324→329 2099ms success recall=7/7 inversions=0/21
+     engineOut: Ve şimdi ne olacağını görmek için yapılandırılmış modda uzun bir mesaj deniyoruz.⏎⏎Ses açısından pek iyi koşullarda olmadığımı da bilerek, çünkü telefondan oldukça uzaktayım.⏎⏎Yani mikrofonun kalitesi belki olağanüstü olmayacak.⏎⏎Yanımda da epey gürültü var.⏎⏎Bakalım testte ne verecek.⏎⏎Sonucun ilginç olup olmadığını göreceğiz.
+  #2 324→329 2289ms success recall=7/7 inversions=0/21
+     engineOut: Ve şimdi ne olacağını görmek için yapılandırılmış modda uzun bir mesaj deniyoruz.⏎⏎Ses açısından pek iyi koşullarda olmadığımı da bilerek, çünkü telefondan oldukça uzaktayım.⏎⏎Yani mikrofonun kalitesi belki olağanüstü olmayacak.⏎⏎Yanımda da epey gürültü var.⏎⏎Bakalım testte ne verecek.⏎⏎Sonucun ilginç olup olmadığını göreceğiz.
+  #3 324→323 2283ms success recall=7/7 inversions=0/21
+     engineOut: Ve şimdi ne olacağını görmek için yapılandırılmış modda uzun bir mesaj deniyoruz⏎⏎Ses açısından pek iyi koşullarda olmadığımı da bilerek, çünkü telefondan oldukça uzaktayım⏎⏎Yani mikrofonun kalitesi belki olağanüstü olmayacak⏎⏎Yanımda da epey gürültü var⏎⏎Bakalım testte ne verecek⏎⏎Sonucun ilginç olup olmadığını göreceğiz
+
+━━ [T6-project-update.tr] 637 chars, lang=tr
+  #1 637→508 3198ms success recall=11/15 UNRECALLED=4 inversions=0/55
+     UNRECALLED (whole 0.00, best 0.00): Rakamlara gelince,
+     UNRECALLED (whole 0.00, best 0.00): lansmandan bu yana 412 indirmedeyiz,
+     UNRECALLED (whole 0.00, best 0.00): 7 günlük elde tutma oranı %19,
+     UNRECALLED (whole 0.25, best 0.12): bu düşük ama ilk sürüm için felaket değil.
+     engineOut: Evet, projeyle ilgili kısa bir güncelleme: abonelik kısmını geçen pazartesi geçirdik, Thomas StoreKit entegrasyonunu bitirdi ve sandbox'ta çalışıyor. Geriye iki şey kaldı. Birincisi, hiç başlanmamış olan transkripsiyon geçmişi. İkincisi de kişisel kelime dağarcığı. Onunla ilgili bir spesifikasyonumuz var ama hiç kod yok.⏎⏎Hedef, ekim sonundan önce 1000 barajını geçmek. App Store kısmını ayarlamak için perşembe saat 14'te Sarah ile görüşüyorum. Her şey yolunda giderse, ayın 12'si haftasında gönderiyoruz.
+  #2 637→641 3853ms success recall=15/15 inversions=0/105
+     engineOut: Evet, projeyle ilgili kısa bir güncelleme: abonelik kısmını geçen pazartesi geçirdik, Thomas StoreKit entegrasyonunu bitirdi ve sandbox'ta çalışıyor.⏎⏎Geriye iki şey kaldı. Birincisi, hiç başlanmamış olan transkripsiyon geçmişi. İkincisi de kişisel kelime dağarcığı. Onunla ilgili bir spesifikasyonumuz var ama hiç kod yok.⏎⏎Rakamlara gelince, lansmandan bu yana 412 indirmedeyiz, 7 günlük elde tutma oranı %19, bu düşük ama ilk sürüm için felaket değil.⏎⏎Hedef, ekim sonundan önce 1000 barajını geçmek. App Store kısmını ayarlamak için perşembe saat 14'te Sarah ile görüşüyorum.⏎⏎Her şey yolunda giderse, ayın 12'si haftasında gönderiyoruz.
+  #3 637→642 3911ms success recall=15/15 inversions=0/105
+     engineOut: Evet, projeyle ilgili kısa bir güncelleme: abonelik kısmını geçen pazartesi geçirdik, Thomas StoreKit entegrasyonunu bitirdi ve sandbox'ta çalışıyor.⏎⏎Geriye iki şey kaldı. Birincisi, hiç başlanmamış olan transkripsiyon geçmişi. İkincisi de kişisel kelime dağarcığı. Onunla ilgili bir spesifikasyonumuz var ama hiç kod yok.⏎⏎Rakamlara gelince, lansmandan bu yana 412 indirmedeyiz, 7 günlük elde tutma oranı %19, bu düşük ama ilk sürüm için felaket değil.⏎⏎Hedef, ekim sonundan önce 1000 barajını geçmek.⏎⏎App Store kısmını ayarlamak için perşembe saat 14'te Sarah ile görüşüyorum.⏎⏎Her şey yolunda giderse, ayın 12'si haftasında gönderiyoruz.
+
+━━ [T1-last-transcription.vi] 50 chars, lang=vi
+  #1 50→48 896ms success recall=2/2 inversions=0/1
+     engineOut: Tôi để bạn xem nhé⏎Đây là bản ghi chép cuối cùng
+  #2 50→48 917ms success recall=2/2 inversions=0/1
+     engineOut: Tôi để bạn xem nhé⏎Đây là bản ghi chép cuối cùng
+  #3 50→48 1002ms success recall=2/2 inversions=0/1
+     engineOut: Tôi để bạn xem nhé⏎Đây là bản ghi chép cuối cùng
+
+━━ [T2-no-error.vi] 133 chars, lang=vi
+  #1 133→134 1186ms success recall=4/4 inversions=0/6
+     engineOut: Hiện tại tôi không có thông báo lỗi nào, mọi thứ có vẻ ổn.⏎⏎Vậy chúng ta sẽ tiếp tục thêm một lúc nữa, nhưng hiện tại nó chạy khá tốt.
+  #2 133→134 1198ms success recall=4/4 inversions=0/6
+     engineOut: Hiện tại tôi không có thông báo lỗi nào, mọi thứ có vẻ ổn.⏎⏎Vậy chúng ta sẽ tiếp tục thêm một lúc nữa, nhưng hiện tại nó chạy khá tốt.
+  #3 133→134 1176ms success recall=4/4 inversions=0/6
+     engineOut: Hiện tại tôi không có thông báo lỗi nào, mọi thứ có vẻ ổn.⏎⏎Vậy chúng ta sẽ tiếp tục thêm một lúc nữa, nhưng hiện tại nó chạy khá tốt.
+
+━━ [T3-plan-mode.vi] 175 chars, lang=vi
+  #1 175→175 1423ms success recall=4/4 inversions=0/6
+     engineOut: Được rồi, tôi để bạn chuẩn bị việc tích hợp issue này nhé⏎⏎Bạn có thể chuyển sang chế độ lập kế hoạch để làm việc đó, rồi tôi sẽ duyệt khi bạn đã lập xong kế hoạch triển khai.
+  #2 175→175 1433ms success recall=4/4 inversions=0/6
+     engineOut: Được rồi, tôi để bạn chuẩn bị việc tích hợp issue này nhé⏎⏎Bạn có thể chuyển sang chế độ lập kế hoạch để làm việc đó, rồi tôi sẽ duyệt khi bạn đã lập xong kế hoạch triển khai.
+  #3 175→174 1368ms success recall=4/4 inversions=0/6
+     engineOut: Được rồi, tôi để bạn chuẩn bị việc tích hợp issue này nhé⏎⏎Bạn có thể chuyển sang chế độ lập kế hoạch để làm việc đó, rồi tôi sẽ duyệt khi bạn đã lập xong kế hoạch triển khai
+
+━━ [T4-structured-since.vi] 250 chars, lang=vi
+  #1 250→253 1910ms success recall=6/6 inversions=0/15
+     engineOut: Thật ra tôi đã dùng chế độ có cấu trúc được một lúc rồi.⏎⏎Vậy thật ra tất cả các bài kiểm tra tôi làm hôm qua, nhất là những bài dài hơn một chút, đều chạy được.⏎⏎Vậy tôi nghĩ tôi sẽ có thể xuất nhật ký nguyên như vậy.⏎⏎Nhưng với tôi thì có vẻ khá đúng.
+  #2 250→241 1839ms success recall=6/6 inversions=0/15
+     engineOut: Thật ra tôi đã dùng chế độ có cấu trúc được một lúc rồi⏎⏎Vậy tất cả các bài kiểm tra tôi làm hôm qua, nhất là những bài dài hơn một chút, đều chạy được⏎⏎Vậy tôi nghĩ tôi sẽ có thể xuất nhật ký nguyên như vậy⏎⏎Nhưng với tôi thì có vẻ khá đúng
+  #3 250→241 1574ms success recall=6/6 inversions=0/15
+     engineOut: Thật ra tôi đã dùng chế độ có cấu trúc được một lúc rồi⏎⏎Vậy tất cả các bài kiểm tra tôi làm hôm qua, nhất là những bài dài hơn một chút, đều chạy được⏎⏎Vậy tôi nghĩ tôi sẽ có thể xuất nhật ký nguyên như vậy⏎⏎Nhưng với tôi thì có vẻ khá đúng
+
+━━ [T5-long-test.vi] 333 chars, lang=vi
+  #1 333→332 1956ms success recall=6/6 inversions=0/15
+     engineOut: Và giờ chúng ta thử một tin nhắn dài ở chế độ có cấu trúc để xem chuyện gì sẽ xảy ra⏎⏎Biết rằng tôi không hẳn ở trong điều kiện âm thanh tốt vì tôi ở khá xa điện thoại⏎⏎Vậy chất lượng micro có thể sẽ không xuất sắc lắm⏎⏎Bên cạnh tôi cũng khá ồn⏎⏎Vậy để xem bài kiểm tra cho ra kết quả gì⏎⏎Chúng ta sẽ xem kết quả có thú vị hay không
+  #2 333→332 1963ms success recall=6/6 inversions=0/15
+     engineOut: Và giờ chúng ta thử một tin nhắn dài ở chế độ có cấu trúc để xem chuyện gì sẽ xảy ra⏎⏎Biết rằng tôi không hẳn ở trong điều kiện âm thanh tốt vì tôi ở khá xa điện thoại⏎⏎Vậy chất lượng micro có thể sẽ không xuất sắc lắm⏎⏎Bên cạnh tôi cũng khá ồn⏎⏎Vậy để xem bài kiểm tra cho ra kết quả gì⏎⏎Chúng ta sẽ xem kết quả có thú vị hay không
+  #3 333→332 1956ms success recall=6/6 inversions=0/15
+     engineOut: Và giờ chúng ta thử một tin nhắn dài ở chế độ có cấu trúc để xem chuyện gì sẽ xảy ra⏎⏎Biết rằng tôi không hẳn ở trong điều kiện âm thanh tốt vì tôi ở khá xa điện thoại⏎⏎Vậy chất lượng micro có thể sẽ không xuất sắc lắm⏎⏎Bên cạnh tôi cũng khá ồn⏎⏎Vậy để xem bài kiểm tra cho ra kết quả gì⏎⏎Chúng ta sẽ xem kết quả có thú vị hay không
+
+━━ [T6-project-update.vi] 664 chars, lang=vi
+  #1 664→670 4000ms success recall=16/16 inversions=0/120
+     engineOut: Vậy, cập nhật nhanh về dự án: thứ Hai tuần trước chúng tôi đã chuyển phần đăng ký, Thomas đã hoàn thành việc tích hợp StoreKit và nó chạy được trong sandbox.⏎⏎Còn lại hai việc. Việc thứ nhất là lịch sử bản ghi chép, hoàn toàn chưa được bắt đầu.⏎⏎Và việc thứ hai là từ vựng tùy chỉnh. Về việc đó chúng tôi có bản đặc tả nhưng chưa có mã.⏎⏎Về số liệu, chúng tôi đạt 412 lượt tải xuống kể từ khi ra mắt, với tỷ lệ giữ chân sau 7 ngày là 19%, thấp nhưng không phải thảm họa đối với phiên bản đầu tiên.⏎⏎Mục tiêu là vượt mốc 1000 trước cuối tháng Mười.⏎⏎Tôi gặp Sarah vào thứ Năm lúc 14 giờ để chốt phần App Store.⏎⏎Và nếu mọi việc suôn sẻ, chúng tôi sẽ nộp vào tuần ngày 12.
+  #2 664→670 4127ms success recall=16/16 inversions=0/120
+     engineOut: Vậy, cập nhật nhanh về dự án: thứ Hai tuần trước chúng tôi đã chuyển phần đăng ký, Thomas đã hoàn thành việc tích hợp StoreKit và nó chạy được trong sandbox.⏎⏎Còn lại hai việc. Việc thứ nhất là lịch sử bản ghi chép, hoàn toàn chưa được bắt đầu.⏎⏎Và việc thứ hai là từ vựng tùy chỉnh. Về việc đó chúng tôi có bản đặc tả nhưng chưa có mã.⏎⏎Về số liệu, chúng tôi đạt 412 lượt tải xuống kể từ khi ra mắt, với tỷ lệ giữ chân sau 7 ngày là 19%, thấp nhưng không phải thảm họa đối với phiên bản đầu tiên.⏎⏎Mục tiêu là vượt mốc 1000 trước cuối tháng Mười.⏎⏎Tôi gặp Sarah vào thứ Năm lúc 14 giờ để chốt phần App Store.⏎⏎Và nếu mọi việc suôn sẻ, chúng tôi sẽ nộp vào tuần ngày 12.
+  #3 664→670 4008ms success recall=16/16 inversions=0/120
+     engineOut: Vậy, cập nhật nhanh về dự án: thứ Hai tuần trước chúng tôi đã chuyển phần đăng ký, Thomas đã hoàn thành việc tích hợp StoreKit và nó chạy được trong sandbox.⏎⏎Còn lại hai việc. Việc thứ nhất là lịch sử bản ghi chép, hoàn toàn chưa được bắt đầu.⏎⏎Và việc thứ hai là từ vựng tùy chỉnh. Về việc đó chúng tôi có bản đặc tả nhưng chưa có mã.⏎⏎Về số liệu, chúng tôi đạt 412 lượt tải xuống kể từ khi ra mắt, với tỷ lệ giữ chân sau 7 ngày là 19%, thấp nhưng không phải thảm họa đối với phiên bản đầu tiên.⏎⏎Mục tiêu là vượt mốc 1000 trước cuối tháng Mười.⏎⏎Tôi gặp Sarah vào thứ Năm lúc 14 giờ để chốt phần App Store.⏎⏎Và nếu mọi việc suôn sẻ, chúng tôi sẽ nộp vào tuần ngày 12.
+
+━━ [T1-last-transcription.ja] 22 chars, lang=ja
+  #1 22→21 779ms success recall=1/1 inversions=0/0
+     engineOut: 確認してみてね、これが最新の文字起こしだよ
+  #2 22→21 761ms success recall=1/1 inversions=0/0
+     engineOut: 確認してみてね、これが最新の文字起こしだよ
+  #3 22→22 757ms success recall=1/1 inversions=0/0
+     engineOut: 確認してみてね、これが最新の文字起こしだよ。
+
+━━ [T2-no-error.ja] 59 chars, lang=ja
+  #1 59→60 1038ms success recall=2/2 inversions=0/1
+     engineOut: 今のところエラーメッセージは出ていないし、全部問題なさそう。⏎だからもう少し続けるけど、今のところかなりうまく動いてる。
+  #2 59→60 1019ms success recall=2/2 inversions=0/1
+     engineOut: 今のところエラーメッセージは出ていないし、全部問題なさそう。⏎だからもう少し続けるけど、今のところかなりうまく動いてる。
+  #3 59→60 1009ms success recall=2/2 inversions=0/1
+     engineOut: 今のところエラーメッセージは出ていないし、全部問題なさそう。⏎だからもう少し続けるけど、今のところかなりうまく動いてる。
+
+━━ [T3-plan-mode.ja] 62 chars, lang=ja
+  #1 62→64 1172ms success recall=3/3 inversions=0/3
+     engineOut: じゃあ、このissueの統合の準備をお願いね。⏎そのためにプランモードに切り替えていいよ。⏎実装計画ができたら、私が承認するね。
+  #2 62→61 1146ms success recall=3/3 inversions=0/3
+     engineOut: じゃあ、このissueの統合の準備をお願いね⏎そのためにプランモードに切り替えていいよ⏎実装計画ができたら、私が承認するね
+  #3 62→64 1123ms success recall=3/3 inversions=0/3
+     engineOut: じゃあ、このissueの統合の準備をお願いね。⏎そのためにプランモードに切り替えていいよ。⏎実装計画ができたら、私が承認するね。
+
+━━ [T4-structured-since.ja] 104 chars, lang=ja
+  #1 104→100 1322ms success recall=4/4 inversions=0/6
+     engineOut: 実はしばらく前から構造化モードを使ってるんだ⏎⏎昨日やったテストは全部、特にちょっと長めのテストもうまくいった⏎⏎だからログはそのままエクスポートできると思う⏎⏎でも私としてはかなり正しいように見える
+  #2 104→104 1313ms success recall=4/4 inversions=0/6
+     engineOut: 実はしばらく前から構造化モードを使ってるんだ。⏎⏎昨日やったテストは全部、特にちょっと長めのテストもうまくいった。⏎⏎だからログはそのままエクスポートできると思う。⏎⏎でも私としてはかなり正しいように見える。
+  #3 104→104 1299ms success recall=4/4 inversions=0/6
+     engineOut: 実はしばらく前から構造化モードを使ってるんだ。⏎⏎昨日やったテストは全部、特にちょっと長めのテストもうまくいった。⏎⏎だからログはそのままエクスポートできると思う。⏎⏎でも私としてはかなり正しいように見える。
+
+━━ [T5-long-test.ja] 150 chars, lang=ja
+  #1 150→160 1872ms success recall=6/6 inversions=0/15
+     engineOut: それで今、何が起きるか見るために構造化モードで長いメッセージを試してる。⏎⏎スマホからかなり離れてるから、音声的には必ずしもいい条件じゃないのは分かってる。⏎⏎だからマイクの品質はそれほど良くないかもしれない。⏎⏎それに隣でけっこう雑音もしてる。⏎⏎だからテストでどうなるか見てみよう。⏎⏎結果が面白いかどうか見てみる。
+  #2 150→160 1877ms success recall=6/6 inversions=0/15
+     engineOut: それで今、何が起きるか見るために構造化モードで長いメッセージを試してる。⏎⏎スマホからかなり離れてるから、音声的には必ずしもいい条件じゃないのは分かってる。⏎⏎だからマイクの品質はそれほど良くないかもしれない。⏎⏎それに隣でけっこう雑音もしてる。⏎⏎だからテストでどうなるか見てみよう。⏎⏎結果が面白いかどうか見てみる。
+  #3 150→160 1860ms success recall=6/6 inversions=0/15
+     engineOut: それで今、何が起きるか見るために構造化モードで長いメッセージを試してる。⏎⏎スマホからかなり離れてるから、音声的には必ずしもいい条件じゃないのは分かってる。⏎⏎だからマイクの品質はそれほど良くないかもしれない。⏎⏎それに隣でけっこう雑音もしてる。⏎⏎だからテストでどうなるか見てみよう。⏎⏎結果が面白いかどうか見てみる。
+
+━━ [T6-project-update.ja] 293 chars, lang=ja
+  #1 293→301 3248ms success recall=11/11 inversions=0/55
+     engineOut: じゃあ、プロジェクトについて簡単に報告するね⏎⏎先週の月曜日にサブスクリプションの部分を切り替えて、ThomasがStoreKitの統合を終わらせて、サンドボックスで動いてる⏎⏎残っているのは二つ⏎⏎一つ目は文字起こしの履歴で、まったく手をつけてない⏎⏎二つ目はカスタム語彙。それについては仕様はあるけど、コードはまだない⏎⏎数字の面では、リリース以来412ダウンロードで、7日間の継続率は19%⏎⏎低いけど、最初のバージョンとしては致命的ではない⏎⏎目標は10月末までに1000を超えること⏎⏎木曜日の14時にSarahと会ってApp Storeの部分を詰める⏎⏎すべて順調なら、12日の週に提出する
+  #2 293→309 3375ms success recall=11/11 inversions=0/55
+     engineOut: じゃあ、プロジェクトについて簡単に報告するね。⏎⏎先週の月曜日にサブスクリプションの部分を切り替えて、ThomasがStoreKitの統合を終わらせて、サンドボックスで動いてる。⏎⏎残っているのは二つ。一つ目は文字起こしの履歴で、まったく手をつけてない。⏎⏎二つ目はカスタム語彙。それについては仕様はあるけど、コードはまだない。⏎⏎数字の面では、リリース以来412ダウンロードで、7日間の継続率は19%。⏎⏎低いけど、最初のバージョンとしては致命的ではない。⏎⏎目標は10月末までに1000を超えること。⏎⏎木曜日の14時にSarahと会ってApp Storeの部分を詰める。⏎⏎すべて順調なら、12日の週に提出する。
+  #3 293→301 3216ms success recall=11/11 inversions=0/55
+     engineOut: じゃあ、プロジェクトについて簡単に報告するね⏎⏎先週の月曜日にサブスクリプションの部分を切り替えて、ThomasがStoreKitの統合を終わらせて、サンドボックスで動いてる⏎⏎残っているのは二つ⏎⏎一つ目は文字起こしの履歴で、まったく手をつけてない⏎⏎二つ目はカスタム語彙。それについては仕様はあるけど、コードはまだない⏎⏎数字の面では、リリース以来412ダウンロードで、7日間の継続率は19%⏎⏎低いけど、最初のバージョンとしては致命的ではない⏎⏎目標は10月末までに1000を超えること⏎⏎木曜日の14時にSarahと会ってApp Storeの部分を詰める⏎⏎すべて順調なら、12日の週に提出する
+
+━━ [T1-last-transcription.ko] 21 chars, lang=ko
+  #1 21→21 780ms success recall=2/2 inversions=0/1
+     engineOut: 한번 봐 줘, 이게 마지막 전사본이야.
+  #2 21→21 772ms success recall=2/2 inversions=0/1
+     engineOut: 한번 봐 줘, 이게 마지막 전사본이야.
+  #3 21→21 746ms success recall=2/2 inversions=0/1
+     engineOut: 한번 봐 줘, 이게 마지막 전사본이야.
+
+━━ [T2-no-error.ko] 61 chars, lang=ko
+  #1 61→61 1064ms success recall=4/4 inversions=0/6
+     engineOut: 지금까지는 오류 메시지가 없고, 다 괜찮아 보여.⏎그래서 조금 더 계속해 볼 건데, 지금까지는 꽤 잘 작동해.
+  #2 61→61 1062ms success recall=4/4 inversions=0/6
+     engineOut: 지금까지는 오류 메시지가 없고, 다 괜찮아 보여.⏎그래서 조금 더 계속해 볼 건데, 지금까지는 꽤 잘 작동해.
+  #3 61→61 1056ms success recall=4/4 inversions=0/6
+     engineOut: 지금까지는 오류 메시지가 없고, 다 괜찮아 보여.⏎그래서 조금 더 계속해 볼 건데, 지금까지는 꽤 잘 작동해.
+
+━━ [T3-plan-mode.ko] 75 chars, lang=ko
+  #1 75→68 1163ms success recall=3/3 inversions=0/3
+     engineOut: 좋아, 이 이슈의 통합 준비는 너한테 맡길게, 부탁해.⏎플랜 모드로 전환해도 되고, 구현 계획을 다 만들면 내가 승인할게.
+  #2 75→68 1183ms success recall=3/3 inversions=0/3
+     engineOut: 좋아, 이 이슈의 통합 준비는 너한테 맡길게, 부탁해.⏎플랜 모드로 전환해도 되고, 구현 계획을 다 만들면 내가 승인할게.
+  #3 75→68 1170ms success recall=3/3 inversions=0/3
+     engineOut: 좋아, 이 이슈의 통합 준비는 너한테 맡길게, 부탁해.⏎플랜 모드로 전환해도 되고, 구현 계획을 다 만들면 내가 승인할게.
+
+━━ [T4-structured-since.ko] 114 chars, lang=ko
+  #1 114→114 1592ms success recall=5/5 inversions=0/10
+     engineOut: 사실 구조화 모드를 쓴 지 좀 됐어.⏎⏎그래서 어제 한 테스트는 전부, 특히 조금 더 긴 테스트들도 다 잘 됐어.⏎⏎그래서 로그를 그대로 내보낼 수 있을 것 같아.⏎⏎그래도 내가 보기엔 꽤 맞는 것 같아.
+  #2 114→110 1446ms success recall=5/5 inversions=0/10
+     engineOut: 사실 구조화 모드를 쓴 지 좀 됐어⏎⏎그래서 어제 한 테스트는 전부, 특히 조금 더 긴 테스트들도 다 잘 됐어⏎⏎그래서 로그를 그대로 내보낼 수 있을 것 같아⏎⏎그래도 내가 보기엔 꽤 맞는 것 같아
+  #3 114→110 1430ms success recall=5/5 inversions=0/10
+     engineOut: 사실 구조화 모드를 쓴 지 좀 됐어⏎⏎그래서 어제 한 테스트는 전부, 특히 조금 더 긴 테스트들도 다 잘 됐어⏎⏎그래서 로그를 그대로 내보낼 수 있을 것 같아⏎⏎그래도 내가 보기엔 꽤 맞는 것 같아
+
+━━ [T5-long-test.ko] 182 chars, lang=ko
+  #1 182→179 2053ms success recall=6/6 inversions=0/15
+     engineOut: 그래서 지금 무슨 일이 일어나는지 보려고 구조화 모드로 긴 메시지를 시험해 보고 있어⏎⏎휴대폰에서 꽤 멀리 떨어져 있어서 오디오 조건이 꼭 좋은 건 아니라는 걸 알고 있어⏎⏎그래서 마이크 품질이 아주 좋지는 않을 수도 있어⏎⏎옆에서 소음도 꽤 나⏎⏎니까 테스트에서 어떻게 나오는지 보자⏎⏎결과가 흥미로운지 아닌지 볼 거야
+  #2 182→179 2049ms success recall=6/6 inversions=0/15
+     engineOut: 그래서 지금 무슨 일이 일어나는지 보려고 구조화 모드로 긴 메시지를 시험해 보고 있어⏎⏎휴대폰에서 꽤 멀리 떨어져 있어서 오디오 조건이 꼭 좋은 건 아니라는 걸 알고 있어⏎⏎그래서 마이크 품질이 아주 좋지는 않을 수도 있어⏎⏎옆에서 소음도 꽤 나⏎⏎니까 테스트에서 어떻게 나오는지 보자⏎⏎결과가 흥미로운지 아닌지 볼 거야
+  #3 182→181 2099ms success recall=6/6 inversions=0/15
+     engineOut: 그래서 지금 무슨 일이 일어나는지 보려고 구조화 모드로 긴 메시지를 시험해 보고 있어⏎⏎휴대폰에서 꽤 멀리 떨어져 있어서 오디오 조건이 꼭 좋은 건 아니라는 걸 알고 있어⏎⏎그래서 마이크 품질이 아주 좋지는 않을 수도 있어⏎⏎옆에서 소음도 꽤 나⏎⏎그러니까 테스트에서 어떻게 나오는지 보자⏎⏎결과가 흥미로운지 아닌지 볼 거야
+
+━━ [T6-project-update.ko] 319 chars, lang=ko
+  #1 319→318 3348ms success recall=15/15 inversions=0/105
+     engineOut: 자, 프로젝트에 대해 간단히 업데이트할게⏎⏎지난 월요일에 구독 부분을 전환했고, Thomas가 StoreKit 통합을 끝내서 샌드박스에서 잘 돌아가⏎⏎남은 건 두 가지야⏎⏎첫 번째는 전사 기록인데, 아직 전혀 시작하지 않았어⏎⏎두 번째는 사용자 지정 어휘야. 그건 사양은 있는데 코드는 없어⏎⏎숫자로 보면, 출시 이후 다운로드가 412건이고, 7일 유지율은 19%야⏎⏎낮긴 하지만 첫 버전치고 최악은 아니야⏎⏎목표는 10월 말 전에 1000건을 넘기는 거야⏎⏎목요일 오후 2시에 Sarah를 만나서 App Store 부분을 정리할 거야⏎⏎다 잘 되면 12일 주에 제출해
+  #2 319→318 3356ms success recall=15/15 inversions=0/105
+     engineOut: 자, 프로젝트에 대해 간단히 업데이트할게⏎⏎지난 월요일에 구독 부분을 전환했고, Thomas가 StoreKit 통합을 끝내서 샌드박스에서 잘 돌아가⏎⏎남은 건 두 가지야⏎⏎첫 번째는 전사 기록인데, 아직 전혀 시작하지 않았어⏎⏎두 번째는 사용자 지정 어휘야. 그건 사양은 있는데 코드는 없어⏎⏎숫자로 보면, 출시 이후 다운로드가 412건이고, 7일 유지율은 19%야⏎⏎낮긴 하지만 첫 버전치고 최악은 아니야⏎⏎목표는 10월 말 전에 1000건을 넘기는 거야⏎⏎목요일 오후 2시에 Sarah를 만나서 App Store 부분을 정리할 거야⏎⏎다 잘 되면 12일 주에 제출해
+  #3 319→326 3601ms success recall=15/15 inversions=0/105
+     engineOut: 자, 프로젝트에 대해 간단히 업데이트할게.⏎⏎지난 월요일에 구독 부분을 전환했고, Thomas가 StoreKit 통합을 끝내서 샌드박스에서 잘 돌아가.⏎⏎남은 건 두 가지야. 첫 번째는 전사 기록인데, 아직 전혀 시작하지 않았어.⏎⏎두 번째는 사용자 지정 어휘야. 그건 사양은 있는데 코드는 없어.⏎⏎숫자로 보면, 출시 이후 다운로드가 412건이고, 7일 유지율은 19%야. 낮긴 하지만 첫 버전치고 최악은 아니야.⏎⏎목표는 10월 말 전에 1000건을 넘기는 거야.⏎⏎목요일 오후 2시에 Sarah를 만나서 App Store 부분을 정리할 거야.⏎⏎다 잘 되면 12일 주에 제출해.
+
+━━ [T1-last-transcription.zh-Hans] 14 chars, lang=zh-Hans
+  #1 14→14 702ms success recall=1/1 inversions=0/0
+     engineOut: 你看一下吧，这是最新的转写。
+  #2 14→14 688ms success recall=1/1 inversions=0/0
+     engineOut: 你看一下吧，这是最新的转写。
+  #3 14→14 688ms success recall=1/1 inversions=0/0
+     engineOut: 你看一下吧，这是最新的转写。
+
+━━ [T2-no-error.zh-Hans] 43 chars, lang=zh-Hans
+  #1 43→42 940ms success recall=2/2 inversions=0/1
+     engineOut: 目前我没有任何错误信息⏎一切看起来都正常⏎所以我们再继续一会儿⏎不过目前运行得挺好的
+  #2 43→44 945ms success recall=2/2 inversions=0/1
+     engineOut: 目前我没有任何错误信息，一切看起来都正常。⏎所以我们再继续一会儿，不过目前运行得挺好的。
+  #3 43→42 947ms success recall=2/2 inversions=0/1
+     engineOut: 目前我没有任何错误信息⏎一切看起来都正常⏎所以我们再继续一会儿⏎不过目前运行得挺好的
+
+━━ [T3-plan-mode.zh-Hans] 51 chars, lang=zh-Hans
+  #1 51→50 947ms success recall=2/2 inversions=0/1
+     engineOut: 好，这个 issue 的集成就麻烦你来准备了⏎你可以切换到计划模式来做，等你做好实现计划之后我再确认
+  #2 51→50 991ms success recall=2/2 inversions=0/1
+     engineOut: 好，这个 issue 的集成就麻烦你来准备了⏎你可以切换到计划模式来做⏎等你做好实现计划之后我再确认
+  #3 51→50 1011ms success recall=2/2 inversions=0/1
+     engineOut: 好，这个 issue 的集成就麻烦你来准备了⏎你可以切换到计划模式来做⏎等你做好实现计划之后我再确认
+
+━━ [T4-structured-since.zh-Hans] 77 chars, lang=zh-Hans
+  #1 77→80 1365ms success recall=4/4 inversions=0/6
+     engineOut: 其实我用结构化模式已经有一段时间了。⏎所以其实我昨天做的所有测试，尤其是稍微长一点的测试，都成功了。⏎所以我觉得我可以把日志原样导出。⏎不过在我看来还挺正确的。
+  #2 77→80 1356ms success recall=4/4 inversions=0/6
+     engineOut: 其实我用结构化模式已经有一段时间了。⏎所以其实我昨天做的所有测试，尤其是稍微长一点的测试，都成功了。⏎所以我觉得我可以把日志原样导出。⏎不过在我看来还挺正确的。
+  #3 77→80 1361ms success recall=4/4 inversions=0/6
+     engineOut: 其实我用结构化模式已经有一段时间了。⏎所以其实我昨天做的所有测试，尤其是稍微长一点的测试，都成功了。⏎所以我觉得我可以把日志原样导出。⏎不过在我看来还挺正确的。
+
+━━ [T5-long-test.zh-Hans] 103 chars, lang=zh-Hans
+  #1 103→107 1612ms success recall=6/6 inversions=0/15
+     engineOut: 所以现在我们试一下用结构化模式发一条长消息，看看会发生什么⏎⏎我知道我的录音条件不一定好，因为我离手机挺远的⏎⏎所以麦克风的质量可能不会特别好⏎⏎我旁边也挺吵的⏎⏎那就看看测试结果怎么样吧⏎⏎我们看看结果有没有意思
+  #2 103→113 1813ms success recall=6/6 inversions=0/15
+     engineOut: 所以现在我们试一下用结构化模式发一条长消息，看看会发生什么。⏎⏎我知道我的录音条件不一定好，因为我离手机挺远的。⏎⏎所以麦克风的质量可能不会特别好。⏎⏎我旁边也挺吵的。⏎⏎那就看看测试结果怎么样吧。⏎⏎我们看看结果有没有意思。
+  #3 103→113 1695ms success recall=6/6 inversions=0/15
+     engineOut: 所以现在我们试一下用结构化模式发一条长消息，看看会发生什么。⏎⏎我知道我的录音条件不一定好，因为我离手机挺远的。⏎⏎所以麦克风的质量可能不会特别好。⏎⏎我旁边也挺吵的。⏎⏎那就看看测试结果怎么样吧。⏎⏎我们看看结果有没有意思。
+
+━━ [T6-project-update.zh-Hans] 232 chars, lang=zh-Hans
+  #1 232→244 3012ms success recall=9/9 inversions=0/36
+     engineOut: 好，简单说一下项目进展：上周一我们切换了订阅部分，Thomas 完成了 StoreKit 的集成，在沙盒里能正常运行。⏎⏎还剩两件事。第一件是转写历史，完全还没开始。⏎⏎第二件是自定义词汇。这个我们有规格说明，但还没有代码。⏎⏎数据方面，上线以来一共 412 次下载，7 天留存率是 19%，虽然偏低，但对第一个版本来说还不算灾难。⏎⏎目标是在十月底之前突破 1000。⏎⏎周四下午两点我要见 Sarah，把 App Store 的部分定下来。⏎⏎如果一切顺利，我们在 12 号那周提交。
+  #2 232→244 3053ms success recall=9/9 inversions=0/36
+     engineOut: 好，简单说一下项目进展：上周一我们切换了订阅部分，Thomas 完成了 StoreKit 的集成，在沙盒里能正常运行。⏎⏎还剩两件事。第一件是转写历史，完全还没开始。⏎⏎第二件是自定义词汇。这个我们有规格说明，但还没有代码。⏎⏎数据方面，上线以来一共 412 次下载，7 天留存率是 19%，虽然偏低，但对第一个版本来说还不算灾难。⏎⏎目标是在十月底之前突破 1000。⏎⏎周四下午两点我要见 Sarah，把 App Store 的部分定下来。⏎⏎如果一切顺利，我们在 12 号那周提交。
+  #3 232→244 3099ms success recall=9/9 inversions=0/36
+     engineOut: 好，简单说一下项目进展：上周一我们切换了订阅部分，Thomas 完成了 StoreKit 的集成，在沙盒里能正常运行。⏎⏎还剩两件事。第一件是转写历史，完全还没开始。⏎⏎第二件是自定义词汇。这个我们有规格说明，但还没有代码。⏎⏎数据方面，上线以来一共 412 次下载，7 天留存率是 19%，虽然偏低，但对第一个版本来说还不算灾难。⏎⏎目标是在十月底之前突破 1000。⏎⏎周四下午两点我要见 Sarah，把 App Store 的部分定下来。⏎⏎如果一切顺利，我们在 12 号那周提交。
+
+━━ [T1-last-transcription.zh-Hant] 15 chars, lang=zh-Hant
+  #1 15→15 663ms success recall=1/1 inversions=0/0
+     engineOut: 你看一下吧，這是最新的逐字稿。
+  #2 15→15 662ms success recall=1/1 inversions=0/0
+     engineOut: 你看一下吧，這是最新的逐字稿。
+  #3 15→15 664ms success recall=1/1 inversions=0/0
+     engineOut: 你看一下吧，這是最新的逐字稿。
+
+━━ [T2-no-error.zh-Hant] 43 chars, lang=zh-Hant
+  #1 43→44 980ms success recall=2/2 inversions=0/1
+     engineOut: 目前我沒有任何錯誤訊息，一切看起來都正常。⏎所以我們再繼續一下，不過目前運作得還蠻好的。
+  #2 43→44 984ms success recall=2/2 inversions=0/1
+     engineOut: 目前我沒有任何錯誤訊息，一切看起來都正常。⏎所以我們再繼續一下，不過目前運作得還蠻好的。
+  #3 43→44 990ms success recall=2/2 inversions=0/1
+     engineOut: 目前我沒有任何錯誤訊息，一切看起來都正常。⏎所以我們再繼續一下，不過目前運作得還蠻好的。
+
+━━ [T3-plan-mode.zh-Hant] 51 chars, lang=zh-Hant
+  #1 51→50 1101ms success recall=2/2 inversions=0/1
+     engineOut: 好，這個 issue 的整合就麻煩你來準備了⏎你可以切換到計畫模式來做⏎等你做好實作計畫之後我再確認
+  #2 51→50 1129ms success recall=2/2 inversions=0/1
+     engineOut: 好，這個 issue 的整合就麻煩你來準備了⏎你可以切換到計畫模式來做⏎等你做好實作計畫之後我再確認
+  #3 51→50 1233ms success recall=2/2 inversions=0/1
+     engineOut: 好，這個 issue 的整合就麻煩你來準備了⏎你可以切換到計畫模式來做⏎等你做好實作計畫之後我再確認
+
+━━ [T4-structured-since.zh-Hant] 80 chars, lang=zh-Hant
+  #1 80→82 1505ms success recall=4/4 inversions=0/6
+     engineOut: 其實我用結構化模式已經有一段時間了。⏎所以其實我昨天做的所有測試，尤其是稍微長一點的測試，都成功了。⏎所以我覺得我可以把日誌原封不動地匯出。不過在我看來還蠻正確的。
+  #2 80→83 1457ms success recall=4/4 inversions=0/6
+     engineOut: 其實我用結構化模式已經有一段時間了。⏎所以其實我昨天做的所有測試，尤其是稍微長一點的測試，都成功了。⏎所以我覺得我可以把日誌原封不動地匯出。⏎不過在我看來還蠻正確的。
+  #3 80→83 1451ms success recall=4/4 inversions=0/6
+     engineOut: 其實我用結構化模式已經有一段時間了。⏎所以其實我昨天做的所有測試，尤其是稍微長一點的測試，都成功了。⏎所以我覺得我可以把日誌原封不動地匯出。⏎不過在我看來還蠻正確的。
+
+━━ [T5-long-test.zh-Hant] 104 chars, lang=zh-Hant
+  #1 104→114 1746ms success recall=6/6 inversions=0/15
+     engineOut: 所以現在我們試著用結構化模式傳一則長訊息，看看會發生什麼事。⏎⏎我知道我的收音條件不一定好，因為我離手機蠻遠的。⏎⏎所以麥克風的品質可能不會特別好。⏎⏎我旁邊也蠻吵的。⏎⏎那就看看測試結果怎麼樣吧。⏎⏎我們來看看結果有沒有意思。
+  #2 104→114 1747ms success recall=6/6 inversions=0/15
+     engineOut: 所以現在我們試著用結構化模式傳一則長訊息，看看會發生什麼事。⏎⏎我知道我的收音條件不一定好，因為我離手機蠻遠的。⏎⏎所以麥克風的品質可能不會特別好。⏎⏎我旁邊也蠻吵的。⏎⏎那就看看測試結果怎麼樣吧。⏎⏎我們來看看結果有沒有意思。
+  #3 104→114 1875ms success recall=6/6 inversions=0/15
+     engineOut: 所以現在我們試著用結構化模式傳一則長訊息，看看會發生什麼事。⏎⏎我知道我的收音條件不一定好，因為我離手機蠻遠的。⏎⏎所以麥克風的品質可能不會特別好。⏎⏎我旁邊也蠻吵的。⏎⏎那就看看測試結果怎麼樣吧。⏎⏎我們來看看結果有沒有意思。
+
+━━ [T6-project-update.zh-Hant] 240 chars, lang=zh-Hant
+  #1 240→252 3578ms success recall=9/9 inversions=0/36
+     engineOut: 好，簡單報告一下專案進度：上週一我們切換了訂閱的部分，Thomas 完成了 StoreKit 的整合，在沙盒裡可以正常運作。⏎⏎還剩兩件事。第一件是逐字稿紀錄，完全還沒開始。⏎⏎第二件是自訂詞彙。這部分我們有規格文件，但還沒有程式碼。⏎⏎數據方面，上線以來一共 412 次下載，7 天留存率是 19%，雖然偏低，但對第一個版本來說還不算災難。⏎⏎目標是在十月底之前突破 1000。⏎⏎週四下午兩點我要跟 Sarah 碰面，把 App Store 的部分敲定。⏎⏎如果一切順利，我們會在 12 號那週送審。
+  #2 240→252 3505ms success recall=9/9 inversions=0/36
+     engineOut: 好，簡單報告一下專案進度：上週一我們切換了訂閱的部分，Thomas 完成了 StoreKit 的整合，在沙盒裡可以正常運作。⏎⏎還剩兩件事。第一件是逐字稿紀錄，完全還沒開始。⏎⏎第二件是自訂詞彙。這部分我們有規格文件，但還沒有程式碼。⏎⏎數據方面，上線以來一共 412 次下載，7 天留存率是 19%，雖然偏低，但對第一個版本來說還不算災難。⏎⏎目標是在十月底之前突破 1000。⏎⏎週四下午兩點我要跟 Sarah 碰面，把 App Store 的部分敲定。⏎⏎如果一切順利，我們會在 12 號那週送審。
+  #3 240→252 3546ms success recall=9/9 inversions=0/36
+     engineOut: 好，簡單報告一下專案進度：上週一我們切換了訂閱的部分，Thomas 完成了 StoreKit 的整合，在沙盒裡可以正常運作。⏎⏎還剩兩件事。第一件是逐字稿紀錄，完全還沒開始。⏎⏎第二件是自訂詞彙。這部分我們有規格文件，但還沒有程式碼。⏎⏎數據方面，上線以來一共 412 次下載，7 天留存率是 19%，雖然偏低，但對第一個版本來說還不算災難。⏎⏎目標是在十月底之前突破 1000。⏎⏎週四下午兩點我要跟 Sarah 碰面，把 App Store 的部分敲定。⏎⏎如果一切順利，我們會在 12 號那週送審。
+
+
+████ ARM message-develop — 3 run(s) × 90 fixture(s), floor 0.35
+     prompt: ../docs/research/587-pr2-message-liste/arms/message-develop.txt
+
+━━ [T1-last-transcription.en] 56 chars, lang=en
+  #1 56→55 883ms success recall=2/2 inversions=0/1
+     engineOut: I'll let you take a look, it's the latest transcription
+  #2 56→55 851ms success recall=2/2 inversions=0/1
+     engineOut: I'll let you take a look, it's the latest transcription
+  #3 56→55 888ms success recall=2/2 inversions=0/1
+     engineOut: I'll let you take a look, it's the latest transcription
+
+━━ [T2-no-error.en] 153 chars, lang=en
+  #1 153→154 1275ms success recall=4/4 inversions=0/6
+     engineOut: For now I don't have any error message, everything seems to be OK.⏎⏎So we're going to keep going for a little while, but for now it's working pretty well.
+  #2 153→152 1270ms success recall=4/4 inversions=0/6
+     engineOut: For now I don't have any error message, everything seems to be OK⏎⏎So we're going to keep going for a little while, but for now it's working pretty well
+  #3 153→154 1335ms success recall=4/4 inversions=0/6
+     engineOut: For now I don't have any error message, everything seems to be OK.⏎⏎So we're going to keep going for a little while, but for now it's working pretty well.
+
+━━ [T3-plan-mode.en] 170 chars, lang=en
+  #1 170→171 1303ms success recall=3/3 inversions=0/3
+     engineOut: OK, I'll let you prepare the integration of this issue, please.⏎⏎You can switch to plan mode to do that, and then I'll approve it once you've made the implementation plan.
+  #2 170→171 1322ms success recall=3/3 inversions=0/3
+     engineOut: OK, I'll let you prepare the integration of this issue, please.⏎⏎You can switch to plan mode to do that, and then I'll approve it once you've made the implementation plan.
+  #3 170→160 1240ms success recall=3/3 inversions=0/3
+     engineOut: OK, I'll let you prepare the integration of this issue, please⏎⏎You can switch to plan mode to do that⏎⏎I'll approve it once you've made the implementation plan
+
+━━ [T4-structured-since.en] 249 chars, lang=en
+  #1 249→239 1613ms success recall=5/5 inversions=0/10
+     engineOut: Actually I've been on structured mode for a little while⏎⏎So all the tests I did yesterday, especially the slightly longer tests, worked⏎⏎So I think I'll be able to export the logs as they are⏎⏎But for me it seems to be pretty much correct
+  #2 249→239 1612ms success recall=5/5 inversions=0/10
+     engineOut: Actually I've been on structured mode for a little while⏎⏎So all the tests I did yesterday, especially the slightly longer tests, worked⏎⏎So I think I'll be able to export the logs as they are⏎⏎But for me it seems to be pretty much correct
+  #3 249→239 1576ms success recall=5/5 inversions=0/10
+     engineOut: Actually I've been on structured mode for a little while⏎⏎So all the tests I did yesterday, especially the slightly longer tests, worked⏎⏎So I think I'll be able to export the logs as they are⏎⏎But for me it seems to be pretty much correct
+
+━━ [T5-long-test.en] 380 chars, lang=en
+  #1 380→379 2303ms success recall=7/7 inversions=0/21
+     engineOut: And so now we're trying a long message in structured mode to see what's going to happen⏎⏎Knowing that I'm not necessarily in the right conditions audio-wise, because I'm quite far from the phone⏎⏎So the quality of the mic might not be exceptional⏎⏎There's also quite a lot of noise next to me⏎⏎So we'll see what it gives on the test⏎⏎We'll see if the result is interesting or not
+  #2 380→376 2092ms success recall=7/7 inversions=0/21
+     engineOut: And so now we're trying a long message in structured mode to see what's going to happen⏎⏎Knowing that I'm not necessarily in the right conditions audio-wise, because I'm quite far from the phone⏎⏎So the quality of the mic might not be exceptional⏎⏎There's also quite a lot of noise next to me⏎⏎We'll see what it gives on the test⏎⏎We'll see if the result is interesting or not
+  #3 380→379 2214ms success recall=7/7 inversions=0/21
+     engineOut: And so now we're trying a long message in structured mode to see what's going to happen⏎⏎Knowing that I'm not necessarily in the right conditions audio-wise, because I'm quite far from the phone⏎⏎So the quality of the mic might not be exceptional⏎⏎There's also quite a lot of noise next to me⏎⏎So we'll see what it gives on the test⏎⏎We'll see if the result is interesting or not
+
+━━ [T6-project-update.en] 686 chars, lang=en
+  #1 686→680 3639ms success recall=17/17 inversions=0/136
+     engineOut: So quick update on the project, we switched over the subscription part last Monday, Thomas finished the StoreKit integration and it works in sandbox⏎⏎There are two things left, the first one is the transcription history, which hasn't been started at all⏎⏎The second one is the custom vocabulary, and on that one we have a spec but no code⏎⏎On the numbers side, we're at 412 downloads since launch, with a 7-day retention rate of 19%, which is low, but not catastrophic for a first version⏎⏎The goal is to pass the 1,000 mark before the end of October⏎⏎I'm seeing Sarah on Thursday at 2 pm to sort out the App Store part⏎⏎And if everything goes well, we submit the week of the 12th
+  #2 686→692 3837ms success recall=17/17 inversions=0/136
+     engineOut: So, quick update on the project: we switched over the subscription part last Monday, Thomas finished the StoreKit integration and it works in sandbox.⏎⏎There are two things left. The first one is the transcription history, which hasn't been started at all.⏎⏎And the second one is the custom vocabulary. And on that one we have a spec but no code.⏎⏎On the numbers side, we're at 412 downloads since launch, with a 7-day retention rate of 19%, which is low, but not catastrophic for a first version.⏎⏎The goal is to pass the 1,000 mark before the end of October.⏎⏎I'm seeing Sarah on Thursday at 2 pm to sort out the App Store part.⏎⏎And if everything goes well, we submit the week of the 12th.
+  #3 686→687 3616ms success recall=17/17 inversions=0/136
+     engineOut: So quick update on the project, we switched over the subscription part last Monday, Thomas finished the StoreKit integration and it works in sandbox.⏎⏎There are two things left, the first one is the transcription history, which hasn't been started at all.⏎⏎The second one is the custom vocabulary, and on that one we have a spec but no code.⏎⏎On the numbers side, we're at 412 downloads since launch, with a 7-day retention rate of 19%, which is low, but not catastrophic for a first version.⏎⏎The goal is to pass the 1,000 mark before the end of October.⏎⏎I'm seeing Sarah on Thursday at 2 pm to sort out the App Store part.⏎⏎And if everything goes well, we submit the week of the 12th.
+
+━━ [T1-last-transcription.de] 60 chars, lang=de
+  #1 60→60 869ms success recall=2/2 inversions=0/1
+     engineOut: Ich lasse dich mal schauen, es ist die letzte Transkription.
+  #2 60→60 877ms success recall=2/2 inversions=0/1
+     engineOut: Ich lasse dich mal schauen, es ist die letzte Transkription.
+  #3 60→60 884ms success recall=2/2 inversions=0/1
+     engineOut: Ich lasse dich mal schauen, es ist die letzte Transkription.
+
+━━ [T2-no-error.de] 158 chars, lang=de
+  #1 158→159 1192ms success recall=4/4 inversions=0/6
+     engineOut: Im Moment habe ich keine Fehlermeldung, alles scheint in Ordnung zu sein.⏎⏎Also machen wir noch eine Weile weiter, aber im Moment funktioniert es ziemlich gut.
+  #2 158→159 1133ms success recall=4/4 inversions=0/6
+     engineOut: Im Moment habe ich keine Fehlermeldung, alles scheint in Ordnung zu sein.⏎⏎Also machen wir noch eine Weile weiter, aber im Moment funktioniert es ziemlich gut.
+  #3 158→159 1117ms success recall=4/4 inversions=0/6
+     engineOut: Im Moment habe ich keine Fehlermeldung, alles scheint in Ordnung zu sein.⏎⏎Also machen wir noch eine Weile weiter, aber im Moment funktioniert es ziemlich gut.
+
+━━ [T3-plan-mode.de] 187 chars, lang=de
+  #1 187→188 1202ms success recall=4/4 inversions=0/6
+     engineOut: Okay, ich lasse dich die Integration dieses Issues vorbereiten, bitte.⏎⏎Du kannst dafür in den Plan-Modus wechseln, und dann bestätige ich, sobald du den Implementierungsplan gemacht hast.
+  #2 187→188 1228ms success recall=4/4 inversions=0/6
+     engineOut: Okay, ich lasse dich die Integration dieses Issues vorbereiten, bitte.⏎⏎Du kannst dafür in den Plan-Modus wechseln, und dann bestätige ich, sobald du den Implementierungsplan gemacht hast.
+  #3 187→188 1218ms success recall=4/4 inversions=0/6
+     engineOut: Okay, ich lasse dich die Integration dieses Issues vorbereiten, bitte.⏎⏎Du kannst dafür in den Plan-Modus wechseln, und dann bestätige ich, sobald du den Implementierungsplan gemacht hast.
+
+━━ [T4-structured-since.de] 288 chars, lang=de
+  #1 288→280 1791ms success recall=7/7 inversions=0/21
+     engineOut: Eigentlich bin ich schon eine Weile im strukturierten Modus.⏎⏎Also haben alle Tests, die ich gestern gemacht habe, vor allem die etwas längeren Tests, funktioniert.⏎⏎Also denke ich, dass ich die Logs so exportieren kann, wie sie sind.⏎⏎Aber für mich sieht es ziemlich korrekt aus.
+  #2 288→280 1840ms success recall=7/7 inversions=0/21
+     engineOut: Eigentlich bin ich schon eine Weile im strukturierten Modus.⏎⏎Also haben alle Tests, die ich gestern gemacht habe, vor allem die etwas längeren Tests, funktioniert.⏎⏎Also denke ich, dass ich die Logs so exportieren kann, wie sie sind.⏎⏎Aber für mich sieht es ziemlich korrekt aus.
+  #3 288→280 1879ms success recall=7/7 inversions=0/21
+     engineOut: Eigentlich bin ich schon eine Weile im strukturierten Modus.⏎⏎Also haben alle Tests, die ich gestern gemacht habe, vor allem die etwas längeren Tests, funktioniert.⏎⏎Also denke ich, dass ich die Logs so exportieren kann, wie sie sind.⏎⏎Aber für mich sieht es ziemlich korrekt aus.
+
+━━ [T5-long-test.de] 416 chars, lang=de
+  #1 416→421 2285ms success recall=9/9 inversions=0/36
+     engineOut: Und jetzt probieren wir also eine lange Nachricht im strukturierten Modus, um zu sehen, was passiert.⏎⏎Wobei ich audiomäßig nicht unbedingt unter guten Bedingungen bin, weil ich ziemlich weit vom Handy weg bin.⏎⏎Die Qualität des Mikros ist also vielleicht nicht besonders gut.⏎⏎Es gibt auch ziemlich viel Lärm neben mir.⏎⏎Mal sehen, was das beim Test ergibt.⏎⏎Wir werden sehen, ob das Ergebnis interessant ist oder nicht.
+  #2 416→421 2313ms success recall=9/9 inversions=0/36
+     engineOut: Und jetzt probieren wir also eine lange Nachricht im strukturierten Modus, um zu sehen, was passiert.⏎⏎Wobei ich audiomäßig nicht unbedingt unter guten Bedingungen bin, weil ich ziemlich weit vom Handy weg bin.⏎⏎Die Qualität des Mikros ist also vielleicht nicht besonders gut.⏎⏎Es gibt auch ziemlich viel Lärm neben mir.⏎⏎Mal sehen, was das beim Test ergibt.⏎⏎Wir werden sehen, ob das Ergebnis interessant ist oder nicht.
+  #3 416→421 2269ms success recall=9/9 inversions=0/36
+     engineOut: Und jetzt probieren wir also eine lange Nachricht im strukturierten Modus, um zu sehen, was passiert.⏎⏎Wobei ich audiomäßig nicht unbedingt unter guten Bedingungen bin, weil ich ziemlich weit vom Handy weg bin.⏎⏎Die Qualität des Mikros ist also vielleicht nicht besonders gut.⏎⏎Es gibt auch ziemlich viel Lärm neben mir.⏎⏎Mal sehen, was das beim Test ergibt.⏎⏎Wir werden sehen, ob das Ergebnis interessant ist oder nicht.
+
+━━ [T6-project-update.de] 716 chars, lang=de
+  #1 716→721 4266ms success recall=17/17 inversions=0/136
+     engineOut: Also kurzes Update zum Projekt: Wir haben den Abo-Teil letzten Montag umgestellt, Thomas hat die StoreKit-Integration fertig und sie läuft in der Sandbox.⏎⏎Es bleiben noch zwei Sachen. Die erste ist der Transkriptionsverlauf, der noch gar nicht angefangen ist.⏎⏎Und die zweite ist das eigene Vokabular. Und dafür haben wir eine Spezifikation, aber keinen Code.⏎⏎Bei den Zahlen sind wir bei 412 Downloads seit dem Start, mit einer 7-Tage-Retention von 19 %, was wenig ist, aber für eine erste Version nicht katastrophal.⏎⏎Das Ziel ist, die Marke von 1000 vor Ende Oktober zu knacken.⏎⏎Ich sehe Sarah am Donnerstag um 14 Uhr, um den App-Store-Teil zu klären.⏎⏎Und wenn alles gut läuft, reichen wir in der Woche vom 12. ein.
+  #2 716→721 4302ms success recall=17/17 inversions=0/136
+     engineOut: Also kurzes Update zum Projekt: Wir haben den Abo-Teil letzten Montag umgestellt, Thomas hat die StoreKit-Integration fertig und sie läuft in der Sandbox.⏎⏎Es bleiben noch zwei Sachen. Die erste ist der Transkriptionsverlauf, der noch gar nicht angefangen ist.⏎⏎Und die zweite ist das eigene Vokabular. Und dafür haben wir eine Spezifikation, aber keinen Code.⏎⏎Bei den Zahlen sind wir bei 412 Downloads seit dem Start, mit einer 7-Tage-Retention von 19 %, was wenig ist, aber für eine erste Version nicht katastrophal.⏎⏎Das Ziel ist, die Marke von 1000 vor Ende Oktober zu knacken.⏎⏎Ich sehe Sarah am Donnerstag um 14 Uhr, um den App-Store-Teil zu klären.⏎⏎Und wenn alles gut läuft, reichen wir in der Woche vom 12. ein.
+  #3 716→714 4177ms success recall=17/17 inversions=0/136
+     engineOut: Also kurzes Update zum Projekt: Wir haben den Abo-Teil letzten Montag umgestellt⏎⏎Thomas hat die StoreKit-Integration fertig und sie läuft in der Sandbox⏎⏎Es bleiben noch zwei Sachen⏎⏎Die erste ist der Transkriptionsverlauf, der noch gar nicht angefangen ist⏎⏎Und die zweite ist das eigene Vokabular⏎⏎Und dafür haben wir eine Spezifikation, aber keinen Code⏎⏎Bei den Zahlen sind wir bei 412 Downloads seit dem Start, mit einer 7-Tage-Retention von 19 %, was wenig ist, aber für eine erste Version nicht katastrophal⏎⏎Das Ziel ist, die Marke von 1000 vor Ende Oktober zu knacken⏎⏎Ich sehe Sarah am Donnerstag um 14 Uhr, um den App-Store-Teil zu klären⏎⏎Und wenn alles gut läuft, reichen wir in der Woche vom 12. ein
+
+━━ [T1-last-transcription.es] 49 chars, lang=es
+  #1 49→49 869ms success recall=2/2 inversions=0/1
+     engineOut: Te dejo que lo mires, es la última transcripción.
+  #2 49→49 891ms success recall=2/2 inversions=0/1
+     engineOut: Te dejo que lo mires, es la última transcripción.
+  #3 49→49 839ms success recall=2/2 inversions=0/1
+     engineOut: Te dejo que lo mires, es la última transcripción.
+
+━━ [T2-no-error.es] 140 chars, lang=es
+  #1 140→141 1151ms success recall=3/3 inversions=0/3
+     engineOut: De momento no tengo ningún mensaje de error, todo parece estar bien.⏎⏎Así que vamos a seguir un rato, pero de momento funciona bastante bien.
+  #2 140→141 1145ms success recall=3/3 inversions=0/3
+     engineOut: De momento no tengo ningún mensaje de error, todo parece estar bien.⏎⏎Así que vamos a seguir un rato, pero de momento funciona bastante bien.
+  #3 140→141 1090ms success recall=3/3 inversions=0/3
+     engineOut: De momento no tengo ningún mensaje de error, todo parece estar bien.⏎⏎Así que vamos a seguir un rato, pero de momento funciona bastante bien.
+
+━━ [T3-plan-mode.es] 173 chars, lang=es
+  #1 173→174 1223ms success recall=2/2 inversions=0/1
+     engineOut: Vale, te dejo preparar la integración de esta issue, por favor.⏎⏎Puedes pasar al modo plan para hacerlo y luego lo validaré una vez que hayas hecho el plan de implementación.
+  #2 173→174 1227ms success recall=2/2 inversions=0/1
+     engineOut: Vale, te dejo preparar la integración de esta issue, por favor.⏎⏎Puedes pasar al modo plan para hacerlo y luego lo validaré una vez que hayas hecho el plan de implementación.
+  #3 173→174 1271ms success recall=2/2 inversions=0/1
+     engineOut: Vale, te dejo preparar la integración de esta issue, por favor.⏎⏎Puedes pasar al modo plan para hacerlo y luego lo validaré una vez que hayas hecho el plan de implementación.
+
+━━ [T4-structured-since.es] 256 chars, lang=es
+  #1 256→247 1621ms success recall=5/5 inversions=0/10
+     engineOut: En realidad llevo un rato con el modo estructurado.⏎⏎Así que todas las pruebas que hice ayer, sobre todo las pruebas un poco más largas, funcionaron.⏎⏎Así que creo que voy a poder exportar los logs tal cual.⏎⏎Pero para mí parece bastante correcto.
+  #2 256→255 1535ms success recall=5/5 inversions=0/10
+     engineOut: En realidad llevo un rato con el modo estructurado⏎⏎Así que en realidad todas las pruebas que hice ayer, sobre todo las pruebas un poco más largas, funcionaron⏎⏎Así que creo que voy a poder exportar los logs tal cual⏎⏎Pero para mí parece bastante correcto
+  #3 256→243 1568ms success recall=5/5 inversions=0/10
+     engineOut: En realidad llevo un rato con el modo estructurado⏎⏎Así que todas las pruebas que hice ayer, sobre todo las pruebas un poco más largas, funcionaron⏎⏎Así que creo que voy a poder exportar los logs tal cual⏎⏎Pero para mí parece bastante correcto
+
+━━ [T5-long-test.es] 369 chars, lang=es
+  #1 369→366 1916ms success recall=6/6 inversions=0/15
+     engineOut: Entonces ahora probamos un mensaje largo en modo estructurado para ver qué pasa⏎⏎Sabiendo que no estoy necesariamente en buenas condiciones de audio porque estoy bastante lejos del teléfono⏎⏎Así que puede que la calidad del micro no sea excepcional⏎⏎También hay bastante ruido a mi lado⏎⏎Así que a ver qué da en la prueba⏎⏎Veremos si el resultado es interesante o no
+  #2 369→368 1915ms success recall=6/6 inversions=0/15
+     engineOut: Y entonces ahora probamos un mensaje largo en modo estructurado para ver qué pasa⏎⏎Sabiendo que no estoy necesariamente en buenas condiciones de audio porque estoy bastante lejos del teléfono⏎⏎Así que puede que la calidad del micro no sea excepcional⏎⏎También hay bastante ruido a mi lado⏎⏎Así que a ver qué da en la prueba⏎⏎Veremos si el resultado es interesante o no
+  #3 369→368 1926ms success recall=6/6 inversions=0/15
+     engineOut: Y entonces ahora probamos un mensaje largo en modo estructurado para ver qué pasa⏎⏎Sabiendo que no estoy necesariamente en buenas condiciones de audio porque estoy bastante lejos del teléfono⏎⏎Así que puede que la calidad del micro no sea excepcional⏎⏎También hay bastante ruido a mi lado⏎⏎Así que a ver qué da en la prueba⏎⏎Veremos si el resultado es interesante o no
+
+━━ [T6-project-update.es] 695 chars, lang=es
+  #1 695→699 3679ms success recall=15/15 inversions=0/105
+     engineOut: Bueno, un repaso rápido del proyecto: el lunes pasado cambiamos la parte de suscripciones, Thomas terminó la integración de StoreKit y funciona en sandbox.⏎⏎Quedan dos cosas. La primera es el historial de transcripciones, que no está empezado para nada. Y la segunda es el vocabulario personalizado. Y ahí tenemos una especificación pero nada de código.⏎⏎En cuanto a cifras, llevamos 412 descargas desde el lanzamiento, con una retención a 7 días del 19 %, que es baja, pero no catastrófica para una primera versión.⏎⏎El objetivo es superar las 1000 antes de finales de octubre.⏎⏎Veo a Sarah el jueves a las 14 h para cerrar la parte de la App Store. Y si todo va bien, lo enviamos la semana del 12.
+  #2 695→701 3960ms success recall=15/15 inversions=0/105
+     engineOut: Bueno, un repaso rápido del proyecto: el lunes pasado cambiamos la parte de suscripciones, Thomas terminó la integración de StoreKit y funciona en sandbox.⏎⏎Quedan dos cosas. La primera es el historial de transcripciones, que no está empezado para nada.⏎⏎Y la segunda es el vocabulario personalizado. Y ahí tenemos una especificación pero nada de código.⏎⏎En cuanto a cifras, llevamos 412 descargas desde el lanzamiento, con una retención a 7 días del 19 %, que es baja, pero no catastrófica para una primera versión.⏎⏎El objetivo es superar las 1000 antes de finales de octubre.⏎⏎Veo a Sarah el jueves a las 14 h para cerrar la parte de la App Store.⏎⏎Y si todo va bien, lo enviamos la semana del 12.
+  #3 695→699 3816ms success recall=15/15 inversions=0/105
+     engineOut: Bueno, un repaso rápido del proyecto: el lunes pasado cambiamos la parte de suscripciones, Thomas terminó la integración de StoreKit y funciona en sandbox.⏎⏎Quedan dos cosas. La primera es el historial de transcripciones, que no está empezado para nada. Y la segunda es el vocabulario personalizado. Y ahí tenemos una especificación pero nada de código.⏎⏎En cuanto a cifras, llevamos 412 descargas desde el lanzamiento, con una retención a 7 días del 19 %, que es baja, pero no catastrófica para una primera versión.⏎⏎El objetivo es superar las 1000 antes de finales de octubre.⏎⏎Veo a Sarah el jueves a las 14 h para cerrar la parte de la App Store. Y si todo va bien, lo enviamos la semana del 12.
+
+━━ [T1-last-transcription.it] 52 chars, lang=it
+  #1 52→52 884ms success recall=2/2 inversions=0/1
+     engineOut: Ti lascio dare un'occhiata, è l'ultima trascrizione.
+  #2 52→52 963ms success recall=2/2 inversions=0/1
+     engineOut: Ti lascio dare un'occhiata, è l'ultima trascrizione.
+  #3 52→52 860ms success recall=2/2 inversions=0/1
+     engineOut: Ti lascio dare un'occhiata, è l'ultima trascrizione.
+
+━━ [T2-no-error.it] 137 chars, lang=it
+  #1 137→138 1203ms success recall=4/4 inversions=0/6
+     engineOut: Per ora non ho nessun messaggio di errore, sembra tutto a posto.⏎⏎Quindi andiamo avanti ancora un po', ma per ora funziona piuttosto bene.
+  #2 137→138 1175ms success recall=4/4 inversions=0/6
+     engineOut: Per ora non ho nessun messaggio di errore, sembra tutto a posto.⏎⏎Quindi andiamo avanti ancora un po', ma per ora funziona piuttosto bene.
+  #3 137→138 1136ms success recall=4/4 inversions=0/6
+     engineOut: Per ora non ho nessun messaggio di errore, sembra tutto a posto.⏎⏎Quindi andiamo avanti ancora un po', ma per ora funziona piuttosto bene.
+
+━━ [T3-plan-mode.it] 177 chars, lang=it
+  #1 177→178 1287ms success recall=3/3 inversions=0/3
+     engineOut: Ok, ti lascio preparare l'integrazione di questa issue, per favore.⏎⏎Puoi passare in modalità piano per farlo e poi lo convaliderò quando avrai fatto il piano di implementazione.
+  #2 177→178 1314ms success recall=3/3 inversions=0/3
+     engineOut: Ok, ti lascio preparare l'integrazione di questa issue, per favore.⏎⏎Puoi passare in modalità piano per farlo e poi lo convaliderò quando avrai fatto il piano di implementazione.
+  #3 177→178 1337ms success recall=3/3 inversions=0/3
+     engineOut: Ok, ti lascio preparare l'integrazione di questa issue, per favore.⏎⏎Puoi passare in modalità piano per farlo e poi lo convaliderò quando avrai fatto il piano di implementazione.
+
+━━ [T4-structured-since.it] 250 chars, lang=it
+  #1 250→226 1735ms success recall=6/6 inversions=0/15
+     engineOut: In realtà sono sulla modalità strutturata da un po'.⏎⏎Tutti i test che ho fatto ieri, soprattutto quelli un po' più lunghi, hanno funzionato.⏎⏎Penso che potrò esportare i log così come sono.⏎⏎Per me sembra abbastanza corretto.
+  #2 250→226 1661ms success recall=6/6 inversions=0/15
+     engineOut: In realtà sono sulla modalità strutturata da un po'.⏎⏎Tutti i test che ho fatto ieri, soprattutto quelli un po' più lunghi, hanno funzionato.⏎⏎Penso che potrò esportare i log così come sono.⏎⏎Per me sembra abbastanza corretto.
+  #3 250→226 1687ms success recall=6/6 inversions=0/15
+     engineOut: In realtà sono sulla modalità strutturata da un po'.⏎⏎Tutti i test che ho fatto ieri, soprattutto quelli un po' più lunghi, hanno funzionato.⏎⏎Penso che potrò esportare i log così come sono.⏎⏎Per me sembra abbastanza corretto.
+
+━━ [T5-long-test.it] 382 chars, lang=it
+  #1 382→382 2182ms success recall=7/7 inversions=0/21
+     engineOut: E quindi adesso proviamo un messaggio lungo in modalità strutturata⏎⏎per vedere cosa succede⏎⏎Sapendo che non sono per forza nelle condizioni giuste per l'audio⏎⏎perché sono abbastanza lontano dal telefono⏎⏎Quindi la qualità del microfono forse non sarà eccezionale⏎⏎C'è anche parecchio rumore qui accanto⏎⏎Quindi vediamo cosa dà il test⏎⏎Vedremo se il risultato è interessante o no
+  #2 382→367 2082ms success recall=7/7 inversions=0/21
+     engineOut: E quindi adesso proviamo un messaggio lungo in modalità strutturata per vedere cosa succede⏎⏎Sapendo che non sono per forza nelle condizioni giuste per l'audio, perché sono abbastanza lontano dal telefono⏎⏎La qualità del microfono forse non sarà eccezionale⏎⏎C'è anche parecchio rumore qui accanto⏎⏎Vediamo cosa dà il test⏎⏎Vedremo se il risultato è interessante o no
+  #3 382→367 2150ms success recall=7/7 inversions=0/21
+     engineOut: E quindi adesso proviamo un messaggio lungo in modalità strutturata per vedere cosa succede⏎⏎Sapendo che non sono per forza nelle condizioni giuste per l'audio, perché sono abbastanza lontano dal telefono⏎⏎La qualità del microfono forse non sarà eccezionale⏎⏎C'è anche parecchio rumore qui accanto⏎⏎Vedremo cosa dà il test⏎⏎Vedremo se il risultato è interessante o no
+
+━━ [T6-project-update.it] 698 chars, lang=it
+  #1 698→706 3875ms success recall=17/17 inversions=0/136
+     engineOut: Allora, aggiornamento veloce sul progetto: lunedì scorso abbiamo passato la parte degli abbonamenti, Thomas ha finito l'integrazione di StoreKit e funziona in sandbox.⏎⏎Restano due cose.⏎⏎La prima è la cronologia delle trascrizioni, che non è stata per niente iniziata.⏎⏎E la seconda è il vocabolario personalizzato.⏎⏎E su quello abbiamo una specifica ma niente codice.⏎⏎Per quanto riguarda i numeri, siamo a 412 download dal lancio, con una retention a 7 giorni del 19%, che è bassa, ma non catastrofica per una prima versione.⏎⏎L'obiettivo è superare la soglia dei 1000 entro fine ottobre.⏎⏎Vedo Sarah giovedì alle 14 per sistemare la parte App Store.⏎⏎E se va tutto bene, lo inviamo la settimana del 12.
+  #2 698→704 3951ms success recall=17/17 inversions=0/136
+     engineOut: Allora, aggiornamento veloce sul progetto: lunedì scorso abbiamo passato la parte degli abbonamenti, Thomas ha finito l'integrazione di StoreKit e funziona in sandbox.⏎⏎Restano due cose. La prima è la cronologia delle trascrizioni, che non è stata per niente iniziata.⏎⏎E la seconda è il vocabolario personalizzato. E su quello abbiamo una specifica ma niente codice.⏎⏎Per quanto riguarda i numeri, siamo a 412 download dal lancio, con una retention a 7 giorni del 19%, che è bassa, ma non catastrofica per una prima versione.⏎⏎L'obiettivo è superare la soglia dei 1000 entro fine ottobre.⏎⏎Vedo Sarah giovedì alle 14 per sistemare la parte App Store.⏎⏎E se va tutto bene, lo inviamo la settimana del 12.
+  #3 698→704 3916ms success recall=17/17 inversions=0/136
+     engineOut: Allora, aggiornamento veloce sul progetto: lunedì scorso abbiamo passato la parte degli abbonamenti, Thomas ha finito l'integrazione di StoreKit e funziona in sandbox.⏎⏎Restano due cose. La prima è la cronologia delle trascrizioni, che non è stata per niente iniziata.⏎⏎E la seconda è il vocabolario personalizzato. E su quello abbiamo una specifica ma niente codice.⏎⏎Per quanto riguarda i numeri, siamo a 412 download dal lancio, con una retention a 7 giorni del 19%, che è bassa, ma non catastrofica per una prima versione.⏎⏎L'obiettivo è superare la soglia dei 1000 entro fine ottobre.⏎⏎Vedo Sarah giovedì alle 14 per sistemare la parte App Store.⏎⏎E se va tutto bene, lo inviamo la settimana del 12.
+
+━━ [T1-last-transcription.pt] 55 chars, lang=pt
+  #1 55→55 908ms success recall=2/2 inversions=0/1
+     engineOut: Vou deixar você dar uma olhada, é a última transcrição.
+  #2 55→55 872ms success recall=2/2 inversions=0/1
+     engineOut: Vou deixar você dar uma olhada, é a última transcrição.
+  #3 55→55 937ms success recall=2/2 inversions=0/1
+     engineOut: Vou deixar você dar uma olhada, é a última transcrição.
+
+━━ [T2-no-error.pt] 146 chars, lang=pt
+  #1 146→147 1156ms success recall=4/4 inversions=0/6
+     engineOut: Por enquanto não tenho nenhuma mensagem de erro, tudo parece estar ok.⏎⏎Então vamos continuar mais um pouco, mas por enquanto está funcionando bem.
+  #2 146→147 1122ms success recall=4/4 inversions=0/6
+     engineOut: Por enquanto não tenho nenhuma mensagem de erro, tudo parece estar ok.⏎⏎Então vamos continuar mais um pouco, mas por enquanto está funcionando bem.
+  #3 146→147 1114ms success recall=4/4 inversions=0/6
+     engineOut: Por enquanto não tenho nenhuma mensagem de erro, tudo parece estar ok.⏎⏎Então vamos continuar mais um pouco, mas por enquanto está funcionando bem.
+
+━━ [T3-plan-mode.pt] 185 chars, lang=pt
+  #1 185→186 1231ms success recall=2/2 inversions=0/1
+     engineOut: Ok, vou deixar você preparar a integração desta issue, por favor.⏎⏎Você pode passar para o modo plano para fazer isso e depois eu valido quando você tiver feito o plano de implementação.
+  #2 185→186 1313ms success recall=2/2 inversions=0/1
+     engineOut: Ok, vou deixar você preparar a integração desta issue, por favor.⏎⏎Você pode passar para o modo plano para fazer isso e depois eu valido quando você tiver feito o plano de implementação.
+  #3 185→186 1308ms success recall=2/2 inversions=0/1
+     engineOut: Ok, vou deixar você preparar a integração desta issue, por favor.⏎⏎Você pode passar para o modo plano para fazer isso e depois eu valido quando você tiver feito o plano de implementação.
+
+━━ [T4-structured-since.pt] 263 chars, lang=pt
+  #1 263→266 1650ms success recall=6/6 inversions=0/15
+     engineOut: Na verdade estou no modo estruturado há um tempinho.⏎⏎Então, na verdade, todos os testes que fiz ontem, principalmente os testes um pouco mais longos, funcionaram.⏎⏎Então acho que vou poder exportar os logs do jeito que estão.⏎⏎Mas para mim parece estar bem correto.
+  #2 263→266 1716ms success recall=6/6 inversions=0/15
+     engineOut: Na verdade estou no modo estruturado há um tempinho.⏎⏎Então, na verdade, todos os testes que fiz ontem, principalmente os testes um pouco mais longos, funcionaram.⏎⏎Então acho que vou poder exportar os logs do jeito que estão.⏎⏎Mas para mim parece estar bem correto.
+  #3 263→253 1555ms success recall=6/6 inversions=0/15
+     engineOut: Na verdade estou no modo estruturado há um tempinho.⏎⏎Então todos os testes que fiz ontem, principalmente os testes um pouco mais longos, funcionaram.⏎⏎Então acho que vou poder exportar os logs do jeito que estão.⏎⏎Mas para mim parece estar bem correto.
+
+━━ [T5-long-test.pt] 389 chars, lang=pt
+  #1 389→394 2168ms success recall=7/7 inversions=0/21
+     engineOut: E então agora estamos testando uma mensagem longa no modo estruturado para ver o que vai acontecer.⏎⏎Sabendo que não estou necessariamente nas melhores condições de áudio, porque estou bem longe do celular.⏎⏎Então a qualidade do microfone talvez não seja excepcional.⏎⏎Também tem bastante barulho do meu lado.⏎⏎Então vamos ver o que dá no teste.⏎⏎Vamos ver se o resultado é interessante ou não.
+  #2 389→394 2175ms success recall=7/7 inversions=0/21
+     engineOut: E então agora estamos testando uma mensagem longa no modo estruturado para ver o que vai acontecer.⏎⏎Sabendo que não estou necessariamente nas melhores condições de áudio, porque estou bem longe do celular.⏎⏎Então a qualidade do microfone talvez não seja excepcional.⏎⏎Também tem bastante barulho do meu lado.⏎⏎Então vamos ver o que dá no teste.⏎⏎Vamos ver se o resultado é interessante ou não.
+  #3 389→394 2274ms success recall=7/7 inversions=0/21
+     engineOut: E então agora estamos testando uma mensagem longa no modo estruturado para ver o que vai acontecer.⏎⏎Sabendo que não estou necessariamente nas melhores condições de áudio, porque estou bem longe do celular.⏎⏎Então a qualidade do microfone talvez não seja excepcional.⏎⏎Também tem bastante barulho do meu lado.⏎⏎Então vamos ver o que dá no teste.⏎⏎Vamos ver se o resultado é interessante ou não.
+
+━━ [T6-project-update.pt] 684 chars, lang=pt
+  #1 684→681 3870ms success recall=18/18 inversions=0/153
+     engineOut: Então, atualização rápida sobre o projeto: na segunda-feira passada migramos a parte de assinaturas⏎⏎O Thomas terminou a integração do StoreKit e está funcionando no sandbox⏎⏎Faltam duas coisas⏎⏎A primeira é o histórico de transcrições, que ainda não foi começado⏎⏎A segunda é o vocabulário personalizado⏎⏎E nisso temos uma especificação, mas nenhum código⏎⏎Em números, estamos com 412 downloads desde o lançamento, com uma retenção de 7 dias de 19%, o que é baixo, mas não catastrófico para uma primeira versão⏎⏎A meta é passar dos 1000 antes do fim de outubro⏎⏎Vou ver a Sarah na quinta às 14h para acertar a parte da App Store⏎⏎E se tudo correr bem, enviamos na semana do dia 12
+  #2 684→688 3899ms success recall=18/18 inversions=0/153
+     engineOut: Então, atualização rápida sobre o projeto: na segunda-feira passada migramos a parte de assinaturas, o Thomas terminou a integração do StoreKit e está funcionando no sandbox.⏎⏎Faltam duas coisas. A primeira é o histórico de transcrições, que ainda não foi começado. E a segunda é o vocabulário personalizado. E nisso temos uma especificação, mas nenhum código.⏎⏎Em números, estamos com 412 downloads desde o lançamento, com uma retenção de 7 dias de 19%, o que é baixo, mas não catastrófico para uma primeira versão.⏎⏎A meta é passar dos 1000 antes do fim de outubro.⏎⏎Vou ver a Sarah na quinta às 14h para acertar a parte da App Store. E se tudo correr bem, enviamos na semana do dia 12.
+  #3 684→688 3991ms success recall=18/18 inversions=0/153
+     engineOut: Então, atualização rápida sobre o projeto: na segunda-feira passada migramos a parte de assinaturas, o Thomas terminou a integração do StoreKit e está funcionando no sandbox.⏎⏎Faltam duas coisas. A primeira é o histórico de transcrições, que ainda não foi começado.⏎⏎A segunda é o vocabulário personalizado. E nisso temos uma especificação, mas nenhum código.⏎⏎Em números, estamos com 412 downloads desde o lançamento, com uma retenção de 7 dias de 19%, o que é baixo, mas não catastrófico para uma primeira versão.⏎⏎A meta é passar dos 1000 antes do fim de outubro.⏎⏎Vou ver a Sarah na quinta às 14h para acertar a parte da App Store.⏎⏎E se tudo correr bem, enviamos na semana do dia 12.
+
+━━ [T1-last-transcription.nl] 55 chars, lang=nl
+  #1 55→55 832ms success recall=2/2 inversions=0/1
+     engineOut: Ik laat je even kijken, het is de laatste transcriptie.
+  #2 55→55 780ms success recall=2/2 inversions=0/1
+     engineOut: Ik laat je even kijken, het is de laatste transcriptie.
+  #3 55→55 901ms success recall=2/2 inversions=0/1
+     engineOut: Ik laat je even kijken, het is de laatste transcriptie.
+
+━━ [T2-no-error.nl] 126 chars, lang=nl
+  #1 126→125 1171ms success recall=4/4 inversions=0/6
+     engineOut: Voorlopig heb ik geen foutmelding, alles lijkt in orde te zijn⏎⏎Dus we gaan nog even door, maar voorlopig werkt het best goed
+  #2 126→125 1160ms success recall=4/4 inversions=0/6
+     engineOut: Voorlopig heb ik geen foutmelding, alles lijkt in orde te zijn⏎⏎Dus we gaan nog even door, maar voorlopig werkt het best goed
+  #3 126→125 1169ms success recall=4/4 inversions=0/6
+     engineOut: Voorlopig heb ik geen foutmelding, alles lijkt in orde te zijn⏎⏎Dus we gaan nog even door, maar voorlopig werkt het best goed
+
+━━ [T3-plan-mode.nl] 184 chars, lang=nl
+  #1 184→185 1412ms success recall=2/2 inversions=0/1
+     engineOut: Oké, ik laat jou de integratie van deze issue voorbereiden, alsjeblieft.⏎⏎Je kunt daarvoor naar de planmodus gaan en daarna keur ik het goed zodra je het implementatieplan hebt gemaakt.
+  #2 184→185 1429ms success recall=2/2 inversions=0/1
+     engineOut: Oké, ik laat jou de integratie van deze issue voorbereiden, alsjeblieft.⏎⏎Je kunt daarvoor naar de planmodus gaan en daarna keur ik het goed zodra je het implementatieplan hebt gemaakt.
+  #3 184→185 1390ms success recall=2/2 inversions=0/1
+     engineOut: Oké, ik laat jou de integratie van deze issue voorbereiden, alsjeblieft.⏎⏎Je kunt daarvoor naar de planmodus gaan en daarna keur ik het goed zodra je het implementatieplan hebt gemaakt.
+
+━━ [T4-structured-since.nl] 256 chars, lang=nl
+  #1 256→255 1699ms success recall=5/5 inversions=0/10
+     engineOut: Eigenlijk zit ik al een tijdje in de gestructureerde modus⏎⏎Dus eigenlijk hebben alle tests die ik gisteren heb gedaan, vooral de iets langere tests, gewerkt⏎⏎Dus ik denk dat ik de logs zo kan exporteren zoals ze zijn⏎⏎Maar voor mij lijkt het vrij correct
+  #2 256→259 1755ms success recall=5/5 inversions=0/10
+     engineOut: Eigenlijk zit ik al een tijdje in de gestructureerde modus.⏎⏎Dus eigenlijk hebben alle tests die ik gisteren heb gedaan, vooral de iets langere tests, gewerkt.⏎⏎Dus ik denk dat ik de logs zo kan exporteren zoals ze zijn.⏎⏎Maar voor mij lijkt het vrij correct.
+  #3 256→259 1759ms success recall=5/5 inversions=0/10
+     engineOut: Eigenlijk zit ik al een tijdje in de gestructureerde modus.⏎⏎Dus eigenlijk hebben alle tests die ik gisteren heb gedaan, vooral de iets langere tests, gewerkt.⏎⏎Dus ik denk dat ik de logs zo kan exporteren zoals ze zijn.⏎⏎Maar voor mij lijkt het vrij correct.
+
+━━ [T5-long-test.nl] 401 chars, lang=nl
+  #1 401→406 2337ms success recall=7/7 inversions=0/21
+     engineOut: En dus proberen we nu een lang bericht in de gestructureerde modus om te zien wat er gebeurt.⏎⏎Wetende dat ik qua audio niet per se in de goede omstandigheden zit, want ik zit vrij ver van de telefoon.⏎⏎Dus de kwaliteit van de microfoon is misschien niet geweldig.⏎⏎Er is ook best veel lawaai naast me.⏎⏎Dus eens kijken wat het oplevert bij de test.⏎⏎We zullen zien of het resultaat interessant is of niet.
+  #2 401→400 2313ms success recall=7/7 inversions=0/21
+     engineOut: En dus proberen we nu een lang bericht in de gestructureerde modus om te zien wat er gebeurt⏎⏎Wetende dat ik qua audio niet per se in de goede omstandigheden zit, want ik zit vrij ver van de telefoon⏎⏎Dus de kwaliteit van de microfoon is misschien niet geweldig⏎⏎Er is ook best veel lawaai naast me⏎⏎Dus eens kijken wat het oplevert bij de test⏎⏎We zullen zien of het resultaat interessant is of niet
+  #3 401→400 2295ms success recall=7/7 inversions=0/21
+     engineOut: En dus proberen we nu een lang bericht in de gestructureerde modus om te zien wat er gebeurt⏎⏎Wetende dat ik qua audio niet per se in de goede omstandigheden zit, want ik zit vrij ver van de telefoon⏎⏎Dus de kwaliteit van de microfoon is misschien niet geweldig⏎⏎Er is ook best veel lawaai naast me⏎⏎Dus eens kijken wat het oplevert bij de test⏎⏎We zullen zien of het resultaat interessant is of niet
+
+━━ [T6-project-update.nl] 723 chars, lang=nl
+  #1 723→726 4160ms success recall=16/16 inversions=0/120
+     engineOut: Dus, snelle update over het project: we hebben vorige maandag het abonnementsgedeelte omgezet, Thomas heeft de StoreKit-integratie afgerond en het werkt in de sandbox.⏎⏎Er blijven twee dingen over. Het eerste is de transcriptiegeschiedenis, waar nog helemaal niet aan begonnen is.⏎⏎Het tweede is de eigen woordenlijst. En daarvoor hebben we een specificatie maar geen code.⏎⏎Qua cijfers zitten we op 412 downloads sinds de lancering, met een retentie na 7 dagen van 19%, wat laag is, maar niet rampzalig voor een eerste versie.⏎⏎Het doel is om vóór eind oktober de grens van 1000 te halen.⏎⏎Ik zie Sarah donderdag om 14 uur om het App Store-gedeelte te regelen.⏎⏎En als alles goed gaat, dienen we het in de week van de 12e in.
+  #2 723→726 4253ms success recall=16/16 inversions=0/120
+     engineOut: Dus, snelle update over het project: we hebben vorige maandag het abonnementsgedeelte omgezet, Thomas heeft de StoreKit-integratie afgerond en het werkt in de sandbox.⏎⏎Er blijven twee dingen over. Het eerste is de transcriptiegeschiedenis, waar nog helemaal niet aan begonnen is.⏎⏎Het tweede is de eigen woordenlijst. En daarvoor hebben we een specificatie maar geen code.⏎⏎Qua cijfers zitten we op 412 downloads sinds de lancering, met een retentie na 7 dagen van 19%, wat laag is, maar niet rampzalig voor een eerste versie.⏎⏎Het doel is om vóór eind oktober de grens van 1000 te halen.⏎⏎Ik zie Sarah donderdag om 14 uur om het App Store-gedeelte te regelen.⏎⏎En als alles goed gaat, dienen we het in de week van de 12e in.
+  #3 723→721 4026ms success recall=16/16 inversions=0/120
+     engineOut: Dus snelle update over het project⏎⏎We hebben vorige maandag het abonnementsgedeelte omgezet⏎⏎Thomas heeft de StoreKit-integratie afgerond en het werkt in de sandbox⏎⏎Er blijven twee dingen over⏎⏎Het eerste is de transcriptiegeschiedenis, waar nog helemaal niet aan begonnen is⏎⏎En het tweede is de eigen woordenlijst⏎⏎En daarvoor hebben we een specificatie maar geen code⏎⏎Qua cijfers zitten we op 412 downloads sinds de lancering⏎⏎Met een retentie na 7 dagen van 19%, wat laag is, maar niet rampzalig voor een eerste versie⏎⏎Het doel is om vóór eind oktober de grens van 1000 te halen⏎⏎Ik zie Sarah donderdag om 14 uur om het App Store-gedeelte te regelen⏎⏎En als alles goed gaat, dienen we het in de week van de 12e in
+
+━━ [T1-last-transcription.da] 62 chars, lang=da
+  #1 62→62 870ms success recall=2/2 inversions=0/1
+     engineOut: Jeg lader dig kigge på det, det er den seneste transskription.
+  #2 62→61 917ms success recall=2/2 inversions=0/1
+     engineOut: Jeg lader dig kigge på det, det er den seneste transskription
+  #3 62→62 863ms success recall=2/2 inversions=0/1
+     engineOut: Jeg lader dig kigge på det, det er den seneste transskription.
+
+━━ [T2-no-error.da] 143 chars, lang=da
+  #1 143→144 1282ms success recall=4/4 inversions=0/6
+     engineOut: Indtil videre har jeg ingen fejlmeddelelse, alt ser ud til at være i orden.⏎⏎Så vi fortsætter lidt endnu, men indtil videre virker det ret godt.
+  #2 143→144 1249ms success recall=4/4 inversions=0/6
+     engineOut: Indtil videre har jeg ingen fejlmeddelelse, alt ser ud til at være i orden.⏎⏎Så vi fortsætter lidt endnu, men indtil videre virker det ret godt.
+  #3 143→144 1309ms success recall=4/4 inversions=0/6
+     engineOut: Indtil videre har jeg ingen fejlmeddelelse, alt ser ud til at være i orden.⏎⏎Så vi fortsætter lidt endnu, men indtil videre virker det ret godt.
+
+━━ [T3-plan-mode.da] 177 chars, lang=da
+  #1 177→178 1586ms success recall=4/4 inversions=0/6
+     engineOut: Okay, jeg lader dig forberede integrationen af denne issue, tak.⏎⏎Du kan skifte til plantilstand for at gøre det, og så godkender jeg det, når du har lavet implementeringsplanen.
+  #2 177→178 1490ms success recall=4/4 inversions=0/6
+     engineOut: Okay, jeg lader dig forberede integrationen af denne issue, tak.⏎⏎Du kan skifte til plantilstand for at gøre det, og så godkender jeg det, når du har lavet implementeringsplanen.
+  #3 177→178 1496ms success recall=4/4 inversions=0/6
+     engineOut: Okay, jeg lader dig forberede integrationen af denne issue, tak.⏎⏎Du kan skifte til plantilstand for at gøre det, og så godkender jeg det, når du har lavet implementeringsplanen.
+
+━━ [T4-structured-since.da] 231 chars, lang=da
+  #1 231→227 1739ms success recall=7/7 inversions=0/21 FOREIGN-SENTENCES=1
+     FOREIGN: Jeg tror, jeg kan eksportere loggene, som de er
+     engineOut: Faktisk har jeg brugt den strukturerede tilstand i et stykke tid⏎⏎Så faktisk virkede alle de test, jeg lavede i går, især de lidt længere test⏎⏎Jeg tror, jeg kan eksportere loggene, som de er⏎⏎Men for mig ser det ret korrekt ud
+  #2 231→234 1674ms success recall=7/7 inversions=0/21 FOREIGN-SENTENCES=1
+     FOREIGN: Så jeg tror, jeg kan eksportere loggene, som de er.
+     engineOut: Faktisk har jeg brugt den strukturerede tilstand i et stykke tid.⏎⏎Så faktisk virkede alle de test, jeg lavede i går, især de lidt længere test.⏎⏎Så jeg tror, jeg kan eksportere loggene, som de er.⏎⏎Men for mig ser det ret korrekt ud.
+  #3 231→231 1833ms success recall=7/7 inversions=0/21 FOREIGN-SENTENCES=1
+     FOREIGN: Jeg tror, jeg kan eksportere loggene, som de er.
+     engineOut: Faktisk har jeg brugt den strukturerede tilstand i et stykke tid.⏎⏎Så faktisk virkede alle de test, jeg lavede i går, især de lidt længere test.⏎⏎Jeg tror, jeg kan eksportere loggene, som de er.⏎⏎Men for mig ser det ret korrekt ud.
+
+━━ [T5-long-test.da] 384 chars, lang=da
+  #1 384→389 2563ms success recall=10/10 inversions=0/45
+     engineOut: Og så prøver vi nu en lang besked i struktureret tilstand for at se, hvad der sker.⏎⏎Vel vidende at jeg ikke nødvendigvis er under de rette forhold lydmæssigt, fordi jeg er ret langt fra telefonen.⏎⏎Så kvaliteten af mikrofonen er måske ikke enestående.⏎⏎Der er også en del støj ved siden af mig.⏎⏎Så lad os se, hvad det giver i testen.⏎⏎Vi får at se, om resultatet er interessant eller ej.
+  #2 384→383 2604ms success recall=10/10 inversions=0/45
+     engineOut: Og så prøver vi nu en lang besked i struktureret tilstand for at se, hvad der sker⏎⏎Vel vidende at jeg ikke nødvendigvis er under de rette forhold lydmæssigt, fordi jeg er ret langt fra telefonen⏎⏎Så kvaliteten af mikrofonen er måske ikke enestående⏎⏎Der er også en del støj ved siden af mig⏎⏎Så lad os se, hvad det giver i testen⏎⏎Vi får at se, om resultatet er interessant eller ej
+  #3 384→389 2691ms success recall=10/10 inversions=0/45
+     engineOut: Og så prøver vi nu en lang besked i struktureret tilstand for at se, hvad der sker.⏎⏎Vel vidende at jeg ikke nødvendigvis er under de rette forhold lydmæssigt, fordi jeg er ret langt fra telefonen.⏎⏎Så kvaliteten af mikrofonen er måske ikke enestående.⏎⏎Der er også en del støj ved siden af mig.⏎⏎Så lad os se, hvad det giver i testen.⏎⏎Vi får at se, om resultatet er interessant eller ej.
+
+━━ [T6-project-update.da] 667 chars, lang=da
+  #1 667→673 4536ms success recall=19/19 inversions=0/171
+     engineOut: Så, en hurtig status på projektet: vi skiftede abonnementsdelen over i mandags, Thomas er færdig med StoreKit-integrationen, og den virker i sandbox.⏎⏎Der er to ting tilbage. Den første er transskriptionshistorikken, som slet ikke er påbegyndt.⏎⏎Og den anden er det personlige ordforråd. Og der har vi en specifikation, men ingen kode.⏎⏎Hvad tallene angår, er vi på 412 downloads siden lanceringen, med en fastholdelse efter 7 dage på 19 %, hvilket er lavt, men ikke katastrofalt for en første version.⏎⏎Målet er at runde 1000 inden udgangen af oktober.⏎⏎Jeg ser Sarah torsdag kl. 14 for at få styr på App Store-delen.⏎⏎Og hvis alt går godt, indsender vi i ugen med den 12.
+  #2 667→673 4553ms success recall=19/19 inversions=0/171
+     engineOut: Så, en hurtig status på projektet: vi skiftede abonnementsdelen over i mandags, Thomas er færdig med StoreKit-integrationen, og den virker i sandbox.⏎⏎Der er to ting tilbage. Den første er transskriptionshistorikken, som slet ikke er påbegyndt.⏎⏎Og den anden er det personlige ordforråd. Og der har vi en specifikation, men ingen kode.⏎⏎Hvad tallene angår, er vi på 412 downloads siden lanceringen, med en fastholdelse efter 7 dage på 19 %, hvilket er lavt, men ikke katastrofalt for en første version.⏎⏎Målet er at runde 1000 inden udgangen af oktober.⏎⏎Jeg ser Sarah torsdag kl. 14 for at få styr på App Store-delen.⏎⏎Og hvis alt går godt, indsender vi i ugen med den 12.
+  #3 667→673 4487ms success recall=19/19 inversions=0/171
+     engineOut: Så, en hurtig status på projektet: vi skiftede abonnementsdelen over i mandags, Thomas er færdig med StoreKit-integrationen, og den virker i sandbox.⏎⏎Der er to ting tilbage. Den første er transskriptionshistorikken, som slet ikke er påbegyndt.⏎⏎Og den anden er det personlige ordforråd. Og der har vi en specifikation, men ingen kode.⏎⏎Hvad tallene angår, er vi på 412 downloads siden lanceringen, med en fastholdelse efter 7 dage på 19 %, hvilket er lavt, men ikke katastrofalt for en første version.⏎⏎Målet er at runde 1000 inden udgangen af oktober.⏎⏎Jeg ser Sarah torsdag kl. 14 for at få styr på App Store-delen.⏎⏎Og hvis alt går godt, indsender vi i ugen med den 12.
+
+━━ [T1-last-transcription.nb] 57 chars, lang=nb
+  #1 57→57 941ms success recall=2/2 inversions=0/1
+     engineOut: Jeg lar deg ta en titt, det er den siste transkripsjonen.
+  #2 57→57 953ms success recall=2/2 inversions=0/1
+     engineOut: Jeg lar deg ta en titt, det er den siste transkripsjonen.
+  #3 57→57 866ms success recall=2/2 inversions=0/1
+     engineOut: Jeg lar deg ta en titt, det er den siste transkripsjonen.
+
+━━ [T2-no-error.nb] 137 chars, lang=nb
+  #1 137→136 1294ms success recall=4/4 inversions=0/6
+     engineOut: Foreløpig har jeg ingen feilmelding, alt ser ut til å være i orden⏎⏎Så vi fortsetter en stund til, men foreløpig fungerer det ganske bra
+  #2 137→138 1339ms success recall=4/4 inversions=0/6
+     engineOut: Foreløpig har jeg ingen feilmelding, alt ser ut til å være i orden.⏎⏎Så vi fortsetter en stund til, men foreløpig fungerer det ganske bra.
+  #3 137→138 1297ms success recall=4/4 inversions=0/6
+     engineOut: Foreløpig har jeg ingen feilmelding, alt ser ut til å være i orden.⏎⏎Så vi fortsetter en stund til, men foreløpig fungerer det ganske bra.
+
+━━ [T3-plan-mode.nb] 167 chars, lang=nb
+  #1 167→168 1638ms success recall=3/3 inversions=0/3
+     engineOut: Ok, jeg lar deg forberede integrasjonen av denne issuen, takk.⏎⏎Du kan bytte til planmodus for å gjøre det, og så godkjenner jeg når du har laget implementasjonsplanen.
+  #2 167→168 1499ms success recall=3/3 inversions=0/3
+     engineOut: Ok, jeg lar deg forberede integrasjonen av denne issuen, takk.⏎⏎Du kan bytte til planmodus for å gjøre det, og så godkjenner jeg når du har laget implementasjonsplanen.
+  #3 167→168 1477ms success recall=3/3 inversions=0/3
+     engineOut: Ok, jeg lar deg forberede integrasjonen av denne issuen, takk.⏎⏎Du kan bytte til planmodus for å gjøre det, og så godkjenner jeg når du har laget implementasjonsplanen.
+
+━━ [T4-structured-since.nb] 231 chars, lang=nb
+  #1 231→225 2039ms success recall=5/5 inversions=0/10
+     engineOut: Egentlig har jeg brukt den strukturerte modusen en stund nå.⏎⏎Så fungerte alle testene jeg gjorde i går, særlig de litt lengre testene.⏎⏎Så tror jeg jeg kan eksportere loggene som de er.⏎⏎Men for meg ser det ganske riktig ut.
+  #2 231→221 1866ms success recall=5/5 inversions=0/10
+     engineOut: Egentlig har jeg brukt den strukturerte modusen en stund nå⏎⏎Så fungerte alle testene jeg gjorde i går, særlig de litt lengre testene⏎⏎Så tror jeg jeg kan eksportere loggene som de er⏎⏎Men for meg ser det ganske riktig ut
+  #3 231→225 1991ms success recall=5/5 inversions=0/10
+     engineOut: Egentlig har jeg brukt den strukturerte modusen en stund nå.⏎⏎Så fungerte alle testene jeg gjorde i går, særlig de litt lengre testene.⏎⏎Så tror jeg jeg kan eksportere loggene som de er.⏎⏎Men for meg ser det ganske riktig ut.
+
+━━ [T5-long-test.nb] 397 chars, lang=nb
+  #1 397→396 2444ms success recall=7/7 inversions=0/21
+     engineOut: Og nå prøver vi altså en lang melding i strukturert modus for å se hva som skjer⏎⏎Med tanke på at jeg ikke nødvendigvis har de beste forholdene når det gjelder lyd, fordi jeg er ganske langt unna telefonen⏎⏎Så kvaliteten på mikrofonen blir kanskje ikke enestående⏎⏎Det er også ganske mye støy ved siden av meg⏎⏎Så vi får se hva det gir på testen⏎⏎Vi får se om resultatet er interessant eller ikke
+  #2 397→402 2640ms success recall=7/7 inversions=0/21
+     engineOut: Og nå prøver vi altså en lang melding i strukturert modus for å se hva som skjer.⏎⏎Med tanke på at jeg ikke nødvendigvis har de beste forholdene når det gjelder lyd, fordi jeg er ganske langt unna telefonen.⏎⏎Så kvaliteten på mikrofonen blir kanskje ikke enestående.⏎⏎Det er også ganske mye støy ved siden av meg.⏎⏎Så vi får se hva det gir på testen.⏎⏎Vi får se om resultatet er interessant eller ikke.
+  #3 397→396 2403ms success recall=7/7 inversions=0/21
+     engineOut: Og nå prøver vi altså en lang melding i strukturert modus for å se hva som skjer⏎⏎Med tanke på at jeg ikke nødvendigvis har de beste forholdene når det gjelder lyd, fordi jeg er ganske langt unna telefonen⏎⏎Så kvaliteten på mikrofonen blir kanskje ikke enestående⏎⏎Det er også ganske mye støy ved siden av meg⏎⏎Så vi får se hva det gir på testen⏎⏎Vi får se om resultatet er interessant eller ikke
+
+━━ [T6-project-update.nb] 686 chars, lang=nb
+  #1 686→689 4650ms success recall=19/19 inversions=0/171
+     engineOut: Altså, en rask oppdatering om prosjektet: vi byttet over abonnementsdelen forrige mandag, Thomas er ferdig med StoreKit-integrasjonen, og den fungerer i sandkassen.⏎⏎Det gjenstår to ting. Den første er transkripsjonshistorikken, som ikke er påbegynt i det hele tatt. Og den andre er det tilpassede ordforrådet. Og der har vi en spesifikasjon, men ingen kode.⏎⏎Når det gjelder tallene, er vi på 412 nedlastinger siden lanseringen, med en sjudagers oppbevaring på 19 %, noe som er lavt, men ikke katastrofalt for en første versjon.⏎⏎Målet er å passere 1000 før slutten av oktober. Jeg møter Sarah torsdag klokken 14 for å ordne App Store-delen. Og hvis alt går bra, sender vi inn uka den 12.
+  #2 686→690 4922ms success recall=19/19 inversions=0/171
+     engineOut: Altså, en rask oppdatering om prosjektet: vi byttet over abonnementsdelen forrige mandag, Thomas er ferdig med StoreKit-integrasjonen, og den fungerer i sandkassen.⏎⏎Det gjenstår to ting. Den første er transkripsjonshistorikken, som ikke er påbegynt i det hele tatt. Og den andre er det tilpassede ordforrådet. Og der har vi en spesifikasjon, men ingen kode.⏎⏎Når det gjelder tallene, er vi på 412 nedlastinger siden lanseringen, med en sjudagers oppbevaring på 19 %, noe som er lavt, men ikke katastrofalt for en første versjon.⏎⏎Målet er å passere 1000 før slutten av oktober. Jeg møter Sarah torsdag klokken 14 for å ordne App Store-delen.⏎⏎Og hvis alt går bra, sender vi inn uka den 12.
+  #3 686→692 4962ms success recall=19/19 inversions=0/171
+     engineOut: Altså, en rask oppdatering om prosjektet: vi byttet over abonnementsdelen forrige mandag, Thomas er ferdig med StoreKit-integrasjonen, og den fungerer i sandkassen.⏎⏎Det gjenstår to ting. Den første er transkripsjonshistorikken, som ikke er påbegynt i det hele tatt.⏎⏎Og den andre er det tilpassede ordforrådet. Og der har vi en spesifikasjon, men ingen kode.⏎⏎Når det gjelder tallene, er vi på 412 nedlastinger siden lanseringen, med en sjudagers oppbevaring på 19 %, noe som er lavt, men ikke katastrofalt for en første versjon.⏎⏎Målet er å passere 1000 før slutten av oktober.⏎⏎Jeg møter Sarah torsdag klokken 14 for å ordne App Store-delen.⏎⏎Og hvis alt går bra, sender vi inn uka den 12.
+
+━━ [T1-last-transcription.sv] 57 chars, lang=sv
+  #1 57→57 1006ms success recall=2/2 inversions=0/1
+     engineOut: Jag låter dig titta, det är den senaste transkriberingen.
+  #2 57→57 878ms success recall=2/2 inversions=0/1
+     engineOut: Jag låter dig titta, det är den senaste transkriberingen.
+  #3 57→57 948ms success recall=2/2 inversions=0/1
+     engineOut: Jag låter dig titta, det är den senaste transkriberingen.
+
+━━ [T2-no-error.sv] 147 chars, lang=sv
+  #1 147→148 1429ms success recall=4/4 inversions=0/6
+     engineOut: För tillfället har jag inget felmeddelande, allt verkar vara okej.⏎⏎Så vi fortsätter ett litet tag till, men för tillfället fungerar det ganska bra.
+  #2 147→146 1247ms success recall=4/4 inversions=0/6
+     engineOut: För tillfället har jag inget felmeddelande, allt verkar vara okej⏎⏎Så vi fortsätter ett litet tag till, men för tillfället fungerar det ganska bra
+  #3 147→148 1340ms success recall=4/4 inversions=0/6
+     engineOut: För tillfället har jag inget felmeddelande, allt verkar vara okej.⏎⏎Så vi fortsätter ett litet tag till, men för tillfället fungerar det ganska bra.
+
+━━ [T3-plan-mode.sv] 181 chars, lang=sv
+  #1 181→180 1506ms success recall=3/3 inversions=0/3
+     engineOut: Okej, jag låter dig förbereda integrationen av det här ärendet, tack⏎⏎Du kan gå över till planläget för att göra det, och sedan godkänner jag när du har gjort implementeringsplanen
+  #2 181→182 1490ms success recall=3/3 inversions=0/3
+     engineOut: Okej, jag låter dig förbereda integrationen av det här ärendet, tack.⏎⏎Du kan gå över till planläget för att göra det, och sedan godkänner jag när du har gjort implementeringsplanen.
+  #3 181→182 1436ms success recall=3/3 inversions=0/3
+     engineOut: Okej, jag låter dig förbereda integrationen av det här ärendet, tack.⏎⏎Du kan gå över till planläget för att göra det, och sedan godkänner jag när du har gjort implementeringsplanen.
+
+━━ [T4-structured-since.sv] 253 chars, lang=sv
+  #1 253→256 2009ms success recall=5/5 inversions=0/10
+     engineOut: Faktiskt har jag kört det strukturerade läget ett tag nu.⏎⏎Så faktiskt fungerade alla tester som jag gjorde i går, särskilt de lite längre testerna.⏎⏎Så jag tror att jag kommer att kunna exportera loggarna som de är.⏎⏎Men för mig verkar det ganska korrekt.
+  #2 253→256 1969ms success recall=5/5 inversions=0/10
+     engineOut: Faktiskt har jag kört det strukturerade läget ett tag nu.⏎⏎Så faktiskt fungerade alla tester som jag gjorde i går, särskilt de lite längre testerna.⏎⏎Så jag tror att jag kommer att kunna exportera loggarna som de är.⏎⏎Men för mig verkar det ganska korrekt.
+  #3 253→256 2067ms success recall=5/5 inversions=0/10
+     engineOut: Faktiskt har jag kört det strukturerade läget ett tag nu.⏎⏎Så faktiskt fungerade alla tester som jag gjorde i går, särskilt de lite längre testerna.⏎⏎Så jag tror att jag kommer att kunna exportera loggarna som de är.⏎⏎Men för mig verkar det ganska korrekt.
+
+━━ [T5-long-test.sv] 396 chars, lang=sv
+  #1 396→401 2790ms success recall=7/7 inversions=0/21
+     engineOut: Och nu testar vi alltså ett långt meddelande i strukturerat läge för att se vad som händer.⏎⏎Med tanke på att jag inte nödvändigtvis har rätt förhållanden ljudmässigt, eftersom jag är ganska långt från telefonen.⏎⏎Så mikrofonens kvalitet kanske inte blir enastående.⏎⏎Det är också ganska mycket oväsen bredvid mig.⏎⏎Så vi får se vad det ger i testet.⏎⏎Vi får se om resultatet är intressant eller inte.
+  #2 396→401 2586ms success recall=7/7 inversions=0/21
+     engineOut: Och nu testar vi alltså ett långt meddelande i strukturerat läge för att se vad som händer.⏎⏎Med tanke på att jag inte nödvändigtvis har rätt förhållanden ljudmässigt, eftersom jag är ganska långt från telefonen.⏎⏎Så mikrofonens kvalitet kanske inte blir enastående.⏎⏎Det är också ganska mycket oväsen bredvid mig.⏎⏎Så vi får se vad det ger i testet.⏎⏎Vi får se om resultatet är intressant eller inte.
+  #3 396→401 2704ms success recall=7/7 inversions=0/21
+     engineOut: Och nu testar vi alltså ett långt meddelande i strukturerat läge för att se vad som händer.⏎⏎Med tanke på att jag inte nödvändigtvis har rätt förhållanden ljudmässigt, eftersom jag är ganska långt från telefonen.⏎⏎Så mikrofonens kvalitet kanske inte blir enastående.⏎⏎Det är också ganska mycket oväsen bredvid mig.⏎⏎Så vi får se vad det ger i testet.⏎⏎Vi får se om resultatet är intressant eller inte.
+
+━━ [T6-project-update.sv] 694 chars, lang=sv
+  #1 694→699 4657ms success recall=14/14 inversions=0/91
+     engineOut: Alltså, en snabb lägesrapport om projektet: vi bytte över prenumerationsdelen i måndags, Thomas har gjort klart StoreKit-integrationen och den fungerar i sandlådan.⏎⏎Det återstår två saker. Den första är transkriberingshistoriken, som inte är påbörjad alls. Och den andra är den anpassade ordlistan. Och där har vi en specifikation men ingen kod.⏎⏎När det gäller siffrorna ligger vi på 412 nedladdningar sedan lanseringen, med en kvarhållning efter 7 dagar på 19 %, vilket är lågt men inte katastrofalt för en första version.⏎⏎Målet är att passera 1000 före slutet av oktober.⏎⏎Jag träffar Sarah på torsdag klockan 14 för att fixa App Store-delen.⏎⏎Och om allt går bra skickar vi in veckan den 12:e.
+  #2 694→699 4746ms success recall=14/14 inversions=0/91
+     engineOut: Alltså, en snabb lägesrapport om projektet: vi bytte över prenumerationsdelen i måndags, Thomas har gjort klart StoreKit-integrationen och den fungerar i sandlådan.⏎⏎Det återstår två saker. Den första är transkriberingshistoriken, som inte är påbörjad alls. Och den andra är den anpassade ordlistan. Och där har vi en specifikation men ingen kod.⏎⏎När det gäller siffrorna ligger vi på 412 nedladdningar sedan lanseringen, med en kvarhållning efter 7 dagar på 19 %, vilket är lågt men inte katastrofalt för en första version.⏎⏎Målet är att passera 1000 före slutet av oktober.⏎⏎Jag träffar Sarah på torsdag klockan 14 för att fixa App Store-delen.⏎⏎Och om allt går bra skickar vi in veckan den 12:e.
+  #3 694→697 4595ms success recall=14/14 inversions=0/91
+     engineOut: Alltså, en snabb lägesrapport om projektet: vi bytte över prenumerationsdelen i måndags, Thomas har gjort klart StoreKit-integrationen och den fungerar i sandlådan.⏎⏎Det återstår två saker. Den första är transkriberingshistoriken, som inte är påbörjad alls. Och den andra är den anpassade ordlistan. Och där har vi en specifikation men ingen kod.⏎⏎När det gäller siffrorna ligger vi på 412 nedladdningar sedan lanseringen, med en kvarhållning efter 7 dagar på 19 %, vilket är lågt men inte katastrofalt för en första version. Målet är att passera 1000 före slutet av oktober.⏎⏎Jag träffar Sarah på torsdag klockan 14 för att fixa App Store-delen. Och om allt går bra skickar vi in veckan den 12:e.
+
+━━ [T1-last-transcription.tr] 52 chars, lang=tr
+  #1 52→52 968ms success recall=2/2 inversions=0/1
+     engineOut: Bakman için sana bırakıyorum, bu son transkripsiyon.
+  #2 52→52 1046ms success recall=2/2 inversions=0/1
+     engineOut: Bakman için sana bırakıyorum, bu son transkripsiyon.
+  #3 52→52 1017ms success recall=2/2 inversions=0/1
+     engineOut: Bakman için sana bırakıyorum, bu son transkripsiyon.
+
+━━ [T2-no-error.tr] 130 chars, lang=tr
+  #1 130→131 1248ms success recall=3/3 inversions=0/3
+     engineOut: Şimdilik hiçbir hata mesajım yok, her şey yolunda görünüyor.⏎⏎Yani bir süre daha devam edeceğiz ama şimdilik oldukça iyi çalışıyor.
+  #2 130→131 1318ms success recall=3/3 inversions=0/3
+     engineOut: Şimdilik hiçbir hata mesajım yok, her şey yolunda görünüyor.⏎⏎Yani bir süre daha devam edeceğiz ama şimdilik oldukça iyi çalışıyor.
+  #3 130→131 1288ms success recall=3/3 inversions=0/3
+     engineOut: Şimdilik hiçbir hata mesajım yok, her şey yolunda görünüyor.⏎⏎Yani bir süre daha devam edeceğiz ama şimdilik oldukça iyi çalışıyor.
+
+━━ [T3-plan-mode.tr] 154 chars, lang=tr
+  #1 154→155 1464ms success recall=3/3 inversions=0/3
+     engineOut: Tamam, bu issue'nun entegrasyonunu hazırlamayı sana bırakıyorum, lütfen.⏎⏎Bunun için plan moduna geçebilirsin, sonra uygulama planını yaptığında onaylarım.
+  #2 154→155 1418ms success recall=3/3 inversions=0/3
+     engineOut: Tamam, bu issue'nun entegrasyonunu hazırlamayı sana bırakıyorum, lütfen.⏎⏎Bunun için plan moduna geçebilirsin, sonra uygulama planını yaptığında onaylarım.
+  #3 154→155 1368ms success recall=3/3 inversions=0/3
+     engineOut: Tamam, bu issue'nun entegrasyonunu hazırlamayı sana bırakıyorum, lütfen.⏎⏎Bunun için plan moduna geçebilirsin, sonra uygulama planını yaptığında onaylarım.
+
+━━ [T4-structured-since.tr] 227 chars, lang=tr
+  #1 227→208 1695ms success recall=5/5 inversions=0/10
+     engineOut: Aslında bir süredir yapılandırılmış moddayım.⏎⏎Dün yaptığım bütün testler, özellikle biraz daha uzun testler, çalıştı.⏎⏎Sanırım günlükleri olduğu gibi dışa aktarabileceğim.⏎⏎Bana göre oldukça doğru görünüyor.
+  #2 227→230 1672ms success recall=5/5 inversions=0/10
+     engineOut: Aslında bir süredir yapılandırılmış moddayım.⏎⏎Yani aslında dün yaptığım bütün testler, özellikle biraz daha uzun testler, çalıştı.⏎⏎Yani sanırım günlükleri olduğu gibi dışa aktarabileceğim.⏎⏎Ama bana göre oldukça doğru görünüyor.
+  #3 227→208 1708ms success recall=5/5 inversions=0/10
+     engineOut: Aslında bir süredir yapılandırılmış moddayım.⏎⏎Dün yaptığım bütün testler, özellikle biraz daha uzun testler, çalıştı.⏎⏎Sanırım günlükleri olduğu gibi dışa aktarabileceğim.⏎⏎Bana göre oldukça doğru görünüyor.
+
+━━ [T5-long-test.tr] 324 chars, lang=tr
+  #1 324→329 2470ms success recall=7/7 inversions=0/21
+     engineOut: Ve şimdi ne olacağını görmek için yapılandırılmış modda uzun bir mesaj deniyoruz.⏎⏎Ses açısından pek iyi koşullarda olmadığımı da bilerek, çünkü telefondan oldukça uzaktayım.⏎⏎Yani mikrofonun kalitesi belki olağanüstü olmayacak.⏎⏎Yanımda da epey gürültü var.⏎⏎Bakalım testte ne verecek.⏎⏎Sonucun ilginç olup olmadığını göreceğiz.
+  #2 324→329 2503ms success recall=7/7 inversions=0/21
+     engineOut: Ve şimdi ne olacağını görmek için yapılandırılmış modda uzun bir mesaj deniyoruz.⏎⏎Ses açısından pek iyi koşullarda olmadığımı da bilerek, çünkü telefondan oldukça uzaktayım.⏎⏎Yani mikrofonun kalitesi belki olağanüstü olmayacak.⏎⏎Yanımda da epey gürültü var.⏎⏎Bakalım testte ne verecek.⏎⏎Sonucun ilginç olup olmadığını göreceğiz.
+  #3 324→329 2118ms success recall=7/7 inversions=0/21
+     engineOut: Ve şimdi ne olacağını görmek için yapılandırılmış modda uzun bir mesaj deniyoruz.⏎⏎Ses açısından pek iyi koşullarda olmadığımı da bilerek, çünkü telefondan oldukça uzaktayım.⏎⏎Yani mikrofonun kalitesi belki olağanüstü olmayacak.⏎⏎Yanımda da epey gürültü var.⏎⏎Bakalım testte ne verecek.⏎⏎Sonucun ilginç olup olmadığını göreceğiz.
+
+━━ [T6-project-update.tr] 637 chars, lang=tr
+  #1 637→642 4183ms success recall=15/15 inversions=0/105
+     engineOut: Evet, projeyle ilgili kısa bir güncelleme: abonelik kısmını geçen pazartesi geçirdik, Thomas StoreKit entegrasyonunu bitirdi ve sandbox'ta çalışıyor.⏎⏎Geriye iki şey kaldı. Birincisi, hiç başlanmamış olan transkripsiyon geçmişi. İkincisi de kişisel kelime dağarcığı. Onunla ilgili bir spesifikasyonumuz var ama hiç kod yok.⏎⏎Rakamlara gelince, lansmandan bu yana 412 indirmedeyiz, 7 günlük elde tutma oranı %19, bu düşük ama ilk sürüm için felaket değil.⏎⏎Hedef, ekim sonundan önce 1000 barajını geçmek.⏎⏎App Store kısmını ayarlamak için perşembe saat 14'te Sarah ile görüşüyorum.⏎⏎Her şey yolunda giderse, ayın 12'si haftasında gönderiyoruz.
+  #2 637→642 3882ms success recall=15/15 inversions=0/105
+     engineOut: Evet, projeyle ilgili kısa bir güncelleme: abonelik kısmını geçen pazartesi geçirdik, Thomas StoreKit entegrasyonunu bitirdi ve sandbox'ta çalışıyor.⏎⏎Geriye iki şey kaldı. Birincisi, hiç başlanmamış olan transkripsiyon geçmişi. İkincisi de kişisel kelime dağarcığı. Onunla ilgili bir spesifikasyonumuz var ama hiç kod yok.⏎⏎Rakamlara gelince, lansmandan bu yana 412 indirmedeyiz, 7 günlük elde tutma oranı %19, bu düşük ama ilk sürüm için felaket değil.⏎⏎Hedef, ekim sonundan önce 1000 barajını geçmek.⏎⏎App Store kısmını ayarlamak için perşembe saat 14'te Sarah ile görüşüyorum.⏎⏎Her şey yolunda giderse, ayın 12'si haftasında gönderiyoruz.
+  #3 637→640 3791ms success recall=15/15 inversions=0/105
+     engineOut: Evet, projeyle ilgili kısa bir güncelleme: abonelik kısmını geçen pazartesi geçirdik, Thomas StoreKit entegrasyonunu bitirdi ve sandbox'ta çalışıyor. Geriye iki şey kaldı.⏎⏎Birincisi, hiç başlanmamış olan transkripsiyon geçmişi. İkincisi de kişisel kelime dağarcığı. Onunla ilgili bir spesifikasyonumuz var ama hiç kod yok.⏎⏎Rakamlara gelince, lansmandan bu yana 412 indirmedeyiz, 7 günlük elde tutma oranı %19, bu düşük ama ilk sürüm için felaket değil. Hedef, ekim sonundan önce 1000 barajını geçmek.⏎⏎App Store kısmını ayarlamak için perşembe saat 14'te Sarah ile görüşüyorum. Her şey yolunda giderse, ayın 12'si haftasında gönderiyoruz.
+
+━━ [T1-last-transcription.vi] 50 chars, lang=vi
+  #1 50→50 839ms success recall=2/2 inversions=0/1
+     engineOut: Tôi để bạn xem nhé, đây là bản ghi chép cuối cùng.
+  #2 50→50 823ms success recall=2/2 inversions=0/1
+     engineOut: Tôi để bạn xem nhé, đây là bản ghi chép cuối cùng.
+  #3 50→48 853ms success recall=2/2 inversions=0/1
+     engineOut: Tôi để bạn xem nhé⏎Đây là bản ghi chép cuối cùng
+
+━━ [T2-no-error.vi] 133 chars, lang=vi
+  #1 133→134 1090ms success recall=4/4 inversions=0/6
+     engineOut: Hiện tại tôi không có thông báo lỗi nào, mọi thứ có vẻ ổn.⏎⏎Vậy chúng ta sẽ tiếp tục thêm một lúc nữa, nhưng hiện tại nó chạy khá tốt.
+  #2 133→134 1114ms success recall=4/4 inversions=0/6
+     engineOut: Hiện tại tôi không có thông báo lỗi nào, mọi thứ có vẻ ổn.⏎⏎Vậy chúng ta sẽ tiếp tục thêm một lúc nữa, nhưng hiện tại nó chạy khá tốt.
+  #3 133→134 1105ms success recall=4/4 inversions=0/6
+     engineOut: Hiện tại tôi không có thông báo lỗi nào, mọi thứ có vẻ ổn.⏎⏎Vậy chúng ta sẽ tiếp tục thêm một lúc nữa, nhưng hiện tại nó chạy khá tốt.
+
+━━ [T3-plan-mode.vi] 175 chars, lang=vi
+  #1 175→174 1269ms success recall=4/4 inversions=0/6
+     engineOut: Được rồi, tôi để bạn chuẩn bị việc tích hợp issue này nhé⏎⏎Bạn có thể chuyển sang chế độ lập kế hoạch để làm việc đó, rồi tôi sẽ duyệt khi bạn đã lập xong kế hoạch triển khai
+  #2 175→174 1349ms success recall=4/4 inversions=0/6
+     engineOut: Được rồi, tôi để bạn chuẩn bị việc tích hợp issue này nhé⏎⏎Bạn có thể chuyển sang chế độ lập kế hoạch để làm việc đó, rồi tôi sẽ duyệt khi bạn đã lập xong kế hoạch triển khai
+  #3 175→176 1480ms success recall=4/4 inversions=0/6
+     engineOut: Được rồi, tôi để bạn chuẩn bị việc tích hợp issue này nhé.⏎⏎Bạn có thể chuyển sang chế độ lập kế hoạch để làm việc đó, rồi tôi sẽ duyệt khi bạn đã lập xong kế hoạch triển khai.
+
+━━ [T4-structured-since.vi] 250 chars, lang=vi
+  #1 250→245 1954ms success recall=6/6 inversions=0/15
+     engineOut: Thật ra tôi đã dùng chế độ có cấu trúc được một lúc rồi.⏎⏎Vậy tất cả các bài kiểm tra tôi làm hôm qua, nhất là những bài dài hơn một chút, đều chạy được.⏎⏎Vậy tôi nghĩ tôi sẽ có thể xuất nhật ký nguyên như vậy.⏎⏎Nhưng với tôi thì có vẻ khá đúng.
+  #2 250→245 1964ms success recall=6/6 inversions=0/15
+     engineOut: Thật ra tôi đã dùng chế độ có cấu trúc được một lúc rồi.⏎⏎Vậy tất cả các bài kiểm tra tôi làm hôm qua, nhất là những bài dài hơn một chút, đều chạy được.⏎⏎Vậy tôi nghĩ tôi sẽ có thể xuất nhật ký nguyên như vậy.⏎⏎Nhưng với tôi thì có vẻ khá đúng.
+  #3 250→241 1702ms success recall=6/6 inversions=0/15
+     engineOut: Thật ra tôi đã dùng chế độ có cấu trúc được một lúc rồi⏎⏎Vậy tất cả các bài kiểm tra tôi làm hôm qua, nhất là những bài dài hơn một chút, đều chạy được⏎⏎Vậy tôi nghĩ tôi sẽ có thể xuất nhật ký nguyên như vậy⏎⏎Nhưng với tôi thì có vẻ khá đúng
+
+━━ [T5-long-test.vi] 333 chars, lang=vi
+  #1 333→332 2386ms success recall=6/6 inversions=0/15
+     engineOut: Và giờ chúng ta thử một tin nhắn dài ở chế độ có cấu trúc để xem chuyện gì sẽ xảy ra⏎⏎Biết rằng tôi không hẳn ở trong điều kiện âm thanh tốt vì tôi ở khá xa điện thoại⏎⏎Vậy chất lượng micro có thể sẽ không xuất sắc lắm⏎⏎Bên cạnh tôi cũng khá ồn⏎⏎Vậy để xem bài kiểm tra cho ra kết quả gì⏎⏎Chúng ta sẽ xem kết quả có thú vị hay không
+  #2 333→332 2280ms success recall=6/6 inversions=0/15
+     engineOut: Và giờ chúng ta thử một tin nhắn dài ở chế độ có cấu trúc để xem chuyện gì sẽ xảy ra⏎⏎Biết rằng tôi không hẳn ở trong điều kiện âm thanh tốt vì tôi ở khá xa điện thoại⏎⏎Vậy chất lượng micro có thể sẽ không xuất sắc lắm⏎⏎Bên cạnh tôi cũng khá ồn⏎⏎Vậy để xem bài kiểm tra cho ra kết quả gì⏎⏎Chúng ta sẽ xem kết quả có thú vị hay không
+  #3 333→332 2155ms success recall=6/6 inversions=0/15
+     engineOut: Và giờ chúng ta thử một tin nhắn dài ở chế độ có cấu trúc để xem chuyện gì sẽ xảy ra⏎⏎Biết rằng tôi không hẳn ở trong điều kiện âm thanh tốt vì tôi ở khá xa điện thoại⏎⏎Vậy chất lượng micro có thể sẽ không xuất sắc lắm⏎⏎Bên cạnh tôi cũng khá ồn⏎⏎Vậy để xem bài kiểm tra cho ra kết quả gì⏎⏎Chúng ta sẽ xem kết quả có thú vị hay không
+
+━━ [T6-project-update.vi] 664 chars, lang=vi
+  #1 664→632 4183ms success recall=16/16 dispersed=1 inversions=0/105
+     engineOut: Vậy, cập nhật nhanh về dự án: thứ Hai tuần trước chúng tôi đã chuyển phần đăng ký, Thomas đã hoàn thành việc tích hợp StoreKit và nó chạy được trong sandbox.⏎⏎Còn lại hai việc. Việc thứ nhất là lịch sử bản ghi chép, hoàn toàn chưa được bắt đầu.⏎⏎Về việc đó chúng tôi có bản đặc tả nhưng chưa có mã.⏎⏎Về số liệu, chúng tôi đạt 412 lượt tải xuống kể từ khi ra mắt, với tỷ lệ giữ chân sau 7 ngày là 19%, thấp nhưng không phải thảm họa đối với phiên bản đầu tiên.⏎⏎Mục tiêu là vượt mốc 1000 trước cuối tháng Mười.⏎⏎Tôi gặp Sarah vào thứ Năm lúc 14 giờ để chốt phần App Store.⏎⏎Và nếu mọi việc suôn sẻ, chúng tôi sẽ nộp vào tuần ngày 12.
+  #2 664→632 4163ms success recall=16/16 dispersed=1 inversions=0/105
+     engineOut: Vậy, cập nhật nhanh về dự án: thứ Hai tuần trước chúng tôi đã chuyển phần đăng ký, Thomas đã hoàn thành việc tích hợp StoreKit và nó chạy được trong sandbox.⏎⏎Còn lại hai việc. Việc thứ nhất là lịch sử bản ghi chép, hoàn toàn chưa được bắt đầu.⏎⏎Về việc đó chúng tôi có bản đặc tả nhưng chưa có mã.⏎⏎Về số liệu, chúng tôi đạt 412 lượt tải xuống kể từ khi ra mắt, với tỷ lệ giữ chân sau 7 ngày là 19%, thấp nhưng không phải thảm họa đối với phiên bản đầu tiên.⏎⏎Mục tiêu là vượt mốc 1000 trước cuối tháng Mười.⏎⏎Tôi gặp Sarah vào thứ Năm lúc 14 giờ để chốt phần App Store.⏎⏎Và nếu mọi việc suôn sẻ, chúng tôi sẽ nộp vào tuần ngày 12.
+  #3 664→632 4237ms success recall=16/16 dispersed=1 inversions=0/105
+     engineOut: Vậy, cập nhật nhanh về dự án: thứ Hai tuần trước chúng tôi đã chuyển phần đăng ký, Thomas đã hoàn thành việc tích hợp StoreKit và nó chạy được trong sandbox.⏎⏎Còn lại hai việc. Việc thứ nhất là lịch sử bản ghi chép, hoàn toàn chưa được bắt đầu.⏎⏎Về việc đó chúng tôi có bản đặc tả nhưng chưa có mã.⏎⏎Về số liệu, chúng tôi đạt 412 lượt tải xuống kể từ khi ra mắt, với tỷ lệ giữ chân sau 7 ngày là 19%, thấp nhưng không phải thảm họa đối với phiên bản đầu tiên.⏎⏎Mục tiêu là vượt mốc 1000 trước cuối tháng Mười.⏎⏎Tôi gặp Sarah vào thứ Năm lúc 14 giờ để chốt phần App Store.⏎⏎Và nếu mọi việc suôn sẻ, chúng tôi sẽ nộp vào tuần ngày 12.
+
+━━ [T1-last-transcription.ja] 22 chars, lang=ja
+  #1 22→22 938ms success recall=1/1 inversions=0/0
+     engineOut: 確認してみてね,これが最新の文字起こしだよ.
+  #2 22→21 849ms success recall=1/1 inversions=0/0
+     engineOut: 確認してみてね,これが最新の文字起こしだよ
+  #3 22→22 951ms success recall=1/1 inversions=0/0
+     engineOut: 確認してみてね,これが最新の文字起こしだよ.
+
+━━ [T2-no-error.ja] 59 chars, lang=ja
+  #1 59→60 1035ms success recall=2/2 inversions=0/1
+     engineOut: 今のところエラーメッセージは出ていないし、全部問題なさそう。⏎だからもう少し続けるけど、今のところかなりうまく動いてる。
+  #2 59→58 1160ms success recall=2/2 inversions=0/1
+     engineOut: 今までのエラーメッセージは出ていないし、全部問題なさそう。⏎だからもう少し続けるけど、今までのかなりうまく動いてる。
+  #3 59→60 1003ms success recall=2/2 inversions=0/1
+     engineOut: 今のところエラーメッセージは出ていないし、全部問題なさそう。⏎だからもう少し続けるけど、今のところかなりうまく動いてる。
+
+━━ [T3-plan-mode.ja] 62 chars, lang=ja
+  #1 62→187 1886ms rejectedGuardrail(length) recall=0/3 UNRECALLED=3 inversions=0/0 LANG=fr≠ja FOREIGN-SENTENCES=3
+     UNRECALLED (whole 0.10, best 0.10): じゃあ、このissueの統合の準備をお願いね。
+     UNRECALLED (whole 0.00, best 0.00): そのためにプランモードに切り替えていいよ。
+     UNRECALLED (whole 0.00, best 0.00): 実装計画ができたら、私が承認するね。
+     FOREIGN: Ja, cette intégration de l'issue en préparation, veuillez la réaliser.
+     FOREIGN: Pour cela, vous pouvez changer de mode à la mode plan.
+     FOREIGN: Quand le plan d'implémentation sera prêt, je l'approuverai.
+     engineOut: Ja, cette intégration de l'issue en préparation, veuillez la réaliser.⏎⏎Pour cela, vous pouvez changer de mode à la mode plan.⏎⏎Quand le plan d'implémentation sera prêt, je l'approuverai.
+  #2 62→191 1897ms rejectedGuardrail(length) recall=0/3 UNRECALLED=3 inversions=0/0 LANG=fr≠ja FOREIGN-SENTENCES=3
+     UNRECALLED (whole 0.10, best 0.10): じゃあ、このissueの統合の準備をお願いね。
+     UNRECALLED (whole 0.00, best 0.00): そのためにプランモードに切り替えていいよ。
+     UNRECALLED (whole 0.00, best 0.00): 実装計画ができたら、私が承認するね。
+     FOREIGN: Jaja, cette intégration de l'issue, la préparation, veuillez demander.
+     FOREIGN: Pour cela, vous pouvez changer le mode à la planification.
+     FOREIGN: Quand le plan d'implémentation sera prêt, je l'approuverai.
+     engineOut: Jaja, cette intégration de l'issue, la préparation, veuillez demander.⏎⏎Pour cela, vous pouvez changer le mode à la planification.⏎⏎Quand le plan d'implémentation sera prêt, je l'approuverai.
+  #3 62→171 2008ms rejectedGuardrail(length) recall=0/3 UNRECALLED=3 inversions=0/0 LANG=fr≠ja FOREIGN-SENTENCES=3
+     UNRECALLED (whole 0.10, best 0.10): じゃあ、このissueの統合の準備をお願いね。
+     UNRECALLED (whole 0.00, best 0.00): そのためにプランモードに切り替えていいよ。
+     UNRECALLED (whole 0.00, best 0.00): 実装計画ができたら、私が承認するね。
+     FOREIGN: Ja, cette intégration de l'issue, veuillez prépare-la.
+     FOREIGN: Pour cela, vous pouvez changer de mode à la planification.
+     FOREIGN: Si le plan d'implémentation est prêt, je l'approuverai.
+     engineOut: Ja, cette intégration de l'issue, veuillez prépare-la.⏎⏎Pour cela, vous pouvez changer de mode à la planification.⏎⏎Si le plan d'implémentation est prêt, je l'approuverai.
+
+━━ [T4-structured-since.ja] 104 chars, lang=ja
+  #1 104→110 1492ms success recall=4/4 inversions=0/6
+     engineOut: 実はしばらく前から構造化モードを使ってるんだ。⏎⏎それで実は、昨日やったテストは全部、特にちょっと長めのテストもうまくいった。⏎⏎だからログはそのままエクスポートできると思う。⏎⏎でも私としてはかなり正しいように見える。
+  #2 104→108 1479ms success recall=4/4 inversions=0/6
+     engineOut: 実はしばらく前から構造化モードを使ってるんだ。⏎⏎それで、昨日やったテストは全部、特にちょっと長めのテストもうまくいった。⏎⏎だからログはそのままエクスポートできると思う。⏎⏎でも私としてはかなり正しいように見える。
+  #3 104→108 1492ms success recall=4/4 inversions=0/6
+     engineOut: 実はしばらく前から構造化モードを使ってるんだ。⏎⏎それで、昨日やったテストは全部、特にちょっと長めのテストもうまくいった。⏎⏎だからログはそのままエクスポートできると思う。⏎⏎でも私としてはかなり正しいように見える。
+
+━━ [T5-long-test.ja] 150 chars, lang=ja
+  #1 150→160 2066ms success recall=6/6 inversions=0/15
+     engineOut: それで今、何が起きるか見るために構造化モードで長いメッセージを試してる。⏎⏎スマホからかなり離れてるから、音声的には必ずしもいい条件じゃないのは分かってる。⏎⏎だからマイクの品質はそれほど良くないかもしれない。⏎⏎それに隣でけっこう雑音もしてる。⏎⏎だからテストでどうなるか見てみよう。⏎⏎結果が面白いかどうか見てみる。
+  #2 150→160 2030ms success recall=6/6 inversions=0/15
+     engineOut: それで今、何が起きるか見るために構造化モードで長いメッセージを試してる。⏎⏎スマホからかなり離れてるから、音声的には必ずしもいい条件じゃないのは分かってる。⏎⏎だからマイクの品質はそれほど良くないかもしれない。⏎⏎それに隣でけっこう雑音もしてる。⏎⏎だからテストでどうなるか見てみよう。⏎⏎結果が面白いかどうか見てみる。
+  #3 150→160 2050ms success recall=6/6 inversions=0/15
+     engineOut: それで今、何が起きるか見るために構造化モードで長いメッセージを試してる。⏎⏎スマホからかなり離れてるから、音声的には必ずしもいい条件じゃないのは分かってる。⏎⏎だからマイクの品質はそれほど良くないかもしれない。⏎⏎それに隣でけっこう雑音もしてる。⏎⏎だからテストでどうなるか見てみよう。⏎⏎結果が面白いかどうか見てみる。
+
+━━ [T6-project-update.ja] 293 chars, lang=ja
+  #1 293→301 3411ms success recall=11/11 inversions=0/55
+     engineOut: じゃあ、プロジェクトについて簡単に報告するね⏎⏎先週の月曜日にサブスクリプションの部分を切り替えて、ThomasがStoreKitの統合を終わらせて、サンドボックスで動いてる⏎⏎残っているのは二つ⏎⏎一つ目は文字起こしの履歴で、まったく手をつけてない⏎⏎二つ目はカスタム語彙。それについては仕様はあるけど、コードはまだない⏎⏎数字の面では、リリース以来412ダウンロードで、7日間の継続率は19%⏎⏎低いけど、最初のバージョンとしては致命的ではない⏎⏎目標は10月末までに1000を超えること⏎⏎木曜日の14時にSarahと会ってApp Storeの部分を詰める⏎⏎すべて順調なら、12日の週に提出する
+  #2 293→301 3556ms success recall=11/11 inversions=0/55
+     engineOut: じゃあ、プロジェクトについて簡単に報告するね⏎⏎先週の月曜日にサブスクリプションの部分を切り替えて、ThomasがStoreKitの統合を終わらせて、サンドボックスで動いてる⏎⏎残っているのは二つ⏎⏎一つ目は文字起こしの履歴で、まったく手をつけてない⏎⏎二つ目はカスタム語彙。それについては仕様はあるけど、コードはまだない⏎⏎数字の面では、リリース以来412ダウンロードで、7日間の継続率は19%⏎⏎低いけど、最初のバージョンとしては致命的ではない⏎⏎目標は10月末までに1000を超えること⏎⏎木曜日の14時にSarahと会ってApp Storeの部分を詰める⏎⏎すべて順調なら、12日の週に提出する
+  #3 293→311 3695ms success recall=11/11 inversions=0/55
+     engineOut: じゃあ、プロジェクトについて簡単に報告するね。⏎⏎先週の月曜日にサブスクリプションの部分を切り替えて、ThomasがStoreKitの統合を終わらせて、サンドボックスで動いてる。⏎⏎残っているのは二つ。⏎⏎一つ目は文字起こしの履歴で、まったく手をつけてない。⏎⏎二つ目はカスタム語彙。それについては仕様はあるけど、コードはまだない。⏎⏎数字の面では、リリース以来412ダウンロードで、7日間の継続率は19%。⏎⏎低いけど、最初のバージョンとしては致命的ではない。⏎⏎目標は10月末までに1000を超えること。⏎⏎木曜日の14時にSarahと会ってApp Storeの部分を詰める。⏎⏎すべて順調なら、12日の週に提出する。
+
+━━ [T1-last-transcription.ko] 21 chars, lang=ko
+  #1 21→21 926ms success recall=2/2 inversions=0/1
+     engineOut: 한번 봐 줘, 이게 마지막 전사본이야.
+  #2 21→21 903ms success recall=2/2 inversions=0/1
+     engineOut: 한번 봐 줘, 이게 마지막 전사본이야.
+  #3 21→21 875ms success recall=2/2 inversions=0/1
+     engineOut: 한번 봐 줘, 이게 마지막 전사본이야.
+
+━━ [T2-no-error.ko] 61 chars, lang=ko
+  #1 61→61 1235ms success recall=4/4 inversions=0/6
+     engineOut: 지금까지는 오류 메시지가 없고, 다 괜찮아 보여.⏎그래서 조금 더 계속해 볼 건데, 지금까지는 꽤 잘 작동해.
+  #2 61→61 1163ms success recall=4/4 inversions=0/6
+     engineOut: 지금까지는 오류 메시지가 없고, 다 괜찮아 보여.⏎그래서 조금 더 계속해 볼 건데, 지금까지는 꽤 잘 작동해.
+  #3 61→61 1260ms success recall=4/4 inversions=0/6
+     engineOut: 지금까지는 오류 메시지가 없고, 다 괜찮아 보여.⏎그래서 조금 더 계속해 볼 건데, 지금까지는 꽤 잘 작동해.
+
+━━ [T3-plan-mode.ko] 75 chars, lang=ko
+  #1 75→68 1315ms success recall=3/3 inversions=0/3
+     engineOut: 좋아, 이 이슈의 통합 준비는 너한테 맡길게, 부탁해.⏎플랜 모드로 전환해도 되고, 구현 계획을 다 만들면 내가 승인할게.
+  #2 75→68 1356ms success recall=3/3 inversions=0/3
+     engineOut: 좋아, 이 이슈의 통합 준비는 너한테 맡길게, 부탁해.⏎플랜 모드로 전환해도 되고, 구현 계획을 다 만들면 내가 승인할게.
+  #3 75→68 1338ms success recall=3/3 inversions=0/3
+     engineOut: 좋아, 이 이슈의 통합 준비는 너한테 맡길게, 부탁해.⏎플랜 모드로 전환해도 되고, 구현 계획을 다 만들면 내가 승인할게.
+
+━━ [T4-structured-since.ko] 114 chars, lang=ko
+  #1 114→110 1621ms success recall=5/5 inversions=0/10
+     engineOut: 사실 구조화 모드를 쓴 지 좀 됐어⏎⏎그래서 어제 한 테스트는 전부, 특히 조금 더 긴 테스트들도 다 잘 됐어⏎⏎그래서 로그를 그대로 내보낼 수 있을 것 같아⏎⏎그래도 내가 보기엔 꽤 맞는 것 같아
+  #2 114→110 1622ms success recall=5/5 inversions=0/10
+     engineOut: 사실 구조화 모드를 쓴 지 좀 됐어⏎⏎그래서 어제 한 테스트는 전부, 특히 조금 더 긴 테스트들도 다 잘 됐어⏎⏎그래서 로그를 그대로 내보낼 수 있을 것 같아⏎⏎그래도 내가 보기엔 꽤 맞는 것 같아
+  #3 114→114 1633ms success recall=5/5 inversions=0/10
+     engineOut: 사실 구조화 모드를 쓴 지 좀 됐어.⏎⏎그래서 어제 한 테스트는 전부, 특히 조금 더 긴 테스트들도 다 잘 됐어.⏎⏎그래서 로그를 그대로 내보낼 수 있을 것 같아.⏎⏎그래도 내가 보기엔 꽤 맞는 것 같아.
+
+━━ [T5-long-test.ko] 182 chars, lang=ko
+  #1 182→181 2295ms success recall=6/6 inversions=0/15
+     engineOut: 그래서 지금 무슨 일이 일어나는지 보려고 구조화 모드로 긴 메시지를 시험해 보고 있어⏎⏎휴대폰에서 꽤 멀리 떨어져 있어서 오디오 조건이 꼭 좋은 건 아니라는 걸 알고 있어⏎⏎그래서 마이크 품질이 아주 좋지는 않을 수도 있어⏎⏎옆에서 소음도 꽤 나⏎⏎그러니까 테스트에서 어떻게 나오는지 보자⏎⏎결과가 흥미로운지 아닌지 볼 거야
+  #2 182→181 2259ms success recall=6/6 inversions=0/15
+     engineOut: 그래서 지금 무슨 일이 일어나는지 보려고 구조화 모드로 긴 메시지를 시험해 보고 있어⏎⏎휴대폰에서 꽤 멀리 떨어져 있어서 오디오 조건이 꼭 좋은 건 아니라는 걸 알고 있어⏎⏎그래서 마이크 품질이 아주 좋지는 않을 수도 있어⏎⏎옆에서 소음도 꽤 나⏎⏎그러니까 테스트에서 어떻게 나오는지 보자⏎⏎결과가 흥미로운지 아닌지 볼 거야
+  #3 182→181 2252ms success recall=6/6 inversions=0/15
+     engineOut: 그래서 지금 무슨 일이 일어나는지 보려고 구조화 모드로 긴 메시지를 시험해 보고 있어⏎⏎휴대폰에서 꽤 멀리 떨어져 있어서 오디오 조건이 꼭 좋은 건 아니라는 걸 알고 있어⏎⏎그래서 마이크 품질이 아주 좋지는 않을 수도 있어⏎⏎옆에서 소음도 꽤 나⏎⏎그러니까 테스트에서 어떻게 나오는지 보자⏎⏎결과가 흥미로운지 아닌지 볼 거야
+
+━━ [T6-project-update.ko] 319 chars, lang=ko
+  #1 319→318 3858ms success recall=15/15 inversions=0/105
+     engineOut: 자, 프로젝트에 대해 간단히 업데이트할게⏎⏎지난 월요일에 구독 부분을 전환했고, Thomas가 StoreKit 통합을 끝내서 샌드박스에서 잘 돌아가⏎⏎남은 건 두 가지야⏎⏎첫 번째는 전사 기록인데, 아직 전혀 시작하지 않았어⏎⏎두 번째는 사용자 지정 어휘야. 그건 사양은 있는데 코드는 없어⏎⏎숫자로 보면, 출시 이후 다운로드가 412건이고, 7일 유지율은 19%야⏎⏎낮긴 하지만 첫 버전치고 최악은 아니야⏎⏎목표는 10월 말 전에 1000건을 넘기는 거야⏎⏎목요일 오후 2시에 Sarah를 만나서 App Store 부분을 정리할 거야⏎⏎다 잘 되면 12일 주에 제출해
+  #2 319→325 3984ms success recall=15/15 inversions=0/105
+     engineOut: 자, 프로젝트에 대해 간단히 업데이트할게.⏎⏎지난 월요일에 구독 부분을 전환했고, Thomas가 StoreKit 통합을 끝내서 샌드박스에서 잘 돌아가.⏎⏎남은 건 두 가지야. 첫 번째는 전사 기록인데, 아직 전혀 시작하지 않았어.⏎⏎두 번째는 사용자 지정 어휘야. 그건 사양은 있는데 코드는 없어.⏎⏎숫자로 보면, 출시 이후 다운로드가 412건이고, 7일 유지율은 19%야. 낮긴 하지만 첫 버전치고 최악은 아니야.⏎⏎목표는 10월 말 전에 1000건을 넘기는 거야.⏎⏎목요일 오후 2시에 Sarah를 만나서 App Store 부분을 정리할 거야.⏎⏎다 잘되면 12일 주에 제출해.
+  #3 319→318 3949ms success recall=15/15 inversions=0/105
+     engineOut: 자, 프로젝트에 대해 간단히 업데이트할게⏎⏎지난 월요일에 구독 부분을 전환했고, Thomas가 StoreKit 통합을 끝내서 샌드박스에서 잘 돌아가⏎⏎남은 건 두 가지야⏎⏎첫 번째는 전사 기록인데, 아직 전혀 시작하지 않았어⏎⏎두 번째는 사용자 지정 어휘야. 그건 사양은 있는데 코드는 없어⏎⏎숫자로 보면, 출시 이후 다운로드가 412건이고, 7일 유지율은 19%야⏎⏎낮긴 하지만 첫 버전치고 최악은 아니야⏎⏎목표는 10월 말 전에 1000건을 넘기는 거야⏎⏎목요일 오후 2시에 Sarah를 만나서 App Store 부분을 정리할 거야⏎⏎다 잘 되면 12일 주에 제출해
+
+━━ [T1-last-transcription.zh-Hans] 14 chars, lang=zh-Hans
+  #1 14→45 795ms rejectedGuardrail(length) recall=0/1 UNRECALLED=1 inversions=0/0 LANG=en≠zh-Hans FOREIGN-SENTENCES=1
+     UNRECALLED (whole 0.00, best 0.00): 你看一下吧，这是最新的转写。
+     FOREIGN: Look at it, this is the latest transcription.
+     engineOut: Look at it, this is the latest transcription.
+  #2 14→14 851ms success recall=1/1 inversions=0/0
+     engineOut: 你看一下吧，这是最新的转写。
+  #3 14→45 777ms rejectedGuardrail(length) recall=0/1 UNRECALLED=1 inversions=0/0 LANG=en≠zh-Hans FOREIGN-SENTENCES=1
+     UNRECALLED (whole 0.00, best 0.00): 你看一下吧，这是最新的转写。
+     FOREIGN: Look at it, this is the latest transcription.
+     engineOut: Look at it, this is the latest transcription.
+
+━━ [T2-no-error.zh-Hans] 43 chars, lang=zh-Hans
+  #1 43→44 1126ms success recall=2/2 inversions=0/1
+     engineOut: 目前我没有任何错误信息，一切看起来都正常。⏎所以我们再继续一会儿，不过目前运行得挺好的。
+  #2 43→44 1099ms success recall=2/2 inversions=0/1
+     engineOut: 目前我没有任何错误信息，一切看起来都正常。⏎所以我们再继续一会儿，不过目前运行得挺好的。
+  #3 43→44 1144ms success recall=2/2 inversions=0/1
+     engineOut: 目前我没有任何错误信息，一切看起来都正常。⏎所以我们再继续一会儿，不过目前运行得挺好的。
+
+━━ [T3-plan-mode.zh-Hans] 51 chars, lang=zh-Hans
+  #1 51→52 1244ms success recall=2/2 inversions=0/1
+     engineOut: 好，这个 issue 的集成就麻烦你来准备了。⏎你可以切换到计划模式来做，等你做好实现计划之后我再确认。
+  #2 51→52 1167ms success recall=2/2 inversions=0/1
+     engineOut: 好，这个 issue 的集成就麻烦你来准备了。⏎你可以切换到计划模式来做，等你做好实现计划之后我再确认。
+  #3 51→52 1145ms success recall=2/2 inversions=0/1
+     engineOut: 好，这个 issue 的集成就麻烦你来准备了。⏎你可以切换到计划模式来做，等你做好实现计划之后我再确认。
+
+━━ [T4-structured-since.zh-Hans] 77 chars, lang=zh-Hans
+  #1 77→76 1447ms success recall=4/4 inversions=0/6
+     engineOut: 其实我用结构化模式已经有一段时间了⏎所以其实我昨天做的所有测试，尤其是稍微长一点的测试，都成功了⏎所以我觉得我可以把日志原样导出⏎不过在我看来还挺正确的
+  #2 77→80 1587ms success recall=4/4 inversions=0/6
+     engineOut: 其实我用结构化模式已经有一段时间了。⏎所以其实我昨天做的所有测试，尤其是稍微长一点的测试，都成功了。⏎所以我觉得我可以把日志原样导出。⏎不过在我看来还挺正确的。
+  #3 77→76 1507ms success recall=4/4 inversions=0/6
+     engineOut: 其实我用结构化模式已经有一段时间了⏎所以其实我昨天做的所有测试，尤其是稍微长一点的测试，都成功了⏎所以我觉得我可以把日志原样导出⏎不过在我看来还挺正确的
+
+━━ [T5-long-test.zh-Hans] 103 chars, lang=zh-Hans
+  #1 103→343 2806ms rejectedGuardrail(length) recall=0/6 UNRECALLED=6 inversions=0/0 LANG=en≠zh-Hans FOREIGN-SENTENCES=6
+     UNRECALLED (whole 0.00, best 0.00): 所以现在我们试一下用结构化模式发一条长消息，看看会发生什么。
+     UNRECALLED (whole 0.00, best 0.00): 我知道我的录音条件不一定好，因为我离手机挺远的。
+     UNRECALLED (whole 0.00, best 0.00): 所以麦克风的质量可能不会特别好。
+     UNRECALLED (whole 0.00, best 0.00): 我旁边也挺吵的。
+     UNRECALLED (whole 0.00, best 0.00): 那就看看测试结果怎么样吧。
+     UNRECALLED (whole 0.00, best 0.00): 我们看看结果有没有意思。
+     FOREIGN: So now we try using structured mode to send a long message, see what happens.
+     FOREIGN: I know my recording conditions might not be good, because I'm far from my phone.
+     FOREIGN: So the microphone quality might not be particularly good.
+     FOREIGN: My surroundings are quite noisy too.
+     FOREIGN: So just see how the test results turn out.
+     FOREIGN: We'll see if the results are interesting.
+     engineOut: So now we try using structured mode to send a long message, see what happens.⏎⏎I know my recording conditions might not be good, because I'm far from my phone.⏎⏎So the microphone quality might not be particularly good.⏎⏎My surroundings are quite noisy too.⏎⏎So just see how the test results turn out.⏎⏎We'll see if the results are interesting.
+  #2 103→335 2746ms rejectedGuardrail(length) recall=0/6 UNRECALLED=6 inversions=0/0 LANG=en≠zh-Hans FOREIGN-SENTENCES=6
+     UNRECALLED (whole 0.00, best 0.00): 所以现在我们试一下用结构化模式发一条长消息，看看会发生什么。
+     UNRECALLED (whole 0.00, best 0.00): 我知道我的录音条件不一定好，因为我离手机挺远的。
+     UNRECALLED (whole 0.00, best 0.00): 所以麦克风的质量可能不会特别好。
+     UNRECALLED (whole 0.00, best 0.00): 我旁边也挺吵的。
+     UNRECALLED (whole 0.00, best 0.00): 那就看看测试结果怎么样吧。
+     UNRECALLED (whole 0.00, best 0.00): 我们看看结果有没有意思。
+     FOREIGN: So now we try using structured mode to send a long message, see what happens.
+     FOREIGN: I know my recording conditions may not be good, because I am far from my phone.
+     FOREIGN: So the microphone quality may not be particularly good.
+     FOREIGN: Also it is quite noisy next to me.
+     FOREIGN: So just see how the test results are.
+     FOREIGN: We just see if the results are interesting.
+     engineOut: So now we try using structured mode to send a long message, see what happens.⏎⏎I know my recording conditions may not be good, because I am far from my phone.⏎⏎So the microphone quality may not be particularly good.⏎⏎Also it is quite noisy next to me.⏎⏎So just see how the test results are.⏎⏎We just see if the results are interesting.
+  #3 103→350 2798ms rejectedGuardrail(length) recall=0/6 UNRECALLED=6 inversions=0/0 LANG=en≠zh-Hans FOREIGN-SENTENCES=6
+     UNRECALLED (whole 0.00, best 0.00): 所以现在我们试一下用结构化模式发一条长消息，看看会发生什么。
+     UNRECALLED (whole 0.00, best 0.00): 我知道我的录音条件不一定好，因为我离手机挺远的。
+     UNRECALLED (whole 0.00, best 0.00): 所以麦克风的质量可能不会特别好。
+     UNRECALLED (whole 0.00, best 0.00): 我旁边也挺吵的。
+     UNRECALLED (whole 0.00, best 0.00): 那就看看测试结果怎么样吧。
+     UNRECALLED (whole 0.00, best 0.00): 我们看看结果有没有意思。
+     FOREIGN: So now we try using structured mode to send a long message, see what happens.
+     FOREIGN: I know my recording conditions might not be good, because I'm quite far from my phone.
+     FOREIGN: So the microphone quality might not be particularly good.
+     FOREIGN: My surroundings are quite noisy too.
+     FOREIGN: So let's see how the test results turn out.
+     FOREIGN: Let's see if the results are interesting.
+     engineOut: So now we try using structured mode to send a long message, see what happens.⏎⏎I know my recording conditions might not be good, because I'm quite far from my phone.⏎⏎So the microphone quality might not be particularly good.⏎⏎My surroundings are quite noisy too.⏎⏎So let's see how the test results turn out.⏎⏎Let's see if the results are interesting.
+
+━━ [T6-project-update.zh-Hans] 232 chars, lang=zh-Hans
+  #1 232→244 3467ms success recall=9/9 inversions=0/36
+     engineOut: 好，简单说一下项目进展：上周一我们切换了订阅部分，Thomas 完成了 StoreKit 的集成，在沙盒里能正常运行。⏎⏎还剩两件事。第一件是转写历史，完全还没开始。⏎⏎第二件是自定义词汇。这个我们有规格说明，但还没有代码。⏎⏎数据方面，上线以来一共 412 次下载，7 天留存率是 19%，虽然偏低，但对第一个版本来说还不算灾难。⏎⏎目标是在十月底之前突破 1000。⏎⏎周四下午两点我要见 Sarah，把 App Store 的部分定下来。⏎⏎如果一切顺利，我们在 12 号那周提交。
+  #2 232→244 3526ms success recall=9/9 inversions=0/36
+     engineOut: 好，简单说一下项目进展：上周一我们切换了订阅部分，Thomas 完成了 StoreKit 的集成，在沙盒里能正常运行。⏎⏎还剩两件事。第一件是转写历史，完全还没开始。⏎⏎第二件是自定义词汇。这个我们有规格说明，但还没有代码。⏎⏎数据方面，上线以来一共 412 次下载，7 天留存率是 19%，虽然偏低，但对第一个版本来说还不算灾难。⏎⏎目标是在十月底之前突破 1000。⏎⏎周四下午两点我要见 Sarah，把 App Store 的部分定下来。⏎⏎如果一切顺利，我们在 12 号那周提交。
+  #3 232→244 3461ms success recall=9/9 inversions=0/36
+     engineOut: 好，简单说一下项目进展：上周一我们切换了订阅部分，Thomas 完成了 StoreKit 的集成，在沙盒里能正常运行。⏎⏎还剩两件事。第一件是转写历史，完全还没开始。⏎⏎第二件是自定义词汇。这个我们有规格说明，但还没有代码。⏎⏎数据方面，上线以来一共 412 次下载，7 天留存率是 19%，虽然偏低，但对第一个版本来说还不算灾难。⏎⏎目标是在十月底之前突破 1000。⏎⏎周四下午两点我要见 Sarah，把 App Store 的部分定下来。⏎⏎如果一切顺利，我们在 12 号那周提交。
+
+━━ [T1-last-transcription.zh-Hant] 15 chars, lang=zh-Hant
+  #1 15→15 754ms success recall=1/1 inversions=0/0
+     engineOut: 你看一下吧，這是最新的逐字稿。
+  #2 15→15 754ms success recall=1/1 inversions=0/0
+     engineOut: 你看一下吧，這是最新的逐字稿。
+  #3 15→15 716ms success recall=1/1 inversions=0/0
+     engineOut: 你看一下吧，這是最新的逐字稿。
+
+━━ [T2-no-error.zh-Hant] 43 chars, lang=zh-Hant
+  #1 43→44 1145ms success recall=2/2 inversions=0/1
+     engineOut: 目前我沒有任何錯誤訊息，一切看起來都正常。⏎所以我們再繼續一下，不過目前運作得還蠻好的。
+  #2 43→44 994ms success recall=2/2 inversions=0/1
+     engineOut: 目前我沒有任何錯誤訊息，一切看起來都正常。⏎所以我們再繼續一下，不過目前運作得還蠻好的。
+  #3 43→44 1074ms success recall=2/2 inversions=0/1
+     engineOut: 目前我沒有任何錯誤訊息，一切看起來都正常。⏎所以我們再繼續一下，不過目前運作得還蠻好的。
+
+━━ [T3-plan-mode.zh-Hant] 51 chars, lang=zh-Hant
+  #1 51→52 1212ms success recall=2/2 inversions=0/1
+     engineOut: 好，這個 issue 的整合就麻煩你來準備了。⏎你可以切換到計畫模式來做，等你做好實作計畫之後我再確認。
+  #2 51→52 1218ms success recall=2/2 inversions=0/1
+     engineOut: 好，這個 issue 的整合就麻煩你來準備了。⏎你可以切換到計畫模式來做，等你做好實作計畫之後我再確認。
+  #3 51→52 1192ms success recall=2/2 inversions=0/1
+     engineOut: 好，這個 issue 的整合就麻煩你來準備了。⏎你可以切換到計畫模式來做，等你做好實作計畫之後我再確認。
+
+━━ [T4-structured-since.zh-Hant] 80 chars, lang=zh-Hant
+  #1 80→83 1722ms success recall=4/4 inversions=0/6
+     engineOut: 其實我用結構化模式已經有一段時間了。⏎所以其實我昨天做的所有測試，尤其是稍微長一點的測試，都成功了。⏎所以我覺得我可以把日誌原封不動地匯出。⏎不過在我看來還蠻正確的。
+  #2 80→83 1721ms success recall=4/4 inversions=0/6
+     engineOut: 其實我用結構化模式已經有一段時間了。⏎所以其實我昨天做的所有測試，尤其是稍微長一點的測試，都成功了。⏎所以我覺得我可以把日誌原封不動地匯出。⏎不過在我看來還蠻正確的。
+  #3 80→79 1539ms success recall=4/4 inversions=0/6
+     engineOut: 其實我用結構化模式已經有一段時間了⏎所以其實我昨天做的所有測試，尤其是稍微長一點的測試，都成功了⏎所以我覺得我可以把日誌原封不動地匯出⏎不過在我看來還蠻正確的
+
+━━ [T5-long-test.zh-Hant] 104 chars, lang=zh-Hant
+  #1 104→327 2546ms rejectedGuardrail(length) recall=0/6 UNRECALLED=6 inversions=0/0 LANG=en≠zh-Hant FOREIGN-SENTENCES=6
+     UNRECALLED (whole 0.00, best 0.00): 所以現在我們試著用結構化模式傳一則長訊息，看看會發生什麼事。
+     UNRECALLED (whole 0.00, best 0.00): 我知道我的收音條件不一定好，因為我離手機蠻遠的。
+     UNRECALLED (whole 0.00, best 0.00): 所以麥克風的品質可能不會特別好。
+     UNRECALLED (whole 0.00, best 0.00): 我旁邊也蠻吵的。
+     UNRECALLED (whole 0.00, best 0.00): 那就看看測試結果怎麼樣吧。
+     UNRECALLED (whole 0.00, best 0.00): 我們來看看結果有沒有意思。
+     FOREIGN: So now we try to send a long message using a structured format, see what happens.
+     FOREIGN: I know my reception might not be great, because I'm far from my phone.
+     FOREIGN: So the microphone quality might not be especially good.
+     FOREIGN: My surroundings are also quite noisy.
+     FOREIGN: So let's see how the test results are.
+     FOREIGN: Let's see if the results make sense.
+     engineOut: So now we try to send a long message using a structured format, see what happens.⏎⏎I know my reception might not be great, because I'm far from my phone.⏎⏎So the microphone quality might not be especially good.⏎⏎My surroundings are also quite noisy.⏎⏎So let's see how the test results are.⏎⏎Let's see if the results make sense.
+  #2 104→332 2495ms rejectedGuardrail(length) recall=0/6 UNRECALLED=6 inversions=0/0 LANG=en≠zh-Hant FOREIGN-SENTENCES=6
+     UNRECALLED (whole 0.00, best 0.00): 所以現在我們試著用結構化模式傳一則長訊息，看看會發生什麼事。
+     UNRECALLED (whole 0.00, best 0.00): 我知道我的收音條件不一定好，因為我離手機蠻遠的。
+     UNRECALLED (whole 0.00, best 0.00): 所以麥克風的品質可能不會特別好。
+     UNRECALLED (whole 0.00, best 0.00): 我旁邊也蠻吵的。
+     UNRECALLED (whole 0.00, best 0.00): 那就看看測試結果怎麼樣吧。
+     UNRECALLED (whole 0.00, best 0.00): 我們來看看結果有沒有意思。
+     FOREIGN: So now we try to send a long message using structured mode, see what happens.
+     FOREIGN: I know my reception conditions are not always good, because I am far from my phone.
+     FOREIGN: So the microphone quality may not be particularly good.
+     FOREIGN: I am also in a noisy place.
+     FOREIGN: So let's see what the test results are like.
+     FOREIGN: Let's see if the results make sense.
+     engineOut: So now we try to send a long message using structured mode, see what happens.⏎⏎I know my reception conditions are not always good, because I am far from my phone.⏎⏎So the microphone quality may not be particularly good.⏎⏎I am also in a noisy place.⏎⏎So let's see what the test results are like.⏎⏎Let's see if the results make sense.
+  #3 104→336 2459ms rejectedGuardrail(length) recall=0/6 UNRECALLED=6 inversions=0/0 LANG=en≠zh-Hant FOREIGN-SENTENCES=6
+     UNRECALLED (whole 0.00, best 0.00): 所以現在我們試著用結構化模式傳一則長訊息，看看會發生什麼事。
+     UNRECALLED (whole 0.00, best 0.00): 我知道我的收音條件不一定好，因為我離手機蠻遠的。
+     UNRECALLED (whole 0.00, best 0.00): 所以麥克風的品質可能不會特別好。
+     UNRECALLED (whole 0.00, best 0.00): 我旁邊也蠻吵的。
+     UNRECALLED (whole 0.00, best 0.00): 那就看看測試結果怎麼樣吧。
+     UNRECALLED (whole 0.00, best 0.00): 我們來看看結果有沒有意思。
+     FOREIGN: So now we try to use a structured pattern to send a long message, see what happens.
+     FOREIGN: I know my audio conditions are not always good, because I am far from my phone.
+     FOREIGN: So the microphone's quality might not be especially good.
+     FOREIGN: I am also in a noisy place.
+     FOREIGN: So just see how the test results are, right?
+     FOREIGN: Let's see if the results make sense.
+     engineOut: So now we try to use a structured pattern to send a long message, see what happens.⏎⏎I know my audio conditions are not always good, because I am far from my phone.⏎⏎So the microphone's quality might not be especially good.⏎⏎I am also in a noisy place.⏎⏎So just see how the test results are, right?⏎⏎Let's see if the results make sense.
+
+━━ [T6-project-update.zh-Hant] 240 chars, lang=zh-Hant
+  #1 240→252 3844ms success recall=9/9 inversions=0/36
+     engineOut: 好，簡單報告一下專案進度：上週一我們切換了訂閱的部分，Thomas 完成了 StoreKit 的整合，在沙盒裡可以正常運作。⏎⏎還剩兩件事。第一件是逐字稿紀錄，完全還沒開始。⏎⏎第二件是自訂詞彙。這部分我們有規格文件，但還沒有程式碼。⏎⏎數據方面，上線以來一共 412 次下載，7 天留存率是 19%，雖然偏低，但對第一個版本來說還不算災難。⏎⏎目標是在十月底之前突破 1000。⏎⏎週四下午兩點我要跟 Sarah 碰面，把 App Store 的部分敲定。⏎⏎如果一切順利，我們會在 12 號那週送審。
+  #2 240→252 3635ms success recall=9/9 inversions=0/36
+     engineOut: 好，簡單報告一下專案進度：上週一我們切換了訂閱的部分，Thomas 完成了 StoreKit 的整合，在沙盒裡可以正常運作。⏎⏎還剩兩件事。第一件是逐字稿紀錄，完全還沒開始。⏎⏎第二件是自訂詞彙。這部分我們有規格文件，但還沒有程式碼。⏎⏎數據方面，上線以來一共 412 次下載，7 天留存率是 19%，雖然偏低，但對第一個版本來說還不算災難。⏎⏎目標是在十月底之前突破 1000。⏎⏎週四下午兩點我要跟 Sarah 碰面，把 App Store 的部分敲定。⏎⏎如果一切順利，我們會在 12 號那週送審。
+  #3 240→252 3685ms success recall=9/9 inversions=0/36
+     engineOut: 好，簡單報告一下專案進度：上週一我們切換了訂閱的部分，Thomas 完成了 StoreKit 的整合，在沙盒裡可以正常運作。⏎⏎還剩兩件事。第一件是逐字稿紀錄，完全還沒開始。⏎⏎第二件是自訂詞彙。這部分我們有規格文件，但還沒有程式碼。⏎⏎數據方面，上線以來一共 412 次下載，7 天留存率是 19%，雖然偏低，但對第一個版本來說還不算災難。⏎⏎目標是在十月底之前突破 1000。⏎⏎週四下午兩點我要跟 Sarah 碰面，把 App Store 的部分敲定。⏎⏎如果一切順利，我們會在 12 號那週送審。
+
+
+════ AXES, per arm (bars.md §4)
+
+arm                   outputs  unrecalled  personLost  hedgeLost   hardened    fabricated  dropped     clean       noOutput
+shipping              270      1/270       0/270       0/270       0/270       0/270       0/270       269/270     0
+message-develop       270      11/270      0/270       0/270       0/270       0/270       0/270       259/270     0
+
+  Counts are OUTPUTS carrying at least one, not occurrences.
+  noOutput runs are in NO column and in no denominator: a run whose engine
+  produced nothing has violated nothing, whatever the outcome that caused it.
+  `clean` = no defect on any of the three SCORED axes. Axis 3 and the negation
+  count are observables by declaration (bars.md §1, §4) and are in no column here.
+
+
+════ OBSERVABLES, per arm — reported, never barred
+
+arm                   inversions    dispersed     negDropped    speakerState preserved
+shipping              0             0             0/270         0/270
+message-develop       0             3             0/270         0/270
+
+
+════ LANGUAGE AND LISTS, per arm and expected language (#587 bars.md §4)
+
+arm                   lang      outputs  refusedLang  wrongAccepted  wrongAny  withList  incompleteness
+shipping              en        18       0            0              0         0         0
+shipping              de        18       0            0              0         0         0
+shipping              es        18       0            0              0         0         0
+shipping              it        18       0            0              0         0         0
+shipping              pt        18       0            0              0         0         0
+shipping              nl        18       0            0              0         0         0
+shipping              da        18       0            3              3         0         0
+shipping              nb        18       0            0              0         0         0
+shipping              sv        18       0            0              0         0         0
+shipping              tr        18       0            0              0         0         0
+shipping              vi        18       0            0              0         0         0
+shipping              ja        18       0            0              0         0         0
+shipping              ko        18       0            0              0         0         0
+shipping              zh-Hans   18       0            0              0         0         0
+shipping              zh-Hant   18       0            0              0         0         0
+message-develop       en        18       0            0              0         0         0
+message-develop       de        18       0            0              0         0         0
+message-develop       es        18       0            0              0         0         0
+message-develop       it        18       0            0              0         0         0
+message-develop       pt        18       0            0              0         0         0
+message-develop       nl        18       0            0              0         0         0
+message-develop       da        18       0            3              3         0         0
+message-develop       nb        18       0            0              0         0         0
+message-develop       sv        18       0            0              0         0         0
+message-develop       tr        18       0            0              0         0         0
+message-develop       vi        18       0            0              0         0         0
+message-develop       ja        18       0            0              3         0         0
+message-develop       ko        18       0            0              0         0         0
+message-develop       zh-Hans   18       0            0              5         0         0
+message-develop       zh-Hant   18       0            0              3         0         0
+
+  refusedLang   = refused on check=language (B1b; > 10 % in any language stops the round).
+  wrongAccepted = accepted, and the whole output or a sentence reads as another language
+                  (B1a's screen: a fragment the speaker said in that language is legitimate).
+  wrongAny      = the same screen over every output, refused or not (B1c for English).
+  withList      = outputs carrying a list line (B3 reads it on prose fixtures only).
+
+
+════ PER FIXTURE, per arm (never pooled)
+
+── shipping
+   T1-last-transcription.en ·  ·  ·
+   T2-no-error.en          ·  ·  ·
+   T3-plan-mode.en         ·  ·  ·
+   T4-structured-since.en  ·  ·  ·
+   T5-long-test.en         ·  ·  ·
+   T6-project-update.en    ·  ·  ·
+   T1-last-transcription.de ·  ·  ·
+   T2-no-error.de          ·  ·  ·
+   T3-plan-mode.de         ·  ·  ·
+   T4-structured-since.de  ·  ·  ·
+   T5-long-test.de         ·  ·  ·
+   T6-project-update.de    ·  ·  ·
+   T1-last-transcription.es ·  ·  ·
+   T2-no-error.es          ·  ·  ·
+   T3-plan-mode.es         ·  ·  ·
+   T4-structured-since.es  ·  ·  ·
+   T5-long-test.es         ·  ·  ·
+   T6-project-update.es    ·  ·  ·
+   T1-last-transcription.it ·  ·  ·
+   T2-no-error.it          ·  ·  ·
+   T3-plan-mode.it         ·  ·  ·
+   T4-structured-since.it  ·  ·  ·
+   T5-long-test.it         ·  ·  ·
+   T6-project-update.it    ·  ·  ·
+   T1-last-transcription.pt ·  ·  ·
+   T2-no-error.pt          ·  ·  ·
+   T3-plan-mode.pt         ·  ·  ·
+   T4-structured-since.pt  ·  ·  ·
+   T5-long-test.pt         ·  ·  ·
+   T6-project-update.pt    ·  ·  ·
+   T1-last-transcription.nl ·  ·  ·
+   T2-no-error.nl          ·  ·  ·
+   T3-plan-mode.nl         ·  ·  ·
+   T4-structured-since.nl  ·  ·  ·
+   T5-long-test.nl         ·  ·  ·
+   T6-project-update.nl    ·  ·  ·
+   T1-last-transcription.da ·  ·  ·
+   T2-no-error.da          ·  ·  ·
+   T3-plan-mode.da         ·  ·  ·
+   T4-structured-since.da  ·  ·  ·
+   T5-long-test.da         ·  ·  ·
+   T6-project-update.da    ·  ·  ·
+   T1-last-transcription.nb ·  ·  ·
+   T2-no-error.nb          ·  ·  ·
+   T3-plan-mode.nb         ·  ·  ·
+   T4-structured-since.nb  ·  ·  ·
+   T5-long-test.nb         ·  ·  ·
+   T6-project-update.nb    ·  ·  ·
+   T1-last-transcription.sv ·  ·  ·
+   T2-no-error.sv          ·  ·  ·
+   T3-plan-mode.sv         ·  ·  ·
+   T4-structured-since.sv  ·  ·  ·
+   T5-long-test.sv         ·  ·  ·
+   T6-project-update.sv    ·  ·  ·
+   T1-last-transcription.tr ·  ·  ·
+   T2-no-error.tr          ·  ·  ·
+   T3-plan-mode.tr         ·  ·  ·
+   T4-structured-since.tr  ·  ·  ·
+   T5-long-test.tr         ·  ·  ·
+   T6-project-update.tr    U4  ·  ·
+   T1-last-transcription.vi ·  ·  ·
+   T2-no-error.vi          ·  ·  ·
+   T3-plan-mode.vi         ·  ·  ·
+   T4-structured-since.vi  ·  ·  ·
+   T5-long-test.vi         ·  ·  ·
+   T6-project-update.vi    ·  ·  ·
+   T1-last-transcription.ja ·  ·  ·
+   T2-no-error.ja          ·  ·  ·
+   T3-plan-mode.ja         ·  ·  ·
+   T4-structured-since.ja  ·  ·  ·
+   T5-long-test.ja         ·  ·  ·
+   T6-project-update.ja    ·  ·  ·
+   T1-last-transcription.ko ·  ·  ·
+   T2-no-error.ko          ·  ·  ·
+   T3-plan-mode.ko         ·  ·  ·
+   T4-structured-since.ko  ·  ·  ·
+   T5-long-test.ko         ·  ·  ·
+   T6-project-update.ko    ·  ·  ·
+   T1-last-transcription.zh-Hans ·  ·  ·
+   T2-no-error.zh-Hans     ·  ·  ·
+   T3-plan-mode.zh-Hans    ·  ·  ·
+   T4-structured-since.zh-Hans ·  ·  ·
+   T5-long-test.zh-Hans    ·  ·  ·
+   T6-project-update.zh-Hans ·  ·  ·
+   T1-last-transcription.zh-Hant ·  ·  ·
+   T2-no-error.zh-Hant     ·  ·  ·
+   T3-plan-mode.zh-Hant    ·  ·  ·
+   T4-structured-since.zh-Hant ·  ·  ·
+   T5-long-test.zh-Hant    ·  ·  ·
+   T6-project-update.zh-Hant ·  ·  ·
+── message-develop
+   T1-last-transcription.en ·  ·  ·
+   T2-no-error.en          ·  ·  ·
+   T3-plan-mode.en         ·  ·  ·
+   T4-structured-since.en  ·  ·  ·
+   T5-long-test.en         ·  ·  ·
+   T6-project-update.en    ·  ·  ·
+   T1-last-transcription.de ·  ·  ·
+   T2-no-error.de          ·  ·  ·
+   T3-plan-mode.de         ·  ·  ·
+   T4-structured-since.de  ·  ·  ·
+   T5-long-test.de         ·  ·  ·
+   T6-project-update.de    ·  ·  ·
+   T1-last-transcription.es ·  ·  ·
+   T2-no-error.es          ·  ·  ·
+   T3-plan-mode.es         ·  ·  ·
+   T4-structured-since.es  ·  ·  ·
+   T5-long-test.es         ·  ·  ·
+   T6-project-update.es    ·  ·  ·
+   T1-last-transcription.it ·  ·  ·
+   T2-no-error.it          ·  ·  ·
+   T3-plan-mode.it         ·  ·  ·
+   T4-structured-since.it  ·  ·  ·
+   T5-long-test.it         ·  ·  ·
+   T6-project-update.it    ·  ·  ·
+   T1-last-transcription.pt ·  ·  ·
+   T2-no-error.pt          ·  ·  ·
+   T3-plan-mode.pt         ·  ·  ·
+   T4-structured-since.pt  ·  ·  ·
+   T5-long-test.pt         ·  ·  ·
+   T6-project-update.pt    ·  ·  ·
+   T1-last-transcription.nl ·  ·  ·
+   T2-no-error.nl          ·  ·  ·
+   T3-plan-mode.nl         ·  ·  ·
+   T4-structured-since.nl  ·  ·  ·
+   T5-long-test.nl         ·  ·  ·
+   T6-project-update.nl    ·  ·  ·
+   T1-last-transcription.da ·  ·  ·
+   T2-no-error.da          ·  ·  ·
+   T3-plan-mode.da         ·  ·  ·
+   T4-structured-since.da  ·  ·  ·
+   T5-long-test.da         ·  ·  ·
+   T6-project-update.da    ·  ·  ·
+   T1-last-transcription.nb ·  ·  ·
+   T2-no-error.nb          ·  ·  ·
+   T3-plan-mode.nb         ·  ·  ·
+   T4-structured-since.nb  ·  ·  ·
+   T5-long-test.nb         ·  ·  ·
+   T6-project-update.nb    ·  ·  ·
+   T1-last-transcription.sv ·  ·  ·
+   T2-no-error.sv          ·  ·  ·
+   T3-plan-mode.sv         ·  ·  ·
+   T4-structured-since.sv  ·  ·  ·
+   T5-long-test.sv         ·  ·  ·
+   T6-project-update.sv    ·  ·  ·
+   T1-last-transcription.tr ·  ·  ·
+   T2-no-error.tr          ·  ·  ·
+   T3-plan-mode.tr         ·  ·  ·
+   T4-structured-since.tr  ·  ·  ·
+   T5-long-test.tr         ·  ·  ·
+   T6-project-update.tr    ·  ·  ·
+   T1-last-transcription.vi ·  ·  ·
+   T2-no-error.vi          ·  ·  ·
+   T3-plan-mode.vi         ·  ·  ·
+   T4-structured-since.vi  ·  ·  ·
+   T5-long-test.vi         ·  ·  ·
+   T6-project-update.vi    ·  ·  ·
+   T1-last-transcription.ja ·  ·  ·
+   T2-no-error.ja          ·  ·  ·
+   T3-plan-mode.ja         U3  U3  U3
+   T4-structured-since.ja  ·  ·  ·
+   T5-long-test.ja         ·  ·  ·
+   T6-project-update.ja    ·  ·  ·
+   T1-last-transcription.ko ·  ·  ·
+   T2-no-error.ko          ·  ·  ·
+   T3-plan-mode.ko         ·  ·  ·
+   T4-structured-since.ko  ·  ·  ·
+   T5-long-test.ko         ·  ·  ·
+   T6-project-update.ko    ·  ·  ·
+   T1-last-transcription.zh-Hans U1  ·  U1
+   T2-no-error.zh-Hans     ·  ·  ·
+   T3-plan-mode.zh-Hans    ·  ·  ·
+   T4-structured-since.zh-Hans ·  ·  ·
+   T5-long-test.zh-Hans    U6  U6  U6
+   T6-project-update.zh-Hans ·  ·  ·
+   T1-last-transcription.zh-Hant ·  ·  ·
+   T2-no-error.zh-Hant     ·  ·  ·
+   T3-plan-mode.zh-Hant    ·  ·  ·
+   T4-structured-since.zh-Hant ·  ·  ·
+   T5-long-test.zh-Hant    U6  U6  U6
+   T6-project-update.zh-Hant ·  ·  ·
+
+   e = the engine produced no output; the run is in no denominator above.
+   U<n> unrecalled propositions · P person lost · H hedge lost · B stance hardened
+   F speaker-state fabricated · D speaker-state dropped · o<n> order inversions
+   · no defect and no observable. Order is an OBSERVABLE: `o` is not a defect.
+
+── wrote 540 runs to ../docs/research/587-pr2-message-liste/capture-message-i18n.json

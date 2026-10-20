@@ -289,7 +289,10 @@ class UnifiedAudioEngine: ObservableObject {
     /// 10 minutes balances UX (warm starts feel instant within a normal
     /// "back-and-forth dictation session") against battery drain (3.3%/h
     /// baseline drops to ~0%/h after release).
-    private static let idleReleaseInterval: TimeInterval = 10 * 60
+    ///
+    /// Read from `WarmEngineTimeout` since #620, the one place #380's user setting
+    /// will plug into.
+    private static var idleReleaseInterval: TimeInterval { WarmEngineTimeout.interval }
 
     /// Idle window applied when the engine was warmed WITHOUT a preceding
     /// dictation: launch pre-load, `didBecomeActive` re-warm, explicit `warmUp()`.
@@ -299,7 +302,7 @@ class UnifiedAudioEngine: ObservableObject {
     /// than one who just dictated. That is a product call, not an implementation
     /// one, so this ships with the conservative answer (identical windows) and a
     /// single line to change if the maintainer decides otherwise.
-    private static let warmUpIdleReleaseInterval: TimeInterval = idleReleaseInterval
+    private static var warmUpIdleReleaseInterval: TimeInterval { idleReleaseInterval }
 
     /// Sample gating flag read from the audio thread.
     /// WHY nonisolated(unsafe): Read from audio callback thread (single reader pattern).
@@ -638,11 +641,19 @@ class UnifiedAudioEngine: ObservableObject {
     /// WHY setActive every time (no sessionConfigured guard for setActive):
     /// iOS interrupts the audio session when the app goes to background. Even if the
     /// category was set, setActive(true) must be called again on foreground return.
+    ///
+    /// WHY the category is also checked, not only `sessionConfigured` (#682): the session
+    /// is the whole app's, and the keyboard step's Picture in Picture borrows it as a
+    /// silent `.playback` session while the engine is idle. `sessionConfigured` cannot
+    /// see that, so a dictation started under the borrowed category would skip
+    /// `setCategory` and try to record under `.playback`, which has no input. Re-asserting
+    /// whenever the category is not ours makes recording win over any other owner.
     func configureAudioSession() throws {
         let session = AVAudioSession.sharedInstance()
         // A settings change must not re-route a dictation already in progress.
         let preference = isRecording ? (configuredInputPreference ?? .current) : .current
-        if !sessionConfigured || configuredInputPreference != preference {
+        if !sessionConfigured || session.category != .playAndRecord
+            || configuredInputPreference != preference {
             if engine.isRunning { replaceEngine() }
             var options: AVAudioSession.CategoryOptions = [.allowBluetoothA2DP, .defaultToSpeaker, .duckOthers]
             if preference == .automatic {
@@ -738,6 +749,25 @@ class UnifiedAudioEngine: ObservableObject {
         }
     }
 
+    /// The record permission, read without asking for it.
+    ///
+    /// `AVAudioApplication` rather than the session's `recordPermission`, which iOS 17
+    /// deprecated; the onboarding already reads it this way.
+    static func currentRecordPermission() -> MicrophonePermissionState {
+        switch AVAudioApplication.shared.recordPermission {
+        case .granted:
+            return .granted
+        case .denied:
+            return .denied
+        case .undetermined:
+            return .undetermined
+        @unknown default:
+            // An unknown future state is not a grant, and treating it as undetermined
+            // keeps the warm-up from opening an input iOS may answer with a prompt.
+            return .undetermined
+        }
+    }
+
     // MARK: - Engine Lifecycle
 
     /// Start the engine in idle mode (running but not recording).
@@ -765,6 +795,22 @@ class UnifiedAudioEngine: ObservableObject {
             // whatever was pending, and leaving without re-arming is how the
             // engine used to end up warm forever.
             scheduleIdleRelease(after: Self.warmUpIdleReleaseInterval)
+            return
+        }
+
+        // The one gate every warm-up door goes through (#715). Starting the input with
+        // the record permission undetermined makes iOS show its prompt, wherever the user
+        // happens to be: during onboarding that was some step before the microphone one,
+        // minutes after the model finished downloading. So a warm-up never asks; the
+        // dictation start paths do, through `ensureMicrophonePermission()`.
+        //
+        // WHY return and not throw: a skip is not a failure. Both callers of this method
+        // treat a throw as the load failing and write the model's state from it (#486),
+        // while the model here is fine. Returning lets the load publish `.ready`, and the
+        // log line is what says why the engine is cold. No idle release is armed, for the
+        // same reason as on a failed start below: there is no warm state to bound.
+        if let reason = WarmUpPermissionGate.skipReason(for: Self.currentRecordPermission()) {
+            PersistentLog.log(.engineWarmUpSkipped(context: "unifiedEngine-warmUp", reason: reason))
             return
         }
         try startEngine(context: "warmUp")
@@ -955,6 +1001,20 @@ class UnifiedAudioEngine: ObservableObject {
         }
         idleReleaseWorkItem = work
         DispatchQueue.main.asyncAfter(deadline: .now() + interval, execute: work)
+    }
+
+    /// Re-arm the idle release from now, if one is armed (#620).
+    ///
+    /// A shared voice note transcribed in the background runs in this process only
+    /// because the warm engine keeps it alive (`UIBackgroundModes: audio`). Releasing
+    /// the engine mid-note would let iOS suspend the app with the note half done. A
+    /// voice note is the user using Dictus, so it earns the same window a dictation
+    /// does: the release is pushed back by one full idle interval, never pulled
+    /// forward, and nothing happens when the engine is not warm-idle — there is no
+    /// warm state to extend, and starting one from the background is what iOS forbids.
+    func extendWarmWindow() {
+        guard idleReleaseWorkItem != nil else { return }
+        scheduleIdleRelease(after: Self.idleReleaseInterval)
     }
 
     /// Cancel a pending idle release. Safe to call when none is armed.

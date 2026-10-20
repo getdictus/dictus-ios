@@ -332,7 +332,7 @@ class ModelManager: ObservableObject {
     /// mid-file.
     ///
     /// WHY SEEDING AND DRIVING ARE SEPARATE: both `ModelManager` instances have to SHOW
-    /// the download — `MainTabView` builds one and onboarding's `ModelDownloadPage`
+    /// the download — `MainTabView` builds one and `OnboardingView` (#649)
     /// builds another, and a first-run user who force-quits mid-download comes back to
     /// the onboarding one. Only one of them may DRIVE it, because driving ends in a Core
     /// ML compile and two compiles of the same model would queue on the Neural Engine for
@@ -614,6 +614,49 @@ class ModelManager: ObservableObject {
         }
     }
 
+    /// Holds a finished download back from its Core ML compile until the app is in the
+    /// foreground (#472).
+    ///
+    /// WHY THIS IS NEEDED NOW (#649): the onboarding starts the download on the language
+    /// screen and then sends the user to iOS Settings to add the keyboard. The transfer
+    /// runs on in a background `URLSession` (#449), so it routinely finishes while Dictus
+    /// is in the background, and this method used to go straight from the last byte to the
+    /// compile. #472 measured what that costs: a compile throttled to 270 s instead of 17,
+    /// timed against a wall clock that also counted the suspension, and reported as a
+    /// failure after it had succeeded. Holding the compile until the foreground is option 1
+    /// of #472. It closes the path where the compile STARTS in the background; a compile
+    /// already running when the user leaves is still #472's open half.
+    ///
+    /// WHY `.background` and not "not `.active`": `.inactive` is also the state of a visible
+    /// app under a system alert, such as the microphone prompt the onboarding raises right
+    /// after the download starts. Waiting through that would delay a compile the user is
+    /// watching for nothing. The same test guards the launch-time adoption above.
+    ///
+    /// The notification sequence is created BEFORE the state is read, so a return to the
+    /// foreground that lands between the two is still delivered. Cancellation ends the wait
+    /// and is rethrown, like every other suspension point of a download.
+    private func waitForForegroundToCompile(_ identifier: String) async throws {
+        let becameActive = NotificationCenter.default.notifications(
+            named: UIApplication.didBecomeActiveNotification
+        )
+        guard UIApplication.shared.applicationState == .background else { return }
+        PersistentLog.log(.diagnosticProbe(
+            component: "ModelPrewarm",
+            instanceID: identifier,
+            action: "deferredUntilForeground",
+            details: "reason=appInBackground"
+        ))
+        let waitStart = Date()
+        for await _ in becameActive { break }
+        try Task.checkCancellation()
+        PersistentLog.log(.diagnosticProbe(
+            component: "ModelPrewarm",
+            instanceID: identifier,
+            action: "resumedInForeground",
+            details: "waitedMs=\(Int(Date().timeIntervalSince(waitStart) * 1000))"
+        ))
+    }
+
     /// Download a WhisperKit model variant from HuggingFace.
     ///
     /// WHY prewarm after download:
@@ -632,18 +675,8 @@ class ModelManager: ObservableObject {
             throw ModelManagerError.noContainer
         }
 
-        setState(.downloading, for: identifier)
-        seedDownloadProgress(for: identifier)
-        lastLoggedDeciles[identifier] = -1
-        // One "started" line per TRANSFER, not per attempt (#449). A resume after a
-        // relaunch re-enters this method, and so does a retry, so a single download was
-        // announcing itself three times — which made acceptance criterion 2 ("exactly
-        // one modelDownloadStarted line") unverifiable by its own method. A manifest
-        // already on disk means the transfer is under way and has been announced.
-        if !BackgroundModelDownloadService.hasUnfinishedTransfer(for: identifier) {
-            let catalogSizeMB = Int((ModelInfo.forIdentifier(identifier)?.sizeBytes ?? 0) / 1_000_000)
-            PersistentLog.log(.modelDownloadStarted(name: identifier, sizeMB: catalogSizeMB))
-        }
+        // `.downloading`, or `.prewarming` when every file is already here (#708).
+        publishOpeningState(for: identifier)
 
         // Tracks which phase a failure (if any) belongs to. Download-phase failures
         // keep files on disk (every file is complete thanks to atomic per-file
@@ -672,6 +705,10 @@ class ModelManager: ObservableObject {
 
             PersistentLog.log(.modelDownloadCompleted(name: identifier))
             downloadPhaseCompleted = true
+
+            // The transfer may have finished while the app was in the background; the
+            // compile waits for the foreground (#472, #649). See `waitForForegroundToCompile`.
+            try await waitForForegroundToCompile(identifier)
 
             // Prewarm: compile Core ML model for this device's Neural Engine/GPU.
             // Serialized — only one model compiles at a time. Multiple simultaneous
@@ -733,7 +770,7 @@ class ModelManager: ObservableObject {
             let config = WhisperKitConfig(
                 model: identifier,
                 modelFolder: modelFolder.path,
-                // Issue #370: A12/A13 need the audio encoder off the Neural Engine.
+                // Issues #370/#612: pre-A14 chips need the audio encoder off the Neural Engine.
                 // This is the site the onboarding hang happens at (prewarm/compile).
                 computeOptions: WhisperComputeOptions.current(),
                 verbose: false,
@@ -976,18 +1013,8 @@ class ModelManager: ObservableObject {
         // chose to download. A failed first download is never listed (the identifier is
         // appended after the prewarm), so this cannot mistake one for the other.
         let isCompletingInstalledModel = downloadedModels.contains(identifier)
-        setState(.downloading, for: identifier)
-        seedDownloadProgress(for: identifier)
-        lastLoggedDeciles[identifier] = -1
-        // One "started" line per TRANSFER, not per attempt (#449). A resume after a
-        // relaunch re-enters this method, and so does a retry, so a single download was
-        // announcing itself three times — which made acceptance criterion 2 ("exactly
-        // one modelDownloadStarted line") unverifiable by its own method. A manifest
-        // already on disk means the transfer is under way and has been announced.
-        if !BackgroundModelDownloadService.hasUnfinishedTransfer(for: identifier) {
-            let catalogSizeMB = Int((ModelInfo.forIdentifier(identifier)?.sizeBytes ?? 0) / 1_000_000)
-            PersistentLog.log(.modelDownloadStarted(name: identifier, sizeMB: catalogSizeMB))
-        }
+        // `.downloading`, or `.prewarming` when every file is already here (#708).
+        publishOpeningState(for: identifier)
 
         do {
             // Step 1: Download all raw model files with REAL byte-level progress
@@ -1013,6 +1040,16 @@ class ModelManager: ObservableObject {
                     self?.updateDownloadProgress(progress, identifier: identifier)
                 }
             }
+
+            // The transfer is over and every file is published: that, and only that, is
+            // what `modelDownloadCompleted` means, for every engine (#693). It used to be
+            // logged here after the compile, so the 17 to 28 s of Core ML compile read as a
+            // download stuck at 100% in the debug log. The compile has its own bracket,
+            // `modelPrewarmStarted` / `modelCompilationCompleted`, as on the WhisperKit path.
+            PersistentLog.log(.modelDownloadCompleted(name: identifier))
+
+            // Same foreground gate as the WhisperKit path (#472, #649).
+            try await waitForForegroundToCompile(identifier)
 
             // Same guard as the WhisperKit path, captured before the wait (finding 1).
             let prewarmEpoch = DictationCoordinator.shared.modelLoadEpoch
@@ -1141,7 +1178,6 @@ class ModelManager: ObservableObject {
 
             PersistentLog.log(.modelCompilationCompleted(name: identifier, durationMs: prewarmDurationMs))
             PersistentLog.log(.modelPrewarmPeakMemory(modelName: identifier, peakMB: consumedMB))
-            PersistentLog.log(.modelDownloadCompleted(name: identifier))
             PersistentLog.log(.modelSelected(name: identifier))
 
             // Released early for the same reason as the WhisperKit path above.
@@ -1197,6 +1233,12 @@ class ModelManager: ObservableObject {
     /// decile-throttled persistent logging (~10 log lines per download).
     /// Shared by the WhisperKit and Parakeet download paths (issue #210).
     private func updateDownloadProgress(_ progress: ModelRepoDownloader.Progress, identifier: String) {
+        // A tick belongs to a download on screen (#708). Two kinds arrive without one: the
+        // downloader verifying a model whose files were all on disk, which opened on
+        // `.prewarming` (`publishOpeningState`), and the last tick of a real transfer, which
+        // hops to the main actor and can land after the state moved to `.prewarming` and
+        // the bar was removed. Either would write a bar back under a compile.
+        guard modelStates[identifier] == .downloading else { return }
         downloadProgress[identifier] = Float(progress.fraction)
         let bytes = ModelDownloadBytes(progress)
         downloadByteInfo[identifier] = bytes
@@ -1306,10 +1348,11 @@ class ModelManager: ObservableObject {
         PersistentLog.log(.modelDeleted(name: identifier, engine: engine.displayName))
     }
 
-    /// Checks if a model is the device-recommended variant.
+    /// Checks if a model is the variant recommended for this device and the user's
+    /// language (#649), the same one the onboarding installed.
     ///
     /// WHY delegate to ModelInfo:
-    /// The recommendation logic is RAM-based and belongs in the catalog layer
+    /// The recommendation logic is catalogue-level and belongs in the catalog layer
     /// (ModelInfo), not the state manager. This instance method preserves the
     /// call-site signature so views don't need to change.
     func isRecommended(_ identifier: String) -> Bool {
@@ -1404,6 +1447,73 @@ class ModelManager: ObservableObject {
         // chooses it. The stricter definition is the one the flag has always claimed.
         defaults.set(isModelReady, forKey: SharedKeys.modelReady)
         defaults.synchronize()
+    }
+}
+
+// MARK: - Opening state of a download (#708)
+
+// An extension so the class body stays within SwiftLint's `type_body_length` budget, as
+// `DictationCoordinator` does for its engine initialization. Same file, so it still
+// reaches the class's private members.
+extension ModelManager {
+    /// Whether every file `identifier` needs to load is already on disk.
+    ///
+    /// The same completeness question each engine already answers elsewhere: WhisperKit's
+    /// `hasCompleteDownload` (#433) and the FluidAudio engines' `missingEntries` (#558).
+    /// Cheap enough to ask from a view: a directory listing and a handful of file checks.
+    static func hasCompleteFilesOnDisk(_ identifier: String) -> Bool {
+        switch ModelInfo.forIdentifier(identifier)?.engine {
+        case .parakeet:
+            return FluidAudioDownloadRoute(engine: .parakeet).missingEntries().isEmpty
+        case .nemotron:
+            return FluidAudioDownloadRoute(engine: .nemotron).missingEntries().isEmpty
+        case .whisperKit, nil:
+            return WhisperModelRepository.hasCompleteDownload(identifier)
+        }
+    }
+
+    /// Publishes the state a download opens on, and says whether bytes are expected.
+    ///
+    /// WHY NOT ALWAYS `.downloading` (#708, defect 1): this used to set `.downloading` and
+    /// seed the bar at 0 % before the downloader had even listed the repository, which
+    /// takes a network round trip, and only then find every file already on disk. The
+    /// preparation screen drew a download that did not happen: 0 %, then 100 %, then
+    /// *Optimizing*. Every caller that re-enters `downloadModel` for a complete model went
+    /// through it: the onboarding resuming after iOS killed the app between the last byte
+    /// and the compile, "Retry" on a model whose compile failed, the launch repair. A model
+    /// whose files are complete opens on `.prewarming` instead, which is what it is about
+    /// to do. The downloader still runs: it is what checks the repository's own file list,
+    /// and it skips every file present, so the sequence after it is unchanged.
+    ///
+    /// The one line left out in that case is `modelDownloadStarted`: no transfer starts,
+    /// and the debug log's reader is an agent that takes it at its word (#255).
+    ///
+    /// - Returns: true when the download phase is shown, false when it was skipped.
+    @discardableResult
+    private func publishOpeningState(for identifier: String) -> Bool {
+        lastLoggedDeciles[identifier] = -1
+        guard !Self.hasCompleteFilesOnDisk(identifier) else {
+            setState(.prewarming, for: identifier)
+            PersistentLog.log(.diagnosticProbe(
+                component: "ModelDownload",
+                instanceID: identifier,
+                action: "downloadPhaseSkipped",
+                details: "reason=filesOnDisk"
+            ))
+            return false
+        }
+        setState(.downloading, for: identifier)
+        seedDownloadProgress(for: identifier)
+        // One "started" line per TRANSFER, not per attempt (#449). A resume after a
+        // relaunch re-enters this method, and so does a retry, so a single download was
+        // announcing itself three times — which made acceptance criterion 2 ("exactly
+        // one modelDownloadStarted line") unverifiable by its own method. A manifest
+        // already on disk means the transfer is under way and has been announced.
+        if !BackgroundModelDownloadService.hasUnfinishedTransfer(for: identifier) {
+            let catalogSizeMB = Int((ModelInfo.forIdentifier(identifier)?.sizeBytes ?? 0) / 1_000_000)
+            PersistentLog.log(.modelDownloadStarted(name: identifier, sizeMB: catalogSizeMB))
+        }
+        return true
     }
 }
 

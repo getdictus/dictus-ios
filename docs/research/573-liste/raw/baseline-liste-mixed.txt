@@ -1,0 +1,154 @@
+
+
+████ ARM shipping — 3 run(s) × 5 fixture(s), floor 0.35
+
+━━ [M1-fr-week-end] 199 chars, lang=fr
+  #1 199→97 1303ms success recall=2/4 UNRECALLED=2 PERSON-LOST=1 inversions=0/1 LIST=3
+     UNRECALLED (whole 0.29, best 0.29): Bon alors pour le week-end il faut que je réserve le restaurant pour samedi,
+     UNRECALLED (whole 0.00, best 0.00): pas 10h, je me suis trompé l'autre jour,
+     PERSONLOST: et faut que je demande à Julie si elle vient ou pas.
+       → - Demander à Julie si elle vient ou pas
+     engineOut: - Réserver le restaurant pour samedi⏎- Le train part à 9h⏎- Demander à Julie si elle vient ou pas
+  #2 199→97 1303ms success recall=2/4 UNRECALLED=2 PERSON-LOST=1 inversions=0/1 LIST=3
+     UNRECALLED (whole 0.29, best 0.29): Bon alors pour le week-end il faut que je réserve le restaurant pour samedi,
+     UNRECALLED (whole 0.00, best 0.00): pas 10h, je me suis trompé l'autre jour,
+     PERSONLOST: et faut que je demande à Julie si elle vient ou pas.
+       → - Demander à Julie si elle vient ou pas
+     engineOut: - Réserver le restaurant pour samedi⏎- Le train part à 9h⏎- Demander à Julie si elle vient ou pas
+  #3 199→97 1294ms success recall=2/4 UNRECALLED=2 PERSON-LOST=1 inversions=0/1 LIST=3
+     UNRECALLED (whole 0.29, best 0.29): Bon alors pour le week-end il faut que je réserve le restaurant pour samedi,
+     UNRECALLED (whole 0.00, best 0.00): pas 10h, je me suis trompé l'autre jour,
+     PERSONLOST: et faut que je demande à Julie si elle vient ou pas.
+       → - Demander à Julie si elle vient ou pas
+     engineOut: - Réserver le restaurant pour samedi⏎- Le train part à 9h⏎- Demander à Julie si elle vient ou pas
+
+━━ [M2-fr-chantier] 308 chars, lang=fr
+  #1 308→165 1489ms success recall=6/8 UNRECALLED=2 PERSON-LOST=2 inversions=1/15 LIST=3
+     UNRECALLED (whole 0.25, best 0.25): elle rend bien, franchement je suis content de la couleur.
+     UNRECALLED (whole 0.00, best 0.00): j'oublie tout le temps.
+     PERSONLOST: donc il faut que je sois là avant huit heures.
+       → - Soi là avant huit heures pour l'appartement,
+     PERSONLOST: Et il faut que je rachète des ampoules pour la cuisine,
+       → - Racheter des ampoules pour la cuisine
+     engineOut: - Soi là avant huit heures pour l'appartement, le plombier passe mardi matin⏎- La peinture du salon est sèche, elle rend bien⏎- Racheter des ampoules pour la cuisine
+  #2 308→167 1476ms success recall=6/8 UNRECALLED=2 PERSON-LOST=2 inversions=1/15 LIST=3
+     UNRECALLED (whole 0.25, best 0.25): elle rend bien, franchement je suis content de la couleur.
+     UNRECALLED (whole 0.00, best 0.00): j'oublie tout le temps.
+     PERSONLOST: donc il faut que je sois là avant huit heures.
+       → - Sois là avant huit heures pour l'appartement :
+     PERSONLOST: Et il faut que je rachète des ampoules pour la cuisine,
+       → - Racheter des ampoules pour la cuisine
+     engineOut: - Sois là avant huit heures pour l'appartement : le plombier passe mardi matin⏎- La peinture du salon est sèche, elle rend bien⏎- Racheter des ampoules pour la cuisine
+  #3 308→166 1430ms success recall=6/8 UNRECALLED=2 PERSON-LOST=2 inversions=1/15 LIST=3
+     UNRECALLED (whole 0.25, best 0.25): elle rend bien, franchement je suis content de la couleur.
+     UNRECALLED (whole 0.00, best 0.00): j'oublie tout le temps.
+     PERSONLOST: donc il faut que je sois là avant huit heures.
+       → - Sois là avant huit heures pour l'appartement,
+     PERSONLOST: Et il faut que je rachète des ampoules pour la cuisine,
+       → - Racheter des ampoules pour la cuisine
+     engineOut: - Sois là avant huit heures pour l'appartement, le plombier passe mardi matin⏎- La peinture du salon est sèche, elle rend bien⏎- Racheter des ampoules pour la cuisine
+
+━━ [M3-en-launch] 260 chars, lang=en
+  #1 260→207 1649ms success recall=6/6 PERSON-LOST=4 inversions=0/15 LIST=4
+     PERSONLOST: I need to send the press kit by Friday.
+       → - Send the press kit by Friday for the launch
+     PERSONLOST: The landing page is live and we had about two hundred sign ups yesterday.
+       → about two hundred sign ups yesterday
+     PERSONLOST: I noticed that this morning.
+       → noticed this morning
+     PERSONLOST: And I have to book the photographer for next week.
+       → - Book the photographer for next week
+     engineOut: - Send the press kit by Friday for the launch⏎- Landing page is live: about two hundred sign ups yesterday⏎- Pricing page still shows the old price, noticed this morning⏎- Book the photographer for next week
+  #2 260→204 1639ms success recall=6/6 PERSON-LOST=4 inversions=0/15 LIST=4
+     PERSONLOST: I need to send the press kit by Friday.
+       → - Send the press kit by Friday for the launch
+     PERSONLOST: The landing page is live and we had about two hundred sign ups yesterday.
+       → about two hundred sign ups yesterday
+     PERSONLOST: I noticed that this morning.
+       → noticed this morning
+     PERSONLOST: And I have to book the photographer for next week.
+       → - Book the photographer for next week
+     engineOut: - Send the press kit by Friday for the launch⏎- Landing page live, about two hundred sign ups yesterday⏎- Pricing page still shows the old price, noticed this morning⏎- Book the photographer for next week
+  #3 260→204 1685ms success recall=6/6 PERSON-LOST=4 inversions=0/15 LIST=4
+     PERSONLOST: I need to send the press kit by Friday.
+       → - Send the press kit by Friday for the launch
+     PERSONLOST: The landing page is live and we had about two hundred sign ups yesterday.
+       → about two hundred sign ups yesterday
+     PERSONLOST: I noticed that this morning.
+       → noticed this morning
+     PERSONLOST: And I have to book the photographer for next week.
+       → - Book the photographer for next week
+     engineOut: - Send the press kit by Friday for the launch⏎- Landing page live: about two hundred sign ups yesterday⏎- Pricing page still shows the old price, noticed this morning⏎- Book the photographer for next week
+
+━━ [D1-fr-device-courses] 196 chars, lang=fr
+  #1 196→70 1195ms success recall=1/3 UNRECALLED=2 inversions=0/0 LIST=3
+     UNRECALLED (whole 0.00, best 0.00): Alors je te fais un petit récap de ce qu'il faut qu'on fasse,
+     UNRECALLED (whole 0.12, best 0.12): mais en gros il faut que absolument qu'on achète du lait parce qu'on n'en a plus,
+     engineOut: - Acheter du lait⏎- Acheter du gris à râper⏎- Donner à manger au chien
+  #2 196→70 1178ms success recall=1/3 UNRECALLED=2 inversions=0/0 LIST=3
+     UNRECALLED (whole 0.00, best 0.00): Alors je te fais un petit récap de ce qu'il faut qu'on fasse,
+     UNRECALLED (whole 0.12, best 0.12): mais en gros il faut que absolument qu'on achète du lait parce qu'on n'en a plus,
+     engineOut: - Acheter du lait⏎- Acheter du gris à râper⏎- Donner à manger au chien
+  #3 196→70 1179ms success recall=1/3 UNRECALLED=2 inversions=0/0 LIST=3
+     UNRECALLED (whole 0.00, best 0.00): Alors je te fais un petit récap de ce qu'il faut qu'on fasse,
+     UNRECALLED (whole 0.12, best 0.12): mais en gros il faut que absolument qu'on achète du lait parce qu'on n'en a plus,
+     engineOut: - Acheter du lait⏎- Acheter du gris à râper⏎- Donner à manger au chien
+
+━━ [D2-en-device-hair] 124 chars, lang=en
+  #1 124→74 1181ms success recall=2/3 UNRECALLED=1 inversions=0/1 LIST=4
+     UNRECALLED (whole 0.00, best 0.00): Okay could you not this please?
+     engineOut: - Wash my hair⏎- Cut my hair⏎- Brush my hair⏎- Hit a big stack with my own
+  #2 124→74 1173ms success recall=2/3 UNRECALLED=1 inversions=0/1 LIST=4
+     UNRECALLED (whole 0.00, best 0.00): Okay could you not this please?
+     engineOut: - Wash my hair⏎- Cut my hair⏎- Brush my hair⏎- Hit a big stack with my own
+  #3 124→74 1173ms success recall=2/3 UNRECALLED=1 inversions=0/1 LIST=4
+     UNRECALLED (whole 0.00, best 0.00): Okay could you not this please?
+     engineOut: - Wash my hair⏎- Cut my hair⏎- Brush my hair⏎- Hit a big stack with my own
+
+
+════ AXES, per arm (bars.md §4)
+
+arm                   outputs  unrecalled  personLost  hedgeLost   hardened    fabricated  dropped     clean       noOutput
+shipping              15       12/15       9/15        0/15        0/15        0/15        0/15        0/15        0
+
+  Counts are OUTPUTS carrying at least one, not occurrences.
+  noOutput runs are in NO column and in no denominator: a run whose engine
+  produced nothing has violated nothing, whatever the outcome that caused it.
+  `clean` = no defect on any of the three SCORED axes. Axis 3 and the negation
+  count are observables by declaration (bars.md §1, §4) and are in no column here.
+
+
+════ OBSERVABLES, per arm — reported, never barred
+
+arm                   inversions    dispersed     negDropped    speakerState preserved
+shipping              3             0             0/15          0/15
+
+
+════ LANGUAGE AND LISTS, per arm and expected language (#587 bars.md §4)
+
+arm                   lang      outputs  refusedLang  wrongAccepted  wrongAny  withList  incompleteness
+shipping              fr        9        0            0              0         9         0
+shipping              en        6        0            0              0         6         0
+
+  refusedLang   = refused on check=language (B1b; > 10 % in any language stops the round).
+  wrongAccepted = accepted, and the whole output or a sentence reads as another language
+                  (B1a's screen: a fragment the speaker said in that language is legitimate).
+  wrongAny      = the same screen over every output, refused or not (B1c for English).
+  withList      = outputs carrying a list line (B3 reads it on prose fixtures only).
+
+
+════ PER FIXTURE, per arm (never pooled)
+
+── shipping
+   M1-fr-week-end          U2P  U2P  U2P
+   M2-fr-chantier          U2Po1  U2Po1  U2Po1
+   M3-en-launch            P  P  P
+   D1-fr-device-courses    U2  U2  U2
+   D2-en-device-hair       U1  U1  U1
+
+   e = the engine produced no output; the run is in no denominator above.
+   U<n> unrecalled propositions · P person lost · H hedge lost · B stance hardened
+   F speaker-state fabricated · D speaker-state dropped · o<n> order inversions
+   · no defect and no observable. Order is an OBSERVABLE: `o` is not a defect.
+
+── wrote 15 runs to ../docs/research/573-liste/captures/baseline-liste-mixed.json

@@ -247,6 +247,16 @@ public enum SmartModeStore {
         return stored
     }
 
+    /// The pinned list as stored, or nil when the user has never chosen one, where
+    /// `pinnedIdentifiers` falls back to the seed.
+    ///
+    /// WHY A SEPARATE READ (#725): the onboarding's pick, returned to by going back after
+    /// its Continue wrote the list, shows what the user chose. The seed is not a choice,
+    /// and showing it there would present the defaults as the user's own.
+    public static var storedPinnedIdentifiers: [String]? {
+        defaults.stringArray(forKey: SharedKeys.smartModePinned)
+    }
+
     /// Replace the pinned list. Order is the user's and is preserved; the list is
     /// capped at `SmartModeCatalogue.maximumPinnedModes` because the fan cannot draw
     /// more than that.

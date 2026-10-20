@@ -2,6 +2,19 @@
 // One saved dictation: the text and the four facts that let the user recognise it.
 import Foundation
 
+/// Where a saved transcription came from (#620 decision 7).
+///
+/// WHY it is stored as a string in the record and read through this enum, like
+/// `language` and `sttProvider`: the history is one JSON array, and a value an older
+/// build cannot map must cost that badge, not every record. An unknown marker reads
+/// as `.dictation`, the only kind that existed before #620.
+public enum TranscriptionSource: String, Sendable {
+    /// Spoken into Dictus, from the keyboard or the app.
+    case dictation
+    /// A voice message or audio file shared to Dictus from another app.
+    case sharedFile
+}
+
 /// One dictation the user can find again (#70).
 ///
 /// WHY `language` and `sttProvider` are `String` and not `SupportedLanguage` /
@@ -33,6 +46,24 @@ public struct TranscriptionRecord: Identifiable, Codable, Hashable, Sendable {
     /// The STT engine's stored marker (`SpeechEngine.rawValue`: "WK" / "PK").
     public let sttProvider: String
 
+    /// `TranscriptionSource.rawValue`. Absent in every record written before #620,
+    /// which all are dictations.
+    private let sourceMarker: String?
+
+    /// What the result screen shows above the transcript of a shared voice note: the
+    /// output of the mode that ran on it (`Résumé` by default). Nil until it has run,
+    /// and for every dictation. Computed in the foreground when the result is first
+    /// opened (#620 decision 5), then kept so it is never computed twice.
+    public private(set) var summary: String?
+
+    /// `SmartMode.id` of the mode that produced `summary`, so the screen can name it.
+    public private(set) var summaryModeIdentifier: String?
+
+    /// When the user first opened this voice note's result (#620). Nil for a voice
+    /// note nobody has looked at yet, and for every dictation, which has nothing to
+    /// open. An unread voice note is what the result screen stacks.
+    public private(set) var openedAt: Date?
+
     /// The value `language` carries when the user let the engine detect it (#226's
     /// auto-detect mode). Not a language code, deliberately: the record must not
     /// claim a language nobody chose and nothing measured.
@@ -43,13 +74,18 @@ public struct TranscriptionRecord: Identifiable, Codable, Hashable, Sendable {
                 language: String,
                 durationSeconds: Int,
                 createdAt: Date = Date(),
-                sttProvider: String) {
+                sttProvider: String,
+                source: TranscriptionSource = .dictation) {
         self.id = id
         self.text = text
         self.language = language
         self.durationSeconds = durationSeconds
         self.createdAt = createdAt
         self.sttProvider = sttProvider
+        self.sourceMarker = source == .dictation ? nil : source.rawValue
+        self.summary = nil
+        self.summaryModeIdentifier = nil
+        self.openedAt = nil
     }
 
     /// Build a record from the per-dictation snapshot the pipeline already carries.
@@ -57,19 +93,34 @@ public struct TranscriptionRecord: Identifiable, Codable, Hashable, Sendable {
     /// The policy is the only honest source for the language: it is captured once at
     /// transcription start (#226) and is what STT and polish both ran against, so a
     /// record built from it cannot disagree with the dictation it describes.
-    public init(text: String,
+    public init(id: UUID = UUID(),
+                text: String,
                 policy: TranscriptionLanguagePolicy,
                 duration: TimeInterval,
-                createdAt: Date = Date()) {
+                createdAt: Date = Date(),
+                source: TranscriptionSource = .dictation) {
         self.init(
+            id: id,
             text: text,
             language: Self.languageCode(for: policy),
             // Rounded rather than truncated: a 0.9 s dictation reading "0s" looks
             // like a bug, and the second is the only precision the card shows.
             durationSeconds: Int(duration.rounded()),
             createdAt: createdAt,
-            sttProvider: policy.engine.rawValue
+            sttProvider: policy.engine.rawValue,
+            source: source
         )
+    }
+
+    // MARK: - Coding
+
+    /// `sourceMarker` is written only when it says something (a shared file), so a
+    /// dictation's JSON is byte-for-byte what it was before #620 and an older build
+    /// reading a newer file meets only keys it ignores.
+    private enum CodingKeys: String, CodingKey {
+        case id, text, language, durationSeconds, createdAt, sttProvider
+        case sourceMarker = "source"
+        case summary, summaryModeIdentifier, openedAt
     }
 
     /// What to record as the language of a dictation run under `policy`.
@@ -101,6 +152,11 @@ public struct TranscriptionRecord: Identifiable, Codable, Hashable, Sendable {
         SpeechEngine(rawValue: sttProvider)
     }
 
+    /// Where the text came from. See `TranscriptionSource` for the unknown case.
+    public var source: TranscriptionSource {
+        sourceMarker.flatMap(TranscriptionSource.init(rawValue:)) ?? .dictation
+    }
+
     /// Short uppercase badge for the card: "FR", "EN", "AUTO".
     public var languageBadge: String {
         language.uppercased()
@@ -121,6 +177,26 @@ public struct TranscriptionRecord: Identifiable, Codable, Hashable, Sendable {
     func withText(_ newText: String) -> TranscriptionRecord {
         var copy = self
         copy.text = newText
+        return copy
+    }
+
+    /// Attach the output of the mode that ran on a voice note's transcript.
+    /// Mark a voice note's result as seen.
+    func withOpened(at date: Date) -> TranscriptionRecord {
+        var copy = self
+        copy.openedAt = date
+        return copy
+    }
+
+    /// A shared voice note whose result has never been opened.
+    public var isUnreadVoiceNote: Bool {
+        source == .sharedFile && openedAt == nil
+    }
+
+    func withSummary(_ newSummary: String, modeIdentifier: String) -> TranscriptionRecord {
+        var copy = self
+        copy.summary = newSummary
+        copy.summaryModeIdentifier = modeIdentifier
         return copy
     }
 }

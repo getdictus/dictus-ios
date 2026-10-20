@@ -8,10 +8,11 @@ final class SmartModeCatalogueTests: XCTestCase {
     // MARK: - The rows
 
     func testCatalogueShipsNotesAndOneTranslateEntryPerSupportedLanguage() {
-        XCTAssertEqual(SmartModeCatalogue.builtIns.count, 3 + SupportedLanguage.allCases.count)
+        XCTAssertEqual(SmartModeCatalogue.builtIns.count, 4 + SupportedLanguage.allCases.count)
         XCTAssertTrue(SmartModeCatalogue.builtIns.contains { $0.id == "notes" })
         XCTAssertTrue(SmartModeCatalogue.builtIns.contains { $0.id == "structured" })
         XCTAssertTrue(SmartModeCatalogue.builtIns.contains { $0.id == "message" })
+        XCTAssertTrue(SmartModeCatalogue.builtIns.contains { $0.id == "summary" })
         for language in SupportedLanguage.allCases {
             XCTAssertTrue(
                 SmartModeCatalogue.builtIns.contains { $0.id == "translate.\(language.rawValue)" },
@@ -307,27 +308,54 @@ final class SmartModeCatalogueTests: XCTestCase {
     /// Stated in the prompt because that is the only place the model reads it.
     func testStructuredPromptKeepsTheSpeakersGrammaticalPerson() {
         let instructions = SmartModeCatalogue.structured.prompt.instructions
-        XCTAssertTrue(instructions.contains("KEEP THE SPEAKER'S GRAMMATICAL PERSON"))
-        XCTAssertTrue(instructions.contains("infinitive"))
+        XCTAssertTrue(instructions.contains("Keep their grammatical person, tense and tone"))
+        XCTAssertTrue(instructions.contains("never a task list"))
     }
 
     /// Decision 7's hard bar: the one thing the reference drops and Dictus keeps.
+    ///
+    /// Since #587 the rule is conditioned on the transcript and quotes **no** phrasing:
+    /// the four it used to name were one of the two sources PR #583 measured leaking
+    /// into outputs that said nothing of the kind. `PolishIncompleteness` is the
+    /// backstop; `SmartModeStructuredPromptTests` asserts no example shows one either.
     func testStructuredPromptKeepsASpeakerFlaggedIncompleteness() {
         let instructions = SmartModeCatalogue.structured.prompt.instructions
-        XCTAssertTrue(instructions.contains("j'ai oublié un truc"))
-        XCTAssertTrue(instructions.contains("KEEP IT"))
+        XCTAssertTrue(instructions.contains("If the transcript itself says that something is missing"))
+        XCTAssertTrue(instructions.contains("keep that sentence in their words"))
+        XCTAssertFalse(instructions.contains("j'ai oublié un truc"))
+        XCTAssertFalse(instructions.contains("ça m'échappe"))
     }
 
     /// Decision 6: a heading is a promotion of the speaker's own opening words, never
     /// an invention. Both reference headings are exactly that.
     func testStructuredPromptForbidsAnInventedTitle() {
         let instructions = SmartModeCatalogue.structured.prompt.instructions
-        XCTAssertTrue(instructions.contains("Never invent a title"))
+        XCTAssertTrue(instructions.contains("no fact, name, date, conclusion, title or closing sentence"))
+        XCTAssertTrue(instructions.contains("A short heading is allowed only when their own first words"))
     }
 
     /// Decision 4 with measurement A behind it: median 0.93 is not a summary.
     func testStructuredPromptForbidsSummarising() {
-        XCTAssertTrue(SmartModeCatalogue.structured.prompt.instructions.contains("Do NOT summarise"))
+        XCTAssertTrue(SmartModeCatalogue.structured.prompt.instructions.contains("Never summarise"))
+    }
+
+    /// Decision 7 of #587: a list only when the speaker enumerates, and never one
+    /// bullet per sentence — the shape the device returned on 2026-09-20.
+    func testStructuredPromptAllowsAListOnlyOnARealEnumeration() {
+        let instructions = SmartModeCatalogue.structured.prompt.instructions
+        XCTAssertTrue(instructions.contains("Use a list only when they enumerate separate items themselves"))
+        XCTAssertTrue(instructions.contains("Never one bullet per sentence"))
+    }
+
+    /// Decision 5 step 2: the mode carries one example set per Apple FM language, and
+    /// the rules stay one English text. The sets themselves are pinned in
+    /// `SmartModeStructuredPromptTests`.
+    func testStructuredCarriesAnExampleSetPerLanguage() {
+        let prompt = SmartModeCatalogue.structured.prompt
+        XCTAssertEqual(prompt.localizedInstructions?.count, 16)
+        XCTAssertEqual(prompt.instructions(forTranscriptLanguage: "da"),
+                       SmartModeStructuredPrompt.localizedInstructions()["da"])
+        XCTAssertEqual(prompt.instructions(forTranscriptLanguage: "cs"), prompt.instructions)
     }
 
     /// The #414 copying finding, pinned: every example in this prompt is neutralised
@@ -357,8 +385,146 @@ final class SmartModeCatalogueTests: XCTestCase {
     /// the input's language.
     func testStructuredPromptIsWrittenOnceAndKeepsTheInputLanguage() {
         let instructions = SmartModeCatalogue.structured.prompt.instructions
-        XCTAssertTrue(instructions.contains("OUTPUT LANGUAGE: the language of the input"))
-        XCTAssertTrue(instructions.contains("NEVER translate"))
+        XCTAssertTrue(instructions.contains("1. Write in the language of the transcript, whatever it is"))
+        XCTAssertTrue(instructions.contains("Never translate, not even partly"))
+    }
+
+    /// #587 decision 9, kept through #573's rebuild: `Liste` carries one example set per
+    /// Apple FM language.
+    func testListCarriesAnExampleSetPerLanguage() {
+        let prompt = SmartModeCatalogue.notes.prompt
+        XCTAssertEqual(prompt.localizedInstructions?.count, 15)
+        XCTAssertEqual(prompt.instructions(forTranscriptLanguage: "ja"),
+                       SmartModeNotesPrompt.localizedInstructions()["ja"])
+        XCTAssertEqual(prompt.instructions(forTranscriptLanguage: "cs"), prompt.instructions)
+    }
+
+    /// Every `Liste` set shows #573's shape: a title line ending on the language's colon,
+    /// then flat `- ` lines. #587 measured that the examples, not the rules, set the
+    /// output's shape, so a set that lost its title or its bullets in translation would
+    /// teach the mode to stop producing them. #393 is why the bullets are a test at all.
+    func testEveryListExampleSetShowsATitleThenBullets() {
+        for (code, set) in SmartModeNotesExamples.byLanguage {
+            for output in [set.mixedOutput, set.statementsOutput, set.counterRight] {
+                let lines = output.components(separatedBy: "\n")
+                let title = lines.first ?? ""
+                XCTAssertFalse(title.hasPrefix("- "), "\(code): an example opens without a title")
+                XCTAssertTrue(title.hasSuffix(":") || title.hasSuffix("："), "\(code): a title has no colon")
+                XCTAssertGreaterThanOrEqual(lines.count, 3, "\(code): fewer than two bullets")
+                for line in lines.dropFirst() {
+                    XCTAssertTrue(line.hasPrefix("- "), "\(code): a line after the title is not a bullet")
+                }
+            }
+            XCTAssertEqual(set.mixedOutput.components(separatedBy: "\n- ").count, 5, code)
+            XCTAssertEqual(set.statementsOutput.components(separatedBy: "\n- ").count, 5, code)
+        }
+    }
+
+    /// French typography puts a space before the colon, every other Latin-script language
+    /// does not (#573 decision 2). The rules say "the way the input language writes it"
+    /// and leave the showing to the examples, so the examples are what is pinned.
+    func testListTitlesFollowEachLanguagesColon() {
+        XCTAssertTrue(SmartModeNotesExamples.byLanguage["fr"]?.mixedOutput.hasPrefix("Vide-grenier de dimanche :\n") == true)
+        XCTAssertTrue(SmartModeNotesExamples.byLanguage["en"]?.mixedOutput.hasPrefix("Sunday's yard sale:\n") == true)
+        XCTAssertTrue(SmartModeNotesExamples.byLanguage["ja"]?.mixedOutput.hasPrefix("日曜のフリーマーケット：\n") == true)
+    }
+
+    /// Decision 1's other half, where the model reads it: the recap example keeps every
+    /// past fact past with its subject and holds no task, and the counter-example names
+    /// the statement-turned-task and the generic title as wrong (#573, device round 1).
+    func testListPromptShowsPastFactsStayingPast() {
+        let french = SmartModeNotesPrompt.instructions(examples: SmartModeNotesPrompt.defaultExamples)
+        XCTAssertTrue(french.contains("Ce qu'on a fait au jardin ce week-end :\n- On a taillé la haie"))
+        XCTAssertTrue(french.contains("WRONG (a statement turned into a task)"))
+        XCTAssertTrue(french.contains("WRONG (a title that fits any list): À faire :"))
+        XCTAssertTrue(french.contains("Never turn a statement into a task."))
+        // The lone-bullet example is gone: a one-item list is declined after the call.
+        XCTAssertFalse(french.contains("Short-input example"))
+        for (code, set) in SmartModeNotesExamples.byLanguage {
+            XCTAssertNotEqual(set.counterGeneric.components(separatedBy: " / ").first,
+                              set.counterRight.components(separatedBy: "\n").first, code)
+        }
+    }
+
+    /// The tense and the one-item-per-line rule ride in the user turn, the position
+    /// #437 and #523 measured as the one that governs the output (#573, round 2).
+    func testListUserTurnAsksForOneLinePerItemAndKeepsPastFactsPast() {
+        let framing = PolishTask.smart(SmartModeCatalogue.notes).userTurn(raw: "x")
+        XCTAssertTrue(framing.contains("one line per point or item"))
+        // Past facts only. C6 asked for "each verb in the tense the speaker used" and
+        // turned plain statements into infinitives ("Apparaître le clavier…"), 6 of 24.
+        XCTAssertTrue(framing.contains("What the speaker says they already did stays in the past."))
+        XCTAssertFalse(framing.contains("each verb in the tense"))
+    }
+
+    /// The two languages whose sets are the originals rather than translations keep
+    /// their own text: `Message`'s French pair is what the mode shipped with, which is
+    /// what makes a French dictation identical to before (#587 decision 9).
+    func testMessageFrenchExamplesAreTheShippingPair() {
+        let french = SmartModeMessageExamples.byLanguage["fr"]
+        XCTAssertEqual(french?.casualInput.hasPrefix("coucou toi euh j'ai récupéré la tondeuse"), true)
+        XCTAssertEqual(french?.greetingInput, "Hello chef, comment tu vas ?")
+        XCTAssertEqual(french?.greetingOutput, "Hello chef, comment tu vas ?")
+        XCTAssertEqual(SmartModeMessagePrompt.instructions(), SmartModeMessagePrompt.instructions(
+            examples: SmartModeMessageExamples.byLanguage["fr"] ?? SmartModeMessagePrompt.defaultExamples
+        ))
+    }
+
+    /// Both tables hold the same 15 base subtags, so no mode silently covers fewer
+    /// languages than the other.
+    func testBothTablesCoverTheSameLanguages() {
+        let expected: Swift.Set<String> = ["da", "de", "en", "es", "fr", "it", "ja", "ko", "nb",
+                                           "nl", "pt", "sv", "tr", "vi", "zh"]
+        XCTAssertEqual(Swift.Set(SmartModeNotesExamples.byLanguage.keys), expected)
+        XCTAssertEqual(Swift.Set(SmartModeMessageExamples.byLanguage.keys), expected)
+        for code in expected {
+            XCTAssertNotNil(SmartModeNotesExamples.set(forLanguageCode: code + "-XX"), code)
+            XCTAssertNotNil(SmartModeMessageExamples.set(forLanguageCode: code + "-XX"), code)
+        }
+    }
+
+    /// **The table has to be on the catalogue row, not only in the examples file**
+    /// (found by CodeRabbit on PR #597): a mode whose wiring regressed would hand every
+    /// non-French transcript the fallback prompt, with the assertion above still green
+    /// because the examples themselves never moved.
+    ///
+    /// Asserted for every mode that carries one, and asserted absent for the modes that
+    /// do not: `Traduction` names its target inside its own instructions.
+    func testEveryLocalizedModeResolvesItsTableThroughTheCatalogue() {
+        let localized = [SmartModeCatalogue.message, SmartModeCatalogue.notes,
+                         SmartModeCatalogue.structured, SmartModeCatalogue.summary]
+        for mode in localized {
+            let prompt = mode.prompt
+            XCTAssertGreaterThanOrEqual(prompt.localizedInstructions?.count ?? 0, 15, mode.id)
+            for code in ["de", "ja", "pt-BR", "no"] {
+                XCTAssertNotEqual(prompt.instructions(forTranscriptLanguage: code), prompt.instructions,
+                                  "\(mode.id) sends the fallback for \(code)")
+            }
+            XCTAssertEqual(prompt.instructions(forTranscriptLanguage: "cs"), prompt.instructions, mode.id)
+        }
+        let localizedIdentifiers = Swift.Set(localized.map(\.id))
+        for mode in SmartModeCatalogue.builtIns where !localizedIdentifiers.contains(mode.id) {
+            XCTAssertNil(mode.prompt.localizedInstructions, mode.id)
+        }
+    }
+
+    /// The language clause in both prompts, and no rule renumbered.
+    ///
+    /// **It names the examples, which reads as a contradiction now that the examples are
+    /// in the transcript's own language** (CodeRabbit, PR #597), and it stays anyway:
+    /// rewording all four modes so the input alone decides was measured on 2026-09-24
+    /// and regressed `Liste`, which answered a Traditional Chinese dictation in English
+    /// 2 runs of 3. Numbers in `docs/research/587-language-clause/`. This assertion is
+    /// what stops the reword being reapplied on the reading alone.
+    func testBothPromptsCarryTheMeasuredLanguageClause() {
+        XCTAssertTrue(SmartModeCatalogue.message.prompt.instructions
+            .contains("never in the language of the examples below"))
+        XCTAssertTrue(SmartModeCatalogue.notes.prompt.instructions
+            .contains("never the examples'"))
+        XCTAssertTrue(SmartModeCatalogue.message.prompt.instructions
+            .contains("1. Cut what only exists because they were speaking"))
+        XCTAssertTrue(SmartModeCatalogue.notes.prompt.instructions
+            .contains("1. The first line is a short title that says what the whole list is about"))
     }
 
     // MARK: - Message (#572)
@@ -389,8 +555,10 @@ final class SmartModeCatalogueTests: XCTestCase {
         XCTAssertLessThan(contract.minimumLengthRatio,
                           SmartModeCatalogue.structured.contract.minimumLengthRatio)
         // And it is still the tightest ceiling in the catalogue by a wide margin:
-        // every other mode may at least half again its input.
-        for mode in SmartModeCatalogue.builtIns where mode.id != "message" {
+        // every other mode may at least half again its input. `summary` is the one
+        // exception, by construction: it is the mode that must shorten (#571), and
+        // its own suite pins its ceiling below every other row's.
+        for mode in SmartModeCatalogue.builtIns where !["message", "summary"].contains(mode.id) {
             XCTAssertGreaterThanOrEqual(mode.contract.maximumLengthRatio, 1.5, mode.id)
         }
     }
@@ -457,7 +625,7 @@ final class SmartModeCatalogueTests: XCTestCase {
     /// where `Structured` is explicitly forbidden from cutting substance.
     func testMessagePromptCarriesTheDeletionLicenceStructuredGaveUp() {
         XCTAssertTrue(SmartModeCatalogue.message.prompt.instructions.contains("Cut what only exists because they were speaking"))
-        XCTAssertTrue(SmartModeCatalogue.structured.prompt.instructions.contains("Do NOT summarise"))
+        XCTAssertTrue(SmartModeCatalogue.structured.prompt.instructions.contains("Never summarise"))
     }
 
     /// Decisions 2 and 7: a dictated emoji is the speaker's content; an invented one

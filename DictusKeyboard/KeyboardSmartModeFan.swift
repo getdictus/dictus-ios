@@ -63,13 +63,18 @@ struct SmartModeFanState: Equatable {
     /// sits on cannot disagree.
     var offersProUpgrade: Bool { entries.contains(.pro) }
 
+    /// Whether the mode rows carry the reverse trial's `PRO` mark (#593): a trial is
+    /// running and nothing is paid. Read once at open, like everything else here.
+    let marksTrialPro: Bool
+
     /// What `entry` carries beside its name, if anything.
     func tag(for entry: SmartModeFanEntry) -> SmartModeFanRowTag? {
         SmartModeFanLayout.tag(
             for: entry,
             armedIdentifier: armedEntryID,
             effectiveIdentifier: effectiveEntryID,
-            modesRequirePro: offersProUpgrade
+            modesRequirePro: offersProUpgrade,
+            marksTrialPro: marksTrialPro
         )
     }
 
@@ -328,7 +333,8 @@ final class KeyboardSmartModeState: ObservableObject {
             // the user.
             effectiveEntryID: SmartModeAvailability.forDictation.isArmable
                 ? (armed?.id ?? SmartModeFanEntry.normal.id)
-                : SmartModeFanEntry.normal.id
+                : SmartModeFanEntry.normal.id,
+            marksTrialPro: ProStatusManager.showsTrialProMarks(now: Date())
         )
         keyboard.presentAreaMode(.smartModeFan)
         armIdleTimer()

@@ -23,7 +23,8 @@ struct HomeView: View {
     /// Drives the history sheet (#70).
     @State private var showHistory = false
 
-    /// Drives the paywall when a non-subscriber reaches for the history.
+    /// Drives the Dictus Pro hub: from the Pro banner, or when a non-subscriber
+    /// reaches for the history. One cover on a view that never leaves the screen (#216).
     @State private var showPaywall = false
 
     /// What the history offers this user (#70, corrected 2026-08-28): the feature is
@@ -71,11 +72,12 @@ struct HomeView: View {
                 testDictationLink
             }
 
-            // Pro banner (hidden when subscribed).
-            // Gated behind PremiumFlags.paywallVisible until the first Pro
+            // The Home Pro card: the offer, the trial reminder, or since #216 decision
+            // 16 a subscriber's way into the hub. Gated behind
+            // PremiumFlags.paywallVisible until the first Pro
             // feature ships and ASC setup is done (#236, #79, #215).
             if PremiumFlags.paywallVisible {
-                ProBannerView()
+                ProBannerView { showPaywall = true }
             }
 
             Spacer()
@@ -174,6 +176,12 @@ struct HomeView: View {
                             endPoint: .bottomTrailing
                         )
                     )
+                // During the reverse trial, the one indicator it gets on this screen
+                // (#593): discreet, never a nag, and honest about the wordmark above
+                // it, which would otherwise read as a subscription.
+                if let daysLeft = proStatus.trialBadgeDaysLeft {
+                    ProTrialBadge(daysLeft: daysLeft)
+                }
             } else {
                 Text("Dictus")
                     .font(.dictusHeading)
@@ -202,7 +210,7 @@ struct HomeView: View {
                         Text("Active model")
                             .font(.dictusCaption)
                             .foregroundColor(.secondary)
-                        Text(info?.displayName ?? modelName)
+                        Text(info?.localizedDisplayName ?? modelName)
                             .font(.dictusSubheading)
                         if let size = info?.sizeLabel {
                             Text(size)

@@ -1,0 +1,71 @@
+
+
+████ ARM shipping — mode summary, 5 run(s) × 2 fixture(s)
+
+━━ [de-free-form] 429 chars, lang=de
+  raw: Also okay, ich hab heute Morgen beim Spazierengehen über was nachgedacht, und zwar dass, wenn man ein Produkt ganz allein startet, das Schwierigste eigentlich nicht das Programmieren ist, sondern zu entscheiden, was man nicht macht. Weil es immer eine Idee gibt, die besser aussieht als die, an der man gerade arbeitet. Und dann springt man drauf und nach 6 Monaten hat man eigentlich 15 angefangene Sachen und nichts ist fertig.
+  #1 rejectedGuardrail/language ratio=0.50 4725ms  ⚑ LANG=en
+     out: Starting a product alone the hardest thing is deciding what not to do because every idea looks better than the one you are working on and after six months you have fifteen started projects and nothing is finished.
+  #2 rejectedGuardrail/language ratio=0.48 4240ms  ⚑ LANG=en
+     out: Starting a product alone the hardest thing is deciding what not to do because every idea looks better than the one you are working on and after six months you have 15 started projects and nothing is finished.
+  #3 rejectedGuardrail/language ratio=0.48 4085ms  ⚑ LANG=en
+     out: Starting a product alone the hardest thing is deciding what not to do because every idea looks better than the one you are working on and after six months you have 15 started things and nothing is finished.
+  #4 rejectedGuardrail/language ratio=0.50 3845ms  ⚑ LANG=en
+     out: Starting a product alone the hardest thing is deciding what not to do because every idea looks better than the one you are working on and after six months you have fifteen started projects and nothing is finished.
+  #5 rejectedGuardrail/language ratio=0.49 3598ms  ⚑ LANG=en
+     out: Starting a product alone the hardest thing is deciding what not to do because every idea looks better than the one you're working on and after six months you have fifteen started ideas and nothing is finished.
+
+━━ [de-todo-enumeration] 533 chars, lang=de
+  raw: also äh ich fass mal zusammen was ich vor dem Meeting machen muss also erstmal muss ich die Januarzahlen von Marion holen sie hat gesagt sie hätte sie Dienstag nee Mittwoch und äh dann muss ich die Vergleichstabelle mit denen vom letzten Jahr machen und dann auch weißt du ich muss unbedingt den Dienstleister anrufen weil ihr Angebot schon wieder von 12000 auf 15000 Euro gestiegen ist und das hat keiner freigegeben und naja ich sollte auch dran denken den Raum im zweiten Stock zu buchen weil der andere die ganze Woche belegt ist
+  #1 rejectedGuardrail/language ratio=0.51 5126ms  ⚑ LANG=en
+     out: I must get Marion's January numbers for Tuesday or Wednesday, make the comparison table with last year's data, call the service provider because their offer rose from 12000 to 15000 Euro without approval, and book the second floor room since the other one is full all week.
+  #2 rejectedGuardrail/language ratio=0.51 6185ms  ⚑ LANG=en
+     out: I must get Marion’s January numbers on Wednesday, make the comparison table with last year’s data, call the service provider because their offer rose from 12000 to 15000 Euro without approval, and book the room on the second floor because the other one is full all week.
+  #3 rejectedGuardrail/language ratio=0.49 5600ms  ⚑ LANG=en
+     out: I must get Marion's January numbers on Wednesday, make the comparison table with last year's data, call the service provider because their offer rose from 12000 to 15000 Euro without approval, and book the second-floor room since the other is occupied all week.
+  #4 rejectedGuardrail/language ratio=0.49 5841ms  ⚑ LANG=en
+     out: I must get Marion's January numbers on Wednesday, make the comparison table with last year's data, call the service provider because their offer rose from 12000 to 15000 Euro without approval, and book the second-floor room because the other one is full all week.
+  #5 rejectedGuardrail/language ratio=0.49 5828ms  ⚑ LANG=en
+     out: I must get Marion's January numbers on Wednesday, make the comparison table with last year's data, call the service provider because their offer rose from 12000 to 15000 Euro without approval, and book the second-floor room since the other is occupied all week.
+
+
+████ ARM arm-de-examples — mode summary, 5 run(s) × 2 fixture(s)
+     prompt: ../docs/research/571-summary/step2/arm-de-examples.txt
+
+━━ [de-free-form] 429 chars, lang=de
+  raw: Also okay, ich hab heute Morgen beim Spazierengehen über was nachgedacht, und zwar dass, wenn man ein Produkt ganz allein startet, das Schwierigste eigentlich nicht das Programmieren ist, sondern zu entscheiden, was man nicht macht. Weil es immer eine Idee gibt, die besser aussieht als die, an der man gerade arbeitet. Und dann springt man drauf und nach 6 Monaten hat man eigentlich 15 angefangene Sachen und nichts ist fertig.
+  #1 success ratio=0.58 4134ms
+     out: Wenn man ein Produkt allein startet ist das Schwierigste nicht das Programmieren sondern zu entscheiden was man nicht macht weil jede Idee besser aussieht als die aktuelle und nach sechs Monaten hat man 15 angefangene Sachen und nichts ist fertig.
+  #2 success ratio=0.39 2729ms
+     out: Ein Produkt allein zu starten ist am schwersten, weil jede Idee besser aussieht als die aktuelle, und nach 6 Monaten gibt es 15 angefangene Sachen und nichts ist fertig.
+  #3 success ratio=0.47 4334ms
+     out: Das Schwierigste beim Alleinstart ist die Entscheidung, was man nicht macht, weil jede Idee besser aussieht als die aktuelle und nach sechs Monaten gibt es 15 angefangene Projekte und nichts ist fertig.
+  #4 success ratio=0.58 4534ms
+     out: Wenn man ein Produkt allein startet, ist es nicht das Programmieren, sondern die Entscheidung, was man nicht macht, schwierig, weil jede Idee besser aussieht als die aktuelle und nach sechs Monaten sind es 15 angefangene Sachen und nichts ist fertig.
+  #5 success ratio=0.56 4050ms
+     out: Das Schwierigste beim Alleinstart eines Produkts ist nicht das Programmieren, sondern zu entscheiden, was man nicht macht, weil jede Idee besser aussieht als die aktuelle und nach 6 Monaten gibt es 15 angefangene Sachen und nichts ist fertig.
+
+━━ [de-todo-enumeration] 533 chars, lang=de
+  raw: also äh ich fass mal zusammen was ich vor dem Meeting machen muss also erstmal muss ich die Januarzahlen von Marion holen sie hat gesagt sie hätte sie Dienstag nee Mittwoch und äh dann muss ich die Vergleichstabelle mit denen vom letzten Jahr machen und dann auch weißt du ich muss unbedingt den Dienstleister anrufen weil ihr Angebot schon wieder von 12000 auf 15000 Euro gestiegen ist und das hat keiner freigegeben und naja ich sollte auch dran denken den Raum im zweiten Stock zu buchen weil der andere die ganze Woche belegt ist
+  #1 rejectedGuardrail/grounding ratio=0.54 4495ms
+     out: Ich hole die Januarzahlen von Marion Mittwoch. Ich erstelle die Vergleichstabelle mit den Zahlen vom letzten Jahr. Ich rufe den Dienstleister an wegen der Preiserhöhung von 12000 auf 15000 Euro ohne Freigabe. Ich buche den Raum im zweiten Stock, weil der andere die ganze Woche belegt ist.
+  #2 success ratio=0.53 3760ms
+     out: Ich hole die Januarzahlen von Marion am Mittwoch, erstelle die Vergleichstabelle mit den letzten Jahren und rufe den Dienstleister an, weil das Angebot von 12000 auf 15000 Euro gestiegen ist ohne Freigabe und buche den Raum im zweiten Stock, weil der andere die ganze Woche belegt ist.
+  #3 success ratio=0.46 4379ms
+     out: Ich hole die Januarzahlen von Marion am Mittwoch, mache die Vergleichstabelle mit dem letzten Jahr und rufe den Dienstleister an wegen der Preiserhöhung auf 15000 Euro, buche den Raum im zweiten Stock, weil der andere die ganze Woche belegt ist.
+  #4 rejectedGuardrail/grounding ratio=0.52 5207ms
+     out: Ich hole die Januarzahlen von Marion Mittwoch und erstelle die Vergleichstabelle mit dem letzten Jahr. Ich rufe den Dienstleister an wegen der Preiserhöhung von 12000 auf 15000 Euro ohne Freigabe und buche den Raum im zweiten Stock, weil der andere die ganze Woche belegt ist.
+  #5 success ratio=0.52 5275ms
+     out: Ich hole die Januarzahlen von Marion am Mittwoch, erstelle die Vergleichstabelle mit dem letzten Jahr und rufe den Dienstleister an wegen der Preiserhöhung von 12000 auf 15000 Euro ohne Freigabe und buche den Raum im zweiten Stock, weil der andere die ganze Woche belegt ist.
+
+
+══ bars (engine outputs; `acc` = accepted by the pipeline)
+arm | lang | runs | wrong-lang (acc) | refused on language | list lines | in band | report/infinitive/person-lost | preamble | example | figure | accepted
+shipping | de | 10 | 10 (0) | 10 (100%) | 0 | 10/10 (100%) | 0 | 0 | 0 | 0 | 0/10
+shipping | ALL | 10 | 10 (0) | 10 (100%) | 0 | 10/10 (100%) | 0 | 0 | 0 | 0 | 0/10
+   refusals, shipping: language×10
+arm-de-examples | de | 10 | 0 (0) | 0 (0%) | 0 | 10/10 (100%) | 0 | 0 | 0 | 0 | 8/10
+arm-de-examples | ALL | 10 | 0 (0) | 0 (0%) | 0 | 10/10 (100%) | 0 | 0 | 0 | 0 | 8/10
+   refusals, arm-de-examples: grounding×2
+
+capture written: ../docs/research/571-summary/step2/run-de.json

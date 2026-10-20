@@ -4,6 +4,33 @@ import DictusCore
 import SwiftUI
 
 extension ModelInfo {
+    /// The model's name as the app shows it (issue #665).
+    ///
+    /// WHY a second property rather than a localized `displayName`:
+    /// DictusCore ships no string catalog, and `displayName` stays the English form
+    /// the catalogue and its tests hold. Logs never read it (they carry the
+    /// identifier), so nothing reads it as data in the app; every on-screen name
+    /// goes through here instead.
+    ///
+    /// Only the parenthesised qualifier is a word. "Small", "Turbo", "Parakeet v3"
+    /// are product names and fall through to `displayName` unchanged.
+    var localizedDisplayName: String {
+        switch identifier {
+        case "openai_whisper-small_216MB":
+            return String(
+                localized: "Small (Quantized)",
+                comment: "Model name: 'Small' is the product name, only the qualifier in parentheses is translated (#665)."
+            )
+        case "openai_whisper-large-v3_turbo_954MB":
+            return String(
+                localized: "Turbo (Legacy)",
+                comment: "Model name of the superseded Turbo variant: 'Turbo' is the product name, only the qualifier in parentheses is translated (#665)."
+            )
+        default:
+            return displayName
+        }
+    }
+
     /// Localized description for display in model cards.
     /// Source strings are in English; French provided via String Catalog.
     var localizedDescription: String {
@@ -46,12 +73,21 @@ extension ModelInfo.IncompatibilityReason {
     var localizedText: String {
         switch self {
         case .hardwareGeneration:
-            return String(localized: "Not supported on this iPhone")
+            // Issue #612 extended this reason to pre-A14 iPads. Telling an iPad owner
+            // "this iPhone" names hardware they are not holding.
+            return Self.isIPad
+                ? String(localized: "Not supported on this iPad")
+                : String(localized: "Not supported on this iPhone")
         case .insufficientMemory(let requiredGB):
             // Says what the requirement is rather than restating the refusal.
             return String(localized: "Requires \(requiredGB) GB of memory or more")
         }
     }
+
+    /// WHY the hardware identifier and not `UIDevice.userInterfaceIdiom`:
+    /// DictusApp is iPhone-only and reaches an iPad through compatibility mode,
+    /// where the idiom reports `.phone`. `uname` still says "iPad8,1".
+    private static let isIPad = DeviceCapabilities.current().deviceModelIdentifier.hasPrefix("iPad")
 }
 
 // MARK: - Language support strings (issue #240)

@@ -61,6 +61,12 @@ cd .. && swiftlint lint --strict
 
 State the device, the iOS version, the app version, the URL tried and the result. Before merge, the device check is a dictation from the Dictus keyboard inside the app: the user must land back on the same screen, and the log must read `hostReturn hostId=<bundle id> outcome=returned`. `returned` only means iOS opened the URL. Where the app landed has to be checked on screen.
 
+## Syncing with VivaDicta
+
+Most of the catalogue is ported from [VivaDicta](https://github.com/n0an/VivaDicta), which keeps adding apps from its own analytics, a few dozen per release. There is no catalogue file upstream: the lists live inline in `VivaDicta/VivaDictaApp.swift`. The "Keeping it in sync" doc comment in `KnownAppSchemes.swift` names the three blocks to diff, records the upstream commit of the last sync, and lists the upstream entries we deliberately do not follow because a device test contradicted them.
+
+Ported entries are inherited, not verified. They go into the matching tier, never into the verified list, until someone runs section 3 on them.
+
 ## When the app has no resuming URL
 
 A failing app can often be fixed on its side with a small change. If its source is public, read how it handles an incoming URL, then file an upstream bug report: the steps from section 3, what it does, what it should do, and the fix (often one line). A bare scheme URL should only wake the app, not navigate it. Meanwhile the app stays in `knownNoSchemeHosts`, with a comment pointing at the upstream report.
