@@ -22,6 +22,10 @@ class DictationCoordinator: ObservableObject {
     // MARK: - Published State
 
     @Published var status: DictationStatus = .idle
+    @Published var standbyRestorationState: MicrophoneStandbyRestorationState = .idle
+    // Owned by DictationCoordinator+MicrophoneLifecycle; stored here for extension access.
+    var standbyRestorationTask: Task<Void, Never>?
+    var standbyRestorationID: UUID?
 
     /// The last transcription, and only that. Nil on every failure by construction —
     /// `startDictation` resets it and nothing but a successful transcription assigns it —
@@ -298,7 +302,13 @@ class DictationCoordinator: ObservableObject {
     /// Configure the audio session, from the orchestration file. A tiny seam rather
     /// than exposing `audioEngine`, which nothing outside this file has any business
     /// holding (issue #428).
-    func configureAudioSessionForWarmUp() throws { try audioEngine.configureAudioSession() }
+    func configureAudioSessionForWarmUp() throws {
+        if microphoneLifecycleMode == .standby {
+            try audioEngine.configureAudioSession()
+        } else {
+            try audioEngine.prepareAudioSessionCategory()
+        }
+    }
 
     /// Whether the audio engine is already running, for the foreground warm-up policy.
     var isAudioEngineRunning: Bool { audioEngine.isEngineRunning }
@@ -325,7 +335,11 @@ class DictationCoordinator: ObservableObject {
         if attemptLog == .beforeModelLoad { PersistentLog.log(.engineWarmUpAttempt(context: context)) }
         try await ensureEngineReady()
         if attemptLog == .beforeAudioWarmUp { PersistentLog.log(.engineWarmUpAttempt(context: context)) }
-        try audioEngine.warmUp()
+        if !Task.isCancelled, UIApplication.shared.applicationState == .active,
+           MicrophoneLifecyclePolicy.canRestoreStandby(
+               mode: microphoneLifecycleMode, status: status, awaitingKeyboard: polishHandoffSession != nil) {
+            try audioEngine.warmUp()
+        }
         return currentModelName ?? "unknown"
     }
 
@@ -399,7 +413,7 @@ class DictationCoordinator: ObservableObject {
         // iOS forbids AVAudioSession.setActive(true) from background. The async Task
         // may not run until after the app is backgrounded. By configuring synchronously
         // in init(), we guarantee the session is active while still in the foreground.
-        try? audioEngine.configureAudioSession()
+        try? configureAudioSessionForWarmUp()
 
         Task {
             let modelReady = defaults.bool(forKey: SharedKeys.modelReady)
@@ -425,6 +439,7 @@ class DictationCoordinator: ObservableObject {
                 // Sync LiveActivityManager state — the intent already ended the activity
                 // but the manager doesn't know. Without this, currentActivity stays non-nil
                 // and ensureActivityAlive() is a no-op on next dictation (#50).
+                self.cancelStandbyRestoration()
                 LiveActivityManager.shared.stopStandbyActivity()
 
                 // Stop any active recording first
@@ -432,7 +447,7 @@ class DictationCoordinator: ObservableObject {
                     self.cancelDictation()
                 }
                 // Kill the audio engine — removes the orange mic indicator
-                if self.audioEngine.isEngineRunning {
+                if self.audioEngine.isEngineRunning || self.audioEngine.sessionConfigured {
                     self.audioEngine.deactivateSession()
                 }
                 PersistentLog.log(.engineWarmUpFailed(context: "standby-power-off", error: "user stopped standby"))
@@ -450,9 +465,12 @@ class DictationCoordinator: ObservableObject {
             queue: .main
         ) { [weak self] _ in
             Task { @MainActor in
+                self?.cancelStandbyRestoration()
                 self?.handleAudioInterruptionDuringDictation()
             }
         }
+
+        observeStandbyWarmStateRelease()
 
         // WHY observe didBecomeActive (not willEnterForeground):
         // willEnterForeground fires while the audio session is still interrupted.
@@ -489,7 +507,9 @@ class DictationCoordinator: ObservableObject {
 
                 // Recover DI if it was lost (Activity.request fails from background on cold start).
                 // Must happen BEFORE pendingColdStartDictation so transitionToRecording finds an activity.
-                LiveActivityManager.shared.ensureActivityAlive()
+                if self.standbyRestorationState != .preparing {
+                    LiveActivityManager.shared.ensureActivityAlive()
+                }
 
                 // Retry deferred cold start dictation now that app is fully active.
                 // WHY here: URL scheme launches fire handleIncomingURL at .inactive state,
@@ -506,6 +526,8 @@ class DictationCoordinator: ObservableObject {
                     PersistentLog.log(.coldStartRetry(keyboardStatus: keyboardStatus))
                     if keyboardStatus == DictationStatus.requested.rawValue {
                         self.startDictation(fromURL: true, origin: .keyboard)
+                    } else {
+                        self.releaseMicrophoneIfPolicyRequires(reason: "retry-dropped", abandonedRequest: true)
                     }
                     return
                 }
@@ -597,6 +619,10 @@ class DictationCoordinator: ObservableObject {
             }
             return
         }
+
+        // A real dictation owns the engine from here. A preference task may no
+        // longer publish readiness or stop an engine this dictation is using.
+        cancelStandbyRestoration()
 
         // New session supersedes any pending delayed reset (issue #60) and any
         // outstanding work from the previous one (#267).
@@ -976,6 +1002,7 @@ class DictationCoordinator: ObservableObject {
                 }
 
                 cleanupRecordingKeys()
+                releaseMicrophoneIfPolicyRequires(reason: "transcription-finished")
             } catch {
                 if #available(iOS 14.0, *) {
                     DictusLogger.app.error(
@@ -1380,6 +1407,7 @@ class DictationCoordinator: ObservableObject {
         status = newStatus
         defaults.set(newStatus.rawValue, forKey: SharedKeys.dictationStatus)
         defaults.synchronize()
+        releaseMicrophoneIfPolicyRequires(reason: "status-\(newStatus.rawValue)")
 
         // Re-arm on every stage the watchdog covers, disarm on everything else.
         // The `.transcribing -> .processing` hand-over is the case that makes the
@@ -1862,4 +1890,36 @@ private extension DictationCoordinator {
             throw wrapped
         }
     }
+}
+
+// MARK: - Microphone lifetime preference
+
+extension DictationCoordinator {
+    var microphoneLifecycleMode: MicrophoneLifecycleMode {
+        MicrophoneLifecyclePolicy.mode(defaults: defaults)
+    }
+
+    /// Retain audio through all processing; release only when the dictation ends.
+    func releaseMicrophoneIfPolicyRequires(reason: String, abandonedRequest: Bool = false) {
+        guard MicrophoneLifecyclePolicy.shouldRelease(
+            mode: microphoneLifecycleMode, status: status,
+            awaitingKeyboard: polishHandoffSession != nil, abandonedRequest: abandonedRequest
+        ), audioEngine.isEngineRunning || audioEngine.sessionConfigured else { return }
+        audioEngine.deactivateSession()
+        PersistentLog.log(.diagnosticProbe(
+            component: "MicrophoneLifecycle", instanceID: "shared",
+            action: "releasedAfterProcessing", details: "reason=\(reason)"
+        ))
+    }
+}
+
+// Narrow engine operations used by the preference-restoration extension.
+extension DictationCoordinator {
+    func ensureStandbyMicrophonePermission() async throws -> Bool {
+        try await audioEngine.ensureMicrophonePermission()
+    }
+
+    func waitForStandbyInputFlow() async throws -> Bool { try await audioEngine.waitForInputFlow() }
+
+    func deactivateStandbyMicrophone() { audioEngine.deactivateSession() }
 }

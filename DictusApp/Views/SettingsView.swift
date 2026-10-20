@@ -62,6 +62,12 @@ struct SettingsView: View {
     @AppStorage(SharedKeys.liveActivityEnabled, store: UserDefaults(suiteName: AppGroup.identifier))
     private var liveActivityEnabled = true
 
+    /// Microphone lifecycle (`MicrophoneLifecyclePolicy`). Off is the standby design
+    /// every install has today; the preference only ever opts out of it.
+    @AppStorage(SharedKeys.releaseMicrophoneAfterDictation, store: UserDefaults(suiteName: AppGroup.identifier))
+    private var releaseMicrophoneAfterDictation = false
+    @ObservedObject private var microphoneCoordinator = DictationCoordinator.shared
+
     /// Post-STT polish toggle (issue #141). Off by default — opt-in measurement at round 1.
     @AppStorage(SharedKeys.polishEnabled, store: UserDefaults(suiteName: AppGroup.identifier))
     private var polishEnabled = false
@@ -373,6 +379,18 @@ struct SettingsView: View {
                             LiveActivityManager.shared.stopStandbyActivity()
                         }
                     }
+
+                // Microphone lifecycle. Off is the standby design every install has
+                // (#106): the engine stays warm for ten minutes after a dictation so the
+                // next one starts from the keyboard with no app switch. On gives the
+                // microphone back the moment a dictation ends; the next keyboard
+                // dictation then opens Dictus for a moment and returns (#23). Turning it
+                // on releases a warm engine right away rather than at its idle timeout —
+                // the user just said they do not want it held.
+                Toggle("Release microphone after each dictation", isOn: $releaseMicrophoneAfterDictation)
+                    .onChange(of: releaseMicrophoneAfterDictation) { _, _ in
+                        microphoneCoordinator.microphoneLifecyclePreferenceDidChange()
+                    }
             } header: {
                 Text("Keyboard")
             } footer: {
@@ -392,6 +410,19 @@ struct SettingsView: View {
                 }
                 if !liveActivityEnabled {
                     Text("Dynamic Island and Lock Screen notification are disabled.")
+                }
+                // Both states get a sentence, because each costs something the other
+                // does not and neither cost is visible from the toggle's label.
+                if releaseMicrophoneAfterDictation {
+                    Text("The microphone is released after transcription and processing finish. The next keyboard dictation may open Dictus and take longer to start.")
+                } else {
+                    Text("After a dictation, Dictus keeps the microphone ready for 10 minutes so the next one starts without leaving your app.")
+                    switch microphoneCoordinator.standbyRestorationState {
+                    case .idle: EmptyView()
+                    case .preparing: Text("Preparing microphone standby…")
+                    case .verified: Text("Standby restored. Audio input was detected.")
+                    case .unavailable: Text("Standby could not be restored. Start a dictation in Dictus to prepare the microphone.")
+                    }
                 }
             }
 

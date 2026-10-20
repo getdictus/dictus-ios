@@ -245,7 +245,7 @@ extension DictationCoordinator {
                     component: "ModelPreload",
                     instanceID: abandonedModel ?? "unknown",
                     action: "warmUpSkippedAfterAbandon",
-                    details: "context=didBecomeActive audioSessionConfigured=true"
+                    details: "context=didBecomeActive audioSessionPrepared=true"
                 ))
                 return
             }

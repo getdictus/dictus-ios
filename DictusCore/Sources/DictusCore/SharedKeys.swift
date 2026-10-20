@@ -121,6 +121,14 @@ public enum SharedKeys {
     /// Whether Live Activity (Dynamic Island + Lock Screen) is enabled, default true
     public static let liveActivityEnabled = "dictus.liveActivityEnabled"
 
+    // Microphone lifecycle preference
+    /// Bool: when true, DictusApp gives the microphone back the moment a dictation
+    /// ends instead of keeping the engine warm for ten minutes (#106/#256). Absent
+    /// reads false, which is the standby behaviour every install has today, so no
+    /// registration and no migration are needed. Read through
+    /// `MicrophoneLifecyclePolicy.mode(defaults:)`, which is where the rule lives.
+    public static let releaseMicrophoneAfterDictation = "dictus.releaseMicrophoneAfterDictation"
+
     // Post-STT polish (issue #141)
     /// Whether the polish layer runs between STT final output and App Group write, default false.
     /// Off by default — round 1 is opt-in measurement. See ADR 0002.

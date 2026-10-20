@@ -345,6 +345,7 @@ extension DictationCoordinator {
         if let reason {
             PersistentLog.log(.polishHandoff(step: "abandoned", outcome: reason, chars: 0))
         }
+        releaseMicrophoneIfPolicyRequires(reason: "handoff-finished")
     }
 
     /// The keyboard says the dictation is over — polished or not, typed or refused.

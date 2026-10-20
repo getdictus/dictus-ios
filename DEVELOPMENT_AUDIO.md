@@ -296,6 +296,35 @@ private func ensureNouveauMoteurReady(modelName: String) async throws {
 
 ---
 
+## Préférence de durée de la session microphone
+
+`SharedKeys.releaseMicrophoneAfterDictation` active la libération de la session après
+la fin de la dictée. La valeur absente conserve le standby actuel. L'option se trouve
+dans Réglages → Clavier.
+
+L'engine et son heartbeat restent actifs pendant la transcription et le traitement
+jusqu'à la conclusion du hand-off au clavier. Aucun budget de tâche en arrière-plan
+supplémentaire n'est ajouté. Les fins normales, annulations, erreurs et requêtes de
+démarrage abandonnées passent par `releaseMicrophoneIfPolicyRequires`. Le chargement
+du modèle reste anticipé, mais le warm-up audio sans dictée est ignoré dans ce mode.
+La prochaine dictée depuis le clavier utilise le chemin URL existant, avec son
+changement d'app. Les délais et limites de transcription existants restent inchangés.
+
+Désactiver l'option dans l'app relance explicitement le warm-up au premier plan,
+avec autorisation microphone et modèle disponible. L'app affiche une préparation,
+puis confirme seulement après un nouveau buffer d'entrée non vide de la même
+génération d'engine. Un délai de deux secondes borne cette vérification, pas la
+prise de son d'une dictée. Un échec désactive la session inutilisable. Cette sonde
+ne conserve aucun échantillon et n'ajoute aucun pré-enregistrement.
+
+Un nouveau réglage, une dictée, le bouton d'arrêt du standby, l'expiration du standby ou une interruption
+invalident la préparation asynchrone. Elle ne peut pas reconfigurer une dictée,
+une transcription, un traitement ou un hand-off actif. Le mode standby habituel
+reste la valeur par défaut. La vérification confirme un flux à cet instant, pas
+une garantie de disponibilité permanente ni une capture depuis un processus
+suspendu. Les chemins de démarrage et de retour automatique existants restent
+inchangés et nécessitent des essais sur iPhone.
+
 ## Contraintes iOS à connaître
 
 | Contrainte | Impact | Solution dans Dictus |
