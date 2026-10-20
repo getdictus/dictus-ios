@@ -1,5 +1,6 @@
 // DictusCore/Sources/DictusCore/Subscription/ProTrialUsage.swift
-// The two counters behind the end-of-trial recap (#593, decision 5).
+// The two counters behind the end-of-trial recap (#593, decision 5), and the snapshot
+// that adds what was dictated (#726).
 import Foundation
 
 /// What the user did with Pro while the trial ran.
@@ -33,15 +34,32 @@ public enum ProTrialUsage {
         public let smartModeUses: Int
         public let vocabularyFixes: Int
 
-        public init(smartModeUses: Int, vocabularyFixes: Int) {
+        /// Words dictated over the trial's days, from `DictationTally` (#726). Not a
+        /// Pro counter: what the most common user, who mostly dictates, did with the
+        /// trial, and what the recap leads with.
+        public let wordsDictated: Int
+
+        /// Seconds of audio behind `wordsDictated`, for the time saved.
+        public let audioSeconds: Int
+
+        public init(smartModeUses: Int, vocabularyFixes: Int, wordsDictated: Int = 0, audioSeconds: Int = 0) {
             self.smartModeUses = smartModeUses
             self.vocabularyFixes = vocabularyFixes
+            self.wordsDictated = wordsDictated
+            self.audioSeconds = audioSeconds
+        }
+
+        /// The time dictation saved over typing, rounded down; nil under a minute.
+        public var timeSaved: TimeSavedEstimate.Rounded? {
+            TimeSavedEstimate.rounded(seconds: TimeSavedEstimate.seconds(words: wordsDictated,
+                                                                         audioSeconds: audioSeconds))
         }
 
         /// Whether there is anything to recap. A recap of zeros would tell the user
         /// they never tried the thing, which is not a reason to keep it; the paywall
-        /// falls back to its generic framing instead.
-        public var isEmpty: Bool { smartModeUses == 0 && vocabularyFixes == 0 }
+        /// falls back to its generic framing instead. Since #726 a user who dictated
+        /// always has something.
+        public var isEmpty: Bool { smartModeUses == 0 && vocabularyFixes == 0 && wordsDictated == 0 }
     }
 
     /// Whether a use happening now belongs to the trial.
@@ -80,11 +98,21 @@ public enum ProTrialUsage {
         defaults.set(defaults.integer(forKey: key) + count, forKey: key)
     }
 
-    /// The two counters as they stand.
-    public static func snapshot(in defaults: UserDefaults = AppGroup.defaults) -> Snapshot {
-        Snapshot(
+    /// The two counters as they stand, with what was dictated over the trial's days.
+    ///
+    /// The dictation figures are read from `DictationTally` over the mirrored
+    /// record's window, day by day, so the trial's first and last days count whole
+    /// (see `DictationTally`). No record, no window: zero.
+    public static func snapshot(in defaults: UserDefaults = AppGroup.defaults,
+                                calendar: Calendar = .current) -> Snapshot {
+        let dictated = ProTrialStore.mirroredRecord(in: defaults).map {
+            DictationTally.totals(from: $0.startedAt, through: $0.endsAt, in: defaults, calendar: calendar)
+        } ?? .zero
+        return Snapshot(
             smartModeUses: defaults.integer(forKey: SharedKeys.proTrialSmartModeUses),
-            vocabularyFixes: defaults.integer(forKey: SharedKeys.proTrialVocabularyFixes)
+            vocabularyFixes: defaults.integer(forKey: SharedKeys.proTrialVocabularyFixes),
+            wordsDictated: dictated.words,
+            audioSeconds: dictated.audioSeconds
         )
     }
 
