@@ -78,7 +78,8 @@ struct OnboardingView: View {
     /// the user has touched it.
     ///
     /// WHY HERE: like `languageDraft`, the page goes with its state on every step change.
-    /// After a kill on a later scene, `goBack` fills it from what the pick's Continue wrote.
+    /// After a kill it is nil again, and the page opens on what this run's Continue wrote
+    /// (`SmartModePick.committed(spokenLanguage:)`), whichever way it is reached.
     @State private var smartModePickDraft: SmartModePick?
 
     /// Whether the last step change went back (#700, #725), which turns the slide around:
@@ -201,9 +202,10 @@ struct OnboardingView: View {
     ///
     /// - A feature scene (Smart Modes, voice notes, vocabulary, history): jumps the whole
     ///   scene sequence, the pick inside it included (#679, #680, #649 decision 8). Nothing
-    ///   is written, so the fan keeps the seed.
-    /// - The Smart Mode pick: writes nothing, so the fan keeps the seed (#677), and jumps
-    ///   the rest of the sequence like the scenes around it.
+    ///   is written, so the fan keeps the seed, or the pick's list if Continue wrote one.
+    /// - The Smart Mode pick: writes nothing, so the fan keeps the seed (#677), or the list
+    ///   this run's Continue already wrote when the user came back to the pick (#725), and
+    ///   jumps the rest of the sequence like the scenes around it.
     ///
     ///   WHY THE PICK JUMPS TOO (#680): the shell draws one Skip at one place on every page
     ///   of the sequence, and decision 8 gives it one meaning. Before #680 the pick was the
@@ -312,13 +314,6 @@ struct OnboardingView: View {
         let from = step
         guard let back = OnboardingStep.goBack(from: from) else { return }
         PersistentLog.log(.onboardingWentBack(from: from.rawValue, to: back.rawValue))
-        if back == .smartModePick, smartModePickDraft == nil {
-            // The pick was left by its Continue, which wrote the selection, but the draft
-            // went with an app kill since. Reopen on what was written.
-            smartModePickDraft = SmartModePick.committed(
-                spokenLanguage: AppGroup.defaults.string(forKey: SharedKeys.spokenLanguage)
-            )
-        }
         show(back, goingBack: true)
     }
 
@@ -442,6 +437,7 @@ struct OnboardingView: View {
         // Reset to the first step on completion so a future onboarding reset starts
         // cleanly from the welcome screen instead of resuming here.
         OnboardingStep.save(.welcome)
+        SmartModePick.endOnboardingRun()
         isComplete = true
     }
 }

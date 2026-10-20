@@ -22,7 +22,8 @@ import DictusCore
 /// WHY A DRAFT (#725): the shell's back control returns here from the voice notes scene,
 /// and to the Smart Modes scene from here, and this page is rebuilt on every visit. Every
 /// change is mirrored into `draft`, which `OnboardingView` keeps, so the page reopens on
-/// the user's selection instead of empty.
+/// the user's selection instead of empty. When an app kill has emptied `draft`, the page
+/// opens on what this run's Continue wrote (`SmartModePick.committed(spokenLanguage:)`).
 struct SmartModePickPage: View {
     /// The flow's model manager, read for the download pill at the bottom
     /// (`OnboardingDownloadPill`).
@@ -44,7 +45,10 @@ struct SmartModePickPage: View {
         _draft = draft
         self.onContinue = onContinue
         // A first visit opens empty (#677): every mode in the fan is one the user asked for.
-        _pick = State(initialValue: draft.wrappedValue ?? SmartModePick())
+        // `committed` is that empty pick until this run's Continue has written a list.
+        _pick = State(initialValue: draft.wrappedValue ?? SmartModePick.committed(
+            spokenLanguage: AppGroup.defaults.string(forKey: SharedKeys.spokenLanguage)
+        ))
     }
 
     /// The language the user said they speak on the language screen, which removes its
