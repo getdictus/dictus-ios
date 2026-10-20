@@ -1,0 +1,914 @@
+[
+  {
+    "alignedPairs" : 8,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 28,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "1-message",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 8,
+    "labels" : [
+
+    ],
+    "listLines" : 0,
+    "ms" : 2256,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Yo man, j'espère que tu vas bien.\n\nÉcoute, je suis en train de regarder le projet, je t'ai pas répondu mais je suis en train de travailler dessus, je te tiens au jus dès que dès que.\n\nDès que j'ai avancé un petit peu plus dessus, s'il te plaît.\n\nEnfin pardon, pas s'il te plaît je me suis planté.",
+    "outputChars" : 296,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 295,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 8,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 28,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "1-message",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 8,
+    "labels" : [
+
+    ],
+    "listLines" : 0,
+    "ms" : 2763,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Yo man, j'espère que tu vas bien.\n\nÉcoute, je suis en train de regarder le projet, je t'ai pas répondu mais je suis en train de travailler dessus, je te tiens au jus dès que dès que.\n\ndès que j'ai avancé un petit peu plus dessus, s'il te plaît.\n\nEnfin pardon, pas s'il te plaît je me suis planté.",
+    "outputChars" : 296,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 295,
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 8,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 28,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "1-message",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 8,
+    "labels" : [
+
+    ],
+    "listLines" : 0,
+    "ms" : 3324,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Yo man, j'espère que tu vas bien.\n\nÉcoute, je suis en train de regarder le projet, je t'ai pas répondu mais je suis en train de travailler dessus, je te tiens au jus dès que dès que.\n\ndés que j'ai avancé un petit peu plus dessus, s'il te plaît.\n\nEnfin pardon, pas s'il te plaît je me suis planté.",
+    "outputChars" : 296,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 295,
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 3,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 3,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "2-message",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 3,
+    "labels" : [
+
+    ],
+    "listLines" : 0,
+    "ms" : 2804,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Salut Manu, comment tu vas ?\n\nEst-ce que tu pourrais checker si tu as bien reçu le mail que je t'ai envoyé tout à l'heure s'il te plaît ?\n\nDes bisous.",
+    "outputChars" : 150,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 147,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 3,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 3,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "2-message",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 3,
+    "labels" : [
+
+    ],
+    "listLines" : 0,
+    "ms" : 2724,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Salut Manu, comment tu vas ?\n\nEst-ce que tu pourrais checker si tu as bien reçu le mail que je t'ai envoyé tout à l'heure s'il te plaît ?\n\nDes bisous.",
+    "outputChars" : 150,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 147,
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 3,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 3,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "2-message",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 3,
+    "labels" : [
+
+    ],
+    "listLines" : 0,
+    "ms" : 2632,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Salut Manu, comment tu vas ?\n\nEst-ce que tu pourrais checker si tu as bien reçu le mail que je t'ai envoyé tout à l'heure s'il te plaît ?\n\nDes bisous.",
+    "outputChars" : 150,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 147,
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 5,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 10,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "3-message",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 5,
+    "labels" : [
+
+    ],
+    "listLines" : 0,
+    "ms" : 2952,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je te tiens au jus, je vais tester ça rapidement.\n\nIl faut juste que je prenne l'abonnement pour pouvoir essayer.\n\nMais honnêtement, de ce que j'ai cru comprendre, c'est peut-être un petit peu moins bien que Hermes et OpenClaw.",
+    "outputChars" : 227,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 225,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 5,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 10,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "3-message",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 5,
+    "labels" : [
+
+    ],
+    "listLines" : 0,
+    "ms" : 2800,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je te tiens au jus, je vais tester ça rapidement.\n\nIl faut juste que je prenne l'abonnement pour pouvoir essayer.\n\nMais honnêtement, de ce que j'ai cru comprendre, c'est peut-être un petit peu moins bien que Hermes et OpenClaw.",
+    "outputChars" : 227,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 225,
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 5,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 10,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "3-message",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 5,
+    "labels" : [
+
+    ],
+    "listLines" : 0,
+    "ms" : 3090,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je te tiens au jus, je vais tester ça rapidement.\n\nIl faut juste que je prenne l'abonnement pour pouvoir essayer.\n\nMais honnêtement, de ce que j'ai cru comprendre, c'est peut-être un petit peu moins bien que Hermes et OpenClaw",
+    "outputChars" : 226,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 225,
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 7,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 21,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "4-message",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 7,
+    "labels" : [
+
+    ],
+    "listLines" : 0,
+    "ms" : 2363,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Yo les gars, vous savez comment on peut voir les limites d'usage du modèle Astra.\n\nParce que ce matin j'ai voulu le tester et visiblement j'ai atteint les limites.\n\nMais quand je vais voir dans les dans les settings utilisation de ChatGPT, je vois juste l'usage global, je vois pas l'usage par modèle.\n\nSi vous avez l'info les gars, je suis preneur.",
+    "outputChars" : 349,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 346,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 7,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 21,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "4-message",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 7,
+    "labels" : [
+
+    ],
+    "listLines" : 0,
+    "ms" : 2455,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Yo les gars, vous savez comment on peut voir les limites d'usage du modèle Astra.\n\nParce que ce matin j'ai voulu le tester et visiblement j'ai atteint les limites.\n\nMais quand je vais voir dans les dans les settings utilisation de ChatGPT, je vois juste l'usage global, je vois pas l'usage par modèle.\n\nSi vous avez l'info les gars, je suis preneur.",
+    "outputChars" : 349,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 346,
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 7,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 21,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "4-message",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 7,
+    "labels" : [
+
+    ],
+    "listLines" : 0,
+    "ms" : 2629,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Yo les gars, vous savez comment on peut voir les limites d'usage du modèle Astra.\n\nParce que ce matin j'ai voulu le tester et visiblement j'ai atteint les limites.\n\nMais quand je vais voir dans les dans les settings utilisation de ChatGPT, je vois juste l'usage global, je vois pas l'usage par modèle.\n\nSi vous avez l'info les gars, je suis preneur.",
+    "outputChars" : 349,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 346,
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 8,
+    "arm" : "message-develop",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 28,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "1-message",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 8,
+    "labels" : [
+
+    ],
+    "listLines" : 0,
+    "ms" : 2684,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Yo man, j'espère que tu vas bien.\n\nÉcoute, je suis en train de regarder le projet, je t'ai pas répondu mais je suis en train de travailler dessus.\n\nJe te tiens au jus dès que dès que. dès que j'ai avancé un petit peu plus dessus, s'il te plaît.\n\nEnfin pardon, pas s'il te plaît je me suis planté.",
+    "outputChars" : 296,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 295,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 8,
+    "arm" : "message-develop",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 28,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "1-message",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 8,
+    "labels" : [
+
+    ],
+    "listLines" : 0,
+    "ms" : 2784,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Yo man, j'espère que tu vas bien.\n\nÉcoute, je suis en train de regarder le projet, je t'ai pas répondu mais je suis en train de travailler dessus, je te tiens au jus dès que dès que.\n\ndès que j'ai avancé un petit peu plus dessus, s'il te plaît.\n\nEnfin pardon, pas s'il te plaît je me suis planté.",
+    "outputChars" : 296,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 295,
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 8,
+    "arm" : "message-develop",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 28,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "1-message",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 8,
+    "labels" : [
+
+    ],
+    "listLines" : 0,
+    "ms" : 2591,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Yo man, j'espère que tu vas bien.\n\nÉcoute, je suis en train de regarder le projet, je t'ai pas répondu mais je suis en train de travailler dessus, je te tiens au jus dès que dès que. dès que j'ai avancé un petit peu plus dessus, s'il te plaît.\n\nEnfin pardon, pas s'il te plaît je me suis planté.",
+    "outputChars" : 295,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 295,
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 3,
+    "arm" : "message-develop",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 3,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "2-message",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 3,
+    "labels" : [
+
+    ],
+    "listLines" : 0,
+    "ms" : 1897,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Salut Manu, comment tu vas ?\n\nEst-ce que tu pourrais checker si tu as bien reçu le mail que je t'ai envoyé tout à l'heure s'il te plaît ?\n\nDes bisous.",
+    "outputChars" : 150,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 147,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 3,
+    "arm" : "message-develop",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 3,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "2-message",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 3,
+    "labels" : [
+
+    ],
+    "listLines" : 0,
+    "ms" : 1869,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Salut Manu, comment tu vas ?\n\nEst-ce que tu pourrais checker si tu as bien reçu le mail que je t'ai envoyé tout à l'heure s'il te plaît ?\n\nDes bisous.",
+    "outputChars" : 150,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 147,
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 3,
+    "arm" : "message-develop",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 3,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "2-message",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 3,
+    "labels" : [
+
+    ],
+    "listLines" : 0,
+    "ms" : 1950,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Salut Manu, comment tu vas ?\n\nEst-ce que tu pourrais checker si tu as bien reçu le mail que je t'ai envoyé tout à l'heure s'il te plaît ?\n\nDes bisous.",
+    "outputChars" : 150,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 147,
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 5,
+    "arm" : "message-develop",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 10,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "3-message",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 5,
+    "labels" : [
+
+    ],
+    "listLines" : 0,
+    "ms" : 2612,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je te tiens au jus, je vais tester ça rapidement.\n\nIl faut juste que je prenne l'abonnement pour pouvoir essayer.\n\nMais honnêtement, de ce que j'ai cru comprendre, c'est peut-être un petit peu moins bien que Hermes et OpenClaw.",
+    "outputChars" : 227,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 225,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 5,
+    "arm" : "message-develop",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 10,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "3-message",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 5,
+    "labels" : [
+
+    ],
+    "listLines" : 0,
+    "ms" : 2426,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je te tiens au jus, je vais tester ça rapidement\n\nIl faut juste que je prenne l'abonnement pour pouvoir essayer\n\nMais honnêtement, de ce que j'ai cru comprendre, c'est peut-être un petit peu moins bien que Hermes et OpenClaw",
+    "outputChars" : 224,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 225,
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 5,
+    "arm" : "message-develop",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 10,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "3-message",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 5,
+    "labels" : [
+
+    ],
+    "listLines" : 0,
+    "ms" : 2994,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je te tiens au jus, je vais tester ça rapidement.\n\nIl faut juste que je prenne l'abonnement pour pouvoir essayer.\n\nMais honnêtement, de ce que j'ai cru comprendre, c'est peut-être un petit peu moins bien que Hermes et OpenClaw.",
+    "outputChars" : 227,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 225,
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 7,
+    "arm" : "message-develop",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 21,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "4-message",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 7,
+    "labels" : [
+
+    ],
+    "listLines" : 0,
+    "ms" : 3246,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Yo les gars, vous savez comment on peut voir les limites d'usage du modèle Astra\n\nParce que ce matin j'ai voulu le tester et visiblement j'ai atteint les limites\n\nMais quand je vais voir dans les dans les settings utilisation de ChatGPT, je vois juste l'usage global, je vois pas l'usage par modèle\n\nSi vous avez l'info les gars, je suis preneur",
+    "outputChars" : 345,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 346,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 7,
+    "arm" : "message-develop",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 21,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "4-message",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 7,
+    "labels" : [
+
+    ],
+    "listLines" : 0,
+    "ms" : 2714,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Yo les gars, vous savez comment on peut voir les limites d'usage du modèle Astra.\n\nParce que ce matin j'ai voulu le tester et visiblement j'ai atteint les limites.\n\nMais quand je vais voir dans les dans les settings utilisation de ChatGPT, je vois juste l'usage global, je vois pas l'usage par modèle.\n\nSi vous avez l'info les gars, je suis preneur.",
+    "outputChars" : 349,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 346,
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 7,
+    "arm" : "message-develop",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 21,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "4-message",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 7,
+    "labels" : [
+
+    ],
+    "listLines" : 0,
+    "ms" : 2607,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Yo les gars, vous savez comment on peut voir les limites d'usage du modèle Astra.\n\nParce que ce matin j'ai voulu le tester et visiblement j'ai atteint les limites.\n\nMais quand je vais voir dans les dans les settings utilisation de ChatGPT, je vois juste l'usage global, je vois pas l'usage par modèle.\n\nSi vous avez l'info les gars, je suis preneur.",
+    "outputChars" : 349,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 346,
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  }
+]

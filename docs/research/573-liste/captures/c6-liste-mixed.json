@@ -1,0 +1,576 @@
+[
+  {
+    "alignedPairs" : 2,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 1,
+    "dispersed" : 1,
+    "expectedLanguage" : "fr",
+    "fixture" : "M1-fr-week-end",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 4,
+    "labels" : [
+
+    ],
+    "listLines" : 3,
+    "ms" : 1705,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Week-end :\n- Réserver le restaurant pour samedi\n- Le train part à 9h\n- Demander à Julie si elle vient ou pas",
+    "outputChars" : 108,
+    "outputLanguage" : "fr",
+    "personLost" : 1,
+    "rawChars" : 199,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "pas 10h, je me suis trompé l'autre jour,"
+    ],
+    "unrecalledWholeRecall" : [
+      0
+    ]
+  },
+  {
+    "alignedPairs" : 2,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 1,
+    "dispersed" : 1,
+    "expectedLanguage" : "fr",
+    "fixture" : "M1-fr-week-end",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 4,
+    "labels" : [
+
+    ],
+    "listLines" : 3,
+    "ms" : 1692,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Week-end :\n- Réserver le restaurant pour samedi\n- Le train part à 9h\n- Demander à Julie si elle vient ou pas",
+    "outputChars" : 108,
+    "outputLanguage" : "fr",
+    "personLost" : 1,
+    "rawChars" : 199,
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "pas 10h, je me suis trompé l'autre jour,"
+    ],
+    "unrecalledWholeRecall" : [
+      0
+    ]
+  },
+  {
+    "alignedPairs" : 2,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 1,
+    "dispersed" : 1,
+    "expectedLanguage" : "fr",
+    "fixture" : "M1-fr-week-end",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 4,
+    "labels" : [
+
+    ],
+    "listLines" : 3,
+    "ms" : 1691,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Week-end :\n- Réserver le restaurant pour samedi\n- Le train part à 9h\n- Demander à Julie si elle vient ou pas",
+    "outputChars" : 108,
+    "outputLanguage" : "fr",
+    "personLost" : 1,
+    "rawChars" : 199,
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "pas 10h, je me suis trompé l'autre jour,"
+    ],
+    "unrecalledWholeRecall" : [
+      0
+    ]
+  },
+  {
+    "alignedPairs" : 7,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 21,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "M2-fr-chantier",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 8,
+    "labels" : [
+
+    ],
+    "listLines" : 3,
+    "ms" : 2154,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Appartement :\n- Passe le plombier mardi matin, il faut que je sois là avant huit heures\n- La peinture du salon est sèche, elle rend bien, franchement je suis content de la couleur\n- Il faut que je rachète des ampoules pour la cuisine",
+    "outputChars" : 233,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 308,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "j'oublie tout le temps."
+    ],
+    "unrecalledWholeRecall" : [
+      0
+    ]
+  },
+  {
+    "alignedPairs" : 7,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 21,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "M2-fr-chantier",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 8,
+    "labels" : [
+
+    ],
+    "listLines" : 3,
+    "ms" : 2151,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Appartement :\n- Passe le plombier mardi matin, donc il faut que je sois là avant huit heures\n- La peinture du salon est sèche, elle rend bien, franchement je suis content de la couleur\n- Rachète des ampoules pour la cuisine",
+    "outputChars" : 223,
+    "outputLanguage" : "fr",
+    "personLost" : 1,
+    "rawChars" : 308,
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "j'oublie tout le temps."
+    ],
+    "unrecalledWholeRecall" : [
+      0
+    ]
+  },
+  {
+    "alignedPairs" : 7,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 21,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "M2-fr-chantier",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 8,
+    "labels" : [
+
+    ],
+    "listLines" : 3,
+    "ms" : 2153,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Appartement :\n- Passe le plombier mardi matin, donc il faut que je sois là avant huit heures\n- La peinture du salon est sèche, elle rend bien, franchement je suis content de la couleur\n- Rachète des ampoules pour la cuisine",
+    "outputChars" : 223,
+    "outputLanguage" : "fr",
+    "personLost" : 1,
+    "rawChars" : 308,
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "j'oublie tout le temps."
+    ],
+    "unrecalledWholeRecall" : [
+      0
+    ]
+  },
+  {
+    "alignedPairs" : 6,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 15,
+    "dispersed" : 0,
+    "expectedLanguage" : "en",
+    "fixture" : "M3-en-launch",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 6,
+    "labels" : [
+
+    ],
+    "listLines" : 4,
+    "ms" : 2102,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Launch:\n- Send the press kit by Friday\n- The landing page is live and we had about two hundred sign ups yesterday\n- The pricing page still says the old price, I noticed that this morning\n- Book the photographer for next week",
+    "outputChars" : 224,
+    "outputLanguage" : "en",
+    "personLost" : 2,
+    "rawChars" : 260,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 6,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 15,
+    "dispersed" : 0,
+    "expectedLanguage" : "en",
+    "fixture" : "M3-en-launch",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 6,
+    "labels" : [
+
+    ],
+    "listLines" : 4,
+    "ms" : 2907,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Launch:\n- Send the press kit by Friday\n- The landing page is live: about two hundred sign ups yesterday\n- The pricing page still says the old price: I noticed that this morning\n- Book the photographer for next week",
+    "outputChars" : 214,
+    "outputLanguage" : "en",
+    "personLost" : 3,
+    "rawChars" : 260,
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 6,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 15,
+    "dispersed" : 0,
+    "expectedLanguage" : "en",
+    "fixture" : "M3-en-launch",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 6,
+    "labels" : [
+
+    ],
+    "listLines" : 4,
+    "ms" : 2270,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Launch:\n- Send the press kit by Friday\n- The landing page is live and we had about two hundred sign ups yesterday\n- The pricing page still says the old price, I noticed that this morning\n- Book the photographer for next week",
+    "outputChars" : 224,
+    "outputLanguage" : "en",
+    "personLost" : 2,
+    "rawChars" : 260,
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 2,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 1,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "D1-fr-device-courses",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 1,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 3,
+    "labels" : [
+
+    ],
+    "listLines" : 3,
+    "ms" : 2196,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Récap du lait :\n- Acheter du lait parce qu'on n'en a plus\n- Acheter du gris à râper\n- Donner à manger au chien",
+    "outputChars" : 110,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 196,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "Alors je te fais un petit récap de ce qu'il faut qu'on fasse,"
+    ],
+    "unrecalledWholeRecall" : [
+      0.3333333333333333
+    ]
+  },
+  {
+    "alignedPairs" : 1,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "D1-fr-device-courses",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 3,
+    "labels" : [
+
+    ],
+    "listLines" : 3,
+    "ms" : 1716,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Récap :\n- Acheter du lait\n- Acheter du gris à râper\n- Donner à manger au chien",
+    "outputChars" : 78,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 196,
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "Alors je te fais un petit récap de ce qu'il faut qu'on fasse,",
+      "mais en gros il faut que absolument qu'on achète du lait parce qu'on n'en a plus,"
+    ],
+    "unrecalledWholeRecall" : [
+      0.16666666666666666,
+      0.125
+    ]
+  },
+  {
+    "alignedPairs" : 1,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "D1-fr-device-courses",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 3,
+    "labels" : [
+
+    ],
+    "listLines" : 3,
+    "ms" : 1723,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Récap du lait et des produits :\n- Acheter du lait\n- Acheter du gris à râper\n- Donner à manger au chien",
+    "outputChars" : 102,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 196,
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "Alors je te fais un petit récap de ce qu'il faut qu'on fasse,",
+      "mais en gros il faut que absolument qu'on achète du lait parce qu'on n'en a plus,"
+    ],
+    "unrecalledWholeRecall" : [
+      0.16666666666666666,
+      0.125
+    ]
+  },
+  {
+    "alignedPairs" : 2,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 1,
+    "dispersed" : 0,
+    "expectedLanguage" : "en",
+    "fixture" : "D2-en-device-hair",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 3,
+    "labels" : [
+
+    ],
+    "listLines" : 4,
+    "ms" : 1935,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Hair care:\n- Wash my hair\n- Cut my hair\n- Brush my hair\n- Hit a big stack with my own",
+    "outputChars" : 85,
+    "outputLanguage" : "en",
+    "personLost" : 0,
+    "rawChars" : 124,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "Okay could you not this please?"
+    ],
+    "unrecalledWholeRecall" : [
+      0
+    ]
+  },
+  {
+    "alignedPairs" : 2,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 1,
+    "dispersed" : 0,
+    "expectedLanguage" : "en",
+    "fixture" : "D2-en-device-hair",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 3,
+    "labels" : [
+
+    ],
+    "listLines" : 4,
+    "ms" : 3573,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Hair care tasks:\n- Wash my hair\n- Cut my hair\n- Brush my hair\n- Hit a big stack with my own",
+    "outputChars" : 91,
+    "outputLanguage" : "en",
+    "personLost" : 0,
+    "rawChars" : 124,
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "Okay could you not this please?"
+    ],
+    "unrecalledWholeRecall" : [
+      0
+    ]
+  },
+  {
+    "alignedPairs" : 2,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 1,
+    "dispersed" : 0,
+    "expectedLanguage" : "en",
+    "fixture" : "D2-en-device-hair",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 3,
+    "labels" : [
+
+    ],
+    "listLines" : 4,
+    "ms" : 3939,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Hair care:\n- Wash my hair\n- Cut my hair\n- Brush my hair\n- Hit a big stack with my own",
+    "outputChars" : 85,
+    "outputLanguage" : "en",
+    "personLost" : 0,
+    "rawChars" : 124,
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "Okay could you not this please?"
+    ],
+    "unrecalledWholeRecall" : [
+      0
+    ]
+  }
+]

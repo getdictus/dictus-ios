@@ -1,0 +1,71 @@
+
+
+████ ARM shipping — mode summary, 5 run(s) × 2 fixture(s)
+
+━━ [ja-free-form] 173 chars, lang=ja
+  raw: えっと、今朝歩きながらちょっと考えてたんだけど、結局一人でプロダクトを立ち上げるときって、一番難しいのはコードを書くことじゃなくて、実は何をやらないかを決めることなんだよね。だっていつも、今取り組んでるものより良さそうに見えるアイデアがあるから。それでついそっちに飛びついて、6か月後には始めたものが15個あって、終わったものは何もないっていう。
+  #1 rejectedGuardrail/length ratio=1.20 OUT-OF-BAND 4057ms  ⚑ LANG=en
+     out: Starting a product alone is hardest not writing code but deciding what not to do because new ideas always seem better than what you’re working on and six months later you have 15 started and nothing finished.
+  #2 rejectedGuardrail/length ratio=1.23 OUT-OF-BAND 2370ms  ⚑ LANG=en
+     out: Starting a product alone is hardest not writing code but deciding what to avoid because new ideas always seem better than what you're doing now, leading to 15 started projects and nothing finished after 6 months.
+  #3 rejectedGuardrail/length ratio=1.22 OUT-OF-BAND 2876ms  ⚑ LANG=en
+     out: Starting a product alone is hardest not writing code but deciding what not to do because new ideas always seem better than what you’re working on, leading to 15 started projects and none finished after 6 months.
+  #4 rejectedGuardrail/length ratio=1.24 OUT-OF-BAND 2745ms  ⚑ LANG=en
+     out: Starting a product alone is hardest not writing code but deciding what not to do because new ideas always seem better than what you're working on, leading to 15 started projects and nothing finished after 6 months.
+  #5 rejectedGuardrail/length ratio=1.20 OUT-OF-BAND 4139ms  ⚑ LANG=en
+     out: Starting a product alone is hardest not coding but deciding what not to do because new ideas always seem better than what you're working on, leading to 15 started projects and nothing finished after 6 months.
+
+━━ [ja-todo-enumeration] 208 chars, lang=ja
+  raw: えーと、会議の前にやらなきゃいけないことをまとめると、まずマリオンから1月の数字をもらわないといけない、火曜日にはあるって言ってた、いや水曜日だ、それで、えー、去年の数字との比較表を作らないといけなくて、あとさ、業者に絶対電話しなきゃいけない、見積もりがまた12000ユーロから15000ユーロに上がってて、それ誰も承認してないから、で、まあ、2階の会議室も予約しとかなきゃ、もう一つの方は一週間ずっと埋まってるから
+  #1 rejectedGuardrail/length ratio=1.49 OUT-OF-BAND 4480ms  ⚑ LANG=en FIGURE[12,000,15,000]
+     out: I need the January numbers from Marion, which are on Wednesday, I must make a comparison table with last year’s data, I have to call the vendor because the estimate rose from 12,000 to 15,000 euros and no one approved it, and I must book the second-floor meeting room because the other one is full for a week.
+  #2 rejectedGuardrail/length ratio=1.59 OUT-OF-BAND 4248ms  ⚑ LANG=en FIGURE[12,000,15,000]
+     out: I need Marion to give me the numbers for January, which are on Wednesday, and I must make a comparison table with last year’s figures. I have to call the contractor because the estimate rose from 12,000 euros to 15,000 euros and no one approves it. I must also book the second-floor meeting room, which is already full for a week.
+  #3 rejectedGuardrail/length ratio=1.29 OUT-OF-BAND 4406ms  ⚑ LANG=en FIGURE[12,000,15,000]
+     out: I must get the numbers from Marion on Wednesday, make a comparison table with last year’s data, call the contractor because the estimate rose from 12,000 to 15,000 euros and no one approves, and book the second-floor meeting room since the other one is full for a week.
+  #4 rejectedGuardrail/length ratio=1.33 OUT-OF-BAND 3047ms  ⚑ LANG=en FIGURE[1500]
+     out: I must get the January numbers from Marion on Wednesday, make a comparison table with last year's figures, call the contractor because the estimate rose from 12000 euros to 1500 euros with no approval, and book the second-floor meeting room since the other one is always full.
+  #5 rejectedGuardrail/length ratio=1.31 OUT-OF-BAND 2329ms  ⚑ LANG=en FIGURE[12,000,15,000]
+     out: I must get the numbers from Marion by Wednesday, make a comparison table with last year’s figures, call the contractor because the estimate rose from 12,000 to 15,000 euros and no one approves, and book the second-floor meeting room since the other one is full for a week.
+
+
+████ ARM arm-ja-examples — mode summary, 5 run(s) × 2 fixture(s)
+     prompt: ../docs/research/571-summary/step2/arm-ja-examples.txt
+
+━━ [ja-free-form] 173 chars, lang=ja
+  raw: えっと、今朝歩きながらちょっと考えてたんだけど、結局一人でプロダクトを立ち上げるときって、一番難しいのはコードを書くことじゃなくて、実は何をやらないかを決めることなんだよね。だっていつも、今取り組んでるものより良さそうに見えるアイデアがあるから。それでついそっちに飛びついて、6か月後には始めたものが15個あって、終わったものは何もないっていう。
+  #1 success ratio=0.51 1542ms
+     out: 一人でプロダクトを立ち上げる一番難しいのは何をやらないかを決めることだ。いつも今取り組んでるより良さそうに見えるアイデアに飛びついて、6か月後に15個始めて終わったのはゼロだ。
+  #2 success ratio=0.50 1433ms
+     out: 一人でプロダクトを立ち上げる一番難しいのは何をやらないかを決めることだ。今取り組んでるより良さそうに見えるアイデアに飛びついて、6か月後に15個始めて終わったものはゼロだ。
+  #3 success ratio=0.51 1470ms
+     out: 一人でプロダクトを立ち上げる一番難しいのは何をやらないかを決めることだ。今取り組んでいるものより良さそうに見えるアイデアに飛びついて、6か月後に15個始めて終わったものはゼロだ。
+  #4 success ratio=0.51 1494ms
+     out: 一人でプロダクトを立ち上げる一番難しいのは何をやらないかを決めることだ。いつも今取り組んでるより良さそうに見えるアイデアに飛びついて、6か月後に15個始めて終わったものはゼロだ。
+  #5 success ratio=0.49 1471ms
+     out: 一人でプロダクトを立ち上げる一番難しいのは何をやらないかを決めることだ。今取り組んでるより良さそうに見えるアイデアに飛びついて、6か月後に15個始めて終わったのはゼロだ。
+
+━━ [ja-todo-enumeration] 208 chars, lang=ja
+  raw: えーと、会議の前にやらなきゃいけないことをまとめると、まずマリオンから1月の数字をもらわないといけない、火曜日にはあるって言ってた、いや水曜日だ、それで、えー、去年の数字との比較表を作らないといけなくて、あとさ、業者に絶対電話しなきゃいけない、見積もりがまた12000ユーロから15000ユーロに上がってて、それ誰も承認してないから、で、まあ、2階の会議室も予約しとかなきゃ、もう一つの方は一週間ずっと埋まってるから
+  #1 rejectedGuardrail/length ratio=0.64 OUT-OF-BAND 2132ms
+     out: マリオンから1月の数字を水曜日に得ないといけない。去年の数字との比較表を作らないといけない。業者に電話して見積もりが12000ユーロから15000ユーロに上がったことを確認しないといけない。2階の会議室を予約しないといけない。もう一つの方は一週間ずっと埋まっている。
+  #2 success ratio=0.51 2077ms
+     out: マリオンから1月の数字が水曜日に届く。去年の数字との比較表を作る。業者に電話して見積りが12000ユーロから15000ユーロに上がったことを確認する。2階の会議室を予約する。もう一つの部屋は一週間中埋まっている。
+  #3 success ratio=0.52 2042ms
+     out: マリオンから1月の数字が水曜日に届く。去年の数字との比較表を作る。業者の電話をして見積もりが12000ユーロから15000ユーロに上がったことを確認する。2階の会議室を予約する。もう一つの場所は一週間中埋まっている。
+  #4 success ratio=0.53 1941ms
+     out: マリオンから1月の数字が水曜日に届く。去年の数字との比較表を作る。業者の電話で見積もりが12000ユーロから15000ユーロに上がったが誰も承認していない。2階の会議室を予約する。もう一つの方は一週間ずっと埋まっている。
+  #5 rejectedGuardrail/length ratio=0.66 OUT-OF-BAND 2108ms
+     out: マリオンから1月の数字を受け取らないといけない。水曜日に、去年の数字との比較表を作らないといけない。業者に電話して見積もりが12000ユーロから15000ユーロに上がったことを確認しないといけない。2階の会議室も予約しないといけない。もう一つの方は一週間ずっと埋まっている。
+
+
+══ bars (engine outputs; `acc` = accepted by the pipeline)
+arm | lang | runs | wrong-lang (acc) | refused on language | list lines | in band | report/infinitive/person-lost | preamble | example | figure | accepted
+shipping | ja | 10 | 10 (0) | 0 (0%) | 0 | 0/10 (0%) | 0 | 0 | 0 | 5 | 0/10
+shipping | ALL | 10 | 10 (0) | 0 (0%) | 0 | 0/10 (0%) | 0 | 0 | 0 | 5 | 0/10
+   refusals, shipping: length×10
+arm-ja-examples | ja | 10 | 0 (0) | 0 (0%) | 0 | 8/10 (80%) | 0 | 0 | 0 | 0 | 8/10
+arm-ja-examples | ALL | 10 | 0 (0) | 0 (0%) | 0 | 8/10 (80%) | 0 | 0 | 0 | 0 | 8/10
+   refusals, arm-ja-examples: length×2
+
+capture written: ../docs/research/571-summary/step2/run-ja.json

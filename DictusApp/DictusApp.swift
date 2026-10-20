@@ -37,7 +37,22 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
     ) -> Bool {
         BackgroundModelDownloadService.shared.restore()
+        // A hint at the launch kind, one main-loop turn from now (#707). `background` alone
+        // does not settle it: see `appLaunchState`.
+        DispatchQueue.main.async {
+            PersistentLog.log(.appLaunchState(state: Self.applicationStateName))
+        }
         return true
+    }
+
+    /// `UIApplication.applicationState` as the log spells it.
+    private static var applicationStateName: String {
+        switch UIApplication.shared.applicationState {
+        case .active: return "active"
+        case .inactive: return "inactive"
+        case .background: return "background"
+        @unknown default: return "unknown"
+        }
     }
 
     /// iOS relaunched (or resumed) the app to deliver background transfer events.
@@ -51,6 +66,10 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         handleEventsForBackgroundURLSession identifier: String,
         completionHandler: @escaping () -> Void
     ) {
+        // First, and for any identifier: two launches in #707's second capture logged
+        // `appLaunched` and never became active, and nothing in the log could say whether
+        // iOS had made them to deliver this session's events or the user had.
+        PersistentLog.log(.appBackgroundSessionEvents(identifier: identifier))
         guard identifier == BackgroundModelDownloadService.sessionIdentifier else {
             completionHandler()
             return
@@ -106,6 +125,9 @@ struct DictusApp: App {
     @StateObject private var proStatus: ProStatusManager
     @StateObject private var subscriptionManager: SubscriptionManager
 
+    /// Raises the reverse trial's announcement and its end-of-trial paywall (#593).
+    @StateObject private var trialCoordinator: ProTrialCoordinator
+
     /// The saved dictations (#70). A `StateObject` on the singleton, like the
     /// coordinator above: the object outlives every view, and this is what publishes
     /// it to the screens that read it.
@@ -140,6 +162,13 @@ struct DictusApp: App {
         PersistentLog.source = "APP"
         let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "?"
         PersistentLog.log(.appLaunched(version: version))
+
+        // What's new's key (#685), before `MainTabView` asks whether it is due. A launch
+        // that has not completed onboarding is a new install: recorded as up to date now,
+        // so its onboarding is never followed by What's new. An existing user's first
+        // launch of 2.0.0 is left due, and recorded once What's new is on screen. A device
+        // that can never run Smart Modes has no scene to show, and is recorded now.
+        WhatsNew.recordLaunch(deviceCanRunSmartModes: SmartModeAvailability.deviceIsCapable)
 
         // Complete a Parakeet cache the 0.15 loader cannot use, before the coordinator's
         // launch preload can reach it (#558): layer 0 moves a 0.12 cache into the folder 0.15
@@ -253,12 +282,21 @@ struct DictusApp: App {
         // to App Group). We need to create proStatus first, pass it to
         // SubscriptionManager, then wrap both in StateObject.
         let proStatus = ProStatusManager()
+        // The Keychain decides whether a trial was ever granted, and the App Group only
+        // mirrors it (#593). Reconciled here, before any view can ask whether a trial
+        // may start, so a reinstall finds its old trial instead of a fresh one.
+        proStatus.reconcileTrial()
         _proStatus = StateObject(wrappedValue: proStatus)
         _subscriptionManager = StateObject(wrappedValue: SubscriptionManager(proStatus: proStatus))
+        _trialCoordinator = StateObject(wrappedValue: ProTrialCoordinator(proStatus: proStatus))
 
         // Warm up the polish engine for the current target language (#141).
         // No-op when the toggle is off or when the engine has nothing to warm.
         PolishCoordinator.shared.prewarm()
+
+        // Listen for voice notes shared to Dictus (#620), and pick up any the share
+        // extension dropped while this process was not running.
+        VoiceNoteProcessor.shared.start()
     }
 
     @Environment(\.scenePhase) private var scenePhase
@@ -270,6 +308,7 @@ struct DictusApp: App {
                 .environmentObject(proStatus)
                 .environmentObject(subscriptionManager)
                 .environmentObject(history)
+                .environmentObject(trialCoordinator)
                 .onOpenURL { url in
                     handleIncomingURL(url)
                 }
@@ -284,10 +323,15 @@ struct DictusApp: App {
                     switch phase {
                     case .active:
                         PersistentLog.log(.appDidBecomeActive)
+                        // #620's cold path: a voice note shared while the app was not
+                        // running starts now, with the list on screen.
+                        VoiceNoteProcessor.shared.appBecameActive()
                     case .inactive:
                         PersistentLog.log(.appWillResignActive)
                     case .background:
                         PersistentLog.log(.appDidEnterBackground)
+                        // The voice note screen lasts one activation (#620).
+                        VoiceNoteProcessor.shared.appWentToBackground()
 
                         // A cold start parked waiting for `.active` gets its last
                         // chance here (#311), because `.active` is not coming — the
@@ -347,6 +391,10 @@ struct DictusApp: App {
                             name: Notification.Name("DictusOnboardingCompleted"),
                             object: nil
                         )
+                        // A new user's trial is announced, and started, at the end of
+                        // onboarding (#593): after the first successful dictation, not
+                        // at install, because the model download can take minutes.
+                        trialCoordinator.onboardingCompleted()
                     }
                 }
                 .fullScreenCover(isPresented: .constant(!hasCompletedOnboarding)) {
@@ -504,6 +552,12 @@ struct DictusApp: App {
     private func handleIncomingURL(_ url: URL) {
         guard url.scheme == "dictus" else { return }
 
+        // Before anything this URL raises: the island's link opens the voice note
+        // cards, and `onOpenURL` may run before the `.active` transition that also
+        // reconciles. A note already read in the keyboard must not come up as unread
+        // (#639).
+        VoiceNoteProcessor.shared.reconcileKeyboardDeliveries(reason: "url")
+
         // Temporary diagnostic: log all URL components for cold start investigation.
         // This captures what information IS available from the URL itself (host, query params).
         // Combined with AppDelegate.sourceApplication logging, this lets us confirm empirically
@@ -614,6 +668,11 @@ struct DictusApp: App {
         case "stop":
             // Stop recording from Dynamic Island expanded view button.
             coordinator.stopDictation()
+        case VoiceNoteURL.host:
+            // A tap on the Live Activity's voice note (#620): its result, or the list.
+            if case .some(let target) = VoiceNoteURL.target(of: url) {
+                VoiceNoteProcessor.shared.open(target)
+            }
         default:
             break
         }
@@ -653,7 +712,7 @@ extension Notification.Name {
     /// Posted by a `ModelManager` whenever a model's preparation state or download
     /// progress changes, so the other instance in this process draws the same thing
     /// (issue #449). Process-local: `MainTabView` builds one `ModelManager` and
-    /// onboarding's `ModelDownloadPage` builds another, and after a relaunch the
+    /// `OnboardingView` builds another (#649), and after a relaunch the
     /// download is resumed by whichever of them was created first.
     static let dictusModelPreparationChanged = Notification.Name(
         "DictusModelPreparationChanged"

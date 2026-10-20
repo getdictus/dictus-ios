@@ -11,7 +11,8 @@ import Foundation
 /// neither of the other two carries: it rewrites the speaker's sentences rather than
 /// reshaping them, which is why it is a row of its own rather than a rendering option
 /// on List. Summary was cut in the design session because List already synthesises;
-/// #571 reopens that on the grounds that List synthesises into *actions*.
+/// #571 reopened that on the grounds that List synthesised into *actions*, and #573
+/// re-centred List as the bulleted twin of Summary: the same loss axis, two shapes.
 ///
 /// **SMS was cut in that same session, and #572 falsified the reason.** The cut read:
 /// the free polish already produces natural conversational text — that is literally
@@ -57,6 +58,11 @@ public enum SmartModeCatalogue {
     /// metrics event and the per-dictation App Group snapshot.
     public static let messageIdentifier = "message"
 
+    /// Identifier of the gist mode, displayed as "Summary" / "Résumé" (#571). A wire
+    /// value from the day it ships, for the reason above: it keys the session cache,
+    /// the metrics event and the per-dictation App Group snapshot.
+    public static let summaryIdentifier = "summary"
+
     /// Identifier of the Translate mode targeting `language`.
     public static func translateIdentifier(target: SupportedLanguage) -> String {
         "translate.\(target.rawValue)"
@@ -64,7 +70,9 @@ public enum SmartModeCatalogue {
 
     // MARK: - The rows
 
-    /// List: bullets, synthesised, filler removed, in the speaker's own language.
+    /// List: a title from the speaker's words, then every point they made, one line
+    /// each, in their own language (#573). Actions come out in the infinitive so they
+    /// can be ticked off; statements stay statements. `Summary` is the prose version.
     ///
     /// **Named `Notes` until 2026-08-27**, when the maintainer renamed the label —
     /// and only the label. `Notes` names an intention and reads equally well as
@@ -91,7 +99,12 @@ public enum SmartModeCatalogue {
         prompt: SmartModePrompt(
             instructions: SmartModeNotesPrompt.instructions(),
             userInstruction: SmartModeNotesPrompt.userInstruction,
-            outputMarker: SmartModeNotesPrompt.outputMarker
+            outputMarker: SmartModeNotesPrompt.outputMarker,
+            // One example set per Apple FM language (#587 decision 9, step 2). This
+            // mode's prompt carried three French blocks and one English one, which is
+            // #585's mechanism in the mode's own file. Only the examples are
+            // translated; no rule of `List` moves here, its rebuild is #573.
+            localizedInstructions: SmartModeNotesPrompt.localizedInstructions()
         ),
         contract: PolishAcceptanceContract(
             minimumLengthRatio: 0.1,
@@ -114,7 +127,15 @@ public enum SmartModeCatalogue {
         // floor is the same words in the same language, merely not restructured.
         // Since #580 the same answer covers a guardrail rejection, which discards the
         // engine's output whole and so cannot put a half-transformation in the field.
-        floorBehaviour: .insertRawText
+        floorBehaviour: .insertRawText,
+        // An output with fewer than two bullets is declined: the dictation gets Normal
+        // polish and the keyboard says "Trop court pour une liste" (#573 decision 5, as
+        // amended on 2026-10-01). It replaced a 100-character input floor, which the
+        // device round caught skipping a 64-character, four-item shopping list: length
+        // cannot see how many items a sentence holds, the model's output can. See
+        // `SmartMode.minimumListItems`; the floor's measurement stays in
+        // `docs/research/573-liste/floor/` as the record of why it was dropped.
+        minimumListItems: 2
     )
 
     /// Structured: the long vocal message, rewritten as paragraphs that do not read
@@ -132,7 +153,8 @@ public enum SmartModeCatalogue {
     ///
     /// The rule that keeps the two apart on the input where they would otherwise
     /// collapse is in the prompt, not here: Structured keeps the speaker's
-    /// grammatical person, where `List` produces infinitive tasks. See
+    /// grammatical person in paragraphs, where `List` condenses each point to one
+    /// line and writes the actions as infinitive tasks. See
     /// `SmartModeStructuredPrompt`.
     ///
     /// ### The band is measured, unusually for this file
@@ -158,14 +180,24 @@ public enum SmartModeCatalogue {
         prompt: SmartModePrompt(
             instructions: SmartModeStructuredPrompt.instructions(),
             userInstruction: SmartModeStructuredPrompt.userInstruction,
-            outputMarker: SmartModeStructuredPrompt.outputMarker
+            outputMarker: SmartModeStructuredPrompt.outputMarker,
+            // One example set per Apple FM language (#587, decision 5 step 2). Benched
+            // at 0 % refused on `check=language` in all 16, against up to 29 % for the
+            // prompt this replaces; the rules stay one English text.
+            localizedInstructions: SmartModeStructuredPrompt.localizedInstructions()
         ),
         contract: PolishAcceptanceContract(
             minimumLengthRatio: 0.4,
             maximumLengthRatio: 1.5,
             outputLanguage: .sameAsInput,
             requiresGroundedNames: true,
-            requiresAlignedPrefix: false
+            requiresAlignedPrefix: false,
+            // The one mode that keeps a speaker-flagged incompleteness as a hard bar
+            // (#523, decision 7), and the one the device caught inventing one: seven
+            // outputs closing on a sentence about the speaker's memory, three of them
+            // inserted (#581). Rule 7 stays; this refuses the sentence when the
+            // transcript never said it (#587, decision 6). See `PolishIncompleteness`.
+            refusesFabricatedIncompleteness: true
         ),
         // The mode armed for the longest dictations is the one that meets the context
         // ceiling first — sooner than `List`, because its prompt is longer. The floor
@@ -175,7 +207,19 @@ public enum SmartModeCatalogue {
         // This mode is also the one #580 measured being refused by a guardrail — three
         // times in nine device runs, one of them 1,337 characters — and the sentence
         // above is already the answer to that: the words are the speaker's either way.
-        floorBehaviour: .insertRawText
+        floorBehaviour: .insertRawText,
+        // Below 200 characters the mode is skipped and the dictation takes the path it
+        // would take with no mode armed (#587, round 4). Read from the 51 `Structuré`
+        // dictations in the device exports of 2026-09-13 to 09-23: all 8 under 120
+        // characters are a single sentence, and 15 of the 16 under 200 are one or two.
+        // That is where the mode did its damage and had nothing to structure — a person swapped
+        // at 28 (`Comment tu vas` → `Comment vais-je`), a `Voici` added at 90, two
+        // clauses swapped at 65, a `s'il te plaît` dropped at 192, a tense and register
+        // lifted at 149 — and where no output in the corpus gained a paragraph worth
+        // having. The one exception is also the known cost: a 149-character dictation
+        // counting off three tasks now gets Normal polish instead of a list; `Liste` is
+        // the mode for that.
+        minimumInputCharacters: 200
     )
 
     /// Message: what the speaker would have typed, rather than a clean copy of what
@@ -247,7 +291,12 @@ public enum SmartModeCatalogue {
             // A short message keeps its beats on separate lines without the blank
             // line between them — the maintainer's own choice on device, 2026-09-18.
             // See `SmartModePrompt.shortOutputBlockLimit`.
-            shortOutputBlockLimit: 100
+            shortOutputBlockLimit: 100,
+            // One example set per Apple FM language (#587 decision 9, step 2). Both of
+            // this prompt's examples were French, so #585 applied to it in full. The
+            // French set is the shipping pair byte for byte: a French dictation, which
+            // is what the maintainer sends daily, gets the prompt it got before.
+            localizedInstructions: SmartModeMessagePrompt.localizedInstructions()
         ),
         contract: PolishAcceptanceContract(
             minimumLengthRatio: 0.2,
@@ -282,6 +331,92 @@ public enum SmartModeCatalogue {
         // language, and never *wrong* (#270), which is the answer the other two
         // structure modes already give.
         floorBehaviour: .insertRawText
+    )
+
+    /// Summary: the gist of a dictation, in prose, in the speaker's person (#571).
+    ///
+    /// ### The axis, and why this is not `List` without bullets
+    ///
+    /// The #79 design session cut Summary because *List already synthesises*. True
+    /// of the axis, not of the shape. When #571 shipped, `List` compressed into
+    /// **actions**, as infinitive bullets, and invented tasks out of statements; #573
+    /// re-centred it on every point, in bullets. The two now share the loss axis and
+    /// differ by shape: this row keeps the **substance**, as prose, to read or
+    /// forward; `List` keeps every point, as lines, to scan or tick off. The difference
+    /// is visible in one glance — #393's bar B, the one Email failed.
+    ///
+    /// ### The band is `0.1 … 0.75`: decision 1's shape, its ceiling raised once
+    ///
+    /// A band and never a sentence count, proportional to what was said. The floor is
+    /// `List`'s, the mode that compresses comparably.
+    ///
+    /// **The ceiling was 0.6 and is 0.75 since the device round of 2026-09-22**,
+    /// approved by the maintainer. That round measured the phone condensing long
+    /// dictations to 0.36 and 0.44, far below the Mac's 0.6 to 0.85, and refusing a
+    /// good one: a 263-character, three-sentence dictation carrying two negations,
+    /// condensed to about 0.72 with both negations kept. A short dense dictation has
+    /// little to drop, and 0.6 read that as a failure. 0.75 still refuses a text that
+    /// keeps three quarters of its input, which is not what the user who armed this
+    /// mode asked for; whether it stays visibly different from Normal (#393 bar B) is
+    /// re-measured in `docs/research/571-summary/bars.md` §8.
+    ///
+    /// **A very short dictation lands on the floor by construction.** The gist of a
+    /// one-line dictation is the line, and no faithful rewrite of it is 75 % of its
+    /// length. That is the contract working, not a defect: the speaker's own words go
+    /// in, which is the answer the other same-language modes give.
+    ///
+    /// Grounded, for the reason every same-language mode is: condensing is the
+    /// licence, adding a figure or a name is the #414 defect. The prefix check is off
+    /// because a gist may open on any sentence of the input (#466).
+    public static let summary = SmartMode(
+        id: summaryIdentifier,
+        displayName: "Summary",
+        // `text.quote` and not `text.line.3.summary`: the second is an SF Symbols 2025
+        // glyph, iOS 26 only, and the mode list is shown on every iOS a Pro user runs
+        // (`SettingsView` does not gate it on device capability), so it would draw an
+        // empty slot on iOS 17 to 25.
+        icon: "text.quote",
+        prompt: SmartModePrompt(
+            instructions: SmartModeSummaryPrompt.instructions(),
+            userInstruction: SmartModeSummaryPrompt.userInstruction,
+            outputMarker: SmartModeSummaryPrompt.outputMarker,
+            // Step 2 of #587 decision 5 (round 2, 2026-09-22): the examples in the
+            // transcript's own language, one prompt per Apple FM language. The
+            // `instructions` above is the step-1 fallback. See
+            // `SmartModeSummaryExamples` for the measurement behind it.
+            localizedInstructions: SmartModeSummaryPrompt.localizedInstructions()
+        ),
+        contract: PolishAcceptanceContract(
+            minimumLengthRatio: 0.1,
+            // 0.75 since round 2 (2026-09-22), not decision 1's 0.6: see the doc
+            // comment above.
+            maximumLengthRatio: 0.75,
+            outputLanguage: .sameAsInput,
+            requiresGroundedNames: true,
+            requiresAlignedPrefix: false
+        ),
+        // The mode armed for the longest dictations after `Structured`, so it meets
+        // the context ceiling and the band's ceiling more than most. Either way the
+        // floor is the speaker's own words in their own language: longer than asked
+        // for, and never wrong (#270, #580).
+        floorBehaviour: .insertRawText,
+        // Below 200 characters the mode is skipped, as `Structured` is (#650,
+        // decision 3). Under about thirty words there is nothing to condense: the
+        // doc comment above already says a one-line dictation lands on the floor
+        // by construction, and both `LanguageModelError` refusals of the voice note
+        // device run of 2026-10-01 were on one 8-second, 132-character note. The
+        // number is `Structured`'s rather than a new one, read off the same 51
+        // device dictations (#587, round 4).
+        //
+        // It lives on the mode, not on the surface, because the voice note path
+        // used to carry it as its own global constant and that constant then
+        // blocked every mode the voice note picker offers: a 7-second French note
+        // armed with `→ EN` came back untranslated and unlogged (#650). One rule,
+        // owned by the mode, read by the keyboard and the voice note alike. The
+        // keyboard therefore changes too: a short dictation armed with this mode
+        // takes the existing short-input path (Normal polish or raw, plus the
+        // "too short" notice), accepted by the maintainer on 2026-10-05.
+        minimumInputCharacters: 200
     )
 
     /// Translate → `target`.
@@ -348,8 +483,12 @@ public enum SmartModeCatalogue {
     /// and dropping one of the three shipped modes out of a non-subscriber's promise
     /// is a product decision this issue did not take. A user reaches `Message` by
     /// pinning it in the app, like any fourth mode.
+    ///
+    /// `Summary` (#571) follows `Message` on the same two grounds: appended rather
+    /// than inserted, so no row a user has already read moves, and not in the seed,
+    /// which is still full.
     public static let builtIns: [SmartMode] =
-        [structured, notes, message] + SupportedLanguage.allCases.map { translate(to: $0) }
+        [structured, notes, message, summary] + SupportedLanguage.allCases.map { translate(to: $0) }
 
     /// Every mode, with the user's pin state stamped on each row.
     public static var all: [SmartMode] {

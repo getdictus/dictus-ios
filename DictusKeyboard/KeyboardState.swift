@@ -617,8 +617,8 @@ class KeyboardState: ObservableObject {
     /// Goes through `openDictusURL`, i.e. `extensionContext` first: that is the
     /// documented path for an app extension, and SwiftUI's `openURL` has no
     /// success result and can fail silently in a keyboard extension.
-    func openDictusApp(intent: KeyboardOpenIntent) {
-        guard let url = KeyboardOpenURL.url(intent: intent) else { return }
+    func openDictusApp(intent: KeyboardOpenIntent, voiceNoteID: UUID? = nil) {
+        guard let url = KeyboardOpenURL.url(intent: intent, voiceNoteID: voiceNoteID) else { return }
         logProbe("openDictusApp", details: "intent=\(intent.rawValue)")
         openDictusURL(url)
     }
@@ -1381,7 +1381,11 @@ class KeyboardState: ObservableObject {
         // not count as a tap. Charging it to the debounce window would make the mic dead for
         // 1.5 s after a refusal that cost nothing, and the tap that refusal is inviting —
         // the one after the call ends — is the one that would be rejected.
-        guard !refuseMicTapIfACallHoldsTheMicrophone() else { return }
+        //
+        // A pre-A14 device is refused on the same line, for the same reason (#635): see
+        // `refuseMicTapOnUnsupportedDevice`. Sharing the line keeps `KeyboardState`
+        // inside swiftlint's type-body limit.
+        guard !refuseMicTapOnUnsupportedDevice(), !refuseMicTapIfACallHoldsTheMicrophone() else { return }
 
         // Debounce: reject taps within 1.5s of the last tap.
         let now = Date()
@@ -1962,5 +1966,35 @@ extension KeyboardState {
         )
         guard decision == .presentPreparation else { return nil }
         return loadState == .loading ? "loading" : "cold-cache"
+    }
+}
+
+// MARK: - Pre-A14 keyboard dictation gate (#635)
+
+extension KeyboardState {
+
+    /// Whether this device can dictate from the keyboard at all (#635).
+    ///
+    /// False on a pre-A14 chip: the dictation would be transcribed by a backgrounded
+    /// DictusApp, and the GPU encoder those chips need is refused in the background.
+    /// Read once per process, since the hardware cannot change under it, and from the
+    /// same DictusCore predicate the onboarding notice uses, so the two cannot
+    /// disagree about which devices are old.
+    static let deviceSupportsDictation = DeviceCapabilities.current().supportsKeyboardDictation
+
+    /// Decline a dictation on a device that cannot run one from the keyboard.
+    ///
+    /// The toolbar already draws the mic disabled and without its Smart Mode fan
+    /// gesture; this is the guarantee for any caller that reaches `startRecording`
+    /// anyway. The mic tap and the fan's release are the two callers today, and both
+    /// go through it. Nothing is posted to DictusApp, so no backgrounded transcription
+    /// is ever attempted.
+    ///
+    /// - Returns: `true` when the tap was refused and the caller must stop.
+    func refuseMicTapOnUnsupportedDevice() -> Bool {
+        guard !Self.deviceSupportsDictation else { return false }
+        logProbe("micTapRejectedUnsupportedDevice", details: sessionDetails())
+        HapticFeedback.actionRefused()
+        return true
     }
 }

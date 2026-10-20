@@ -290,6 +290,29 @@ final class LogEventTests: XCTestCase {
         XCTAssertFalse(event.payload().contains("confidence"))
     }
 
+    /// Parakeet's drift retry (#623), after the confidence: three counters, never text.
+    func testTranscriptionCompletedCarriesTheDriftRetryFields() {
+        let event = LogEvent.transcriptionCompleted(
+            durationMs: 3400, wordCount: 214, confidence: 0.916, retry: DriftRetryStats(spans: 3, wins: 2, durationMs: 2210)
+        )
+        XCTAssertEqual(event.message, "duration=3400ms words=214 confidence=0.916 retrySpans=3 retryWins=2 retryMs=2210")
+    }
+
+    /// A clean Parakeet dictation still prints `retrySpans=0`: the device validation reads
+    /// exactly that to confirm a clean dictation paid nothing.
+    func testTranscriptionCompletedPrintsAZeroSpanRetry() {
+        let event = LogEvent.transcriptionCompleted(
+            durationMs: 900, wordCount: 30, confidence: 0.97, retry: DriftRetryStats(spans: 0, wins: 0, durationMs: 3)
+        )
+        XCTAssertEqual(event.message, "duration=900ms words=30 confidence=0.970 retrySpans=0 retryWins=0 retryMs=3")
+    }
+
+    /// An engine without the retry prints no retry field at all.
+    func testTranscriptionCompletedWithoutARetryPrintsNoRetryField() {
+        let event = LogEvent.transcriptionCompleted(durationMs: 2500, wordCount: 42, confidence: nil)
+        XCTAssertFalse(event.payload().contains("retry"))
+    }
+
     /// No tag emitted: the field is absent rather than `detected=nil`.
     func testTranscriptionCompletedWithoutADetectedLanguagePrintsNoField() {
         let event = LogEvent.transcriptionCompleted(
@@ -439,6 +462,96 @@ final class LogEventTests: XCTestCase {
         XCTAssertEqual(event.subsystem, .lifecycle)
     }
 
+    /// The state is what tells a relaunch by iOS from a launch by the user (#707).
+    func testAppLaunchStateIsInfoLifecycle() {
+        let event = LogEvent.appLaunchState(state: "background")
+        XCTAssertEqual(event.level, .info)
+        XCTAssertEqual(event.subsystem, .lifecycle)
+        XCTAssertEqual(event.message, "state=background")
+    }
+
+    func testBackgroundSessionEventsIsInfoLifecycle() {
+        let event = LogEvent.appBackgroundSessionEvents(identifier: "com.pivi.dictus.model-download")
+        XCTAssertEqual(event.level, .info)
+        XCTAssertEqual(event.subsystem, .lifecycle)
+        XCTAssertEqual(event.message, "identifier=com.pivi.dictus.model-download")
+    }
+
+    // MARK: - Model download task diagnosis (#707)
+
+    func testTaskStateNamesItsSession() {
+        let event = LogEvent.modelDownloadTaskState(
+            name: "parakeet-tdt-0.6b-v3",
+            path: "Encoder.mlmodelc/weights/weight.bin",
+            chunk: 6,
+            phase: "start+10s",
+            origin: "new",
+            session: "bg",
+            state: "running",
+            receivedBytes: 0,
+            error: "none"
+        )
+        XCTAssertEqual(event.level, .info)
+        XCTAssertEqual(event.subsystem, .model)
+        XCTAssertEqual(
+            event.message,
+            "name=parakeet-tdt-0.6b-v3 path=Encoder.mlmodelc/weights/weight.bin chunk=6 "
+                + "phase=start+10s origin=new session=bg state=running received=0B error=none"
+        )
+    }
+
+    func testBackgroundTaskSilentIsAWarningWithItsOrigin() {
+        let event = LogEvent.modelDownloadBackgroundTaskSilent(
+            name: "parakeet-tdt-0.6b-v3",
+            path: "Encoder.mlmodelc/weights/weight.bin",
+            chunk: 7,
+            origin: "new",
+            secondsWithoutByte: 31
+        )
+        XCTAssertEqual(event.level, .warning)
+        XCTAssertEqual(event.subsystem, .model)
+        XCTAssertEqual(
+            event.message,
+            "name=parakeet-tdt-0.6b-v3 path=Encoder.mlmodelc/weights/weight.bin chunk=7 "
+                + "origin=new noByte=31s"
+        )
+    }
+
+    func testOrphanedChunksAbsorbedIsANoticeTheUnifiedLogKeeps() {
+        // `notice` is the lowest level the unified log persists: the next device capture
+        // has to show a relaunch that recovered (#732).
+        let event = LogEvent.modelDownloadOrphanedChunks(
+            name: "parakeet-tdt-0.6b-v3",
+            path: "Decoder.mlmodelc/coremldata.bin",
+            file: 3,
+            absorbed: [0],
+            discarded: []
+        )
+        XCTAssertEqual(event.level, .notice)
+        XCTAssertEqual(event.subsystem, .model)
+        XCTAssertEqual(event.name, "modelDownloadOrphanedChunks")
+        XCTAssertEqual(
+            event.message,
+            "name=parakeet-tdt-0.6b-v3 path=Decoder.mlmodelc/coremldata.bin file=3 absorbed=0 discarded=none"
+        )
+    }
+
+    func testOrphanedChunksWithADiscardIsAWarning() {
+        let event = LogEvent.modelDownloadOrphanedChunks(
+            name: "parakeet-tdt-0.6b-v3",
+            path: "Encoder.mlmodelc/weights/weight.bin",
+            file: 7,
+            absorbed: [0, 1],
+            discarded: ["2:chunk-length-100-expected-33554432"]
+        )
+        XCTAssertEqual(event.level, .warning)
+        XCTAssertEqual(
+            event.message,
+            "name=parakeet-tdt-0.6b-v3 path=Encoder.mlmodelc/weights/weight.bin file=7 absorbed=0,1 "
+                + "discarded=2:chunk-length-100-expected-33554432"
+        )
+    }
+
     func testAppDidBecomeActiveIsDebugLifecycle() {
         let event = LogEvent.appDidBecomeActive
         XCTAssertEqual(event.level, .debug)
@@ -461,6 +574,27 @@ final class LogEventTests: XCTestCase {
         let event = LogEvent.appWhisperKitLoaded(modelName: "base")
         XCTAssertEqual(event.level, .info)
         XCTAssertEqual(event.subsystem, .lifecycle)
+    }
+
+    // MARK: - Full Access link on the keyboard step (#709)
+
+    /// Info, not debug: the device check of #709 greps it, and it must survive a level
+    /// filter next to `onboardingKeyboardDetected`.
+    func testFullAccessLinkOpenedIsInfoLifecycle() {
+        let event = LogEvent.onboardingFullAccessLinkOpened
+        XCTAssertEqual(event.level, .info)
+        XCTAssertEqual(event.subsystem, .lifecycle)
+        XCTAssertEqual(event.name, "onboardingFullAccessLinkOpened")
+        XCTAssertTrue(event.formatted().contains("onboardingFullAccessLinkOpened"))
+    }
+
+    /// Same level and subsystem as its sibling link (#709), for the same grep (#704).
+    func testFullAccessExplainerOpenedIsInfoLifecycle() {
+        let event = LogEvent.onboardingFullAccessExplainerOpened
+        XCTAssertEqual(event.level, .info)
+        XCTAssertEqual(event.subsystem, .lifecycle)
+        XCTAssertEqual(event.name, "onboardingFullAccessExplainerOpened")
+        XCTAssertTrue(event.formatted().contains("onboardingFullAccessExplainerOpened"))
     }
 
     // MARK: - User dictionary events (#307)

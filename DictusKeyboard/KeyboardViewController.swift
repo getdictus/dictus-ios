@@ -513,6 +513,15 @@ class KeyboardViewController: UIInputViewController {
             KeyboardState.shared.presentAreaMode(.keys)
         }
 
+        // Shared voice notes (#637). A reader left open by an earlier appearance is
+        // closed, like the panel above; then, for a note this keyboard has never
+        // shown, the reader opens by itself — here, at the appearance, because that is
+        // when the user has come back to the conversation and has not started typing.
+        // A note that lands while the keyboard is already on screen only ever rings
+        // the ☰ (decision 1, #639). Ordered after registration and the subscription, so
+        // the mode change it may make is applied by this controller like any other.
+        KeyboardVoiceNoteState.shared.keyboardWillAppear(controllerID: controllerID)
+
         applyAreaMode(KeyboardState.shared.areaMode)
         PersistentLog.log(.diagnosticProbe(
             component: "KeyboardViewController",
@@ -1075,11 +1084,12 @@ class KeyboardViewController: UIInputViewController {
         // path in viewDidDisappear covers the well-behaved case; this guard
         // short-circuits stale controllers that iOS forgot to notify.
         //
-        // It applies to `.recording` only, mirroring KeyboardRootView.presentedMode
-        // exactly — the two layers have to agree on what is presented, and that is
+        // It applies to the two full-surface modes only, `.recording` and the voice
+        // note reader (#637), through the predicate KeyboardRootView.presentedMode
+        // asks too — the two layers have to agree on what is presented, and that is
         // where the reasoning lives. A picker is opened by a key on the visible
         // keyboard, which is not the case #128 was ever about.
-        guard mode != .recording || KeyboardState.shared.activeControllerID == controllerID else {
+        guard !mode.requiresVisibleOwner || KeyboardState.shared.activeControllerID == controllerID else {
             PersistentLog.log(.diagnosticProbe(
                 component: "KeyboardViewController",
                 instanceID: controllerID,
@@ -1167,7 +1177,14 @@ class KeyboardViewController: UIInputViewController {
                 details: "old=\(oldHosting) new=\(fanHeight) status=\(status) mode=\(mode.rawValue)"
             ))
 
-        case .recording:
+        case .recording, .voiceNoteResult:
+            // The voice note reader (#637) shares this branch rather than copying it:
+            // it replaces the toolbar too, so its geometry is `.recording`'s exactly —
+            // full hosting height, expanded anchor, grid hidden — and one branch is how
+            // that stays true. It fits inside today's keyboard: a long transcript
+            // scrolls in the view, and `heightConstraint` is not touched here or
+            // anywhere on this path (#166, #92, #116, #117, #202). Only the probe's
+            // name differs, so a device log can tell the two apart.
             giellaKeyboard?.isHidden = true
             let fullHeight = computeKeyboardHeight()
             hostingHeightConstraint?.constant = fullHeight
@@ -1175,7 +1192,7 @@ class KeyboardViewController: UIInputViewController {
             PersistentLog.log(.diagnosticProbe(
                 component: "KeyboardViewController",
                 instanceID: controllerID,
-                action: "hostingSet_recording",
+                action: mode == .recording ? "hostingSet_recording" : "hostingSet_voiceNoteResult",
                 details: "old=\(oldHosting) new=\(fullHeight) status=\(status) mode=\(mode.rawValue)"
             ))
         }

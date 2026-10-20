@@ -53,12 +53,57 @@ public struct SmartModePrompt: Equatable, Sendable, Codable {
     /// did not flag, and his own 184-character target, which keeps its blank lines.
     public let shortOutputBlockLimit: Int?
 
+    /// The system prompt with its worked examples in the transcript's language, keyed
+    /// by `NLLanguage` code (`"de"`, `"ja"`, `"zh-Hant"`, or a base subtag like
+    /// `"zh"`). `nil` — every mode that has not climbed there — sends `instructions`
+    /// whatever the language.
+    ///
+    /// ### Why it exists (#587, decision 5 step 2)
+    ///
+    /// The rules stay one English text, but the model reads the worked examples as
+    /// the template, language included: `Structuré` with an English example set
+    /// translated a Danish dictation into English 3 of 3, and #571 measured `Résumé`
+    /// returning English on 28 of 40 outputs across four languages with English and
+    /// French examples, and on 0 of 40 once the two examples were in the transcript's
+    /// language. So a mode can carry one example set per language, and
+    /// `instructions(forTranscriptLanguage:)` picks the one that matches.
+    ///
+    /// ### What it costs
+    ///
+    /// The record crosses the App Group inside the per-dictation snapshot, so a mode
+    /// that fills this carries every language's prompt with it — about 16 × 3 KB for
+    /// a mode localised into every Apple FM language. That is the price of keeping
+    /// the prompt a property of the record rather than a lookup the keyboard could
+    /// resolve differently from the app, and it is paid once per dictation.
+    public let localizedInstructions: [String: String]?
+
     public init(instructions: String, userInstruction: String, outputMarker: String,
-                shortOutputBlockLimit: Int? = nil) {
+                shortOutputBlockLimit: Int? = nil,
+                localizedInstructions: [String: String]? = nil) {
         self.instructions = instructions
         self.userInstruction = userInstruction
         self.outputMarker = outputMarker
         self.shortOutputBlockLimit = shortOutputBlockLimit
+        self.localizedInstructions = localizedInstructions
+    }
+
+    /// The system prompt for a transcript in `code`: the exact code's entry, else its
+    /// base subtag's (`"zh-Hans"` → `"zh"`, `"pt-BR"` → `"pt"`), else `instructions`.
+    ///
+    /// `nil` — no language known, as at prewarm on the auto path — is the fallback.
+    /// So is a language the mode has no set for: the fallback is the prompt that was
+    /// measured before any set existed, never a guess at a neighbouring language.
+    public func instructions(forTranscriptLanguage code: String?) -> String {
+        guard let code, let table = localizedInstructions else { return instructions }
+        if let exact = table[code] { return exact }
+        let base = code.split(whereSeparator: { $0 == "-" || $0 == "_" }).first.map(String.init)
+        if let found = base.flatMap({ table[$0] }) { return found }
+        // Norwegian arrives under two codes: `NLLanguageRecognizer` answers `nb`, and a
+        // locale or a transcription engine can say `no`, the macrolanguage. The tables
+        // store Bokmål under `nb`, so `no` would otherwise fall back silently (found by
+        // CodeRabbit on PR #589).
+        if base == "no", let bokmal = table["nb"] { return bokmal }
+        return instructions
     }
 
     /// Hand-written so the layout field can be absent, for the reason
@@ -72,6 +117,11 @@ public struct SmartModePrompt: Equatable, Sendable, Codable {
         self.outputMarker = try container.decode(String.self, forKey: .outputMarker)
         self.shortOutputBlockLimit = try container.decodeIfPresent(
             Int.self, forKey: .shortOutputBlockLimit
+        )
+        // Absent means `nil`: a snapshot written before #587 sends the one prompt it
+        // was written with, whatever the transcript's language.
+        self.localizedInstructions = try container.decodeIfPresent(
+            [String: String].self, forKey: .localizedInstructions
         )
     }
 }
@@ -243,6 +293,47 @@ public struct SmartMode: Equatable, Sendable, Codable, Identifiable {
     /// a field, and which refusals consult it.
     public let floorBehaviour: SmartModeFloorBehaviour
 
+    /// Shortest transcript, in characters, this mode runs on. Below it the mode is
+    /// **skipped, not refused**: the dictation takes the path it would take with no
+    /// mode armed, and the keyboard says so in one sentence. `nil` — every mode but
+    /// `Structuré` — runs on any length.
+    ///
+    /// ### Why a mode can decline short input (#587, round 4)
+    ///
+    /// A mode that structures text has nothing to structure in one sentence, and on
+    /// device that is where it did damage: `Comment tu vas aujourd'hui ?` (28
+    /// characters) came back as `Comment vais-je aujourd'hui ?`, and a 90-character line
+    /// gained a leading `Voici`. See `SmartModeCatalogue.structured` for the floor and
+    /// the corpus it was read from.
+    ///
+    /// It is a property of the mode rather than a pipeline constant because it is a
+    /// product answer about the mode: `Message` exists for short text and must never
+    /// skip it, and `Traduction` of a short message is the reason to share one.
+    /// `Résumé` carries the same 200 since #650: one sentence has no gist to extract,
+    /// and the voice note path, which had its own global floor, now reads this one.
+    /// `Liste` declines short input too, but after the model has run: see
+    /// `minimumListItems`.
+    public let minimumInputCharacters: Int?
+
+    /// Fewest list items this mode's output must carry to be inserted. A one-item list
+    /// is **declined, not refused**: the dictation gets the path it would take with no
+    /// mode armed, with the same notice and export event as an input under
+    /// `minimumInputCharacters`. An output with no list at all, or from an engine that
+    /// does not generate, is not judged. `SmartModeListCheck` holds the rule. `nil`
+    /// — every mode but `Liste` — accepts any shape.
+    ///
+    /// ### Why `Liste` checks its output rather than its input (#573, decision 5 amended)
+    ///
+    /// A list of one item is a title over a lone dash-line, which is the defect the
+    /// maintainer named. The first answer was a 100-character input floor, measured on
+    /// his exports; the device round of 2026-10-01 showed its cost on the mode's most
+    /// natural use: `Liste de courses pour ce midi carottes, patates, choux et quino.`,
+    /// 64 characters and four items, was skipped. Length cannot see how many items a
+    /// sentence holds; the model's own output can. The price is one model call (about
+    /// three seconds) on a one-sentence dictation armed in `Liste`, accepted by the
+    /// maintainer.
+    public let minimumListItems: Int?
+
     public init(id: String,
                 displayName: String,
                 icon: String,
@@ -250,7 +341,9 @@ public struct SmartMode: Equatable, Sendable, Codable, Identifiable {
                 prompt: SmartModePrompt,
                 contract: PolishAcceptanceContract,
                 floorBehaviour: SmartModeFloorBehaviour,
-                isPinned: Bool = false) {
+                isPinned: Bool = false,
+                minimumInputCharacters: Int? = nil,
+                minimumListItems: Int? = nil) {
         self.id = id
         self.displayName = displayName
         self.icon = icon
@@ -259,6 +352,14 @@ public struct SmartMode: Equatable, Sendable, Codable, Identifiable {
         self.contract = contract
         self.floorBehaviour = floorBehaviour
         self.isPinned = isPinned
+        self.minimumInputCharacters = minimumInputCharacters
+        self.minimumListItems = minimumListItems
+    }
+
+    /// Whether this mode runs on a transcript of `characters` characters.
+    public func runs(onInputOfLength characters: Int) -> Bool {
+        guard let floor = minimumInputCharacters else { return true }
+        return characters >= floor
     }
 
     // MARK: - Decoding
@@ -294,6 +395,14 @@ public struct SmartMode: Equatable, Sendable, Codable, Identifiable {
         self.floorBehaviour = try container.decodeIfPresent(
             SmartModeFloorBehaviour.self, forKey: .floorBehaviour
         ) ?? .insertNothing
+        // Absent means no floor: a snapshot written before #587 round 4 runs the mode
+        // on any length, which is what that build did.
+        self.minimumInputCharacters = try container.decodeIfPresent(
+            Int.self, forKey: .minimumInputCharacters
+        )
+        // Absent means no check: a snapshot written before #573's amendment inserts
+        // whatever shape the mode returned, which is what that build did.
+        self.minimumListItems = try container.decodeIfPresent(Int.self, forKey: .minimumListItems)
     }
 
     /// Written out rather than synthesised for one key only: `floorBehaviour` is
@@ -311,8 +420,34 @@ public struct SmartMode: Equatable, Sendable, Codable, Identifiable {
     /// here too. `init(from:)` above is hand-written for the same reason and carries
     /// the same obligation.
     private enum CodingKeys: String, CodingKey {
-        case id, displayName, icon, badge, prompt, contract, isPinned
+        case id, displayName, icon, badge, prompt, contract, isPinned, minimumInputCharacters
+        case minimumListItems
         case floorBehaviour = "overflowBehaviour"
+    }
+
+    /// The same record, with `prompt.instructions` resolved for a transcript in
+    /// `code` (#587). See `SmartModePrompt.instructions(forTranscriptLanguage:)`.
+    ///
+    /// The pipeline calls this once, before the engine, so the engine, the context
+    /// guard and the session cache all see the one string that is actually sent. The
+    /// identifier does not change: a mode is the same mode in every language, and the
+    /// metrics event keys on it.
+    public func resolvingExamples(forTranscriptLanguage code: String?) -> SmartMode {
+        let resolved = prompt.instructions(forTranscriptLanguage: code)
+        guard resolved != prompt.instructions else { return self }
+        return SmartMode(
+            id: id, displayName: displayName, icon: icon, badge: badge,
+            prompt: SmartModePrompt(
+                instructions: resolved,
+                userInstruction: prompt.userInstruction,
+                outputMarker: prompt.outputMarker,
+                shortOutputBlockLimit: prompt.shortOutputBlockLimit,
+                localizedInstructions: prompt.localizedInstructions
+            ),
+            contract: contract, floorBehaviour: floorBehaviour, isPinned: isPinned,
+            minimumInputCharacters: minimumInputCharacters,
+            minimumListItems: minimumListItems
+        )
     }
 
     /// The same record with its pinned flag set. Used by the catalogue when it

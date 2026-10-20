@@ -1,52 +1,94 @@
 // DictusApp/Onboarding/OnboardingView.swift
 // Container for the onboarding flow with programmatic-only step advancement.
 import SwiftUI
+import AVFoundation
 import DictusCore
 
 /// Onboarding flow presented as a fullScreenCover on first launch.
-/// Steps: Welcome, Mic, Keyboard setup, Transcription polish opt-in (when the
-/// device supports Apple Foundation Models), Model download, Globe tutorial.
+/// Steps (#649, #675): intro, language, keyboard setup, Apple Intelligence (#683, only on a
+/// capable iPhone where it is not ready), the Smart Modes scene (#679) and right after it
+/// the pick of three Smart Modes (#677), then the voice notes, vocabulary and history
+/// scenes (#680), all only where Smart Modes can run, model
+/// preparation (only while the model is still downloading or compiling), microphone (only
+/// while not yet granted), first dictation through the globe key, how to stop Dictus from the
+/// Dynamic Island or the Lock Screen (#681), completion. The order is
+/// `OnboardingStep.allCases`; which steps are passed over is
+/// `OnboardingStep.next(skipping:deviceCanRunSmartModes:)`.
 ///
 /// WHY switch/case instead of TabView:
 /// TabView(.page) allows the user to swipe between pages, which means they could
 /// skip required steps (mic permission, keyboard setup, model download).
-/// Using a manual switch/case with @State currentPage ensures the user can ONLY
+/// Using a manual switch/case on the current step ensures the user can ONLY
 /// advance via each page's completion button — no swiping. This guarantees every
 /// prerequisite is properly set up before the user reaches the test recording step.
 ///
 /// WHY @Binding isComplete:
 /// The parent (DictusApp.swift) owns `hasCompletedOnboarding` via @AppStorage.
-/// When the last page (TestRecordingPage) finishes, it sets isComplete = true,
+/// When the last page (the completion step) finishes, it sets isComplete = true,
 /// which writes to App Group UserDefaults and dismisses the fullScreenCover.
+///
+/// WHY THE POLISH PAGE IS GONE (#649 decision 2): polish adds seconds to every dictation,
+/// Parakeet's output is already clean, and a new user judges Dictus on speed. Polish stays
+/// off by default and is found in Settings; a user who already turned it on keeps it.
 struct OnboardingView: View {
     @Binding var isComplete: Bool
 
-    /// WHY @AppStorage instead of @SceneStorage:
-    /// @SceneStorage relies on iOS scene restoration which can fail when the
-    /// process is forcibly terminated. When the user enables "Allow Full Access"
-    /// in iOS Settings, iOS's TCC daemon kills the main app because the
-    /// kTCCServiceKeyboardNetwork permission changes. We need the onboarding
-    /// step to survive this termination so the user resumes at the right step.
-    /// @AppStorage writes to UserDefaults (App Group) which is always persisted
-    /// across any app termination.
-    @AppStorage(SharedKeys.onboardingCurrentPage, store: UserDefaults(suiteName: AppGroup.identifier))
-    private var currentPage: Int = 0
-
-    /// Track which steps have been completed to show in the step indicator.
-    @State private var completedSteps: Set<Int> = []
-
-    /// Whether the transcription polish opt-in page is part of the flow (#213).
+    /// The step on screen, persisted on every change.
     ///
-    /// WHY computed once at init: PolishAvailability queries the Foundation
-    /// Models SDK; the answer can't meaningfully change mid-onboarding, and a
-    /// stable value keeps the page indices coherent for the whole flow.
-    /// When false (device can never run Apple FM), the page is skipped entirely
-    /// so we never show a toggle that does nothing.
-    private let showsPolishPage = PolishAvailability.isToggleVisible
+    /// WHY persisted, and in the App Group: when the user enables "Allow Full Access" in
+    /// iOS Settings, iOS's TCC daemon kills the main app because the
+    /// kTCCServiceKeyboardNetwork permission changes. The step has to survive that
+    /// termination so the user resumes at the right place. `OnboardingStep.current()` also
+    /// places an install that was mid-onboarding on the pre-#649 page numbering.
+    ///
+    /// WHY @State + an explicit save instead of @AppStorage: the stored value is a step
+    /// name with a one-time migration in front of it, which @AppStorage cannot express.
+    @State private var step: OnboardingStep = OnboardingStep.current()
 
-    /// Total number of onboarding steps shown in the indicator
-    /// (Welcome, Mic, Keyboard, [Polish], Model, Test).
-    private var totalSteps: Int { showsPolishPage ? 6 : 5 }
+    /// One `ModelManager` for the whole flow, shared by the language page that starts the
+    /// download and the preparation page that waits for it (#649).
+    ///
+    /// WHY HERE and not in the pages: the download now starts two pages before anybody
+    /// watches it. A manager owned by the language page would be released with that page,
+    /// and the preparation page would build a second one that only learns about the
+    /// transfer through the peer broadcast. One owner for the length of the flow keeps a
+    /// single source of truth for "is the model ready", which is also what decides whether
+    /// the preparation step is shown at all.
+    @StateObject private var modelManager = ModelManager()
+
+    /// The model whose download the language screen just started, while the keep-open
+    /// popup is up (`keepOpenWarning`). nil otherwise.
+    @State private var keepOpenWarningModel: String?
+
+    /// Whether this iPhone could ever run Smart Modes, which decides whether the Pro steps
+    /// are part of the flow (#677, #593 decision 2). Read once: hardware, OS and SDK do
+    /// not change during an onboarding, and the progress bar must not change length.
+    @State private var deviceCanRunSmartModes = SmartModeAvailability.deviceIsCapable
+
+    /// The language step's choices as the user left them by going back to the intro
+    /// (#700), so the step shows them again instead of the prefill. nil until then.
+    ///
+    /// WHY HERE: the page is rebuilt on every visit (`.id(step)`), and its own state goes
+    /// with it. Held in memory only: nothing is written before the step is confirmed,
+    /// because confirming is what applies the setup and starts the download.
+    @State private var languageDraft: LanguageSetup?
+
+    /// The Smart Mode pick as the user left it (#725), so going back to the pick, or
+    /// coming forward to it again, shows that selection instead of an empty pick. nil until
+    /// the user has touched it.
+    ///
+    /// WHY HERE: like `languageDraft`, the page goes with its state on every step change.
+    /// After a kill it is nil again, and the page opens on what this run's Continue wrote
+    /// (`SmartModePick.committed(spokenLanguage:)`), whichever way it is reached.
+    @State private var smartModePickDraft: SmartModePick?
+
+    /// Whether the last step change went back (#700, #725), which turns the slide around:
+    /// the step gone back to comes in from the leading edge and the one left goes out by the
+    /// trailing one.
+    @State private var isGoingBack = false
+
+    /// Reset when the first dictation is left, so Home does not open on its transcription.
+    @EnvironmentObject private var coordinator: DictationCoordinator
 
     var body: some View {
         ZStack {
@@ -54,106 +96,348 @@ struct OnboardingView: View {
                 .ignoresSafeArea()
 
             VStack(spacing: 0) {
+                // The shell's top row (#675, #700, #725): back chevron and progress bar. Outside
+                // the sliding page so it stays put while the pages change under it, and
+                // only its segments animate.
+                OnboardingTopBar(
+                    step: step,
+                    deviceCanRunSmartModes: deviceCanRunSmartModes,
+                    onBack: step.stepBack != nil ? goBack : nil
+                )
+                    .padding(.top, OnboardingMetrics.topBarTopPadding)
+
                 // Current page content — only one page visible at a time
-                // WHY Group instead of ZStack: Group avoids stacking all 5 pages
+                // WHY Group instead of ZStack: Group avoids stacking every page
                 // on top of each other (unnecessary view hierarchy). Only the
                 // matched case is instantiated.
                 Group {
-                    switch currentPage {
-                    case 0:
-                        WelcomePage(onNext: { advanceToPage(1) })
-                    case 1:
-                        MicPermissionPage(onNext: { advanceToPage(2) })
-                    case 2:
-                        // Skip the polish page index when the device can't run
-                        // Apple Foundation Models at all.
-                        KeyboardSetupPage(onNext: { advanceToPage(showsPolishPage ? 3 : 4) })
-                    case 3 where showsPolishPage:
-                        PolishTogglePage(onNext: { advanceToPage(4) })
-                    case 3:
-                        // Stale persisted index: a user mid-onboarding on the old
-                        // flow (layer choice lived at index 3) relaunching on a
-                        // device without polish support resumes at model download.
-                        ModelDownloadPage(onNext: { advanceToPage(5) })
-                    case 4:
-                        ModelDownloadPage(onNext: { advanceToPage(5) })
-                    case 5:
-                        GlobeKeyTutorialPage(onComplete: {
-                            // Reset currentPage to 0 on completion so a future
-                            // onboarding reset (e.g., via Settings → Reset) starts
-                            // cleanly from the first step instead of resuming here.
-                            currentPage = 0
-                            isComplete = true
-                        })
-                    default:
-                        // Safety fallback — should never happen
-                        WelcomePage(onNext: { advanceToPage(1) })
+                    switch step {
+                    case .welcome:
+                        WelcomePage(onNext: advance)
+                    case .language:
+                        LanguageSetupPage(draft: $languageDraft, onConfirm: confirmLanguage)
+                    case .keyboardSetup:
+                        KeyboardSetupPage(onNext: advance)
+                    case .appleIntelligence:
+                        AppleIntelligencePage(
+                            modelManager: modelManager,
+                            modelIdentifier: onboardingModel,
+                            onNext: advance
+                        )
+                    case .smartModesScene:
+                        SmartModesScenePage(
+                            modelManager: modelManager,
+                            modelIdentifier: onboardingModel,
+                            onNext: advance
+                        )
+                    case .smartModePick:
+                        SmartModePickPage(
+                            modelManager: modelManager,
+                            modelIdentifier: onboardingModel,
+                            draft: $smartModePickDraft,
+                            onContinue: advance
+                        )
+                    case .voiceNotesScene:
+                        VoiceNotesScenePage(
+                            modelManager: modelManager,
+                            modelIdentifier: onboardingModel,
+                            onNext: advance
+                        )
+                    case .vocabularyScene:
+                        VocabularyScenePage(
+                            modelManager: modelManager,
+                            modelIdentifier: onboardingModel,
+                            onNext: advance
+                        )
+                    case .historyScene:
+                        HistoryScenePage(
+                            modelManager: modelManager,
+                            modelIdentifier: onboardingModel,
+                            onNext: advance
+                        )
+                    case .modelPreparation:
+                        ModelDownloadPage(
+                            modelManager: modelManager,
+                            modelIdentifier: onboardingModel,
+                            onNext: advance
+                        )
+                    case .microphone:
+                        MicPermissionPage(onNext: advance)
+                    case .firstDictation:
+                        GlobeKeyTutorialPage(onComplete: leaveFirstDictation)
+                    case .stopStandby:
+                        StopStandbyPage(onNext: advance)
+                    case .completion:
+                        OnboardingSuccessView(onComplete: finish)
                     }
                 }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                // The Skip under the primary button (#700), drawn by the page's shell
+                // (`OnboardingSkipRow`) on the steps that offer it.
+                .environment(\.onboardingSkip, step.isSkippable ? OnboardingSkipAction(perform: skip) : nil)
                 // Slide transition: new page slides in from trailing edge,
                 // old page slides out to leading edge — standard forward navigation feel.
+                // Going back (#700) runs it the other way round.
                 .transition(.asymmetric(
-                    insertion: .move(edge: .trailing),
-                    removal: .move(edge: .leading)
+                    insertion: .move(edge: isGoingBack ? .leading : .trailing),
+                    removal: .move(edge: isGoingBack ? .trailing : .leading)
                 ))
-                .id(currentPage) // Force SwiftUI to treat each page as a unique view for transitions
-
-                // Step indicator dots at the bottom
-                stepIndicator
-                    .padding(.bottom, 24)
+                .id(step) // Force SwiftUI to treat each page as a unique view for transitions
             }
+        }
+        .alert(Text("Keep Dictus open"), isPresented: keepOpenWarning) {
+            Button("Got it") {}
+        } message: {
+            keepOpenWarningMessage
         }
         // Prevent interactive dismiss (swipe down) on the fullScreenCover
         .interactiveDismissDisabled()
-        .animation(.easeInOut(duration: 0.3), value: currentPage)
+        .animation(.easeInOut(duration: 0.3), value: step)
     }
 
-    // MARK: - Step Indicator
+    // MARK: - Skip
 
-    /// Row of dots showing onboarding progress.
+    /// The shell's Skip, under the primary button on the steps that offer it
+    /// (`OnboardingStep.isSkippable`, `OnboardingSkipRow`).
     ///
-    /// WHY custom dots instead of TabView's built-in page indicator:
-    /// Since we replaced TabView with manual switch/case, we need our own dots.
-    /// Filled dot = current or completed step. Outlined dot = future step.
-    /// This gives the user a clear sense of progress through the flow.
-    private var stepIndicator: some View {
-        HStack(spacing: 8) {
-            ForEach(0..<totalSteps, id: \.self) { step in
-                Circle()
-                    .fill(dotColor(for: step))
-                    .frame(width: 8, height: 8)
-            }
-        }
-        .padding(.top, 16)
-    }
-
-    /// Map a page index to its dot position in the step indicator.
+    /// - A feature scene (Smart Modes, voice notes, vocabulary, history): jumps the whole
+    ///   scene sequence, the pick inside it included (#679, #680, #649 decision 8). Nothing
+    ///   is written, so the fan keeps the seed, or the pick's list if Continue wrote one.
+    /// - The Smart Mode pick: writes nothing, so the fan keeps the seed (#677), or the list
+    ///   this run's Continue already wrote when the user came back to the pick (#725), and
+    ///   jumps the rest of the sequence like the scenes around it.
     ///
-    /// WHY: when the polish page is hidden the flow skips index 3, so the pages
-    /// after it map to one dot earlier (page 4 → dot 3, page 5 → dot 4). With
-    /// the polish page visible this is the identity mapping.
-    private func displayStep(for page: Int) -> Int {
-        guard !showsPolishPage && page > 3 else { return page }
-        return page - 1
+    ///   WHY THE PICK JUMPS TOO (#680): the shell draws one Skip at one place on every page
+    ///   of the sequence, and decision 8 gives it one meaning. Before #680 the pick was the
+    ///   sequence's last step, so its plain "next" and the jump landed on the same step;
+    ///   with the three scenes after it, keeping a plain "next" would make the same button
+    ///   leave the sequence on one page and stay in it on the next.
+    /// - The first dictation: closes the keyboard and moves on, as a finished dictation
+    ///   does, to how to stop Dictus (#681).
+    private func skip() {
+        switch step {
+        case .smartModesScene, .voiceNotesScene, .vocabularyScene, .historyScene:
+            skipSceneSequence()
+        case .smartModePick:
+            PersistentLog.log(.onboardingSmartModePickSkipped)
+            skipSceneSequence()
+        case .firstDictation:
+            PersistentLog.log(.onboardingGlobeTutorialSkipped)
+            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+            leaveFirstDictation()
+        case .welcome, .language, .keyboardSetup, .appleIntelligence, .modelPreparation, .microphone,
+             .stopStandby, .completion:
+            advance()
+        }
     }
 
-    /// Determine dot color based on step state.
-    private func dotColor(for step: Int) -> Color {
-        if step == displayStep(for: currentPage) {
-            return .dictusAccent
-        } else if completedSteps.contains(where: { displayStep(for: $0) == step }) {
-            return .dictusAccent.opacity(0.5)
-        } else {
-            return .gray.opacity(0.3)
-        }
+    /// Leaves the scene sequence for the first step after it (`stepAfterSceneSequence`).
+    private func skipSceneSequence() {
+        guard let next = step.stepAfterSceneSequence(
+            skipping: satisfiedSteps, deviceCanRunSmartModes: deviceCanRunSmartModes
+        ) else { return }
+        PersistentLog.log(.onboardingSceneSequenceSkipped(from: step.rawValue, to: next.rawValue))
+        go(to: next)
+    }
+
+    // MARK: - Model
+
+    /// The model the onboarding installs: the recommendation for the language the user
+    /// confirmed and this device.
+    ///
+    /// Read from the settings the language page wrote, not held in memory, so it is still
+    /// the same model after iOS kills the app during keyboard setup and the flow resumes.
+    private var onboardingModel: String {
+        ModelInfo.recommendedIdentifier()
+    }
+
+    /// Whether `identifier` has finished preparing, so the preparation step has nothing to
+    /// show. Same test the preparation page applies (#433): files listed AND some model
+    /// active, because a listed model whose compile was interrupted cannot transcribe yet.
+    private func isReady(_ identifier: String) -> Bool {
+        modelManager.downloadedModels.contains(identifier) && modelManager.isModelReady
     }
 
     // MARK: - Navigation
 
-    private func advanceToPage(_ page: Int) {
-        completedSteps.insert(currentPage)
-        withAnimation {
-            currentPage = page
+    private func advance() {
+        guard let next = step.next(skipping: satisfiedSteps, deviceCanRunSmartModes: deviceCanRunSmartModes) else {
+            return
         }
+        go(to: next)
+    }
+
+    /// The steps with nothing left to ask, which `OnboardingStep.next(skipping:deviceCanRunSmartModes:)` passes
+    /// over (#675). Which steps may be passed over is DictusCore's rule; this only reads
+    /// the facts it needs from the app and the system.
+    ///
+    /// - Apple Intelligence: shown only on a capable iPhone where it is not ready (#683,
+    ///   #649 decision 7). Read when the keyboard step moves on, so a user who turned it on
+    ///   earlier, or an iPhone that can never run it, never sees the step.
+    /// - The preparation: shown only while there is something to wait for (#649 decision
+    ///   1.6). A download that finished while the user was in Settings goes straight on.
+    /// - The microphone: already granted on a second run, or by an install that went
+    ///   through the order before #675, where the microphone came first. A denied
+    ///   microphone is still shown, because that page says where to turn it back on.
+    /// - How to stop Dictus: passed over on an iPad, where iPadOS shows no Live Activity
+    ///   (#681, `OnboardingStep.passedOver(on:)`). Every iPhone sees it.
+    private var satisfiedSteps: Set<OnboardingStep> {
+        var satisfied: Set<OnboardingStep> = []
+        if !AppleIntelligenceOnboarding.isStepNeeded {
+            satisfied.insert(.appleIntelligence)
+        }
+        if isReady(onboardingModel) {
+            satisfied.insert(.modelPreparation)
+        }
+        if AVAudioApplication.shared.recordPermission == .granted {
+            satisfied.insert(.microphone)
+        }
+        // How to stop Dictus: nothing to show on an iPad, which has no Live Activity (#681).
+        satisfied.formUnion(OnboardingStep.passedOver(on: DeviceCapabilities.current()))
+        return satisfied
+    }
+
+    private func go(to newStep: OnboardingStep) {
+        OnboardingStep.save(newStep)
+        show(newStep, goingBack: false)
+    }
+
+    /// The shell's back control (#700, #725): from the language step to the intro, which
+    /// starts again at its first page (`WelcomePage` is rebuilt), and inside the scene
+    /// sequence to the step before (`OnboardingStep.stepBack`), whose scene starts its loop
+    /// again from the beginning (the page is rebuilt, and its player's clock with it).
+    /// `OnboardingStep.goBack` records the step first, so an app killed now resumes there.
+    ///
+    /// Nothing here touches the model download: `modelManager` belongs to this view, not
+    /// to the pages, so the transfer and the pages' download pill carry on across it.
+    private func goBack() {
+        let from = step
+        guard let back = OnboardingStep.goBack(from: from) else { return }
+        PersistentLog.log(.onboardingWentBack(from: from.rawValue, to: back.rawValue))
+        show(back, goingBack: true)
+    }
+
+    /// Puts `newStep` on screen with the slide that matches the direction.
+    ///
+    /// WHY THE STEP CHANGES ONE TURN LATER WHEN THE DIRECTION FLIPS: a page that leaves
+    /// slides out with the transition it was last drawn with. Changing the direction and
+    /// the step together would send the leaving page off with the old direction's edge,
+    /// against the page coming in. The new direction is drawn first, then the step changes.
+    private func show(_ newStep: OnboardingStep, goingBack: Bool) {
+        guard goingBack != isGoingBack else {
+            withAnimation {
+                step = newStep
+            }
+            return
+        }
+        isGoingBack = goingBack
+        DispatchQueue.main.async {
+            withAnimation {
+                step = newStep
+            }
+        }
+    }
+
+    /// Writes the language setup and starts the model download, then moves on (#649).
+    ///
+    /// WHY THE DOWNLOAD STARTS HERE: the microphone and keyboard steps take the user a
+    /// minute or two, much of it in iOS Settings. Starting the transfer now spends that
+    /// time downloading instead of making the user wait for it afterwards. It runs on the
+    /// background `URLSession` (#449), on any network and without asking (decision 5),
+    /// survives the trip to Settings and the kill that enabling Full Access causes, and
+    /// its compile waits for the foreground (`ModelManager.waitForForegroundToCompile`).
+    private func confirmLanguage(_ setup: LanguageSetup) {
+        setup.apply()
+        let model = setup.recommendedModel(on: DeviceCapabilities.current())
+        if startDownloadIfNeeded(model) {
+            // The download is already running; the popup only asks the user to stay. Its
+            // button moves on (`keepOpenWarning`), so the flow continues as before.
+            keepOpenWarningModel = model
+        } else {
+            advance()
+        }
+    }
+
+    /// Starts the download of `identifier` unless it is already ready or already moving.
+    ///
+    /// WHY THE GUARD: this screen can be confirmed again after a relaunch, and by then the
+    /// launch adoption (#449) may already be driving the transfer from this same manager.
+    /// A second `downloadModel` would join the transfer but run its own compile after it.
+    ///
+    /// - Returns: whether bytes are now being transferred: false when nothing was started,
+    ///   and false for a model whose files are already on disk (`.ready`), where only the
+    ///   compile is left. That is the case the keep-open popup is about.
+    @discardableResult
+    private func startDownloadIfNeeded(_ identifier: String) -> Bool {
+        guard !isReady(identifier) else { return false }
+        let transfersBytes: Bool
+        switch modelManager.modelStates[identifier] {
+        case .downloading, .prewarming:
+            return false
+        case .ready:
+            transfersBytes = false
+        case .notDownloaded, .error, nil:
+            transfersBytes = true
+        }
+        Task {
+            // Failures are recorded on the model's state by `downloadModel` itself, and
+            // the preparation page shows them with a retry. Nothing to do here.
+            try? await modelManager.downloadModel(identifier)
+        }
+        return transfersBytes
+    }
+
+    // MARK: - Keep-open warning
+
+    /// The popup raised when the language screen starts a download (decided 2026-10-09).
+    ///
+    /// WHY A POPUP AND WHY HERE: the background `URLSession` survives the user leaving
+    /// (#449), but iOS throttles it hard. Measured on device: about 6.5 MB/s with Dictus in
+    /// front, about 0.2 MB/s once it is in the background. Users start the download and go
+    /// to another app; a line of text on a page is not read, a popup at the moment the
+    /// download starts is. It does not block anything: the download is already running,
+    /// and its one button continues the flow.
+    ///
+    /// WHY "EXCEPT TO TURN ON THE KEYBOARD": the very next step sends the user to Settings.
+    /// The copy must not contradict it.
+    private var keepOpenWarning: Binding<Bool> {
+        Binding(
+            get: { keepOpenWarningModel != nil },
+            set: { isPresented in
+                guard !isPresented, keepOpenWarningModel != nil else { return }
+                keepOpenWarningModel = nil
+                advance()
+            }
+        )
+    }
+
+    /// The popup's message, with the real size of the model being downloaded.
+    private var keepOpenWarningMessage: Text {
+        if let identifier = keepOpenWarningModel, let size = ModelInfo.forIdentifier(identifier)?.sizeLabel {
+            return Text("The model (\(size)) is downloading now. It continues if you leave the app, but iOS slows it down a lot. To have it ready sooner, stay in Dictus, except to turn on the keyboard in Settings.")
+        }
+        return Text("The model is downloading now. It continues if you leave the app, but iOS slows it down a lot. To have it ready sooner, stay in Dictus, except to turn on the keyboard in Settings.")
+    }
+
+    /// Leaves the first dictation, whether it succeeded or was skipped, for the next step:
+    /// how to stop Dictus (#681), then the completion screen (#675).
+    ///
+    /// WHY reset the coordinator here:
+    /// If the user dictated during the first dictation, the DictationCoordinator holds the
+    /// last transcription in `lastResult`. Without clearing it, HomeView displays a "last
+    /// transcription card" as soon as the user lands on the main screen, which is not the
+    /// expected fresh Home state.
+    private func leaveFirstDictation() {
+        coordinator.lastResult = nil
+        coordinator.resetStatus()
+        advance()
+    }
+
+    private func finish() {
+        // Reset to the first step on completion so a future onboarding reset starts
+        // cleanly from the welcome screen instead of resuming here.
+        OnboardingStep.save(.welcome)
+        SmartModePick.endOnboardingRun()
+        isComplete = true
     }
 }

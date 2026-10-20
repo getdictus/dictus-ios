@@ -97,23 +97,35 @@ public struct PolishOutcome: Equatable, Sendable {
     /// than nil.
     public let smartModeFailure: SmartModeFailure?
 
+    /// How long the engine itself took (`PolishTimings.engineMs`), or nil when the call
+    /// never reached the pipeline's engine stage — a skip, a toggle off.
+    ///
+    /// Carried for the voice note's attempt line (#627): a `rateLimited` refusal comes
+    /// back in about ten milliseconds, and that number is how a reader tells Apple's
+    /// budget refusing from a model that ran. The metrics event has always had it; the
+    /// caller of `polish` did not.
+    public let engineMs: Int?
+
     /// A successful call, or a free-polish call that fell back to its floor.
-    public init(text: String) {
+    public init(text: String, engineMs: Int? = nil) {
         self.text = text
         self.smartModeFailure = nil
+        self.engineMs = engineMs
     }
 
     /// A Smart Mode that produced nothing insertable.
-    public init(failure: SmartModeFailure) {
+    public init(failure: SmartModeFailure, engineMs: Int? = nil) {
         self.text = nil
         self.smartModeFailure = failure
+        self.engineMs = engineMs
     }
 
     /// A Smart Mode that did not run, on a mode that accepts the untransformed floor
     /// for this refusal. `text` is that floor.
-    public init(degradedTo text: String, failure: SmartModeFailure) {
+    public init(degradedTo text: String, failure: SmartModeFailure, engineMs: Int? = nil) {
         self.text = text
         self.smartModeFailure = failure
+        self.engineMs = engineMs
     }
 
     /// Whether the text being inserted is the untransformed floor rather than the

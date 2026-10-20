@@ -1,0 +1,232 @@
+
+
+████ ARM shipping — 3 run(s) × 6 fixture(s), floor 0.35
+
+━━ [1-free-form] 395 chars, lang=fr
+  #1 395→280 2350ms success recall=5/6 UNRECALLED=1 inversions=0/10 LIST=4
+     UNRECALLED (whole 0.00, best 0.00): Bon alors je pensais à un truc ce matin en marchant,
+     engineOut: Lancer un produit tout seul :⏎- Le plus dur ce n'est pas de le coder, c'est de décider quoi ne pas faire⏎- Il y a toujours une idée qui a l'air meilleure que celle sur laquelle on est en train de bosser⏎- On saute dessus⏎- Au bout de 6 mois on a 15 trucs commencés et rien de fini
+  #2 395→280 2320ms success recall=5/6 UNRECALLED=1 inversions=0/10 LIST=4
+     UNRECALLED (whole 0.00, best 0.00): Bon alors je pensais à un truc ce matin en marchant,
+     engineOut: Lancer un produit tout seul :⏎- Le plus dur ce n'est pas de le coder, c'est de décider quoi ne pas faire⏎- Il y a toujours une idée qui a l'air meilleure que celle sur laquelle on est en train de bosser⏎- On saute dessus⏎- Au bout de 6 mois on a 15 trucs commencés et rien de fini
+  #3 395→280 2319ms success recall=5/6 UNRECALLED=1 inversions=0/10 LIST=4
+     UNRECALLED (whole 0.00, best 0.00): Bon alors je pensais à un truc ce matin en marchant,
+     engineOut: Lancer un produit tout seul :⏎- Le plus dur ce n'est pas de le coder, c'est de décider quoi ne pas faire⏎- Il y a toujours une idée qui a l'air meilleure que celle sur laquelle on est en train de bosser⏎- On saute dessus⏎- Au bout de 6 mois on a 15 trucs commencés et rien de fini
+
+━━ [2-project-update] 698 chars, lang=fr
+  #1 698→510 3477ms success recall=11/15 UNRECALLED=4 inversions=0/55 LIST=8
+     UNRECALLED (whole 0.33, best 0.33): Alors point rapide sur le projet,
+     UNRECALLED (whole 0.00, best 0.00): Il reste deux trucs.
+     UNRECALLED (whole 0.00, best 0.00): Côté chiffres,
+     UNRECALLED (whole 0.00, best 0.00): ce qui est faible, mais pas catastrophique pour une première version.
+     engineOut: Projet :⏎- On a basculé la partie abonnement lundi dernier⏎- Thomas a fini l'intégration StoreKit et ça passe en sandbox⏎- L'historique des transcriptions n'est pas commencé du tout⏎- Le vocabulaire personnalisé a une spec mais pas de code⏎- On est à 412 téléchargements depuis le lancement, avec un taux de rétention à 7 jours de 19%⏎- L'objectif est de passer la barre des 1000 avant fin octobre⏎- Je vois Sarah jeudi à 14h pour caler la partie Apple Store⏎- Si tout se passe bien, on soumet la semaine du 12
+  #2 698→510 3490ms success recall=11/15 UNRECALLED=4 inversions=0/55 LIST=8
+     UNRECALLED (whole 0.33, best 0.33): Alors point rapide sur le projet,
+     UNRECALLED (whole 0.00, best 0.00): Il reste deux trucs.
+     UNRECALLED (whole 0.00, best 0.00): Côté chiffres,
+     UNRECALLED (whole 0.00, best 0.00): ce qui est faible, mais pas catastrophique pour une première version.
+     engineOut: Projet :⏎- On a basculé la partie abonnement lundi dernier⏎- Thomas a fini l'intégration StoreKit et ça passe en sandbox⏎- L'historique des transcriptions n'est pas commencé du tout⏎- Le vocabulaire personnalisé a une spec mais pas de code⏎- On est à 412 téléchargements depuis le lancement, avec un taux de rétention à 7 jours de 19%⏎- L'objectif est de passer la barre des 1000 avant fin octobre⏎- Je vois Sarah jeudi à 14h pour caler la partie Apple Store⏎- Si tout se passe bien, on soumet la semaine du 12
+  #3 698→510 3475ms success recall=11/15 UNRECALLED=4 inversions=0/55 LIST=8
+     UNRECALLED (whole 0.33, best 0.33): Alors point rapide sur le projet,
+     UNRECALLED (whole 0.00, best 0.00): Il reste deux trucs.
+     UNRECALLED (whole 0.00, best 0.00): Côté chiffres,
+     UNRECALLED (whole 0.00, best 0.00): ce qui est faible, mais pas catastrophique pour une première version.
+     engineOut: Projet :⏎- On a basculé la partie abonnement lundi dernier⏎- Thomas a fini l'intégration StoreKit et ça passe en sandbox⏎- L'historique des transcriptions n'est pas commencé du tout⏎- Le vocabulaire personnalisé a une spec mais pas de code⏎- On est à 412 téléchargements depuis le lancement, avec un taux de rétention à 7 jours de 19%⏎- L'objectif est de passer la barre des 1000 avant fin octobre⏎- Je vois Sarah jeudi à 14h pour caler la partie Apple Store⏎- Si tout se passe bien, on soumet la semaine du 12
+
+━━ [3-message-draft] 353 chars, lang=fr
+  #1 353→189 2148ms success recall=4/7 UNRECALLED=3 dispersed=1 PERSON-LOST=1 inversions=0/3 LIST=5
+     UNRECALLED (whole 0.33, best 0.33): J'ai un rendez-vous chez le dentiste à 11h and I think that it will déborder.
+     UNRECALLED (whole 0.00, best 0.00): ça m'arrangerait.
+     UNRECALLED (whole 0.00, best 0.00): Dis-moi ce qui t'arrange.
+     PERSONLOST: Sinon je me débrouillerai pour suivre une visio depuis la salle à tante.
+       → - Suivre une visio depuis la salle à tante
+     engineOut: Absenté du bureau demain :⏎- Ne pas venir au bureau⏎- Rendu-vous chez le dentiste à 11h⏎- Décaler le point d'équipe à l'après-midi⏎- Suivre une visio depuis la salle à tante⏎- Ce sera moyen
+  #2 353→183 1989ms success recall=4/7 UNRECALLED=3 PERSON-LOST=2 inversions=0/6 LIST=5
+     UNRECALLED (whole 0.33, best 0.33): J'ai un rendez-vous chez le dentiste à 11h and I think that it will déborder.
+     UNRECALLED (whole 0.00, best 0.00): ça m'arrangerait.
+     UNRECALLED (whole 0.00, best 0.00): Dis-moi ce qui t'arrange.
+     PERSONLOST: Je voulais juste te dire pour demain que je ne pourrais pas venir au bureau.
+       → - Ne pas venir au bureau demain
+     PERSONLOST: Sinon je me débrouillerai pour suivre une visio depuis la salle à tante.
+       → - Suivre une visio depuis la salle à tante
+     engineOut: Aujourd'hui :⏎- Ne pas venir au bureau demain⏎- Rendu-vous chez le dentiste à 11h⏎- Décaler le point d'équipe à l'après-midi⏎- Suivre une visio depuis la salle à tante⏎- Ce sera moyen
+  #3 353→171 1886ms success recall=3/7 UNRECALLED=4 PERSON-LOST=2 HEDGE-LOST=1 inversions=0/3 LIST=4
+     UNRECALLED (whole 0.29, best 0.29): Je voulais juste te dire pour demain que je ne pourrais pas venir au bureau.
+     UNRECALLED (whole 0.00, best 0.00): ça m'arrangerait.
+     UNRECALLED (whole 0.00, best 0.00): Mais ce sera moyen.
+     UNRECALLED (whole 0.00, best 0.00): Dis-moi ce qui t'arrange.
+     PERSONLOST: J'ai un rendez-vous chez le dentiste à 11h and I think that it will déborder.
+       → - Rendre un rendez-vous chez le dentiste à 11h
+     HEDGELOST: J'ai un rendez-vous chez le dentiste à 11h and I think that it will déborder.
+       → - Rendre un rendez-vous chez le dentiste à 11h
+     PERSONLOST: Sinon je me débrouillerai pour suivre une visio depuis la salle à tante.
+       → - Suivre une visio depuis la salle à tante
+     engineOut: Aujourd'hui :⏎- Ne pas venir au bureau⏎- Rendre un rendez-vous chez le dentiste à 11h⏎- Décaler le point d'équipe à l'après-midi⏎- Suivre une visio depuis la salle à tante
+
+━━ [4-explanation] 838 chars, lang=fr
+  #1 838→681 4103ms success recall=11/12 UNRECALLED=1 dispersed=1 PERSON-LOST=1 HEDGE-LOST=1 inversions=12/45 LIST=3
+     UNRECALLED (whole 0.00, best 0.00): Et la troisième étape,
+     PERSONLOST: Alors je t'explique comment fonctionne la reconnaissance vocale sur le téléphone.
+       → Reconnaissance vocale sur le téléphone :
+     HEDGELOST: En gros il y a trois étapes.
+       → le truc important à comprendre c'est que ces trois étapes ne coûtent pas du tout le même prix en calcul,
+     engineOut: Reconnaissance vocale sur le téléphone :⏎- La capture : le micro enregistre le son et le système le découpe en petits morceaux de quelques millisecondes⏎- Le modèle : il prend ses morceaux et essaye de deviner quels sons ont été prononcés, puis quels mots ces sons forment, en utilisant ce qu'il entend et ce qu'il a déjà écrit avant, parce que le contexte aide énormément à lever les ambiguïtés⏎- La mise en forme : on prend le texte brut qui sort du modèle et on ajoute la ponctuation, les majuscules éventuellement, on découpe en paragraphes, le truc important à comprendre c'est que ces trois étapes ne coûtent pas du tout le même prix en calcul, le deuxième c'est 90% du temps
+  #2 838→651 3888ms success recall=11/12 UNRECALLED=1 dispersed=1 PERSON-LOST=1 HEDGE-LOST=1 negationDropped=1 inversions=13/45 LIST=3
+     UNRECALLED (whole 0.00, best 0.00): Et la troisième étape,
+     PERSONLOST: Alors je t'explique comment fonctionne la reconnaissance vocale sur le téléphone.
+       → Reconnaissance vocale sur le téléphone :
+     HEDGELOST: En gros il y a trois étapes.
+       → les trois étapes ne coûtent pas du tout le même prix en calcul le deuxième c'est 90% du temps
+     NEGATIONDROPPED: Là on prend le texte brut qui sort du modèle et on ajoute la ponctuation les majuscules éventuellement on découpe en paragraphes le truc important à comprendre c'est que ces trois étapes ne coûtent pas du tout le même prix en calcul le deuxième c'est 90% du temps.
+       → on prend le texte brut qui sort du modèle et on ajoute la ponctuation les majuscules éventuellement on découpe en paragraphes ;
+     engineOut: Reconnaissance vocale sur le téléphone :⏎- La capture : le micro enregistre le son et le système le découpe en petits morceaux de quelques millisecondes⏎- Le modèle : il prend ses morceaux et il essaye de deviner quels sons ont été prononcés, puis quels mots ces sons forment ; il utilise à la fois ce qu'il entend et ce qu'il a déjà écrit avant ; parce que le contexte aide énormément à lever les ambiguïtés⏎- La mise en forme : on prend le texte brut qui sort du modèle et on ajoute la ponctuation les majuscules éventuellement on découpe en paragraphes ; les trois étapes ne coûtent pas du tout le même prix en calcul le deuxième c'est 90% du temps
+  #3 838→552 3494ms success recall=10/12 UNRECALLED=2 dispersed=1 PERSON-LOST=1 negationDropped=1 inversions=7/36 LIST=4
+     UNRECALLED (whole 0.00, best 0.00): En gros il y a trois étapes.
+     UNRECALLED (whole 0.00, best 0.00): Parce que le contexte aide énormément à lever les ambiguïtés.
+     PERSONLOST: Alors je t'explique comment fonctionne la reconnaissance vocale sur le téléphone.
+       → Reconnaissance vocale sur le téléphone :
+     NEGATIONDROPPED: Là on prend le texte brut qui sort du modèle et on ajoute la ponctuation les majuscules éventuellement on découpe en paragraphes le truc important à comprendre c'est que ces trois étapes ne coûtent pas du tout le même prix en calcul le deuxième c'est 90% du temps.
+       → on prend le texte brut qui sort du modèle et on ajoute la ponctuation les majuscules éventuellement on découpe en paragraphes
+     engineOut: Reconnaissance vocale sur le téléphone :⏎- La capture : le micro enregistre le son et le système le découpe en petits morceaux de quelques millisecondes⏎- Le modèle : il prend ses morceaux et il essaye de deviner quels sons ont été prononcés, puis quels mots ces sons forment, et pour ça, il utilise à la fois ce qu'il entend et ce qu'il a déjà écrit avant⏎- La mise en forme : on prend le texte brut qui sort du modèle et on ajoute la ponctuation les majuscules éventuellement on découpe en paragraphes⏎- Le deuxième étape c'est 90% du temps en calcul
+
+━━ [5-rambling] 1283 chars, lang=fr
+  #1 1283→350 3287ms success recall=7/25 UNRECALLED=18 dispersed=1 PERSON-LOST=2 HEDGE-LOST=1 inversions=0/15 LIST=5 SPEAKER-STATE-DROPPED
+     UNRECALLED (whole 0.00, best 0.00): Bon alors je me lance.
+     UNRECALLED (whole 0.00, best 0.00): Je voulais faire le point sur plein de choses en fait.
+     UNRECALLED (whole 0.17, best 0.17): Je crois qu'il commence un peu à se demander si je les zappais.
+     UNRECALLED (whole 0.00, best 0.00): Ce qui est un peu le cas honnête.
+     UNRECALLED (whole 0.00, best 0.00): Quoi d'autre?
+     UNRECALLED (whole 0.00, best 0.00): Ah oui,
+     UNRECALLED (whole 0.00, best 0.00): il faut le refaire.
+     UNRECALLED (whole 0.00, best 0.00): Enfin, pas le refaire,
+     UNRECALLED (whole 0.00, best 0.00): Les gens arrivent,
+     UNRECALLED (whole 0.00, best 0.00): ils lisent trois lignes, ils partent.
+     UNRECALLED (whole 0.20, best 0.20): mais avant ça, il faut que je sache ce qu'on fait, ce qui est bon.
+     UNRECALLED (whole 0.00, best 0.00): Ça c'est vraiment le sujet en fait.
+     UNRECALLED (whole 0.00, best 0.00): Enfin bref.
+     UNRECALLED (whole 0.00, best 0.00): Ah, j'ai aussi...
+     UNRECALLED (whole 0.33, best 0.17): Ça fait donc 6 mois qu'on paye pour rien.
+     UNRECALLED (whole 0.00, best 0.00): Super quoi.
+     UNRECALLED (whole 0.00, best 0.00): Et puis la dernière chose,
+     UNRECALLED (whole 0.23, best 0.23): et là je note vraiment parce que sinon je vais oublier c'est de préparer les questions pour l'entretien de mardi voilà je crois que c'est tout ah non il y avait un dernier truc ça m'échappe mais ça me reviendra
+     PERSONLOST: je changeais la page d'accueil parce que là,
+       → - Changer la page d'accueil du site car elle ne dit pas ce qu'on fait
+     PERSONLOST: Il faut que je pense à annuler l'abonnement machin.
+       → - Penser à annuler l'abonnement de 19 euros par mois inutilisé depuis février
+     HEDGELOST: Il faut que je pense à annuler l'abonnement machin.
+       → - Penser à annuler l'abonnement de 19 euros par mois inutilisé depuis février
+     engineOut: Points à faire :⏎- Rappeler le comptable pour l'assurance concernant la voiture⏎- Répondre à Julien car il attend depuis peut-être une semaine et demie⏎- Changer la page d'accueil du site car elle ne dit pas ce qu'on fait⏎- Penser à annuler l'abonnement de 19 euros par mois inutilisé depuis février⏎- Préparer les questions pour l'entretien de mardi
+  #2 1283→403 3603ms success recall=10/25 UNRECALLED=15 dispersed=2 PERSON-LOST=2 HEDGE-LOST=1 inversions=0/28 LIST=5 SPEAKER-STATE-DROPPED
+     UNRECALLED (whole 0.00, best 0.00): Bon alors je me lance.
+     UNRECALLED (whole 0.00, best 0.00): Je voulais faire le point sur plein de choses en fait.
+     UNRECALLED (whole 0.17, best 0.17): Je crois qu'il commence un peu à se demander si je les zappais.
+     UNRECALLED (whole 0.00, best 0.00): Ce qui est un peu le cas honnête.
+     UNRECALLED (whole 0.00, best 0.00): Quoi d'autre?
+     UNRECALLED (whole 0.00, best 0.00): Ah oui,
+     UNRECALLED (whole 0.00, best 0.00): il faut le refaire.
+     UNRECALLED (whole 0.00, best 0.00): Enfin, pas le refaire,
+     UNRECALLED (whole 0.20, best 0.20): mais avant ça, il faut que je sache ce qu'on fait, ce qui est bon.
+     UNRECALLED (whole 0.00, best 0.00): Ça c'est vraiment le sujet en fait.
+     UNRECALLED (whole 0.00, best 0.00): Enfin bref.
+     UNRECALLED (whole 0.00, best 0.00): Ah, j'ai aussi...
+     UNRECALLED (whole 0.00, best 0.00): Super quoi.
+     UNRECALLED (whole 0.33, best 0.33): Et puis la dernière chose,
+     UNRECALLED (whole 0.23, best 0.23): et là je note vraiment parce que sinon je vais oublier c'est de préparer les questions pour l'entretien de mardi voilà je crois que c'est tout ah non il y avait un dernier truc ça m'échappe mais ça me reviendra
+     PERSONLOST: je changeais la page d'accueil parce que là,
+       → - Changer la page d'accueil du site car elle ne dit pas ce qu'on fait et les gens lisent trois lignes puis partent
+     PERSONLOST: Il faut que je pense à annuler l'abonnement machin.
+       → - Penser à annuler l'abonnement à 19 euros par mois inutilisé depuis février (6 mois)
+     HEDGELOST: Il faut que je pense à annuler l'abonnement machin.
+       → - Penser à annuler l'abonnement à 19 euros par mois inutilisé depuis février (6 mois)
+     engineOut: Points à faire :⏎- Rappeler le comptable pour l'assurance concernant la voiture⏎- Répondre à Julien car il attend depuis peut-être une semaine et demie⏎- Changer la page d'accueil du site car elle ne dit pas ce qu'on fait et les gens lisent trois lignes puis partent⏎- Penser à annuler l'abonnement à 19 euros par mois inutilisé depuis février (6 mois)⏎- Préparer les questions pour l'entretien de mardi
+  #3 1283→375 3338ms success recall=9/25 UNRECALLED=16 dispersed=2 PERSON-LOST=3 HEDGE-LOST=1 inversions=4/21 LIST=5 SPEAKER-STATE-DROPPED
+     UNRECALLED (whole 0.00, best 0.00): Bon alors je me lance.
+     UNRECALLED (whole 0.00, best 0.00): Je voulais faire le point sur plein de choses en fait.
+     UNRECALLED (whole 0.17, best 0.17): Je crois qu'il commence un peu à se demander si je les zappais.
+     UNRECALLED (whole 0.00, best 0.00): Ce qui est un peu le cas honnête.
+     UNRECALLED (whole 0.00, best 0.00): Quoi d'autre?
+     UNRECALLED (whole 0.00, best 0.00): Ah oui,
+     UNRECALLED (whole 0.00, best 0.00): il faut le refaire.
+     UNRECALLED (whole 0.00, best 0.00): Enfin, pas le refaire,
+     UNRECALLED (whole 0.00, best 0.00): Les gens arrivent,
+     UNRECALLED (whole 0.00, best 0.00): ils lisent trois lignes, ils partent.
+     UNRECALLED (whole 0.25, best 0.25): Ça c'est vraiment le sujet en fait.
+     UNRECALLED (whole 0.00, best 0.00): Enfin bref.
+     UNRECALLED (whole 0.00, best 0.00): Ah, j'ai aussi...
+     UNRECALLED (whole 0.00, best 0.00): Super quoi.
+     UNRECALLED (whole 0.00, best 0.00): Et puis la dernière chose,
+     UNRECALLED (whole 0.32, best 0.23): et là je note vraiment parce que sinon je vais oublier c'est de préparer les questions pour l'entretien de mardi voilà je crois que c'est tout ah non il y avait un dernier truc ça m'échappe mais ça me reviendra
+     PERSONLOST: je changeais la page d'accueil parce que là,
+       → - Changer la page d'accueil du site parce qu'elle ne dit pas ce qu'on fait
+     PERSONLOST: mais avant ça, il faut que je sache ce qu'on fait, ce qui est bon.
+       → - Répondre à Julien parce que ça fait peut-être une semaine et demie qu'il attend
+     PERSONLOST: Il faut que je pense à annuler l'abonnement machin.
+       → - Penser à annuler l'abonnement à 19 euros par mois qu'on n'utilise plus depuis février
+     HEDGELOST: Il faut que je pense à annuler l'abonnement machin.
+       → - Penser à annuler l'abonnement à 19 euros par mois qu'on n'utilise plus depuis février
+     engineOut: Points à faire :⏎- Rappeler le comptable pour l'assurance concernant la voiture⏎- Répondre à Julien parce que ça fait peut-être une semaine et demie qu'il attend⏎- Changer la page d'accueil du site parce qu'elle ne dit pas ce qu'on fait⏎- Penser à annuler l'abonnement à 19 euros par mois qu'on n'utilise plus depuis février⏎- Préparer les questions pour l'entretien de mardi
+
+━━ [6-unscripted] 1159 chars, lang=fr
+  #1 1159→860 4578ms success recall=9/10 UNRECALLED=1 dispersed=1 PERSON-LOST=1 inversions=0/28 LIST=8
+     UNRECALLED (whole 0.33, best 0.33): Et voilà, tout simplement l,
+     PERSONLOST: Comme ça, ça va nous permettre d'essayer de créer par la suite soit un mode différent,
+       → - Essayer de créer par la suite soit un mode différent,
+     engineOut: Sixième test :⏎- Faire un sixième test parce que les autres c'est pas vraiment ma voix, c'est pas naturel⏎- Voir encore une fois comment se comporte type less vs mon application dictus⏎- Repérer la qualité de la transcription éventuellement⏎- Voir comment Type Laiss arrive à découper les différents paragraphes, les organiser, s'il met éventuellement des listes, s'il met des espaces entre les lignes⏎- Analyser tout ça⏎- Essayer de créer par la suite soit un mode différent, soit améliorer notre polish⏎- Améliorer l'expérience des utilisateurs et même les utilisateurs qui sont gratuits⏎- Note que quand tu lances un grand un grand audio comme je peux le faire là tout de suite ça fait un gros pavé sur dictus alors quand je fais du développement c'est pas dérangeant mais c'est vrai que si tu veux l'utiliser pour discuter avec quelqu'un c'est un peu moyen
+  #2 1159→856 4467ms success recall=9/10 UNRECALLED=1 dispersed=1 PERSON-LOST=1 inversions=0/28 LIST=8
+     UNRECALLED (whole 0.33, best 0.33): Et voilà, tout simplement l,
+     PERSONLOST: Comme ça, ça va nous permettre d'essayer de créer par la suite soit un mode différent,
+       → - Essayer de créer par la suite soit un mode différent,
+     engineOut: Sixième test :⏎- Faire un sixième test parce que les autres c'est pas vraiment ma voix, c'est pas naturel⏎- Voir encore une fois comment se comporte type less vs mon application dictus⏎- Repérer déjà la qualité de la transcription éventuellement⏎- Voir comment Type Laiss arrive à découper les différents paragraphes, les organiser, s'il met éventuellement des listes, s'il met des espaces entre les lignes⏎- Analyser tout ça⏎- Essayer de créer par la suite soit un mode différent, soit améliorer notre polish⏎- Améliorer l'expérience des utilisateurs et même les utilisateurs qui sont gratuits⏎- Quand tu lances un grand un grand audio comme je peux le faire là tout de suite ça fait un gros pavé sur dictus alors quand je fais du développement c'est pas dérangeant mais c'est vrai que si tu veux l'utiliser pour discuter avec quelqu'un c'est un peu moyen
+  #3 1159→864 4581ms success recall=9/10 UNRECALLED=1 dispersed=1 PERSON-LOST=1 inversions=0/28 LIST=8
+     UNRECALLED (whole 0.33, best 0.33): Et voilà, tout simplement l,
+     PERSONLOST: Comme ça, ça va nous permettre d'essayer de créer par la suite soit un mode différent,
+       → - Essayer de créer par la suite soit un mode différent,
+     engineOut: Sixième test :⏎- Faire un sixième test parce que les autres c'est pas vraiment ma voix, c'est pas naturel⏎- Voir encore une fois comment se comporte type less vs mon application dictus⏎- Repérer la qualité de la transcription éventuellement⏎- Voir comment Type Laiss arrive à découper les différents paragraphes, les organiser, s'il met éventuellement des listes, s'il met des espaces entre les lignes⏎- Analyser tout ça⏎- Essayer de créer par la suite soit un mode différent, soit améliorer notre polish⏎- Améliorer l'expérience des utilisateurs et même les utilisateurs qui sont gratuits⏎- Observer que quand tu lances un grand un grand audio comme je peux le faire là tout de suite ça fait un gros pavé sur dictus alors quand je fais du développement c'est pas dérangeant mais c'est vrai que si tu veux l'utiliser pour discuter avec quelqu'un c'est un peu moyen
+
+
+════ AXES, per arm (bars.md §4)
+
+arm                   outputs  unrecalled  personLost  hedgeLost   hardened    fabricated  dropped     clean       noOutput
+shipping              18       18/18       12/18       6/18        0/18        0/18        3/18        0/18        0
+
+  Counts are OUTPUTS carrying at least one, not occurrences.
+  noOutput runs are in NO column and in no denominator: a run whose engine
+  produced nothing has violated nothing, whatever the outcome that caused it.
+  `clean` = no defect on any of the three SCORED axes. Axis 3 and the negation
+  count are observables by declaration (bars.md §1, §4) and are in no column here.
+
+
+════ OBSERVABLES, per arm — reported, never barred
+
+arm                   inversions    dispersed     negDropped    speakerState preserved
+shipping              36            12            2/18          0/18
+
+
+════ LANGUAGE AND LISTS, per arm and expected language (#587 bars.md §4)
+
+arm                   lang      outputs  refusedLang  wrongAccepted  wrongAny  withList  incompleteness
+shipping              fr        18       0            0              0         18        0
+
+  refusedLang   = refused on check=language (B1b; > 10 % in any language stops the round).
+  wrongAccepted = accepted, and the whole output or a sentence reads as another language
+                  (B1a's screen: a fragment the speaker said in that language is legitimate).
+  wrongAny      = the same screen over every output, refused or not (B1c for English).
+  withList      = outputs carrying a list line (B3 reads it on prose fixtures only).
+
+
+════ PER FIXTURE, per arm (never pooled)
+
+── shipping
+   1-free-form             U1  U1  U1
+   2-project-update        U4  U4  U4
+   3-message-draft         U3P  U3P  U4PH
+   4-explanation           U1PHo12  U1PHo13  U2Po7
+   5-rambling              U18PHD  U15PHD  U16PHDo4
+   6-unscripted            U1P  U1P  U1P
+
+   e = the engine produced no output; the run is in no denominator above.
+   U<n> unrecalled propositions · P person lost · H hedge lost · B stance hardened
+   F speaker-state fabricated · D speaker-state dropped · o<n> order inversions
+   · no defect and no observable. Order is an OBSERVABLE: `o` is not a defect.
+
+── wrote 18 runs to ../docs/research/573-liste/captures/c1-longform-fr.json

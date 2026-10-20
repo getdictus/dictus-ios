@@ -62,7 +62,18 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@ : n’a pas pu s’appliquer. Réessaie."
+            "value" : "%@ : n’a pas pu s’appliquer. Réessayez."
+          }
+        }
+      }
+    },
+    "%@: dictation too short, text inserted as dictated." : {
+      "comment" : "Shown when an armed Smart Mode declined a dictation for being shorter than the mode's floor, so the text went in as dictated. The placeholder is the mode's name.",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ : dictée trop courte, texte inséré tel quel."
           }
         }
       }
@@ -84,7 +95,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@ : trop long. Essaie une dictée plus courte."
+            "value" : "%@ : trop long. Essayez une dictée plus courte."
           }
         }
       }
@@ -143,7 +154,18 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Choisis un mode"
+            "value" : "Choisissez un mode"
+          }
+        }
+      }
+    },
+    "Close" : {
+      "comment" : "Accessibility label of the keyboard voice note reader's close button (#637).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fermer"
           }
         }
       }
@@ -154,6 +176,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Fermer le menu"
+          }
+        }
+      }
+    },
+    "Delete voice note" : {
+      "comment" : "Accessibility label of the keyboard voice note reader's button that removes the note from the keyboard; it stays in the app (#639).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Supprimer la note vocale"
+          }
+        }
+      }
+    },
+    "Dictation unavailable on this device" : {
+      "comment" : "Keyboard toolbar note beside the disabled mic on a device whose chip is too old to dictate from the keyboard (#635).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dictée indisponible sur cet appareil"
           }
         }
       }
@@ -174,7 +218,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Active l’Accès complet dans Réglages > Claviers > Dictus pour utiliser la dictée."
+            "value" : "Activez l’Accès complet dans Réglages > Claviers > Dictus pour utiliser la dictée."
           }
         }
       }
@@ -195,7 +239,18 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Maintiens le micro pour les modes"
+            "value" : "Maintenez le micro pour les modes"
+          }
+        }
+      }
+    },
+    "Insert" : {
+      "comment" : "Primary button of the keyboard's voice note reader: writes the transcript into the text field (#637).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Insérer"
           }
         }
       }
@@ -252,6 +307,17 @@
         }
       }
     },
+    "Long press: languages & settings" : {
+      "comment" : "Toolbar hint, right of the menu button, teaching that a long press on it opens the keyboard panel (languages, layouts, settings). An arrow pointing at the menu button precedes it (#639).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Appui long : langues et réglages"
+          }
+        }
+      }
+    },
     "Message" : {
       "comment" : "Name of the Smart Mode that rewrites a dictation as the short blocks the speaker would have typed to a person (#572).",
       "localizations" : {
@@ -259,6 +325,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Message"
+          }
+        }
+      }
+    },
+    "No recent voice note" : {
+      "comment" : "Keyboard voice note reader, opened by a long press on the menu button when no shared voice note is waiting (#639).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucune note vocale récente"
           }
         }
       }
@@ -305,6 +382,17 @@
         }
       }
     },
+    "Open in Dictus" : {
+      "comment" : "Accessibility label of the keyboard voice note reader's button that opens the note in the app (#637).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ouvrir dans Dictus"
+          }
+        }
+      }
+    },
     "Open Settings" : {
       "localizations" : {
         "fr" : {
@@ -332,7 +420,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Choisis tes modes dans Dictus."
+            "value" : "Choisissez vos modes dans Dictus."
           }
         }
       }
@@ -344,6 +432,47 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Le polissage est temporairement indisponible."
+          }
+        }
+      }
+    },
+    "Pro · %lld days left" : {
+      "comment" : "Keyboard panel pill in the last two days of the free Dictus Pro trial. The number is the days left, 1 or 2.",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Pro · %lld day left"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Pro · %lld days left"
+                }
+              }
+            }
+          }
+        },
+        "fr" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Pro · %lld jour restant"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Pro · %lld jours restants"
+                }
+              }
+            }
           }
         }
       }
@@ -380,6 +509,17 @@
         }
       }
     },
+    "Share a voice message to Dictus from a messaging app, and its transcript will show up here." : {
+      "comment" : "Keyboard voice note reader's empty state: how a voice note gets here (#639).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Partagez un message vocal vers Dictus depuis une app de messagerie, et sa transcription apparaîtra ici."
+          }
+        }
+      }
+    },
     "Smart Modes are not available in this build." : {
       "comment" : "Shown in the Smart Mode fan when the build has no FoundationModels SDK.",
       "localizations" : {
@@ -408,7 +548,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Les modes sont désactivés. Réactive-les dans Dictus."
+            "value" : "Les modes sont désactivés. Réactivez-les dans Dictus."
           }
         }
       }
@@ -452,7 +592,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Les modes exigent Apple Intelligence. Active-le dans Réglages."
+            "value" : "Les modes exigent Apple Intelligence. Activez-le dans Réglages."
           }
         }
       }
@@ -489,13 +629,35 @@
         }
       }
     },
+    "Summary" : {
+      "comment" : "Name of the Smart Mode that condenses a dictation into its gist, in a few sentences of prose (#571).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Résumé"
+          }
+        }
+      }
+    },
     "The microphone is busy on a call. Try again once the call ends." : {
       "comment" : "Toolbar message shown when the keyboard declines a mic tap because a call holds the microphone (issues #313, #483). Same sentence as DictusApp's.",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Le micro est occupé par un appel. Réessayez une fois l'appel terminé."
+            "value" : "Le micro est occupé par un appel. Réessayez une fois l’appel terminé."
+          }
+        }
+      }
+    },
+    "Too short for a list." : {
+      "comment" : "Shown when the List Smart Mode produced fewer than two items, so the dictation went in with the normal polish instead.",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trop court pour une liste."
           }
         }
       }
@@ -527,7 +689,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Annuler l'insertion de la dictée"
+            "value" : "Annuler l’insertion de la dictée"
           }
         }
       }

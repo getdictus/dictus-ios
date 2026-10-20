@@ -139,10 +139,11 @@ final class SmartModeFanLayoutTests: XCTestCase {
     private func tag(_ entry: SmartModeFanEntry,
                      armed: String? = nil,
                      effective: String = "normal",
-                     requiresPro: Bool = false) -> SmartModeFanRowTag? {
+                     requiresPro: Bool = false,
+                     trial: Bool = false) -> SmartModeFanRowTag? {
         SmartModeFanLayout.tag(
             for: entry, armedIdentifier: armed, effectiveIdentifier: effective,
-            modesRequirePro: requiresPro
+            modesRequirePro: requiresPro, marksTrialPro: trial
         )
     }
 
@@ -175,6 +176,19 @@ final class SmartModeFanLayoutTests: XCTestCase {
         XCTAssertEqual(
             tag(.mode(SmartModeCatalogue.notes), armed: "notes", requiresPro: true), .pro
         )
+    }
+
+    /// #593: during the reverse trial the mode rows are armable and carry `PRO`, so the
+    /// user learns which features the trial is lending. The mark never displaces the
+    /// check, and never displaces `INACTIF`, which say what happens now.
+    func testTheTrialMarksModeRowsProWithoutDisplacingTheCheckOrInactive() {
+        XCTAssertEqual(tag(.mode(SmartModeCatalogue.notes), trial: true), .pro)
+        XCTAssertEqual(tag(.normal, trial: true), .effective)
+        XCTAssertEqual(
+            tag(.mode(SmartModeCatalogue.notes), armed: "notes", effective: "notes", trial: true), .effective
+        )
+        XCTAssertEqual(tag(.mode(SmartModeCatalogue.notes), armed: "notes", trial: true), .inactive)
+        XCTAssertNil(tag(.mode(SmartModeCatalogue.notes)), "no trial, no subscription question: no mark")
     }
 
     /// The Pro row carries no tag: its own chevron says what it does.

@@ -1,0 +1,72 @@
+[
+  {
+    "id": "R1-fr-annonce-recap-matin",
+    "lang": "fr",
+    "sttEngine": "PK",
+    "_note": "#573 round 2, synthetic. Shape of device dictation 1 of 2026-10-01: an announcement SENTENCE opens it, then past facts. C3 promoted the first point to title on device. Expected: a title about the recap of the morning, three past facts kept past.",
+    "raw": "Je te fais un petit récap de ce qu'on a fait ce matin. On a fini la maquette de la page d'accueil, on a corrigé le bug de connexion et on a envoyé le devis au client."
+  },
+  {
+    "id": "R2-fr-annonce-liste-journee",
+    "lang": "fr",
+    "sttEngine": "PK",
+    "_note": "#573 round 2, synthetic. Shape of device dictation 2: 'On fait une liste de ...' then a first point carrying a number. On device the title became that point and the bullet was left as '- J'ai fait'. Expected: no point in the title, no truncated bullet.",
+    "raw": "On fait une liste de ce qu'on a fait aujourd'hui. J'ai réglé au moins trois ou quatre tickets sur le site, j'ai relu le contrat du fournisseur et j'ai rangé le garage."
+  },
+  {
+    "id": "R3-en-announcement-uh",
+    "lang": "en",
+    "sttEngine": "PK",
+    "_note": "#573 round 2, synthetic. Shape of device dictation 3: English announcement opener with 'uh' fillers, then past facts. On device: first point promoted to title, a duplicated bullet, a kept 'uh'.",
+    "raw": "Okay so uh now we are going through what we did this morning. Uh we fixed the login bug, uh we updated the docs and we tested the new build on two phones."
+  },
+  {
+    "id": "R4-fr-point-journee-passe",
+    "lang": "fr",
+    "sttEngine": "PK",
+    "_note": "#573 round 2, synthetic. Shape of device dictation 5: 'point de la journée' then past facts only. On device the past facts became tasks ('Garder…', 'Emmener…'). Decision 1 restated: a past fact stays past.",
+    "raw": "Donc point de la journée, on a promené le chien le matin, on a emmené la voiture au contrôle technique, et le soir on a fait les comptes du mois."
+  },
+  {
+    "id": "R5-fr-annonce-recap-soir",
+    "lang": "fr",
+    "sttEngine": "PK",
+    "_note": "#573 round 2, synthetic. Announcement opener carrying a time word ('ce soir'). A title may say 'ce soir'; it must never say another day or time (C1's 'Aujourd'hui' over 'demain', the device 'Samedi' over 'mercredi').",
+    "raw": "Je te fais un petit récap de ce qu'on a fait ce soir, on a regardé le match, on a fini les restes et on a réparé la lampe du salon."
+  },
+  {
+    "id": "R6-fr-courses-court",
+    "lang": "fr",
+    "sttEngine": "PK",
+    "_note": "#573 round 2, synthetic. Shape of the 64-character device dictation the 100-character floor skipped: a four-item shopping list in one breath. Expected: a list of four items, so the post-check lets it through.",
+    "raw": "Liste de courses pour ce soir tomates, riz, oignons et yaourts."
+  },
+  {
+    "id": "R7-en-short-list",
+    "lang": "en",
+    "sttEngine": "PK",
+    "_note": "#573 round 2, synthetic. The same shape in English, under 60 characters.",
+    "raw": "Shopping for tonight eggs, bread, apples and milk."
+  },
+  {
+    "id": "R8-fr-sans-annonce",
+    "lang": "fr",
+    "sttEngine": "PK",
+    "_note": "#573 round 2, synthetic. Three tasks and no announcement. The title has to summarise them, never be the first task.",
+    "raw": "Il faut que je rappelle le garage, que je paie la facture d'électricité et que je réserve le train pour lundi."
+  },
+  {
+    "id": "R9-en-duplicate",
+    "lang": "en",
+    "sttEngine": "PK",
+    "_note": "#573 round 2, synthetic. A point said twice ('call the bank') with 'uh' fillers: one bullet for it, no 'uh' anywhere.",
+    "raw": "So I need to call the bank, uh call the bank about the card, and then email the landlord and uh book the dentist for next week."
+  },
+  {
+    "id": "R10-fr-une-idee",
+    "lang": "fr",
+    "sttEngine": "PK",
+    "_note": "#573 round 2, synthetic. One idea. Fewer than two bullets is the expected answer, and the post-check then inserts Normal polish with the notice.",
+    "raw": "Pense à racheter du café demain matin."
+  }
+]

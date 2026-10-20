@@ -1,0 +1,175 @@
+
+
+████ ARM shipping — 3 run(s) × 6 fixture(s), floor 0.35
+
+━━ [N1-field-commits] 252 chars, lang=fr
+  #1 252→109 1803ms success recall=1/1 dispersed=1 inversions=0/0 LIST=3
+     engineOut: - On a fait 5 commith au lieu de 4⏎- On a acheté des yaourts au lieu de fraise⏎- Cela fait 3 gros changements
+  #2 252→109 1764ms success recall=1/1 dispersed=1 inversions=0/0 LIST=3
+     engineOut: - On a fait 5 commith au lieu de 4⏎- On a acheté des yaourts au lieu de fraise⏎- Cela fait 3 gros changements
+  #3 252→109 1894ms success recall=1/1 dispersed=1 inversions=0/0 LIST=3
+     engineOut: - On a fait 5 commith au lieu de 4⏎- On a acheté des yaourts au lieu de fraise⏎- Cela fait 3 gros changements
+
+━━ [N2-reunion-vrac] 585 chars, lang=fr
+  #1 585→310 3430ms success recall=1/1 dispersed=1 inversions=0/0 LIST=4
+     engineOut: - Récupérer les chiffres de janvier auprès de Marion, qui les aura mercredi⏎- Faire le tableau comparatif avec ceux de l'année dernière⏎- Appeler le prestataire : leur devis est passé de 12000 à 15000 euros et personne ne l'a validé⏎- Réserver la salle du deuxième étage, car l'autre est prise toute la semaine
+  #2 585→324 2987ms success recall=1/1 dispersed=1 inversions=0/0 LIST=4
+     engineOut: - Récupérer les chiffres de janvier auprès de Marion : ils seront disponibles mercredi⏎- Faire le tableau comparatif avec ceux de l'année dernière⏎- Appeler le prestataire : le devis est passé de 12000 à 15000 euros et personne ne l'a validé⏎- Réserver la salle du deuxième étage parce que l'autre est prise toute la semaine
+  #3 585→327 3262ms success recall=1/1 dispersed=1 inversions=0/0 LIST=4
+     engineOut: - Récupérer les chiffres de janvier auprès de Marion : ils seront disponibles mercredi⏎- Faire le tableau comparatif avec les données de l'année dernière⏎- Appeler le prestataire : leur devis est passé de 12000 à 15000 euros et personne ne l'a validé⏎- Réserver la salle du deuxième étage car l'autre est prise toute la semaine
+
+━━ [N3-projet-fleuve] 782 chars, lang=fr
+  #1 782→679 4422ms success recall=1/1 dispersed=1 inversions=0/0 LIST=3
+     engineOut: - Faire le point général : côté design c'est bon, les maquettes ont été validées vendredi, mais le dev a pris deux semaines de retard à cause de l'API du prestataire qui renvoie n'importe quoi sur les dates et on est en train de voir si on décale la livraison au 15 mars au lieu du premier⏎- Sur le budget : on est à peu près dans les clous, il reste 8000 euros mais faut compter les licences qui tombent en février et ça c'est 3000 de plus donc en vrai on est juste⏎- Thomas part en congé trois semaines à partir du 20, donc si on veut qu'il finisse la partie paiement faut que ce soit bouclé avant sinon ça repousse encore et là franchement je sais pas comment on tient la date
+  #2 782→617 4425ms success recall=1/1 dispersed=1 inversions=0/0 LIST=3
+     engineOut: - Point général : côté design c'est bon, les maquettes ont été validées vendredi, le dev a pris deux semaines de retard à cause de l'API du prestataire qui renvoie n'importe quoi sur les dates, on est en train de voir si on décale la livraison au 15 mars au lieu du premier⏎- Budget : 8000 euros restants, il faut compter les licences qui tombent en février et ça c'est 3000 de plus, donc en vrai on est juste⏎- Thomas part en congé trois semaines à partir du 20, si on veut qu'il finisse la partie paiement faut que ce soit bouclé avant sinon ça repousse encore et là franchement je sais pas comment on tient la date
+  #3 782→675 4910ms success recall=1/1 dispersed=1 inversions=0/0 LIST=3
+     engineOut: - Faire le point général : côté design c'est bon, les maquettes ont été validées vendredi, mais le dev a pris deux semaines de retard à cause de l'API du prestataire qui renvoie n'importe quoi sur les dates et on est en train de voir si on décale la livraison au 15 mars au lieu du premier⏎- Budget : on est à peu près dans les clous, il reste 8000 euros mais il faut compter les licences qui tombent en février et ça c'est 3000 de plus donc en vrai on est juste⏎- Thomas part en congé trois semaines à partir du 20, donc si on veut qu'il finisse la partie paiement faut que ce soit bouclé avant sinon ça repousse encore et là franchement je sais pas comment on tient la date
+
+━━ [N4-une-idee] 73 chars, lang=fr
+  #1 73→63 1369ms success recall=1/1 PERSON-LOST=1 inversions=0/0 LIST=1
+     PERSONLOST: faut que je rappelle le comptable avant vendredi pour la TVA du trimestre
+       → - Rappeler le comptable avant vendredi pour la TVA du trimestre
+     engineOut: - Rappeler le comptable avant vendredi pour la TVA du trimestre
+  #2 73→63 1317ms success recall=1/1 PERSON-LOST=1 inversions=0/0 LIST=1
+     PERSONLOST: faut que je rappelle le comptable avant vendredi pour la TVA du trimestre
+       → - Rappeler le comptable avant vendredi pour la TVA du trimestre
+     engineOut: - Rappeler le comptable avant vendredi pour la TVA du trimestre
+  #3 73→63 1368ms success recall=1/1 PERSON-LOST=1 inversions=0/0 LIST=1
+     PERSONLOST: faut que je rappelle le comptable avant vendredi pour la TVA du trimestre
+       → - Rappeler le comptable avant vendredi pour la TVA du trimestre
+     engineOut: - Rappeler le comptable avant vendredi pour la TVA du trimestre
+
+━━ [N5-en-ramble] 384 chars, lang=en
+  #1 384→246 2210ms success recall=1/1 dispersed=1 inversions=0/0 LIST=4
+     engineOut: - Deploy blocked because certificate expired on staging box⏎- Sam will rotate certificate tomorrow morning⏎- Bump node version because build image on eighteen and new package needs twenty⏎- Do both in same window otherwise two freezes for nothing
+  #2 384→246 2148ms success recall=1/1 dispersed=1 inversions=0/0 LIST=4
+     engineOut: - Deploy blocked because certificate expired on staging box⏎- Sam will rotate certificate tomorrow morning⏎- Bump node version because build image on eighteen and new package needs twenty⏎- Do both in same window otherwise two freezes for nothing
+  #3 384→268 2187ms success recall=1/1 dispersed=1 inversions=0/0 LIST=4
+     engineOut: - Deploy blocked because certificate expired on staging box⏎- Sam said he'd rotate it tomorrow morning⏎- Need to bump node version because build image is on eighteen and new package needs twenty⏎- Suggest doing both in the same window otherwise two freezes for nothing
+
+━━ [N6-ponctuation-dictee] 151 chars, lang=fr
+  #1 151→105 1484ms success recall=1/1 dispersed=1 inversions=0/0 LIST=2
+     engineOut: - Relancer l'agence : ils n'ont pas répondu depuis dix jours⏎- Prévoir un plan B au cas où ça se confirme
+  #2 151→105 1619ms success recall=1/1 dispersed=1 inversions=0/0 LIST=2
+     engineOut: - Relancer l'agence : ils n'ont pas répondu depuis dix jours⏎- Prévoir un plan B au cas où ça se confirme
+  #3 151→105 1656ms success recall=1/1 dispersed=1 inversions=0/0 LIST=2
+     engineOut: - Relancer l'agence : ils n'ont pas répondu depuis dix jours⏎- Prévoir un plan B au cas où ça se confirme
+
+
+████ ARM notes-develop — 3 run(s) × 6 fixture(s), floor 0.35
+     prompt: ../docs/research/587-pr2-message-liste/arms/notes-develop.txt
+
+━━ [N1-field-commits] 252 chars, lang=fr
+  #1 252→109 1815ms success recall=1/1 dispersed=1 inversions=0/0 LIST=3
+     engineOut: - On a fait 5 commith au lieu de 4⏎- On a acheté des yaourts au lieu de fraise⏎- Cela fait 3 gros changements
+  #2 252→109 1701ms success recall=1/1 dispersed=1 inversions=0/0 LIST=3
+     engineOut: - On a fait 5 commith au lieu de 4⏎- On a acheté des yaourts au lieu de fraise⏎- Cela fait 3 gros changements
+  #3 252→107 1925ms success recall=1/1 dispersed=1 inversions=0/0 LIST=3
+     engineOut: - On a fait 5 commith au lieu de 4⏎- On a acheté des yaourts au lieu de fraise⏎- Ça fait 3 gros changements
+
+━━ [N2-reunion-vrac] 585 chars, lang=fr
+  #1 585→299 3369ms success recall=1/1 dispersed=1 inversions=0/0 LIST=4
+     engineOut: - Récupérer les chiffres de janvier auprès de Marion, attendus mercredi⏎- Créer le tableau comparatif avec les données de l'année dernière⏎- Appeler le prestataire : le devis est passé de 12000 à 15000 euros, non validé⏎- Réserver la salle du deuxième étage, l'autre salle est prise toute la semaine
+  #2 585→280 2851ms success recall=1/1 dispersed=1 inversions=0/0 LIST=4
+     engineOut: - Récupérer les chiffres de janvier auprès de Marion, attendus mercredi⏎- Faire le tableau comparatif avec ceux de l'année dernière⏎- Appeler le prestataire, devis passé de 12000 à 15000 euros, non validé⏎- Réserver la salle du deuxième étage, l'autre salle prise toute la semaine
+  #3 585→317 3058ms success recall=1/1 dispersed=1 inversions=0/0 LIST=4
+     engineOut: - Récupérer les chiffres de janvier auprès de Marion : elle les aurait mercredi⏎- Faire le tableau comparatif avec ceux de l'année dernière⏎- Appeler le prestataire : leur devis est passé de 12000 à 15000 euros et personne ne l'a validé⏎- Réserver la salle du deuxième étage : l'autre salle est prise toute la semaine
+
+━━ [N3-projet-fleuve] 782 chars, lang=fr
+  #1 782→648 4422ms success recall=1/1 dispersed=1 inversions=0/0 LIST=3
+     engineOut: - Point général car ça part un peu dans tous les sens : côté design c'est bon, les maquettes ont été validées vendredi, mais le dev a pris deux semaines de retard à cause de l'API du prestataire qui renvoie n'importe quoi sur les dates et on est en train de voir si on décale la livraison au 15 mars au lieu du premier⏎- Budget : 8000 euros mais il faut compter les licences qui tombent en février et ça c'est 3000 de plus donc en vrai⏎- Thomas part en congé trois semaines à partir du 20, donc si on veut qu'il finisse la partie paiement faut que ce soit bouclé avant sinon ça repousse encore et là franchement je sais pas comment on tient la date
+  #2 782→676 4448ms success recall=1/1 dispersed=1 inversions=0/0 LIST=3
+     engineOut: - Faire le point général : côté design c'est bon, les maquettes ont été validées vendredi, mais le dev a pris deux semaines de retard à cause de l'API du prestataire qui renvoie n'importe quoi sur les dates et on est en train de voir si on décale la livraison au 15 mars au lieu du premier⏎- Sur le budget, on est à peu près dans les clous, il reste 8000 euros mais il faut compter les licences qui tombent en février et ça c'est 3000 de plus donc en vrai on est juste⏎- Thomas part en congé trois semaines à partir du 20, si on veut qu'il finisse la partie paiement faut que ce soit bouclé avant sinon ça repousse encore et là franchement je sais pas comment on tient la date
+  #3 782→666 4630ms success recall=1/1 dispersed=1 inversions=0/0 LIST=3
+     engineOut: - Point général car ça part en tous directions : côté design c'est bon, les maquettes validées vendredi, mais le dev a pris deux semaines de retard à cause de l'API du prestataire qui renvoie n'importe quoi sur les dates, donc on voit si on décale la livraison au 15 mars au lieu du premier⏎- Budget : presque dans les clous, il reste 8000 euros mais il faut compter les licences qui tombent en février et ça c'est 3000 de plus donc en vrai on est juste⏎- Thomas part en congé trois semaines à partir du 20, donc si on veut qu'il finisse la partie paiement faut que ce soit bouclé avant sinon ça repousse encore et là franchement je sais pas comment on tient la date
+
+━━ [N4-une-idee] 73 chars, lang=fr
+  #1 73→63 1413ms success recall=1/1 PERSON-LOST=1 inversions=0/0 LIST=1
+     PERSONLOST: faut que je rappelle le comptable avant vendredi pour la TVA du trimestre
+       → - Rappeler le comptable avant vendredi pour la TVA du trimestre
+     engineOut: - Rappeler le comptable avant vendredi pour la TVA du trimestre
+  #2 73→63 1447ms success recall=1/1 PERSON-LOST=1 inversions=0/0 LIST=1
+     PERSONLOST: faut que je rappelle le comptable avant vendredi pour la TVA du trimestre
+       → - Rappeler le comptable avant vendredi pour la TVA du trimestre
+     engineOut: - Rappeler le comptable avant vendredi pour la TVA du trimestre
+  #3 73→63 1420ms success recall=1/1 PERSON-LOST=1 inversions=0/0 LIST=1
+     PERSONLOST: faut que je rappelle le comptable avant vendredi pour la TVA du trimestre
+       → - Rappeler le comptable avant vendredi pour la TVA du trimestre
+     engineOut: - Rappeler le comptable avant vendredi pour la TVA du trimestre
+
+━━ [N5-en-ramble] 384 chars, lang=en
+  #1 384→246 2350ms success recall=1/1 dispersed=1 inversions=0/0 LIST=4
+     engineOut: - Deploy blocked because certificate expired on staging box⏎- Sam will rotate certificate tomorrow morning⏎- Bump node version because build image on eighteen and new package needs twenty⏎- Do both in same window otherwise two freezes for nothing
+  #2 384→263 2219ms success recall=1/1 dispersed=1 inversions=0/0 LIST=4
+     engineOut: - Deploy blocked because certificate expired on staging box⏎- Sam said he'd rotate certificate tomorrow morning⏎- Need to bump node version because build image on eighteen, new package needs twenty⏎- Should do both in same window otherwise two freezes for nothing
+  #3 384→246 2395ms success recall=1/1 dispersed=1 inversions=0/0 LIST=4
+     engineOut: - Deploy blocked because certificate expired on staging box⏎- Sam will rotate certificate tomorrow morning⏎- Bump node version because build image on eighteen and new package needs twenty⏎- Do both in same window otherwise two freezes for nothing
+
+━━ [N6-ponctuation-dictee] 151 chars, lang=fr
+  #1 151→105 1742ms success recall=1/1 dispersed=1 inversions=0/0 LIST=2
+     engineOut: - Relancer l'agence : ils n'ont pas répondu depuis dix jours⏎- Prévoir un plan B au cas où ça se confirme
+  #2 151→105 1800ms success recall=1/1 dispersed=1 inversions=0/0 LIST=2
+     engineOut: - Relancer l'agence : ils n'ont pas répondu depuis dix jours⏎- Prévoir un plan B au cas où ça se confirme
+  #3 151→105 1583ms success recall=1/1 dispersed=1 inversions=0/0 LIST=2
+     engineOut: - Relancer l'agence : ils n'ont pas répondu depuis dix jours⏎- Prévoir un plan B au cas où ça se confirme
+
+
+════ AXES, per arm (bars.md §4)
+
+arm                   outputs  unrecalled  personLost  hedgeLost   hardened    fabricated  dropped     clean       noOutput
+shipping              18       0/18        3/18        0/18        0/18        0/18        0/18        15/18       0
+notes-develop         18       0/18        3/18        0/18        0/18        0/18        0/18        15/18       0
+
+  Counts are OUTPUTS carrying at least one, not occurrences.
+  noOutput runs are in NO column and in no denominator: a run whose engine
+  produced nothing has violated nothing, whatever the outcome that caused it.
+  `clean` = no defect on any of the three SCORED axes. Axis 3 and the negation
+  count are observables by declaration (bars.md §1, §4) and are in no column here.
+
+
+════ OBSERVABLES, per arm — reported, never barred
+
+arm                   inversions    dispersed     negDropped    speakerState preserved
+shipping              0             15            0/18          0/18
+notes-develop         0             15            0/18          0/18
+
+
+════ LANGUAGE AND LISTS, per arm and expected language (#587 bars.md §4)
+
+arm                   lang      outputs  refusedLang  wrongAccepted  wrongAny  withList  incompleteness
+shipping              fr        15       0            0              0         15        0
+shipping              en        3        0            0              0         3         0
+notes-develop         fr        15       0            0              0         15        0
+notes-develop         en        3        0            0              0         3         0
+
+  refusedLang   = refused on check=language (B1b; > 10 % in any language stops the round).
+  wrongAccepted = accepted, and the whole output or a sentence reads as another language
+                  (B1a's screen: a fragment the speaker said in that language is legitimate).
+  wrongAny      = the same screen over every output, refused or not (B1c for English).
+  withList      = outputs carrying a list line (B3 reads it on prose fixtures only).
+
+
+════ PER FIXTURE, per arm (never pooled)
+
+── shipping
+   N1-field-commits        ·  ·  ·
+   N2-reunion-vrac         ·  ·  ·
+   N3-projet-fleuve        ·  ·  ·
+   N4-une-idee             P  P  P
+   N5-en-ramble            ·  ·  ·
+   N6-ponctuation-dictee   ·  ·  ·
+── notes-develop
+   N1-field-commits        ·  ·  ·
+   N2-reunion-vrac         ·  ·  ·
+   N3-projet-fleuve        ·  ·  ·
+   N4-une-idee             P  P  P
+   N5-en-ramble            ·  ·  ·
+   N6-ponctuation-dictee   ·  ·  ·
+
+   e = the engine produced no output; the run is in no denominator above.
+   U<n> unrecalled propositions · P person lost · H hedge lost · B stance hardened
+   F speaker-state fabricated · D speaker-state dropped · o<n> order inversions
+   · no defect and no observable. Order is an OBSERVABLE: `o` is not a defect.
+
+── wrote 36 runs to ../docs/research/587-pr2-message-liste/capture-notes-fr.json

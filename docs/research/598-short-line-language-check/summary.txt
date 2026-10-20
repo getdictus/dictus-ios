@@ -1,0 +1,190 @@
+readings: 6292 outputs — K414 482, C587 5792, 18 with no expected code (pipeline passes them through, excluded)
+guard: the re-implemented rule reproduces the shipping verdict on all 6274 outputs
+C587 by expected language: {'da': 308, 'de': 326, 'en': 540, 'es': 328, 'fr': 919, 'it': 308, 'ja': 327, 'ko': 307, 'nb': 305, 'nl': 306, 'pt': 308, 'sv': 305, 'tr': 307, 'vi': 308, 'zh-Hans': 324, 'zh-Hant': 266}
+
+══ M1 — does the misreading survive on ordinary length?
+
+C587 refusals under V0: 529 — 406 by the whole pass, 123 by the segment pass
+  false refusals (every reason a labelled misreading): 9
+  whole-pass false refusals: 0 of 406
+  es→pt: 9 outputs
+     587-language-clause/capture-notes.json:T4-structured-since.es#1[shipping]  output 148 ch, whole es 1.000; line 24 ch at 0.910: Parece bastante correcto
+     587-language-clause/capture-notes.json:T4-structured-since.es#2[shipping]  output 148 ch, whole es 1.000; line 24 ch at 0.910: Parece bastante correcto
+     587-language-clause/capture-notes.json:T4-structured-since.es#3[shipping]  output 151 ch, whole es 1.000; line 24 ch at 0.910: Parece bastante correcto
+     587-pr2-message-liste/capture-notes-i18n.json:T4-structured-since.es#1[shipping]  output 142 ch, whole es 1.000; line 24 ch at 0.910: Parece bastante correcto
+     587-pr2-message-liste/capture-notes-i18n.json:T4-structured-since.es#3[shipping]  output 148 ch, whole es 1.000; line 24 ch at 0.910: Parece bastante correcto
+     587-pr2-message-liste/capture-notes-i18n.json:T4-structured-since.es#1[notes-develop]  output 129 ch, whole es 0.999; line 24 ch at 0.910: Parece bastante correcto
+     587-structured-rewrite/capture-r4.json:T4-structured-since.es#2[shipping]  output 370 ch, whole es 0.999; line 25 ch at 0.910: Parece bastante correcto.
+     round2/capture-r4.json:T4-structured-since.es#1[shipping]  output 241 ch, whole es 0.999; line 25 ch at 0.910: Parece bastante correcto.
+     round2/capture-r4.json:T4-structured-since.es#2[shipping]  output 241 ch, whole es 0.999; line 25 ch at 0.910: Parece bastante correcto.
+
+Every labelled misreading, by pair (incl. the ones the Scandinavian rule already accepts):
+  da→nb: 31 lines in 30 outputs, 9 distinct strings, 28–51 ch, fixtures ['T3-plan-mode.da', 'T4-structured-since.da']
+  es→pt: 9 lines in 9 outputs, 2 distinct strings, 24–25 ch, fixtures ['T4-structured-since.es']
+
+Rate of confident misreading (≥ 0.85, any other code) per segment length, over the 2983 of the 5272 correct-language C587 outputs that have more than one segment:
+  lang           12-24         25-49         50-99       100-199          200+
+  es              6/14         3/150         0/253         0/139          0/43
+  pt              0/20         0/160         0/282         0/128          0/39
+  da              0/19        29/190         1/270          0/93          0/45
+  nb              0/20         0/202         0/234         0/133          0/38
+  sv              0/23         0/172         0/251         0/139          0/49
+  fr               0/7         0/168         0/325         0/335         0/506
+  en               0/4         0/154         0/276         0/198          0/54
+  it              0/29         0/130         0/300         0/125          0/28
+  de              0/23         0/112         0/258         0/148          0/42
+  (a numerator counts misreadings the Scandinavian rule already accepts; single-segment outputs are never segment-tested and are left out)
+
+Cross-readings between es and pt at ANY confidence, every C587 segment and whole output:
+  6×  ('Parece bastante correcto', 'es', 'pt', 0.91)
+  3×  ('Parece bastante correcto.', 'es', 'pt', 0.91)
+  es outputs 328, pt outputs 308
+
+══ M2 — read the whole output instead of a line
+
+K414 — V1 whole output only: caught 17/18, false rejections 0/464
+   kept  mac-200-run-20260903:R118#1
+   kept  mac-200-run-20260903:R190#1
+   kept  r3-freepolish-seed-5runs-after.txt:7-repair-de#1
+   kept  r3-freepolish-seed-5runs-after.txt:7-repair-de#2
+   kept  r3-freepolish-seed-5runs-after.txt:7-repair-de#3
+   kept  r3-freepolish-seed-5runs-after.txt:7-repair-de#4
+   kept  r3-freepolish-seed-5runs-after.txt:7-repair-de#5
+   kept  round1-notes-show-5runs.txt:N1-field-commits#1
+   kept  round1-notes-show-5runs.txt:N1-field-commits#2
+   kept  round1-notes-show-5runs.txt:N1-field-commits#3
+   kept  round1-notes-show-5runs.txt:N1-field-commits#4
+   kept  round1-notes-show-5runs.txt:N1-field-commits#5
+   kept  round1-notes-show-5runs.txt:N3-projet-fleuve#2
+   LOST  round1-notes-show-5runs.txt:N3-projet-fleuve#3
+   kept  round7-notes-v2-5runs.txt:N1-field-commits#2
+   kept  round7-notes-v2-5runs.txt:N1-field-commits#3
+   kept  round7-notes-v2-5runs.txt:N1-field-commits#4
+   kept  round7-notes-v2-5runs.txt:N5-en-ramble#2
+C587 — V1 whole output only: false refusals 9 → 0, genuine catches 520 → 406
+   refusal avoided: 587-language-clause/capture-notes.json:T4-structured-since.es#1[shipping]
+   refusal avoided: 587-language-clause/capture-notes.json:T4-structured-since.es#2[shipping]
+   refusal avoided: 587-language-clause/capture-notes.json:T4-structured-since.es#3[shipping]
+   refusal avoided: 587-pr2-message-liste/capture-notes-i18n.json:T4-structured-since.es#1[shipping]
+   refusal avoided: 587-pr2-message-liste/capture-notes-i18n.json:T4-structured-since.es#3[shipping]
+   refusal avoided: 587-pr2-message-liste/capture-notes-i18n.json:T4-structured-since.es#1[notes-develop]
+   refusal avoided: 587-structured-rewrite/capture-r4.json:T4-structured-since.es#2[shipping]
+   refusal avoided: round2/capture-r4.json:T4-structured-since.es#1[shipping]
+   refusal avoided: round2/capture-r4.json:T4-structured-since.es#2[shipping]
+   genuine catch lost:  24  it→fr
+   genuine catch lost:  15  en→fr
+   genuine catch lost:  14  es→fr
+   genuine catch lost:  10  da→fr
+   genuine catch lost:  10  tr→fr
+   genuine catch lost:   8  nl→fr
+   genuine catch lost:   6  nb→fr
+   genuine catch lost:   6  vi→fr
+   genuine catch lost:   5  pt→fr
+   genuine catch lost:   3  de→fr
+   genuine catch lost:   3  ko→fr
+   genuine catch lost:   3  zh-Hans→fr
+   genuine catch lost:   2  da→en
+   genuine catch lost:   2  pt→en
+   genuine catch lost:   1  de→en
+   genuine catch lost:   1  es→en, es→fr
+   genuine catch lost:   1  fr→en
+     e.g. round3/capture-r4.json:T2-no-error.zh-Hans#3[shipping]: j'ai oublié un truc, mais ça m'échappe.
+     e.g. 587-structured-rewrite/capture-r4.json:T2-no-error.zh-Hans#3[shipping]: j'ai oublié un truc, mais ça m'échappe.
+     e.g. 587-structured-rewrite/capture-r4.json:T1-last-transcription.pt#2[shipping]: The last transcription is here.
+
+══ M3 — the cost of an es/pt exception, scored the way PR #588 scored the Scandinavian one
+
+K414 outputs touching es or pt at all (expected, whole or any segment): 9
+   adversarial:X4-es-liste#1 expected=es label=sameLanguage whole=es
+   r3-freepolish-seed-5runs-after.txt:6-repair-es#1 expected=es label=sameLanguage whole=es
+   r3-freepolish-seed-5runs-after.txt:6-repair-es#2 expected=es label=sameLanguage whole=es
+   r3-freepolish-seed-5runs-after.txt:6-repair-es#3 expected=es label=sameLanguage whole=es
+   r3-freepolish-seed-5runs-after.txt:6-repair-es#4 expected=es label=sameLanguage whole=es
+   r3-freepolish-seed-5runs-after.txt:6-repair-es#5 expected=es label=sameLanguage whole=es
+   r4-freepolish-auto-3runs-after.txt:auto-verbal-es-prompt-layer#1 expected=es label=sameLanguage whole=es
+   r4-freepolish-auto-3runs-after.txt:auto-verbal-es-prompt-layer#2 expected=es label=sameLanguage whole=es
+   r4-freepolish-auto-3runs-after.txt:auto-verbal-es-prompt-layer#3 expected=es label=sameLanguage whole=es
+
+K414 — V2 es/pt family, both passes: caught 18/18, false rejections 0/464
+   kept  mac-200-run-20260903:R118#1
+   kept  mac-200-run-20260903:R190#1
+   kept  r3-freepolish-seed-5runs-after.txt:7-repair-de#1
+   kept  r3-freepolish-seed-5runs-after.txt:7-repair-de#2
+   kept  r3-freepolish-seed-5runs-after.txt:7-repair-de#3
+   kept  r3-freepolish-seed-5runs-after.txt:7-repair-de#4
+   kept  r3-freepolish-seed-5runs-after.txt:7-repair-de#5
+   kept  round1-notes-show-5runs.txt:N1-field-commits#1
+   kept  round1-notes-show-5runs.txt:N1-field-commits#2
+   kept  round1-notes-show-5runs.txt:N1-field-commits#3
+   kept  round1-notes-show-5runs.txt:N1-field-commits#4
+   kept  round1-notes-show-5runs.txt:N1-field-commits#5
+   kept  round1-notes-show-5runs.txt:N3-projet-fleuve#2
+   kept  round1-notes-show-5runs.txt:N3-projet-fleuve#3
+   kept  round7-notes-v2-5runs.txt:N1-field-commits#2
+   kept  round7-notes-v2-5runs.txt:N1-field-commits#3
+   kept  round7-notes-v2-5runs.txt:N1-field-commits#4
+   kept  round7-notes-v2-5runs.txt:N5-en-ramble#2
+C587 — V2 es/pt family, both passes: false refusals 9 → 0, genuine catches 520 → 520
+   refusal avoided: 587-language-clause/capture-notes.json:T4-structured-since.es#1[shipping]
+   refusal avoided: 587-language-clause/capture-notes.json:T4-structured-since.es#2[shipping]
+   refusal avoided: 587-language-clause/capture-notes.json:T4-structured-since.es#3[shipping]
+   refusal avoided: 587-pr2-message-liste/capture-notes-i18n.json:T4-structured-since.es#1[shipping]
+   refusal avoided: 587-pr2-message-liste/capture-notes-i18n.json:T4-structured-since.es#3[shipping]
+   refusal avoided: 587-pr2-message-liste/capture-notes-i18n.json:T4-structured-since.es#1[notes-develop]
+   refusal avoided: 587-structured-rewrite/capture-r4.json:T4-structured-since.es#2[shipping]
+   refusal avoided: round2/capture-r4.json:T4-structured-since.es#1[shipping]
+   refusal avoided: round2/capture-r4.json:T4-structured-since.es#2[shipping]
+
+K414 — V3 es/pt family, segment pass only: caught 18/18, false rejections 0/464
+   kept  mac-200-run-20260903:R118#1
+   kept  mac-200-run-20260903:R190#1
+   kept  r3-freepolish-seed-5runs-after.txt:7-repair-de#1
+   kept  r3-freepolish-seed-5runs-after.txt:7-repair-de#2
+   kept  r3-freepolish-seed-5runs-after.txt:7-repair-de#3
+   kept  r3-freepolish-seed-5runs-after.txt:7-repair-de#4
+   kept  r3-freepolish-seed-5runs-after.txt:7-repair-de#5
+   kept  round1-notes-show-5runs.txt:N1-field-commits#1
+   kept  round1-notes-show-5runs.txt:N1-field-commits#2
+   kept  round1-notes-show-5runs.txt:N1-field-commits#3
+   kept  round1-notes-show-5runs.txt:N1-field-commits#4
+   kept  round1-notes-show-5runs.txt:N1-field-commits#5
+   kept  round1-notes-show-5runs.txt:N3-projet-fleuve#2
+   kept  round1-notes-show-5runs.txt:N3-projet-fleuve#3
+   kept  round7-notes-v2-5runs.txt:N1-field-commits#2
+   kept  round7-notes-v2-5runs.txt:N1-field-commits#3
+   kept  round7-notes-v2-5runs.txt:N1-field-commits#4
+   kept  round7-notes-v2-5runs.txt:N5-en-ramble#2
+C587 — V3 es/pt family, segment pass only: false refusals 9 → 0, genuine catches 520 → 520
+   refusal avoided: 587-language-clause/capture-notes.json:T4-structured-since.es#1[shipping]
+   refusal avoided: 587-language-clause/capture-notes.json:T4-structured-since.es#2[shipping]
+   refusal avoided: 587-language-clause/capture-notes.json:T4-structured-since.es#3[shipping]
+   refusal avoided: 587-pr2-message-liste/capture-notes-i18n.json:T4-structured-since.es#1[shipping]
+   refusal avoided: 587-pr2-message-liste/capture-notes-i18n.json:T4-structured-since.es#3[shipping]
+   refusal avoided: 587-pr2-message-liste/capture-notes-i18n.json:T4-structured-since.es#1[notes-develop]
+   refusal avoided: 587-structured-rewrite/capture-r4.json:T4-structured-since.es#2[shipping]
+   refusal avoided: round2/capture-r4.json:T4-structured-since.es#1[shipping]
+   refusal avoided: round2/capture-r4.json:T4-structured-since.es#2[shipping]
+
+Outputs where Apple FM wrote es or pt on a dictation in another language (whole reading ≥ 0.5):
+   587-pr2-message-liste/capture-notes-i18n.json:T5-long-test.en#2[notes-develop]  expected en, whole es 0.9987, V2 refuses, V3 refuses
+   587-pr2-message-liste/capture-notes-i18n.json:T6-project-update.en#1[notes-develop]  expected en, whole es 0.9991, V2 refuses, V3 refuses
+   587-pr2-message-liste/capture-notes-i18n.json:T5-long-test.ja#1[notes-develop]  expected ja, whole es 0.9976, V2 refuses, V3 refuses
+   587-pr2-message-liste/capture-notes-i18n.json:T5-long-test.ja#2[notes-develop]  expected ja, whole es 0.9955, V2 refuses, V3 refuses
+   587-pr2-message-liste/capture-notes-i18n.json:T5-long-test.ko#1[notes-develop]  expected ko, whole pt 0.9999, V2 refuses, V3 refuses
+   587-pr2-message-liste/capture-notes-i18n.json:T5-long-test.ko#2[notes-develop]  expected ko, whole pt 0.9998, V2 refuses, V3 refuses
+   587-pr2-message-liste/capture-notes-i18n.json:T5-long-test.ko#3[notes-develop]  expected ko, whole es 0.9972, V2 refuses, V3 refuses
+
+══ Also scored: a longer segment floor (V4), everything else shipping
+  rule                               K414 caught  K414 false  C587 false  C587 genuine
+  V0 shipping                              18/18       0/464           9           520
+  V4-20 segment floor 20 chars             18/18       0/464           9           520
+  V4-25 segment floor 25 chars             18/18       0/464           3           519
+     genuine C587 catches lost vs V0: 1
+       round3/capture-r4.json:T3-plan-mode.de#3[C3] — 22 ch: "title": "Plan-Modus",
+  V4-30 segment floor 30 chars             18/18       0/464           0           519
+     genuine C587 catches lost vs V0: 1
+       round3/capture-r4.json:T3-plan-mode.de#3[C3] — 22 ch: "title": "Plan-Modus",
+  V4-40 segment floor 40 chars             18/18       0/464           0           505
+     genuine C587 catches lost vs V0: 15
+  V4-60 segment floor 60 chars             18/18       0/464           0           489
+     genuine C587 catches lost vs V0: 31

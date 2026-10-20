@@ -1,0 +1,1151 @@
+[
+  {
+    "alignedPairs" : 3,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 3,
+    "dispersed" : 0,
+    "expectedLanguage" : "en",
+    "fixture" : "E1-structure-mode-english",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 3,
+    "labels" : [
+
+    ],
+    "listLines" : 0,
+    "ms" : 2434,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Another thing I want to test is whether the structure mod works in English. I don't know if in the code we made it for only the French or if we made it also for the English or even German for Spanish people.\n\nRight now I'm in detection language detection, and I will try to put the English transcription in the settings to see if I obtain the same result.",
+    "outputChars" : 355,
+    "outputLanguage" : "en",
+    "personLost" : 0,
+    "rawChars" : 381,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 3,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 3,
+    "dispersed" : 0,
+    "expectedLanguage" : "en",
+    "fixture" : "E1-structure-mode-english",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 3,
+    "labels" : [
+
+    ],
+    "listLines" : 0,
+    "ms" : 2383,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Another thing I want to test is whether the structure mod works in English. I don't know if in the code we made it for only the French or if we made it also for the English or even German for Spanish people.\n\nRight now I'm in detection language detection, and I will try to put the English transcription in the settings to see if I obtain the same result.",
+    "outputChars" : 355,
+    "outputLanguage" : "en",
+    "personLost" : 0,
+    "rawChars" : 381,
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 3,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 3,
+    "dispersed" : 0,
+    "expectedLanguage" : "en",
+    "fixture" : "E1-structure-mode-english",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 3,
+    "labels" : [
+
+    ],
+    "listLines" : 0,
+    "ms" : 2382,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Another thing I want to test is if the structure mod works in English. Because I don't know if in the code we made it for only the French or if we made also for the English or even German for Spanish people.\n\nRight now I'm in detection language detection, and I will try to put the English transcription in the settings to see if I obtain the same result.",
+    "outputChars" : 355,
+    "outputLanguage" : "en",
+    "personLost" : 0,
+    "rawChars" : 381,
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 2,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 1,
+    "dispersed" : 0,
+    "expectedLanguage" : "en",
+    "fixture" : "E2-switched-to-english",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 2,
+    "labels" : [
+
+    ],
+    "listLines" : 1,
+    "ms" : 3418,
+    "negationDropped" : 0,
+    "outcome" : "rejectedGuardrail",
+    "output" : "Another thing I want to test is the structure mod in English, because I don't know if the code we made made it for the English. I mean for the French or if it will work for English or even German or Spanish people right now. I'm switched to English transcription and I will try maybe Spanish just after that to see if the mod works.\n\nHere the speaker began a new topic, so the technical consideration remains in their voice, with the same hesitation and timeline preserved.\n\n- I'm switched to English transcription and I will try maybe Spanish just after that to see if the mod works.",
+    "outputChars" : 584,
+    "outputLanguage" : "en",
+    "personLost" : 0,
+    "rawChars" : 348,
+    "rejectedCheck" : "length",
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 2,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 1,
+    "dispersed" : 0,
+    "expectedLanguage" : "en",
+    "fixture" : "E2-switched-to-english",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 2,
+    "labels" : [
+
+    ],
+    "listLines" : 0,
+    "ms" : 2289,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Another thing that I want to test is the structure mod in English, because I don't know if the code we made made it for the English.\n\nI mean for the French or if it will work for English or even German or Spanish people right now. I'm switched to English transcription and I will try maybe Spanish just after that to see if the mod works.",
+    "outputChars" : 338,
+    "outputLanguage" : "en",
+    "personLost" : 0,
+    "rawChars" : 348,
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 2,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 1,
+    "dispersed" : 0,
+    "expectedLanguage" : "en",
+    "fixture" : "E2-switched-to-english",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 2,
+    "labels" : [
+
+    ],
+    "listLines" : 0,
+    "ms" : 4018,
+    "negationDropped" : 0,
+    "outcome" : "rejectedGuardrail",
+    "output" : "Another thing I want to test is the structure mod in English, because I don't know if the code we made made it for the English. I mean for the French or if it will work for English or even German or Spanish people right now. I'm switched to English transcription and I will try maybe Spanish just after that to see if the mod works.\n\nHere the speaker began with a personal test, so the focus remains on their own doubt and sequence of attempts:\n\nThe code we made may not be ready for English, French, German or Spanish users right now, even though the speaker is now using English transcription. The intention is to test the structure mod in English first, then consider Spanish.",
+    "outputChars" : 679,
+    "outputLanguage" : "en",
+    "personLost" : 0,
+    "rawChars" : 348,
+    "rejectedCheck" : "length",
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 1,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "expectedLanguage" : "en",
+    "fixture" : "E3-now-in-english",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "listLines" : 0,
+    "ms" : 1938,
+    "negationDropped" : 0,
+    "outcome" : "rejectedGuardrail",
+    "output" : "Now I speak in English, and I will see if the transcription looks fine or if it's just a normal transcription without the structured mod.\n\nI will see if the transcription looks fine.\n\nI will see if it's just a normal transcription without the structured mod.",
+    "outputChars" : 258,
+    "outputLanguage" : "en",
+    "personLost" : 0,
+    "rawChars" : 148,
+    "rejectedCheck" : "length",
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 1,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "expectedLanguage" : "en",
+    "fixture" : "E3-now-in-english",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "listLines" : 0,
+    "ms" : 2126,
+    "negationDropped" : 0,
+    "outcome" : "rejectedGuardrail",
+    "output" : "Now I speak in English, and I will see if the transcription looks fine or if it's just a normal transcription without the structured mod.\n\nIt is not clear what to do with the output, and the structure remains unchanged.\n\nThere is no further action to take.",
+    "outputChars" : 256,
+    "outputLanguage" : "en",
+    "personLost" : 0,
+    "rawChars" : 148,
+    "rejectedCheck" : "length",
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 1,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "expectedLanguage" : "en",
+    "fixture" : "E3-now-in-english",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "listLines" : 2,
+    "ms" : 2401,
+    "negationDropped" : 0,
+    "outcome" : "rejectedGuardrail",
+    "output" : "I now speak in English and I will see if the transcription looks fine or if it's just a normal transcription without the structured mod.\n\nHere the speaker stated their intention, so the observation remains in their voice:\n\n- I will see if the transcription looks fine.\n- I will see if it is just a normal transcription without the structured mod.",
+    "outputChars" : 346,
+    "outputLanguage" : "en",
+    "personLost" : 0,
+    "rawChars" : 148,
+    "rejectedCheck" : "length",
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 1,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "expectedLanguage" : "en",
+    "fixture" : "E4-toolbar-refusal",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "listLines" : 0,
+    "ms" : 2104,
+    "negationDropped" : 1,
+    "outcome" : "success",
+    "output" : "Now I'm speaking in English to make a refus in the toolbar, and I will check if the error message in the toolbar is correctly readable or not.\n\nIt is necessary to make a refus in the toolbar.\n\nI will check if the error message in the toolbar is correctly readable or not.",
+    "outputChars" : 271,
+    "outputLanguage" : "en",
+    "personLost" : 0,
+    "rawChars" : 187,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 1,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "expectedLanguage" : "en",
+    "fixture" : "E4-toolbar-refusal",
+    "foreignSentences" : [
+      "Il faut que je vérifie si l'avis d'erreur dans la barre de commande est correctement readable ou non."
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "listLines" : 0,
+    "ms" : 2111,
+    "negationDropped" : 1,
+    "outcome" : "rejectedGuardrail",
+    "output" : "Now I'm speaking in English to make a refus in the toolbar, and thanks to that I will check if the error message in the toolbar is correctly readable or not.\n\nIl faut que je vérifie si l'avis d'erreur dans la barre de commande est correctement readable ou non.",
+    "outputChars" : 260,
+    "outputLanguage" : "en",
+    "personLost" : 0,
+    "rawChars" : 187,
+    "rejectedCheck" : "language",
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 1,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "expectedLanguage" : "en",
+    "fixture" : "E4-toolbar-refusal",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "listLines" : 0,
+    "ms" : 2012,
+    "negationDropped" : 1,
+    "outcome" : "success",
+    "output" : "Now I'm speaking in English to make a refus in the toolbar, and I will check if the error message in the toolbar is correctly readable or not.\n\nIt is necessary to confirm the readability of the error message in the toolbar after the refus has been made.",
+    "outputChars" : 253,
+    "outputLanguage" : "en",
+    "personLost" : 0,
+    "rawChars" : 187,
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 0,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "expectedLanguage" : "en",
+    "fixture" : "E5-should-not-work",
+    "foreignSentences" : [
+      "Il faut que je fasse un message structuré en anglais, et ce devrait pas fonctionner.",
+      "Il faut que je fasse un message structuré en anglais, et ce devrait pas fonctionner."
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "listLines" : 0,
+    "ms" : 1843,
+    "negationDropped" : 0,
+    "outcome" : "rejectedGuardrail",
+    "output" : "Il faut que je fasse un message structuré en anglais, et ce devrait pas fonctionner.\nIl faut que je fasse un message structuré en anglais, et ce devrait pas fonctionner.",
+    "outputChars" : 169,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 78,
+    "rejectedCheck" : "length",
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "And now I will make a structured message in English and uh it should not work."
+    ],
+    "unrecalledWholeRecall" : [
+      0.14285714285714285
+    ]
+  },
+  {
+    "alignedPairs" : 1,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "expectedLanguage" : "en",
+    "fixture" : "E5-should-not-work",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "listLines" : 0,
+    "ms" : 1254,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "And now I will make a structured message in English, and it should not work.",
+    "outputChars" : 76,
+    "outputLanguage" : "en",
+    "personLost" : 0,
+    "rawChars" : 78,
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 0,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "expectedLanguage" : "en",
+    "fixture" : "E5-should-not-work",
+    "foreignSentences" : [
+      "Il faut que je créer un message structuré en anglais, et cela ne devrait pas fonctionner."
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "listLines" : 0,
+    "ms" : 1960,
+    "negationDropped" : 0,
+    "outcome" : "rejectedGuardrail",
+    "output" : "Il faut que je créer un message structuré en anglais, et cela ne devrait pas fonctionner.\n\nHere the speaker declared their intention and the condition for its execution, maintaining the original structure and tone.",
+    "outputChars" : 214,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 78,
+    "rejectedCheck" : "length",
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "And now I will make a structured message in English and uh it should not work."
+    ],
+    "unrecalledWholeRecall" : [
+      0.14285714285714285
+    ]
+  },
+  {
+    "alignedPairs" : 3,
+    "arm" : "C3",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 3,
+    "dispersed" : 0,
+    "expectedLanguage" : "en",
+    "fixture" : "E1-structure-mode-english",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 3,
+    "labels" : [
+
+    ],
+    "listLines" : 0,
+    "ms" : 1796,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Another thing that I want to test is if the structure mod works in English.\n\nBecause I don't know if in the code we made it for only the French or if we made also for the English or even German for Spanish people.\n\nRight now I'm in detection language detection but I will try to put the English transcription in the settings to see if I obtain the same result.",
+    "outputChars" : 360,
+    "outputLanguage" : "en",
+    "personLost" : 0,
+    "rawChars" : 381,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 3,
+    "arm" : "C3",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 3,
+    "dispersed" : 0,
+    "expectedLanguage" : "en",
+    "fixture" : "E1-structure-mode-english",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 3,
+    "labels" : [
+
+    ],
+    "listLines" : 0,
+    "ms" : 1810,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Another thing that I want to test is if the structure mod works in English.\n\nBecause I don't know if in the code we made it for only the French or if we made also for the English or even German for Spanish people.\n\nRight now I'm in detection language detection but I will try to put the English transcription in the settings to see if I obtain the same result.",
+    "outputChars" : 360,
+    "outputLanguage" : "en",
+    "personLost" : 0,
+    "rawChars" : 381,
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 3,
+    "arm" : "C3",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 3,
+    "dispersed" : 0,
+    "expectedLanguage" : "en",
+    "fixture" : "E1-structure-mode-english",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 3,
+    "labels" : [
+
+    ],
+    "listLines" : 0,
+    "ms" : 1750,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Another thing I want to test is if the structure mod works in English. Because I don't know if in the code we made it for only the French or if we made also for the English or even German for Spanish people.\n\nRight now I'm in detection language detection but I will try to put the English transcription in the settings to see if I obtain the same result.",
+    "outputChars" : 354,
+    "outputLanguage" : "en",
+    "personLost" : 0,
+    "rawChars" : 381,
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 2,
+    "arm" : "C3",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 1,
+    "dispersed" : 0,
+    "expectedLanguage" : "en",
+    "fixture" : "E2-switched-to-english",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 2,
+    "labels" : [
+
+    ],
+    "listLines" : 0,
+    "ms" : 1696,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Another thing I want to test is the structure mod in English because I don't know if the code we made made it for the English. I mean for the French or if it will work for English or even German or Spanish people right now. I'm switched to English transcription and I will try uh maybe Spanish just after that to see if the mod works.",
+    "outputChars" : 334,
+    "outputLanguage" : "en",
+    "personLost" : 0,
+    "rawChars" : 348,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 2,
+    "arm" : "C3",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 1,
+    "dispersed" : 0,
+    "expectedLanguage" : "en",
+    "fixture" : "E2-switched-to-english",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 2,
+    "labels" : [
+
+    ],
+    "listLines" : 0,
+    "ms" : 1719,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Another thing I want to test is the structure mod in English because I don't know if the code we made made it for the English. I mean for the French or if it will work for English or even German or Spanish people right now. I'm switched to English transcription and I will try maybe Spanish just after that to see if the mod works.",
+    "outputChars" : 331,
+    "outputLanguage" : "en",
+    "personLost" : 0,
+    "rawChars" : 348,
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 2,
+    "arm" : "C3",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 1,
+    "dispersed" : 0,
+    "expectedLanguage" : "en",
+    "fixture" : "E2-switched-to-english",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 2,
+    "labels" : [
+
+    ],
+    "listLines" : 0,
+    "ms" : 1706,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Another thing I want to test is the structure mod in English because I don't know if the code we made made it for the English.\n\nI mean for the French or if it will work for English or even German or Spanish people right now. I'm switched to English transcription and I will try uh maybe Spanish just after that to see if the mod works.",
+    "outputChars" : 335,
+    "outputLanguage" : "en",
+    "personLost" : 0,
+    "rawChars" : 348,
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 1,
+    "arm" : "C3",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "expectedLanguage" : "en",
+    "fixture" : "E3-now-in-english",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "listLines" : 0,
+    "ms" : 1156,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Okay, so now I speak in English and I will see if the transcription looks fine or if it's just a normal transcription without the structured mod.\n",
+    "outputChars" : 146,
+    "outputLanguage" : "en",
+    "personLost" : 0,
+    "rawChars" : 148,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 1,
+    "arm" : "C3",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "expectedLanguage" : "en",
+    "fixture" : "E3-now-in-english",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "listLines" : 0,
+    "ms" : 1057,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Okay, so now I speak in English and I will see if the transcription looks fine or if it's just a normal transcription without the structured mod.",
+    "outputChars" : 145,
+    "outputLanguage" : "en",
+    "personLost" : 0,
+    "rawChars" : 148,
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 1,
+    "arm" : "C3",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "expectedLanguage" : "en",
+    "fixture" : "E3-now-in-english",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "listLines" : 0,
+    "ms" : 1145,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Okay, so now I speak in English and I will see if the transcription looks fine or if it's just a normal transcription without the structured mod.\n",
+    "outputChars" : 146,
+    "outputLanguage" : "en",
+    "personLost" : 0,
+    "rawChars" : 148,
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 1,
+    "arm" : "C3",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "expectedLanguage" : "en",
+    "fixture" : "E4-toolbar-refusal",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "listLines" : 0,
+    "ms" : 1174,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Okay, so now I'm speaking in English to make a refus in the toolbar and thanks to that I will check if the error message in the toolbar is correctly readable or not.",
+    "outputChars" : 165,
+    "outputLanguage" : "en",
+    "personLost" : 0,
+    "rawChars" : 187,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 1,
+    "arm" : "C3",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "expectedLanguage" : "en",
+    "fixture" : "E4-toolbar-refusal",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "listLines" : 0,
+    "ms" : 1415,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Okay, so now I'm speaking in English to make a refus in the toolbar and thanks to that I will check if the error message in the toolbar is correctly readable or not.\n\nI will check if the error message in the toolbar is correctly readable or not.",
+    "outputChars" : 245,
+    "outputLanguage" : "en",
+    "personLost" : 0,
+    "rawChars" : 187,
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 1,
+    "arm" : "C3",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "expectedLanguage" : "en",
+    "fixture" : "E4-toolbar-refusal",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "listLines" : 0,
+    "ms" : 1226,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Okay, so now I'm speaking in English to make a refus in the toolbar and thanks to that I will check if the error message in the toolbar is correctly readable or not.",
+    "outputChars" : 165,
+    "outputLanguage" : "en",
+    "personLost" : 0,
+    "rawChars" : 187,
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 1,
+    "arm" : "C3",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "expectedLanguage" : "en",
+    "fixture" : "E5-should-not-work",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "listLines" : 0,
+    "ms" : 801,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "And now I will make a structured message in English and it should not work.",
+    "outputChars" : 75,
+    "outputLanguage" : "en",
+    "personLost" : 0,
+    "rawChars" : 78,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 1,
+    "arm" : "C3",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "expectedLanguage" : "en",
+    "fixture" : "E5-should-not-work",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "listLines" : 0,
+    "ms" : 798,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "And now I will make a structured message in English and it should not work.",
+    "outputChars" : 75,
+    "outputLanguage" : "en",
+    "personLost" : 0,
+    "rawChars" : 78,
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 1,
+    "arm" : "C3",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "expectedLanguage" : "en",
+    "fixture" : "E5-should-not-work",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "listLines" : 0,
+    "ms" : 802,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "And now I will make a structured message in English and it should not work.",
+    "outputChars" : 75,
+    "outputLanguage" : "en",
+    "personLost" : 0,
+    "rawChars" : 78,
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  }
+]

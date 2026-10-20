@@ -68,7 +68,7 @@ Quand tu as besoin de générer des assets visuels :
 Barre centrale = dégradé #6BA3FF → #2563EB
 Barres latérales = blanc à 45% et 65% d'opacité
 Fond icône = dégradé #0D2040 → #071020 à 135°
-Border radius barres = 4.5pt
+Largeur des barres = 9/42 de la plus haute, écart = 7,5/42, bouts en capsule (rayon = largeur / 2, jamais une valeur fixe en points). Source : `assets/brand/appicon-dark.svg`, code : `DictusLogoGeometry` (#636)
 
 ## Agent skills
 
@@ -87,3 +87,5 @@ Single-context — `CONTEXT.md` + `docs/adr/` at the repo root (created lazily b
 ### Headless simulator
 
 Boot, build, install, launch, capture, and what a simulator cannot show. See `docs/agents/simulator.md`.
+
+**Smoke test:** `scripts/simulator-smoke-test.sh` runs the app → keyboard → app path headlessly in about two minutes and ends with `SMOKE PASS` or `SMOKE FAIL step N`. Run it while verifying any change to DictusApp, DictusKeyboard, onboarding or the App Group hand-off, and before a TestFlight cut. A pass is not a device validation. See `docs/agents/simulator-smoke-test.md`.

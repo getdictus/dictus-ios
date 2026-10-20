@@ -21,10 +21,14 @@ extension View {
     /// WHY its own NavigationStack: the cover is presented outside the tab's
     /// stack, so the paywall would otherwise have no navigation bar to hang its
     /// close button on.
-    func paywallCover(isPresented: Binding<Bool>) -> some View {
+    ///
+    /// `framing` is `.trialEnded` for the one presentation the app makes on its own,
+    /// at the end of the reverse trial (#593); every entry point the user taps keeps
+    /// the default.
+    func paywallCover(isPresented: Binding<Bool>, framing: PaywallFraming = .standard) -> some View {
         fullScreenCover(isPresented: isPresented) {
             NavigationStack {
-                PaywallView()
+                PaywallView(framing: framing)
             }
         }
     }

@@ -118,7 +118,7 @@ class TranscriptionService {
 
         let config = WhisperKitConfig(
             modelFolder: modelPath,
-            // Issue #370: A12/A13 need the audio encoder off the Neural Engine.
+            // Issues #370/#612: pre-A14 chips need the audio encoder off the Neural Engine.
             computeOptions: WhisperComputeOptions.current(),
             verbose: false,
             prewarm: true,
@@ -186,7 +186,7 @@ class TranscriptionService {
                 PersistentLog.log(.transcriptionCompleted(
                     durationMs: durationMs, wordCount: wordCount, confidence: result.confidence,
                     language: result.language, promptId: result.promptId,
-                    detectedLanguage: result.detectedLanguage))
+                    detectedLanguage: result.detectedLanguage, retry: result.retry))
                 logPerformance(modelName: modelName, audioSamples: audioSamples, transcriptionDurationMs: durationMs)
                 return result.text
             } catch {

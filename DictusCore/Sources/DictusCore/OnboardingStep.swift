@@ -1,0 +1,404 @@
+// DictusCore/Sources/DictusCore/OnboardingStep.swift
+// The onboarding steps, in order, and where an install mid-onboarding resumes (#649, #675).
+import Foundation
+
+/// One step of the first-run onboarding, persisted by name in `SharedKeys.onboardingStep`.
+///
+/// WHY persisted at all: when the user enables "Allow Full Access" during keyboard setup,
+/// iOS kills the app (the TCC permission changes under it). The step has to survive that
+/// so the user comes back where they were, not to the welcome screen.
+///
+/// WHY by name and not by index (#649): the flow used to store a page index, and every
+/// page added or removed moved the meaning of every index after it — the old switch
+/// carried a `case 3` that meant two different pages depending on the device. A raw
+/// string means the same step for as long as the step exists, and a name this build does
+/// not know (written by a later build, then rolled back) falls back to the start instead
+/// of to whichever page happens to hold that number.
+///
+/// WHY in DictusCore: the order, the skips and the migrations are rules, and the app
+/// target has no test bundle.
+///
+/// THE ORDER (#675, #649 decisions 1 and 17): intro, language, keyboard in Settings, Apple
+/// Intelligence (#683, only when it is not ready), the Smart Modes scene (#679), the pick
+/// of three Smart Modes (#677), the voice notes, vocabulary and history scenes (#680), the
+/// wait for the model, the microphone, the first dictation, how to stop Dictus (#681), the
+/// completion screen. The microphone sits right before the first dictation because it is
+/// the first step that uses it, and its pre-permission screen keeps the system popup out of
+/// the recording. Steps added later slot in as new cases with new raw values; the existing
+/// raw values keep their meaning.
+public enum OnboardingStep: String, CaseIterable, Sendable {
+    /// The intro: the three-page carousel of looping scenes (#676, `OnboardingIntroScene`).
+    /// Which page of it is on screen is not persisted: the carousel sets nothing up.
+    case welcome
+    /// Spoken language, keyboard language and layout. Confirming it starts the model
+    /// download.
+    case language
+    /// Adding the keyboard and Full Access in iOS Settings. The step iOS kills the app on.
+    case keyboardSetup
+    /// Turning on Apple Intelligence (#683, #649 decision 7). Shown only on a capable
+    /// iPhone where it is not ready (`AppleIntelligenceOnboarding.isStepNeeded`); skipped
+    /// otherwise. A Pro step: the Smart Modes are what it is for.
+    case appleIntelligence
+    /// The Smart Modes scene (#679, #649 decisions 8, 9 and 14): a looping drawing of the
+    /// keyboard's long-press fan, with Next and a Skip that jumps the whole scene sequence.
+    /// The first of the feature scenes; the other three follow the pick (#680). A Pro step.
+    case smartModesScene
+    /// Choosing the three Smart Modes the keyboard's long-press fan holds (#677, #649
+    /// decision 16). A Pro step: hidden on a device that can never run Smart Modes.
+    ///
+    /// WHY RIGHT AFTER THE SMART MODES SCENE (#679, decision 16 as moved on 2026-10-07):
+    /// the user has just seen what a mode does, so the choice means something. It still
+    /// falls within the model download, which is what decision 16 asks of it.
+    case smartModePick
+    /// The voice notes scene (#680, #649 decision 9.2): a voice message shared to Dictus,
+    /// its transcript inserted from the keyboard's reader, then Dictus added to the share
+    /// sheet's favourites, which no API does for the user. A Pro step.
+    case voiceNotesScene
+    /// The vocabulary scene (#680, decision 9.3): a term added to the real Vocabulary list,
+    /// with what Dictus writes instead. A Pro step.
+    case vocabularyScene
+    /// The history scene (#680, decision 9.4, #621): the real History sheet, searched for a
+    /// word from the search bar at its bottom. The last of the scene sequence. A Pro step.
+    case historyScene
+    /// Shown only while the model is still downloading or compiling; skipped otherwise.
+    case modelPreparation
+    /// The pre-permission screen, then the system microphone prompt.
+    ///
+    /// WHY NOT "microphone" (#675): that raw value was written by the flow before #675,
+    /// where the microphone came BEFORE the keyboard. A stored "microphone" therefore
+    /// means "keyboard not set up yet", and reading it as this step would skip the
+    /// keyboard for whoever updates mid-onboarding. A new name keeps the two apart;
+    /// `current()` sends the old one to `keyboardSetup`.
+    case microphone = "microphonePrompt"
+    /// The first dictation through the globe key.
+    case firstDictation
+    /// How to stop Dictus's standby (#681, #649 decision 19): a looping drawing of the
+    /// standby Live Activity's power button, in the Dynamic Island or, on an iPhone without
+    /// one (`DeviceCapabilities.hasDynamicIsland`), on the Lock Screen.
+    ///
+    /// WHY RIGHT AFTER THE FIRST DICTATION: that dictation is what puts the standby island
+    /// up for real, so it is the moment the orange dot the user will ask about appears.
+    /// Shown on every iPhone: every iPhone gets the standby, the Lock Screen view at least.
+    /// Passed over on an iPad (`passedOver(on:)`), where iPadOS shows no Live Activity.
+    case stopStandby
+    /// The "you're all set" screen. Its button ends the onboarding.
+    case completion
+
+    /// The step after this one in the whole flow, as a capable device with nothing yet
+    /// done walks it, or nil for the last.
+    public var next: OnboardingStep? {
+        next(skipping: [], deviceCanRunSmartModes: true)
+    }
+
+    /// The step after this one, passing over every step in `satisfied` and, on a device
+    /// that can never run Smart Modes, every Pro step; nil for the last.
+    ///
+    /// WHY THE CALLER SAYS WHAT IS SATISFIED: whether the model is ready or the microphone
+    /// already granted is read from `ModelManager` and `AVAudioSession`, which DictusCore
+    /// does not see. Which steps CAN be passed over is a rule, and lives here
+    /// (`isSkippedWhenSatisfied`): a step outside that list is shown even if the caller
+    /// puts it in `satisfied`.
+    ///
+    /// WHY THE CAPABILITY HAS NO DEFAULT: it is `SmartModeAvailability.deviceIsCapable`,
+    /// and a default of `true` is exactly the iPhone 13 shown a Smart Mode step it can
+    /// never use (#593 decision 2).
+    public func next(skipping satisfied: Set<OnboardingStep>, deviceCanRunSmartModes: Bool) -> OnboardingStep? {
+        let all = Self.allCases
+        guard var index = all.firstIndex(of: self) else { return nil }
+        while index + 1 < all.count {
+            index += 1
+            let candidate = all[index]
+            if !candidate.isShown(deviceCanRunSmartModes: deviceCanRunSmartModes) { continue }
+            if candidate.isSkippedWhenSatisfied, satisfied.contains(candidate) { continue }
+            return candidate
+        }
+        return nil
+    }
+
+    /// Whether this step sells or sets up a Pro feature (#649).
+    ///
+    /// Pro steps are hidden on a device that can never run Smart Modes, for the reason the
+    /// reverse trial is withheld there (#593 decision 2): on such an iPhone Pro is History
+    /// and Vocabulary only, and a step about Smart Modes would describe a feature the user
+    /// cannot have. A capable iPhone with Apple Intelligence switched off still sees them.
+    ///
+    /// WHY THE VOICE NOTES, VOCABULARY AND HISTORY SCENES TOO (#680): those features run on
+    /// every iPhone, but they are Pro, and decision 2 also says no Pro promotion where no
+    /// trial starts (#593 acceptance: "no trial starts and no Pro promotion appears"). A
+    /// scene showing a feature the user would have to buy, on the one device the trial
+    /// skips, is that promotion.
+    public var isProStep: Bool {
+        switch self {
+        case .appleIntelligence, .smartModesScene, .smartModePick, .voiceNotesScene, .vocabularyScene, .historyScene:
+            return true
+        case .welcome, .language, .keyboardSetup, .modelPreparation, .microphone, .firstDictation, .stopStandby,
+             .completion:
+            return false
+        }
+    }
+
+    /// Whether this step is part of the feature-scene sequence that the scenes' Skip
+    /// jumps as a whole (#649 decision 8): the Smart Modes scene, the pick, then the voice
+    /// notes, vocabulary and history scenes (#680).
+    ///
+    /// WHY THE PICK IS PART OF IT: it sits inside the sequence (decision 9 as amended: the
+    /// Smart Modes scene, the pick, then the other scenes), and it asks the user to choose
+    /// among modes the scene was there to show. A user who skipped the scenes has not seen
+    /// them; landing on "you have just seen them, pick three" would be false. Skipping it
+    /// writes nothing, so the fan keeps the seed, exactly as the pick's own Skip does.
+    public var isInSceneSequence: Bool {
+        switch self {
+        case .smartModesScene, .smartModePick, .voiceNotesScene, .vocabularyScene, .historyScene:
+            return true
+        case .welcome, .language, .keyboardSetup, .appleIntelligence, .modelPreparation, .microphone, .firstDictation,
+             .stopStandby, .completion:
+            return false
+        }
+    }
+
+    /// Where the scenes' Skip lands: the first step after the last step of the scene
+    /// sequence, with the same skips `next(skipping:deviceCanRunSmartModes:)` applies.
+    ///
+    /// WHY FROM THE LAST MEMBER AND NOT FROM SELF: Skip jumps the whole sequence, wherever
+    /// in it the user taps it (decision 8), not just the scene on screen.
+    public func stepAfterSceneSequence(skipping satisfied: Set<OnboardingStep>,
+                                       deviceCanRunSmartModes: Bool) -> OnboardingStep? {
+        guard isInSceneSequence, let last = Self.allCases.last(where: \.isInSceneSequence) else {
+            return next(skipping: satisfied, deviceCanRunSmartModes: deviceCanRunSmartModes)
+        }
+        return last.next(skipping: satisfied, deviceCanRunSmartModes: deviceCanRunSmartModes)
+    }
+
+    /// Whether this step is part of the flow on this device: every step on a device that
+    /// can run Smart Modes, every step but the Pro ones otherwise.
+    public func isShown(deviceCanRunSmartModes: Bool) -> Bool {
+        deviceCanRunSmartModes || !isProStep
+    }
+
+    /// Whether this step is passed over when what it asks for is already done.
+    ///
+    /// - `modelPreparation`: there is nothing to wait for once the model is ready (#649
+    ///   decision 1.6). A download that finished while the user was in Settings goes
+    ///   straight on.
+    /// - `appleIntelligence`: nothing to ask when Apple Intelligence is ready (#683). On a
+    ///   device that can never run it the step is already hidden as a Pro step.
+    /// - `microphone`: a microphone already granted (a second run of the onboarding, or an
+    ///   install that went through the old order, where the microphone came first) has
+    ///   nothing to ask. A denied one is still shown: the page says where to turn it on.
+    /// - `stopStandby`: nothing to show on a device without the standby Live Activity, which
+    ///   is what `passedOver(on:)` reports (#681).
+    public var isSkippedWhenSatisfied: Bool {
+        switch self {
+        case .appleIntelligence, .modelPreparation, .microphone, .stopStandby:
+            return true
+        case .welcome, .language, .keyboardSetup, .smartModesScene, .smartModePick, .voiceNotesScene,
+             .vocabularyScene, .historyScene, .firstDictation, .completion:
+            return false
+        }
+    }
+
+    /// The steps this hardware has nothing to show for, to add to what the caller passes to
+    /// `next(skipping:deviceCanRunSmartModes:)`.
+    ///
+    /// - `stopStandby` on an iPad (#681): the step teaches the power button of the standby
+    ///   Live Activity, in the Dynamic Island or on the Lock Screen, and iPadOS shows no
+    ///   Live Activity at all. Either picture would describe a control the user does not
+    ///   have, so the first dictation goes straight to the completion screen there.
+    ///
+    /// WHY HERE AND NOT IN `isShown`: the step is shown or not by hardware, like the Pro
+    /// steps, but iPads are a fringe of an iPhone app (#612). Passing the step over keeps
+    /// one signature for every caller, at the cost of an iPad keeping that step's progress
+    /// segment, which it only ever sees ahead on the first dictation, as an iPhone does.
+    public static func passedOver(on device: DeviceCapabilities) -> Set<OnboardingStep> {
+        device.isIPad ? [.stopStandby] : []
+    }
+
+    /// Position in the flow.
+    public var position: Int {
+        Self.allCases.firstIndex(of: self) ?? 0
+    }
+
+    // MARK: - Shell
+
+    /// Whether the step shows the segmented progress bar (#675).
+    ///
+    /// The intro and the completion screen are drawn without it in the mock-ups: the
+    /// first is before the work starts, the second after it ends.
+    public var showsProgress: Bool {
+        switch self {
+        case .welcome, .completion:
+            return false
+        case .language, .keyboardSetup, .appleIntelligence, .smartModesScene, .smartModePick, .voiceNotesScene,
+             .vocabularyScene, .historyScene, .modelPreparation, .microphone, .firstDictation, .stopStandby:
+            return true
+        }
+    }
+
+    /// The steps that own a segment of the progress bar on this device, in order.
+    ///
+    /// WHY a skipped step keeps its segment: the bar would otherwise change length
+    /// depending on how fast the download was. A passed-over step reads as done, like the
+    /// old dots did.
+    ///
+    /// WHY A HIDDEN PRO STEP DOES NOT: whether the device can run Smart Modes is known
+    /// before the first segment is drawn and never changes during the flow, so leaving its
+    /// segment in would only draw a step that device never sees.
+    public static func progressSteps(deviceCanRunSmartModes: Bool) -> [OnboardingStep] {
+        allCases.filter { $0.showsProgress && $0.isShown(deviceCanRunSmartModes: deviceCanRunSmartModes) }
+    }
+
+    /// This step's segment in `progressSteps(deviceCanRunSmartModes:)`, or nil for a step
+    /// without the bar.
+    public func progressIndex(deviceCanRunSmartModes: Bool) -> Int? {
+        Self.progressSteps(deviceCanRunSmartModes: deviceCanRunSmartModes).firstIndex(of: self)
+    }
+
+    /// Whether the shell offers the discreet Skip in the top-right slot.
+    ///
+    /// - The feature scenes (Smart Modes, voice notes, vocabulary, history): Skip jumps the
+    ///   whole scene sequence (`stepAfterSceneSequence`, #649 decision 8).
+    /// - The Smart Mode pick: skipping it keeps the seed (`defaultPinnedIdentifiers`), so
+    ///   the fan is never left empty (#677). Inside the sequence, so it jumps it too.
+    /// - The first dictation.
+    ///
+    /// Everything else sets up something the keyboard needs, and the completion screen is
+    /// its own way out. So is the stop-Dictus step (#681): one screen whose only button
+    /// already moves on, as the mock-up draws it. The Apple Intelligence step can always be skipped too (#683), but
+    /// by its own *Later* button, drawn as large as the main one, not by this discreet slot.
+    public var isSkippable: Bool {
+        switch self {
+        case .smartModesScene, .smartModePick, .voiceNotesScene, .vocabularyScene, .historyScene, .firstDictation:
+            return true
+        case .welcome, .language, .keyboardSetup, .appleIntelligence, .modelPreparation, .microphone,
+             .stopStandby, .completion:
+            return false
+        }
+    }
+
+    // MARK: - Going back (#700, #725)
+
+    /// The step the shell's back control returns to, or nil for a step without one.
+    ///
+    /// - The language step returns to the intro (#700): a reflex tap on the intro's button
+    ///   should not cost the user the three scenes.
+    /// - Every step of the scene sequence but its first returns to the one before it
+    ///   (#725): the pick to the Smart Modes scene, then each scene to the step before it.
+    ///   A reflex tap on Next should not cost the user a scene either.
+    ///
+    /// WHY NOT FROM THE KEYBOARD SETUP ON: confirming the language step starts the model
+    /// download. Going back to the language step would mean cancelling or duplicating that
+    /// download, and the keyboard setup is the step iOS kills the app on.
+    ///
+    /// WHY THE SCENE SEQUENCE ANYWAY (#725): it is the download #700 protects, not the
+    /// steps after it. The scenes are presentation only and the pick only writes the pinned
+    /// Smart Modes; moving between them neither cancels nor starts a download. The first
+    /// scene has no back control, so going back never leaves the sequence. Every step of it
+    /// is a Pro step, shown or hidden together (`isShown`), so the step before is always
+    /// on screen where the step is.
+    public var stepBack: OnboardingStep? {
+        switch self {
+        case .language:
+            return .welcome
+        case .smartModePick:
+            return .smartModesScene
+        case .voiceNotesScene:
+            return .smartModePick
+        case .vocabularyScene:
+            return .voiceNotesScene
+        case .historyScene:
+            return .vocabularyScene
+        case .welcome, .keyboardSetup, .appleIntelligence, .smartModesScene, .modelPreparation, .microphone,
+             .firstDictation, .stopStandby, .completion:
+            return nil
+        }
+    }
+
+    /// Goes back from `step`: records `stepBack` as the step to resume at and returns it,
+    /// or returns nil and records nothing for a step without a back control.
+    ///
+    /// WHY THE WRITE IS HERE: an app killed after going back must resume on the step the
+    /// user went back to, not on the one they left (#700, #725), and the app target has no
+    /// test bundle.
+    @discardableResult
+    public static func goBack(from step: OnboardingStep, defaults: UserDefaults = AppGroup.defaults) -> OnboardingStep? {
+        guard let back = step.stepBack else { return nil }
+        save(back, defaults: defaults)
+        return back
+    }
+
+    // MARK: - Migration from the page index (before #649)
+
+    /// Where an install that was mid-onboarding on the old page numbering resumes.
+    ///
+    /// The old flow was Welcome (0), Mic (1), Keyboard (2), Polish or, on a device without
+    /// polish, Model (3), Model (4), Globe (5). The language screen did not exist, so every
+    /// install between the welcome and the model has not seen it, and it is the screen
+    /// that decides the keyboard and the model. They resume there; the keyboard and
+    /// microphone steps that follow detect what is already granted.
+    ///
+    /// Index 5 had already installed a model on the old device-only rule, so it resumes at
+    /// the first dictation: sending it back to the language screen would download a second
+    /// model to someone one step from done. Anything else (a negative or unknown index)
+    /// starts over, which is what the old switch's `default` did.
+    public static func migrated(fromLegacyPageIndex index: Int) -> OnboardingStep {
+        switch index {
+        case 1...4: return .language
+        case 5: return .firstDictation
+        default: return .welcome
+        }
+    }
+
+    // MARK: - Migration from the #649 order (before #675)
+
+    /// The raw value the microphone step had while it came second, right after the
+    /// language screen (#649 PR A).
+    public static let legacyMicrophoneRawValue = "microphone"
+
+    /// The raw value of the Full Access explainer while it was a step of its own, right
+    /// before the keyboard (#704, on test builds only). It is a sheet on the keyboard step
+    /// now, so a phone stored there resumes at the keyboard, where the sheet's link is.
+    public static let legacyFullAccessExplainerRawValue = "fullAccessExplainer"
+
+    /// Where a step name written by an earlier build resumes, or nil for a name this build
+    /// does not know.
+    ///
+    /// Every current raw value resumes at its own step: the five that existed before #675
+    /// mean the same thing in the new order (what was done before them is still done
+    /// before them, the microphone apart, and the microphone step is shown later). The one
+    /// exception is the old microphone name: the user had confirmed the language and not
+    /// yet added the keyboard, so they resume at the keyboard. The removed Full Access
+    /// explainer step (#704) sat at that same place and resumes there too.
+    public static func resumed(fromStoredRawValue raw: String) -> OnboardingStep? {
+        if raw == legacyMicrophoneRawValue || raw == legacyFullAccessExplainerRawValue { return .keyboardSetup }
+        return OnboardingStep(rawValue: raw)
+    }
+
+    // MARK: - Persistence
+
+    /// The step to show, read from the App Group, migrating the legacy values once.
+    ///
+    /// The legacy index key is removed as soon as it has been read, and a legacy step name
+    /// is rewritten under its new meaning, so neither migration can run twice and a later
+    /// reset of the onboarding is not dragged back to the old position.
+    public static func current(defaults: UserDefaults = AppGroup.defaults) -> OnboardingStep {
+        if let raw = defaults.string(forKey: SharedKeys.onboardingStep) {
+            guard let step = resumed(fromStoredRawValue: raw) else { return .welcome }
+            if step.rawValue != raw {
+                defaults.set(step.rawValue, forKey: SharedKeys.onboardingStep)
+            }
+            return step
+        }
+        guard defaults.object(forKey: SharedKeys.onboardingCurrentPage) != nil else {
+            return .welcome
+        }
+        let migrated = migrated(fromLegacyPageIndex: defaults.integer(forKey: SharedKeys.onboardingCurrentPage))
+        defaults.set(migrated.rawValue, forKey: SharedKeys.onboardingStep)
+        defaults.removeObject(forKey: SharedKeys.onboardingCurrentPage)
+        return migrated
+    }
+
+    /// Records `step` as the one to resume at.
+    public static func save(_ step: OnboardingStep, defaults: UserDefaults = AppGroup.defaults) {
+        defaults.set(step.rawValue, forKey: SharedKeys.onboardingStep)
+    }
+}

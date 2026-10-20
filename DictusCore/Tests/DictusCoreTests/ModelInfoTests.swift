@@ -97,7 +97,7 @@ final class ModelInfoTests: XCTestCase {
         }
         XCTAssertEqual(nemotron.engine, .nemotron)
         XCTAssertEqual(nemotron.sizeBytes, 664_846_846, "measured 2026-09-14 from multilingual/2240ms/")
-        XCTAssertEqual(nemotron.sizeLabel, "~664 MB")
+        XCTAssertEqual(nemotron.sizeLabel(locale: Self.english), "~664 MB")
         XCTAssertEqual(nemotron.visibility, .available)
         XCTAssertEqual(nemotron.prewarmTimeoutSeconds, 300,
                        "the 120 s default would cut off the cold compile #558 exists to measure")
@@ -261,8 +261,8 @@ final class ModelInfoTests: XCTestCase {
             let rows = ModelInfo.available(on: device)
             let runnable = Set(rows.filter { $0.isSupported(on: device) }.map(\.identifier))
 
-            XCTAssertTrue(runnable.isSubset(of: ModelInfo.a12a13SupportedIdentifiers),
-                          "\(identifier) can run \(runnable.subtracting(ModelInfo.a12a13SupportedIdentifiers))")
+            XCTAssertTrue(runnable.isSubset(of: ModelInfo.preA14SupportedIdentifiers),
+                          "\(identifier) can run \(runnable.subtracting(ModelInfo.preA14SupportedIdentifiers))")
             for unsupported in ["openai_whisper-small",
                                 "openai_whisper-small_216MB",
                                 "openai_whisper-medium",
@@ -332,7 +332,7 @@ final class ModelInfoTests: XCTestCase {
     func testIsSupportedOnA12A13AcceptsOnlyTinyAndBase() {
         let iphone11 = makeCapabilities(ramGB: 4, model: "iPhone12,1")
         for model in ModelInfo.allIncludingDeprecated {
-            let expected = ModelInfo.a12a13SupportedIdentifiers.contains(model.identifier)
+            let expected = ModelInfo.preA14SupportedIdentifiers.contains(model.identifier)
             XCTAssertEqual(model.isSupported(on: iphone11), expected,
                            "\(model.identifier) gating on iPhone 11")
         }
@@ -401,6 +401,86 @@ final class ModelInfoTests: XCTestCase {
         XCTAssertTrue(rows.allSatisfy { $0.isSupported(on: iphone15ProMax) })
     }
 
+    // MARK: - Issue #612: pre-A14 iPads
+
+    /// The reported device: an iPad Pro 11" 2018 (A12X). At 4 GB the RAM rule handed
+    /// it Small; at 6 GB (1 TB 2018, every 2020 model) it handed it Parakeet. Neither
+    /// is in Argmax's matrix for that chip.
+    func testA12XAndA12ZIPadProsAreRecommendedBaseNotSmallOrParakeet() {
+        let devices = [
+            makeCapabilities(ramGB: 4, model: "iPad8,1"),
+            makeCapabilities(ramGB: 6, model: "iPad8,3"),
+            makeCapabilities(ramGB: 6, model: "iPad8,9"),
+            makeCapabilities(ramGB: 6, model: "iPad8,11")
+        ]
+        for device in devices {
+            XCTAssertEqual(ModelInfo.recommendedIdentifier(for: device), "openai_whisper-base",
+                           "\(device.deviceModelIdentifier) at \(device.physicalMemoryGB) GB")
+        }
+    }
+
+    func testA12AndA13IPadsAreRecommendedBase() {
+        // iPad11,3 = iPad Air 3 (A12), iPad12,1 = iPad 9th gen (A13), iPad7,5 = iPad
+        // 6th gen (A10), the oldest iPad iPadOS 17 still installs on.
+        for identifier in ["iPad11,1", "iPad11,3", "iPad11,6", "iPad12,1", "iPad12,2", "iPad7,5"] {
+            let device = makeCapabilities(ramGB: 3, model: identifier)
+            XCTAssertEqual(ModelInfo.recommendedIdentifier(for: device), "openai_whisper-base", identifier)
+        }
+    }
+
+    /// The floor stops at A14: the iPad Air 4 and iPad 10th gen keep Small at 4 GB,
+    /// the M1 iPad Pro keeps Parakeet.
+    func testA14AndM1IPadsAreUnchanged() {
+        XCTAssertEqual(ModelInfo.recommendedIdentifier(for: makeCapabilities(ramGB: 4, model: "iPad13,1")),
+                       "openai_whisper-small")
+        XCTAssertEqual(ModelInfo.recommendedIdentifier(for: makeCapabilities(ramGB: 4, model: "iPad13,18")),
+                       "openai_whisper-small")
+        XCTAssertEqual(ModelInfo.recommendedIdentifier(for: makeCapabilities(ramGB: 8, model: "iPad13,4")),
+                       "parakeet-tdt-0.6b-v3")
+
+        let m1 = makeCapabilities(ramGB: 8, model: "iPad13,4")
+        XCTAssertEqual(ModelInfo.available(on: m1).map(\.identifier), ModelInfo.all.map(\.identifier))
+        XCTAssertTrue(ModelInfo.available(on: m1).allSatisfy { $0.isSupported(on: m1) })
+    }
+
+    /// The iPhone side of the same rule must not move: A12/A13 keep Base, A14 keeps
+    /// Small at 4 GB and Parakeet at 6 GB (the iPhone 12 Pro / Pro Max).
+    func testIPhoneRecommendationsAreUnchangedByTheFloor() {
+        XCTAssertEqual(ModelInfo.recommendedIdentifier(for: makeCapabilities(ramGB: 4, model: "iPhone12,1")),
+                       "openai_whisper-base")
+        for identifier in ["iPhone13,1", "iPhone13,2"] {
+            XCTAssertEqual(ModelInfo.recommendedIdentifier(for: makeCapabilities(ramGB: 4, model: identifier)),
+                           "openai_whisper-small", identifier)
+        }
+        for identifier in ["iPhone13,3", "iPhone13,4"] {
+            XCTAssertEqual(ModelInfo.recommendedIdentifier(for: makeCapabilities(ramGB: 6, model: identifier)),
+                           "parakeet-tdt-0.6b-v3", identifier)
+        }
+    }
+
+    /// Settings on a pre-A14 iPad: the whole catalogue is listed (issue #369), only
+    /// Tiny/Base can run, and every other row says it is the hardware generation —
+    /// not memory, even on a 6 GB iPad Pro where the RAM rule alone would pass.
+    func testPreA14IPadsGateEverythingButTinyAndBase() {
+        for device in [makeCapabilities(ramGB: 4, model: "iPad8,1"),
+                       makeCapabilities(ramGB: 6, model: "iPad8,3"),
+                       makeCapabilities(ramGB: 3, model: "iPad11,3"),
+                       makeCapabilities(ramGB: 3, model: "iPad12,1")] {
+            let name = "\(device.deviceModelIdentifier) at \(device.physicalMemoryGB) GB"
+            for model in ModelInfo.allIncludingDeprecated {
+                let expected: ModelInfo.IncompatibilityReason? =
+                    ModelInfo.preA14SupportedIdentifiers.contains(model.identifier) ? nil : .hardwareGeneration
+                XCTAssertEqual(model.incompatibilityReason(on: device), expected, "\(model.identifier) on \(name)")
+            }
+
+            let rows = ModelInfo.available(on: device)
+            XCTAssertEqual(Set(rows.map(\.identifier)),
+                           Set(ModelInfo.all.map(\.identifier)).union(["openai_whisper-base"]), name)
+            XCTAssertEqual(rows.filter { $0.isSupported(on: device) }.map(\.identifier),
+                           ["openai_whisper-base"], name)
+        }
+    }
+
     // MARK: - Supported identifiers
 
     func testSupportedIdentifiersMatchesAllIncludingDeprecated() {
@@ -427,10 +507,47 @@ final class ModelInfoTests: XCTestCase {
     /// figure the download progress counts down from.
     func testSizeLabelIsDerivedFromSizeBytes() {
         for model in ModelInfo.allIncludingDeprecated {
-            XCTAssertEqual(model.sizeLabel, "~\(model.sizeBytes / 1_000_000) MB",
+            XCTAssertEqual(model.sizeLabel(locale: Self.english), "~\(model.sizeBytes / 1_000_000) MB",
                            "\(model.identifier) label and byte count disagree")
         }
-        XCTAssertEqual(ModelInfo.forIdentifier("openai_whisper-small")?.sizeLabel, "~486 MB")
+        XCTAssertEqual(ModelInfo.forIdentifier("openai_whisper-small")?.sizeLabel(locale: Self.english), "~486 MB")
+    }
+
+    // MARK: - Localized size unit (issue #661)
+
+    /// Pinned because `sizeLabel` follows the current locale, and `swift test`
+    /// inherits the Mac's: on a French Mac the English assertions would read "Mo".
+    static let english = Locale(identifier: "en_US")
+    static let french = Locale(identifier: "fr_FR")
+
+    /// A French iPhone read "~217 MB" on every model card. The unit is "Mo" there,
+    /// and the figure must stay the same truncated megabyte count as in English.
+    func testSizeLabelUsesTheFrenchUnitInFrench() throws {
+        let compact = try XCTUnwrap(ModelInfo.forIdentifier("openai_whisper-small_216MB"))
+        let figure = compact.sizeBytes / 1_000_000
+        let label = compact.sizeLabel(locale: Self.french)
+        // The separator is a narrow no-break space from ICU; its exact code point is
+        // ICU's to choose, so the assertion checks the figure and the unit around it.
+        XCTAssertTrue(label.hasPrefix("~\(figure)"), label)
+        XCTAssertTrue(label.hasSuffix("Mo"), label)
+        XCTAssertFalse(label.contains("MB"), label)
+    }
+
+    /// The formatter must not round the figure up, nor switch a large model to GB,
+    /// nor group its digits: the card has to print what the download counter prints.
+    func testSizeLabelKeepsTheTruncatedMegabyteFigure() {
+        for model in ModelInfo.allIncludingDeprecated {
+            let figure = model.sizeBytes / 1_000_000
+            XCTAssertTrue(model.sizeLabel(locale: Self.french).hasPrefix("~\(figure)"),
+                          "\(model.identifier): \(model.sizeLabel(locale: Self.french))")
+        }
+    }
+
+    /// The property is the current-locale rendering, nothing else.
+    func testSizeLabelPropertyFollowsTheCurrentLocale() {
+        for model in ModelInfo.allIncludingDeprecated {
+            XCTAssertEqual(model.sizeLabel, model.sizeLabel(locale: .autoupdatingCurrent))
+        }
     }
 
     /// A zero or negative size would render as "~0 MB" on the card and would make
@@ -456,7 +573,7 @@ final class ModelInfoTests: XCTestCase {
             return
         }
         XCTAssertEqual(turbo.sizeBytes, 645_668_913)
-        XCTAssertEqual(turbo.sizeLabel, "~645 MB")
+        XCTAssertEqual(turbo.sizeLabel(locale: Self.english), "~645 MB")
         XCTAssertEqual(turbo.displayName, "Turbo")
         XCTAssertEqual(turbo.engine, .whisperKit)
         XCTAssertEqual(turbo.visibility, .available)
@@ -565,6 +682,19 @@ final class ModelInfoTests: XCTestCase {
         let names = ModelInfo.allIncludingDeprecated.map(\.displayName)
         XCTAssertEqual(Set(names).count, names.count, "two catalogue rows share a display name")
         XCTAssertEqual(ModelInfo.forIdentifier(turbo954)?.displayName, "Turbo (Legacy)")
+    }
+
+    /// Issue #665: DictusApp's `localizedDisplayName` translates the qualifier by
+    /// matching these two identifiers, and uses these exact English names as its
+    /// string catalog keys. A renamed identifier would silently drop the French name
+    /// (the switch falls back to `displayName`); a reworded name would orphan the
+    /// translation. `displayName` itself stays the unlocalized English form.
+    func testQualifiedNamesKeepTheIdentifiersAndKeysTheAppTranslates() {
+        XCTAssertEqual(ModelInfo.forIdentifier("openai_whisper-small_216MB")?.displayName, "Small (Quantized)")
+        XCTAssertEqual(ModelInfo.forIdentifier(turbo954)?.displayName, "Turbo (Legacy)")
+        // No other entry carries a qualifier the app would need to translate.
+        let qualified = ModelInfo.allIncludingDeprecated.filter { $0.displayName.contains("(") }
+        XCTAssertEqual(Set(qualified.map(\.identifier)), ["openai_whisper-small_216MB", turbo954])
     }
 
     /// The predicate behind the `modelDownloadSizeMismatch` log line. The 250 MB case

@@ -182,7 +182,7 @@ final class DictationErrorCopyTests: XCTestCase {
                                      "\(path) has no French translation for the call sentence")
             XCTAssertEqual(unit["state"] as? String, "translated", "in \(path)")
             XCTAssertEqual(unit["value"] as? String,
-                           "Le micro est occupé par un appel. Réessayez une fois l'appel terminé.",
+                           "Le micro est occupé par un appel. Réessayez une fois l’appel terminé.",
                            "\(path) translates the call sentence differently from the other catalog")
         }
     }

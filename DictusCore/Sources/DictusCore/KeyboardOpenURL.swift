@@ -18,6 +18,13 @@ public enum KeyboardOpenIntent: String, Sendable, Equatable, CaseIterable {
     /// foreground — and that is still true; the case exists so the vocabulary is
     /// closed rather than open to typos.
     case settings
+
+    /// A shared voice note's result screen, from the keyboard's voice note reader
+    /// (#637). Unlike the two above it does not travel on `dictus://open`: it targets
+    /// the voice note link the Live Activity and the share extension already use,
+    /// `dictus://voice-note?id=<uuid>`, so the app routes it with the code that
+    /// already opens a note — `VoiceNoteURL`, then `VoiceNoteProcessor.open`.
+    case voiceNote
 }
 
 /// The `dictus://open` URLs, built by the keyboard and read by the app.
@@ -44,8 +51,22 @@ public enum KeyboardOpenURL {
     private static let host = "open"
 
     /// The URL the keyboard opens for `intent`.
-    public static func url(intent: KeyboardOpenIntent) -> URL? {
-        URL(string: "\(scheme)://\(host)?source=keyboard&intent=\(intent.rawValue)")
+    ///
+    /// - Parameter voiceNoteID: the note `.voiceNote` opens on. Ignored by every other
+    ///   intent; nil opens the voice note screen on the oldest unread note.
+    public static func url(intent: KeyboardOpenIntent, voiceNoteID: UUID? = nil) -> URL? {
+        switch intent {
+        case .voiceNote:
+            // `source=keyboard` rides along so the app can tell the keyboard's link
+            // from the island's and the share extension's; `VoiceNoteURL.target`
+            // reads only the id, so the routing is the same for all three.
+            guard let link = VoiceNoteURL.url(for: voiceNoteID),
+                  var components = URLComponents(url: link, resolvingAgainstBaseURL: false) else { return nil }
+            components.queryItems = (components.queryItems ?? []) + [URLQueryItem(name: "source", value: "keyboard")]
+            return components.url
+        case .pro, .settings:
+            return URL(string: "\(scheme)://\(host)?source=keyboard&intent=\(intent.rawValue)")
+        }
     }
 
     /// The intent carried by `url`, or nil when it is not one of ours.
@@ -55,13 +76,20 @@ public enum KeyboardOpenURL {
     /// sent it.
     public static func intent(from url: URL) -> KeyboardOpenIntent? {
         guard url.scheme?.lowercased() == scheme,
-              url.host?.lowercased() == host,
               let queryItems = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems,
-              queryItems.contains(where: { $0.name == "source" && $0.value == "keyboard" }),
-              let raw = queryItems.first(where: { $0.name == "intent" })?.value
+              queryItems.contains(where: { $0.name == "source" && $0.value == "keyboard" })
         else {
             return nil
         }
-        return KeyboardOpenIntent(rawValue: raw)
+        if url.host?.lowercased() == VoiceNoteURL.host { return .voiceNote }
+        guard url.host?.lowercased() == host,
+              let raw = queryItems.first(where: { $0.name == "intent" })?.value,
+              let intent = KeyboardOpenIntent(rawValue: raw),
+              // `.voiceNote` lives on its own host; an `open` URL naming it is not ours.
+              intent != .voiceNote
+        else {
+            return nil
+        }
+        return intent
     }
 }

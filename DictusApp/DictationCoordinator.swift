@@ -316,6 +316,10 @@ class DictationCoordinator: ObservableObject {
     /// Compile if needed, load into RAM, warm the audio path. Returns the model that
     /// ended up loaded, for the log.
     ///
+    /// The audio warm-up leaves the engine cold, without throwing, while the record
+    /// permission is not granted (#715). Returning normally therefore means the MODEL is
+    /// loaded; whether the engine runs is `isAudioEngineRunning`'s to say.
+    ///
     /// WHY it exists as a seam rather than being inlined where it is used: the callers
     /// live in `DictationCoordinator+ModelLoad.swift`, because this file is at the
     /// length budget issue #146 calibrated against it. One named entry point is a
@@ -341,6 +345,27 @@ class DictationCoordinator: ObservableObject {
             try audioEngine.warmUp()
         }
         return currentModelName ?? "unknown"
+    }
+
+    /// Transcribe one chunk of a shared voice note (#620), on the same engine and with
+    /// the same custom vocabulary pass as a dictation.
+    ///
+    /// The caller holds `EngineAccessGate` for the duration; this seam exists because
+    /// `ensureEngineReady` and `transcriptionService` are private to this file, and
+    /// one named entry point is cheaper to expose than either (the reasoning
+    /// `loadActiveModelIntoMemory` gives). Nothing here touches the dictation's
+    /// status, its session or the App Group keys the keyboard reads: a voice note is
+    /// invisible to the keyboard by construction.
+    func transcribeVoiceNoteChunk(_ samples: [Float], languagePolicy: TranscriptionLanguagePolicy) async throws -> String {
+        try await ensureEngineReady()
+        let text = try await transcriptionService.transcribe(audioSamples: samples, languagePolicy: languagePolicy)
+        return DictationTranscript.corrected(text).text
+    }
+
+    /// Keep the warm audio engine, and with it the process, alive while a voice note
+    /// transcribes in the background (#620). See `UnifiedAudioEngine.extendWarmWindow`.
+    func extendWarmWindowForVoiceNote() {
+        audioEngine.extendWarmWindow()
     }
 
     private init() {
@@ -915,6 +940,31 @@ class DictationCoordinator: ObservableObject {
                 LiveActivityManager.shared.startRecordingWatchdog()
                 SoundFeedbackService.playRecordStop()
 
+                // The engine is shared with the voice note queue since #620. Taken
+                // before the model load and handed back once the transcript exists, so
+                // a voice note can neither swap the model out from under this
+                // dictation nor run a second `transcribe` beside it (#144). A
+                // dictation is served first; the wait is at most the one chunk a
+                // voice note may be in the middle of. See `EngineAccessGate`.
+                //
+                // Waiting on the gate is waiting on someone else's work, so it defers the
+                // stage watchdog like the other two engine waits (#542): a voice note can
+                // hold the engine through a cold model load, and the 30 s watchdog would
+                // otherwise cancel a dictation whose audio is already captured.
+                enterNeuralEngineWait()
+                await EngineAccessGate.shared.acquire(.dictation)
+                leaveNeuralEngineWait()
+                var holdsEngine = true
+                let releaseEngine = {
+                    guard holdsEngine else { return }
+                    holdsEngine = false
+                    EngineAccessGate.shared.release()
+                }
+                defer { releaseEngine() }
+                // The gate does not observe cancellation: a dictation cancelled while it
+                // was parked must not go on to load and transcribe.
+                try Task.checkCancellation()
+
                 // Wrapped, not just called: this is the one place in a dictation that
                 // can queue on hardware someone else holds (finding 2).
                 try await waitingForNeuralEngine { try await self.ensureEngineReady() }
@@ -960,6 +1010,8 @@ class DictationCoordinator: ObservableObject {
                 let transcript = DictationTranscript.corrected(
                     try await transcriptionService.transcribe(audioSamples: samples, languagePolicy: languagePolicy)
                 )
+                // Polish and the hand-off below do not touch the speech engine.
+                releaseEngine()
 
                 // Where the tail of the dictation happens, since #361.
                 //
@@ -1158,6 +1210,11 @@ class DictationCoordinator: ObservableObject {
                     engineRunning: self.audioEngine.isEngineRunning
                 ))
                 self.startDictation(origin: .keyboard)
+                // A warm start from the keyboard never brings the app forward, so none
+                // of the lifecycle reconciliations run: catch up on the voice note
+                // receipts here too (#639). After the start, so it costs the recording
+                // nothing.
+                VoiceNoteProcessor.shared.reconcileKeyboardDeliveries(reason: "darwinStart")
             }
         }
 
@@ -1648,7 +1705,7 @@ private extension DictationCoordinator {
             let config = WhisperKitConfig(
                 model: modelName,
                 modelFolder: modelFolder.path,
-                // Issue #370: A12/A13 need the audio encoder off the Neural Engine.
+                // Issues #370/#612: pre-A14 chips need the audio encoder off the Neural Engine.
                 computeOptions: WhisperComputeOptions.current(),
                 verbose: false,
                 prewarm: true,

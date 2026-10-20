@@ -1,22 +1,56 @@
 // DictusApp/Views/PaywallView.swift
-// Full-screen paywall pushed via NavigationStack: hero, feature cards, plan selector, CTA.
+// The Dictus Pro hub: hero, feature cards, then a block that follows the subscription state (#216).
 import SwiftUI
 import StoreKit
 import DictusCore
 
+/// The one Dictus Pro screen, for every user (#216).
+///
+/// It began as the paywall (#78) and kept the name: every entry point already opens
+/// it, and a second screen beside it is exactly what #216 decided against. One
+/// structure, and a bottom block chosen by `ProHub.bottomBlock`:
+///
+/// - **Free:** informational cards, then the plan selector and CTA, the paywall as
+///   validated in #78 and deliberately unchanged.
+/// - **Trial:** active cards, the days left, then the same offers.
+/// - **Subscriber:** active cards, the plan, its date, Manage subscription.
+/// - **Lifetime:** active cards, "Dictus Pro Lifetime", nothing to manage.
+///
+/// The end-of-trial presentation (`framing: .trialEnded`) stays a sales page: its
+/// cards remain informational whatever the state, because that screen exists to say
+/// what was lost, not to hand the features back.
 struct PaywallView: View {
     @EnvironmentObject var subscriptionManager: SubscriptionManager
     @EnvironmentObject var proStatus: ProStatusManager
     @Environment(\.dismiss) private var dismiss
+
+    /// Why this paywall is up (#593). `.standard` for every entry point the user
+    /// chose; `.trialEnded` for the one the app opens once when the trial is over.
+    var framing: PaywallFraming = .standard
 
     /// Selected plan, tracked by product ID (never by array index: StoreKit's
     /// product order is unspecified). Yearly is preselected per the pricing
     /// decision on #78, true from the first frame with no load-completion hook.
     @State private var selectedProductID = ProProductID.yearly
 
+    /// Set by "See all plans": the monthly row joins the two in view (#724).
+    @State private var showsAllPlans = false
+
+    /// The end-of-trial paywall's monthly offer, on screen (#724 decision 2).
+    @State private var showsMonthlyOffer = false
+
+    /// Whether this presentation already made that offer. Once: closing the offer
+    /// closes everything.
+    @State private var monthlyOfferMade = false
+
     /// Whether the user can still claim the yearly intro offer (7-day trial).
-    /// The offer exists in configuration for everyone, but StoreKit grants it
-    /// once per Apple ID. Defaults to false so the CTA never over-promises.
+    /// StoreKit grants it once per Apple ID. Defaults to false so the CTA never
+    /// over-promises.
+    ///
+    /// Since #593 the catalogue carries no introductory offer at all (#215), and
+    /// this stays false for anyone who ever had the reverse trial even if one
+    /// reappears in App Store Connect: a user who has just finished two free weeks
+    /// must never be offered "7 more days free".
     @State private var isEligibleForTrial = false
 
     /// Shows the thank-you screen after a successful purchase or restore.
@@ -24,6 +58,14 @@ struct PaywallView: View {
 
     /// Drives the staged entrance animation of the thank-you screen elements.
     @State private var successEntrance = false
+
+    /// The feature whose screen is pushed onto the hub's stack (#216 decision 4).
+    @State private var openedFeature: ProFeature?
+
+    /// The three per-feature switches, observed so the rows' "On" / "Off" values
+    /// follow a switch flipped on a pushed screen (#216). The same object that screen
+    /// writes through; see `ProFeatureSwitches` for why it is not `@AppStorage`.
+    @ObservedObject private var switches = ProFeatureSwitches.shared
 
     /// Product matching the current selection. Nil disables the CTA.
     ///
@@ -60,25 +102,60 @@ struct PaywallView: View {
             VStack(spacing: 14) {
                 heroSection
 
-                // Feature cards (3 cards: Smart Mode, History, Vocabulary)
+                // The end of the trial is stated before anything is sold (#593).
+                if showsTrialRecap {
+                    TrialEndedHeader(usage: proStatus.trialUsage)
+                }
+
+                // Feature cards (3 cards: Smart Mode, History, Vocabulary): active for
+                // anyone who has Pro, informational for everyone being sold it.
                 VStack(spacing: 10) {
                     ForEach(ProFeature.allCases, id: \.self) { feature in
-                        featureCard(feature)
+                        if cardsAreActive {
+                            ProHubFeatureCard(
+                                feature: feature,
+                                isAvailable: isAvailable(feature),
+                                open: { openedFeature = feature }
+                            )
+                        } else {
+                            featureCard(feature)
+                        }
                     }
                 }
 
-                if proStatus.isProActive {
-                    // Already subscribed
-                    alreadyProBanner
-                } else {
-                    // Plan selector: yearly (preselected), monthly and lifetime
-                    planSelector
-                    // Subscribe CTA following the selected plan
-                    subscribeCTA
-                    // Reassurance following the selected plan
-                    reassuranceLabel
-                        .font(.dictusCaption)
-                        .foregroundColor(.secondary)
+                // The recap sells nothing itself: its button leads here.
+                if !showsTrialRecap {
+                    // Keyed on `isPaid` and not `isProActive` inside `ProHub` (#593):
+                    // during the reverse trial Pro is active and nothing is paid, and
+                    // subscribing then is exactly what the trial is for.
+                    if hubBlock.sellsPlans {
+                        if case .offers(let endsAt?, let daysLeft) = hubBlock {
+                            TrialRunningNotice(endsAt: endsAt, daysLeft: daysLeft)
+                        }
+                        // Plan selector: yearly (preselected) and lifetime, monthly behind a link
+                        planSelector
+                        // Subscribe CTA following the selected plan
+                        subscribeCTA
+                        // Reassurance following the selected plan
+                        reassuranceLabel
+                            .font(.dictusCaption)
+                            .foregroundColor(.secondary)
+
+                        if framing == .trialEnded {
+                            continueForFreeButton
+                        }
+                    } else {
+                        ProHubMembershipCard(
+                            block: hubBlock,
+                            refresh: { subscriptionManager.recheckAfterManageSheet() },
+                            upgrade: ProLifetimeUpgrade.offer(
+                                for: hubBlock, paywallVisible: PremiumFlags.paywallVisible
+                            ),
+                            lifetimePrice: subscriptionManager.lifetimeProduct?.displayPrice,
+                            isPurchasing: subscriptionManager.purchaseState == .purchasing,
+                            buyLifetime: buyLifetime
+                        )
+                    }
                 }
 
                 // Bottom links: Restore + ToS + Privacy
@@ -87,11 +164,28 @@ struct PaywallView: View {
             }
             .padding(.horizontal, 16)
         }
+        // A new scroll view per step, so the offers open at their top rather than at
+        // the recap's scroll offset.
+        .id(showsTrialRecap)
+        .safeAreaInset(edge: .bottom) {
+            if showsTrialRecap {
+                trialRecapActions
+                    .padding(.horizontal, 16)
+                    .padding(.top, 12)
+                    .padding(.bottom, 8)
+                    .background(Color.dictusBackground.ignoresSafeArea())
+            }
+        }
         .background(Color.dictusBackground.ignoresSafeArea())
         // Empty bar title: the hero's gradient title is the screen title.
         .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar { closeButton }
+        // Pushed inside this screen's own stack (decision 4), so the back button
+        // returns to the hub rather than closing it.
+        .navigationDestination(item: $openedFeature) { feature in
+            featureScreen(feature)
+        }
         .task {
             // Retry the product fetch if the launch-time load came back empty,
             // so a transient failure doesn't leave the CTA stuck on "...".
@@ -101,7 +195,10 @@ struct PaywallView: View {
             reconcileSelection()
             // Configuration describes the trial for everyone; eligibility is
             // per Apple ID. Ask StoreKit rather than assuming.
-            if let subscription = subscriptionManager.yearlyProduct?.subscription {
+            //
+            // Never after a reverse trial (#593): see `isEligibleForTrial`.
+            if !proStatus.trialState.hasEverStarted,
+               let subscription = subscriptionManager.yearlyProduct?.subscription {
                 isEligibleForTrial = await subscription.isEligibleForIntroOffer
             }
         }
@@ -117,6 +214,9 @@ struct PaywallView: View {
                 withAnimation(.easeOut(duration: 0.25)) {
                     showPurchaseSuccess = true
                 }
+                // Bought from the monthly offer: it steps aside for the thank-you
+                // screen rather than closing the paywall with it.
+                showsMonthlyOffer = false
             }
         }
         .overlay {
@@ -125,10 +225,127 @@ struct PaywallView: View {
                     .transition(.opacity)
             }
         }
-        .alert("Purchase Error", isPresented: showErrorAlert) {
+        .alert("Purchase Error", isPresented: showsErrorAlert(fromOffer: false)) {
             Button("OK") { subscriptionManager.resetState() }
         } message: {
             Text(errorMessage)
+        }
+        // Closing it any way but a purchase closes the paywall too (#724): the user
+        // has now declined twice, and a third screen would be the nag the decision
+        // rules out. A purchase leaves `showPurchaseSuccess` set, and the thank-you
+        // screen underneath takes over.
+        .sheet(isPresented: $showsMonthlyOffer, onDismiss: {
+            if !showPurchaseSuccess { dismiss() }
+        }, content: {
+            monthlyOfferSheet
+        })
+    }
+
+    // MARK: - Hub state (#216)
+
+    /// The subscriber's upgrade (#216 decision 15): the lifetime, bought directly
+    /// through the same path as the plan selector. Apple's sheet confirms; on success
+    /// the thank-you screen shows, and the next scan lands on plain lifetime, since the
+    /// row only buys once the subscription no longer renews.
+    ///
+    /// The rule is checked again here and not only by which shape the row draws: this
+    /// is the one function that can sell the lifetime over a subscription.
+    private func buyLifetime() {
+        guard ProLifetimeUpgrade.offer(for: hubBlock, paywallVisible: PremiumFlags.paywallVisible)?.isPurchasable == true,
+              let lifetime = subscriptionManager.lifetimeProduct else { return }
+        Task { await subscriptionManager.purchase(lifetime) }
+    }
+
+    /// What sits under the cards. Read from the published caches, so a purchase, a
+    /// renewal scan or the trial ending redraws it.
+    private var hubBlock: ProHubBottomBlock {
+        ProHub.bottomBlock(
+            paywallVisible: PremiumFlags.paywallVisible,
+            isPaid: proStatus.isPaid,
+            isEntitled: proStatus.isProActive,
+            trial: proStatus.trialState,
+            now: Date(),
+            ownership: subscriptionManager.ownership
+        )
+    }
+
+    /// Whether the cards carry toggles and open their screens (decision 4). Never on
+    /// the end-of-trial presentation (decision 3).
+    private var cardsAreActive: Bool {
+        framing == .standard && hubBlock.cardsAreActive
+    }
+
+    /// `FeatureGate.isAvailable`, the one predicate (decision 5). The switch and the
+    /// entitlement are read first so SwiftUI redraws when either moves: the gate
+    /// itself goes to the App Group, which publishes nothing.
+    private func isAvailable(_ feature: ProFeature) -> Bool {
+        _ = switches.isOn(feature)
+        _ = proStatus.isProActive
+        return FeatureGate.isAvailable(feature)
+    }
+
+    /// The screens the Settings "Pro Features" rows used to open, now reached here.
+    ///
+    /// History keeps its home-screen swipe (decision 7); this is a second way in, so
+    /// it is pushed rather than presented as the sheet the swipe opens. Its store is
+    /// handed over explicitly for the reason `HomeView` gives: this screen is itself a
+    /// cover, presented from elsewhere in the tree. `proStatus` likewise, for every
+    /// screen: each one observes it to relock when the entitlement changes.
+    @ViewBuilder
+    private func featureScreen(_ feature: ProFeature) -> some View {
+        switch feature {
+        case .smartMode:
+            SmartModeListView()
+                .environmentObject(proStatus)
+        case .vocabulary:
+            VocabularyListView()
+                .environmentObject(proStatus)
+        case .voiceNotes:
+            VoiceNoteSettingsView()
+                .environmentObject(proStatus)
+        case .history:
+            HistoryView(isPushed: true)
+                .environmentObject(TranscriptionHistoryStore.shared)
+                .environmentObject(proStatus)
+        }
+    }
+
+    // MARK: - End-of-trial recap
+
+    /// Whether the end-of-trial screen is on its first step, the recap (#593).
+    ///
+    /// WHY two steps and not the recap on top of the plans: recap, feature cards,
+    /// three plans and a way out do not fit one screen, and every way of making them
+    /// fit cost something the paywall needs (the features it reminds of, the three
+    /// plans side by side with the yearly highlighted). So the recap says what ended
+    /// and what it gave, with "Keep Dictus Pro" and "Continue for free" pinned under
+    /// it; the first leads to the ordinary paywall, unchanged, on the same screen.
+    private var showsTrialRecap: Bool {
+        framing == .trialEnded && !proStatus.isPaid && !showsOffers
+    }
+
+    /// Set by "Keep Dictus Pro": the end-of-trial screen moves on to the offers.
+    @State private var showsOffers = false
+
+    /// The recap's two ways forward, pinned so neither needs scrolling to find.
+    private var trialRecapActions: some View {
+        VStack(spacing: 8) {
+            Button {
+                withAnimation(.easeInOut(duration: 0.25)) {
+                    showsOffers = true
+                }
+            } label: {
+                Text("Keep Dictus Pro")
+                    .font(.dictusSubheading)
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Color.dictusAccent)
+                    .foregroundColor(.white)
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+            }
+            .buttonStyle(GlassPressStyle())
+
+            continueForFreeButton
         }
     }
 
@@ -142,7 +359,7 @@ struct PaywallView: View {
         ToolbarItem(placement: .topBarLeading) {
             if !showPurchaseSuccess {
                 Button {
-                    dismiss()
+                    close()
                 } label: {
                     Image(systemName: "xmark")
                         .font(.body.weight(.semibold))
@@ -160,21 +377,9 @@ struct PaywallView: View {
     /// Glow uses the double-shadow pattern (tight + wide) from SwipeBackOverlayView.
     private var heroSection: some View {
         VStack(spacing: 12) {
-            // Forcing the dark color scheme keeps DictusLogo's side bars
-            // white on the dark tile in light mode too, matching the app icon.
-            DictusLogo(height: 48)
-                .environment(\.colorScheme, .dark)
-                .padding(20)
-                .background(
-                    RoundedRectangle(cornerRadius: 24)
-                        .fill(
-                            LinearGradient(
-                                colors: [Color(hex: 0x0D2040), Color(hex: 0x071020)],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            )
-                        )
-                )
+            // The tile is the app icon itself (square, continuous corners, same
+            // ratios); only the glow below belongs to this screen.
+            DictusIconTile(logoHeight: 48)
                 .shadow(color: Color.dictusAccent.opacity(0.7), radius: 10)
                 .shadow(color: Color.dictusAccent.opacity(0.4), radius: 20)
 
@@ -188,9 +393,13 @@ struct PaywallView: View {
                     )
                 )
 
-            Text("Your voice, unlimited")
-                .font(.dictusBody)
-                .foregroundColor(.secondary)
+            // The end-of-trial header below carries this screen's sentence, and a
+            // tagline above it would say a second, unrelated thing.
+            if !showsTrialRecap {
+                Text("Your voice, unlimited")
+                    .font(.dictusBody)
+                    .foregroundColor(.secondary)
+            }
         }
         .padding(.top, 8)
         .accessibilityElement(children: .combine)
@@ -273,24 +482,8 @@ struct PaywallView: View {
     private func iconColor(for feature: ProFeature) -> Color {
         switch feature {
         case .smartMode: return .dictusSmartMode
-        case .history, .vocabulary: return .dictusAccentHighlight
+        case .history, .vocabulary, .voiceNotes: return .dictusAccentHighlight
         }
-    }
-
-    // MARK: - Already Pro Banner
-
-    private var alreadyProBanner: some View {
-        HStack(spacing: 16) {
-            Image(systemName: "checkmark.circle.fill")
-                .font(.title2)
-                .foregroundColor(.dictusSuccess)
-
-            Text("Dictus Pro Active")
-                .font(.dictusSubheading)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(16)
-        .dictusGlass()
     }
 
     // MARK: - Plan Selector
@@ -299,6 +492,10 @@ struct PaywallView: View {
     /// if its product loaded, so a partial fetch degrades instead of crashing.
     /// The lifetime comes last: it is the plan that needs the most reading,
     /// and its scope footnote closes the group.
+    ///
+    /// The monthly is behind "See all plans" (#724 decision 1): two plans in view,
+    /// on every entry point. Which rows draw is `ProPaywallPlans`' answer, which
+    /// keeps a selected monthly visible whatever the link says.
     private var planSelector: some View {
         VStack(spacing: 12) {
             if let yearly = subscriptionManager.yearlyProduct {
@@ -309,7 +506,8 @@ struct PaywallView: View {
                     badge: discountBadgeText
                 )
             }
-            if let monthly = subscriptionManager.monthlyProduct {
+            if let monthly = subscriptionManager.monthlyProduct,
+               ProPaywallPlans.isVisible(monthly.id, showsAllPlans: showsAllPlans, selectedID: selectedProductID) {
                 planCard(
                     product: monthly,
                     title: "Monthly",
@@ -326,7 +524,35 @@ struct PaywallView: View {
                 )
                 lifetimeScopeFootnote
             }
+            if ProPaywallPlans.showsSeeAllPlansLink(
+                loaded: Set(subscriptionManager.products.map(\.id)),
+                showsAllPlans: showsAllPlans,
+                selectedID: selectedProductID
+            ) {
+                seeAllPlansLink
+            }
         }
+    }
+
+    /// Reveals the monthly row. A link and not a card: the monthly is there for whoever
+    /// looks for it, and the two plans in view are the ones the screen recommends.
+    ///
+    /// WHY the revealed row is not selected for the user: the link answers "what else
+    /// is there", not "I want this one". The yearly stays checked until a row is tapped,
+    /// so the CTA never changes price behind a tap that did not mean to buy.
+    private var seeAllPlansLink: some View {
+        Button {
+            withAnimation(.easeInOut(duration: 0.25)) {
+                showsAllPlans = true
+            }
+        } label: {
+            Text("See all plans")
+                .font(.dictusCaption.weight(.semibold))
+                .foregroundColor(.dictusAccent)
+                .frame(maxWidth: .infinity)
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
     }
 
     /// What the lifetime purchase covers, verbatim from the #350 decision.
@@ -579,7 +805,13 @@ struct PaywallView: View {
     /// out per branch: the period belongs to the price, so one localized
     /// sentence serves every plan and there is no branch left to fall through.
     private var ctaLabel: Text {
-        guard let product = selectedProduct else { return Text(verbatim: "...") }
+        ctaLabel(for: selectedProduct)
+    }
+
+    /// The CTA sentence for any plan, so the monthly offer (#724) reads exactly like
+    /// the paywall's own button would for the same plan.
+    private func ctaLabel(for product: Product?) -> Text {
+        guard let product else { return Text(verbatim: "...") }
         let price = priceLabel(for: product)
 
         // No `subscription` means a non-consumable, and "Subscribe" would
@@ -600,16 +832,20 @@ struct PaywallView: View {
         return Text("Subscribe for \(price)")
     }
 
-    /// Fine print under the CTA, following the selected plan: "Cancel anytime"
-    /// describes a subscription and would misdescribe the one-off lifetime.
-    /// Falls back to the subscription wording while nothing has loaded, which
-    /// is the state the CTA itself shows as "...".
+    /// Fine print under the CTA, following the selected plan: the no-commitment
+    /// line (#724 decision 3) describes a subscription and would misdescribe the
+    /// one-off lifetime, which says what it is instead. Falls back to the
+    /// subscription wording while nothing has loaded, which is the state the CTA
+    /// itself shows as "...".
     private var reassuranceLabel: Text {
         guard let product = selectedProduct, product.subscription == nil else {
-            return Text("Cancel anytime")
+            return Self.noCommitmentLabel
         }
         return Text("One-time purchase")
     }
+
+    /// The line under every subscription CTA, the monthly offer's included.
+    static let noCommitmentLabel = Text("No commitment, cancel anytime")
 
     /// Trial length in days. StoreKit expresses the 7-day trial as 1 week;
     /// convert so the CTA reads "7 days free" as designed. Returns nil for
@@ -623,21 +859,91 @@ struct PaywallView: View {
         }
     }
 
+    // MARK: - Monthly offer on close (#724)
+
+    /// Every way out of the paywall the user can take: the cross and "Continue for
+    /// free". On the end-of-trial paywall, once the user has seen the plans, the first
+    /// one shows the monthly offer instead of closing
+    /// (`ProPaywallPlans.offersMonthlyOnClose`); from the recap, everywhere else, and
+    /// the second time, it closes.
+    private func close() {
+        guard ProPaywallPlans.offersMonthlyOnClose(
+            isEndOfTrialPaywall: framing == .trialEnded,
+            sawPlans: showsOffers,
+            isPaid: proStatus.isPaid,
+            monthlyLoaded: subscriptionManager.monthlyProduct != nil,
+            alreadyOffered: monthlyOfferMade
+        ) else {
+            dismiss()
+            return
+        }
+        monthlyOfferMade = true
+        showsMonthlyOffer = true
+    }
+
+    /// The offer's content. Its price is the monthly product's `displayPrice`, through
+    /// the same CTA sentence as the paywall.
+    @ViewBuilder
+    private var monthlyOfferSheet: some View {
+        if let monthly = subscriptionManager.monthlyProduct {
+            MonthlyPlanOfferSheet(
+                ctaLabel: ctaLabel(for: monthly),
+                isPurchasing: subscriptionManager.purchaseState == .purchasing,
+                buy: { Task { await subscriptionManager.purchase(monthly) } },
+                decline: { showsMonthlyOffer = false }
+            )
+            // A swipe mid-purchase would close the paywall under a payment still in
+            // flight, and its thank-you screen with it.
+            .interactiveDismissDisabled(subscriptionManager.purchaseState == .purchasing)
+            .alert("Purchase Error", isPresented: showsErrorAlert(fromOffer: true)) {
+                Button("OK") { subscriptionManager.resetState() }
+            } message: {
+                Text(errorMessage)
+            }
+        }
+    }
+
+    // MARK: - Continue for free
+
+    /// The end-of-trial paywall's way out, as obvious as the way in (#593).
+    ///
+    /// WHY a full-width button and not only the close cross: this screen was not
+    /// asked for. The app opened it, so leaving has to read as a first-class choice
+    /// rather than a dismissal hunted for in a corner. The free tier keeps working,
+    /// and nothing the user saved is deleted.
+    private var continueForFreeButton: some View {
+        Button {
+            close()
+        } label: {
+            Text("Continue for free")
+                .font(.dictusSubheading)
+                .frame(maxWidth: .infinity)
+                .padding()
+                .foregroundColor(.dictusAccent)
+                .dictusGlass()
+        }
+        .buttonStyle(GlassPressStyle())
+    }
+
     // MARK: - Bottom Links
 
     // Apple requires functional Terms of Use and Privacy Policy links for
-    // auto-renewable subscriptions (guideline 3.1.2). Force unwrap is safe:
+    // auto-renewable subscriptions (guideline 3.1.2). Not private: the monthly
+    // offer sheet (#724) shows them too. Force unwrap is safe:
     // compile-time constant URLs that cannot be malformed.
     // swiftlint:disable:next force_unwrapping
-    private static let termsURL = URL(string: "https://getdictus.com/terms")!
+    static let termsURL = URL(string: "https://getdictus.com/terms")!
     // swiftlint:disable:next force_unwrapping
-    private static let privacyURL = URL(string: "https://getdictus.com/privacy")!
+    static let privacyURL = URL(string: "https://getdictus.com/privacy")!
 
     private var bottomLinks: some View {
         VStack(spacing: 8) {
-            // Hidden while Pro is active: Apple requires a restore mechanism
-            // to exist (guideline 3.1.1), not to be shown to subscribers.
-            if !proStatus.isProActive {
+            // Hidden once paid: Apple requires a restore mechanism to exist
+            // (guideline 3.1.1), not to be shown to subscribers. Shown during the
+            // reverse trial (#593), when a returning buyer is exactly who needs it.
+            // Follows the offers (#216): wherever plans are sold, and nowhere else,
+            // which also keeps it off the DEBUG forced-entitlement hub.
+            if hubBlock.sellsPlans {
                 Button("Restore purchases") {
                     Task { await subscriptionManager.restorePurchases() }
                 }
@@ -725,17 +1031,23 @@ struct PaywallView: View {
             // scene focus, where sensoryFeedback is silently dropped. The
             // delay lands the haptic as the checkmark spring settles.
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                HapticFeedback.textInserted()
+                HapticFeedback.purchaseSucceeded()
             }
         }
     }
 
     // MARK: - Error Handling
 
-    private var showErrorAlert: Binding<Bool> {
+    /// Whether a purchase error is up, on the screen that is in front.
+    ///
+    /// WHY two bindings over one state: a purchase can fail from the monthly offer
+    /// (#724), and an alert asked of a view that is already presenting a sheet is
+    /// dropped by UIKit. So the error shows on the offer while it is up, and on the
+    /// paywall otherwise.
+    private func showsErrorAlert(fromOffer: Bool) -> Binding<Bool> {
         Binding(
             get: {
-                if case .failed = subscriptionManager.purchaseState { return true }
+                if case .failed = subscriptionManager.purchaseState { return showsMonthlyOffer == fromOffer }
                 return false
             },
             set: { _ in }
