@@ -23,7 +23,7 @@ window.DICTUS_STRINGS = {
   locale: "es-ES",
   proBadge: "Pro",
   wordmark: "dictus",
-  heroArt: { "v15-B": "art/v15-B/hero-es-ES.png" },
+  heroArt: { "v15-B": "art/v15-B/hero-es-ES.png", "v16-B": "art/v16-B/hero-es-ES.png" },
   slides: {
     hero: {
       // "en vez de escribir" held together, the break falls after "Habla"
