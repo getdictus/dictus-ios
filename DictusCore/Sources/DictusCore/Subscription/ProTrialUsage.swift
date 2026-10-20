@@ -102,7 +102,9 @@ public enum ProTrialUsage {
     ///
     /// The dictation figures are read from `DictationTally` over the mirrored
     /// record's window, day by day, so the trial's first and last days count whole
-    /// (see `DictationTally`). No record, no window: zero.
+    /// (see `DictationTally`). The window's edges go through `DictationTally.dayKey`,
+    /// the function that wrote the keys, so both are Gregorian days in the same time
+    /// zone whatever `calendar` is. No record, no window: zero.
     public static func snapshot(in defaults: UserDefaults = AppGroup.defaults,
                                 calendar: Calendar = .current) -> Snapshot {
         let dictated = ProTrialStore.mirroredRecord(in: defaults).map {

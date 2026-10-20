@@ -115,16 +115,41 @@ final class DictationTallyTests: XCTestCase {
         XCTAssertTrue(ProTrialUsage.Snapshot(smartModeUses: 0, vocabularyFixes: 0).isEmpty)
     }
 
-    // MARK: - Not gated (#726, 2026-10-13)
+    // MARK: - Non-Gregorian calendars
 
-    func testCountingIgnoresProTheTrialAndThePaywallFlag() {
+    /// The user's calendar, as `Calendar.current` hands it over, pinned to UTC.
+    private func userCalendar(_ identifier: Calendar.Identifier) -> Calendar {
+        var calendar = Calendar(identifier: identifier)
+        calendar.timeZone = utc.timeZone
+        return calendar
+    }
+
+    /// A Buddhist-calendar iPhone (Thailand) is in year 2569; the key stays an ISO day.
+    func testABuddhistCalendarStillWritesAndReadsGregorianDays() {
+        assertGregorianDays(with: userCalendar(.buddhist))
+    }
+
+    /// A Japanese-calendar iPhone is in Reiwa 8, whose string order breaks at the next
+    /// era; the key stays an ISO day.
+    func testAJapaneseCalendarStillWritesAndReadsGregorianDays() {
+        assertGregorianDays(with: userCalendar(.japanese))
+    }
+
+    private func assertGregorianDays(with calendar: Calendar,
+                                     file: StaticString = #filePath,
+                                     line: UInt = #line) {
         let defaults = makeDefaults()
-        // No trial, no Pro, and the writer takes no flag: there is nothing to gate it on.
-        record(12, 5, at: t0, in: defaults)
-        // A subscriber counts too.
-        defaults.set(true, forKey: SharedKeys.proActive)
-        record(8, 3, at: t0, in: defaults)
-        XCTAssertEqual(DictationTally.totals(from: t0, through: t0, in: defaults, calendar: utc),
-                       .init(words: 20, audioSeconds: 8))
+        DictationTally.record(words: 10, audioSeconds: 4, in: defaults, now: t0, calendar: calendar)
+        DictationTally.record(words: 20, audioSeconds: 6, in: defaults, now: t0.addingTimeInterval(day), calendar: calendar)
+
+        let stored = defaults.dictionary(forKey: SharedKeys.dictationTally) as? [String: [String: Int]]
+        XCTAssertEqual(stored.map { Set($0.keys) }, ["2026-09-21", "2026-09-22"], file: file, line: line)
+        // The same keys whichever calendar wrote them, so a user who switches calendar
+        // keeps their history.
+        XCTAssertEqual(DictationTally.totals(from: t0, through: t0.addingTimeInterval(day), in: defaults, calendar: utc),
+                       .init(words: 30, audioSeconds: 10), file: file, line: line)
+        // And the recap's window, read in that calendar, finds them.
+        mirrorTrial(startingAt: t0, in: defaults)
+        XCTAssertEqual(ProTrialUsage.snapshot(in: defaults, calendar: calendar).wordsDictated, 30, file: file, line: line)
     }
 }

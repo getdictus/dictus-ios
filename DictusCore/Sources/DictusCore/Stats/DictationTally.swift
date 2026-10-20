@@ -113,9 +113,22 @@ public enum DictationTally {
         return count
     }
 
-    /// `"2026-10-20"` in `calendar`'s time zone: the day the user lived it in.
+    /// `"2026-10-20"`: the Gregorian day, in `calendar`'s time zone, the day the user
+    /// lived it in.
+    ///
+    /// Only the time zone is taken from `calendar`, which is the user's. WHY not the
+    /// calendar itself: an iPhone set to the Buddhist calendar would write "2569-10-20"
+    /// and one set to the Japanese calendar "0008-10-20", whose string order breaks at
+    /// the next era. Keys written once in 2.0.0 are read for good by the 2.1 stats
+    /// (#728), so they are ISO days whatever the user's calendar, and `totals` reads
+    /// its window's edges through this same function.
+    ///
+    /// The cost left is the time zone: each key is the day where it was written, the
+    /// window the day where it is read. After a flight, a window edge can move by a day.
     static func dayKey(for date: Date, calendar: Calendar) -> String {
-        let parts = calendar.dateComponents([.year, .month, .day], from: date)
+        var gregorian = Calendar(identifier: .gregorian)
+        gregorian.timeZone = calendar.timeZone
+        let parts = gregorian.dateComponents([.year, .month, .day], from: date)
         return String(format: "%04d-%02d-%02d", parts.year ?? 0, parts.month ?? 0, parts.day ?? 0)
     }
 
