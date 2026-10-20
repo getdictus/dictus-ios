@@ -16,7 +16,8 @@
 #   - it is not the main checkout, nor the worktree running the script, nor `device`;
 #   - it is on a branch, and that branch is neither main nor develop;
 #   - the branch has at least one PR, and none of its PRs is open;
-#   - nothing is uncommitted, ignoring the build noise in Localizable.xcstrings;
+#   - nothing is uncommitted, except Localizable.xcstrings files whose only change is
+#     the build noise Xcode writes (CLAUDE.md), proven by content and then discarded;
 #   - every commit is reachable from a remote branch.
 # Its local branch is left in place: it costs nothing and a closed PR may be reopened.
 #
@@ -83,6 +84,39 @@ xcode_derived_data_for() {
   done
 }
 
+# True when the unstaged change to catalog $2 in worktree $1 is only what an Xcode build
+# writes: `"extractionState" : "stale"` lines added and the final newline dropped
+# (CLAUDE.md). Both versions are compared line by line, trailing comma and whitespace
+# ignored; any removed line or any other added line is someone's edit.
+is_catalog_build_noise() {
+  local committed current edits
+  committed=$(git -C "$1" show "HEAD:$2" | catalog_lines) || return 1
+  current=$(catalog_lines <"$1/$2") || return 1
+  edits=$(diff <(echo "$committed") <(echo "$current") | grep '^[<>]' \
+    | grep -v '^> *"extractionState" : "stale"$' || true)
+  [ -z "$edits" ]
+}
+catalog_lines() { sed -e 's/[[:space:]]*$//' -e 's/,$//'; }
+
+# Prints, NUL-terminated, the worktree-relative path of every catalog in $1 whose only
+# change is proven build noise (mode `noise`), or one line per other change (mode
+# `real`). Fails when git status cannot run, so a caller never reads that as clean.
+changes_in() {
+  local path=$1 mode=$2 status entry file
+  status=$(git -C "$path" status --porcelain -z | tr '\0' '\n') || return 1
+  while IFS= read -r entry; do
+    [ -n "$entry" ] || continue
+    file=${entry:3}
+    if [ "${entry:0:3}" = " M " ] && [ "$(basename "$file")" = Localizable.xcstrings ] \
+      && is_catalog_build_noise "$path" "$file"; then
+      [ "$mode" = noise ] && printf '%s\0' "$file"
+    else
+      [ "$mode" = real ] && echo "$entry"
+    fi
+  done <<<"$status"
+  return 0
+}
+
 # Prints the reason a worktree must be kept, or nothing when it can go.
 keep_reason() {
   local path=$1 branch=$2 states changes
@@ -98,39 +132,45 @@ keep_reason() {
   if [ -z "$states" ]; then echo "no PR for $branch"; return; fi
   case "$states" in *OPEN*) echo "PR still open"; return ;; esac
 
-  # Captured first: with pipefail, `grep -q` closing the pipe early would fail it.
-  changes=$(git -C "$path" status --porcelain | grep -v 'Localizable\.xcstrings$' || true)
-  if [ -n "$changes" ]; then echo "uncommitted changes"; return; fi
+  changes=$(changes_in "$path" real) || { echo "git status failed"; return; }
+  if [ -n "$changes" ]; then
+    echo "uncommitted changes, not proven build noise: $(echo "$changes" | tr '\n' ' ')"
+    return
+  fi
   if [ "$(git -C "$path" rev-list --count HEAD --not --remotes)" != 0 ]; then
     echo "unpushed commits"; return
   fi
 }
 
 retire() {
-  local path=$1 branch=$2 udid dir
+  local path=$1 branch=$2 udid dir file
   echo "RETIRE  $path [$branch]"
   echo "        worktree $(size "$path")"
   [ -d "$path/build/DerivedData" ] && echo "        build/DerivedData $(size "$path/build/DerivedData")"
-  for dir in $(xcode_derived_data_for "$path"); do
-    echo "        Xcode DerivedData $dir $(size "$dir")"
-  done
-  for udid in $(simulators_named "$branch"); do
-    echo "        simulator $udid $(size "$SIM_ROOT/$udid")"
-  done
+  while IFS= read -r dir; do
+    [ -n "$dir" ] && echo "        Xcode DerivedData $dir $(size "$dir")"
+  done < <(xcode_derived_data_for "$path")
+  while IFS= read -r udid; do
+    [ -n "$udid" ] && echo "        simulator $udid $(size "$SIM_ROOT/$udid")"
+  done < <(simulators_named "$branch")
+  while IFS= read -r -d '' file; do
+    echo "        build noise to discard: $file"
+  done < <(changes_in "$path" noise)
   [ "$APPLY" = 1 ] || return 0
 
-  for udid in $(simulators_named "$branch"); do
+  while IFS= read -r udid; do
+    [ -n "$udid" ] || continue
     xcrun simctl shutdown "$udid" >/dev/null 2>&1 || true
     xcrun simctl delete "$udid"
-  done
-  for dir in $(xcode_derived_data_for "$path"); do
-    rm -rf "${dir:?}"
-  done
+  done < <(simulators_named "$branch")
+  while IFS= read -r dir; do
+    case "$dir" in "$XCODE_DD"/?*) rm -rf "$dir" ;; esac
+  done < <(xcode_derived_data_for "$path")
   rm -rf "${path:?}/build"
-  # Xcode rewrites this file on every build; it is noise, never work (CLAUDE.md).
-  if [ -n "$(git -C "$path" status --porcelain -- '*Localizable.xcstrings')" ]; then
-    git -C "$path" checkout -- '*Localizable.xcstrings'
-  fi
+  # Only catalogs whose change was proven to be build noise, one path at a time.
+  while IFS= read -r -d '' file; do
+    git -C "$path" checkout -- ":(literal)$file"
+  done < <(changes_in "$path" noise)
   git worktree remove "$path"
   echo "        removed"
 }
