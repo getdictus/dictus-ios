@@ -2,13 +2,13 @@
 
 Every user-facing feature of Dictus iOS, one file each. The **ID is the feature's domain name, not the iOS one**: it names what the user gets, never a target, a view or a framework, so the Android app can reuse the same IDs for the same features. An ID never changes once published; a feature that goes away keeps its ID retired, never reused.
 
-Each file has the same four sections: **Sub-features** (each with its own stable ID), **How to get to it (user POV)**, **Driving it with axe + Argent** (the recipe, with `drive.sh` from `../SKILL.md`), **Gotchas** (including what the simulator cannot show). Screens are mapped in [screens.md](screens.md).
+Each file has the same four sections: **Sub-features** (each with its own stable ID), **How to get to it (user POV)**, **Driving it with axe + Argent** (the recipe, with `drive.sh` from `../SKILL.md`), **Gotchas** (including what the simulator cannot show). Screens are mapped in [screens.md](screens.md), which also describes the keyboard top bar's states and transitions.
 
 **Tier.** *Gratuit* is available to everyone. *Pro* is gated by `FeatureGate.isAvailable(_:)` (`DictusCore/Sources/DictusCore/Subscription/ProFeature.swift`): Pro active **and** the feature's own switch. While `PremiumFlags.paywallVisible = false` nothing Pro can be bought; a Debug build reaches every Pro feature with `drive.sh set-default dictus.debugProEntitlementForced -bool YES`.
 
 | ID | Feature | Tier | Drivable in the simulator |
 | --- | --- | --- | --- |
-| [`dictation.keyboard`](dictation.keyboard.md) | Dictation from the keyboard | Gratuit | Hand-off up to the no-model failure; not a recording |
+| [`dictation.keyboard`](dictation.keyboard.md) | Dictation from the keyboard | Gratuit | Yes with a model: a real recording of the Mac's mic, transcription, insertion, undo |
 | [`dictation.in-app`](dictation.in-app.md) | Dictation inside the app | Gratuit | Home state only; recording = the Mac's mic |
 | [`dictation.return-to-app`](dictation.return-to-app.md) | Return to the app you were typing in | Gratuit | Cold start only; return = device |
 | [`models.transcription`](models.transcription.md) | Transcription models | Gratuit | Yes (download is real traffic); RAM gates no |
@@ -31,7 +31,7 @@ Out of the map on purpose: the "Developer" section of Réglages (Debug builds on
 
 ## All IDs
 
-Every ID in this map, in one table: the 18 features first, then their 109 sub-features (in the order of the feature files), then the 49 screens of [screens.md](screens.md) — 176 IDs in all. **Gratuit/Pro** is the tier of the feature the ID belongs to. **Spécifique iOS** is « oui » when the ID has no Android equivalent to compare against: the keyboard-to-app hand-off and Full Access (an iOS keyboard extension cannot record and must ask for Full Access), return to the host app, Apple Intelligence (polish), the Dynamic Island (Live Activity, stopping standby), and the App Group check.
+Every ID in this map, in one table: the 18 features first, then their 109 sub-features (in the order of the feature files), then the 53 screens of [screens.md](screens.md) — 180 IDs in all. **Gratuit/Pro** is the tier of the feature the ID belongs to. **Spécifique iOS** is « oui » when the ID has no Android equivalent to compare against: the keyboard-to-app hand-off and Full Access (an iOS keyboard extension cannot record and must ask for Full Access), return to the host app, Apple Intelligence (polish), the Dynamic Island (Live Activity, stopping standby), and the App Group check.
 
 | ID | Gratuit/Pro | Spécifique iOS |
 | --- | --- | --- |
@@ -203,6 +203,10 @@ Every ID in this map, in one table: the 18 features first, then their 109 sub-fe
 | `kbd.no-full-access` | Gratuit | oui |
 | `kbd.dictation-error` | Gratuit | non |
 | `kbd.recording` | Gratuit | non |
+| `kbd.transcribing` | Gratuit | non |
+| `kbd.dictation-undo` | Gratuit | non |
+| `kbd.numbers` | Gratuit | non |
+| `kbd.symbols` | Gratuit | non |
 | `kbd.panel` | Gratuit | non |
 | `kbd.emoji` | Gratuit | non |
 | `kbd.voice-note-reader` | Pro | non |
