@@ -988,7 +988,14 @@ class DictationCoordinator: ObservableObject {
                 // dictations transcribe in this process too, and this is the one line
                 // both tails below share. Counted once the transcript exists, so a
                 // dictation cancelled during polish still counts what was said.
-                DictationTally.record(transcript.text, audioDuration: audioDuration)
+                //
+                // Not counted when the user cancelled during the transcription: the
+                // engine does not stop promptly and can still hand back a transcript,
+                // whose words never reach the document. Both checks, because a cancel
+                // abandons the session and does not always cancel this task in time.
+                if !Task.isCancelled, sessionGeneration.mayReport(from: session) {
+                    DictationTally.record(transcript.text, audioDuration: audioDuration)
+                }
                 // Polish and the hand-off below do not touch the speech engine.
                 releaseEngine()
 

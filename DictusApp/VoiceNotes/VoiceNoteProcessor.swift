@@ -290,10 +290,6 @@ final class VoiceNoteProcessor: ObservableObject {
 
         let transcript = parts.joined(separator: " ")
         guard !transcript.isEmpty else { return fail(note, .noSpeech, detail: "empty transcript") }
-        // Once per finished note, not per chunk (#726): a note that fails halfway is
-        // transcribed again from its first chunk, and would count those twice.
-        DictationTally.record(transcript, audioDuration: duration)
-
         let record = TranscriptionRecord(id: note.id, text: transcript, policy: policy, duration: duration,
                                          createdAt: note.receivedAt, source: .sharedFile)
         let saved = TranscriptionHistoryStore.shared.append(record) != nil
@@ -301,6 +297,11 @@ final class VoiceNoteProcessor: ObservableObject {
         store.mutate {
             evicted = $0.complete(note.id, transcript: transcript, language: record.language, savedToHistory: saved)
         }
+        // Once per finished note, not per chunk (#726): a note that fails halfway is
+        // transcribed again from its first chunk, and would count those twice. After
+        // the note is marked complete, so an app killed in between loses this note's
+        // count rather than counting it again when the queue picks the note back up.
+        DictationTally.record(transcript, audioDuration: duration)
         // History off: the queue's cap may have pushed an older transcript out, and the
         // keyboard must not keep offering it (#639, decision C).
         withdrawKeyboardDeliveries(evicted, reason: "evictedFromQueue")
