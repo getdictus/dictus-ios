@@ -24,12 +24,34 @@ final class TimeSavedEstimateTests: XCTestCase {
         XCTAssertEqual(TimeSavedEstimate.seconds(words: -5, audioSeconds: -5), 0)
     }
 
-    func testRoundingGoesDownToMinutesThenToWholeHours() {
+    func testRoundingGoesDownToMinutesThenToHoursAndMinutes() {
         XCTAssertNil(TimeSavedEstimate.rounded(seconds: 0))
         XCTAssertNil(TimeSavedEstimate.rounded(seconds: 59), "under a minute says nothing")
         XCTAssertEqual(TimeSavedEstimate.rounded(seconds: 60), .minutes(1))
         XCTAssertEqual(TimeSavedEstimate.rounded(seconds: 59 * 60 + 59), .minutes(59))
-        XCTAssertEqual(TimeSavedEstimate.rounded(seconds: 3_600), .hours(1))
-        XCTAssertEqual(TimeSavedEstimate.rounded(seconds: 4 * 3_600 + 59 * 60), .hours(4), "about 4 h, never 5")
+        XCTAssertEqual(TimeSavedEstimate.rounded(seconds: 3_600), .hours(1, minutes: 0))
+        XCTAssertEqual(TimeSavedEstimate.rounded(seconds: 3_600 + 58 * 60), .hours(1, minutes: 58), "1 h 58, not 1 h")
+        XCTAssertEqual(TimeSavedEstimate.rounded(seconds: 4 * 3_600 + 59 * 60 + 59), .hours(4, minutes: 59),
+                       "rounded down, never 5 h")
+    }
+
+    /// The figure the user reads never drops when the time saved grows, across the
+    /// hour and every boundary after it. Whole hours from 60 min did: 1 h 58 read
+    /// "about 1 h", less than the "about 59 min" just under it.
+    func testTheRoundedFigureNeverDecreasesAsTimeSavedGrows() {
+        func shownMinutes(_ seconds: Int) -> Int {
+            switch TimeSavedEstimate.rounded(seconds: seconds) {
+            case nil: return 0
+            case .minutes(let minutes): return minutes
+            case .hours(let hours, let minutes): return hours * 60 + minutes
+            }
+        }
+        var previous = 0
+        for seconds in stride(from: 0, through: 3 * 3_600, by: 30) {
+            let shown = shownMinutes(seconds)
+            XCTAssertGreaterThanOrEqual(shown, previous, "dropped at \(seconds) s")
+            XCTAssertLessThanOrEqual(shown * 60, seconds, "claims more than the formula at \(seconds) s")
+            previous = shown
+        }
     }
 }

@@ -5746,12 +5746,23 @@
       }
     },
     "About %lld h" : {
-      "comment" : "End-of-trial recap: estimated time dictation saved over typing, rounded down to whole hours (#726).",
+      "comment" : "End-of-trial recap: estimated time dictation saved over typing, a whole number of hours (#726).",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Environ %lld h"
+          }
+        }
+      }
+    },
+    "About %lld h %lld min" : {
+      "comment" : "End-of-trial recap: estimated time dictation saved over typing, an hour or more, in hours then minutes (#726).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Environ %1$lld h %2$lld min"
           }
         }
       }

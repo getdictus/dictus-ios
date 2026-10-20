@@ -39,12 +39,17 @@ public enum TimeSavedEstimate {
         return max(0, Int((typingSeconds - Double(max(0, audioSeconds))).rounded(.down)))
     }
 
-    /// The figure as the user reads it, rounded down: minutes under an hour, whole
-    /// hours from one hour on. Rounded down so the estimate never claims more than
-    /// the formula gave.
+    /// The figure as the user reads it, rounded down: minutes under an hour, then
+    /// hours and minutes. Rounded down so the estimate never claims more than the
+    /// formula gave.
+    ///
+    /// WHY not whole hours from one hour on: 1 h 58 min would read "about 1 h", less
+    /// than the "about 59 min" just under it. Hours and minutes grow with the time
+    /// saved, every minute of the way.
     public enum Rounded: Equatable, Sendable {
         case minutes(Int)
-        case hours(Int)
+        /// `minutes` is 0 to 59; 0 reads as whole hours.
+        case hours(Int, minutes: Int)
     }
 
     /// Nil under one minute: "about 0 min" would tell the user nothing was saved,
@@ -52,6 +57,6 @@ public enum TimeSavedEstimate {
     public static func rounded(seconds: Int) -> Rounded? {
         let minutes = seconds / 60
         guard minutes > 0 else { return nil }
-        return minutes < 60 ? .minutes(minutes) : .hours(minutes / 60)
+        return minutes < 60 ? .minutes(minutes) : .hours(minutes / 60, minutes: minutes % 60)
     }
 }

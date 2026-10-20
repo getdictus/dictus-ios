@@ -96,16 +96,19 @@ struct TrialEndedHeader: View {
             .fixedSize(horizontal: false, vertical: true)
     }
 
-    /// "About 4 h", "About 25 min": an estimate, and worded as one (#726). The
-    /// formula and its source are `TimeSavedEstimate`'s.
+    /// "About 25 min", "About 4 h", "About 1 h 58 min": an estimate, and worded as one
+    /// (#726). The formula and its source are `TimeSavedEstimate`'s.
     private func timeSavedText(_ saved: TimeSavedEstimate.Rounded) -> Text {
         switch saved {
         case .minutes(let minutes):
             return Text("About \(minutes) min",
                         comment: "End-of-trial recap: estimated time dictation saved over typing, under an hour (#726).")
-        case .hours(let hours):
+        case .hours(let hours, minutes: 0):
             return Text("About \(hours) h",
-                        comment: "End-of-trial recap: estimated time dictation saved over typing, rounded down to whole hours (#726).")
+                        comment: "End-of-trial recap: estimated time dictation saved over typing, a whole number of hours (#726).")
+        case .hours(let hours, let minutes):
+            return Text("About \(hours) h \(minutes) min",
+                        comment: "End-of-trial recap: estimated time dictation saved over typing, an hour or more, in hours then minutes (#726).")
         }
     }
 
