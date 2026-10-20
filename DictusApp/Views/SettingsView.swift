@@ -23,6 +23,9 @@ struct SettingsView: View {
 
     // MARK: - Preferences (App Group persisted)
 
+    @AppStorage(SharedKeys.audioInputDevice, store: UserDefaults(suiteName: AppGroup.identifier))
+    private var audioInputDevice = AudioInputPreference.builtIn.rawValue
+
     @AppStorage(SharedKeys.language, store: UserDefaults(suiteName: AppGroup.identifier))
     private var language = "fr"
 
@@ -253,6 +256,13 @@ struct SettingsView: View {
                         Text(lang.displayName).tag(lang.rawValue)
                     }
                 }
+                Picker("Input Device", selection: $audioInputDevice) {
+                    Text("Automatic").tag(AudioInputPreference.automatic.rawValue)
+                    Text("iPhone microphone").tag(AudioInputPreference.builtIn.rawValue)
+                }
+                Text("Automatic uses a connected headset microphone when available. Changes apply to the next recording.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
                 if isParakeetActive {
                     Text("Parakeet automatically detects the spoken language. This setting only applies to Whisper models.")
                         .font(.caption)

@@ -217,6 +217,7 @@ class UnifiedAudioEngine: ObservableObject {
     /// `sessionConfigured=true` in a device log was a literal, not a measurement.
     /// The snapshot now reads the real value.
     private(set) var sessionConfigured = false
+    private var configuredInputPreference: AudioInputPreference?
 
     /// True when an AVAudioSession interruption is currently in flight.
     ///
@@ -622,12 +623,9 @@ class UnifiedAudioEngine: ObservableObject {
 
     /// Configure the audio session. Must be called from foreground.
     ///
-    /// WHY .allowBluetoothA2DP (not .allowBluetooth) — fix #85:
-    /// .allowBluetooth enables HFP (Hands-Free Profile) which hijacks AirPods AVRCP
-    /// controls — single-tap play/pause stops working for Music app during recording.
-    /// .allowBluetoothA2DP keeps A2DP output on AirPods without activating HFP:
-    /// built-in mic is used for recording, AirPods controls stay with media apps.
-    /// Confirmed via WhisperFlow reverse-engineering (same NoBluetooth approach).
+    /// Built-in input preserves A2DP playback and avoids HFP taking over media
+    /// controls (#85). Automatic explicitly enables headset microphones; iOS may
+    /// then route output through HFP as well.
     ///
     /// WHY .duckOthers:
     /// Automatically lowers other apps' volume (~60%) while Dictus's engine is active.
@@ -642,11 +640,36 @@ class UnifiedAudioEngine: ObservableObject {
     /// category was set, setActive(true) must be called again on foreground return.
     func configureAudioSession() throws {
         let session = AVAudioSession.sharedInstance()
-        if !sessionConfigured {
-            try session.setCategory(.playAndRecord, options: [.allowBluetoothA2DP, .defaultToSpeaker, .duckOthers])
+        // A settings change must not re-route a dictation already in progress.
+        let preference = isRecording ? (configuredInputPreference ?? .current) : .current
+        if !sessionConfigured || configuredInputPreference != preference {
+            if engine.isRunning { replaceEngine() }
+            var options: AVAudioSession.CategoryOptions = [.allowBluetoothA2DP, .defaultToSpeaker, .duckOthers]
+            if preference == .automatic {
+                if #available(iOS 26.0, *) {
+                    options.insert(.allowBluetoothHFP)
+                } else {
+                    options.insert(.allowBluetooth)
+                }
+            }
+            try session.setCategory(.playAndRecord, options: options)
         }
         try session.setActive(true)
+        // Input selection can throw after activation; terminal cleanup must still release it.
         sessionConfigured = true
+        let inputs = session.availableInputs ?? []
+        let preferredInput = preference == .builtIn
+            ? inputs.first { $0.portType == .builtInMic }
+            : inputs.first { $0.portType == .bluetoothHFP || $0.portType == .headsetMic || $0.portType == .usbAudio }
+        if preference == .builtIn && preferredInput == nil {
+            throw AudioEngineError.audioHardwareUnavailable(reason: "Built-in microphone is unavailable")
+        }
+        if !isRecording, let preferredInput,
+           session.currentRoute.inputs.first?.uid != preferredInput.uid, engine.isRunning {
+            replaceEngine()
+        }
+        try session.setPreferredInput(preferredInput)
+        configuredInputPreference = preference
 
         PersistentLog.log(.audioSessionConfigured(category: "playAndRecord"))
         applyHapticsAllowance(context: "configureAudioSession")
@@ -773,6 +796,10 @@ class UnifiedAudioEngine: ObservableObject {
         // that bounds a warm engine (#256). Throwing after it would leave the engine warm
         // with nothing armed to release it.
         try refuseIfACallHoldsTheMicrophone()
+
+        // Re-read the shared preference and available ports for every recording,
+        // including a warm start after a headset connected or disconnected.
+        try configureAudioSession()
 
         // Cancel any pending idle release — recording activity resets the timer.
         cancelIdleRelease()
