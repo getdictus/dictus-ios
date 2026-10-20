@@ -54,6 +54,7 @@ Milestone `2.1 — after the Pro launch`, plus the unmilestoned open issues. Pic
 - #622 — translation targets from Apple FM's languages, not the keyboard's
 - #628 — Smart Modes on voice notes over ~4 min: per-mode output reserve first, then multi-call
 - #269 — custom Smart Modes
+- #760 — onboarding model step shows a bare spinner after a failed keyboard dictation (stale `failed` status trips the #458 gate)
 
 ## Settled — do not reopen
 
