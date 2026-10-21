@@ -45,11 +45,13 @@ final class NonSpeechMarkersTests: XCTestCase {
 
     func test_markerInsideWords_leavesOneSpace() {
         XCTAssertEqual(NonSpeechMarkers.spokenText(in: "Hello (music) everyone"), "Hello everyone")
+        XCTAssertEqual(NonSpeechMarkers.spokenText(in: "Bonjour[Music]monde"), "Bonjour monde")
     }
 
     func test_markerAfterWords_keepsTheirPunctuation() {
         XCTAssertEqual(NonSpeechMarkers.spokenText(in: "On se voit demain. [Musique]"), "On se voit demain.")
         XCTAssertEqual(NonSpeechMarkers.spokenText(in: "See you tomorrow [Music]."), "See you tomorrow.")
+        XCTAssertEqual(NonSpeechMarkers.spokenText(in: "...et voilà [Music]"), "...et voilà")
     }
 
     // MARK: - Normal text is untouched

@@ -10,9 +10,8 @@ import Foundation
 
 public enum NonSpeechMarkers {
 
-    /// A bracketed or parenthesized span, with the whitespace before it, so removing it
-    /// from the middle of a sentence leaves one space and not two.
-    private static let marker = #"\s*(?:\[[^\[\]]*\]|\([^()]*\))"#
+    /// A bracketed or parenthesized span.
+    private static let marker = #"(?:\[[^\[\]]*\]|\([^()]*\))"#
 
     /// The spoken words in `text`, or an empty string when there are none.
     ///
@@ -20,15 +19,21 @@ public enum NonSpeechMarkers {
     /// holds a letter or a digit, so a result of punctuation, ellipsis or whitespace alone
     /// comes back empty. Text with no marker is returned trimmed and otherwise untouched.
     public static func spokenText(in text: String) -> String {
-        let stripped = text.replacingOccurrences(of: marker, with: "", options: .regularExpression)
+        // A marker glued between two words ("Bonjour[Music]monde") becomes a space, so the
+        // words stay apart. Every other marker goes with the whitespace before it, so one
+        // in mid-sentence leaves one space and not two.
+        let separated = text.replacingOccurrences(
+            of: #"(?<=[\p{L}\p{N}])"# + marker + #"(?=[\p{L}\p{N}])"#, with: " ", options: .regularExpression)
+        let stripped = separated.replacingOccurrences(of: #"\s*"# + marker, with: "", options: .regularExpression)
         guard stripped.unicodeScalars.contains(where: CharacterSet.alphanumerics.contains) else {
             return ""
         }
         let trimmed = stripped.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard stripped != text else { return trimmed }
         // A marker that opened the text can leave the punctuation that followed it, as in
-        // "[Musique]. Bonjour": the sentence must not start with ". ". An opening quote
-        // is kept, since it belongs to the words after it.
+        // "[Musique]. Bonjour": the sentence must not start with ". ". Only then: the
+        // leading "..." of "...et voilà [Music]" is the speaker's. An opening quote is
+        // kept, since it belongs to the words after it.
+        guard text.range(of: #"^\s*"# + marker, options: .regularExpression) != nil else { return trimmed }
         return String(trimmed.drop { ".,;:!?…".contains($0) || $0.isWhitespace })
     }
 }
