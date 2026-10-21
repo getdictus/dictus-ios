@@ -181,14 +181,21 @@ class TranscriptionService {
         if let activeEngine {
             do {
                 let result = try await activeEngine.transcribe(audioSamples: audioSamples, language: language)
+                // Every engine's text passes here, so this is the one place the markers are
+                // dropped (#766). A result of markers alone is the engine's own empty result.
+                let text = NonSpeechMarkers.spokenText(in: result.text)
+                guard !text.isEmpty else {
+                    throw TranscriptionError.noSpeechDetected(
+                        context: "non-speech markers only (\(result.text.count) chars)")
+                }
                 let durationMs = Int(Date().timeIntervalSince(transcriptionStart) * 1000)
-                let wordCount = result.text.split(separator: " ").count
+                let wordCount = text.split(separator: " ").count
                 PersistentLog.log(.transcriptionCompleted(
                     durationMs: durationMs, wordCount: wordCount, confidence: result.confidence,
                     language: result.language, promptId: result.promptId,
                     detectedLanguage: result.detectedLanguage, retry: result.retry))
                 logPerformance(modelName: modelName, audioSamples: audioSamples, transcriptionDurationMs: durationMs)
-                return result.text
+                return text
             } catch {
                 // The diagnostic, not `localizedDescription`: since #313 the latter is the
                 // sentence written for the user, and a log line that carried it would say
@@ -250,8 +257,8 @@ class TranscriptionService {
             // Whisper may produce multiple segments for longer audio.
             let text = results.map { $0.text }.joined(separator: " ")
 
-            // Trim whitespace — Whisper sometimes adds leading/trailing spaces
-            let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+            // Trims, and drops non-speech markers such as "[Musique]" (#766).
+            let trimmed = NonSpeechMarkers.spokenText(in: text)
 
             guard !trimmed.isEmpty else {
                 throw TranscriptionError.noSpeechDetected(context: "empty WhisperKit transcription result (legacy path)")
