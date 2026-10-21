@@ -7,7 +7,7 @@
 // every engine's text can apply it.
 //
 // THE RULE (#766):
-// 1. A result made only of bracketed or parenthesized spans, whatever they hold, and/or
+// 1. A result made only of bracketed, parenthesized or `*...*` spans, whatever they hold, and/or
 //    punctuation and whitespace is no speech: it comes back empty.
 // 2. When real words remain, only the known markers below are removed. Any other
 //    bracketed text stays, since "(salle 212)" may be what the user said.
@@ -17,8 +17,12 @@ import Foundation
 
 public enum NonSpeechMarkers {
 
-    /// Any bracketed or parenthesized span.
-    private static let anyMarker = #"(?:\[[^\[\]]*\]|\([^()]*\))"#
+    /// Any bracketed or parenthesized span, or a `*...*` span. Whisper small writes
+    /// `*musique*` in French (#766, device). An asterisk span holds no asterisk and no
+    /// newline, and touches no whitespace just inside its asterisks, so `2 * 3 * 4` is
+    /// arithmetic and not a marker.
+    private static let anyMarker =
+        #"(?:\[[^\[\]]*\]|\([^()]*\)|(?<!\*)\*[^*\s](?:[^*\n]*[^*\s])?\*(?!\*))"#
 
     /// The markers removed from text that also holds words. Matched case-insensitively,
     /// with whitespace and punctuation allowed around the word inside the brackets.
@@ -31,7 +35,8 @@ public enum NonSpeechMarkers {
 
     private static let knownMarker: String = {
         let inner = #"[\s.,;:!?…-]*(?:"# + knownWords + #")[\s.,;:!?…-]*"#
-        return #"(?:\["# + inner + #"\]|\("# + inner + #"\))"#
+        let asteriskInner = #"(?:"# + knownWords + #")[.,;:!?…-]*"#
+        return #"(?:\["# + inner + #"\]|\("# + inner + #"\)|(?<!\*)\*"# + asteriskInner + #"\*(?!\*))"#
     }()
 
     private static let options: String.CompareOptions = [.regularExpression, .caseInsensitive]

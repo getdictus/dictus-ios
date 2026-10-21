@@ -95,6 +95,28 @@ final class NonSpeechMarkersTests: XCTestCase {
         XCTAssertEqual(NonSpeechMarkers.spokenText(in: "Bonjour (rires"), "Bonjour (rires")
     }
 
+    // MARK: - Asterisk spans (Whisper small, French, device)
+
+    func test_asteriskMarkersAlone_areNotSpeech() {
+        for text in ["*musique*", "*Bruit de chute*", "[Musique] *rires*"] {
+            XCTAssertEqual(NonSpeechMarkers.spokenText(in: text), "", text)
+        }
+    }
+
+    func test_knownAsteriskMarker_inMixedText_isDropped() {
+        XCTAssertEqual(NonSpeechMarkers.spokenText(in: "Bonjour *musique* à tous"), "Bonjour à tous")
+    }
+
+    func test_asteriskEmphasis_inMixedText_isKept() {
+        XCTAssertEqual(NonSpeechMarkers.spokenText(in: "c'est *vraiment* bien"), "c'est *vraiment* bien")
+    }
+
+    func test_asterisksThatAreNotASpan_areNotFiltered() {
+        for text in ["*musique", "2 * 3 * 4", "*musique\n*"] {
+            XCTAssertEqual(NonSpeechMarkers.spokenText(in: text), text, text)
+        }
+    }
+
     // MARK: - Normal text is untouched
 
     func test_normalText_isOnlyTrimmed() {
