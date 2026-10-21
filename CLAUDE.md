@@ -133,6 +133,13 @@ Boot, build, install, launch, capture, and what a simulator cannot show. See `do
 
 **Smoke test:** `scripts/simulator-smoke-test.sh` runs the app → keyboard → app path headlessly in about two minutes and ends with `SMOKE PASS` or `SMOKE FAIL step N`. Run it while verifying any change to DictusApp, DictusKeyboard, onboarding or the App Group hand-off, and before a TestFlight cut. A pass is not a device validation. See `docs/agents/simulator-smoke-test.md`.
 
+### Verification and device tests
+
+- **`verify-dictus-ios`** (`.claude/skills/verify-dictus-ios/`): use it when a change to DictusApp or DictusKeyboard has to be seen working in the real app rather than in `swift test`, when a feature of its map (`.claude/skills/verify-dictus-ios/features/README.md`) must be exercised, or when screens need re-capturing.
+- **Keep the map current (mandatory):** a PR that adds or changes a screen or a feature updates `.claude/skills/verify-dictus-ios/features/` and its `screens.md` in the same PR (stable ID, capture). See the skill's "Keeping the map current".
+- **Follow the physical test shortlist (mandatory):** a PR that changes a behavior or a screen classified "iPhone" by the skill carries the `needs-physical-test` label and goes through the `batch-device-test` skill (until that skill exists, its steps by hand, as the skill describes). See the skill's "Physical test shortlist".
+- **pstack** (https://github.com/cursor/plugins/tree/main/pstack) is the reference toolkit for agent workflows, including `/maintain-verification-skill` for the map. It is enabled for this repo through `.claude/settings.json`; Claude Code asks you to trust the `cursor-plugins` marketplace on first use.
+
 ### Releasing
 
 `testflight-build` cuts a version, uploads it and distributes it to a tester group. **`appstore-promote` is user-invoked and has no model-facing description on purpose** — merging into `main` and submitting to Apple's review queue are Pierre's to start, never something an agent reaches by interpreting a sentence. Pierre types it himself.

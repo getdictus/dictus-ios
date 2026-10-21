@@ -7,7 +7,7 @@ description: Verify the Dictus iOS app (DictusApp, the Dictus keyboard extension
 
 Five steps, always in this order: **Launch → Doctor → Drive → Evidence → Cleanup**. Each one is a script under `scripts/`, run from the repository root. The simulator is created by Launch for this run and deleted by Cleanup; evidence outlives both.
 
-Read first: `docs/agents/simulator.md` is the authority on what a simulator can and cannot do here, and `features/README.md` maps every user feature to its recipe. A pass here is not a device validation (CLAUDE.md): what only a physical iPhone can show is listed in each feature's Gotchas.
+Read first: `docs/agents/simulator.md` is the authority on what a simulator can and cannot do here, and `features/README.md` maps every user feature to its recipe. A pass here is not a device validation (CLAUDE.md): what only a physical iPhone can show is listed in each feature's Gotchas and gathered in [Physical test shortlist](#physical-test-shortlist).
 
 **Headless, always.** Never `open -a Simulator`. Xcode 27 (installed here) has no Simulator.app and `axe` needs nothing; on an Xcode 26 machine `launch.sh` starts it with `open -g -a Simulator`, which does not take the focus. Doctor fails if Simulator or DeviceHub ends up frontmost.
 
@@ -157,6 +157,56 @@ It copies `dictus_debug.full.log` out of the App Group, then `xcrun simctl shutd
 - Never kill a process by name (`killall Simulator`, `pkill -f simctl`): other sessions and the smoke test's `Dictus Smoke` device share this Mac. Quitting Simulator.app shuts down every device it owns.
 - Never delete anything under `~/dev/dictus-evidence/`: Cleanup does not, and nothing else should.
 - Run Cleanup on a failed run too. Afterwards, check: `xcrun simctl list devices | grep "<udid>"` prints nothing, and the run directory still holds its files.
+
+## Physical test shortlist
+
+Two lists. The first is what an agent proves alone with this skill; the second is what only Pierre's iPhone can prove, however good the simulator run was. Sources: `docs/agents/simulator.md` (§1 device identity and RAM, §8 what the simulator cannot show) and the Gotchas of each `features/<id>.md`. IDs are from [features/README.md](features/README.md).
+
+### Simulator: the agent proves it alone
+
+| Area | What is proven | IDs |
+| --- | --- | --- |
+| App starts | Build, install, launch, first screen, no crash signal (Launch + Doctor) | `app.home`, `app.onboarding.welcome` |
+| Onboarding | Every step displays, back/skip/next, What's new; not the download, mic prompt or practice dictation | `onboarding.*` except `onboarding.model-download`, `onboarding.microphone`, `onboarding.first-dictation` |
+| Keyboard setup | The keyboard registers, is enabled, takes Full Access, is selected from the globe menu | `dictation.requires-full-access`, `sys.settings.full-access`, `kbd.keys`, `kbd.no-full-access` |
+| Hand-off, cold path | Mic tap → DictusApp cold start → `No model downloaded` → keyboard shows the failure | `dictation.handoff` (cold only), `kbd.dictation-error` |
+| Dictation chain, with a model | Only when the task asks for a recording: a `say` clip played through the Mac's speakers is recorded, transcribed and inserted; the top-bar states are captured (`features/dictation.keyboard.md`, With a model). Proves the chain runs, not the voice, the quality or the timings | `dictation.start`, `dictation.stop`, `dictation.cancel`, `kbd.recording`, `kbd.transcribing`, `kbd.dictation-undo`, `dictation.undo-insert` (drivable by tapping « Annuler » within 8 s; the recipe does not) |
+| Typing | Suggestions, autocorrect on space, undo, accents, dead keys, learned words, reset | `typing.*`, `learned-words.*`, `kbd.suggestions` |
+| Keyboard surfaces | Languages panel, layouts, number row, 123 and `#+=` pages, emoji picker, recents, search | `keyboard.*`, `emoji.*`, `kbd.panel`, `kbd.numbers`, `kbd.symbols`, `kbd.emoji` |
+| Settings and switches | Every preference changes and persists through the App Group (sounds, haptics, polish, Live Activity, history, vocabulary, voice notes) | `sounds.toggle`, `sounds.volume`, `sounds.per-event`, `haptics.toggle`, `polish.toggle`, `live-activity.toggle`, `*.toggle` |
+| Pro, Debug-forced | Hub, Smart Mode pins, fan opening (greyed), vocabulary add/edit/delete, history and voice-note reader empty states | `pro.hub`, `smart-modes.fan`, `smart-modes.pin`, `vocabulary.add`/`edit`/`delete`/`reset`, `history.list` (empty), `voice-notes.reader` (empty) |
+| Models | Catalogue, download (real traffic), preparation screen, select, delete, retry, languages sheet; A12/A13 refusal on a device created as `iPhone-11` | `models.*` except the RAM half of `models.device-gating`; `app.models.loading` (screen, not timing) |
+| Diagnostics | Log view, export sheet opens, App Group check (signed build) | `diagnostics.*` |
+
+### iPhone: needs Pierre's phone
+
+| Area | Why the simulator cannot prove it | IDs |
+| --- | --- | --- |
+| Real voice and microphone | A simulator records the Mac's input device: the room, or a synthesized `say` clip. A real voice, its accent and the text quality, and what depends on them (a filled history, the vocabulary effect, voice-note transcription) | `dictation.in-app`, `app.recording`, `history.detail`, `vocabulary.apply`, `voice-notes.transcribe` |
+| Audio routing | AirPods, Bluetooth headsets, wired input, route changes and interruptions mid-recording: the simulator has only the Mac's devices | `dictation.start`, `dictation.in-app`, `voice-notes.transcribe` |
+| Keyboard memory and jetsam | The extension's ~50 MB ceiling and its kills are device figures; simulator `memMB` carries no verdict | `dictation.keyboard`, `kbd.*` |
+| Keyboard height and dead zones | The declared height constraint (#166) and touch dead zones | `kbd.keys` |
+| Warm hand-off and return | The warm path depends on iOS keeping the app alive; auto-return and the Spotlight/arbiter cases (#23) behave differently on device | `dictation.handoff` (warm), `return.auto-return`, `return.swipe-back` |
+| RAM-gated device tiers | `physicalMemory` is the Mac's RAM: the `>= 6 GB` Turbo gate and `insufficientMemory` never fire | `models.device-gating`, `dictation.device-gating` (memory half) |
+| Model speed and cache | Compile time, Neural Engine, transcription timing, the Core ML cache across installs: all Mac silicon in a simulator | `models.preparation` (timing), `app.onboarding.model-preparation` |
+| Apple Intelligence | Unavailable in the simulator: polish and every Smart Mode rewrite | `polish.clean-up`, `polish.in-keyboard`, `smart-modes.structured`/`list`/`message`/`summary`/`translate` |
+| Real StoreKit purchases | StoreKit is inert without a configuration (`loadProducts error=empty result`); paywall, restore and trial | `pro.paywall`, `pro.restore`, `pro.trial`, `pro.trial-end`, `app.paywall`, `app.pro.trial-announcement` |
+| Live Activity and Dynamic Island | Not reproduced by this skill; states, stop from the island, Focus dropping alerts, dev installs killing activities | `live-activity.*`, `voice-notes.progress-activity`, `widget.live-activity`, `onboarding.stop-standby` |
+| Haptics and sounds | No haptic engine and no audible check; only the preference is provable | `haptics.toggle` (effect), `sounds.*` (effect) |
+| Voice notes from a messaging app | No messaging app in the simulator to share from | `voice-notes.share-in`, `share.voice-note`, `app.voice-note.result` |
+| Host spell-check | Host underlines are not a usable probe in the simulator (`docs/agents/simulator.md` §8) | `typing.autocorrect` |
+
+**Rule.** A PR that changes a behavior or a screen in the iPhone list (its code, not only this table) carries the `needs-physical-test` label and goes through the `batch-device-test` skill (proposed in Pivii/skills#20, not merged yet): one local branch merges every PR waiting for a device test, without pushing; one build goes on the iPhone; Pierre fills one checklist, `#<num> OK` / `#<num> KO`; then each PR that passed is merged on its own, PR by PR. Until that skill exists, run the same steps by hand; the iPhone verdict goes on the PR's manual test list either way. The simulator run of this skill still happens first, for the first list. A green simulator run never stands in for a line of the second.
+
+## Keeping the map current
+
+**MANDATORY.** A PR that adds or changes a screen or a user feature updates the map in the same PR:
+
+- `features/<id>.md` for the feature (new file, or its Sub-features, recipe and Gotchas), and its rows in [features/README.md](features/README.md), including the All IDs table and its count;
+- [features/screens.md](features/screens.md) for the screen, with its capture in `docs/agents/screens/<screen-id>.png` (`evidence.sh`, then `sips -Z 874`), or « non » with the reason in the feature's Gotchas;
+- a line in the [Physical test shortlist](#physical-test-shortlist) when the change moves something between the two lists.
+
+IDs are stable: never rename one, and a removed feature keeps its ID retired. The tool for this upkeep is pstack's `/maintain-verification-skill`, which audits every feature from source and drives each one live, then ships at most one PR of proven corrections. It is user-invoked (`disable-model-invocation`): an agent writes the map changes itself and leaves that pass to a person.
 
 ## Helpers
 
