@@ -2,8 +2,8 @@
 // Where the dictation tally is written, checked against the source that writes it (#726).
 //
 // WHY this suite reaches across targets: what the tally promises (every user counts, a
-// cancelled dictation does not, a voice note counts once) is decided at its two call
-// sites, `DictationCoordinator` and `VoiceNoteProcessor`. Both live in DictusApp, which
+// cancelled dictation does not, a shared voice note never does) is decided at its call
+// site in `DictationCoordinator` and by `VoiceNoteProcessor` staying out of it. Both live in DictusApp, which
 // has no test bundle, so a later `if proStatus.isPro` around a call would keep every
 // behavioural test green. Reading the source catches it, the pattern
 // `CallGuardCallSiteTests` uses for the same reason.
@@ -48,26 +48,48 @@ final class DictationTallyCallSiteTests: XCTestCase {
         XCTAssertLessThan(call, split)
     }
 
-    // MARK: - Voice notes
+    // MARK: - Shared voice notes are not counted (#726, decided 2026-10-21)
 
-    func testAVoiceNoteIsRecordedOnceAfterItIsMarkedComplete() throws {
+    /// A shared voice note is often someone else's voice: its words were not dictated
+    /// by the user. The voice note queue must not write the tally.
+    func testTheVoiceNoteQueueDoesNotRecord() throws {
         let lines = try codeLines(at: Self.voiceNotesPath)
-        let calls = lines.indices.filter { lines[$0].contains(Self.recordCall) }
-        XCTAssertEqual(calls.count, 1, "once per note, never per chunk")
-        let call = try XCTUnwrap(calls.first)
-        let complete = try XCTUnwrap(lines.firstIndex { $0.contains(".complete(note.id") },
-                                     "VoiceNoteProcessor no longer marks a note complete")
-        XCTAssertLessThan(complete, call,
-                          "counted before the note is complete: a kill in between counts it twice")
-        let condition = lines[(call - 3)..<call].joined()
-        for gate in Self.gates {
-            XCTAssertFalse(condition.contains(gate), "counting is gated on \(gate); #726 counts every user")
-        }
+        XCTAssertFalse(lines.contains { $0.contains("DictationTally") },
+                       "VoiceNoteProcessor writes the tally; shared voice notes are excluded from the recap")
     }
 
-    // MARK: - The entry both call
+    /// The voice note's chunks transcribe through the coordinator too, by their own
+    /// entry point. That entry must not reach the dictation's count.
+    func testTheVoiceNoteChunkEntryDoesNotRecord() throws {
+        let source = try codeLines(at: Self.coordinatorPath).joined(separator: "\n")
+        let start = try XCTUnwrap(source.range(of: "func transcribeVoiceNoteChunk(")?.lowerBound,
+                                  "the coordinator no longer declares transcribeVoiceNoteChunk")
+        let end = try XCTUnwrap(source.range(of: "\n    }\n", range: start..<source.endIndex)?.upperBound)
+        XCTAssertFalse(source[start..<end].contains(Self.recordCall),
+                       "a voice note chunk is counted as a dictation")
+    }
 
-    func testTheEntryBothSitesCallReadsNoGate() throws {
+    /// Nothing else in the app targets writes the tally: the coordinator's one call is
+    /// the only way in, so only dictations count.
+    func testTheCoordinatorIsTheOnlyWriter() throws {
+        let root = repoRoot()
+        var writers: [String] = []
+        for target in ["DictusApp", "DictusKeyboard", "DictusShare", "DictusWidgets"] {
+            let directory = root.appendingPathComponent(target)
+            guard let files = FileManager.default.enumerator(at: directory, includingPropertiesForKeys: nil) else { continue }
+            for case let url as URL in files where url.pathExtension == "swift" {
+                let path = String(url.path.dropFirst(root.path.count + 1))
+                if try codeLines(at: path).contains(where: { $0.contains(Self.recordCall) }) {
+                    writers.append(path)
+                }
+            }
+        }
+        XCTAssertEqual(writers, [Self.coordinatorPath])
+    }
+
+    // MARK: - The entry the coordinator calls
+
+    func testTheTallyEntryReadsNoGate() throws {
         let source = try codeLines(at: Self.tallyPath).joined(separator: "\n")
         let start = try XCTUnwrap(source.range(of: "public static func record(_ text: String")?.lowerBound)
         let end = try XCTUnwrap(source.range(of: "static func record(words:", range: start..<source.endIndex)?.lowerBound)
@@ -82,12 +104,7 @@ final class DictationTallyCallSiteTests: XCTestCase {
     /// The file's lines, with comment lines removed: the comments at these call sites
     /// name the very things being checked.
     private func codeLines(at path: String) throws -> [String] {
-        let root = URL(fileURLWithPath: #filePath)
-            .deletingLastPathComponent()  // DictusCoreTests
-            .deletingLastPathComponent()  // Tests
-            .deletingLastPathComponent()  // DictusCore
-            .deletingLastPathComponent()  // repo root
-        let url = root.appendingPathComponent(path)
+        let url = repoRoot().appendingPathComponent(path)
         guard let text = try? String(contentsOf: url, encoding: .utf8) else {
             XCTFail("Source not found at \(url.path)")
             throw CocoaError(.fileNoSuchFile)
@@ -95,5 +112,13 @@ final class DictationTallyCallSiteTests: XCTestCase {
         return text.split(separator: "\n", omittingEmptySubsequences: false)
             .map(String.init)
             .filter { !$0.trimmingCharacters(in: .whitespaces).hasPrefix("//") }
+    }
+
+    private func repoRoot() -> URL {
+        URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()  // DictusCoreTests
+            .deletingLastPathComponent()  // Tests
+            .deletingLastPathComponent()  // DictusCore
+            .deletingLastPathComponent()  // repo root
     }
 }

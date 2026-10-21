@@ -297,11 +297,9 @@ final class VoiceNoteProcessor: ObservableObject {
         store.mutate {
             evicted = $0.complete(note.id, transcript: transcript, language: record.language, savedToHistory: saved)
         }
-        // Once per finished note, not per chunk (#726): a note that fails halfway is
-        // transcribed again from its first chunk, and would count those twice. After
-        // the note is marked complete, so an app killed in between loses this note's
-        // count rather than counting it again when the queue picks the note back up.
-        DictationTally.record(transcript, audioDuration: duration)
+        // Not counted in `DictationTally` (#726, decided 2026-10-21): a shared voice
+        // note is often someone else's voice, so its words are not "words dictated"
+        // and typing them was never time the user would have spent.
         // History off: the queue's cap may have pushed an older transcript out, and the
         // keyboard must not keep offering it (#639, decision C).
         withdrawKeyboardDeliveries(evicted, reason: "evictedFromQueue")

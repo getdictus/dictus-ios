@@ -30,10 +30,11 @@ import Foundation
 ///
 /// ### Who writes it
 ///
-/// Every transcription completes in DictusApp, keyboard dictations included: the
-/// keyboard only receives the text. So in practice one process writes, from two
-/// sites (`DictationCoordinator` for dictations, `VoiceNoteProcessor` for voice
-/// notes). The read-modify-write is still not atomic across processes, for
+/// Every dictation completes in DictusApp, keyboard dictations included: the
+/// keyboard only receives the text. So in practice one process writes, from one
+/// site, `DictationCoordinator`. Shared voice notes are not counted (#726, decided
+/// 2026-10-21): they are often someone else's voice, so their words were never
+/// dictated by the user. The read-modify-write is still not atomic across processes, for
 /// `ProTrialUsage`'s reason: losing one increment in a rare race costs a recap less
 /// than a cross-process lock would.
 ///
