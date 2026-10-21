@@ -290,7 +290,6 @@ final class VoiceNoteProcessor: ObservableObject {
 
         let transcript = parts.joined(separator: " ")
         guard !transcript.isEmpty else { return fail(note, .noSpeech, detail: "empty transcript") }
-
         let record = TranscriptionRecord(id: note.id, text: transcript, policy: policy, duration: duration,
                                          createdAt: note.receivedAt, source: .sharedFile)
         let saved = TranscriptionHistoryStore.shared.append(record) != nil
@@ -298,6 +297,9 @@ final class VoiceNoteProcessor: ObservableObject {
         store.mutate {
             evicted = $0.complete(note.id, transcript: transcript, language: record.language, savedToHistory: saved)
         }
+        // Not counted in `DictationTally` (#726, decided 2026-10-21): a shared voice
+        // note is often someone else's voice, so its words are not "words dictated"
+        // and typing them was never time the user would have spent.
         // History off: the queue's cap may have pushed an older transcript out, and the
         // keyboard must not keep offering it (#639, decision C).
         withdrawKeyboardDeliveries(evicted, reason: "evictedFromQueue")

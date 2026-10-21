@@ -32,6 +32,13 @@ struct ProTrialDebugSection: View {
             } label: {
                 Text(verbatim: "Smart Mode uses / vocabulary fixes")
             }
+            // Over the trial's days, what the recap leads with (#726). Not cleared by
+            // "Forget the trial": the tally belongs to every user, not to the trial.
+            LabeledContent {
+                Text(verbatim: "\(proStatus.trialUsage.wordsDictated) / \(proStatus.trialUsage.audioSeconds) s")
+            } label: {
+                Text(verbatim: "Words dictated / audio")
+            }
             Button {
                 proStatus.debugSetTrial(endingInDays: Double(ProTrial.durationDays))
             } label: {

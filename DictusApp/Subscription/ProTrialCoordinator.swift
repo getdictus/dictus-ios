@@ -116,9 +116,10 @@ final class ProTrialCoordinator: ObservableObject {
             // if the process dies with the paywall on screen.
             proStatus.markEndOfTrialPaywallShown()
             showsEndOfTrialPaywall = true
+            let usage = proStatus.trialUsage
             PersistentLog.log(.diagnosticProbe(
                 component: "proTrial", instanceID: "0", action: "endOfTrialPaywallShown",
-                details: "usage=\(proStatus.trialUsage.smartModeUses)/\(proStatus.trialUsage.vocabularyFixes)"
+                details: "usage=\(usage.smartModeUses)/\(usage.vocabularyFixes) words=\(usage.wordsDictated) audioSec=\(usage.audioSeconds)"
             ))
         }
     }

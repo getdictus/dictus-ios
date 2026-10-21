@@ -5712,6 +5712,61 @@
         }
       }
     },
+    "Words dictated" : {
+      "comment" : "End-of-trial recap tile label under a number: how many words the user dictated over the trial's days, free dictations included (#726).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mots dictés"
+          }
+        }
+      }
+    },
+    "Time saved over typing" : {
+      "comment" : "End-of-trial recap tile label under an estimated duration: typing those words on the iPhone keyboard minus the time spent saying them (#726).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Temps gagné par rapport au clavier"
+          }
+        }
+      }
+    },
+    "About %lld min" : {
+      "comment" : "End-of-trial recap: estimated time dictation saved over typing, under an hour (#726).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Environ %lld min"
+          }
+        }
+      }
+    },
+    "About %lld h" : {
+      "comment" : "End-of-trial recap: estimated time dictation saved over typing, a whole number of hours (#726).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Environ %lld h"
+          }
+        }
+      }
+    },
+    "About %lld h %lld min" : {
+      "comment" : "End-of-trial recap: estimated time dictation saved over typing, an hour or more, in hours then minutes (#726).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Environ %1$lld h %2$lld min"
+          }
+        }
+      }
+    },
     "Words the keyboard learned from your typing will be forgotten and autocorrect will apply to them again." : {},
     "Works but imprecise. Medium or Turbo recommended." : {
       "comment" : "Language detail sheet: Chinese quality note on small-class Whisper models (issue #240).",
