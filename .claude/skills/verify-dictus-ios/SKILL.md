@@ -170,24 +170,25 @@ Two lists. The first is what an agent proves alone with this skill; the second i
 | Onboarding | Every step displays, back/skip/next, What's new; not the download, mic prompt or practice dictation | `onboarding.*` except `onboarding.model-download`, `onboarding.microphone`, `onboarding.first-dictation` |
 | Keyboard setup | The keyboard registers, is enabled, takes Full Access, is selected from the globe menu | `dictation.requires-full-access`, `sys.settings.full-access`, `kbd.keys`, `kbd.no-full-access` |
 | Hand-off, cold path | Mic tap → DictusApp cold start → `No model downloaded` → keyboard shows the failure | `dictation.handoff` (cold only), `kbd.dictation-error` |
+| Dictation chain, with a model | Only when the task asks for a recording: a `say` clip played through the Mac's speakers is recorded, transcribed and inserted; the top-bar states are captured (`features/dictation.keyboard.md`, With a model). Proves the chain runs, not the voice, the quality or the timings | `dictation.start`, `dictation.stop`, `dictation.cancel`, `kbd.recording`, `kbd.transcribing`, `kbd.dictation-undo`, `dictation.undo-insert` (drivable by tapping « Annuler » within 8 s; the recipe does not) |
 | Typing | Suggestions, autocorrect on space, undo, accents, dead keys, learned words, reset | `typing.*`, `learned-words.*`, `kbd.suggestions` |
-| Keyboard surfaces | Languages panel, layouts, number row, emoji picker, recents, search | `keyboard.*`, `emoji.*`, `kbd.panel`, `kbd.emoji` |
+| Keyboard surfaces | Languages panel, layouts, number row, 123 and `#+=` pages, emoji picker, recents, search | `keyboard.*`, `emoji.*`, `kbd.panel`, `kbd.numbers`, `kbd.symbols`, `kbd.emoji` |
 | Settings and switches | Every preference changes and persists through the App Group (sounds, haptics, polish, Live Activity, history, vocabulary, voice notes) | `sounds.toggle`, `sounds.volume`, `sounds.per-event`, `haptics.toggle`, `polish.toggle`, `live-activity.toggle`, `*.toggle` |
 | Pro, Debug-forced | Hub, Smart Mode pins, fan opening (greyed), vocabulary add/edit/delete, history and voice-note reader empty states | `pro.hub`, `smart-modes.fan`, `smart-modes.pin`, `vocabulary.add`/`edit`/`delete`/`reset`, `history.list` (empty), `voice-notes.reader` (empty) |
-| Models | Catalogue, download (real traffic), select, delete, retry, languages sheet; A12/A13 refusal on a device created as `iPhone-11` | `models.*` except `models.preparation` timing and the RAM half of `models.device-gating` |
+| Models | Catalogue, download (real traffic), preparation screen, select, delete, retry, languages sheet; A12/A13 refusal on a device created as `iPhone-11` | `models.*` except the RAM half of `models.device-gating`; `app.models.loading` (screen, not timing) |
 | Diagnostics | Log view, export sheet opens, App Group check (signed build) | `diagnostics.*` |
 
 ### iPhone: needs Pierre's phone
 
 | Area | Why the simulator cannot prove it | IDs |
 | --- | --- | --- |
-| Real voice and microphone | A simulator records the Mac's input device, i.e. the room. Any recording, transcript, or what depends on one (filled history, vocabulary effect, voice-note transcription) | `dictation.start`, `dictation.stop`, `dictation.cancel`, `dictation.undo-insert`, `dictation.in-app`, `app.recording`, `kbd.recording`, `history.detail`, `vocabulary.apply`, `voice-notes.transcribe` |
+| Real voice and microphone | A simulator records the Mac's input device: the room, or a synthesized `say` clip. A real voice, its accent and the text quality, and what depends on them (a filled history, the vocabulary effect, voice-note transcription) | `dictation.in-app`, `app.recording`, `history.detail`, `vocabulary.apply`, `voice-notes.transcribe` |
 | Audio routing | AirPods, Bluetooth headsets, wired input, route changes and interruptions mid-recording: the simulator has only the Mac's devices | `dictation.start`, `dictation.in-app`, `voice-notes.transcribe` |
 | Keyboard memory and jetsam | The extension's ~50 MB ceiling and its kills are device figures; simulator `memMB` carries no verdict | `dictation.keyboard`, `kbd.*` |
 | Keyboard height and dead zones | The declared height constraint (#166) and touch dead zones | `kbd.keys` |
 | Warm hand-off and return | The warm path depends on iOS keeping the app alive; auto-return and the Spotlight/arbiter cases (#23) behave differently on device | `dictation.handoff` (warm), `return.auto-return`, `return.swipe-back` |
 | RAM-gated device tiers | `physicalMemory` is the Mac's RAM: the `>= 6 GB` Turbo gate and `insufficientMemory` never fire | `models.device-gating`, `dictation.device-gating` (memory half) |
-| Model speed and cache | Compile time, Neural Engine, transcription timing, the Core ML cache across installs: all Mac silicon in a simulator | `models.preparation`, `app.models.loading`, `app.onboarding.model-preparation` |
+| Model speed and cache | Compile time, Neural Engine, transcription timing, the Core ML cache across installs: all Mac silicon in a simulator | `models.preparation` (timing), `app.onboarding.model-preparation` |
 | Apple Intelligence | Unavailable in the simulator: polish and every Smart Mode rewrite | `polish.clean-up`, `polish.in-keyboard`, `smart-modes.structured`/`list`/`message`/`summary`/`translate` |
 | Real StoreKit purchases | StoreKit is inert without a configuration (`loadProducts error=empty result`); paywall, restore and trial | `pro.paywall`, `pro.restore`, `pro.trial`, `pro.trial-end`, `app.paywall`, `app.pro.trial-announcement` |
 | Live Activity and Dynamic Island | Not reproduced by this skill; states, stop from the island, Focus dropping alerts, dev installs killing activities | `live-activity.*`, `voice-notes.progress-activity`, `widget.live-activity`, `onboarding.stop-standby` |
