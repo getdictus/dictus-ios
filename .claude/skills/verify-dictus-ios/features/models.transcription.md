@@ -3,7 +3,7 @@
 - **ID:** `models.transcription`
 - **Tier:** Gratuit (Free)
 - **Targets:** DictusApp + DictusCore
-- **Screens:** `app.models`, `app.models.languages`, `app.models.loading` (not captured) — see [screens.md](screens.md)
+- **Screens:** `app.models`, `app.models.languages`, `app.models.loading` — see [screens.md](screens.md)
 
 ## Sub-features
 
@@ -33,6 +33,16 @@
 ```
 
 Card labels are the whole card, e.g. `Parakeet v3, PK, Recommandé, Rapide et précis (NVIDIA), Précision, Vitesse, ~483 Mo`.
+
+The smallest model that downloads and transcribes is **Small (quantifié)**, `openai_whisper-small_216MB`, ~217 Mo. Download it the way a user does (only when the task needs a model):
+
+```bash
+.claude/skills/verify-dictus-ios/scripts/drive.sh tab Modèles
+.claude/skills/verify-dictus-ios/scripts/drive.sh tap-label "Small (quantifié)"    # the title; the whole-card label does not match
+.claude/skills/verify-dictus-ios/scripts/drive.sh wait-log '<APP> modelLoadStateChanged from=loading to=ready' 300
+```
+
+`app.models.loading` (« On prépare votre modèle ») covers the screen until the model is ready. Measured on 2026-10-20: `modelDownloadStarted size=217MB` → `modelDownloadCompleted` 14 s, `modelCompilationCompleted duration=7658ms`, ready 24 s after the tap.
 
 ## Gotchas
 
