@@ -383,6 +383,13 @@ public enum SharedKeys {
     /// Int: words the custom vocabulary rewrote while the trial ran.
     public static let proTrialVocabularyFixes = "dictus.proTrialVocabularyFixes"
 
+    // MARK: - Dictation tally (#726)
+    /// [String: [String: Int]]: words dictated and seconds of audio, per local day
+    /// (`"2026-10-20"` → `["words": 312, "audioSeconds": 140]`). Every user, Pro or
+    /// not, from the first dictation on 2.0.0. Integers only, never text. See
+    /// `DictationTally`.
+    public static let dictationTally = "dictus.dictationTally"
+
     // MARK: - Retired keys
     /// The #357 probe's arming flag, removed with the probe in #361. Kept as a
     /// literal, and only here, so DictusApp can delete it from the App Group on
