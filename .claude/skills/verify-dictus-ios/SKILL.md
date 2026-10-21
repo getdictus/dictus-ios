@@ -195,7 +195,7 @@ Two lists. The first is what an agent proves alone with this skill; the second i
 | Voice notes from a messaging app | No messaging app in the simulator to share from | `voice-notes.share-in`, `share.voice-note`, `app.voice-note.result` |
 | Host spell-check | Host underlines are not a usable probe in the simulator (`docs/agents/simulator.md` §8) | `typing.autocorrect` |
 
-**Rule.** A PR that touches anything in the iPhone list carries the `needs-physical-test` label and goes through the `batch-device-test` skill: one local branch merges every PR waiting for a device test, without pushing; one build goes on the iPhone; Pierre fills one checklist, `#<num> OK` / `#<num> KO`; then each PR that passed is merged on its own, PR by PR. The simulator run of this skill still happens first, for the first list. A green simulator run never stands in for a line of the second.
+**Rule.** A PR that changes a behavior or a screen in the iPhone list (its code, not only this table) carries the `needs-physical-test` label and goes through the `batch-device-test` skill: one local branch merges every PR waiting for a device test, without pushing; one build goes on the iPhone; Pierre fills one checklist, `#<num> OK` / `#<num> KO`; then each PR that passed is merged on its own, PR by PR. Until that skill and that label exist, run the same steps by hand and say in the PR body that the label is missing; the iPhone verdict goes on the PR's manual test list either way. The simulator run of this skill still happens first, for the first list. A green simulator run never stands in for a line of the second.
 
 ## Keeping the map current
 

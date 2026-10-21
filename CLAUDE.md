@@ -137,7 +137,7 @@ Boot, build, install, launch, capture, and what a simulator cannot show. See `do
 
 - **`verify-dictus-ios`** (`.claude/skills/verify-dictus-ios/`): use it when a change to DictusApp or DictusKeyboard has to be seen working in the real app rather than in `swift test`, when a feature of its map (`features/README.md`) must be exercised, or when screens need re-capturing.
 - **Keep the map current (mandatory):** a PR that adds or changes a screen or a feature updates `features/` and `features/screens.md` in the same PR (stable ID, capture). See the skill's "Keeping the map current".
-- **Follow the physical test shortlist (mandatory):** a PR that touches a line of the skill's "iPhone" list carries the `needs-physical-test` label and goes through the `batch-device-test` skill. See the skill's "Physical test shortlist".
+- **Follow the physical test shortlist (mandatory):** a PR that changes a behavior or a screen classified "iPhone" by the skill carries the `needs-physical-test` label and goes through the `batch-device-test` skill (until that skill exists, its steps by hand, as the skill describes). See the skill's "Physical test shortlist".
 - **pstack** (https://github.com/cursor/plugins/tree/main/pstack) is the reference toolkit for agent workflows, including `/maintain-verification-skill` for the map.
 
 ### Releasing
