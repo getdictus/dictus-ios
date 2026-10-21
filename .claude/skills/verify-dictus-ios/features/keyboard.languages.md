@@ -3,7 +3,7 @@
 - **ID:** `keyboard.languages`
 - **Tier:** Gratuit (Free)
 - **Targets:** DictusKeyboard + DictusApp + DictusCore
-- **Screens:** `kbd.panel`, `app.settings` — see [screens.md](screens.md)
+- **Screens:** `kbd.panel`, `kbd.numbers`, `kbd.symbols`, `app.settings` — see [screens.md](screens.md)
 
 ## Sub-features
 
@@ -27,6 +27,8 @@
 .claude/skills/verify-dictus-ios/scripts/evidence.sh panel
 .claude/skills/verify-dictus-ios/scripts/drive.sh kbd menu                                   # ✕ sits where ☰ was
 ```
+
+The 123 and `#+=` pages: `drive.sh kbd abc` on the letters page presses the bottom-left key, which reads 123 there (`kbd.numbers`); `#+=` is the first key of the third row, at (+30, +187) pt from `inputView`'s origin (`kbd.symbols`); `kbd abc` goes back to the letters.
 
 App side: `.claude/skills/verify-dictus-ios/scripts/drive.sh tab Réglages`, then `.claude/skills/verify-dictus-ios/scripts/drive.sh tap-label "Disposition, AZERTY"`.
 
