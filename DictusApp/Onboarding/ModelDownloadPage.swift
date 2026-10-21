@@ -41,14 +41,15 @@ struct ModelDownloadPage: View {
     /// → RAM load, so the onboarding shares the same wait UX as the in-app model manager.
     @State private var preparingModelID: String?
 
-    /// The same #458 gate `ModelManagerView` uses, for the same reactive pair below.
+    /// The same #458 gate `ModelManagerView` uses, for the same reactive pair below, judged
+    /// for the onboarding surface.
     ///
-    /// Onboarding cannot overlap a dictation today — `OnboardingView` is a `switch` on
-    /// one page at a time and none of the pages before this one records. It is gated
-    /// anyway because the rule belongs to the screen, not to the flow that happens to
-    /// reach it, and because the comment on `liveActivePrepModel` promises this page
-    /// behaves identically to the model manager.
-    @State private var preparationGate = ModelPreparationGate()
+    /// Onboarding can overlap a dictation: a keyboard dictation started from another app
+    /// runs through the app's `DictationCoordinator` while this page is up (#760). What it
+    /// cannot do is show one, since `OnboardingView` covers `MainTabView`, so only a
+    /// dictation still in flight holds the screen off, never a `.failed` or `.ready` it
+    /// left behind. See `ModelPreparationGate.dictationOwnsTheDisplay`.
+    @State private var preparationGate = ModelPreparationGate(surface: .onboarding)
 
     /// Set once this page has handed over to the next step, so the several triggers of
     /// `advanceIfReady()` cannot advance twice.
@@ -119,7 +120,7 @@ struct ModelDownloadPage: View {
 
     /// What the step shows when the preparation screen is not up: after a failure, with a
     /// retry; for the instant between the model becoming ready and the step moving on; and
-    /// should #458's gate ever withhold the preparation screen.
+    /// while #458's gate withholds the preparation screen for a dictation in flight.
     private var waitingPage: some View {
         OnboardingPage(
             title: Text("Voice model"),

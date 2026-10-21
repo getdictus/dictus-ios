@@ -41,18 +41,46 @@ public struct ModelPreparationGate: Equatable, Sendable {
     /// have to choose between them.
     private var withheldModels: Set<String> = []
 
-    public init() {}
+    /// The screen this gate decides for.
+    private let surface: Surface
+
+    /// Where the preparation screen would be raised. The two answer "is a dictation on
+    /// screen" differently, because only one of them mounts the dictation screen.
+    public enum Surface: Equatable, Sendable {
+        /// `MainTabView` and the views it hosts, `ModelManagerView` included.
+        case mainTabs
+        /// The onboarding's model step (#760).
+        case onboarding
+    }
+
+    public init(surface: Surface = .mainTabs) {
+        self.surface = surface
+    }
 
     /// Whether a dictation currently owns what the user is looking at.
     ///
-    /// WHY `!= .idle` and not `DictationSessionLivenessPolicy.isActive`: that policy
-    /// answers "is some process still driving this dictation", which is false for
-    /// `.ready` and `.failed`, and it is what the watchdogs judge staleness with. The
+    /// WHY `!= .idle` on the main tabs and not `DictationSessionLivenessPolicy.isActive`:
+    /// that policy answers "is some process still driving this dictation", which is false
+    /// for `.ready` and `.failed`, and it is what the watchdogs judge staleness with. The
     /// question here is the other one — "is the dictation screen on screen" — and
     /// `MainTabView` already answers it with exactly this comparison: `RecordingView` is
     /// mounted for every status but `.idle`, result and error included.
-    public static func dictationOwnsTheDisplay(_ status: DictationStatus) -> Bool {
-        status != .idle
+    ///
+    /// WHY the liveness policy in onboarding (#760): `OnboardingView` covers `MainTabView`,
+    /// so a `.failed` or `.ready` left by a keyboard dictation from another app owns
+    /// nothing on screen, and nothing resets it while the onboarding is up. Treating it as
+    /// a dictation refused the preparation screen, latched the model, and left the step on
+    /// a bare spinner for the whole compile. Only a dictation still in flight holds it off.
+    public static func dictationOwnsTheDisplay(
+        _ status: DictationStatus,
+        on surface: Surface = .mainTabs
+    ) -> Bool {
+        switch surface {
+        case .mainTabs:
+            return status != .idle
+        case .onboarding:
+            return DictationSessionLivenessPolicy.isActive(status)
+        }
     }
 
     /// The model whose preparation may be raised on screen right now, if any.
@@ -80,7 +108,7 @@ public struct ModelPreparationGate: Equatable, Sendable {
             withheldModels.removeAll()
             return nil
         }
-        guard !Self.dictationOwnsTheDisplay(dictationStatus) else {
+        guard !Self.dictationOwnsTheDisplay(dictationStatus, on: surface) else {
             // The load runs on regardless — it is only the screen that is refused.
             withheldModels.insert(liveModel)
             return nil
