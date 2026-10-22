@@ -4,11 +4,12 @@ import Foundation
 /// Compile-time visibility flags for premium UI (issue #236).
 ///
 /// WHY a compile-time constant instead of remote config:
-/// No Pro feature exists yet (#79) and App Store Connect setup is pending (#215),
-/// so the paywall would render with empty prices. A single `static let` is enough
-/// to hide every entry point (Home banner, Settings Pro section, locked rows, the
+/// when it was introduced no Pro feature existed (#79) and App Store Connect setup
+/// was pending (#215), so the paywall would have rendered with empty prices. A
+/// single `static let` was enough to hide every entry point (Home banner, Settings Pro section, locked rows, the
 /// keyboard panel's Pro pill) while keeping all subscription code compiled and
-/// intact.
+/// intact. A build's readiness to sell is a property of the build, not a runtime
+/// toggle.
 ///
 /// WHY it lives in DictusCore rather than beside `SubscriptionManager`:
 /// entry points exist in both DictusApp and DictusKeyboard. It started as an
@@ -18,7 +19,9 @@ import Foundation
 ///
 /// Re-enabled for 2.0.0 (#279): Smart Modes (#79) is the first real Pro feature and
 /// the App Store Connect setup (#215) is done. Flipping it back to `false` hides
-/// every entry point again without touching subscription code.
+/// the surfaces that read it (the four above, the paywall's offers, the trial's
+/// screens) and stops new trials, without touching subscription code; a paid
+/// entitlement is read the same way either side of the flag.
 ///
 /// WHY an enum with no cases: a caseless enum can never be instantiated,
 /// making it a pure namespace for static constants (common Swift pattern).
