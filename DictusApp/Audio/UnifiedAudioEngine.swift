@@ -62,6 +62,11 @@ enum AudioEngineError: Error, DiagnosableError {
     /// are the same event.
     case installTapFailed(call: ObjCAudioStartCall, reason: String)
 
+    /// `setCategory` or `setActive(true)` threw (#775). `status` is the error code with its
+    /// four-character code when it has one (`560557684 '!int'`), which is what tells "another
+    /// session owns the hardware" from "the audio server is down" (`'msrv'`).
+    case sessionActivationFailed(step: AudioSessionActivationStep, status: String)
+
     /// User-facing text. Written to `DictationErrorChannel` and displayed by whichever
     /// surface the user is on — the keyboard's toolbar, the app's failure screen, or both.
     var errorDescription: String? {
@@ -81,6 +86,11 @@ enum AudioEngineError: Error, DiagnosableError {
             // said the microphone was unavailable, and the tester in #417 correctly
             // answered that nothing else was holding their microphone.
             return String(localized: "Dictation could not start. Tap the microphone again.")
+        case .sessionActivationFailed:
+            // The same sentence, and deliberately not the "microphone is not available"
+            // one #775 was showing: the hardware is there, the session would not come up,
+            // and a second tap is what worked on the device.
+            return String(localized: "Dictation could not start. Tap the microphone again.")
         }
     }
 
@@ -97,6 +107,8 @@ enum AudioEngineError: Error, DiagnosableError {
             return "input node reports an unusable format after the engine rebuild — \(reason)"
         case .installTapFailed(let call, let reason):
             return "\(call.rawValue) raised: \(reason)"
+        case .sessionActivationFailed(let step, let status):
+            return "audio session \(step.rawValue) failed — OSStatus \(status)"
         }
     }
 }
@@ -217,6 +229,11 @@ class UnifiedAudioEngine: ObservableObject {
     /// `sessionConfigured=true` in a device log was a literal, not a measurement.
     /// The snapshot now reads the real value.
     private(set) var sessionConfigured = false
+
+    /// Whether the audio server is down: `mediaServicesWereLost` has been posted and its
+    /// `mediaServicesWereReset` has not (#775). While it is, no activation can succeed, so a
+    /// dictation start waits for the reset instead of spending its retry.
+    private(set) var mediaServicesLost = false
 
     /// True when an AVAudioSession interruption is currently in flight.
     ///
@@ -384,6 +401,14 @@ class UnifiedAudioEngine: ObservableObject {
             MainActor.assumeIsolated { self?.handleRouteChange(note) }
         }
 
+        let mediaLostToken = center.addObserver(
+            forName: AVAudioSession.mediaServicesWereLostNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            MainActor.assumeIsolated { self?.handleMediaServicesLost() }
+        }
+
         let mediaResetToken = center.addObserver(
             forName: AVAudioSession.mediaServicesWereResetNotification,
             object: nil,
@@ -392,7 +417,7 @@ class UnifiedAudioEngine: ObservableObject {
             MainActor.assumeIsolated { self?.handleMediaServicesReset() }
         }
 
-        notificationObservers = [interruptionToken, routeChangeToken, mediaResetToken]
+        notificationObservers = [interruptionToken, routeChangeToken, mediaLostToken, mediaResetToken]
     }
 
     /// AVAudioSession interruption handler.
@@ -581,6 +606,7 @@ class UnifiedAudioEngine: ObservableObject {
     /// before any future start() call.
     private func handleMediaServicesReset() {
         PersistentLog.log(.audioMediaServicesReset)
+        mediaServicesLost = false
         logHapticsAllowance(context: "mediaServicesReset")
 
         cancelIdleRelease()
@@ -592,6 +618,14 @@ class UnifiedAudioEngine: ObservableObject {
 
         NotificationCenter.default.post(name: .dictusAudioSessionInterrupted, object: nil)
         DarwinNotificationCenter.post(DarwinNotificationName.audioSessionInterrupted)
+    }
+
+    /// AVAudioSession.mediaServicesWereLost handler (#775). Logs and raises the flag a
+    /// dictation start reads to wait for the reset. Everything else waits for the reset
+    /// itself, which is when iOS says the stack can be rebuilt.
+    private func handleMediaServicesLost() {
+        PersistentLog.log(.audioMediaServicesLost)
+        mediaServicesLost = true
     }
 
     /// Throw the current `AVAudioEngine` away and put a fresh one in its place.
@@ -650,16 +684,37 @@ class UnifiedAudioEngine: ObservableObject {
     /// see that, so a dictation started under the borrowed category would skip
     /// `setCategory` and try to record under `.playback`, which has no input. Re-asserting
     /// whenever the category is not ours makes recording win over any other owner.
+    ///
+    /// WHY each call is caught on its own and logged here (#775): the dictation start used
+    /// to call this through `try?`, so a refused activation left no line at all and the
+    /// start carried on as if the session were up. Logging at the source covers every
+    /// caller, and the thrown error names the call and its OSStatus for the caller's own line.
     func configureAudioSession() throws {
         let session = AVAudioSession.sharedInstance()
         if !sessionConfigured || session.category != .playAndRecord {
-            try session.setCategory(.playAndRecord, options: [.allowBluetoothA2DP, .defaultToSpeaker, .duckOthers])
+            try activationStep(.setCategory) {
+                try session.setCategory(.playAndRecord, options: [.allowBluetoothA2DP, .defaultToSpeaker, .duckOthers])
+            }
         }
-        try session.setActive(true)
+        try activationStep(.setActive) { try session.setActive(true) }
         sessionConfigured = true
 
         PersistentLog.log(.audioSessionConfigured(category: "playAndRecord"))
         applyHapticsAllowance(context: "configureAudioSession")
+    }
+
+    /// Run one `AVAudioSession` call; on a throw, log it with the route state and rethrow it
+    /// as `sessionActivationFailed`, naming the call and its OSStatus.
+    private func activationStep(_ step: AudioSessionActivationStep, _ call: () throws -> Void) throws {
+        do {
+            try call()
+        } catch {
+            let status = AudioSessionActivationPolicy.statusDescription((error as NSError).code)
+            PersistentLog.log(.audioSessionFailed(
+                error: "\(step.rawValue) OSStatus \(status) mediaServicesLost=\(mediaServicesLost) \(routeStateDescription())"
+            ))
+            throw AudioEngineError.sessionActivationFailed(step: step, status: status)
+        }
     }
 
     // MARK: - System Haptics Allowance (issue #293)
@@ -1117,6 +1172,16 @@ class UnifiedAudioEngine: ObservableObject {
         // a whole AVAudioEngine to chase a format a call is holding cannot succeed.
         // Nothing about the #457 rebuild itself changes — only when it is reached.
         try refuseIfACallHoldsTheMicrophone()
+
+        // An inactive session is activated before anything waits on its route (#775).
+        // `sessionConfigured` is false after the idle release, a media-services reset, or a
+        // failed activation; `engine.start()` used to activate implicitly, but only after the
+        // route wait and the format guards below had already run against a session that was
+        // not up, and turned the failure into "the microphone is not available". Throwing
+        // here keeps a refused activation from reaching either.
+        if !sessionConfigured {
+            try configureAudioSession()
+        }
 
         // The start after an interruption is the one that re-establishes the input route,
         // and it is the one that captures nothing (#515). Runs after the call guard, for
