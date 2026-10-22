@@ -43,8 +43,9 @@ public enum AudioSessionActivationDecision: Equatable, Sendable {
 ///
 /// ### The rule
 ///
+/// - The audio server is known to be down: wait for its reset, once, then activate again —
+///   even when the last activation succeeded, since it may predate the loss.
 /// - Activated: start.
-/// - The audio server is known to be down: wait for its reset, once, then activate again.
 /// - Otherwise one more activation after a short pause, then fail with "tap again".
 ///
 /// The retry after the reset is the one retry that start gets: a reset that arrives and
@@ -77,14 +78,17 @@ public enum AudioSessionActivationPolicy {
         mediaServicesLost: Bool,
         hasWaitedForReset: Bool
     ) -> AudioSessionActivationDecision {
-        if activated { return .startRecording }
-
         // Retrying against a dead audio server burns the retry for nothing: wait for it.
+        // Checked before `activated` (CodeRabbit on PR #777): the first activation runs
+        // before the microphone-permission await, so the server can be lost after it
+        // succeeded, and `sessionConfigured` would then keep `startEngine` from repairing it.
         if mediaServicesLost {
             return hasWaitedForReset
                 ? .fail
                 : .waitForMediaServicesReset(timeoutMilliseconds: mediaServicesResetTimeoutMilliseconds)
         }
+
+        if activated { return .startRecording }
 
         // The reset came and the activation after it still failed. That was the retry.
         if hasWaitedForReset { return .fail }

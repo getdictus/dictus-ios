@@ -88,6 +88,26 @@ final class AudioSessionActivationPolicyTests: XCTestCase {
         )
     }
 
+    /// The first activation worked, then the server was lost during the permission await
+    /// (CodeRabbit on PR #777). That activation is stale: wait for the reset.
+    func testALossAfterASuccessfulActivationStillWaitsForTheReset() {
+        XCTAssertEqual(
+            AudioSessionActivationPolicy.decide(
+                activated: true, failedAttempts: 0, mediaServicesLost: true, hasWaitedForReset: false),
+            .waitForMediaServicesReset(
+                timeoutMilliseconds: AudioSessionActivationPolicy.mediaServicesResetTimeoutMilliseconds)
+        )
+    }
+
+    /// The reset came and the activation after it worked: start.
+    func testAnActivationAfterTheResetStartsRecording() {
+        XCTAssertEqual(
+            AudioSessionActivationPolicy.decide(
+                activated: true, failedAttempts: 1, mediaServicesLost: false, hasWaitedForReset: true),
+            .startRecording
+        )
+    }
+
     /// The reset came, and the activation after it failed: that was the one retry.
     func testAFailureAfterTheResetFails() {
         XCTAssertEqual(
