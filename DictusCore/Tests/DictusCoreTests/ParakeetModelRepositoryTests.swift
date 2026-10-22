@@ -415,4 +415,43 @@ final class ParakeetModelRepositoryTests: XCTestCase {
             in: cacheDirectory, requiredModelBundles: requiredBundles, vocabularyFileName: vocabularyFileName
         ), ["Decoder.mlmodelc", "Encoder.mlmodelc", "JointDecisionv3.mlmodelc", "Preprocessor.mlmodelc", vocabularyFileName])
     }
+
+    // MARK: - Where a repair takes what is missing (#769)
+
+    /// 2.0.0's case (#769): the app bundle no longer carries the new joint, so a cache made on
+    /// FluidAudio 0.12 (before 1.9.0) reports it missing and all of it goes to the download
+    /// repair, layer 1. Nothing is left for the bundle copy to do.
+    func testAPre190CacheGoesToTheNetworkRepairWhenTheBundleCarriesNothing() throws {
+        try FileManager.default.createDirectory(at: cacheDirectory, withIntermediateDirectories: true)
+        for bundle in ["Preprocessor.mlmodelc", "Encoder.mlmodelc", "Decoder.mlmodelc", "JointDecision.mlmodelc"] {
+            try makeCompiledBundle(bundle)
+        }
+        try Data("{}".utf8).write(to: cacheDirectory.appendingPathComponent(vocabularyFileName))
+
+        let missing = ParakeetModelRepository.missingEntries(
+            in: cacheDirectory, requiredModelBundles: requiredBundles, vocabularyFileName: vocabularyFileName
+        )
+        let sources = ParakeetModelRepository.repairSources(missing: missing, bundledModelBundles: [])
+
+        XCTAssertEqual(missing, ["JointDecisionv3.mlmodelc"])
+        XCTAssertEqual(sources.fromBundle, [])
+        XCTAssertEqual(sources.fromNetwork, ["JointDecisionv3.mlmodelc"])
+    }
+
+    /// The 1.9.0 configuration, for contrast: with the joint in the bundle, it is copied from
+    /// there and the network gets the rest.
+    func testRepairSourcesTakeFromTheBundleOnlyWhatItCarries() {
+        let sources = ParakeetModelRepository.repairSources(
+            missing: ["Encoder.mlmodelc", "JointDecisionv3.mlmodelc", vocabularyFileName],
+            bundledModelBundles: ["JointDecisionv3.mlmodelc"]
+        )
+        XCTAssertEqual(sources.fromBundle, ["JointDecisionv3.mlmodelc"])
+        XCTAssertEqual(sources.fromNetwork, ["Encoder.mlmodelc", vocabularyFileName])
+    }
+
+    func testRepairSourcesOfACompleteCacheAreEmpty() {
+        let sources = ParakeetModelRepository.repairSources(missing: [], bundledModelBundles: [])
+        XCTAssertEqual(sources.fromBundle, [])
+        XCTAssertEqual(sources.fromNetwork, [])
+    }
 }
