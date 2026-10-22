@@ -126,6 +126,16 @@ final class AudioSessionActivationPolicyTests: XCTestCase {
         )
     }
 
+    /// A loss iOS never followed with a reset leaves the flag raised. Once the wait is
+    /// spent, an activation that worked is the evidence: start, never "tap again" (#775).
+    func testAnActivationAfterAResetThatNeverCameStartsRecording() {
+        XCTAssertEqual(
+            AudioSessionActivationPolicy.decide(
+                activated: true, failedAttempts: 0, mediaServicesLost: true, hasWaitedForReset: true),
+            .startRecording
+        )
+    }
+
     /// The wait is bounded inside the keyboard's 15 s cold-start grace, so a parked start
     /// is resolved by the app before the keyboard's watchdog gives up on it.
     func testTheWorstCaseWaitFitsTheKeyboardGrace() {

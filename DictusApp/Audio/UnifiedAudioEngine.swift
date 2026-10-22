@@ -230,9 +230,10 @@ class UnifiedAudioEngine: ObservableObject {
     /// The snapshot now reads the real value.
     private(set) var sessionConfigured = false
 
-    /// Whether the audio server is down: `mediaServicesWereLost` has been posted and its
-    /// `mediaServicesWereReset` has not (#775). While it is, no activation can succeed, so a
-    /// dictation start waits for the reset instead of spending its retry.
+    /// Whether the audio server is down: `mediaServicesWereLost` has been posted and neither
+    /// its `mediaServicesWereReset` nor a successful `setActive(true)` has followed (#775).
+    /// While it is, no activation can succeed, so a dictation start waits for the reset
+    /// instead of spending its retry.
     private(set) var mediaServicesLost = false
 
     /// True when an AVAudioSession interruption is currently in flight.
@@ -698,6 +699,10 @@ class UnifiedAudioEngine: ObservableObject {
         }
         try activationStep(.setActive) { try session.setActive(true) }
         sessionConfigured = true
+        // An activation that worked means the audio server is up. Without this, a loss that
+        // iOS never followed with a reset would keep the flag raised for the life of the
+        // process, and every later cold start would wait out the full reset timeout (#775).
+        mediaServicesLost = false
 
         PersistentLog.log(.audioSessionConfigured(category: "playAndRecord"))
         applyHapticsAllowance(context: "configureAudioSession")
