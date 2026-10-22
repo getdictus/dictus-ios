@@ -4,7 +4,7 @@ Every user-facing feature of Dictus iOS, one file each. The **ID is the feature'
 
 Each file has the same four sections: **Sub-features** (each with its own stable ID), **How to get to it (user POV)**, **Driving it with axe + Argent** (the recipe, with `drive.sh` from `../SKILL.md`), **Gotchas** (including what the simulator cannot show). Screens are mapped in [screens.md](screens.md), which also describes the keyboard top bar's states and transitions.
 
-**Tier.** *Gratuit* is available to everyone. *Pro* is gated by `FeatureGate.isAvailable(_:)` (`DictusCore/Sources/DictusCore/Subscription/ProFeature.swift`): Pro active **and** the feature's own switch. While `PremiumFlags.paywallVisible = false` nothing Pro can be bought; a Debug build reaches every Pro feature with `drive.sh set-default dictus.debugProEntitlementForced -bool YES`.
+**Tier.** *Gratuit* is available to everyone. *Pro* is gated by `FeatureGate.isAvailable(_:)` (`DictusCore/Sources/DictusCore/Subscription/ProFeature.swift`): Pro active **and** the feature's own switch. Since #279 `PremiumFlags.paywallVisible` is `true`: a fresh install gets the 14-day trial at the end of onboarding, and Pro is on sale from the Home card, the Settings row and the keyboard panel's pill. A Debug build still reaches every Pro feature without a trial with `drive.sh set-default dictus.debugProEntitlementForced -bool YES`.
 
 | ID | Feature | Tier | Drivable in the simulator |
 | --- | --- | --- | --- |

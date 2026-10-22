@@ -40,6 +40,6 @@
 ## Gotchas
 
 - **Not drivable in the simulator:** a Smart Mode rewrite. Apple Intelligence is unavailable, so the fan opens with every mode greyed out and « Les modes exigent Apple Intelligence. Activez-le dans Réglages. »
-- Pro is reachable only through the Debug-only `dictus.debugProEntitlementForced` key (Settings → Developer → Force Pro entitlement); a Release build has no way in while `PremiumFlags.paywallVisible = false`.
+- Pro is reached through the trial (end of onboarding) or the Debug-only `dictus.debugProEntitlementForced` key (Settings → Developer → Force Pro entitlement).
 - `kbd mic-fan` releases on nothing (`smartModeFanAborted`), so nothing records. Releasing on a mode would start a recording.
 - Screenshot during the drag: after release the fan is gone.
