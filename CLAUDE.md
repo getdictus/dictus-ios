@@ -87,7 +87,7 @@ Notes for the global `ios-build` skill (Pivii/skills) when it puts Dictus on Pie
   plutil -p "$APP/PlugIns/DictusKeyboard.appex/DictusBuildInfo.plist"
   ```
 
-- Installing resets the app container: learned dictionary, settings and stored dictation state are lost. Tell Pierre every time.
+- Installing over a build signed by the same team normally keeps the app data (observed 2026-10-22, `devicectl` install over a Debug build). Uninstalling, or installing over a TestFlight or App Store build (different signature), wipes it.
 
 ### Rester headless
 
