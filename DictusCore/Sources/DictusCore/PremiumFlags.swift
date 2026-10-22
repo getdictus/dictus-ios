@@ -16,15 +16,16 @@ import Foundation
 /// see — so the panel added in #241 shipped a Pro pill that ignored the flag
 /// entirely. One flag gating two targets belongs in the shared framework.
 ///
-/// Re-enable: flip `paywallVisible` to `true` in the PR that ships the first
-/// real Pro feature, once #215 (ASC setup) is done. See #79/#215/#216.
+/// Re-enabled for 2.0.0 (#279): Smart Modes (#79) is the first real Pro feature and
+/// the App Store Connect setup (#215) is done. Flipping it back to `false` hides
+/// every entry point again without touching subscription code.
 ///
 /// WHY an enum with no cases: a caseless enum can never be instantiated,
 /// making it a pure namespace for static constants (common Swift pattern).
 public enum PremiumFlags {
     /// Controls whether users can see and reach the paywall.
     /// `false` = the app looks like there is no subscription at all.
-    public static let paywallVisible = false
+    public static let paywallVisible = true
 
     /// Last day of the lifetime founder window, or `nil` while it is not
     /// scheduled (#350).
@@ -54,7 +55,7 @@ public enum PremiumFlags {
     ///
     /// ### Why it exists
     ///
-    /// #460 makes the keyboard's Smart Mode surface *absent* while `paywallVisible` is
+    /// #460 makes the keyboard's Smart Mode surface *absent* whenever `paywallVisible` is
     /// false, and that hides it from the maintainer too. Smart Modes are still being
     /// built and still need device testing, so the fix would otherwise block the work
     /// it exists to protect. This is the way back in, and it is a hard requirement of
