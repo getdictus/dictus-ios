@@ -21,7 +21,7 @@ extension DictationCoordinator {
     ///   - origin: a keyboard start is only resumed after a media-services reset while the
     ///     keyboard still shows `requested`; past that, nobody is waiting for it.
     /// - Returns: `true` to go on and start the engine, `false` to drop the start silently
-    ///   (the session was abandoned, or the keyboard stopped waiting).
+    ///   (the session was abandoned or its task cancelled, or the keyboard stopped waiting).
     /// - Throws: the last activation error when the policy gives up, so the caller's catch
     ///   logs it and shows "Dictation could not start. Tap the microphone again."
     func activateSessionForColdStart(
@@ -61,12 +61,12 @@ extension DictationCoordinator {
 
             case .retryActivation(let delayMs):
                 logActivation("sessionActivationRetry", "failedAttempts=\(failedAttempts) delayMs=\(delayMs)")
-                try await Task.sleep(nanoseconds: UInt64(delayMs) * 1_000_000)
+                guard await sleepUnlessCancelled(milliseconds: delayMs) else { return false }
 
             case .waitForMediaServicesReset(let timeoutMs):
                 let started = Date()
                 while engine.mediaServicesLost && Date().timeIntervalSince(started) * 1000 < Double(timeoutMs) {
-                    try await Task.sleep(nanoseconds: 50_000_000)
+                    guard await sleepUnlessCancelled(milliseconds: 50) else { return false }
                 }
                 hasWaitedForReset = true
                 let waitedMs = Int(Date().timeIntervalSince(started) * 1000)
@@ -91,6 +91,19 @@ extension DictationCoordinator {
                 failedAttempts += 1
             }
         }
+    }
+
+    /// Sleep, or return `false` when the start's task was cancelled during the pause.
+    ///
+    /// WHY not `try await Task.sleep` (Titus on PR #777): its `CancellationError` reached the
+    /// caller's catch and was logged as `dictationFailed`. A cancel here is the user stopping
+    /// or a newer start replacing this one, so it is logged as a cancel and the start is
+    /// dropped silently, like any other abandoned one, before it can reach the engine.
+    private func sleepUnlessCancelled(milliseconds: Int) async -> Bool {
+        try? await Task.sleep(nanoseconds: UInt64(milliseconds) * 1_000_000)
+        guard Task.isCancelled else { return true }
+        logActivation("sessionActivationCancelled", "duringSleepMs=\(milliseconds)")
+        return false
     }
 
     private func logActivation(_ action: String, _ details: String) {
