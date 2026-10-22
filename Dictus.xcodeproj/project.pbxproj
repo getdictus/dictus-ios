@@ -74,7 +74,6 @@
 		AA055801 /* ParakeetCacheRepair.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA155801 /* ParakeetCacheRepair.swift */; };
 		AA055803 /* NemotronEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA155803 /* NemotronEngine.swift */; };
 		AA055804 /* FluidAudioDownloadRoute.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA155804 /* FluidAudioDownloadRoute.swift */; };
-		AA055802 /* JointDecisionv3.mlmodelc in Resources */ = {isa = PBXBuildFile; fileRef = AA155802 /* JointDecisionv3.mlmodelc */; };
 		AA000449 /* BackgroundModelDownloadService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100449 /* BackgroundModelDownloadService.swift */; };
 		AA000492 /* DownloadConnectivityWatch.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100492 /* DownloadConnectivityWatch.swift */; };
 		AA000707 /* ModelDownloadManifestStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100707 /* ModelDownloadManifestStore.swift */; };
@@ -314,7 +313,6 @@
 		AA155801 /* ParakeetCacheRepair.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParakeetCacheRepair.swift; sourceTree = "<group>"; };
 		AA155803 /* NemotronEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NemotronEngine.swift; sourceTree = "<group>"; };
 		AA155804 /* FluidAudioDownloadRoute.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FluidAudioDownloadRoute.swift; sourceTree = "<group>"; };
-		AA155802 /* JointDecisionv3.mlmodelc */ = {isa = PBXFileReference; lastKnownFileType = folder; name = JointDecisionv3.mlmodelc; path = DictusApp/ParakeetMigration/JointDecisionv3.mlmodelc; sourceTree = SOURCE_ROOT; };
 		AA100449 /* BackgroundModelDownloadService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundModelDownloadService.swift; sourceTree = "<group>"; };
 		AA100492 /* DownloadConnectivityWatch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadConnectivityWatch.swift; sourceTree = "<group>"; };
 		AA100707 /* ModelDownloadManifestStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelDownloadManifestStore.swift; sourceTree = "<group>"; };
@@ -570,7 +568,6 @@
 				AA1000C0 /* Assets.xcassets */,
 				AA1000C1 /* Settings.bundle */,
 				AA1000F4 /* Sounds */,
-				AA155802 /* JointDecisionv3.mlmodelc */,
 				AA100005 /* DictusApp.entitlements */,
 				AA100007 /* Info.plist */,
 				AA100P10 /* PrivacyInfo.xcprivacy */,
@@ -1157,7 +1154,6 @@
 				AA0000C0 /* Assets.xcassets in Resources */,
 				AA0000C1 /* Settings.bundle in Resources */,
 				AA0000F4 /* Sounds in Resources */,
-				AA055802 /* JointDecisionv3.mlmodelc in Resources */,
 				AA0676A1 /* intro-a-light.mp4 in Resources */,
 				AA0676A2 /* intro-a-dark.mp4 in Resources */,
 				AA0676A3 /* intro-b-light.mp4 in Resources */,
