@@ -76,7 +76,7 @@ A frame is a pure function of its number and appearance: no clock, no `Math.rand
 - `src/introKeyboard.ts`: scene C, driven by one cue table (taps, mic, check, landing, clearing) checked against the 5-frame grid when the module loads.
 - `src/phoneGeometry.ts`: the App Store hero V10-A's phone in perspective (from `heroSpeak10.ts`, branch `chore/643-hero-a`).
 
-The App Store art files are untouched: these sources are adapted copies. The changes to the character (hair, phone held out, hands) were accepted by Pierre; the App Store screenshots will be redone from them later.
+The App Store art files up to V15-B are untouched: these sources are adapted copies. The changes to the character (hair, phone held out, hands) were accepted by Pierre. The App Store hero V16-B (`assets/appstore/art/v16-B/heroWalk16.ts`, issue #758) now draws her with `src/woman.ts` itself, posed as scene A's frame 0, so the listing's slide 1 and the intro show one character. A change to `woman.ts` changes slide 1 the next time it is rebuilt.
 
 ## Decisions
 

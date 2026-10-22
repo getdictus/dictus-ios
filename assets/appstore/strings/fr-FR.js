@@ -30,7 +30,7 @@ window.DICTUS_STRINGS = {
   proBadge: "Pro",
   wordmark: "dictus",
   // The hero's illustration per art iteration, when the locale has its own lettering.
-  heroArt: { "v15-B": "art/v15-B/hero-fr-FR.png" },
+  heroArt: { "v15-B": "art/v15-B/hero-fr-FR.png", "v16-B": "art/v16-B/hero-fr-FR.png" },
   slides: {
     hero: {
       // "au lieu de taper" held together, so the break falls after "Parlez" (as "Speak instead / of typing")

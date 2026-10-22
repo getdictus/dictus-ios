@@ -14,6 +14,9 @@ import { THEMES, type Loop, type Theme } from "./theme";
 // so her voice has a gap to cross); her hair is a jaw-length bob (round 7, replacing V15-B's);
 // her voice goes into it.
 //
+// The App Store hero V16-B (assets/appstore/art/v16-B/heroWalk16.ts, issue #758) draws her with
+// this file, posed as scene A's frame 0: a change here changes slide 1 on its next rebuild.
+//
 // The walk (legAt): a leg is its hip, its foot (heel point, sole angle, toe bend) and two bone
 // lengths; the knee is solved from them. V15-B's pose is the cycle's CONTACT position (Richard
 // Williams, The Animator's Survival Kit, walk chapter): phase 0 is the far leg's heel strike and

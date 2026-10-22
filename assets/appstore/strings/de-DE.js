@@ -21,7 +21,7 @@ window.DICTUS_STRINGS = {
   locale: "de-DE",
   proBadge: "Pro",
   wordmark: "dictus",
-  heroArt: { "v15-B": "art/v15-B/hero-de-DE.png" },
+  heroArt: { "v15-B": "art/v15-B/hero-de-DE.png", "v16-B": "art/v16-B/hero-de-DE.png" },
   slides: {
     hero: {
       headline: "Sprich, statt zu tippen",
