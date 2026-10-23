@@ -1,9 +1,7 @@
 import type { Gfx, P } from "./core";
 
-// HAND LETTERING (issue #667). The intro's lines of text, in short everyday English that works
-// under every locale's headline (round 10: invented words read as machine-made), hand-lettered in
-// the marker line and written letter by letter. The keyboard's keys in scene C carry QWERTY
-// letters.
+// HAND LETTERING (issue #667). The intro's lines of text, hand-lettered in the marker line and
+// written letter by letter. The lines themselves are per locale, in strings.ts (issue #771).
 //
 // Glyphs are single marker strokes in a unit box: x from 0 to the glyph's width, y UP from the
 // baseline, x-height 1, ascenders and capitals 1.6, descenders to -0.6. drawText maps them through
@@ -75,11 +73,53 @@ const G: Record<string, Glyph> = {
   V: { w: 0.94, s: [[[0, 1.6], [0.47, 0], [0.94, 1.6]]] },
   ".": { w: 0.24, s: [[[0.1, 0.04], [0.14, 0.08], [0.1, 0.12], [0.06, 0.08], [0.1, 0.04]]] },
   ",": { w: 0.26, s: [[[0.14, 0.12], [0.12, -0.04], [0.02, -0.28]]] },
+  // issue #771: the hyphen, and the typographic apostrophe French text is typed with (a small
+  // comma hung at the cap height, where the straight ' is a plain tick)
+  "-": { w: 0.5, s: [[[0.06, 0.52], [0.44, 0.54]]] },
+  "\u2019": { w: 0.26, s: [[[0.16, 1.62], [0.19, 1.5], [0.13, 1.36], [0.03, 1.26]]] },
 };
 const TRACK = 0.2, SPACE = 0.55;
 
+// ---------------------------------------------------------------- accents (issue #771)
+// An accented letter is its base glyph plus one mark, composed from the Unicode decomposition
+// (é = e + U+0301), so every base letter takes every mark without a table of its own. The mark
+// is written after the letter, as a hand writes it: above the x-height on a small letter, above
+// the cap height on a capital, the cedilla under the baseline. On i and j the mark replaces the
+// dot (î, ï).
+const MARKS: Record<string, (cx: number, y: number) => P[][]> = {
+  "\u0301": (cx, y) => [[[cx + 0.2, y + 0.5], [cx - 0.1, y + 0.06]]],                         // acute
+  "\u0300": (cx, y) => [[[cx - 0.2, y + 0.5], [cx + 0.1, y + 0.06]]],                         // grave
+  "\u0302": (cx, y) => [[[cx - 0.27, y + 0.04], [cx, y + 0.42], [cx + 0.27, y + 0.04]]],       // circumflex
+  "\u0308": (cx, y) => [-0.18, 0.18].map((d) => [[cx + d - 0.01, y + 0.16], [cx + d + 0.01, y + 0.2]] as P[]),   // diaeresis
+  "\u0327": (cx) => [[[cx, 0.02], [cx + 0.03, -0.14], [cx + 0.17, -0.26], [cx + 0.06, -0.44], [cx - 0.12, -0.42]]],  // cedilla
+};
+// where a mark sits across a letter: its middle, or the bowl's for a, whose stem stands clear
+const MARK_X: Record<string, number> = { a: 0.4, d: 0.4, g: 0.4, q: 0.4, b: 0.46, p: 0.46 };
+const composed = new Map<string, Glyph | undefined>();
+const compose = (ch: string): Glyph | undefined => {
+  const [base, mark, ...rest] = [...ch.normalize("NFD")];
+  const g = G[base], draw = mark && MARKS[mark];
+  if (!g || !draw || rest.length) return undefined;
+  const capital = base !== base.toLowerCase(), dotted = base === "i" || base === "j";
+  const strokes = dotted ? g.s.slice(0, 1) : g.s;
+  const cx = MARK_X[base] ?? (base === "j" ? 0.32 : g.w / 2);
+  return { w: g.w, s: [...strokes, ...draw(cx, capital ? 1.8 : 1.24)] };
+};
+/** the glyph that writes `ch`, or undefined when the alphabet cannot write it */
+const glyphOf = (ch: string): Glyph | undefined => {
+  if (G[ch]) return G[ch];
+  if (!composed.has(ch)) composed.set(ch, compose(ch));
+  return composed.get(ch);
+};
+/**
+ * The characters of `text` the alphabet cannot write, in order, without repeats. A character
+ * with no glyph would be drawn as a blank gap, so a locale's strings are checked with this
+ * before anything is rendered (strings.ts).
+ */
+export const missingGlyphs = (text: string) => [...new Set([...text].filter((ch) => ch !== " " && !glyphOf(ch)))];
+
 /** the width of a text at letter size `h` (its x-height), in local units */
-export const textWidth = (text: string, h: number) => [...text].reduce((x, ch) => x + (ch === " " ? SPACE : (G[ch]?.w ?? 0.6) + TRACK), 0) * h;
+export const textWidth = (text: string, h: number) => [...text].reduce((x, ch) => x + (ch === " " ? SPACE : (glyphOf(ch)?.w ?? 0.6) + TRACK), 0) * h;
 
 /**
  * Draw `text` with its baseline at local (0, 0), x-height `h`, up to `progress` (0..1 of its
@@ -90,7 +130,7 @@ export const drawText = (g: Gfx, text: string, progress: number, map: (p: P) => 
   const chars = [...text], upTo = progress * chars.length;
   let x = 0;
   chars.forEach((ch, i) => {
-    const glyph = G[ch];
+    const glyph = glyphOf(ch);
     if (i >= upTo) return;
     if (ch === " " || !glyph) { x += (ch === " " ? SPACE : 0.6) * o.h; return; }
     const p = Math.min(1, upTo - i);

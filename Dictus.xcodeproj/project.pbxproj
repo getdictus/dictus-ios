@@ -341,12 +341,18 @@
 		AA106803 /* HistoryScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryScene.swift; sourceTree = "<group>"; };
 		AA100681 /* StopStandbyScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StopStandbyScene.swift; sourceTree = "<group>"; };
 		AA100685 /* WhatsNewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhatsNewView.swift; sourceTree = "<group>"; };
-		AA1676A1 /* intro-a-light.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; name = "intro-a-light.mp4"; path = "assets/onboarding/intro/intro-a-light.mp4"; sourceTree = SOURCE_ROOT; };
-		AA1676A2 /* intro-a-dark.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; name = "intro-a-dark.mp4"; path = "assets/onboarding/intro/intro-a-dark.mp4"; sourceTree = SOURCE_ROOT; };
-		AA1676A3 /* intro-b-light.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; name = "intro-b-light.mp4"; path = "assets/onboarding/intro/intro-b-light.mp4"; sourceTree = SOURCE_ROOT; };
-		AA1676A4 /* intro-b-dark.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; name = "intro-b-dark.mp4"; path = "assets/onboarding/intro/intro-b-dark.mp4"; sourceTree = SOURCE_ROOT; };
-		AA1676A5 /* intro-c-light.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; name = "intro-c-light.mp4"; path = "assets/onboarding/intro/intro-c-light.mp4"; sourceTree = SOURCE_ROOT; };
-		AA1676A6 /* intro-c-dark.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; name = "intro-c-dark.mp4"; path = "assets/onboarding/intro/intro-c-dark.mp4"; sourceTree = SOURCE_ROOT; };
+		AA2676A1 /* en */ = {isa = PBXFileReference; lastKnownFileType = file; name = en; path = "assets/onboarding/intro/en.lproj/intro-a-light.mp4"; sourceTree = SOURCE_ROOT; };
+		AA3676A1 /* fr */ = {isa = PBXFileReference; lastKnownFileType = file; name = fr; path = "assets/onboarding/intro/fr.lproj/intro-a-light.mp4"; sourceTree = SOURCE_ROOT; };
+		AA2676A2 /* en */ = {isa = PBXFileReference; lastKnownFileType = file; name = en; path = "assets/onboarding/intro/en.lproj/intro-a-dark.mp4"; sourceTree = SOURCE_ROOT; };
+		AA3676A2 /* fr */ = {isa = PBXFileReference; lastKnownFileType = file; name = fr; path = "assets/onboarding/intro/fr.lproj/intro-a-dark.mp4"; sourceTree = SOURCE_ROOT; };
+		AA2676A3 /* en */ = {isa = PBXFileReference; lastKnownFileType = file; name = en; path = "assets/onboarding/intro/en.lproj/intro-b-light.mp4"; sourceTree = SOURCE_ROOT; };
+		AA3676A3 /* fr */ = {isa = PBXFileReference; lastKnownFileType = file; name = fr; path = "assets/onboarding/intro/fr.lproj/intro-b-light.mp4"; sourceTree = SOURCE_ROOT; };
+		AA2676A4 /* en */ = {isa = PBXFileReference; lastKnownFileType = file; name = en; path = "assets/onboarding/intro/en.lproj/intro-b-dark.mp4"; sourceTree = SOURCE_ROOT; };
+		AA3676A4 /* fr */ = {isa = PBXFileReference; lastKnownFileType = file; name = fr; path = "assets/onboarding/intro/fr.lproj/intro-b-dark.mp4"; sourceTree = SOURCE_ROOT; };
+		AA2676A5 /* en */ = {isa = PBXFileReference; lastKnownFileType = file; name = en; path = "assets/onboarding/intro/en.lproj/intro-c-light.mp4"; sourceTree = SOURCE_ROOT; };
+		AA3676A5 /* fr */ = {isa = PBXFileReference; lastKnownFileType = file; name = fr; path = "assets/onboarding/intro/fr.lproj/intro-c-light.mp4"; sourceTree = SOURCE_ROOT; };
+		AA2676A6 /* en */ = {isa = PBXFileReference; lastKnownFileType = file; name = en; path = "assets/onboarding/intro/en.lproj/intro-c-dark.mp4"; sourceTree = SOURCE_ROOT; };
+		AA3676A6 /* fr */ = {isa = PBXFileReference; lastKnownFileType = file; name = fr; path = "assets/onboarding/intro/fr.lproj/intro-c-dark.mp4"; sourceTree = SOURCE_ROOT; };
 		AA100675 /* OnboardingShell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingShell.swift; sourceTree = "<group>"; };
 		AA100683 /* AppleIntelligencePage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleIntelligencePage.swift; sourceTree = "<group>"; };
 		AA1000A2 /* MicPermissionPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MicPermissionPage.swift; sourceTree = "<group>"; };
@@ -1503,6 +1509,63 @@
 			targetProxy = DS6205000001 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		AA1676A1 /* intro-a-light.mp4 */ = {
+			isa = PBXVariantGroup;
+			children = (
+				AA2676A1 /* en */,
+				AA3676A1 /* fr */,
+			);
+			name = "intro-a-light.mp4";
+			sourceTree = "<group>";
+		};
+		AA1676A2 /* intro-a-dark.mp4 */ = {
+			isa = PBXVariantGroup;
+			children = (
+				AA2676A2 /* en */,
+				AA3676A2 /* fr */,
+			);
+			name = "intro-a-dark.mp4";
+			sourceTree = "<group>";
+		};
+		AA1676A3 /* intro-b-light.mp4 */ = {
+			isa = PBXVariantGroup;
+			children = (
+				AA2676A3 /* en */,
+				AA3676A3 /* fr */,
+			);
+			name = "intro-b-light.mp4";
+			sourceTree = "<group>";
+		};
+		AA1676A4 /* intro-b-dark.mp4 */ = {
+			isa = PBXVariantGroup;
+			children = (
+				AA2676A4 /* en */,
+				AA3676A4 /* fr */,
+			);
+			name = "intro-b-dark.mp4";
+			sourceTree = "<group>";
+		};
+		AA1676A5 /* intro-c-light.mp4 */ = {
+			isa = PBXVariantGroup;
+			children = (
+				AA2676A5 /* en */,
+				AA3676A5 /* fr */,
+			);
+			name = "intro-c-light.mp4";
+			sourceTree = "<group>";
+		};
+		AA1676A6 /* intro-c-dark.mp4 */ = {
+			isa = PBXVariantGroup;
+			children = (
+				AA2676A6 /* en */,
+				AA3676A6 /* fr */,
+			);
+			name = "intro-c-dark.mp4";
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
 		AA710000 /* Debug */ = {

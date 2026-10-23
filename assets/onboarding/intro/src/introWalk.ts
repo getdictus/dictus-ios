@@ -3,7 +3,8 @@ import { clearEdges } from "./edges";
 import type { Film } from "./film";
 import { fillShape } from "./gallery";
 import { BPM, FPS, FRAME, LOOP_A, loop, place, THEMES, type Theme } from "./theme";
-import { drawNoteCard, type Card } from "./noteCard";
+import { checkCardText, drawNoteCard, type Card } from "./noteCard";
+import { stringsFor, type IntroStrings } from "./strings";
 import {
   ARM_NEAR, BAG_D, bobAt, drawVoice, drawWoman, FIG, fig, LEG_FAR, LEG_NEAR, legAt, MARKER, mouthOpen, phoneMap, setTheme, stroke, type Pose,
 } from "./woman";
@@ -86,7 +87,7 @@ const poseAt = (frame: number): Pose => {
 };
 
 // ---------------------------------------------------------------- the picture
-const drawFor = (theme: Theme) => (ctx: Ctx, frame: number, env: Env) => {
+const drawFor = (theme: Theme, text: IntroStrings) => (ctx: Ctx, frame: number, env: Env) => {
   setTheme(theme);
   const g = new Gfx(ctx, env, frame, MARKER);
   const k = PLACE.k * env.scale, toFrame = () => ctx.setTransform(k, 0, 0, k, -PLACE.o[0] * k, -PLACE.o[1] * k);
@@ -110,7 +111,7 @@ const drawFor = (theme: Theme) => (ctx: Ctx, frame: number, env: Env) => {
   g.pop();
 
   // 3. the text, coming out of the phone as a chat message
-  g.group("plain", () => drawNoteCard(g, theme, LP, frame, CARD, fig(phoneMap(pose)([[56, -6]])[0])));
+  g.group("plain", () => drawNoteCard(g, theme, LP, frame, CARD, fig(phoneMap(pose)([[56, -6]])[0]), text));
   // 4. a clean band round the frame, so the page colour decodes exactly at its edge (edges.ts)
   clearEdges(ctx, env);
 };
@@ -118,10 +119,17 @@ const drawFor = (theme: Theme) => (ctx: Ctx, frame: number, env: Env) => {
 // the message, canvas pixels: in the empty right of the frame, below and right of the phone
 const CARD: Card = { style: "bubble", c: [1190, 1350], w: 400, deg: -2 };
 
-const film = (theme: Theme, title: string): Film => ({
-  meta: { title: `Dictus onboarding intro A · walking · ${theme.name}`, W: FRAME.w, H: FRAME.h, fps: FPS, bpm: BPM, durationFrames: LOOP_A },
-  assets: { images: {} },
-  shots: [{ id: title, start: 0, end: LOOP_A, draw: drawFor(theme) }],
-});
-export const introWalkLight = film(THEMES.light, "introWalkLight");
-export const introWalkDark = film(THEMES.dark, "introWalkDark");
+/**
+ * Scene A in one appearance and one locale's text (strings.ts), as the film `id` (render.mjs
+ * names it, e.g. introWalkLight, introWalkDarkFr). Throws before any frame is drawn if the locale
+ * uses a character with no glyph or a line overflows the card.
+ */
+export const introWalk = (appearance: Theme["name"], locale: string, id: string): Film => {
+  const theme = THEMES[appearance], text = stringsFor(locale);
+  checkCardText(CARD, text, id);
+  return {
+    meta: { title: `Dictus onboarding intro A · walking · ${theme.name}`, W: FRAME.w, H: FRAME.h, fps: FPS, bpm: BPM, durationFrames: LOOP_A },
+    assets: { images: {} },
+    shots: [{ id, start: 0, end: LOOP_A, draw: drawFor(theme, text) }],
+  };
+};
