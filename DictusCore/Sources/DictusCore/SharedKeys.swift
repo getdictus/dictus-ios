@@ -4,6 +4,8 @@ import Foundation
 /// Centralized UserDefaults keys for App Group shared storage.
 /// Using an enum with static properties prevents typo-based bugs.
 public enum SharedKeys {
+    /// AudioInputPreference raw value; absent preserves the built-in microphone.
+    public static let audioInputDevice = "dictus.audioInputDevice"
     public static let dictationStatus = "dictus.dictationStatus"
     public static let lastTranscription = "dictus.lastTranscription"
     public static let lastTranscriptionTimestamp = "dictus.lastTranscriptionTimestamp"

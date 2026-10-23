@@ -6092,7 +6092,47 @@
         }
       }
     },
-    "😊" : {}
+    "😊" : {},
+    "Input Device" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Périphérique d’entrée"
+          }
+        }
+      }
+    },
+    "Automatic" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Automatique"
+          }
+        }
+      }
+    },
+    "iPhone microphone" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Microphone de l’iPhone"
+          }
+        }
+      }
+    },
+    "Automatic uses a connected headset microphone when available. Changes apply to the next recording." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Automatique utilise le microphone d’un casque connecté, si disponible. Les modifications s’appliquent au prochain enregistrement."
+          }
+        }
+      }
+    }
   },
   "version" : "1.1"
 }
