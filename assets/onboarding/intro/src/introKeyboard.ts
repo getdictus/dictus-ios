@@ -4,6 +4,7 @@ import type { Film } from "./film";
 import { clipped, fillShape, smooth } from "./gallery";
 import { drop, mm, MM, mmPts, rrect, WAVE } from "./phoneGeometry";
 import { drawDigits, drawText, textWidth } from "./handLettering";
+import { LOCALES, stringsFor, type IntroStrings } from "./strings";
 import { BPM, FPS, FRAME, LOOP_C, loop, place, THEMES, type Theme } from "./theme";
 
 // ONBOARDING INTRO, SCENE C · "the keyboard in a note" (issue #667, headline "Dans votre
@@ -12,7 +13,7 @@ import { BPM, FPS, FRAME, LOOP_C, loop, place, THEMES, type Theme } from "./them
 // No hand: every tap is a touch indicator (an accent disc spreading into a fading ring where the
 // finger lands), with the key's own flash.
 //
-//   1. two keys are typed, a short beat (each key flashes as it is hit); the letters appear;
+//   1. a short word is typed (each key flashes as it is hit); the letters appear;
 //   2. the blue mic in the keyboard's top bar is tapped;
 //   3. RECORDING: the bars follow the voice, the timer runs, the x and check pills are up;
 //   4. the check is tapped;
@@ -27,8 +28,9 @@ import { BPM, FPS, FRAME, LOOP_C, loop, place, THEMES, type Theme } from "./them
 // pills and the timer while recording, an empty bar of the same height while transcribing, so the
 // waveform never moves). The layout is read off the captures (assets/appstore/captures/en-GB/
 // 04-keyboard-azerty-fr.png at rest, fr-FR/01-recording-reminders.png recording), in the phone's
-// millimetres. The keys carry QWERTY letters and their icons (shift, delete, emoji, return,
-// globe, mic); the suggestions, the captions and the note are short English, hand-lettered
+// millimetres. The keys carry the locale's letter rows (QWERTY in English, AZERTY in French, issue
+// #771) and their icons (shift, delete, emoji, return, globe, mic); the word typed, the
+// suggestions, the captions and the note are the locale's (strings.ts), hand-lettered
 // (handLettering.ts), as is the timer.
 //
 // Marker comic, like the figure (V10-A): every face a flat fill, one hard-edged shadow tone per
@@ -57,25 +59,30 @@ const cel = (g: Gfx, s: P[], lit: string, shade: string, k = 18) => {
 };
 
 // ---------------------------------------------------------------- the story, frame by frame
-// ONE cue table holds every frame number of the scene; everything below reads it. Events sit on
-// the engine's 5-frame grid (checked at load).
+// ONE cue table holds every frame number of the scene; everything below reads it, with the
+// moment each key of the typed word is hit, which is the locale's (strings.ts: `keyboard.taps`,
+// one per letter). Events sit on the engine's 5-frame grid (checked at load, for every locale).
 const CUE = {
-  taps: [10, 20],            // two keys typed, a short beat, and the moment each one is hit
   mic: 35,                   // the mic tapped: recording starts
   check: 125,                // the check tapped: transcribing starts
   land: 155,                 // the text lands, the keys come back
   clear: [175, 195] as P,    // the note fades out for the next loop
 };
 // where each touch lands, and when: the touch indicator draws them (no hand, by Pierre's call:
-// a drawn hand covered what it tapped and never looked right)
-type Spot = "k0" | "k1" | "mic" | "check";
+// a drawn hand covered what it tapped and never looked right). A key spot is `k<n>`, the n-th
+// letter of the typed word.
+type Spot = `k${number}` | "mic" | "check";
 // the touch lands three frames before its cue, so the contact is seen on the mic or the check
 // before the overlay swaps them away
 const LEAD = 3;
-const TOUCHES: [number, Spot][] = [[CUE.taps[0], "k0"], [CUE.taps[1], "k1"], [CUE.mic - LEAD, "mic"], [CUE.check - LEAD, "check"]];
 const onGrid = (f: number) => f % 5 === 0;
-const problems = [...CUE.taps, CUE.mic, CUE.check, CUE.land, ...CUE.clear].filter((f) => !onGrid(f) || f > LOOP_C);
-if (problems.length) throw new Error(`introKeyboard cue table off the 5-frame grid or past the loop: ${problems.join(", ")}`);
+for (const locale of LOCALES) {
+  const { word, taps } = stringsFor(locale).keyboard;
+  const problems = [...taps, CUE.mic, CUE.check, CUE.land, ...CUE.clear].filter((f) => !onGrid(f) || f > LOOP_C);
+  if (problems.length) throw new Error(`introKeyboard cue table (${locale}) off the 5-frame grid or past the loop: ${problems.join(", ")}`);
+  if (taps.length !== [...word].length) throw new Error(`introKeyboard (${locale}): ${taps.length} taps for the ${[...word].length} letters of "${word}"`);
+  if (taps.some((f, i) => i > 0 && f <= taps[i - 1]) || taps[taps.length - 1] >= CUE.mic - LEAD) throw new Error(`introKeyboard (${locale}): the taps ${taps.join(", ")} must rise and end before the mic at ${CUE.mic}`);
+}
 type Mode = "keys" | "recording" | "transcribing";
 const modeAt = (f: number): Mode => (f >= CUE.mic && f < CUE.check ? "recording" : f >= CUE.check && f < CUE.land ? "transcribing" : "keys");
 
@@ -85,27 +92,31 @@ const modeAt = (f: number): Mode => (f >= CUE.mic && f < CUE.check ? "recording"
 const PANEL_TOP = 100, BAR_Y = 108, ROWS = [116.8, 126.2, 135.7, 145.4], KEY_H = 7.4, BOTTOM_Y = 155.4;
 const PITCH = 7.28, KEY_W = 6.2, X0 = 6.25;
 type Key = { x0: number; x1: number; y: number; icon?: "shift" | "delete" | "emoji" | "return"; ch?: string };
-const KEYS: Key[] = [
-  ...[..."qwertyuiop"].map((ch, i) => ({ x0: X0 + i * PITCH - KEY_W / 2, x1: X0 + i * PITCH + KEY_W / 2, y: ROWS[0], ch })),
-  ...[..."asdfghjkl"].map((ch, i) => ({ x0: X0 + (i + 0.5) * PITCH - KEY_W / 2, x1: X0 + (i + 0.5) * PITCH + KEY_W / 2, y: ROWS[1], ch })),
-  { x0: 3.15, x1: 12.4, y: ROWS[2], icon: "shift" },
-  ...[..."zxcvbnm"].map((ch, i) => ({ x0: 16.4 + i * PITCH - KEY_W / 2, x1: 16.4 + i * PITCH + KEY_W / 2, y: ROWS[2], ch })),
-  { x0: 65.1, x1: 74.9, y: ROWS[2], icon: "delete" },
-  { x0: 3.15, x1: 12.4, y: ROWS[3] }, { x0: 13.9, x1: 23.2, y: ROWS[3], icon: "emoji" },
-  { x0: 24.7, x1: 56.6, y: ROWS[3] }, { x0: 58.1, x1: 74.9, y: ROWS[3], icon: "return" },
-];
-// the two keys typed, by index into KEYS (the letter keys run QWERTY, row by row)
-const TYPED = [15, 7];   // h, then i: the note's first word is "Hi"
+// the keys of a layout from its three letter rows: the first two rows centred on the first's
+// ten keys (QWERTY's nine-key middle row sits half a key in, AZERTY's ten line up), the third
+// row's seven keys between shift and delete, as both captures show
+const keysFor = ([top, middle, bottom]: [string, string, string]): Key[] => {
+  const row = (letters: string, y: number) => { const off = ([...top].length - [...letters].length) / 2; return [...letters].map((ch, i) => ({ x0: X0 + (i + off) * PITCH - KEY_W / 2, x1: X0 + (i + off) * PITCH + KEY_W / 2, y, ch })); };
+  return [
+    ...row(top, ROWS[0]),
+    ...row(middle, ROWS[1]),
+    { x0: 3.15, x1: 12.4, y: ROWS[2], icon: "shift" },
+    ...[...bottom].map((ch, i) => ({ x0: 16.4 + i * PITCH - KEY_W / 2, x1: 16.4 + i * PITCH + KEY_W / 2, y: ROWS[2], ch })),
+    { x0: 65.1, x1: 74.9, y: ROWS[2], icon: "delete" },
+    { x0: 3.15, x1: 12.4, y: ROWS[3] }, { x0: 13.9, x1: 23.2, y: ROWS[3], icon: "emoji" },
+    { x0: 24.7, x1: 56.6, y: ROWS[3] }, { x0: 58.1, x1: 74.9, y: ROWS[3], icon: "return" },
+  ];
+};
 const MIC_PILL = { x0: 62.4, x1: 73.6, y0: 104.6, y1: 111.4 };
 // the recording overlay (01-recording-reminders.png): the pills in the top bar, the waveform, the
 // timer and its caption; the waveform keeps V10-A's 17 wider bars, which read at this size
 const PILL_X: P = [3.4, 14.6], PILL_CHECK: P = [62.4, 73.6], PILL_Y: P = [104.6, 111.4];
 const WAVE_CY = 125.6, WAVE_H = 21, TIMER_Y = 138.6, TIMER_H = 3.6, CAPTION_Y = 146;
 const BARS = [0.55, 0.8, 0.86, 0.5, 0.3, 0.34, 0.62, 0.56, 0.36, 0.28, 0.66, 0.9, 1, 0.84, 0.7, 0.92, 0.8];
-const spotMM = (s: Spot): P => {
+const spotMM = (L: Layout, s: Spot): P => {
   if (s === "mic") return [(MIC_PILL.x0 + MIC_PILL.x1) / 2, BAR_Y];
   if (s === "check") return [(PILL_CHECK[0] + PILL_CHECK[1]) / 2, (PILL_Y[0] + PILL_Y[1]) / 2];
-  const k = KEYS[TYPED[Number(s.slice(1))]];
+  const k = L.keys[L.typed[Number(s.slice(1))]];
   return [(k.x0 + k.x1) / 2, k.y];
 };
 
@@ -125,15 +136,32 @@ const sweepLevel = (i: number, f: number) => {
 };
 
 // ---------------------------------------------------------------- the note's text
-// the note's text (handLettering.ts): the word typed, the paragraph dictated after it, the title;
-// the keyboard's suggestions for what was typed; the overlay's captions, as the keyboard says them
-const XH = 2.2, WORD = "Hi", WORD_END = textWidth(WORD, XH);
-const PARAGRAPH = ["Sam, quick reminder:", "dinner at eight tonight.", "I'll bring dessert, can", "you pick up the bread?"];
-const LAST_END = textWidth(PARAGRAPH[3], XH);
-const DATE = "Notes";
-const CAPTION_REC = "Listening...", CAPTION_TRANS = "Transcribing...";
-const SUGGEST = ["Hi", "Hey", "Hello"];
-const NOTE = { x: 7, line0: 32, lead: 7 };
+// the note's text is the locale's (strings.ts): the word typed, the paragraph dictated after it,
+// the title; the keyboard's suggestions for what was typed; the overlay's captions, as the
+// keyboard says them. Hand-lettered at these sizes, in phone mm.
+const XH = 2.2, NOTE = { x: 7, line0: 32, lead: 7 };
+// the widest each text may run, in mm: a note line up to the screen's right margin, a
+// suggestion inside its slot between the dividers, a caption across the waveform
+const NOTE_RIGHT = 70, SLOT_W = 17, CAPTION_W = 56;
+type Layout = { text: IntroStrings["keyboard"]; keys: Key[]; typed: number[]; touches: [number, Spot][]; wordEnd: number; lastEnd: number };
+/** scene C for one locale: its keys, the keys its word types, its touches; throws when a text overflows */
+const layoutFor = (locale: string): Layout => {
+  const text = stringsFor(locale).keyboard, keys = keysFor(text.rows);
+  const typed = [...text.word.toLowerCase()].map((ch) => {
+    const i = keys.findIndex((k) => k.ch === ch);
+    if (i < 0) throw new Error(`introKeyboard (${locale}): no key for "${ch}" of "${text.word}" in the rows ${text.rows.join(" / ")}`);
+    return i;
+  });
+  const touches: [number, Spot][] = [...text.taps.map((t, i) => [t, `k${i}`] as [number, Spot]), [CUE.mic - LEAD, "mic"], [CUE.check - LEAD, "check"]];
+  const wordEnd = textWidth(text.word, XH), last = text.paragraph[text.paragraph.length - 1];
+  const over = [
+    ...text.paragraph.map((line, i) => [line, (i === 0 ? NOTE.x + wordEnd + textWidth(" ", XH) : NOTE.x) + textWidth(line, XH), NOTE_RIGHT] as const),
+    ...text.suggestions.map((w) => [w, textWidth(w, 1.8), SLOT_W] as const),
+    ...[text.listening, text.transcribing].map((c) => [c, textWidth(c, 1.5), CAPTION_W] as const),
+  ].filter(([, w, max]) => w > max).map(([line]) => JSON.stringify(line));
+  if (over.length) throw new Error(`introKeyboard (${locale}): these texts overflow: ${over.join(", ")}`);
+  return { text, keys, typed, touches, wordEnd, lastEnd: textWidth(last, XH) };
+};
 
 // ---------------------------------------------------------------- the touches
 // Where a finger lands, a soft accent disc appears on the glass and spreads out as a fading ring,
@@ -141,11 +169,11 @@ const NOTE = { x: 7, line0: 32, lead: 7 };
 // recordings, legible on the light and the dark keyboard alike, and it never hides the target.
 // It shows from two frames before the hit (the contact) to twelve after.
 const TOUCH_R = 3.6;   // mm, about a fingertip's contact
-const drawTouches = (g: Gfx, f: number) => {
-  TOUCHES.forEach(([t, s], k) => {
+const drawTouches = (g: Gfx, L: Layout, f: number) => {
+  L.touches.forEach(([t, s], k) => {
     const dt = f - t;
     if (dt < -2 || dt > 12) return;
-    const c = spotMM(s), grow = dt < 0 ? 0.7 + 0.15 * (dt + 2) : 1 + 1.2 * ease(dt / 12), fade = dt < 0 ? 0.6 + 0.2 * (dt + 2) : 1 - ease(dt / 12);
+    const c = spotMM(L, s), grow = dt < 0 ? 0.7 + 0.15 * (dt + 2) : 1 + 1.2 * ease(dt / 12), fade = dt < 0 ? 0.6 + 0.2 * (dt + 2) : 1 - ease(dt / 12);
     const ring = (r: number) => mmPts(Array.from({ length: 32 }, (_, i) => [c[0] + Math.cos((i / 32) * Math.PI * 2) * r, c[1] + Math.sin((i / 32) * Math.PI * 2) * r] as P));
     fillShape(g, ring(TOUCH_R * grow), ACCENT, 0.34 * fade);
     g.pen(ring(TOUCH_R * grow), { w: 4, color: ACCENT, seed: 990 + k, closed: true, wobble: 0.2, boil: 0, taper: 0, opacity: 0.9 * fade, retrace: false });
@@ -153,7 +181,8 @@ const drawTouches = (g: Gfx, f: number) => {
 };
 
 // ---------------------------------------------------------------- the picture
-const drawFor = (theme: Theme) => (ctx: Ctx, frame: number, env: Env) => {
+const drawFor = (theme: Theme, L: Layout) => (ctx: Ctx, frame: number, env: Env) => {
+  const { text } = L;
   T = theme;
   const g = new Gfx(ctx, env, frame, MARKER);
   g.push(-PLACE.o[0] * PLACE.k, -PLACE.o[1] * PLACE.k, PLACE.k);
@@ -191,21 +220,21 @@ const drawFor = (theme: Theme) => (ctx: Ctx, frame: number, env: Env) => {
     clipped(g, screen, () => {
       // ---- the note (Apple Notes-like): back chevron, the date in grey, the text, the caret
       stroke(g, at([[8.6, 12.2], [6.4, 14.6], [8.6, 17]]), 3.6, 700, T.notesAccent, 0.2);
-      drawText(g, DATE, 1, local(MM.w / 2 - textWidth(DATE, 1.6) / 2, 23.5), { h: 1.6, w: 2, color: T.screenFaint, seed: 702 });
+      drawText(g, text.title, 1, local(MM.w / 2 - textWidth(text.title, 1.6) / 2, 23.5), { h: 1.6, w: 2, color: T.screenFaint, seed: 702 });
       const clearK = 1 - ease((frame - CUE.clear[0]) / (CUE.clear[1] - CUE.clear[0]));
-      const typed = CUE.taps.reduce((n, t) => n + ease((frame - t) / 2), 0) / CUE.taps.length;
-      const wordLen = WORD_END * typed;
+      const typed = text.taps.reduce((n, t) => n + ease((frame - t) / 2), 0) / text.taps.length;
+      const wordLen = L.wordEnd * typed;
       if (clearK > 0) {
-        drawText(g, WORD, typed, local(NOTE.x, NOTE.line0), { h: XH, w: 2.8, color: T.screenInk, seed: 710, opacity: clearK });
+        drawText(g, text.word, typed, local(NOTE.x, NOTE.line0), { h: XH, w: 2.8, color: T.screenInk, seed: 710, opacity: clearK });
         // the paragraph lands line after line, fast, the way inserted text appears
-        PARAGRAPH.forEach((line, i) => {
-          const p = ease((frame - CUE.land - i * 3) / 9), x0 = i === 0 ? NOTE.x + WORD_END + textWidth(" ", XH) : NOTE.x;
+        text.paragraph.forEach((line, i) => {
+          const p = ease((frame - CUE.land - i * 3) / 9), x0 = i === 0 ? NOTE.x + L.wordEnd + textWidth(" ", XH) : NOTE.x;
           drawText(g, line, p, local(x0, NOTE.line0 + i * NOTE.lead), { h: XH, w: 2.8, color: T.screenInk, seed: 720 + i * 37, opacity: clearK });
         });
       }
       // the caret: after the typed word, then after the paragraph; it blinks five times a loop
       const landed = frame >= CUE.land + 12 && frame < CUE.clear[0];
-      const caret: P = landed ? [NOTE.x + LAST_END + 1, NOTE.line0 + 3 * NOTE.lead] : frame >= CUE.clear[0] ? [NOTE.x + 1.2, NOTE.line0] : [NOTE.x + wordLen + 1.2, NOTE.line0];
+      const caret: P = landed ? [NOTE.x + L.lastEnd + 1, NOTE.line0 + (text.paragraph.length - 1) * NOTE.lead] : frame >= CUE.clear[0] ? [NOTE.x + 1.2, NOTE.line0] : [NOTE.x + wordLen + 1.2, NOTE.line0];
       if (frame % 39 < 20 || mode !== "keys") stroke(g, at([[caret[0], caret[1] + 0.8], [caret[0], caret[1] - 4.4]]), 2.6, 705, T.notesAccent, 0.1);
       // the comic glass shine across the empty part of the note
       fillShape(g, at([[0, 70], [MM.w * 0.62, 50], [MM.w * 0.78, 50], [0, 76]]), T.shine, 0.6);
@@ -216,7 +245,7 @@ const drawFor = (theme: Theme) => (ctx: Ctx, frame: number, env: Env) => {
       const pill = (x: P, n: number, glyph: () => void) => { const sh = at(rrect(x[0], PILL_Y[0], x[1], PILL_Y[1], 3.4, 8)); fillShape(g, sh, T.pill); outline(g, sh, 3.2, n); glyph(); };
       if (mode === "keys") {
         // the top bar: three suggestions between thin dividers, the blue mic pill
-        SUGGEST.forEach((w, i) => drawText(g, w, 1, local(11 + i * 19.5 - textWidth(w, 1.8) / 2, BAR_Y + 1), { h: 1.8, w: 2.2, color: T.screenInk, seed: 730 + i * 13, opacity: 0.8 }));
+        text.suggestions.forEach((w, i) => drawText(g, w, 1, local(11 + i * 19.5 - textWidth(w, 1.8) / 2, BAR_Y + 1), { h: 1.8, w: 2.2, color: T.screenInk, seed: 730 + i * 13, opacity: 0.8 }));
         [21, 40.5].forEach((x, i) => stroke(g, at([[x, BAR_Y - 2.6], [x, BAR_Y + 2.6]]), 2, 735 + i, T.screenFaint, 0.2));
         const hit = clamp(1 - Math.abs(frame - CUE.mic + 2) / 4);
         const mic = at(rrect(MIC_PILL.x0, MIC_PILL.y0, MIC_PILL.x1, MIC_PILL.y1, 3.4, 8));
@@ -226,8 +255,9 @@ const drawFor = (theme: Theme) => (ctx: Ctx, frame: number, env: Env) => {
         const cap = at(rrect(mc[0] - 0.9, mc[1] - 2.4, mc[0] + 0.9, mc[1] + 0.6, 0.9, 5)); fillShape(g, cap, WHITE);
         stroke(g, at([[mc[0] - 1.7, mc[1] - 0.4], [mc[0] - 1.4, mc[1] + 1.2], [mc[0], mc[1] + 1.8], [mc[0] + 1.4, mc[1] + 1.2], [mc[0] + 1.7, mc[1] - 0.4]]), 2.2, 741, WHITE, 0.1);
         // the keys: blank caps, a darker lip under each, flashing while hit
-        KEYS.forEach((k, i) => {
-          const typedAt = TYPED.indexOf(i), hitK = typedAt >= 0 ? clamp(1 - Math.abs(frame - CUE.taps[typedAt] - 1) / 4) : 0;
+        L.keys.forEach((k, i) => {
+          // a key typed twice flashes on each of its hits
+          const hitK = L.typed.reduce((m, key, n) => (key === i ? Math.max(m, clamp(1 - Math.abs(frame - text.taps[n] - 1) / 4)) : m), 0);
           const lip = at(rrect(k.x0, k.y - KEY_H / 2 + 0.6, k.x1, k.y + KEY_H / 2 + 0.6, 1.4, 4)), cap = at(rrect(k.x0, k.y - KEY_H / 2, k.x1, k.y + KEY_H / 2, 1.4, 4));
           fillShape(g, lip, T.keyShade); fillShape(g, cap, hitK > 0.3 ? T.keyHit : T.key);
           const c: P = [(k.x0 + k.x1) / 2, k.y], ic = (pts: P[], s: number, closed = false) => g.pen(at(pts.map(([x, y]) => [c[0] + x, c[1] + y] as P)), { w: s, color: T.glyph, seed: 760 + i, closed, wobble: 0.2, boil: 0, taper: 0.2, opacity: 0.85, retrace: false });
@@ -250,7 +280,7 @@ const drawFor = (theme: Theme) => (ctx: Ctx, frame: number, env: Env) => {
           const wTimer = text.length * 0.7 * TIMER_H - 0.38 * TIMER_H;
           drawDigits(g, text, TIMER_H, local(MM.w / 2 - wTimer / 2, TIMER_Y), { w: 2.8, color: T.screenInk, seed: 780 });
         }
-        { const cap = mode === "recording" ? CAPTION_REC : CAPTION_TRANS; drawText(g, cap, 1, local(MM.w / 2 - textWidth(cap, 1.5) / 2, CAPTION_Y + 0.6), { h: 1.5, w: 2, color: T.pillGlyph, seed: 790 }); }
+        { const cap = mode === "recording" ? text.listening : text.transcribing; drawText(g, cap, 1, local(MM.w / 2 - textWidth(cap, 1.5) / 2, CAPTION_Y + 0.6), { h: 1.5, w: 2, color: T.pillGlyph, seed: 790 }); }
         // the BrandWaveform: flat bars, blue through the centre 40 %, grey toward the edges, each
         // with a hard darker lower half and a thin ink edge
         const n = BARS.length, pitch = (WAVE.x1 - WAVE.x0) / (n - 1);
@@ -283,15 +313,22 @@ const drawFor = (theme: Theme) => (ctx: Ctx, frame: number, env: Env) => {
   });
 
   // the touches, over everything
-  g.group("plain", () => drawTouches(g, frame));
+  g.group("plain", () => drawTouches(g, L, frame));
   // a clean band round the frame, so the page colour decodes exactly at its edge (edges.ts)
   clearEdges(ctx, env);
 };
 
-const film = (theme: Theme, title: string): Film => ({
-  meta: { title: `Dictus onboarding intro C · the keyboard in a note · ${theme.name}`, W: FRAME.w, H: FRAME.h, fps: FPS, bpm: BPM, durationFrames: LOOP_C },
-  assets: { images: {} },
-  shots: [{ id: title, start: 0, end: LOOP_C, draw: drawFor(theme) }],
-});
-export const introKeyboardLight = film(THEMES.light, "introKeyboardLight");
-export const introKeyboardDark = film(THEMES.dark, "introKeyboardDark");
+/**
+ * Scene C in one appearance and one locale's keyboard and text (strings.ts), as the film `id`
+ * (render.mjs names it, e.g. introKeyboardLight, introKeyboardDarkFr). Throws before any frame
+ * is drawn if the locale uses a character with no glyph, a text overflows, or a letter of the
+ * typed word has no key.
+ */
+export const introKeyboard = (appearance: Theme["name"], locale: string, id: string): Film => {
+  const theme = THEMES[appearance];
+  return {
+    meta: { title: `Dictus onboarding intro C · the keyboard in a note · ${theme.name}`, W: FRAME.w, H: FRAME.h, fps: FPS, bpm: BPM, durationFrames: LOOP_C },
+    assets: { images: {} },
+    shots: [{ id, start: 0, end: LOOP_C, draw: drawFor(theme, layoutFor(locale)) }],
+  };
+};

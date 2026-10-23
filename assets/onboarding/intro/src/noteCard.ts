@@ -1,6 +1,7 @@
 import { type Gfx, type P } from "./core";
 import { fillShape } from "./gallery";
-import { drawText } from "./handLettering";
+import { drawText, textWidth } from "./handLettering";
+import type { IntroStrings } from "./strings";
 import type { Loop, Theme } from "./theme";
 import { clamp, sm } from "./woman";
 
@@ -13,8 +14,8 @@ import { clamp, sm } from "./woman";
 //   growing a line at a time as she talks, under a small grey message already received;
 // - "mail" (scene B): a mail draft, a small sheet with an envelope mark, a subject line, a rule,
 //   then the body writing itself.
-// The text is short everyday English (handLettering.ts). A row of dots runs from the phone to the
-// card.
+// The text is the locale's (strings.ts), hand-lettered (handLettering.ts). A row of dots runs from
+// the phone to the card.
 //
 // The chain to read at phone size: mouth, blue strokes, phone, dots, the text appearing.
 //
@@ -24,13 +25,12 @@ import { clamp, sm } from "./woman";
 
 export type Card = { style: "bubble" | "mail"; c: P; w: number; deg: number };
 const ACCENT = "#3D7EFF";
-// the text (handLettering.ts), its letter size and pen: a question received and the reply she
-// dictates while walking (A); a mail she dictates in the metro (B)
+// the text's letter size and pen; the text itself is the locale's (strings.ts): a question
+// received and the reply she dictates while walking (A), a mail she dictates in the metro (B)
 const XH = 15, PEN = 2.8;
-const BODY = ["On my way, I'll be", "there in ten minutes.", "Can you order me", "a coffee?"];
-const RECEIVED = "Where are you?";
-const SUBJECT = "Notes from today";
-const MAIL = ["Great meeting this", "morning. Next steps", "for the launch below."];
+// where each text starts across the card and the margin it must keep from the card's right edge,
+// in card pixels: the bubble's lines, the received message's, the mail's subject and body
+const RECEIVED_W = 0.68, BUBBLE_X0 = 0.06, MARGIN = 24;
 const ease = (t: number) => { const x = clamp(t); return x * x * (3 - 2 * x); };
 // a rounded rectangle from its top-left corner, width and height
 const rrect = (x0: number, y0: number, w: number, h: number, r: number): P[] => {
@@ -39,8 +39,25 @@ const rrect = (x0: number, y0: number, w: number, h: number, r: number): P[] => 
   return out;
 };
 
+/**
+ * Throws when a line of `text` would run past the edge of its card (issue #771: a translation
+ * keeps the English width, and this holds it to that).
+ */
+export const checkCardText = (card: Card, text: IntroStrings, scene: string) => {
+  const W = card.w, over: string[] = [];
+  const fit = (line: string, x0: number, h: number, right: number) => { if (x0 + textWidth(line, h) > right - MARGIN) over.push(JSON.stringify(line)); };
+  if (card.style === "bubble") {
+    fit(text.walk.received, 30, XH, W * RECEIVED_W);
+    text.walk.reply.forEach((line) => fit(line, W * BUBBLE_X0 + 32, XH, W));
+  } else {
+    fit(text.metro.subject, 96, XH * 1.1, W);
+    text.metro.body.forEach((line) => fit(line, 28, XH, W));
+  }
+  if (over.length) throw new Error(`${scene}: these lines overflow their card: ${over.join(", ")}`);
+};
+
 /** the card, in canvas pixels: `from` is the point on the phone's edge it springs from */
-export const drawNoteCard = (g: Gfx, t: Theme, lp: Loop, frame: number, card: Card, from: P) => {
+export const drawNoteCard = (g: Gfx, t: Theme, lp: Loop, frame: number, card: Card, from: P, text: IntroStrings) => {
   const tau = lp.tau(frame);
   const out = ease((tau - 0.02) / 0.08), gone = ease((tau - 0.88) / 0.09), alpha = out * (1 - gone);
   if (alpha <= 0.001) return;
@@ -72,17 +89,17 @@ export const drawNoteCard = (g: Gfx, t: Theme, lp: Loop, frame: number, card: Ca
 
   if (card.style === "bubble") {
     // a small grey message already received, top left
-    shape(rrect(0, -118, W * 0.68, 84, 40), t.received, 958);
-    lines([RECEIVED], 30, -70, 0, 1, t.screenInk, 959);
+    shape(rrect(0, -118, W * RECEIVED_W, 84, 40), t.received, 958);
+    lines([text.walk.received], 30, -70, 0, 1, t.screenInk, 959);
     // the sent message, right-aligned: its height grows a line at a time as the lines come
     const lead = 52, pad = 34, n = 1 + [1, 2, 3].reduce((s, i) => s + ease((written - i + 0.2) / 0.35), 0);
-    const h = 2 * pad + lead * (n - 1) + 24, x0 = W * 0.06, w = W * 0.94;
+    const h = 2 * pad + lead * (n - 1) + 24, x0 = W * BUBBLE_X0, w = W * 0.94;
     const bubble = rrect(x0, 0, w, h, 42);
     // the tail at the bottom right, curling out of the bubble's corner
     // (it replaces the rounded bottom-right corner: points 7 to 13 of the outline)
     const tail: P[] = [[x0 + w, h - 44], [x0 + w + 4, h - 12], [x0 + w + 18, h + 6], [x0 + w - 24, h - 2], [x0 + w - 64, h]];
     shape([...bubble.slice(0, 7), ...tail, ...bubble.slice(14)], ACCENT, 960);
-    lines(BODY, x0 + 32, pad + 18, lead, written, "#FFFFFF", 970);
+    lines(text.walk.reply, x0 + 32, pad + 18, lead, written, "#FFFFFF", 970);
   } else {
     // a mail draft: the sheet, an envelope mark and the subject on its head, a rule, the body
     const H = 300;
@@ -90,8 +107,8 @@ export const drawNoteCard = (g: Gfx, t: Theme, lp: Loop, frame: number, card: Ca
     const env = [[28, 26], [76, 26], [76, 60], [28, 60]] as P[];
     pen(env.map(map), 3.6, ACCENT, 961);
     pen(([[28, 26], [52, 46], [76, 26]] as P[]).map(map), 3.2, ACCENT, 962, false);
-    drawText(g, SUBJECT, clamp(written * 2), ([x, y]) => map([96 + x, 58 + y]), { h: XH * 1.1, w: PEN * 1.25, color: t.screenInk, seed: 963, opacity: alpha });
+    drawText(g, text.metro.subject, clamp(written * 2), ([x, y]) => map([96 + x, 58 + y]), { h: XH * 1.1, w: PEN * 1.25, color: t.screenInk, seed: 963, opacity: alpha });
     pen(([[24, 86], [W - 24, 86]] as P[]).map(map), 2.4, t.screenFaint, 964, false);
-    lines(MAIL, 28, 140, 56, Math.max(0, written - 0.5) * 3 / 3.5, t.screenInk, 970);
+    lines(text.metro.body, 28, 140, 56, Math.max(0, written - 0.5) * 3 / 3.5, t.screenInk, 970);
   }
 };
