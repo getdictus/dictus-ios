@@ -454,6 +454,12 @@ class LiveActivityManager {
         }
     }
 
+    /// Preference changes may dismiss standby, never an active dictation.
+    func stopIdleStandbyActivity() {
+        guard currentPhase == .standby else { return }
+        stopStandbyActivity()
+    }
+
     /// Stop the standby Live Activity entirely.
     /// Called when user taps Power button in expanded Dynamic Island view.
     func stopStandbyActivity() {
@@ -885,6 +891,7 @@ class LiveActivityManager {
                               activitiesEnabled: ActivityAuthorizationInfo().areActivitiesEnabled)
             return
         }
+        guard MicrophoneLifecyclePolicy.mode(defaults: AppGroup.defaults) == .standby else { return }
         PersistentLog.log(.liveActivityTransition(from: currentPhase.rawValue, to: "recovery-standby"))
         // startStandbyActivity() persists its own outcome (created, orphanRecovered,
         // systemActivitiesDisabled, requestFailed, ...) -- no extra entry needed here.
@@ -931,6 +938,10 @@ class LiveActivityManager {
         }
 
         guard let activity = currentActivity else { return }
+        if MicrophoneLifecyclePolicy.mode(defaults: AppGroup.defaults) == .releaseAfterDictation {
+            endActivityForWarmStateRelease()
+            return
+        }
 
         PersistentLog.log(.liveActivityTransition(from: currentPhase.rawValue, to: "standby"))
         currentPhase = .standby  // Update BEFORE async work to prevent races (#49)

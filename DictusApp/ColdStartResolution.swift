@@ -101,6 +101,7 @@ extension DictationCoordinator {
             // The keyboard has already stopped waiting — its watchdog reset the status,
             // or a cancel wrote `.idle`. Raising an error banner now would speak for a
             // request the user has moved on from.
+            releaseMicrophoneIfPolicyRequires(reason: "cold-start-dropped", abandonedRequest: true)
             endColdStartAssertion(reason: "dropped")
             return false
         case .report:

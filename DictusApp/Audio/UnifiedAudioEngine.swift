@@ -3,6 +3,7 @@
 // Uses native AVAudioEngine (no WhisperKit dependency). Captured samples are passed to
 // transcribe(audioArray:) which accepts any [Float] 16kHz mono array.
 import Foundation
+import os
 @preconcurrency import AVFoundation
 import DictusCore
 
@@ -168,6 +169,13 @@ class UnifiedAudioEngine: ObservableObject {
     // MARK: - Private
 
     private var engine = AVAudioEngine()
+
+    // Keep the installed node so teardown never creates input hardware while idle.
+    private weak var installedTapNode: AVAudioInputNode?
+
+    // One observation per explicit standby restoration, without retaining idle audio.
+    private nonisolated let inputFlowProbe = OSAllocatedUnfairLock<(id: UUID, generation: UInt64)?>(initialState: nil)
+    private var observedInputFlowProbe: UUID?
 
     /// Accumulated audio samples in 16kHz mono Float32 (WhisperKit/Parakeet expected format).
     private var audioSamples: [Float] = []
@@ -653,13 +661,19 @@ class UnifiedAudioEngine: ObservableObject {
     func configureAudioSession() throws {
         let session = AVAudioSession.sharedInstance()
         if !sessionConfigured || session.category != .playAndRecord {
-            try session.setCategory(.playAndRecord, options: [.allowBluetoothA2DP, .defaultToSpeaker, .duckOthers])
+            try prepareAudioSessionCategory()
         }
         try session.setActive(true)
         sessionConfigured = true
 
         PersistentLog.log(.audioSessionConfigured(category: "playAndRecord"))
         applyHapticsAllowance(context: "configureAudioSession")
+    }
+
+    /// Prepare idle model loading without activating microphone input.
+    func prepareAudioSessionCategory() throws {
+        try AVAudioSession.sharedInstance().setCategory(
+            .playAndRecord, options: [.allowBluetoothA2DP, .defaultToSpeaker, .duckOthers])
     }
 
     // MARK: - System Haptics Allowance (issue #293)
@@ -870,6 +884,41 @@ class UnifiedAudioEngine: ObservableObject {
         return samples
     }
 
+    /// Confirm a new nonempty input buffer from this engine generation.
+    /// An engine reporting isRunning alone is not proof that its input tap works.
+    func waitForInputFlow() async throws -> Bool {
+        let probe = UUID()
+        let generation = engineGeneration
+        inputFlowProbe.withLock { $0 = (probe, generation) }
+        defer {
+            inputFlowProbe.withLock { if $0?.id == probe { $0 = nil } }
+        }
+        let deadline = ContinuousClock.now.advanced(by: .seconds(2))
+        while engine.isRunning && engineGeneration == generation && ContinuousClock.now < deadline {
+            try Task.checkCancellation()
+            if observedInputFlowProbe == probe { return true }
+            try await Task.sleep(for: .milliseconds(25))
+        }
+        return false
+    }
+
+    private nonisolated func observeInputFlow(_ buffer: AVAudioPCMBuffer, generation: UInt64) {
+        guard buffer.frameLength > 0, buffer.format.sampleRate > 0, buffer.format.channelCount > 0 else { return }
+        let probe = inputFlowProbe.withLock { pending -> UUID? in
+            // A callback already in flight during teardown must not consume a
+            // newer engine's observation request.
+            guard pending?.generation == generation else { return nil }
+            let value = pending?.id
+            pending = nil
+            return value
+        }
+        guard let probe else { return }
+        DispatchQueue.main.async { [weak self] in
+            guard let self, self.engineGeneration == generation, self.engine.isRunning else { return }
+            self.observedInputFlowProbe = probe
+        }
+    }
+
     /// Stop the engine completely and return all accumulated samples.
     /// After this, the next recording requires warmUp() or startRecording().
     ///
@@ -901,8 +950,12 @@ class UnifiedAudioEngine: ObservableObject {
         cancelIdleRelease()
         isRecording = false
         isRecordingFlag = false
-        engine.inputNode.removeTap(onBus: 0)
+        installedTapNode?.removeTap(onBus: 0)
+        installedTapNode = nil
         engine.stop()
+        engineGeneration &+= 1
+        converter = nil
+        lastUnconvertibleInputFormat = nil
         audioSamples = []
         PersistentLog.log(.audioEngineStopped)
         try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
@@ -1182,6 +1235,7 @@ class UnifiedAudioEngine: ObservableObject {
                 inputNode.installTap(onBus: 0, bufferSize: 4096, format: nil) { [weak self] buffer, _ in
                     guard let self else { return }
                     guard installedGeneration == self.engineGeneration else { return }
+                    self.observeInputFlow(buffer, generation: installedGeneration)
                     self.processBuffer(buffer)
                 }
             }
@@ -1190,6 +1244,8 @@ class UnifiedAudioEngine: ObservableObject {
             PersistentLog.log(.dictationFailed(error: "installTap NSException: \(reason)"))
             throw AudioEngineError.installTapFailed(call: .installTap, reason: reason)
         }
+
+        installedTapNode = inputNode
 
         // engine.start() can throw both Swift errors (AUIOClient_StartIO) and
         // Objective-C NSExceptions. Wrap in both ObjCExceptionCatcher AND Swift do/catch.

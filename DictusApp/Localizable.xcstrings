@@ -6092,7 +6092,69 @@
         }
       }
     },
-    "😊" : {}
+    "😊" : {},
+    "Release microphone after each dictation" : {
+      "comment" : "Settings toggle: when on, the app gives the microphone back the moment a dictation ends instead of keeping the engine warm.",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Libérer le micro après chaque dictée"
+          }
+        }
+      }
+    },
+    "After a dictation, Dictus keeps the microphone ready for 10 minutes so the next one starts without leaving your app." : {
+      "comment" : "Settings footer for the microphone lifecycle toggle when it is off: describes the standby design (issue #106).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Après une dictée, Dictus garde le micro prêt pendant 10 minutes pour que la suivante démarre sans quitter votre app."
+          }
+        }
+      }
+    },
+    "The microphone is released after transcription and processing finish. The next keyboard dictation may open Dictus and take longer to start." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le microphone est libéré après la transcription et le traitement. La prochaine dictée au clavier peut ouvrir Dictus et prendre plus de temps à démarrer."
+          }
+        }
+      }
+    },
+    "Preparing microphone standby…" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Préparation du microphone en veille…"
+          }
+        }
+      }
+    },
+    "Standby restored. Audio input was detected." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Veille rétablie. Une entrée audio a été détectée."
+          }
+        }
+      }
+    },
+    "Standby could not be restored. Start a dictation in Dictus to prepare the microphone." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La veille n’a pas pu être rétablie. Lancez une dictée dans Dictus pour préparer le microphone."
+          }
+        }
+      }
+    }
   },
   "version" : "1.1"
 }

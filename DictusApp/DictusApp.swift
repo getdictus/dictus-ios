@@ -373,7 +373,8 @@ struct DictusApp: App {
                         // the Live Activity. Calling startStandbyActivity() here creates a race:
                         // it detects the recording activity as "stale" and replaces it with a new
                         // standby activity, losing all waveform updates to the Dynamic Island.
-                        if !isRecordingActive {
+                        if !isRecordingActive, coordinator.microphoneLifecycleMode == .standby,
+                           coordinator.standbyRestorationState != .preparing {
                             LiveActivityManager.shared.startStandbyActivity()
                         }
                     @unknown default:
