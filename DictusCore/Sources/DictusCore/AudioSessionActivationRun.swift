@@ -100,6 +100,12 @@ public struct AudioSessionActivationRun {
         self.now = now
     }
 
+    /// Whole milliseconds since `start`, rounded so a clock that adds 0.05 s sixty times
+    /// reads 3000, not 2999.
+    private func milliseconds(since start: Date) -> Int {
+        Int((now().timeIntervalSince(start) * 1000).rounded())
+    }
+
     /// - Parameter firstActivation: how the start's own activation went.
     /// - Returns: `true` to start the engine, `false` to drop the start silently.
     /// - Throws: the last activation error when the policy gives up.
@@ -139,13 +145,16 @@ public struct AudioSessionActivationRun {
             case .waitForMediaServicesReset(let timeoutMs):
                 // Ends on a reset during this start. A loss flag still raised after one is
                 // a loss that reset cleared and a later one raised: the timeout bounds it.
+                // Each pause is capped at what is left, so the wait never asks for more than
+                // `timeoutMs` in total: a full 50 ms poll after 2990 ms used to overrun it.
                 let started = now()
-                while mediaServicesResetCount() == resetCountAtStart
-                        && now().timeIntervalSince(started) * 1000 < Double(timeoutMs) {
-                    guard await sleep(50) else { return false }
+                while mediaServicesResetCount() == resetCountAtStart {
+                    let remainingMs = timeoutMs - milliseconds(since: started)
+                    guard remainingMs > 0 else { break }
+                    guard await sleep(min(50, remainingMs)) else { return false }
                 }
                 hasWaitedForReset = true
-                let waitedMs = Int(now().timeIntervalSince(started) * 1000)
+                let waitedMs = milliseconds(since: started)
                 log("sessionActivationWaitedForReset",
                     "waitedMs=\(waitedMs) timeoutMs=\(timeoutMs) "
                         + "reset=\(mediaServicesResetCount() != resetCountAtStart) lost=\(mediaServicesLost())")
