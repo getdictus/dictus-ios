@@ -77,7 +77,7 @@ struct TrialEndedHeader: View {
                 tileRow {
                     if usage.smartModeUses > 0 {
                         tile(value: Text(usage.smartModeUses, format: .number), label: Text("Smart Mode dictations"),
-                             icon: ProFeature.smartMode.icon, tint: .dictusSmartMode)
+                             icon: ProFeature.smartMode.icon, tint: .dictusAccent)
                     }
                     if usage.vocabularyFixes > 0 {
                         tile(value: Text(usage.vocabularyFixes, format: .number), label: Text("Words fixed by Vocabulary"),

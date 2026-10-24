@@ -59,7 +59,6 @@ Quand tu as besoin de générer des assets visuels :
 - Accent highlight : #6BA3FF
 - Surface : #161C2C
 - Recording : #EF4444
-- Smart mode : #8B5CF6
 - Success : #22C55E
 
 ### Logo

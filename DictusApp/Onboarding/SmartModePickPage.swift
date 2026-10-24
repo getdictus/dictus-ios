@@ -16,8 +16,8 @@ import DictusCore
 /// (`OnboardingView.skip`). The rules (offer, cap, write) are `SmartModePick`, in
 /// DictusCore, where they are tested.
 ///
-/// WHY BLUE: Smart Modes are the app's accent here, never the purple `dictusSmartMode`
-/// token (#649 mock-ups).
+/// WHY BLUE: Smart Modes wear the app's accent, here as everywhere else (#649 mock-ups,
+/// #789).
 ///
 /// WHY A DRAFT (#725): the shell's back control returns here from the voice notes scene,
 /// and to the Smart Modes scene from here, and this page is rebuilt on every visit. Every

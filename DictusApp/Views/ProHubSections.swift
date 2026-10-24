@@ -88,7 +88,7 @@ struct ProHubFeatureCard: View {
 
     private var iconColor: Color {
         switch feature {
-        case .smartMode: return .dictusSmartMode
+        case .smartMode: return .dictusAccent
         case .history, .vocabulary, .voiceNotes: return .dictusAccentHighlight
         }
     }

@@ -129,7 +129,7 @@ struct SmartModeListView: View {
     private func row(_ mode: SmartMode, isPinned: Bool) -> some View {
         HStack(spacing: 12) {
             Image(systemName: mode.icon)
-                .foregroundColor(isPinned ? .dictusSmartMode : .secondary)
+                .foregroundColor(isPinned ? .dictusAccent : .secondary)
                 .frame(width: 24)
 
             Text(Self.listName(for: mode))

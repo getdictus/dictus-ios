@@ -106,7 +106,7 @@ struct ProTrialAnnouncementView: View {
         HStack(spacing: 12) {
             Image(systemName: feature.icon)
                 .font(.title3)
-                .foregroundColor(feature == .smartMode ? .dictusSmartMode : .dictusAccentHighlight)
+                .foregroundColor(feature == .smartMode ? .dictusAccent : .dictusAccentHighlight)
                 .frame(width: 28)
 
             VStack(alignment: .leading, spacing: 2) {
