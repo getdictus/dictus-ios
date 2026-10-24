@@ -478,10 +478,10 @@ struct PaywallView: View {
         return "\(feature.displayName): \(feature.paywallDescription). \(notice)"
     }
 
-    /// Icon color per feature (UI-SPEC: Smart Mode = purple, others = accent highlight).
+    /// Icon color per feature (Smart Mode = accent, others = accent highlight; #789).
     private func iconColor(for feature: ProFeature) -> Color {
         switch feature {
-        case .smartMode: return .dictusSmartMode
+        case .smartMode: return .dictusAccent
         case .history, .vocabulary, .voiceNotes: return .dictusAccentHighlight
         }
     }

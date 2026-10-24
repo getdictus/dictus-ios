@@ -470,7 +470,7 @@ Dictus fully embraces **iOS 26 Liquid Glass** â€” Apple's new design language â€
 - **Idle**: frosted glass, `mic.fill` SF Symbol, subtle inner glow
 - **Recording**: glass tints red/orange, pulsing ring, real-time waveform
 - **Transcribing**: spinning shimmer progress ring
-- **Smart mode active**: subtle blue/purple tint to signal LLM is processing
+- **Smart mode active**: subtle blue tint to signal LLM is processing
 
 #### Mode pill
 - Floating Liquid Glass pill next to the mic button showing active mode name + icon

@@ -126,10 +126,10 @@ struct DictusLiveActivity: Widget {
         case .processing:
             // Different glyph AND different colour from transcribing: at compact
             // size the pill shows one icon, so it has to carry the whole
-            // distinction on its own (#267). Purple is the brand's Smart-mode
-            // colour, which is where this stage is heading (#79).
+            // distinction on its own (#267). The lighter accent blue keeps it
+            // apart from transcribing without leaving the brand's blues (#789).
             Image(systemName: "sparkles")
-                .foregroundColor(Color(hex: 0x8B5CF6))
+                .foregroundColor(Color(hex: 0x6BA3FF))
                 .font(.system(size: 14))
         case .ready:
             Text("Done")
@@ -225,7 +225,7 @@ struct DictusLiveActivity: Widget {
                 case .processing:
                     Text("Processing...")
                         .font(.system(size: 12))
-                        .foregroundColor(Color(hex: 0x8B5CF6))
+                        .foregroundColor(Color(hex: 0x6BA3FF))
                 case .ready:
                     Text("Transcription ready")
                         .font(.system(size: 12))
@@ -302,7 +302,7 @@ struct DictusLiveActivity: Widget {
                     .tint(.white)
             case .processing:
                 ProgressView()
-                    .tint(Color(hex: 0x8B5CF6))
+                    .tint(Color(hex: 0x6BA3FF))
             case .ready, .failed:
                 EmptyView()
             }
@@ -387,7 +387,7 @@ struct DictusLiveActivity: Widget {
                 case .processing:
                     Text("Processing...")
                         .font(.system(size: 13))
-                        .foregroundColor(Color(hex: 0x8B5CF6))
+                        .foregroundColor(Color(hex: 0x6BA3FF))
                         .lineLimit(1)
                         .minimumScaleFactor(0.8)
                 case .ready:
