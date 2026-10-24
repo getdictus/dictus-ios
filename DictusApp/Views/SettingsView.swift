@@ -663,7 +663,11 @@ struct SettingsView: View {
 
     /// User-facing explanation per availability state. Strings live in this
     /// view so Localizable.xcstrings can auto-detect them.
-    private func polishStateMessage(for state: PolishAvailabilityState) -> String {
+    ///
+    /// WHY `LocalizedStringKey` (#792): `Text` shows a `String` verbatim, so these
+    /// sentences stayed English on a French iPhone. A key is looked up in the catalog,
+    /// and the interpolated `reason` below becomes its `%@`.
+    private func polishStateMessage(for state: PolishAvailabilityState) -> LocalizedStringKey {
         switch state {
         case .available:
             return ""
