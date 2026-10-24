@@ -26,8 +26,8 @@ import Foundation
 ///   returns French is the lie #423 removed from the keyboard.
 public struct SmartModeHomeMic: Equatable, Sendable {
 
-    /// Whether the home screen offers the Smart Mode surface: the mode chip, the long
-    /// press and the accessibility action. False exactly where the keyboard's long press
+    /// Whether the home screen offers the Smart Mode surface: the dial's resting hint,
+    /// the long press and the accessibility actions. False exactly where the keyboard's long press
     /// opens nothing.
     public let isOffered: Bool
 
@@ -84,12 +84,14 @@ public enum SmartModeHomeChoice: Equatable, Sendable {
     /// The Dictus Pro row: nothing was written, the caller opens the paywall.
     case openPaywall
 
-    /// A mode row that cannot be armed right now. Nothing was written; the picker's
-    /// reason line already says why.
+    /// A mode row that cannot be armed right now. Nothing was written; the dial's
+    /// line already says why.
     case refused
 }
 
-/// The home mic's mode picker: the keyboard's long-press fan, drawn in the app (#489).
+/// The home mic's mode picker: the keyboard's long-press fan, drawn in the app as the
+/// dial around the mic (`SmartModeRingSession` lays these rows out and reads the
+/// finger) and offered to VoiceOver as one action per row (#489).
 ///
 /// ### Same rows, same order, same gate
 ///
