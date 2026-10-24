@@ -80,7 +80,8 @@ argent run screenshot --udid <udid> --scale 1 --out ~/dev/dictus-evidence/verify
 | `onboarding.smartModePick.counter`, `onboarding.smartModePick.<mode>` | Smart Mode tiles: `structured`, `notes`, `message`, `summary`, `translate.fr/en/es/de` |
 | `onboarding.firstDictation.field`, `onboarding.firstDictation.banner` | Practice field |
 | `proFeatureDemoLink`, `proFeatureScene.ok` | "Voir la démonstration" on a Pro screen, its OK |
-| `home.newDictation` | The round mic on Home that starts a dictation (label « Nouvelle dictée »; only with a model) |
+| `home.newDictation` | The round mic on Home that starts a dictation (label « Nouvelle dictée »; value: the mode the next dictation runs; one VoiceOver action per choosable mode, « Utiliser <mode> » / « Dictus Pro »; only with a model). Holding it opens the Smart Mode ring |
+| `home.smartModeRing` | The Smart Mode ring around the Home mic, while it is open (#489). `accessibilityHidden`, so **not** in `axe describe-ui`: prove it with a screenshot and the `smartModeRing*` log lines (features/smart-modes.md) |
 | `voiceNoteReaderClose`, `voiceNoteReaderDelete`, `voiceNoteReaderEmpty`, `voiceNoteReaderOpen`, `voiceNoteReaderInsert` | Keyboard voice-note reader (inside the keyboard, so not in the host's tree) |
 
 Labels that are stable and unique (French device): tabs `Accueil` / `Modèles` / `Réglages` (RadioButtons, no identifier); `Dictus Pro, Pro actif`; the Pro hub rows `Mode intelligent, …`, `Historique, …`, `Vocabulaire, …`, `Messages vocaux, …`; `Langues prises en charge`; `Sons`, `Diagnostic`, `Debug Logs`, `Licences`, `Exporter les logs`; navigation back is the identifier `BackButton`, a modal close `xmark` or the label `Fermer`.
