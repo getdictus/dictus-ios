@@ -51,6 +51,9 @@ public enum AudioSessionActivationDecision: Equatable, Sendable {
 ///   The capture has no loss line (nothing observed it then) and its reset came one second
 ///   after the failure, so a server going down is not always announced before activation
 ///   fails on it. A failure that is not the server costs the wait, then "tap again".
+///   The error code does not pick those apart: `'!int'` (`cannotInterruptOthers`) refused
+///   the activation right after an interruption in #515's capture and the next attempt
+///   worked, so it is not proof that another app keeps the session.
 ///
 /// The activation after the wait is the last one that start gets: a reset that arrives and
 /// still leaves the session unable to activate is not something a second wait can fix.

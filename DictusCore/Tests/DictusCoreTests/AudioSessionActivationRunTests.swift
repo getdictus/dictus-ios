@@ -176,11 +176,50 @@ final class AudioSessionActivationRunTests: XCTestCase {
             XCTAssertEqual((error as? AudioSessionActivationFailure)?.code, 560_557_684)
         }
         XCTAssertEqual(session.activations, 3)
-        let waitedMs = Int(session.clock.timeIntervalSince(begin) * 1000)
+        let waitedMs = Int((session.clock.timeIntervalSince(begin) * 1000).rounded())
         XCTAssertLessThanOrEqual(
             waitedMs,
             AudioSessionActivationPolicy.retryDelayMilliseconds
-                + AudioSessionActivationPolicy.mediaServicesResetTimeoutMilliseconds + 50)
+                + AudioSessionActivationPolicy.mediaServicesResetTimeoutMilliseconds)
+    }
+
+    /// The trade-off PR #801 makes, pinned: a `'!int'` refusal (`cannotInterruptOthers`) with
+    /// no reset ever posted costs the one retry and the one reset wait, never more, then
+    /// fails with the activation error. That error is the "tap again" path: the app's
+    /// `activationStep` rethrows it as `AudioEngineError.sessionActivationFailed`, whose
+    /// sentence is "Dictation could not start. Tap the microphone again."
+    ///
+    /// WHY `'!int'` still waits rather than failing at once: #515's capture shows `'!int'`
+    /// refusing the activation right after an interruption, and the next attempt working.
+    /// It is a transient refusal, so it does not tell another app holding the session apart
+    /// from an audio stack still coming back, and #775's own code was never logged.
+    func testACannotInterruptOthersRefusalWithNoResetFailsWithinTheBound() async {
+        let session = FakeSession(failuresLeft: .max)
+        let begin = session.clock
+        var thrown: Error?
+        do {
+            let started = try await session.run(session.firstActivation())
+            XCTFail("expected the activation error, got started=\(started)")
+        } catch {
+            thrown = error
+        }
+
+        let failure = thrown as? AudioSessionActivationFailure
+        XCTAssertEqual(failure?.step, .setActive)
+        XCTAssertEqual(failure?.code, 560_557_684)
+        XCTAssertEqual(failure?.status, "560557684 '!int'")
+        XCTAssertEqual(session.activations, 3, "first, retry, after the wait")
+        XCTAssertEqual(session.resetCount, 0)
+
+        let elapsedMs = Int((session.clock.timeIntervalSince(begin) * 1000).rounded())
+        XCTAssertLessThanOrEqual(
+            elapsedMs,
+            AudioSessionActivationPolicy.retryDelayMilliseconds
+                + AudioSessionActivationPolicy.mediaServicesResetTimeoutMilliseconds)
+        XCTAssertLessThanOrEqual(elapsedMs, 3250)
+        XCTAssertTrue(session.lines.contains { $0.hasPrefix("sessionActivationWaitedForReset") && $0.contains("reset=false") },
+                      session.lines.joined(separator: "\n"))
+        XCTAssertFalse(session.lines.contains { $0.hasPrefix("sessionActivationRecovered") })
     }
 
     /// The keyboard stopped waiting during the reset wait: drop the start, no engine.
