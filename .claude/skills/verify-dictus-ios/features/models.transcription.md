@@ -48,4 +48,4 @@ The smallest model that downloads and transcribes is **Small (quantifié)**, `op
 
 - A download is real network traffic (217 MB to 1.5 GB). Do it only when the task needs a model.
 - **Not drivable in the simulator:** the `>= 6 GB` Turbo gate and `insufficientMemory` (the simulator reports the Mac's RAM), compile times and Neural Engine behaviour (Mac silicon), the Core ML cache surviving an install.
-- Identifier-based gating (A12/A13, and Turbo on A14 since #660) does render on a device created with that device type (`docs/agents/simulator.md` §1). Measured 2026-10-24: on `iPhone-12-Pro` (`model=iPhone13,3 ramGB=24`) the Turbo card reads « Non compatible avec cet iPhone »; on `iPhone-13-Pro` (`iPhone14,2`) it is enabled.
+- Identifier-based gating (A12/A13) does render on a device created with that device type (`docs/agents/simulator.md` §1).
