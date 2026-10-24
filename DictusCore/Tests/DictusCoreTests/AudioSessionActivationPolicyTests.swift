@@ -39,12 +39,14 @@ final class AudioSessionActivationPolicyTests: XCTestCase {
         )
     }
 
-    /// The retry failed too: give up with "tap again" rather than start an inactive session.
-    func testASecondFailedActivationFails() {
+    /// The retry failed too, with no loss observed: wait for a reset before giving up. The
+    /// capture's reset came one second after the failure, with no loss line before it.
+    func testASecondFailedActivationWaitsForAReset() {
         XCTAssertEqual(
             AudioSessionActivationPolicy.decide(
                 activated: false, failedAttempts: 2, mediaServicesLost: false, hasWaitedForReset: false),
-            .fail
+            .waitForMediaServicesReset(
+                timeoutMilliseconds: AudioSessionActivationPolicy.mediaServicesResetTimeoutMilliseconds)
         )
     }
 
