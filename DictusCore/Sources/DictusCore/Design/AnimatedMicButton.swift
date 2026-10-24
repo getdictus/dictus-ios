@@ -62,19 +62,47 @@ public struct AnimatedMicButton: View {
     /// dictation, where the motion carries state the user needs.
     public let animatesIdleGlow: Bool
 
+    /// What the resting button shows instead of the plain mic, or nil for the mic.
+    ///
+    /// The app's Home mic only (#489): there the button is 72 pt across and the mode
+    /// dial sits around it, so it can carry the mode's own glyph and the brand's deep
+    /// blue. The keyboard pill never passes one — its 36 pt and the rule #79 set for
+    /// it (a badge, never a second colour) stand. Ignored outside the resting states:
+    /// recording and transcribing keep their own fills.
+    public let face: MicFace?
+
     public let onTap: () -> Void
 
     public init(status: DictationStatus,
                 isPill: Bool = false,
                 badge: SmartModeBadge? = nil,
                 animatesIdleGlow: Bool = true,
+                face: MicFace? = nil,
                 onTap: @escaping () -> Void) {
         self.status = status
         self.isPill = isPill
         self.badge = badge
         self.animatesIdleGlow = animatesIdleGlow
+        self.face = face
         self.onTap = onTap
     }
+
+    /// A resting face for the round mic: a glyph, an optional caption under it (a
+    /// translation's target code), and the fill.
+    public struct MicFace: Equatable {
+        public let symbol: String
+        public let caption: String?
+        public let fill: Color
+
+        public init(symbol: String, caption: String? = nil, fill: Color) {
+            self.symbol = symbol
+            self.caption = caption
+            self.fill = fill
+        }
+    }
+
+    /// The face in force: only at rest, where `isTappable` is true.
+    private var restingFace: MicFace? { isTappable ? face : nil }
 
     // MARK: - Animation State
 
@@ -137,11 +165,24 @@ public struct AnimatedMicButton: View {
                         .frame(width: buttonWidth, height: buttonHeight)
                 }
 
-                // Mic icon
-                Image(systemName: "mic.fill")
-                    .font(.system(size: isPill ? 14 : 16, weight: .medium))
+                // Mic icon, or the armed mode's face on the Home mic
+                if let restingFace {
+                    VStack(spacing: 1) {
+                        Image(systemName: restingFace.symbol)
+                            .font(.system(size: 22, weight: .medium))
+                        if let caption = restingFace.caption {
+                            Text(verbatim: caption)
+                                .font(.system(size: 10, weight: .bold, design: .rounded))
+                                .lineLimit(1)
+                        }
+                    }
                     .foregroundColor(.white)
-                    .scaleEffect(status == .recording ? pulseScale * 0.9 + 0.1 : 1.0)
+                } else {
+                    Image(systemName: "mic.fill")
+                        .font(.system(size: isPill ? 14 : 16, weight: .medium))
+                        .foregroundColor(.white)
+                        .scaleEffect(status == .recording ? pulseScale * 0.9 + 0.1 : 1.0)
+                }
 
                 // Armed Smart Mode, last so nothing draws over it
                 armedBadge
@@ -262,7 +303,7 @@ public struct AnimatedMicButton: View {
         case .transcribing, .processing:
             return .dictusAccentHighlight.opacity(0.5)
         default:
-            return .dictusAccent
+            return restingFace?.fill ?? .dictusAccent
         }
     }
 
