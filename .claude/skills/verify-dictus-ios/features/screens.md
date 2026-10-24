@@ -40,8 +40,8 @@ Captures are in [`docs/agents/screens/`](../../../../docs/agents/screens/), one 
 | `app.pro.vocabulary` | Pro → Vocabulaire (terms, suggestions) | hub → « Vocabulaire, … » | vocabulary | [oui](../../../../docs/agents/screens/app.pro.vocabulary.png) |
 | `app.pro.vocabulary.term-editor` | « Nouveau terme » sheet | Vocabulaire → « Ajouter un terme » | vocabulary | non |
 | `app.pro.voice-notes` | Pro → Messages vocaux (language, after transcription) | hub → « Messages vocaux, … » | voice-notes | [oui](../../../../docs/agents/screens/app.pro.voice-notes.png) |
-| `app.paywall` | Paywall (three plans) | unreachable while PremiumFlags.paywallVisible = false | pro.subscription | non |
-| `app.pro.trial-announcement` | Reverse-trial announcement sheet | unreachable while paywallVisible = false | pro.subscription | non |
+| `app.paywall` | Paywall (plans and prices) | Accueil → « Débloquez Dictus Pro, … » (no trial running); prices need simslim's `store` category, see pro.subscription Gotchas | pro.subscription | [oui](../../../../docs/agents/screens/app.paywall.png) |
+| `app.pro.trial-announcement` | Reverse-trial announcement sheet | « C'est prêt » → « Commencer » on a fresh install (`kind=newUser`); or Réglages → Developer → « Forget the trial » + « Forget What's new », relaunch, end of What's new (`kind=existingUser`) | pro.subscription | [oui](../../../../docs/agents/screens/app.pro.trial-announcement.png) |
 | `app.voice-note.result` | Voice-note result cards | share an audio file to Dictus (no messaging app in the simulator) | voice-notes | non |
 | `kbd.keys` | Dictus keyboard, letters (AZERTY), toolbar with ☰ and mic | full-access, select-keyboard | dictation.keyboard, typing.autocorrect | [oui](../../../../docs/agents/screens/kbd.keys.png) |
 | `kbd.no-full-access` | Keyboard bar « Accès complet requis », mic greyed | select-keyboard before full-access | dictation.keyboard | [oui](../../../../docs/agents/screens/kbd.no-full-access.png) |
@@ -60,7 +60,7 @@ Captures are in [`docs/agents/screens/`](../../../../docs/agents/screens/), one 
 | `share.voice-note` | Share extension sheet | Partager → Dictus from a messaging app | voice-notes | non |
 | `widget.live-activity` | Live Activity in the Dynamic Island | leave Dictus with standby on (not reproduced) | live-activity | non |
 
-43 of 53 screens captured. Each « non » is explained in the Gotchas of the feature it belongs to: a model download, a recording of the Mac's microphone, Apple Intelligence, StoreKit, a messaging app, or `paywallVisible = false`.
+45 of 53 screens captured. Each « non » is explained in the Gotchas of the feature it belongs to: a model download, a recording of the Mac's microphone, Apple Intelligence, StoreKit or a messaging app.
 
 ## The keyboard's top bar: states and transitions
 

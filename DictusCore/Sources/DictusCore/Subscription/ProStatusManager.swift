@@ -356,7 +356,7 @@ public final class ProStatusManager: ObservableObject {
     ///
     /// `isProActiveStatic` is this with the App Group, the wall clock and the shipping
     /// flag. The tests call it directly, because the shipping flag is a compile-time
-    /// `false` that would otherwise make the trial branch unreachable to them.
+    /// constant that would otherwise pin one side of the trial branch for them.
     nonisolated public static func entitlement(in defaults: UserDefaults,
                                                now: Date,
                                                trialsEnabled: Bool) -> Bool {
