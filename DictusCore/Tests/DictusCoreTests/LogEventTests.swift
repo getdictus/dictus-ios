@@ -231,6 +231,24 @@ final class LogEventTests: XCTestCase {
         XCTAssertEqual(event.message, "context=startEngine-warmUp error=boom")
     }
 
+    // MARK: - Idle input mute (issue #430)
+
+    func testInputMutedIsInfoAudioAndCarriesTheValue() {
+        let event = LogEvent.audioInputMuted(context: "collectSamples", muted: true)
+        XCTAssertEqual(event.level, .info)
+        XCTAssertEqual(event.subsystem, .audio)
+        XCTAssertEqual(event.name, "audioInputMuted")
+        XCTAssertEqual(event.message, "context=collectSamples muted=true")
+    }
+
+    func testInputMuteFailedIsWarningAudio() {
+        let event = LogEvent.audioInputMuteFailed(context: "startRecording", muted: false, error: "boom")
+        XCTAssertEqual(event.level, .warning)
+        XCTAssertEqual(event.subsystem, .audio)
+        XCTAssertEqual(event.name, "audioInputMuteFailed")
+        XCTAssertEqual(event.message, "context=startRecording muted=false error=boom")
+    }
+
     /// The snapshot is the periodic line a reader scans; #293 added the
     /// allowance to it so a regression is visible without correlating two events.
     func testEngineStateSnapshotReportsHapticsAllowance() {
