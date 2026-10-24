@@ -31,7 +31,7 @@ Out of the map on purpose: the "Developer" section of Réglages (Debug builds on
 
 ## All IDs
 
-Every ID in this map, in one table: the 18 features first, then their 109 sub-features (in the order of the feature files), then the 53 screens of [screens.md](screens.md) — 180 IDs in all. **Gratuit/Pro** is the tier of the feature the ID belongs to. **Spécifique iOS** is « oui » when the ID has no Android equivalent to compare against: the keyboard-to-app hand-off and Full Access (an iOS keyboard extension cannot record and must ask for Full Access), return to the host app, Apple Intelligence (polish), the Dynamic Island (Live Activity, stopping standby), and the App Group check.
+Every ID in this map, in one table: the 18 features first, then their 110 sub-features (in the order of the feature files), then the 54 screens of [screens.md](screens.md) — 182 IDs in all. **Gratuit/Pro** is the tier of the feature the ID belongs to. **Spécifique iOS** is « oui » when the ID has no Android equivalent to compare against: the keyboard-to-app hand-off and Full Access (an iOS keyboard extension cannot record and must ask for Full Access), return to the host app, Apple Intelligence (polish), the Dynamic Island (Live Activity, stopping standby), and the App Group check.
 
 | ID | Gratuit/Pro | Spécifique iOS |
 | --- | --- | --- |
@@ -88,6 +88,7 @@ Every ID in this map, in one table: the 18 features first, then their 109 sub-fe
 | `smart-modes.translate` | Pro | non |
 | `smart-modes.pin` | Pro | non |
 | `smart-modes.toggle` | Pro | non |
+| `smart-modes.home-picker` | Pro | non |
 | `history.list` | Pro | non |
 | `history.search` | Pro | non |
 | `history.delete` | Pro | non |
@@ -178,6 +179,7 @@ Every ID in this map, in one table: the 18 features first, then their 109 sub-fe
 | `app.onboarding.completion` | Gratuit | non |
 | `app.whats-new` | Gratuit | non |
 | `app.home` | Gratuit | non |
+| `app.home.smart-mode-picker` | Pro | non |
 | `app.recording` | Gratuit | non |
 | `app.history` | Pro | non |
 | `app.history.detail` | Pro | non |
