@@ -738,7 +738,7 @@ public struct ModelInfo: Identifiable {
     /// Whether this model is safe to expose on a device with the given capabilities.
     ///
     /// For the quantized Whisper Turbo variants (`_v20240930_turbo_632MB` and the
-    /// deprecated `_954MB`): requires ≥ 6 GB RAM. This matches Argmax's published
+    /// deprecated `_954MB`): requires an A15 or later (#660) and ≥ 6 GB RAM. This matches Argmax's published
     /// compatibility matrix: the iPhone 14/15/16/17 families (iPhone14,X through
     /// iPhone18,X in Apple identifier nomenclature) list both variants as supported,
     /// and those devices ship with 6 GB+ RAM.
@@ -801,7 +801,15 @@ public struct ModelInfo: Identifiable {
         // the same device families, so they share one rule. The deprecated `_954MB`
         // is matched here too — it is still installed on devices, so the Settings
         // "Downloaded" row it renders must be able to say why it is disabled.
+        //
+        // The chip test comes before the RAM test (#660): Argmax lists neither variant for
+        // the A14 or the M1 iPads, so a 6 GB iPhone 12 Pro has the memory and lacks the
+        // generation. This is the same line `recommendedIdentifier(forSpokenLanguage:on:)`
+        // reads through `isA15OrLater`, so the picker and the recommendation agree. It
+        // only greys the Available row: the Downloaded section passes no reason, so an
+        // A14 user who installed Turbo under an earlier build keeps dictating with it.
         case "openai_whisper-large-v3-v20240930_turbo_632MB", "openai_whisper-large-v3_turbo_954MB":
+            if capabilities.isPreA15 { return .hardwareGeneration }
             return capabilities.physicalMemoryGB >= 6 ? nil : .insufficientMemory(requiredGB: 6)
         default:
             return nil
