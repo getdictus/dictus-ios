@@ -88,7 +88,7 @@ Every ID in this map, in one table: the 18 features first, then their 110 sub-fe
 | `smart-modes.translate` | Pro | non |
 | `smart-modes.pin` | Pro | non |
 | `smart-modes.toggle` | Pro | non |
-| `smart-modes.home-picker` | Pro | non |
+| `smart-modes.home-ring` | Pro | non |
 | `history.list` | Pro | non |
 | `history.search` | Pro | non |
 | `history.delete` | Pro | non |
@@ -179,7 +179,7 @@ Every ID in this map, in one table: the 18 features first, then their 110 sub-fe
 | `app.onboarding.completion` | Gratuit | non |
 | `app.whats-new` | Gratuit | non |
 | `app.home` | Gratuit | non |
-| `app.home.smart-mode-picker` | Pro | non |
+| `app.home.smart-mode-ring` | Pro | non |
 | `app.recording` | Gratuit | non |
 | `app.history` | Pro | non |
 | `app.history.detail` | Pro | non |

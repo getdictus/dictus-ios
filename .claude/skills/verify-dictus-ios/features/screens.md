@@ -22,7 +22,7 @@ Captures are in [`docs/agents/screens/`](../../../../docs/agents/screens/), one 
 | `app.onboarding.completion` | Onboarding: « C'est prêt » | … -string completion | onboarding | [oui](../../../../docs/agents/screens/app.onboarding.completion.png) |
 | `app.whats-new` | What's new (existing user behind 2.0.0) | set-default dictus.hasCompletedOnboarding -bool YES, then dictus.lastVersionSeen -string 1.8.0 | onboarding | [oui](../../../../docs/agents/screens/app.whats-new.png) |
 | `app.home` | Tab Accueil (no model: « Télécharger un modèle pour commencer »; with a model, a round mic above the history hint) | launch.sh --skip-onboarding | dictation.in-app, history | [oui](../../../../docs/agents/screens/app.home.png) |
-| `app.home.smart-mode-picker` | Home's Smart Mode picker over the mic (#489) | Accueil (with a model) → tap-id home.smartMode, or hold home.newDictation | smart-modes | [oui](../../../../docs/agents/screens/app.home.smart-mode-picker.png) |
+| `app.home.smart-mode-ring` | Home's Smart Mode ring open around the mic, Liste lit, « Relâchez pour dicter : Liste » (#489) | Pro + `dictus.debugAppleIntelligenceForced`, Accueil (with a model) → hold `home.newDictation`, slide; screenshot during the drag (recipe in smart-modes.md) | smart-modes | [oui](../../../../docs/agents/screens/app.home.smart-mode-ring.png) |
 | `app.recording` | Full-screen in-app recording | Accueil → round mic `home.newDictation` (needs a model; records the Mac's mic) | dictation.in-app | non |
 | `app.history` | History sheet (empty state) | Pro on, Accueil → tap-label Historique | history | [oui](../../../../docs/agents/screens/app.history.png) |
 | `app.history.detail` | Transcription detail | History → a row (needs a transcription) | history, vocabulary | non |
