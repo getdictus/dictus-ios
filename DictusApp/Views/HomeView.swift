@@ -33,18 +33,31 @@ struct HomeView: View {
     /// writes it from another process and nothing publishes that write.
     @State private var smartModeMic = SmartModeHomeMic(isOffered: false, effectiveMode: nil)
 
-    /// The open picker, or nil when it is closed (#489).
-    @State private var smartModePicker: SmartModeHomePicker?
+    /// The rows VoiceOver's actions on the mic offer, resolved with `smartModeMic` so a
+    /// body evaluation never asks Apple Intelligence anything (#489).
+    @State private var smartModeChoices: SmartModeHomePicker?
 
-    /// The mic's frame in the dashboard's coordinate space, which is where the picker
-    /// anchors its rows.
+    /// The open dial: one long press, from the ring opening to the release (#489).
+    @State private var ringSession: SmartModeRingSession?
+
+    /// When the last dial closed. The release of a long press can still reach the mic's
+    /// button and the dashboard's swipe as a tap and a drag; neither may act on it.
+    @State private var ringClosedAt: Date?
+
+    /// Whether the mic's long-press-then-slide gesture is in flight. Resets on its own
+    /// when the touch ends or is cancelled, which is how a dial whose drag never began
+    /// still closes.
+    @GestureState private var ringGestureActive = false
+
+    /// The mic's frame in the dashboard's coordinate space: the drag is measured from
+    /// its centre.
     @State private var micFrame: CGRect = .zero
 
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     /// Observed so a Smart Mode switch flipped in the Pro hub moves the badge and the
-    /// chip on the way back here: the switch writes the App Group, which publishes nothing.
+    /// mic's face on the way back here: the switch writes the App Group, which publishes nothing.
     @ObservedObject private var switches = ProFeatureSwitches.shared
 
     private static let dashboardSpace = "home.dashboard"
@@ -96,6 +109,7 @@ struct HomeView: View {
                     dashboardCards
                 }
             }
+            .homeSmartModeRingDim(ringSession != nil)
 
             // The primary action, a round mic since #788. At the bottom of the content
             // rather than among the cards: it is within thumb reach, it stays put when
@@ -103,6 +117,8 @@ struct HomeView: View {
             // recording screen's own mic sits.
             if modelManager.isModelReady {
                 micRow
+                    // Above the hint below it, which the dial's line overlaps.
+                    .zIndex(1)
             }
 
             // The affordance for the history (#70), last so it sits at the bottom
@@ -110,25 +126,23 @@ struct HomeView: View {
             // paywall is unreachable the app must look like there is no subscription
             // at all (#236), and a lock leading nowhere is the one place that would
             // break it.
-            switch entryPoint {
-            case .open:
-                SwipeUpHintView { showHistory = true }
-            case .locked:
-                SwipeUpHintView(isLocked: true) { showPaywall = true }
-            case .hidden:
-                EmptyView()
+            Group {
+                switch entryPoint {
+                case .open:
+                    SwipeUpHintView { showHistory = true }
+                case .locked:
+                    SwipeUpHintView(isLocked: true) { showPaywall = true }
+                case .hidden:
+                    EmptyView()
+                }
             }
+            // Gone rather than dimmed while the dial's line is drawn over it.
+            .opacity(ringSession != nil && HomeSmartModeRingStyle.showsReleaseHint ? 0 : 1)
+            .homeSmartModeRingDim(ringSession != nil)
         }
         .padding()
         .background(Color.dictusBackground.ignoresSafeArea())
         .coordinateSpace(.named(Self.dashboardSpace))
-        // The Smart Mode picker (#489), over the dashboard and under nothing: it is the
-        // one thing on screen while it is open, and a tap anywhere else closes it.
-        .overlay {
-            if let picker = smartModePicker {
-                smartModePickerOverlay(picker)
-            }
-        }
         // The swipe itself. Attached to the whole dashboard rather than to the hint,
         // because the issue asks for a swipe up "from the home screen" — the hint
         // says where, it is not the only place the gesture is allowed to start.
@@ -144,6 +158,9 @@ struct HomeView: View {
         .gesture(
             DragGesture(minimumDistance: 20)
                 .onEnded { value in
+                    // A finger sliding up from the mic to the dial's Normal sector is
+                    // a 60 pt swipe up; it chose a mode, it did not ask for the history.
+                    guard !isRingBusy else { return }
                     // The predicted end is what makes a fast flick work: the finger
                     // may lift after 30pt while still travelling. Either the actual
                     // or the predicted travel clearing the threshold opens the sheet.
@@ -160,9 +177,8 @@ struct HomeView: View {
             // but not receiving". On `.hidden` no touch on this screen reaches the
             // drag at all.
             //
-            // Off as well while the Smart Mode picker is open (#489): a swipe on its dim
-            // is a dismissal at most, never a second screen opening under the menu.
-            including: entryPoint == .hidden || smartModePicker != nil ? .none : .all
+            // Off as well while the Smart Mode dial is open (#489).
+            including: entryPoint == .hidden || ringSession != nil ? .none : .all
         )
         .sheet(isPresented: $showHistory) {
             // A sheet is the vertical transition the issue asks for, and it brings
@@ -191,8 +207,8 @@ struct HomeView: View {
         }
         .onChange(of: proStatus.isProActive) { _, _ in refreshSmartMode() }
         .onChange(of: switches.values) { _, _ in refreshSmartMode() }
-        // A picker left open behind another tab would come back stale.
-        .onDisappear { smartModePicker = nil }
+        // A dial left open behind another tab would come back stale.
+        .onDisappear { ringSession = nil }
         .onReceive(NotificationCenter.default.publisher(for: Notification.Name("DictusOnboardingCompleted"))) { _ in
             // WHY onReceive in addition to onAppear:
             // HomeView mounts behind the onboarding fullScreenCover, so onAppear fires
@@ -356,28 +372,35 @@ struct HomeView: View {
 
     // MARK: - New Dictation Button
 
-    /// The mic, centred, with the Smart Mode chip beside it (#489).
+    /// The mic, centred, with the Smart Mode dial's resting hint around it (#489).
     ///
-    /// The chip sits in the same row rather than under the mic so the row costs no
-    /// height: #788 had to win back 64 pt to keep the history hint above the tab bar on
-    /// an iPhone SE height, and a line under the mic would give it back. The two sides
-    /// take equal widths, so the mic stays on the screen's centre line whatever the chip
-    /// says.
+    /// Everything Smart Mode draws here is an overlay or a background on the mic: the
+    /// chevrons, the ring, the line under it. None of it owns layout, so the mic is
+    /// exactly where #788 put it whatever the dial is doing, and the recording screen,
+    /// which lines its own button up on this one, sees no difference.
     private var micRow: some View {
-        HStack(spacing: 8) {
-            Color.clear
-                .frame(height: 1)
-                .frame(maxWidth: .infinity)
-            newDictationButton
-            Group {
-                if smartModeMic.isOffered {
-                    HomeSmartModeChip(mode: smartModeMic.effectiveMode) { openSmartModePicker() }
-                } else {
-                    Color.clear.frame(height: 1)
+        newDictationButton
+            // The ring and the resting hint behind the mic, so the mic draws over both.
+            // Outside the button's accessibility modifiers on purpose: inside them, the
+            // chevrons inherited the mic's identifier and read as three more mics.
+            .background {
+                if let ringSession {
+                    HomeSmartModeRing(session: ringSession)
+                        .transition(reduceMotion
+                                    ? .opacity
+                                    : .opacity.combined(with: .scale(scale: 0.85)))
+                } else if smartModeMic.isOffered {
+                    HomeSmartModeRestHint()
                 }
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
-        }
+            .overlay(alignment: .top) {
+                if let ringSession, HomeSmartModeRingStyle.showsReleaseHint {
+                    HomeSmartModeRingHint(hint: ringSession.hint)
+                        .fixedSize()
+                        .offset(y: DictusHalo.size(isPill: false).height + 12)
+                }
+            }
+            .frame(maxWidth: .infinity)
     }
 
     /// The round mic that starts a dictation. Only shown when a model is ready.
@@ -388,9 +411,9 @@ struct HomeView: View {
     /// MainTabView covers this screen with the recording overlay, which carries the
     /// live states.
     ///
-    /// The armed Smart Mode (#489) rides on it as the keyboard pill's own badge — the
-    /// mode's glyph, or a translation's target code — and only when the next dictation
-    /// will actually run it. Normal is a plain mic.
+    /// The armed Smart Mode (#489) shows on it twice: the mode's glyph in the brand's
+    /// deep blue as its face, and the keyboard pill's own corner badge. Both only when
+    /// the next dictation will actually run it. Normal is a plain mic.
     ///
     /// WHY a button that starts dictation instead of a NavigationLink to TestDictationView:
     /// NavigationLink pushes TestDictationView inside the NavigationStack. Meanwhile,
@@ -399,31 +422,46 @@ struct HomeView: View {
     /// the pushed TestDictationView is still there with its nav bar visible.
     /// A Button just starts dictation — the MainTabView overlay handles the full UI.
     private var newDictationButton: some View {
-        AnimatedMicButton(status: .idle, badge: smartModeMic.effectiveMode?.badge) {
-            // The release of a long press that opened the picker still arrives here as a
-            // tap. The picker being open is what says so, and it must not also start a
-            // recording: the user asked for the menu, not for the mic.
-            guard smartModePicker == nil else { return }
-            // A tap that lands during a model load gets the preparation screen instead of
-            // being swallowed by `startDictation`'s guard (#484). The button stays live and
-            // keeps its shape: `isModelReady` above says a model is on disk and elected, which
-            // is a different question from whether one is loading right now.
-            switch coordinator.recordTapDecision {
-            case .presentPreparation:
-                presentModelPreparation()
-            case .startDictation:
-                coordinator.startDictation(origin: .app)
-            }
+        AnimatedMicButton(
+            status: .idle,
+            badge: ringSession == nil ? smartModeMic.effectiveMode?.badge : nil,
+            face: micFace
+        ) {
+            // The release of a long press still arrives here as a tap when the finger
+            // lifts on the mic. The dial being open, or having just closed, is what says
+            // so, and it must not also start a recording: lifting on the mic is the
+            // dial's cancel.
+            guard !isRingBusy else { return }
+            startDictation()
         }
-        // The long press is the keyboard fan's gesture, at the fan's 0.35 s. Simultaneous
+        // The dial's gesture: hold for the keyboard fan's 0.35 s, then slide. Simultaneous
         // rather than high-priority so a plain tap pays no delay, the fan's own reasoning
-        // (`ToolbarView.micPill`). It does not compete with the dashboard's swipe to the
-        // history: that drag needs 20 pt of travel, and a long press is a finger at rest.
+        // (`ToolbarView.micPill`). The drag is measured in the dashboard's space so the
+        // finger keeps being tracked once it leaves the button.
         .simultaneousGesture(
             LongPressGesture(minimumDuration: 0.35)
-                .onEnded { _ in openSmartModePicker() },
+                .sequenced(before: DragGesture(minimumDistance: 0,
+                                               coordinateSpace: .named(Self.dashboardSpace)))
+                .updating($ringGestureActive) { value, active, _ in
+                    if case .second(true, _) = value { active = true }
+                }
+                .onChanged { value in
+                    guard case .second(true, let drag) = value else { return }
+                    if ringSession == nil { openRing() }
+                    if let drag { moveRing(to: drag.location) }
+                }
+                .onEnded { value in
+                    guard case .second(true, let drag) = value else { return }
+                    if let drag { moveRing(to: drag.location) }
+                    releaseRing()
+                },
             including: smartModeMic.isOffered ? .all : .none
         )
+        // A touch the system cancelled, or a long press lifted before the drag began,
+        // never reaches `onEnded`: the gesture state resetting is the one signal left.
+        .onChange(of: ringGestureActive) { _, active in
+            if !active, ringSession != nil { closeRing(cancelled: true) }
+        }
         .onGeometryChange(for: CGRect.self) { proxy in
             proxy.frame(in: .named(Self.dashboardSpace))
         } action: { frame in
@@ -433,12 +471,17 @@ struct HomeView: View {
         // mode the dictation will run as the value (#397's missing half, on this mic).
         .accessibilityLabel("New dictation")
         .accessibilityValue(smartModeMic.isOffered
-                            ? Text(HomeSmartModePicker.spokenName(of: smartModeMic.effectiveMode))
+                            ? Text(HomeSmartModeCopy.spokenName(of: smartModeMic.effectiveMode))
                             : Text(verbatim: ""))
-        // The picker without the long press, which VoiceOver takes for itself.
+        // The dial without the gesture, which VoiceOver takes for itself: one action per
+        // row that may be chosen. Choosing arms the mode and stops there — the
+        // double-tap that follows is the dictation, and VoiceOver reads the new value
+        // first, so the user hears what they picked before anything records.
         .accessibilityActions {
-            if smartModeMic.isOffered {
-                Button("Choose a Smart Mode") { openSmartModePicker() }
+            if let choices = smartModeChoices {
+                ForEach(choices.entries.filter(choices.canChoose)) { entry in
+                    Button(accessibilityActionName(for: entry)) { chooseFromAccessibility(entry) }
+                }
             }
         }
         .accessibilityIdentifier("home.newDictation")
@@ -447,90 +490,137 @@ struct HomeView: View {
         .reportsPrimaryMicAnchor()
     }
 
-    // MARK: - Smart Mode Picker
-
-    /// The dimmed dashboard and the picker's rows, anchored just above the mic.
-    private func smartModePickerOverlay(_ picker: SmartModeHomePicker) -> some View {
-        GeometryReader { proxy in
-            ZStack(alignment: .bottom) {
-                // A dim in the background colour, so the rows stand on the screen's own
-                // surface in both appearances rather than on a black veil.
-                Color.dictusBackground.opacity(0.9)
-                    .ignoresSafeArea()
-                    .onTapGesture { closeSmartModePicker() }
-                    .accessibilityHidden(true)
-
-                HomeSmartModePicker(
-                    picker: picker,
-                    onChoose: chooseSmartMode,
-                    onDismiss: closeSmartModePicker
-                )
-                .frame(maxWidth: 320)
-                .padding(.horizontal)
-                // Its bottom edge 8 pt above the top of the mic's halo, so the column
-                // rises out of the button the way the fan drops out of the pill.
-                .padding(.bottom, max(0, proxy.size.height - micFrame.minY) + 8)
-                .transition(reduceMotion
-                            ? .opacity
-                            : .opacity.combined(with: .scale(scale: 0.92, anchor: .bottom)))
-            }
+    /// The mic's face: the targeted row's while the dial is open, the armed mode's at
+    /// rest, nil for the plain mic.
+    private var micFace: AnimatedMicButton.MicFace? {
+        if let ringSession {
+            return HomeSmartModeCopy.micFace(for: ringSession.micEntry)
         }
+        return smartModeMic.effectiveMode.flatMap { HomeSmartModeCopy.micFace(for: .mode($0)) }
+    }
+
+    /// A tap on the mic, or a dial released on a mode after arming it.
+    private func startDictation() {
+        // A tap that lands during a model load gets the preparation screen instead of
+        // being swallowed by `startDictation`'s guard (#484). The button stays live and
+        // keeps its shape: `isModelReady` above says a model is on disk and elected, which
+        // is a different question from whether one is loading right now.
+        switch coordinator.recordTapDecision {
+        case .presentPreparation:
+            presentModelPreparation()
+        case .startDictation:
+            coordinator.startDictation(origin: .app)
+        }
+    }
+
+    // MARK: - Smart Mode Dial
+
+    /// Whether the dial is open or closed so recently that its release is still being
+    /// delivered to the mic's tap and the dashboard's swipe.
+    private var isRingBusy: Bool {
+        if ringSession != nil { return true }
+        guard let ringClosedAt else { return false }
+        return Date().timeIntervalSince(ringClosedAt) < 0.4
     }
 
     /// Re-read what the home mic shows from the App Group.
     private func refreshSmartMode() {
         smartModeMic = SmartModeHomeMic.current
+        smartModeChoices = smartModeMic.isOffered ? SmartModeHomePicker.current() : nil
     }
 
-    /// Open the picker, from the long press, the chip or VoiceOver's action.
+    /// Open the dial when the long press completes.
     ///
-    /// Resolved at open, as the fan is: armability cannot change between opening the
-    /// menu and touching a row, and reading it once keeps `SystemLanguageModel` off the
-    /// main thread's per-frame path.
-    private func openSmartModePicker() {
-        guard smartModePicker == nil, let picker = SmartModeHomePicker.current() else { return }
+    /// Resolved at open, as the keyboard fan is: armability cannot change between the
+    /// press and the release, and reading it once keeps `SystemLanguageModel` off the
+    /// per-frame path of the drag.
+    private func openRing() {
+        guard let picker = SmartModeHomePicker.current() else { return }
         // The fan's own haptic on opening (`KeyboardSmartModeState.open`).
         HapticFeedback.keyTapped()
         withAnimation(.easeOut(duration: 0.18)) {
-            smartModePicker = picker
+            ringSession = SmartModeRingSession(picker: picker)
         }
         PersistentLog.log(.diagnosticProbe(
-            component: "HomeView", instanceID: "-", action: "smartModePickerOpened",
+            component: "HomeView", instanceID: "-", action: "smartModeRingOpened",
             details: "entries=\(picker.entries.count) armed=\(picker.armedIdentifier ?? "normal")"
         ))
     }
 
-    private func closeSmartModePicker() {
-        withAnimation(.easeOut(duration: 0.18)) {
-            smartModePicker = nil
+    /// Feed the finger's position, in the dashboard's space, to the dial.
+    private func moveRing(to location: CGPoint) {
+        guard var session = ringSession else { return }
+        let point = CGPoint(x: location.x - micFrame.midX, y: location.y - micFrame.midY)
+        let cue = session.move(to: point)
+        ringSession = session
+        if cue == .tick { HapticFeedback.keyTapped() }
+    }
+
+    /// Lift the finger: arm and record, open the paywall, refuse, or nothing.
+    private func releaseRing() {
+        guard let session = ringSession else { return }
+        let outcome = session.commit()
+        closeRing(cancelled: false)
+        switch outcome {
+        case .cancel:
+            break
+        case .refused:
+            HapticFeedback.actionRefused()
+        case .openPaywall:
+            showPaywall = true
+        case .record:
+            refreshSmartMode()
+            startDictation()
+        }
+        PersistentLog.log(.diagnosticProbe(
+            component: "HomeView", instanceID: "-", action: "smartModeRingReleased",
+            details: "outcome=\(Self.logName(outcome)) source=home"
+        ))
+    }
+
+    private func closeRing(cancelled: Bool) {
+        ringClosedAt = Date()
+        withAnimation(.easeOut(duration: 0.15)) {
+            ringSession = nil
+        }
+        if cancelled {
+            PersistentLog.log(.diagnosticProbe(
+                component: "HomeView", instanceID: "-", action: "smartModeRingReleased",
+                details: "outcome=interrupted source=home"
+            ))
         }
     }
 
-    /// Apply a row. Arming changes the setting and nothing else: no recording starts,
-    /// unlike the fan's release. Here the mic is one tap away and in sight, and a menu
-    /// row that suddenly records would be a surprise; in the keyboard the release *is*
-    /// the commitment because the finger is already on the mic.
-    private func chooseSmartMode(_ entry: SmartModeFanEntry) {
-        guard let picker = smartModePicker else { return }
-        let choice = picker.choose(entry)
-        switch choice {
-        case .refused:
-            // The reason is already written above the rows; the haptic says this row
-            // is one of the ones it is about. The picker stays open on it.
-            HapticFeedback.actionRefused()
-            return
+    /// VoiceOver's action for `entry`: arm it (Normal disarms), or open the paywall.
+    private func chooseFromAccessibility(_ entry: SmartModeFanEntry) {
+        guard let picker = SmartModeHomePicker.current() else { return }
+        switch picker.choose(entry) {
         case .openPaywall:
-            closeSmartModePicker()
             showPaywall = true
         case .armed, .disarmed:
-            HapticFeedback.keyTapped()
             refreshSmartMode()
-            closeSmartModePicker()
+        case .refused:
+            HapticFeedback.actionRefused()
         }
         PersistentLog.log(.diagnosticProbe(
             component: "HomeView", instanceID: "-", action: "smartModeChosen",
-            details: "row=\(entry.id) source=home"
+            details: "row=\(entry.id) source=homeAccessibility"
         ))
+    }
+
+    private func accessibilityActionName(for entry: SmartModeFanEntry) -> String {
+        if case .pro = entry { return String(localized: "Dictus Pro") }
+        return String(localized: "Use \(HomeSmartModeCopy.spokenName(of: entry.smartMode))",
+                      comment: "VoiceOver action on the Home mic that arms this Smart Mode. The placeholder is the mode's name, or Normal.")
+    }
+
+    private static func logName(_ outcome: SmartModeRingRelease) -> String {
+        switch outcome {
+        case .cancel: return "cancel"
+        case .refused: return "refused"
+        case .openPaywall: return "paywall"
+        case .record(let entry): return "record:\(entry.id)"
+        }
     }
 }
 
