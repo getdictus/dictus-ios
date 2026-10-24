@@ -344,6 +344,9 @@ struct HomeView: View {
         // The visible label went with the rectangle; VoiceOver keeps it.
         .accessibilityLabel("New dictation")
         .accessibilityIdentifier("home.newDictation")
+        // The recording screen draws its own button at this height, so tapping here
+        // shows no jump (#788).
+        .reportsPrimaryMicAnchor()
     }
 }
 
