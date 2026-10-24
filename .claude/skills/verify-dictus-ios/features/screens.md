@@ -21,8 +21,8 @@ Captures are in [`docs/agents/screens/`](../../../../docs/agents/screens/), one 
 | `app.onboarding.stop-standby` | Onboarding: « Pour arrêter Dictus » | … -string stopStandby | onboarding, live-activity | [oui](../../../../docs/agents/screens/app.onboarding.stop-standby.png) |
 | `app.onboarding.completion` | Onboarding: « C'est prêt » | … -string completion | onboarding | [oui](../../../../docs/agents/screens/app.onboarding.completion.png) |
 | `app.whats-new` | What's new (existing user behind 2.0.0) | set-default dictus.hasCompletedOnboarding -bool YES, then dictus.lastVersionSeen -string 1.8.0 | onboarding | [oui](../../../../docs/agents/screens/app.whats-new.png) |
-| `app.home` | Tab Accueil (no model: « Télécharger un modèle pour commencer ») | launch.sh --skip-onboarding | dictation.in-app, history | [oui](../../../../docs/agents/screens/app.home.png) |
-| `app.recording` | Full-screen in-app recording | Accueil → « Nouvelle dictée » (needs a model; records the Mac's mic) | dictation.in-app | non |
+| `app.home` | Tab Accueil (no model: « Télécharger un modèle pour commencer »; with a model, a round mic above the history hint) | launch.sh --skip-onboarding | dictation.in-app, history | [oui](../../../../docs/agents/screens/app.home.png) |
+| `app.recording` | Full-screen in-app recording | Accueil → round mic `home.newDictation` (needs a model; records the Mac's mic) | dictation.in-app | non |
 | `app.history` | History sheet (empty state) | Pro on, Accueil → tap-label Historique | history | [oui](../../../../docs/agents/screens/app.history.png) |
 | `app.history.detail` | Transcription detail | History → a row (needs a transcription) | history, vocabulary | non |
 | `app.models` | Tab Modèles | tab Modèles | models.transcription | [oui](../../../../docs/agents/screens/app.models.png) |

@@ -61,6 +61,16 @@ struct RecordingView: View {
     /// Fires when a held stage becomes drawable. At most one is ever in flight.
     @State private var holdTask: Task<Void, Never>?
 
+    /// Where Home's mic is on screen, which the button below lines up on (#788).
+    @ObservedObject private var micAnchor = PrimaryMicAnchor.shared
+
+    /// Height of the slot the mic / stop button is centred in.
+    private static let micSlotHeight: CGFloat = 100
+
+    /// Space under that slot when there is no Home mic to line up on: onboarding, or a
+    /// launch that never drew Home. The layout this screen always had.
+    private static let defaultBottomSpacing: CGFloat = 40
+
     init(mode: RecordingMode, onComplete: (() -> Void)? = nil) {
         self.mode = mode
         self.onComplete = onComplete
@@ -70,118 +80,126 @@ struct RecordingView: View {
         ZStack {
             Color.dictusBackground.ignoresSafeArea()
 
-            VStack(spacing: 0) {
-                // Close button (top-left) — standalone only
-                HStack {
-                    if mode == .standalone {
-                        Button {
-                            HapticFeedback.recordingStopped()
-                            // Step 1: animate RecordingView out
-                            withAnimation(.easeOut(duration: 0.25)) {
-                                isDismissing = true
+            // The reader is only there for the bottom edge of the safe area, in the window
+            // coordinates Home's mic was reported in.
+            GeometryReader { geo in
+                VStack(spacing: 0) {
+                    // Close button (top-left) — standalone only
+                    HStack {
+                        if mode == .standalone {
+                            Button {
+                                HapticFeedback.recordingStopped()
+                                // Step 1: animate RecordingView out
+                                withAnimation(.easeOut(duration: 0.25)) {
+                                    isDismissing = true
+                                }
+                                // Step 2: after animation, reset status (no animation leak to HomeView).
+                                // Generation guard (issue #60): if a new dictation started while the
+                                // dismiss animation ran, this stale reset must not tear it down.
+                                let generation = coordinator.dictationGeneration
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
+                                    guard coordinator.dictationGeneration == generation else { return }
+                                    coordinator.resetStatus()
+                                }
+                            } label: {
+                                Image(systemName: "xmark")
+                                    .font(.system(size: 17, weight: .medium))
+                                    .foregroundColor(.secondary)
+                                    .frame(width: 40, height: 40)
+                                    .dictusGlass(in: Circle())
                             }
-                            // Step 2: after animation, reset status (no animation leak to HomeView).
-                            // Generation guard (issue #60): if a new dictation started while the
-                            // dismiss animation ran, this stale reset must not tear it down.
-                            let generation = coordinator.dictationGeneration
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
-                                guard coordinator.dictationGeneration == generation else { return }
-                                coordinator.resetStatus()
-                            }
-                        } label: {
-                            Image(systemName: "xmark")
-                                .font(.system(size: 17, weight: .medium))
-                                .foregroundColor(.secondary)
-                                .frame(width: 40, height: 40)
-                                .dictusGlass(in: Circle())
+                            .frame(width: 44, height: 44)
+                            .buttonStyle(GlassPressStyle(pressedScale: 1.35))
+                            .padding(.leading, 20)
+                            .padding(.top, 8)
                         }
-                        .frame(width: 44, height: 44)
-                        .buttonStyle(GlassPressStyle(pressedScale: 1.35))
-                        .padding(.leading, 20)
-                        .padding(.top, 8)
+                        Spacer()
                     }
-                    Spacer()
-                }
 
-                // MARK: - Upper zone: result text (centered between top and waveform)
-                // WHY above waveform: The waveform+mic are anchored in the bottom
-                // third. Placing the result in the large empty upper zone avoids
-                // pushing anything down when text appears.
-                ZStack {
-                    if showResult, let result = transcriptionResult {
-                        // WHY GeometryReader + ScrollView combo:
-                        // GeometryReader gives us the available height so we can
-                        // vertically center short text. ScrollView handles long text
-                        // that exceeds the zone. Short text sits centered; long text scrolls.
-                        GeometryReader { geo in
-                            ScrollView {
-                                Button {
-                                    UIPasteboard.general.string = result
-                                    showCopiedFeedback = true
-                                    HapticFeedback.recordingStopped()
-                                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-                                        showCopiedFeedback = false
+                    // MARK: - Upper zone: result text (centered between top and waveform)
+                    // WHY above waveform: The waveform+mic are anchored in the bottom
+                    // third. Placing the result in the large empty upper zone avoids
+                    // pushing anything down when text appears.
+                    ZStack {
+                        if showResult, let result = transcriptionResult {
+                            // WHY GeometryReader + ScrollView combo:
+                            // GeometryReader gives us the available height so we can
+                            // vertically center short text. ScrollView handles long text
+                            // that exceeds the zone. Short text sits centered; long text scrolls.
+                            GeometryReader { geo in
+                                ScrollView {
+                                    Button {
+                                        UIPasteboard.general.string = result
+                                        showCopiedFeedback = true
+                                        HapticFeedback.recordingStopped()
+                                        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                                            showCopiedFeedback = false
+                                        }
+                                    } label: {
+                                        Text(result)
+                                            .font(.dictusBody)
+                                            .foregroundStyle(.primary)
+                                            .multilineTextAlignment(.center)
+                                            .padding()
+                                            .frame(maxWidth: .infinity)
+                                            .dictusGlass(in: RoundedRectangle(cornerRadius: 14))
                                     }
-                                } label: {
-                                    Text(result)
-                                        .font(.dictusBody)
-                                        .foregroundStyle(.primary)
-                                        .multilineTextAlignment(.center)
-                                        .padding()
-                                        .frame(maxWidth: .infinity)
-                                        .dictusGlass(in: RoundedRectangle(cornerRadius: 14))
+                                    .buttonStyle(GlassPressStyle(pressedScale: 0.96))
+                                    .padding(.horizontal, 32)
+                                    .frame(minHeight: geo.size.height)
                                 }
-                                .buttonStyle(GlassPressStyle(pressedScale: 0.96))
-                                .padding(.horizontal, 32)
-                                .frame(minHeight: geo.size.height)
                             }
-                        }
-                        .transition(.opacity)
-                    } else if showError, let error = errorMessage {
-                        VStack(spacing: 12) {
-                            Image(systemName: "exclamationmark.triangle.fill")
-                                .font(.system(size: 32))
-                                .foregroundColor(.orange)
-                            Text(error)
-                                .font(.dictusCaption)
-                                .foregroundColor(.dictusRecording)
-                                .multilineTextAlignment(.center)
-                                .padding(.horizontal, 32)
+                            .transition(.opacity)
+                        } else if showError, let error = errorMessage {
+                            VStack(spacing: 12) {
+                                Image(systemName: "exclamationmark.triangle.fill")
+                                    .font(.system(size: 32))
+                                    .foregroundColor(.orange)
+                                Text(error)
+                                    .font(.dictusCaption)
+                                    .foregroundColor(.dictusRecording)
+                                    .multilineTextAlignment(.center)
+                                    .padding(.horizontal, 32)
 
-                            if mode == .onboarding {
-                                Button("Retry") {
-                                    errorMessage = nil
-                                    showError = false
-                                    showResult = false
+                                if mode == .onboarding {
+                                    Button("Retry") {
+                                        errorMessage = nil
+                                        showError = false
+                                        showResult = false
+                                    }
+                                    .font(.dictusBody)
+                                    .foregroundColor(.dictusAccent)
+                                    .padding(.top, 8)
                                 }
-                                .font(.dictusBody)
-                                .foregroundColor(.dictusAccent)
-                                .padding(.top, 8)
                             }
                         }
+
+                        // Onboarding: auto-advance handled in handleStatusChange
                     }
+                    .frame(maxHeight: .infinity)
 
-                    // Onboarding: auto-advance handled in handleStatusChange
+                    // MARK: - Waveform (always visible, anchored in bottom third)
+                    waveformSection
+                        .padding(.horizontal)
+                        .frame(height: 120)
+
+                    // MARK: - Status text (duration or processing indicator)
+                    statusText
+                        .frame(height: 30)
+                        .padding(.top, 8)
+
+                    // MARK: - Mic / Stop button (always in same position)
+                    micOrStopButton
+                        .frame(height: Self.micSlotHeight)
+                        .padding(.top, 16)
+
+                    // Whatever lifts the button's centre to the height of Home's mic, so the
+                    // one the user just tapped does not jump down when this screen covers it
+                    // (#788). Every state of the button shares the slot, so all of them line up.
+                    Spacer()
+                        .frame(height: bottomSpacing(in: geo))
                 }
-                .frame(maxHeight: .infinity)
-
-                // MARK: - Waveform (always visible, anchored in bottom third)
-                waveformSection
-                    .padding(.horizontal)
-                    .frame(height: 120)
-
-                // MARK: - Status text (duration or processing indicator)
-                statusText
-                    .frame(height: 30)
-                    .padding(.top, 8)
-
-                // MARK: - Mic / Stop button (always in same position)
-                micOrStopButton
-                    .frame(height: 100)
-                    .padding(.top, 16)
-
-                Spacer()
-                    .frame(height: 40)
+                .frame(width: geo.size.width, height: geo.size.height)
             }
         }
         .opacity(isDismissing ? 0 : 1)
@@ -245,6 +263,19 @@ struct RecordingView: View {
             displayedStatus = .idle
         }
         .navigationBarHidden(true)
+    }
+
+    // MARK: - Button Height
+
+    /// Space under the button slot. Home's mic is only an anchor for the standalone screen,
+    /// the one Home opens; onboarding keeps its own layout.
+    private func bottomSpacing(in geo: GeometryProxy) -> CGFloat {
+        PrimaryMicAnchor.bottomSpacing(
+            anchorY: mode == .standalone ? micAnchor.centerY : nil,
+            containerMaxY: geo.frame(in: .global).maxY,
+            slotHeight: Self.micSlotHeight,
+            fallback: Self.defaultBottomSpacing
+        )
     }
 
     // MARK: - Waveform Section
