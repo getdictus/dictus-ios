@@ -84,6 +84,12 @@ public enum LogEvent: Sendable {
     /// call site was a bare `try?`, so a failure was indistinguishable from a
     /// success.
     case audioHapticsAllowanceFailed(context: String, error: String)
+    /// `AVAudioApplication.setInputMuted` changed the app's input mute (#430). Muted is the
+    /// warm-idle state, the one that no longer shows the orange indicator; every dictation
+    /// start must log `muted=false` before it records.
+    case audioInputMuted(context: String, muted: Bool)
+    /// `setInputMuted` threw. On a start this fails the dictation rather than record silence.
+    case audioInputMuteFailed(context: String, muted: Bool, error: String)
 
     // MARK: Transcription
     case transcriptionStarted(modelName: String)
@@ -673,7 +679,8 @@ public enum LogEvent: Sendable {
         case .audioEngineStarted, .audioEngineStopped, .audioSessionConfigured, .audioSessionFailed,
              .audioInterruptionBegan, .audioInterruptionEnded, .audioRouteChanged,
              .audioMediaServicesLost, .audioMediaServicesReset, .warmStateReleased, .warmStateRestored,
-             .audioHapticsAllowance, .audioHapticsAllowanceFailed:
+             .audioHapticsAllowance, .audioHapticsAllowanceFailed,
+             .audioInputMuted, .audioInputMuteFailed:
             return .audio
         case .transcriptionStarted, .transcriptionCompleted, .transcriptionFailed, .recordingTooShort,
              .transcriptionPerformance:
@@ -778,7 +785,7 @@ public enum LogEvent: Sendable {
              .waveformStall, .waveformTimelineNotFiring,
              .coldStartDarwinFallback, .coldStartStranded, .modelPrewarmTimeout,
              .audioInterruptionBegan, .audioMediaServicesLost, .audioMediaServicesReset,
-             .modelDownloadStalled, .audioHapticsAllowanceFailed,
+             .modelDownloadStalled, .audioHapticsAllowanceFailed, .audioInputMuteFailed,
              .modelDownloadSizeMismatch, .modelDownloadRangeRejected,
              .modelDownloadOffline, .modelDownloadBackgroundTaskSilent:
             return .warning
@@ -818,7 +825,7 @@ public enum LogEvent: Sendable {
              .waveformAppeared, .waveformDisappeared, .waveformRefreshIDChanged,
              .waveformEnergyTransition, .overlayBodyEvaluated, .overlayRecreated,
              .audioInterruptionEnded, .audioRouteChanged,
-             .warmStateReleased, .warmStateRestored, .audioHapticsAllowance,
+             .warmStateReleased, .warmStateRestored, .audioHapticsAllowance, .audioInputMuted,
              .userDictionaryEvicted, .userDictionaryReset, .userDictionaryMigrated,
              .userDictionaryStaleDiscarded, .userDictionaryPruned:
             return .info
@@ -921,6 +928,10 @@ public enum LogEvent: Sendable {
             return "context=\(context) allowed=\(allowed)"
         case .audioHapticsAllowanceFailed(let context, let error):
             return "context=\(context) error=\(error)"
+        case .audioInputMuted(let context, let muted):
+            return "context=\(context) muted=\(muted)"
+        case .audioInputMuteFailed(let context, let muted, let error):
+            return "context=\(context) muted=\(muted) error=\(error)"
 
         // Transcription
         case .transcriptionStarted(let modelName):
@@ -1271,6 +1282,8 @@ extension LogEvent {
         case .warmStateRestored: return "warmStateRestored"
         case .audioHapticsAllowance: return "audioHapticsAllowance"
         case .audioHapticsAllowanceFailed: return "audioHapticsAllowanceFailed"
+        case .audioInputMuted: return "audioInputMuted"
+        case .audioInputMuteFailed: return "audioInputMuteFailed"
         case .transcriptionStarted: return "transcriptionStarted"
         case .transcriptionCompleted: return "transcriptionCompleted"
         case .transcriptionFailed: return "transcriptionFailed"

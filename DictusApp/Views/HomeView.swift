@@ -442,6 +442,9 @@ struct HomeView: View {
             }
         }
         .accessibilityIdentifier("home.newDictation")
+        // The recording screen draws its own button at this height, so tapping here
+        // shows no jump (#788).
+        .reportsPrimaryMicAnchor()
     }
 
     // MARK: - Smart Mode Picker
