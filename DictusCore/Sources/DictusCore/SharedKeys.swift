@@ -145,6 +145,13 @@ public enum SharedKeys {
     /// lose.
     public static let debugProEntitlementForced = "dictus.debugProEntitlementForced"
 
+    // Forced Apple Intelligence (DEBUG builds only - see SmartModeAvailability.engineState).
+    /// Bool: when true, the Smart Mode surfaces read Apple Foundation Models as available,
+    /// so a simulator without Apple Intelligence can draw an armable mode (#489's dial
+    /// captures). It forces what the surfaces *show*: a generation still asks the real
+    /// model and fails where it is missing. Inside the conditional for the reason above.
+    public static let debugAppleIntelligenceForced = "dictus.debugAppleIntelligenceForced"
+
     /// Bool: when true, the keyboard never opens the voice note reader on its own; it
     /// opens from a tap on ☰ only (#637 decision 3, #639). Absent reads false,
     /// the default "auto-open". Exists for one device comparison between the two
