@@ -1,5 +1,5 @@
 // DictusApp/Views/HomeView.swift
-// Home dashboard showing model status, last transcription, and test dictation link.
+// Home dashboard showing model status, last transcription, and the new-dictation mic.
 import SwiftUI
 import DictusCore
 
@@ -54,33 +54,34 @@ struct HomeView: View {
 
     var body: some View {
         VStack(spacing: 24) {
-            Spacer()
-
-            // Logo mark
-            logoSection
-
-            // Model status card
-            modelStatusCard
-
-            // Last transcription preview
-            if let result = coordinator.lastResult {
-                transcriptionCard(result: result)
+            // The cards scroll only when they do not fit: a short screen (iPhone SE, or
+            // the iPhone layout an iPad runs in), a last transcription, a large Dynamic
+            // Type. Since #788 the mic below is 92 pt tall with its halo, and without
+            // this the cards pushed it and the history hint under the tab bar.
+            //
+            // WHY `ViewThatFits` and not a permanent ScrollView: a scroll view takes
+            // every vertical drag that starts on it, which would take the swipe up to
+            // the history (#70) away from most of the screen. Here it exists only on
+            // the screens that need it, and there the mic and the hint below it,
+            // which stay outside, are still where the swipe starts.
+            ViewThatFits(in: .vertical) {
+                // Centred in the space above the mic. A frame and not a `Spacer` on
+                // each side: two collapsed spacers in a 24 pt stack still cost 64 pt,
+                // which is what tipped an iPhone SE height into scrolling.
+                dashboardCards
+                    .frame(maxHeight: .infinity)
+                ScrollView {
+                    dashboardCards
+                }
             }
 
-            // Test dictation button
+            // The primary action, a round mic since #788. At the bottom of the content
+            // rather than among the cards: it is within thumb reach, it stays put when
+            // the last-transcription card comes and goes, and it sits where the
+            // recording screen's own mic sits.
             if modelManager.isModelReady {
-                testDictationLink
+                newDictationButton
             }
-
-            // The Home Pro card: the offer, the trial reminder, or since #216 decision
-            // 16 a subscriber's way into the hub. Gated behind
-            // PremiumFlags.paywallVisible until the first Pro
-            // feature ships and ASC setup is done (#236, #79, #215).
-            if PremiumFlags.paywallVisible {
-                ProBannerView { showPaywall = true }
-            }
-
-            Spacer()
 
             // The affordance for the history (#70), last so it sits at the bottom
             // edge the swipe starts from. Absent entirely on `.hidden`: while the
@@ -154,6 +155,32 @@ struct HomeView: View {
             // the cover, onAppear does NOT re-fire. This notification-based refresh
             // ensures HomeView shows the correct model state immediately.
             modelManager.loadState()
+        }
+    }
+
+    // MARK: - Dashboard Cards
+
+    /// Logo, model, last transcription and Pro card.
+    private var dashboardCards: some View {
+        VStack(spacing: 24) {
+            // Logo mark
+            logoSection
+
+            // Model status card
+            modelStatusCard
+
+            // Last transcription preview
+            if let result = coordinator.lastResult {
+                transcriptionCard(result: result)
+            }
+
+            // The Home Pro card: the offer, the trial reminder, or since #216 decision
+            // 16 a subscriber's way into the hub. Gated behind
+            // PremiumFlags.paywallVisible until the first Pro
+            // feature ships and ASC setup is done (#236, #79, #215).
+            if PremiumFlags.paywallVisible {
+                ProBannerView { showPaywall = true }
+            }
         }
     }
 
@@ -282,18 +309,27 @@ struct HomeView: View {
         .buttonStyle(GlassPressStyle(pressedScale: 0.97))
     }
 
-    // MARK: - Test Dictation Link
+    // MARK: - New Dictation Button
 
-    /// Prominent button to test dictation. Only shown when a model is ready.
+    /// The round mic that starts a dictation. Only shown when a model is ready.
     ///
-    /// WHY a Button instead of NavigationLink to TestDictationView:
+    /// WHY `AnimatedMicButton` (#788): the onboarding and the recording screen already
+    /// draw their mic with it, so the home action is the same object the user taps on
+    /// the next screen. Its status is pinned to `.idle`: as soon as a dictation starts,
+    /// MainTabView covers this screen with the recording overlay, which carries the
+    /// live states.
+    ///
+    /// The armed Smart Mode (#489) goes on this button through the component's `badge`,
+    /// which straddles the circle inside its halo and needs no room of its own here.
+    ///
+    /// WHY a button that starts dictation instead of a NavigationLink to TestDictationView:
     /// NavigationLink pushes TestDictationView inside the NavigationStack. Meanwhile,
     /// MainTabView shows a RecordingView overlay when coordinator.status != .idle.
     /// This creates TWO stacked RecordingViews. When the overlay dismisses (status → idle),
     /// the pushed TestDictationView is still there with its nav bar visible.
     /// A Button just starts dictation — the MainTabView overlay handles the full UI.
-    private var testDictationLink: some View {
-        Button {
+    private var newDictationButton: some View {
+        AnimatedMicButton(status: .idle) {
             // A tap that lands during a model load gets the preparation screen instead of
             // being swallowed by `startDictation`'s guard (#484). The button stays live and
             // keeps its shape: `isModelReady` above says a model is on disk and elected, which
@@ -304,19 +340,10 @@ struct HomeView: View {
             case .startDictation:
                 coordinator.startDictation(origin: .app)
             }
-        } label: {
-            HStack {
-                Image(systemName: "waveform")
-                Text("New dictation")
-                    .font(.dictusBody)
-            }
-            .frame(maxWidth: .infinity)
-            .padding()
-            .background(Color.dictusAccent)
-            .foregroundColor(.white)
-            .clipShape(RoundedRectangle(cornerRadius: 12))
         }
-        .buttonStyle(GlassPressStyle())
+        // The visible label went with the rectangle; VoiceOver keeps it.
+        .accessibilityLabel("New dictation")
+        .accessibilityIdentifier("home.newDictation")
     }
 }
 
