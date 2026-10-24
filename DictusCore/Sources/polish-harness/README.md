@@ -244,6 +244,57 @@ refuses all of it — 10 of 10, at every pair swept. That is why the mode's
 contract turns the check off, and the split is what keeps the fact visible
 instead of averaged away.
 
+## Vocabulary pairs and the Apple FM judge (#512 step 2)
+
+Two commands measure the vocabulary **pair generator** (`VocabularyPairGenerator` in
+DictusCore) before any UI is built on it, as the step 2 brief on #512 decides
+(2026-10-19). The generator pairs each spelling the user wrote down (Personal
+Vocabulary terms, then keyboard-learned words) with History spans of one to three
+words that sound or spell like it: `cloud code` for `Claude Code`.
+
+```sh
+# 1. List: the first 20 pairs of a device journal export, ranked by similarity, to a
+#    file OUTSIDE any git repository (the command refuses a path inside one, and an
+#    existing file). Drives no model; prints counts only. `--learned` is optional:
+#    drop it to pair the Personal Vocabulary terms alone.
+swift run polish-harness vocabpairs ~/Downloads/dictus-polish-debug-….json \
+  --terms ~/Documents/512/terms.txt --learned ~/Documents/512/learned.txt \
+  --out ~/Documents/512/pairs.txt
+
+# 2. Label: prefix every pair line with `v` (true) or `f` (false), blind.
+
+# 3. Judge: the go/no-go. With 17 or more of 20 true it stops there and Apple FM is
+#    NOT called. Otherwise each pair is judged 3 times (any disagreement is an error)
+#    and the judge passes at 80 % kept true pairs and 80 % rejected false pairs.
+swift run polish-harness vocabjudge ~/Documents/512/pairs.txt
+```
+
+- **The export** is the Polish debug screen's JSON (long-press the Version row in
+  Settings for 3 s → Export JSON). The text read is `vocabularyCorrected` when present,
+  `raw` otherwise: History before polish. Real data needs #749 (journal records every
+  dictation with polish off). Two events with the same text within 60 s are one
+  dictation (a Smart Mode declining a short input writes its own event).
+- **`--terms`**: the Personal Vocabulary, typed by hand since the export does not carry
+  it. One entry per line, `Term` or `Term = variant, variant`; a span already one of
+  the variants is skipped, as in the app.
+- **`--learned`**: optional, one learned word per line. No screen lists them.
+- **Dictionary**: `NSSpellChecker`, the Mac twin of the app's `UITextChecker`, in
+  English, the keyboard language and every detected language. It only decides which
+  single words are refused (a single dictionary word is never a variant).
+- **The pairs file holds dictation text.** Never commit it; the committed
+  `fixtures/vocab-pairs-*` files are synthetic.
+- **The judge** gets the sentence, the span and the term, in a fresh session per run,
+  and answers through a guided schema of two closed fields (the pair id, `yes`/`no`).
+  The Mac model may differ from the iPhone's: a go is followed by one on-device check.
+
+Synthetic run, no device data needed:
+
+```sh
+swift run polish-harness vocabpairs Sources/polish-harness/fixtures/vocab-pairs-export.json \
+  --terms Sources/polish-harness/fixtures/vocab-pairs-terms.txt \
+  --learned Sources/polish-harness/fixtures/vocab-pairs-learned.txt --out /tmp/pairs.txt
+```
+
 ## Fixtures
 
 A JSON array of cases (`fixtures/seed.json` seeds the 5 Wispr-Flow comparison
