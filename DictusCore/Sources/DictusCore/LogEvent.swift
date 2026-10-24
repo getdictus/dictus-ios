@@ -67,6 +67,8 @@ public enum LogEvent: Sendable {
     case audioInterruptionBegan(reason: String)
     case audioInterruptionEnded(shouldResume: Bool, restored: Bool)
     case audioRouteChanged(reason: String, details: String)
+    /// The audio server died (`mediaServicesWereLostNotification`, #775). Its reset follows.
+    case audioMediaServicesLost
     case audioMediaServicesReset
     case warmStateReleased(idleSeconds: Int)
     case warmStateRestored(context: String)
@@ -670,7 +672,7 @@ public enum LogEvent: Sendable {
             return .dictation
         case .audioEngineStarted, .audioEngineStopped, .audioSessionConfigured, .audioSessionFailed,
              .audioInterruptionBegan, .audioInterruptionEnded, .audioRouteChanged,
-             .audioMediaServicesReset, .warmStateReleased, .warmStateRestored,
+             .audioMediaServicesLost, .audioMediaServicesReset, .warmStateReleased, .warmStateRestored,
              .audioHapticsAllowance, .audioHapticsAllowanceFailed:
             return .audio
         case .transcriptionStarted, .transcriptionCompleted, .transcriptionFailed, .recordingTooShort,
@@ -775,7 +777,7 @@ public enum LogEvent: Sendable {
              .watchdogReset, .engineWarmUpFailed, .recordingTooShort,
              .waveformStall, .waveformTimelineNotFiring,
              .coldStartDarwinFallback, .coldStartStranded, .modelPrewarmTimeout,
-             .audioInterruptionBegan, .audioMediaServicesReset,
+             .audioInterruptionBegan, .audioMediaServicesLost, .audioMediaServicesReset,
              .modelDownloadStalled, .audioHapticsAllowanceFailed,
              .modelDownloadSizeMismatch, .modelDownloadRangeRejected,
              .modelDownloadOffline, .modelDownloadBackgroundTaskSilent:
@@ -909,7 +911,7 @@ public enum LogEvent: Sendable {
             return "shouldResume=\(shouldResume) restored=\(restored)"
         case .audioRouteChanged(let reason, let details):
             return "reason=\(reason) details=\(details)"
-        case .audioMediaServicesReset:
+        case .audioMediaServicesLost, .audioMediaServicesReset:
             return ""
         case .warmStateReleased(let idleSeconds):
             return "idleSeconds=\(idleSeconds)"
@@ -1263,6 +1265,7 @@ extension LogEvent {
         case .audioInterruptionBegan: return "audioInterruptionBegan"
         case .audioInterruptionEnded: return "audioInterruptionEnded"
         case .audioRouteChanged: return "audioRouteChanged"
+        case .audioMediaServicesLost: return "audioMediaServicesLost"
         case .audioMediaServicesReset: return "audioMediaServicesReset"
         case .warmStateReleased: return "warmStateReleased"
         case .warmStateRestored: return "warmStateRestored"

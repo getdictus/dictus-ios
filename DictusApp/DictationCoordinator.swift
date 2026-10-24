@@ -424,6 +424,9 @@ class DictationCoordinator: ObservableObject {
         // iOS forbids AVAudioSession.setActive(true) from background. The async Task
         // may not run until after the app is backgrounded. By configuring synchronously
         // in init(), we guarantee the session is active while still in the foreground.
+        //
+        // A failure here is logged by `configureAudioSession` itself (#775) and needs nothing
+        // more: this is a head start, and every dictation start activates again and retries.
         try? audioEngine.configureAudioSession()
 
         Task {
@@ -687,7 +690,13 @@ class DictationCoordinator: ObservableObject {
         SoundFeedbackService.playRecordStart()
 
         // Configure audio session NOW while we're in the foreground.
-        try? audioEngine.configureAudioSession()
+        //
+        // WHY the error is kept rather than dropped by `try?` (#775): a cold start that went
+        // on with a session that refused to activate waited for a route and rebuilt the
+        // engine for nothing, then said the microphone was missing. The cold start below
+        // hands it to `activateSessionForColdStart`, which retries or fails with "tap again".
+        // The warm path needs no retry: its running engine means the session is up.
+        let firstActivation = Result { try audioEngine.configureAudioSession() }
 
         // The session these start paths belong to. `ensureMicrophonePermission` is
         // an await even when permission is already granted, so a cancel queued on
@@ -755,7 +764,9 @@ class DictationCoordinator: ObservableObject {
                         handleError(DictationFailureMessage.microphonePermissionDenied)
                         return
                     }
-                    guard mayReport(session, "cold start") else { return }
+                    // Checks `mayReport(session, "cold start")` first, then makes sure the
+                    // session is up before the engine waits on its route (#775).
+                    guard try await activateSessionForColdStart(after: firstActivation, engine: audioEngine, session: session, origin: origin) else { return }
                     try audioEngine.startRecording()
                     updateStatus(.recording)
                     LiveActivityManager.shared.transitionToRecording()
