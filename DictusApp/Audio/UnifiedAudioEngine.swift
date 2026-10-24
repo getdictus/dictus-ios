@@ -236,6 +236,11 @@ class UnifiedAudioEngine: ObservableObject {
     /// instead of spending its retry.
     private(set) var mediaServicesLost = false
 
+    /// How many `mediaServicesWereReset` this process has seen. A cold start whose activation
+    /// keeps failing waits for this to move (#775): a reset can follow a failure with no
+    /// `mediaServicesWereLost` before it, as in the capture the issue was written from.
+    private(set) var mediaServicesResetCount = 0
+
     /// True when an AVAudioSession interruption is currently in flight.
     ///
     /// WHY tracked separately from `engine.isRunning`: When an interruption begins,
@@ -608,6 +613,7 @@ class UnifiedAudioEngine: ObservableObject {
     private func handleMediaServicesReset() {
         PersistentLog.log(.audioMediaServicesReset)
         mediaServicesLost = false
+        mediaServicesResetCount &+= 1
         logHapticsAllowance(context: "mediaServicesReset")
 
         cancelIdleRelease()
@@ -708,17 +714,18 @@ class UnifiedAudioEngine: ObservableObject {
         applyHapticsAllowance(context: "configureAudioSession")
     }
 
-    /// Run one `AVAudioSession` call; on a throw, log it with the route state and rethrow it
-    /// as `sessionActivationFailed`, naming the call and its OSStatus.
+    /// Run one `AVAudioSession` call; on a throw, log `audioSessionActivationFailed` with the
+    /// error and the route state, and rethrow it as `sessionActivationFailed`, naming the call
+    /// and its OSStatus. The logging is `AudioSessionActivationPolicy.perform`, tested there.
     private func activationStep(_ step: AudioSessionActivationStep, _ call: () throws -> Void) throws {
         do {
-            try call()
-        } catch {
-            let status = AudioSessionActivationPolicy.statusDescription((error as NSError).code)
-            PersistentLog.log(.audioSessionFailed(
-                error: "\(step.rawValue) OSStatus \(status) mediaServicesLost=\(mediaServicesLost) \(routeStateDescription())"
-            ))
-            throw AudioEngineError.sessionActivationFailed(step: step, status: status)
+            try AudioSessionActivationPolicy.perform(
+                step,
+                context: { "mediaServicesLost=\(mediaServicesLost) \(routeStateDescription())" },
+                call
+            )
+        } catch let failure as AudioSessionActivationFailure {
+            throw AudioEngineError.sessionActivationFailed(step: failure.step, status: failure.status)
         }
     }
 
