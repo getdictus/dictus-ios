@@ -764,6 +764,44 @@ class UnifiedAudioEngine: ObservableObject {
         ))
     }
 
+    // MARK: - Idle Input Mute (issue #430)
+
+    /// Mute or unmute the app's microphone input, logging the change at the source.
+    ///
+    /// WHY mute instead of stopping the engine: the warm engine is what lets a keyboard
+    /// press start a dictation from the background (#106), and a stopped input cannot be
+    /// started again from there: E1 measured `kAUStartIO 'what'` for every mode that tried.
+    /// A running, muted input kept the engine warm with no orange indicator on device
+    /// (E1, 10/10 starts, 47-113 ms from press to first sample). Apple does not document
+    /// the indicator side of this, so the device test is what proves it.
+    ///
+    /// The rule every caller keeps: muted while the engine runs with nobody recording,
+    /// unmuted before a recording starts. The flag belongs to the process and outlives
+    /// the engine, so the two full teardowns (`releaseWarmState`, `deactivateSession`)
+    /// unmute too. An interruption leaves the flag as it found it: the engine is stopped,
+    /// so there is no input to show, and the next start or warm-up sets it again.
+    ///
+    /// WHY no `setInputMuteStateChangeHandler`: nothing but this method changes the flag
+    /// on iOS, and `startRecording()` unmutes on every start whatever state it finds.
+    private func setInputMuted(_ muted: Bool, context: String) throws {
+        let application = AVAudioApplication.shared
+        guard application.isInputMuted != muted else { return }
+        do {
+            try application.setInputMuted(muted)
+        } catch {
+            PersistentLog.log(.audioInputMuteFailed(context: context, muted: muted, error: error.localizedDescription))
+            throw error
+        }
+        PersistentLog.log(.audioInputMuted(context: context, muted: muted))
+    }
+
+    /// Mute the input if the engine is running with nobody recording: the state that
+    /// used to keep the orange indicator on for the whole warm window (#430).
+    private func muteInputIfIdle(context: String) {
+        guard engine.isRunning && !isRecording else { return }
+        try? setInputMuted(true, context: context)
+    }
+
     /// Check and request microphone permission if needed.
     /// Returns true if permission is granted, false otherwise.
     func ensureMicrophonePermission() async throws -> Bool {
@@ -827,6 +865,7 @@ class UnifiedAudioEngine: ObservableObject {
             // the paths that would otherwise leave the allowance untouched
             // (issue #293).
             applyHapticsAllowance(context: "warmUp-alreadyRunning")
+            muteInputIfIdle(context: "warmUp-alreadyRunning")
             // Re-arm before returning. `cancelIdleRelease()` above dropped
             // whatever was pending, and leaving without re-arming is how the
             // engine used to end up warm forever.
@@ -851,6 +890,8 @@ class UnifiedAudioEngine: ObservableObject {
         }
         try startEngine(context: "warmUp")
         PersistentLog.log(.engineWarmUpSuccess(context: "unifiedEngine-warmUp"))
+        // A warm-up records nothing, so the input it just opened is muted (#430).
+        muteInputIfIdle(context: "warmUp")
 
         // NOT in a `defer`: on a `startEngine()` throw we are not warm, and
         // arming a release for an engine that never started would only produce a
@@ -878,6 +919,12 @@ class UnifiedAudioEngine: ObservableObject {
         // that bounds a warm engine (#256). Throwing after it would leave the engine warm
         // with nothing armed to release it.
         try refuseIfACallHoldsTheMicrophone()
+
+        // Unmute before anything can record (#430). A warm engine is muted while idle,
+        // and a start that cannot unmute would capture silence, so it fails instead.
+        // Before `cancelIdleRelease()` for the reason the call guard is: a throw here
+        // leaves the engine idle and muted with its release still armed.
+        try setInputMuted(false, context: "startRecording")
 
         // Cancel any pending idle release — recording activity resets the timer.
         cancelIdleRelease()
@@ -923,6 +970,10 @@ class UnifiedAudioEngine: ObservableObject {
         bufferEnergy = []
         bufferSeconds = 0
 
+        // The engine stays warm, the input goes quiet: no orange indicator at rest (#430).
+        // Stop, cancel and the idle invariant's forced teardown all come through here.
+        muteInputIfIdle(context: "collectSamples")
+
         // Arm the idle-release timer (issue #106 Phase B). If the user starts a
         // new recording or warms up before the timer fires, it gets cancelled.
         scheduleIdleRelease(after: Self.idleReleaseInterval)
@@ -963,6 +1014,7 @@ class UnifiedAudioEngine: ObservableObject {
         isRecordingFlag = false
         engine.inputNode.removeTap(onBus: 0)
         engine.stop()
+        try? setInputMuted(false, context: "deactivateSession")
         audioSamples = []
         PersistentLog.log(.audioEngineStopped)
         try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
@@ -1124,6 +1176,7 @@ class UnifiedAudioEngine: ObservableObject {
         // Bump generation so any in-flight tap callback bails out before mutating
         // shared audio-thread state (matches the mediaServicesWereReset pattern).
         engineGeneration &+= 1
+        try? setInputMuted(false, context: "releaseWarmState-\(reason)")
 
         try? AVAudioSession.sharedInstance().setActive(
             false,
