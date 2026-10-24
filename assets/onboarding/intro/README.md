@@ -6,14 +6,20 @@ the user swipes or taps **Commencer**.
 
 The three scenes tell one story: **the voice goes into the phone and comes out as text.** The
 headline and subtitle are SwiftUI text under the video, localized. The text inside the art is
-short everyday English, hand-lettered in the marker line, which reads naturally under every
-locale's headline.
+hand-lettered in the marker line and speaks the device's language: each language has its own
+render of the six videos (issue #771, see "One render per language").
 
 | File | Scene (headline) | What it shows | Loop |
 |---|---|---|---|
 | `intro-a-{light,dark}.mp4` | A, walking ("Parlez. Dictus écrit.") | She walks, a tote held by its handles in one hand. With the other she holds her phone out in front of her, between chin and collarbone, seen from the back. Her voice crosses the gap to the phone as small blue bars of the Dictus waveform. A dotted trail leads from the phone to a chat thread: under a grey "Where are you?", her blue reply writes itself and grows a line at a time: "On my way, I'll be there in ten minutes. Can you order me a coffee?" | 5.5 s |
 | `intro-b-{light,dark}.mp4` | B, the metro ("Même sans réseau.") | The same woman stands in a rocking metro carriage, one hand on the vertical pole at shoulder height. Tunnel lights streak past the window and sweep over her, the grab handles swing, and a badge in the top-right corner says no network (signal bars struck through in red). Her voice still goes into the phone, and a mail draft writes itself: "Notes from today", then "Great meeting this morning. Next steps for the launch below." | 5.5 s |
-| `intro-c-{light,dark}.mp4` | C, the keyboard ("Dans votre clavier.") | The drawn iPhone shows a note above the Dictus keyboard (QWERTY keys) through one whole dictation: "Hi" is typed (touch indicators on h, then i), the blue mic is tapped, the recording overlay runs (waveform on the voice, timer, ✕ and ✓), ✓ is tapped, transcribing runs (the sweep), and the paragraph lands: "Sam, quick reminder: dinner at eight tonight. I'll bring dessert, can you pick up the bread?" Then the note clears. | 6.5 s |
+| `intro-c-{light,dark}.mp4` | C, the keyboard ("Dans votre clavier.") | The drawn iPhone shows a note above the Dictus keyboard (QWERTY keys; AZERTY in French) through one whole dictation: "Hi" is typed (touch indicators on h, then i), the blue mic is tapped, the recording overlay runs (waveform on the voice, timer, ✕ and ✓), ✓ is tapped, transcribing runs (the sweep), and the paragraph lands: "Sam, quick reminder: dinner at eight tonight. I'll bring dessert, can you pick up the bread?" Then the note clears. | 6.5 s |
+
+The lines quoted above are the English render's. Every language's lines are in `src/strings.ts`; the French render writes, for example, "Tu es où ?", "Notes du jour" and types "Salut" on AZERTY keys.
+
+Where the files are:
+- the videos: `<locale>.lproj/intro-<scene>-<theme>.mp4` next to this file (`en.lproj/`, `fr.lproj/`). In the Xcode project each file name is a localized variant group, so the app bundle carries `en.lproj/intro-a-light.mp4`, `fr.lproj/intro-a-light.mp4`, and so on, and `Bundle.main.url(forResource:withExtension:)` returns the device language's copy, with English as the fallback (the development region);
+- the stills (`intro-{a,b,c}-still` in `DictusApp/Assets.xcassets`, shown with Reduce Motion on and while a video loads): the English PNGs keep their names and no locale, the fallback; every other language adds `intro-<scene>-<theme>-<locale>.png` with `"locale" : "<locale>"` in the image set's `Contents.json`. The asset catalog picks the device language's by itself.
 
 Format of every video:
 - 1000 × 1440 px (the 330 × 476 pt art area at 3×), 30 fps;
@@ -25,23 +31,30 @@ The light page is `#F2F2F7` and the dark page `#0A1628`, exact to the code value
 ## Re-rendering
 
 ```sh
-node assets/onboarding/intro/render.mjs                 # all six
-node assets/onboarding/intro/render.mjs --only b-dark   # some of them, comma-separated
-node assets/onboarding/intro/render.mjs --frames 0,90   # a few frames as PNG, into .build/frames/, no video
+node assets/onboarding/intro/render.mjs                    # the six English videos (--locale en)
+node assets/onboarding/intro/render.mjs --locale fr        # the six French ones
+node assets/onboarding/intro/render.mjs --locale en,fr     # several languages, comma-separated
+node assets/onboarding/intro/render.mjs --only b-dark      # some of them, comma-separated
+node assets/onboarding/intro/render.mjs --frames 0,90      # a few frames as PNG, into .build/frames/<locale>/, no video
 ```
 
 No manual step is needed. The script:
 1. scaffolds the anidoodle engine into `.build/` (git ignores it);
 2. installs its npm dependencies the first time;
 3. copies `src/` next to the engine's core;
-4. draws every frame in headless Chromium through the engine's Playwright adapter, in a single page and in order;
-5. encodes each video with ffmpeg, then prints its size, its ffprobe line and a hash of its frames.
+4. checks every requested language's text before drawing anything, and stops with the reason if a string uses a character the hand-lettered alphabet has no glyph for (it would otherwise be drawn as a blank gap), if a line is wider than its bubble, mail sheet or note, if a typed letter has no key, or if a cue leaves the 5-frame grid;
+5. draws every frame in headless Chromium through the engine's Playwright adapter, in a single page and in order, and checks that the frame one loop on is frame 0 again;
+6. encodes each video with ffmpeg into `<locale>.lproj/`, decodes it again and checks the four corners of every frame against the page colour;
+7. extracts the scene's still into the asset catalog (left untouched when its pixels already match);
+8. prints each video's size, its ffprobe line and a hash of its frames.
+
+The English render writes today's six files byte for byte: the strings table moved the English lines, it did not change them.
 
 To render from a clean state, delete `.build/` first.
 
 ### What it depends on
 
-The script reads nothing outside this folder except the following:
+The script reads nothing outside this folder except the following, and writes outside it only the stills in `DictusApp/Assets.xcassets/intro-{a,b,c}-still.imageset/`:
 
 - **The anidoodle engine**, installed at `~/.claude/skills/anidoodle` (https://github.com/alexgreensh/anidoodle). Set `ANIDOODLE=/path/to/anidoodle` to use another copy.
   - The art imports the engine's `core`, `film` and `gallery` modules.
@@ -64,7 +77,8 @@ A frame is a pure function of its number and appearance: no clock, no `Math.rand
   - the jaw-length bob;
   - the hand on the tote's handles, the hand holding the phone, the hand on the metro pole;
   - her voice as waveform bars.
-- `src/handLettering.ts`: the hand-lettered alphabet, punctuation and timer digits, and how text is written letter by letter.
+- `src/strings.ts`: every line of text drawn in the art, one table per language, already broken into lines, and the check that throws on a character with no glyph.
+- `src/handLettering.ts`: the hand-lettered alphabet, punctuation and timer digits, the accents composed on it, and how text is written letter by letter.
 - `src/noteCard.ts`: where the text comes out: a chat thread in A, a mail draft in B.
 - `src/edges.ts`: the clean band round every frame.
 - `src/introWalk.ts`: scene A, with the pavement sliding back one slab joint per step.
@@ -79,6 +93,26 @@ A frame is a pure function of its number and appearance: no clock, no `Math.rand
 The App Store art files up to V15-B are untouched: these sources are adapted copies. The changes to the character (hair, phone held out, hands) were accepted by Pierre. The App Store hero V16-B (`assets/appstore/art/v16-B/heroWalk16.ts`, issue #758) now draws her with `src/woman.ts` itself, posed as scene A's frame 0, so the listing's slide 1 and the intro show one character. A change to `woman.ts` changes slide 1 the next time it is rebuilt.
 
 ## Decisions
+
+### One render per language
+
+Decided on 2026-10-22 (issue #771), reversing #667's "short everyday English under every locale's headline": on a French device the art speaks French. Each language gets its own six videos, about 3.7 MB, which every user downloads since the App Store does not thin by language. 2.0.0 ships English and French; German and Spanish come with a real translation of the app (#773), because a `de.lproj` holding only videos would make the bundle declare a language the app does not speak.
+
+Rejected: text-free videos with SwiftUI text on top. It costs no bytes, but the text is written letter by letter in time with the voice, and in scene C it lies in perspective on the drawn phone; rebuilding that in SwiftUI in sync with the player is a new animation system with a risk of drift, and it would no longer be the marker's line.
+
+- **Accents** are composed: a letter's Unicode decomposition gives its base glyph and one mark (acute, grave, circumflex, diaeresis, cedilla), written after the letter, above the x-height or the cap height, the cedilla under the baseline; on i and j the mark replaces the dot. The alphabet also has the hyphen and the typographic apostrophe `’`, which French text is typed with.
+- **Scene C follows the language's keyboard:** the rows are `KeyboardLetterRows`' for the layout (AZERTY in French, `w x c v b n '` on the third row), the typed word and its key taps are the language's ("Salut", five taps a beat apart before the mic), and so are the suggestions and the overlay's captions, as the keyboard's own catalog says them ("En écoute...", "Transcription...").
+- **Same lines, same width:** a translation keeps the English line count and about its width, so the cards and the loops keep their size and timing. The scenes measure every line when the film is built and refuse one that overflows.
+
+### Adding a language
+
+1. Add its table to `src/strings.ts`: every line, broken as on the card; the scene C word with one tap frame per letter (on the 5-frame grid, before frame 32); the suggestions; the captions as `DictusKeyboard/Localizable.xcstrings` gives them; the three letter rows as `KeyboardLetterRows` gives them for the language's layout.
+2. `node assets/onboarding/intro/render.mjs --locale <code>`. If it stops on a missing glyph, draw that glyph in `src/handLettering.ts` (a letter with a new kind of mark needs the mark in `MARKS`), or reword.
+3. In the Xcode project, add the language to each of the six `intro-*.mp4` variant groups (a file reference named `<code>` with the path `assets/onboarding/intro/<code>.lproj/intro-….mp4`).
+4. In each `intro-{a,b,c}-still.imageset/Contents.json`, add the light and dark entries for the PNGs the render wrote, with `"locale" : "<code>"`.
+5. Add the code to `introLocales` in `DictusCore/Tests/DictusCoreTests/OnboardingIntroSceneTests.swift`.
+
+Only add a language the app itself is translated into (`knownRegions` in the project).
 
 ### Light page `#F2F2F7`, not the issue's `#FFFFFF`
 
@@ -134,7 +168,7 @@ The carriage rocks and she sways with it, her hair swinging. Bands of the tunnel
 - **The states follow the real keyboard** (`KeyboardWaveformView.resolvedAnimation(for:)`, `RecordingOverlay`):
   - recording draws the bars on a voice, with the ✕ and ✓ pills, the timer and "Listening...";
   - transcribing draws the code's sine sweep, a bright band on its crest, with "Transcribing..." and no pills.
-- **Suggestions:** the bar suggests "Hi", "Hey" and "Hello" after the typed word.
+- **Suggestions:** the bar suggests "Hi", "Hey" and "Hello" after the typed word ("Salut", "Coucou", "Bonjour" in French).
 
 ### Dark appearance
 

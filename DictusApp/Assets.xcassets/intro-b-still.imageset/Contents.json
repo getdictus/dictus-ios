@@ -15,6 +15,24 @@
       "filename" : "intro-b-dark.png",
       "idiom" : "universal",
       "scale" : "3x"
+    },
+    {
+      "filename" : "intro-b-light-fr.png",
+      "idiom" : "universal",
+      "locale" : "fr",
+      "scale" : "3x"
+    },
+    {
+      "appearances" : [
+        {
+          "appearance" : "luminosity",
+          "value" : "dark"
+        }
+      ],
+      "filename" : "intro-b-dark-fr.png",
+      "idiom" : "universal",
+      "locale" : "fr",
+      "scale" : "3x"
     }
   ],
   "info" : {

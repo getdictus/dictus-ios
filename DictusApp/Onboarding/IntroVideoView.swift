@@ -21,6 +21,10 @@ import DictusCore
 ///   very frame the still was taken from (`stillFrameSeconds`), so the hand-over is
 ///   invisible.
 ///
+/// WHY NO LANGUAGE HERE: the art's text is drawn in the device's language by one render per
+/// language (#771). The videos sit in `en.lproj` / `fr.lproj` and the stills are localized in
+/// the asset catalog, so the lookups by name below already return the right language.
+///
 /// Decorative: VoiceOver reads the page's headline and subtitle, not the art.
 struct IntroVideoView: View {
     let scene: OnboardingIntroScene

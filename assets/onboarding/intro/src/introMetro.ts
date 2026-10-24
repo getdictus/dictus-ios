@@ -3,7 +3,8 @@ import { clearEdges } from "./edges";
 import type { Film } from "./film";
 import { clipped, fillShape } from "./gallery";
 import { BPM, FPS, FRAME, LOOP_B, loop, place, THEMES, type Theme } from "./theme";
-import { drawNoteCard, type Card } from "./noteCard";
+import { checkCardText, drawNoteCard, type Card } from "./noteCard";
+import { stringsFor, type IntroStrings } from "./strings";
 import {
   ARM_NEAR, cel, drawVoice, drawWoman, FIG, fig, LEG_FAR, LEG_NEAR, legFrom, MARKER, mouthOpen, outline, phoneMap, setTheme, sm, stroke, twoBone, type Pose,
 } from "./woman";
@@ -171,7 +172,7 @@ const poseAt = (frame: number): Pose => {
 };
 
 // ---------------------------------------------------------------- the picture
-const drawFor = (theme: Theme) => (ctx: Ctx, frame: number, env: Env) => {
+const drawFor = (theme: Theme, text: IntroStrings) => (ctx: Ctx, frame: number, env: Env) => {
   setTheme(theme);
   const g = new Gfx(ctx, env, frame, MARKER);
   const k = PLACE.k * env.scale, toFrame = () => ctx.setTransform(k, 0, 0, k, -PLACE.o[0] * k, -PLACE.o[1] * k);
@@ -199,7 +200,7 @@ const drawFor = (theme: Theme) => (ctx: Ctx, frame: number, env: Env) => {
   // screen-blended, so the light brightens what it crosses (her navy trousers, the window) instead
   // of tinting it brown
   g.group("plain", () => lightBands(g, theme, frame), { blend: "screen" });
-  g.group("plain", () => drawNoteCard(g, theme, LP, frame, CARD, fig(phoneMap(pose)([[56, -6]])[0])));
+  g.group("plain", () => drawNoteCard(g, theme, LP, frame, CARD, fig(phoneMap(pose)([[56, -6]])[0]), text));
   g.group("plain", () => noNetwork(g, theme, frame));
   // 4. a clean band round the frame, so the page colour decodes exactly at its edge (edges.ts)
   clearEdges(ctx, env);
@@ -235,10 +236,17 @@ const noNetwork = (g: Gfx, t: Theme, frame: number) => {
   g.pen([a, b], { w: px(8.5), color: RED, seed: 712, closed: false, wobble: 0.2, boil: 0, taper: 0.15, opacity: 1, retrace: false });
 };
 
-const film = (theme: Theme, title: string): Film => ({
-  meta: { title: `Dictus onboarding intro B · the metro, no network · ${theme.name}`, W: FRAME.w, H: FRAME.h, fps: FPS, bpm: BPM, durationFrames: LOOP_B },
-  assets: { images: {} },
-  shots: [{ id: title, start: 0, end: LOOP_B, draw: drawFor(theme) }],
-});
-export const introMetroLight = film(THEMES.light, "introMetroLight");
-export const introMetroDark = film(THEMES.dark, "introMetroDark");
+/**
+ * Scene B in one appearance and one locale's text (strings.ts), as the film `id` (render.mjs
+ * names it, e.g. introMetroLight, introMetroDarkFr). Throws before any frame is drawn if the locale
+ * uses a character with no glyph or a line overflows the card.
+ */
+export const introMetro = (appearance: Theme["name"], locale: string, id: string): Film => {
+  const theme = THEMES[appearance], text = stringsFor(locale);
+  checkCardText(CARD, text, id);
+  return {
+    meta: { title: `Dictus onboarding intro B · the metro, no network · ${theme.name}`, W: FRAME.w, H: FRAME.h, fps: FPS, bpm: BPM, durationFrames: LOOP_B },
+    assets: { images: {} },
+    shots: [{ id, start: 0, end: LOOP_B, draw: drawFor(theme, text) }],
+  };
+};

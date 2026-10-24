@@ -65,6 +65,30 @@ Les issues du milestone `Someday` sont hors de vue volontairement. Ne pas les re
 - Lint : `swiftlint lint --strict`. Pas de baseline ni de fichier d'exemptions (la baseline a été supprimée en #146), donc toute violation introduite se corrige ou porte un `swiftlint:disable` avec sa raison écrite.
 - Xcode régénère `Localizable.xcstrings` au build (état d'extraction `stale`, newline finale perdue). C'est du bruit de build : le jeter, jamais le committer.
 
+### Device builds
+
+Notes for the global `ios-build` skill (Pivii/skills) when it puts Dictus on Pierre's iPhone.
+
+- Scheme: `DictusApp`.
+- Build from the dedicated worktree `/Users/pierreviviere/dev/dictus-wt/device`, never the main clone (a checkout there has been seen moving back under an agent seconds later, which stamps the wrong sha). Derived data: `/Users/pierreviviere/dev/dictus-wt/device/build/DerivedData`. Check out the commit detached, by sha.
+- Fresh worktree only, resolve packages first:
+
+  ```bash
+  cd /Users/pierreviviere/dev/dictus-wt/device
+  xcodebuild -resolvePackageDependencies -project Dictus.xcodeproj -scheme DictusApp \
+    -derivedDataPath build/DerivedData
+  ```
+
+- Before installing, both bundles must print the sha you checked out. A different sha, or a missing file: stop, do not install.
+
+  ```bash
+  APP=build/DerivedData/Build/Products/Debug-iphoneos/DictusApp.app
+  plutil -p "$APP/DictusBuildInfo.plist"
+  plutil -p "$APP/PlugIns/DictusKeyboard.appex/DictusBuildInfo.plist"
+  ```
+
+- Installing over a build signed by the same team normally keeps the app data (observed 2026-10-22, `devicectl` install over a Debug build). Uninstalling, or installing over a TestFlight or App Store build (different signature), wipes it.
+
 ### Rester headless
 
 Pierre travaille sur cette machine : toute fenêtre qui s'ouvre lui vole le focus.

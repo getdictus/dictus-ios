@@ -172,9 +172,10 @@ struct DictusApp: App {
 
         // Complete a Parakeet cache the 0.15 loader cannot use, before the coordinator's
         // launch preload can reach it (#558): layer 0 moves a 0.12 cache into the folder 0.15
-        // reads, then layer 2 restores the new joint from the app bundle. A no-op on a
-        // complete cache and on a device that never downloaded Parakeet. What neither can
-        // supply is fetched later by `ModelManager` (layer 1), with progress on the card.
+        // reads. A no-op on a complete cache and on a device that never downloaded Parakeet.
+        // What is still missing (the new joint, on a pre-1.9.0 cache, since the app bundle no
+        // longer carries it, #769) is fetched later by `ModelManager` (layer 1), with progress
+        // on the card.
         ParakeetCacheRepair.restoreFromBundleIfNeeded(context: "appLaunch")
 
         // A process that has just started cannot have a model load in flight (#428).

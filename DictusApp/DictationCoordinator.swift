@@ -1777,10 +1777,10 @@ private extension DictationCoordinator {
                 modelName: modelName,
                 component: "ParakeetLoad",
                 installedDirectory: {
-                    // Take from the app bundle whatever it carries that the cache lacks,
-                    // before judging the cache (#558). Launch already did this once; a file
-                    // can go missing between then and now, and the rule is "before any
-                    // Parakeet load".
+                    // Repair the cache before judging it (#558): layer 0, and the bundle
+                    // restore, which carries nothing since 2.0.0 (#769). Launch already did
+                    // this once; a file can go missing between then and now, and the rule is
+                    // "before any Parakeet load".
                     ParakeetCacheRepair.restoreFromBundleIfNeeded(context: "ParakeetLoad")
                     return ParakeetEngine.installedModelCacheDirectory()
                 },
