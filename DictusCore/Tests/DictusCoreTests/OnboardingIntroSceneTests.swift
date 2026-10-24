@@ -64,9 +64,13 @@ final class OnboardingIntroSceneTests: XCTestCase {
             .deletingLastPathComponent() // repository root
     }
 
+    /// The languages the intro art is drawn in (#771): one render per language, each in its
+    /// `.lproj` folder, so `Bundle.main.url(forResource:)` picks the device's.
+    private let introLocales = ["en", "fr"]
+
     /// The app finds each video by name in its bundle and falls back to the still frame
     /// when it is missing, so a renamed file would not fail the build: the page would just
-    /// stop moving. Pin the names to the files #667 committed.
+    /// stop moving. Pin the names to the files #667 committed, in every language (#771).
     func testEveryVideoTheAppAsksForExistsInTheRepository() {
         let introFolder = URL(fileURLWithPath: #filePath)
             .deletingLastPathComponent() // DictusCoreTests
@@ -74,18 +78,22 @@ final class OnboardingIntroSceneTests: XCTestCase {
             .deletingLastPathComponent() // DictusCore
             .deletingLastPathComponent() // repository root
             .appendingPathComponent("assets/onboarding/intro")
-        for scene in OnboardingIntroScene.allCases {
-            for dark in [false, true] {
-                let file = introFolder
-                    .appendingPathComponent(scene.videoResourceName(dark: dark))
-                    .appendingPathExtension(OnboardingIntroScene.videoExtension)
-                XCTAssertTrue(FileManager.default.fileExists(atPath: file.path), "missing \(file.lastPathComponent)")
+        for locale in introLocales {
+            for scene in OnboardingIntroScene.allCases {
+                for dark in [false, true] {
+                    let file = introFolder
+                        .appendingPathComponent("\(locale).lproj")
+                        .appendingPathComponent(scene.videoResourceName(dark: dark))
+                        .appendingPathExtension(OnboardingIntroScene.videoExtension)
+                    XCTAssertTrue(FileManager.default.fileExists(atPath: file.path), "missing \(locale).lproj/\(file.lastPathComponent)")
+                }
             }
         }
     }
 
     /// Same pin for the stills: each image set exists in DictusApp's asset catalog with a
-    /// light and a dark appearance.
+    /// light and a dark appearance, in English (unlocalized, the fallback) and in French
+    /// (`"locale" : "fr"`, #771).
     func testEveryStillExistsInTheAssetCatalogInBothAppearances() throws {
         let catalog = URL(fileURLWithPath: #filePath)
             .deletingLastPathComponent()
@@ -97,8 +105,12 @@ final class OnboardingIntroSceneTests: XCTestCase {
             let imageSet = catalog.appendingPathComponent("\(scene.stillImageName).imageset")
             let contents = try String(contentsOf: imageSet.appendingPathComponent("Contents.json"), encoding: .utf8)
             XCTAssertTrue(contents.contains("\"dark\""), "\(scene.stillImageName) has no dark appearance")
+            XCTAssertTrue(contents.contains("\"locale\" : \"fr\""), "\(scene.stillImageName) has no French still")
             let pngs = try FileManager.default.contentsOfDirectory(atPath: imageSet.path).filter { $0.hasSuffix(".png") }
-            XCTAssertEqual(pngs.count, 2, "\(scene.stillImageName) should hold a light and a dark PNG")
+            XCTAssertEqual(pngs.count, 2 * introLocales.count, "\(scene.stillImageName) should hold a light and a dark PNG per language")
+            for png in pngs {
+                XCTAssertTrue(contents.contains("\"\(png)\""), "\(png) is not listed in \(scene.stillImageName)'s Contents.json")
+            }
         }
     }
 }

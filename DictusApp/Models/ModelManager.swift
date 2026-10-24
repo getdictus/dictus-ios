@@ -442,8 +442,10 @@ class ModelManager: ObservableObject {
 
     /// Completes, without being asked, every downloaded model whose files are incomplete.
     ///
-    /// LAYER 1 OF #558, the permanent one. The app bundle restores what it carries at
-    /// launch (`ParakeetCacheRepair`, layer 2); whatever is still missing is fetched here,
+    /// LAYER 1 OF #558, the permanent one, and since 2.0.0 the only one that supplies
+    /// files: the app bundle no longer carries the new joint (#769), so a pre-1.9.0
+    /// Parakeet cache that lacks `JointDecisionv3.mlmodelc` is completed here. Whatever is
+    /// missing after `ParakeetCacheRepair` (layer 0) is fetched here,
     /// through `downloadModel`, which is the only place a model download may start:
     /// `ModelRepoDownloader` skips every file already on disk, so this moves exactly the
     /// missing bytes, with progress on the card, and the prewarm that follows compiles
@@ -483,7 +485,7 @@ class ModelManager: ObservableObject {
                 ? ParakeetCacheRepair.restoreFromBundleIfNeeded(context: "launchRepair")
                 : route.missingEntries()
             guard !missing.isEmpty else {
-                // The bundle had everything after all (a file removed after launch).
+                // Complete after all (a file restored or moved after launch).
                 modelStates[identifier] = .ready
                 continue
             }
@@ -1026,10 +1028,10 @@ class ModelManager: ObservableObject {
             // the same files into the same cache directory using a delegate-based
             // downloadTask that does deliver byte callbacks.
             let cacheDir = route.cacheDirectory
-            // Take what the app bundle carries before listing the repository (#558), so a
-            // fresh download on this release uses the same bundled joint an update does,
-            // and the downloader, which skips files already on disk, never fetches it.
-            // Parakeet only: the bundle carries nothing for Nemotron.
+            // Run the cache repair before listing the repository (#558), so a 0.12 cache
+            // is moved into place first and the downloader, which skips files already on
+            // disk, fetches only what is missing. Since 2.0.0 the app bundle carries no
+            // model file (#769). Parakeet only: Nemotron has no legacy cache.
             try FileManager.default.createDirectory(at: cacheDir, withIntermediateDirectories: true)
             if engine == .parakeet {
                 ParakeetCacheRepair.restoreFromBundleIfNeeded(context: "download")

@@ -75,10 +75,12 @@ struct LanguageSetupPage: View {
                 .pickerStyle(.segmented)
                 .padding(.bottom, 12)
 
-                LayoutPreview(layout: setup.layout, language: setup.keyboardLanguage)
+                // Above the preview so it stays above the fold on a 667 pt iPhone SE (#772):
+                // the preview is 208 pt tall and the Continue button is pinned.
+                modelLine
                     .padding(.bottom, 24)
 
-                modelLine
+                LayoutPreview(layout: setup.layout, language: setup.keyboardLanguage)
             }
         } bottom: {
             OnboardingPrimaryButton(Text("Continue")) {
