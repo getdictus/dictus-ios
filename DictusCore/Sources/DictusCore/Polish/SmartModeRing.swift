@@ -48,30 +48,33 @@ public struct SmartModeRingLayout: Equatable, Sendable {
     /// out, it points at nothing and lifting there cancels.
     public static let outerSlack: CGFloat = 48
 
-    /// The band's default radii, for a 390 pt wide screen. On a device, `radii(…)` derives
-    /// them from the room the Home screen has.
-    public static let defaultInnerRadius: CGFloat = 62
-    public static let defaultOuterRadius: CGFloat = 146
-
-    /// The band's inner radius is fixed: a small gap around the grown mic.
-    public static let fittedInnerRadius: CGFloat = 62
+    /// The band's default radii, as on an iPhone 15 Pro Max. On a device, `radii(…)`
+    /// derives them from the room the Home screen has.
+    public static let defaultInnerRadius: CGFloat = 90
+    public static let defaultOuterRadius: CGFloat = 154
 
     /// The band's outer diameter as a share of the screen's width, and its bounds.
-    public static let widthShare: CGFloat = 0.76
-    public static let minimumOuterRadius: CGFloat = 132
-    public static let maximumOuterRadius: CGFloat = 176
+    public static let widthShare: CGFloat = 0.718
+    public static let minimumOuterRadius: CGFloat = 125
+    public static let maximumOuterRadius: CGFloat = 166
+
+    /// The inner radius as a share of the outer one. The band is thin and stands clear of
+    /// the mic, so that even a quarter of the half-circle (four rows, 45°) has an inner
+    /// edge longer than the band is thick: a segment then reads as a piece of one ring,
+    /// not as a wedge (device feedback on round 4, 2026-10-25).
+    public static let innerShare: CGFloat = 90.0 / 154.0
 
     /// The band's radii for a Home screen `width` points wide, with `heightAbove` points
     /// between the mic's centre and the top of the area the band may cover.
     ///
     /// The outer diameter is `widthShare` of the width, no taller than the room above the
-    /// mic, and clamped to `minimumOuterRadius...maximumOuterRadius`. The inner radius
-    /// stays put, so a smaller screen gets a thinner band rather than a band that crowds
-    /// the mic.
+    /// mic, clamped to `minimumOuterRadius...maximumOuterRadius`, rounded to the point;
+    /// the inner radius is `innerShare` of it. 90–154 pt on an iPhone 15 Pro Max, 79–135
+    /// pt on an iPhone SE, whatever the number of rows.
     public static func radii(width: CGFloat, heightAbove: CGFloat) -> (inner: CGFloat, outer: CGFloat) {
         let byWidth = width * widthShare / 2
-        let outer = min(maximumOuterRadius, max(minimumOuterRadius, min(byWidth, heightAbove)))
-        return (fittedInnerRadius, outer)
+        let outer = min(maximumOuterRadius, max(minimumOuterRadius, min(byWidth, heightAbove))).rounded()
+        return ((outer * innerShare).rounded(), outer)
     }
 
     /// The band's inner and outer radii as drawn.
@@ -169,34 +172,59 @@ public struct SmartModeRingLayout: Equatable, Sendable {
     /// The band's radial thickness.
     public var thickness: CGFloat { outerRadius - innerRadius }
 
-    /// The largest corner radius a segment can take with `gap` between segments without
-    /// its outline folding over itself.
+    /// The length of a segment's inner edge, between its two radial edges, before its
+    /// corners are rounded.
+    public func innerEdgeLength(gap: CGFloat) -> CGFloat {
+        innerRadius * CGFloat(slotWidth * .pi / 180) - gap
+    }
+
+    /// The corner radii a segment is drawn with: small inner corners, larger outer ones.
     ///
-    /// Three limits, the smallest wins:
+    /// - **Inner:** `innerCorner`, but never more than `innerEdgeShare` of the inner
+    ///   edge, so a short inner edge keeps a straight part and the segment does not turn
+    ///   into a wedge.
+    /// - **Outer:** `outerShare` of the band's thickness.
     ///
-    /// - **Half the thickness.** An outer and an inner corner share each radial edge; at
-    ///   half the thickness they meet and the edge has zero length (fully round ends).
+    /// Both then go through `clampedCorners(gap:inner:outer:)`.
+    public func fittedCorners(gap: CGFloat,
+                              innerCorner: CGFloat,
+                              innerEdgeShare: CGFloat,
+                              outerShare: CGFloat) -> (inner: CGFloat, outer: CGFloat) {
+        clampedCorners(
+            gap: gap,
+            inner: min(innerCorner, innerEdgeLength(gap: gap) * innerEdgeShare),
+            outer: thickness * outerShare
+        )
+    }
+
+    /// The inner and outer corner radii, each clamped so the outline never folds over
+    /// itself.
+    ///
     /// - **The inner arc.** The two inner corners must not cross: each is a circle of
     ///   radius `c` centred at `innerRadius + c`, `gap / 2 + c` from its edge, so they
     ///   meet when `gap / 2 + c = (innerRadius + c) · sin(slot / 2)`, i.e.
     ///   `c ≤ (innerRadius · sin(slot / 2) − gap / 2) / (1 − sin(slot / 2))`.
     /// - **The outer arc**, the same way with centres at `outerRadius − c`:
     ///   `c ≤ (outerRadius · sin(slot / 2) − gap / 2) / (1 + sin(slot / 2))`.
+    /// - **The thickness.** An inner and an outer corner share each radial edge: together
+    ///   they leave at least a point of it, or both shrink in proportion.
     ///
-    /// Half a point is kept back from each so the arcs between corners never vanish.
-    public func maximumCornerRadius(gap: CGFloat) -> CGFloat {
+    /// Half a point is kept back from each arc limit so the arcs between corners never
+    /// vanish.
+    public func clampedCorners(gap: CGFloat, inner: CGFloat, outer: CGFloat) -> (inner: CGFloat, outer: CGFloat) {
         let half = Double(gap) / 2
         let sine = sin(slotWidth * .pi / 360)
-        let byThickness = Double(thickness) / 2
-        let byInner = sine < 1 ? (Double(innerRadius) * sine - half) / (1 - sine) : byThickness
-        let byOuter = (Double(outerRadius) * sine - half) / (1 + sine)
-        return CGFloat(max(0, min(byThickness, byInner, byOuter) - 0.5))
-    }
-
-    /// The corner radius for segments `roundness` of fully round (1 = half the thickness),
-    /// clamped to `maximumCornerRadius(gap:)`.
-    public func fittedCornerRadius(gap: CGFloat, roundness: CGFloat) -> CGFloat {
-        min(thickness / 2 * max(0, min(1, roundness)), maximumCornerRadius(gap: gap))
+        let byInnerArc = sine < 1 ? (Double(innerRadius) * sine - half) / (1 - sine) : Double(thickness)
+        let byOuterArc = (Double(outerRadius) * sine - half) / (1 + sine)
+        var innerCorner = max(0, min(Double(inner), byInnerArc - 0.5))
+        var outerCorner = max(0, min(Double(outer), byOuterArc - 0.5))
+        let room = Double(thickness) - 1
+        if innerCorner + outerCorner > room {
+            let ratio = room / (innerCorner + outerCorner)
+            innerCorner *= ratio
+            outerCorner *= ratio
+        }
+        return (CGFloat(innerCorner), CGFloat(outerCorner))
     }
 
     /// The outline of row `index`'s band segment, relative to the mic's centre, y down.
@@ -208,20 +236,23 @@ public struct SmartModeRingLayout: Equatable, Sendable {
     ///   `gap / 2` into the segment, parallel to it. Two neighbours' facing edges are then
     ///   `gap` points apart, measured perpendicular to them, at every radius — the chord
     ///   across the gap, not an angle (an angular inset would widen toward the outside).
-    /// - **Rounded corners.** Each of the four corners is a circle of `cornerRadius`
-    ///   tangent to its edge and to its arc: inside the outer arc, outside the inner one.
-    ///   `cornerRadius` is clamped to `maximumCornerRadius(gap:)`.
+    /// - **Rounded corners.** Each of the four corners is a circle tangent to its edge
+    ///   and to its arc: `outerCornerRadius` inside the outer arc, `innerCornerRadius`
+    ///   outside the inner one, both clamped by `clampedCorners(gap:inner:outer:)`.
     ///
     /// The arcs and corners are sampled every `stepDegrees`, so the outline is a closed
     /// polygon the view fills as is. Every point lies inside the sector, between the
     /// radii, and at least `gap / 2` from both of the sector's edges.
     public func segmentOutline(ofEntry index: Int,
                                gap: CGFloat,
-                               cornerRadius: CGFloat,
+                               innerCornerRadius: CGFloat,
+                               outerCornerRadius: CGFloat,
                                stepDegrees: Double = 1) -> [CGPoint] {
         let range = angleRange(ofEntry: index)
         let half = Double(gap) / 2
-        let corner = Double(max(0, min(cornerRadius, maximumCornerRadius(gap: gap))))
+        let corners = clampedCorners(gap: gap, inner: innerCornerRadius, outer: outerCornerRadius)
+        let innerCorner = Double(corners.inner)
+        let outerCorner = Double(corners.outer)
         let outer = Double(outerRadius)
         let inner = Double(innerRadius)
 
@@ -238,6 +269,7 @@ public struct SmartModeRingLayout: Equatable, Sendable {
         /// the circle of `radius` from inside (outer arc) or outside (inner arc).
         struct Corner { let center: Vector; let onArc: Vector; let onEdge: Vector }
         func makeCorner(edge: Double, inward: Double, radius: Double, insideCircle: Bool) -> Corner {
+            let corner = insideCircle ? outerCorner : innerCorner
             let along = unit(edge)
             let normal = scale(unit(edge + 90), inward)
             let toCenter = insideCircle ? radius - corner : radius + corner
@@ -271,11 +303,11 @@ public struct SmartModeRingLayout: Equatable, Sendable {
 
         var points: [Vector] = []
         points += arc(radius: outer, from: angle(lowOuter.onArc), to: angle(highOuter.onArc))
-        points += sweep(from: highOuter.onArc, to: highOuter.onEdge, around: highOuter.center, radius: corner)
-        points += sweep(from: highInner.onEdge, to: highInner.onArc, around: highInner.center, radius: corner)
+        points += sweep(from: highOuter.onArc, to: highOuter.onEdge, around: highOuter.center, radius: outerCorner)
+        points += sweep(from: highInner.onEdge, to: highInner.onArc, around: highInner.center, radius: innerCorner)
         points += arc(radius: inner, from: angle(highInner.onArc), to: angle(lowInner.onArc))
-        points += sweep(from: lowInner.onArc, to: lowInner.onEdge, around: lowInner.center, radius: corner)
-        points += sweep(from: lowOuter.onEdge, to: lowOuter.onArc, around: lowOuter.center, radius: corner)
+        points += sweep(from: lowInner.onArc, to: lowInner.onEdge, around: lowInner.center, radius: innerCorner)
+        points += sweep(from: lowOuter.onEdge, to: lowOuter.onArc, around: lowOuter.center, radius: outerCorner)
         return points.map { CGPoint(x: $0.x, y: -$0.y) }
     }
 

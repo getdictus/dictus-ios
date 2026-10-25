@@ -42,10 +42,14 @@ enum HomeSmartModeRingStyle {
     /// the selection has no gap (`SmartModeRingLayout.entryIndex(at:)`).
     static let segmentGap: CGFloat = 4
 
-    /// How round a segment's corners are, as a share of fully round (half the band's
-    /// thickness). `SmartModeRingLayout.fittedCornerRadius` turns it into points and
-    /// clamps it so narrow segments (four rows on an iPhone SE) stay valid.
-    static let segmentRoundness: CGFloat = 0.9
+    /// A segment's corners: small on the inner arc (8 pt, at most a fifth of the inner
+    /// edge), larger on the outer arc (0.3 of the band's thickness). Rounder outer corners
+    /// carved visible V-shaped holes between neighbours near the arc (round 5 captures,
+    /// 2026-10-25). `SmartModeRingLayout.fittedCorners` turns these into points and
+    /// clamps them.
+    static let innerCornerRadius: CGFloat = 8
+    static let innerCornerEdgeShare: CGFloat = 0.2
+    static let outerCornerThicknessShare: CGFloat = 0.3
 
     /// Space kept between a label and its segment's sides.
     static let labelPadding: CGFloat = 6
@@ -240,10 +244,17 @@ struct HomeSmartModeRing: View {
     private func segment(index: Int, entry: SmartModeFanEntry) -> some View {
         let isLit = session.highlightedIndex == index
         let isSelectable = session.isSelectable(index)
+        let corners = session.layout.fittedCorners(
+            gap: Style.segmentGap,
+            innerCorner: Style.innerCornerRadius,
+            innerEdgeShare: Style.innerCornerEdgeShare,
+            outerShare: Style.outerCornerThicknessShare
+        )
         let outline = session.layout.segmentOutline(
             ofEntry: index,
             gap: Style.segmentGap,
-            cornerRadius: session.layout.fittedCornerRadius(gap: Style.segmentGap, roundness: Style.segmentRoundness)
+            innerCornerRadius: corners.inner,
+            outerCornerRadius: corners.outer
         )
         let fill = isLit ? Color.dictusAccent : Color.dictusSurface.opacity(isSelectable ? 1 : 0.7)
         let center = session.layout.labelCenter(ofEntry: index)

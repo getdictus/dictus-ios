@@ -158,197 +158,209 @@ final class SmartModeRingTests: XCTestCase {
     // MARK: - What is drawn
 
     private let gap: CGFloat = 4
-    private let corner: CGFloat = 10
+
+    /// The band on the two reference phones, from `SmartModeRingLayout.radii`.
+    private var devices: [(name: String, layout: (Int) -> SmartModeRingLayout)] {
+        [("15 Pro Max", 430, 600), ("SE", 375, 400)].map { name, width, above in
+            let radii = SmartModeRingLayout.radii(width: width, heightAbove: above)
+            return (name, { SmartModeRingLayout(entryCount: $0, innerRadius: radii.inner, outerRadius: radii.outer) })
+        }
+    }
+
+    /// The view's corner rule: 8 pt inner corners (at most a fifth of the inner edge),
+    /// outer corners 0.3 of the thickness.
+    private func corners(_ layout: SmartModeRingLayout) -> (inner: CGFloat, outer: CGFloat) {
+        layout.fittedCorners(gap: gap, innerCorner: 8, innerEdgeShare: 0.2, outerShare: 0.3)
+    }
+
+    private func outline(_ layout: SmartModeRingLayout, _ index: Int) -> [CGPoint] {
+        let corners = corners(layout)
+        return layout.segmentOutline(ofEntry: index, gap: gap,
+                                     innerCornerRadius: corners.inner, outerCornerRadius: corners.outer)
+    }
+
+    /// One rule for every count: a thin band standing clear of the mic, 90–154 pt on an
+    /// iPhone 15 Pro Max and 79–135 pt on an iPhone SE, clamped on other widths, and
+    /// never taller than the room above the mic.
+    func testTheBandIsThinAndClearOfTheMic() {
+        let proMax = SmartModeRingLayout.radii(width: 430, heightAbove: 600)
+        XCTAssertEqual(proMax.inner, 90)
+        XCTAssertEqual(proMax.outer, 154)
+        let se = SmartModeRingLayout.radii(width: 375, heightAbove: 400)
+        XCTAssertEqual(se.inner, 79)
+        XCTAssertEqual(se.outer, 135)
+
+        XCTAssertEqual(SmartModeRingLayout.radii(width: 430, heightAbove: 100).outer,
+                       SmartModeRingLayout.minimumOuterRadius)
+        XCTAssertEqual(SmartModeRingLayout.radii(width: 1000, heightAbove: 1000).outer,
+                       SmartModeRingLayout.maximumOuterRadius)
+
+        for device in devices {
+            for count in 2...4 {
+                let layout = device.layout(count)
+                // Clear of the grown mic's halo, and even with four rows a segment's inner
+                // edge is longer than the band is thick: a piece of a ring, not a wedge.
+                XCTAssertGreaterThan(layout.innerRadius, SmartModeRingLayout.micRadius + 20, device.name)
+                XCTAssertGreaterThan(layout.innerEdgeLength(gap: gap), layout.thickness, "\(device.name) \(count)")
+            }
+        }
+    }
+
+    /// Inner and outer corners follow their own rules, and each stays valid: positive,
+    /// within its arc's limit, and together within the band's thickness.
+    func testInnerAndOuterCornersAreDistinctAndValid() {
+        for device in devices {
+            for count in 2...4 {
+                let layout = device.layout(count)
+                let fitted = corners(layout)
+                XCTAssertEqual(fitted.inner, min(8, layout.innerEdgeLength(gap: gap) * 0.2), accuracy: 0.001)
+                XCTAssertEqual(fitted.outer, layout.thickness * 0.3, accuracy: 0.001, "\(device.name) \(count)")
+                XCTAssertGreaterThan(fitted.inner, 0)
+                XCTAssertGreaterThan(fitted.outer, fitted.inner, "\(device.name) \(count)")
+                XCTAssertLessThan(fitted.inner + fitted.outer, layout.thickness)
+            }
+        }
+        // Asking for more than the geometry allows is clamped, never honoured: the arcs'
+        // limits first, then the thickness shared between the two.
+        let layout = SmartModeRingLayout(entryCount: 4, innerRadius: 79, outerRadius: 135)
+        let clamped = layout.clampedCorners(gap: gap, inner: 500, outer: 500)
+        XCTAssertLessThanOrEqual(clamped.inner + clamped.outer, layout.thickness - 1 + 0.001)
+        XCTAssertGreaterThan(clamped.inner, 0)
+        XCTAssertGreaterThan(clamped.outer, 0)
+        XCTAssertEqual(layout.clampedCorners(gap: gap, inner: -3, outer: -3).inner, 0)
+    }
 
     /// Each drawn segment lies over its own sector, between the band's radii, and at
-    /// least half the gap from both of the sector's edges at every radius: neighbours are
-    /// separated by a constant gap and never overlap.
-    func testEachSegmentIsDrawnInsideItsOwnSectorWithAConstantGap() {
-        for count in 2...4 {
-            let layout = SmartModeRingLayout(entryCount: count, innerRadius: 62, outerRadius: 160)
-            for index in 0..<count {
-                let range = layout.angleRange(ofEntry: index)
-                let outline = layout.segmentOutline(ofEntry: index, gap: gap, cornerRadius: corner)
-                XCTAssertGreaterThan(outline.count, 8)
-                for point in outline {
-                    let radius = (point.x * point.x + point.y * point.y).squareRoot()
-                    XCTAssertGreaterThanOrEqual(radius + 0.01, layout.innerRadius)
-                    XCTAssertLessThanOrEqual(radius - 0.01, layout.outerRadius)
-                    for edge in [range.lowerBound, range.upperBound] {
-                        let radians = edge * .pi / 180
-                        let distance = abs(Double(point.x) * sin(radians) + Double(point.y) * cos(radians))
-                        XCTAssertGreaterThanOrEqual(distance + 0.01, Double(gap) / 2, "count \(count) row \(index)")
+    /// least half the gap from both of the sector's edges: neighbours never overlap.
+    func testEachSegmentIsDrawnInsideItsOwnSector() {
+        for device in devices {
+            for count in 2...4 {
+                let layout = device.layout(count)
+                for index in 0..<count {
+                    let range = layout.angleRange(ofEntry: index)
+                    for point in outline(layout, index) {
+                        let radius = hypot(point.x, point.y)
+                        XCTAssertGreaterThanOrEqual(radius + 0.01, layout.innerRadius)
+                        XCTAssertLessThanOrEqual(radius - 0.01, layout.outerRadius)
+                        for edge in [range.lowerBound, range.upperBound] {
+                            let radians = edge * .pi / 180
+                            let distance = abs(Double(point.x) * sin(radians) + Double(point.y) * cos(radians))
+                            XCTAssertGreaterThanOrEqual(distance + 0.01, Double(gap) / 2, "\(device.name) \(count) row \(index)")
+                        }
+                        let degrees = atan2(Double(-point.y), Double(point.x)) * 180 / .pi
+                        XCTAssertTrue(range.contains(degrees), "\(device.name) \(count) row \(index) at \(degrees)°")
                     }
-                    let degrees = atan2(Double(-point.y), Double(point.x)) * 180 / .pi
-                    XCTAssertTrue(range.contains(degrees), "count \(count) row \(index) at \(degrees)°")
                 }
             }
         }
     }
 
-    /// The segments are band pieces, not bubbles: each reaches both radii, its straight
-    /// edges run the band's full thickness bar the corners, and together they span the
-    /// half-circle from left to right with only the gaps missing.
-    func testTheSegmentsFormOneContinuousBand() {
-        for count in 2...4 {
-            let layout = SmartModeRingLayout(entryCount: count, innerRadius: 62, outerRadius: 160)
-            var lowest = 180.0
-            var highest = 0.0
-            for index in 0..<count {
-                let outline = layout.segmentOutline(ofEntry: index, gap: gap, cornerRadius: corner)
-                let radii = outline.map { Double(($0.x * $0.x + $0.y * $0.y).squareRoot()) }
-                XCTAssertEqual(radii.min() ?? 0, Double(layout.innerRadius), accuracy: 0.5)
-                XCTAssertEqual(radii.max() ?? 0, Double(layout.outerRadius), accuracy: 0.5)
-                let angles = outline.map { atan2(Double(-$0.y), Double($0.x)) * 180 / .pi }
-                lowest = min(lowest, angles.min() ?? 180)
-                highest = max(highest, angles.max() ?? 0)
-                // The outer arc covers the sector less the gap and the corners, nothing
-                // more: the segment is as wide as its share of the half-circle.
-                let range = layout.angleRange(ofEntry: index)
-                let span = (angles.max() ?? 0) - (angles.min() ?? 0)
-                XCTAssertGreaterThan(span, (range.upperBound - range.lowerBound) * 0.9, "count \(count) row \(index)")
+    /// The gap is constant in points: the straight part of every radial edge runs exactly
+    /// half the gap from the sector's edge, measured perpendicular to it, along most of
+    /// the band's thickness.
+    func testTheGapIsConstantInPoints() {
+        for device in devices {
+            for count in 2...4 {
+                let layout = device.layout(count)
+                let fitted = corners(layout)
+                for index in 0..<count {
+                    let range = layout.angleRange(ofEntry: index)
+                    for edge in [range.lowerBound, range.upperBound] {
+                        let radians = edge * .pi / 180
+                        let onEdge = outline(layout, index).filter { point in
+                            let distance = abs(Double(point.x) * sin(radians) + Double(point.y) * cos(radians))
+                            return abs(distance - Double(gap) / 2) < 0.01
+                        }
+                        let radii = onEdge.map { Double(hypot($0.x, $0.y)) }
+                        XCTAssertGreaterThanOrEqual(onEdge.count, 2, "\(device.name) \(count) row \(index)")
+                        XCTAssertGreaterThan((radii.max() ?? 0) - (radii.min() ?? 0),
+                                             Double(layout.thickness - fitted.inner - fitted.outer) - 1,
+                                             "\(device.name) \(count) row \(index)")
+                    }
+                }
             }
-            // Only half a gap is missing at each end of the half-circle.
-            XCTAssertLessThan(lowest, 2.5, "count \(count)")
-            XCTAssertGreaterThan(highest, 177.5, "count \(count)")
         }
     }
 
-    /// The corners are rounded with the given radius: no point of the outline sits in the
-    /// sharp corner a square segment would have.
+    /// The segments read as one continuous band: each reaches both radii and spans most of
+    /// its sector, and together they run from the left end of the half-circle to the right.
+    func testTheSegmentsFormOneContinuousBand() {
+        for device in devices {
+            for count in 2...4 {
+                let layout = device.layout(count)
+                var lowest = 180.0
+                var highest = 0.0
+                for index in 0..<count {
+                    let points = outline(layout, index)
+                    let radii = points.map { Double(hypot($0.x, $0.y)) }
+                    XCTAssertEqual(radii.min() ?? 0, Double(layout.innerRadius), accuracy: 0.5)
+                    XCTAssertEqual(radii.max() ?? 0, Double(layout.outerRadius), accuracy: 0.5)
+                    let angles = points.map { atan2(Double(-$0.y), Double($0.x)) * 180 / .pi }
+                    lowest = min(lowest, angles.min() ?? 180)
+                    highest = max(highest, angles.max() ?? 0)
+                    let range = layout.angleRange(ofEntry: index)
+                    XCTAssertGreaterThan((angles.max() ?? 0) - (angles.min() ?? 0),
+                                         (range.upperBound - range.lowerBound) * 0.9, "\(device.name) \(count) row \(index)")
+                    // One simple loop, not a shape folded over itself.
+                    var area = 0.0
+                    for (a, b) in zip(points, Array(points.dropFirst()) + [points[0]]) {
+                        area += Double(a.x * b.y - b.x * a.y) / 2
+                    }
+                    let ring = Double(layout.outerRadius * layout.outerRadius - layout.innerRadius * layout.innerRadius)
+                    let sectorArea = ring * (range.upperBound - range.lowerBound) * .pi / 360
+                    XCTAssertGreaterThan(abs(area), sectorArea * 0.8, "\(device.name) \(count) row \(index)")
+                    XCTAssertLessThan(abs(area), sectorArea)
+                }
+                XCTAssertLessThan(lowest, 2.5, "\(device.name) \(count)")
+                XCTAssertGreaterThan(highest, 177.5, "\(device.name) \(count)")
+            }
+        }
+    }
+
+    /// The corners are rounded: no point of the outline sits in the sharp corner a square
+    /// segment would have, at the inner arc or at the outer one.
     func testTheCornersAreRounded() {
-        let layout = SmartModeRingLayout(entryCount: 3, innerRadius: 62, outerRadius: 160)
-        let range = layout.angleRange(ofEntry: 0)
-        let outline = layout.segmentOutline(ofEntry: 0, gap: gap, cornerRadius: corner)
-        // The sharp outer corner: on the outer arc, half a gap from the low edge.
-        let sharpDegrees = range.lowerBound + asin(Double(gap) / 2 / 160) * 180 / .pi
-        let sharp = CGPoint(x: cos(sharpDegrees * .pi / 180) * 160, y: -sin(sharpDegrees * .pi / 180) * 160)
-        let nearest = outline.map { hypot($0.x - sharp.x, $0.y - sharp.y) }.min() ?? 0
-        // A corner of radius r cuts the sharp point by r(√2 − 1) at a right angle.
-        XCTAssertGreaterThan(Double(nearest), Double(corner) * 0.35)
+        let layout = SmartModeRingLayout(entryCount: 4, innerRadius: 90, outerRadius: 154)
+        let fitted = corners(layout)
+        let range = layout.angleRange(ofEntry: 1)
+        let points = outline(layout, 1)
+        for (radius, corner) in [(Double(layout.outerRadius), fitted.outer), (Double(layout.innerRadius), fitted.inner)] {
+            let sharpDegrees = range.lowerBound + asin(Double(gap) / 2 / radius) * 180 / .pi
+            let sharp = CGPoint(x: cos(sharpDegrees * .pi / 180) * radius, y: -sin(sharpDegrees * .pi / 180) * radius)
+            let nearest = points.map { hypot($0.x - sharp.x, $0.y - sharp.y) }.min() ?? 0
+            XCTAssertGreaterThan(Double(nearest), Double(corner) * 0.3)
+        }
     }
 
     /// Labels sit at mid-angle of their sector and mid-radius of the band.
     func testLabelsAreCentredInTheirSegments() {
-        for count in 2...4 {
-            let layout = SmartModeRingLayout(entryCount: count, innerRadius: 62, outerRadius: 160)
-            for index in 0..<count {
-                let centre = layout.labelCenter(ofEntry: index)
-                XCTAssertEqual(Double(hypot(centre.x, centre.y)), 111, accuracy: 0.01)
-                let degrees = atan2(Double(-centre.y), Double(centre.x)) * 180 / .pi
-                XCTAssertEqual(degrees, layout.centerAngle(ofEntry: index), accuracy: 0.01)
-            }
-        }
-    }
-
-    /// The band is sized from the screen: about three quarters of the width, clamped, and
-    /// never taller than the room above the mic. The inner radius does not move.
-    func testTheRadiiFollowTheScreen() {
-        let proMax = SmartModeRingLayout.radii(width: 430, heightAbove: 600)
-        XCTAssertEqual(proMax.outer, 430 * SmartModeRingLayout.widthShare / 2, accuracy: 0.01)
-        XCTAssertEqual(proMax.inner, SmartModeRingLayout.fittedInnerRadius)
-
-        let se = SmartModeRingLayout.radii(width: 375, heightAbove: 400)
-        XCTAssertEqual(se.outer, 375 * SmartModeRingLayout.widthShare / 2, accuracy: 0.01)
-        XCTAssertLessThan(se.outer, proMax.outer)
-
-        let short = SmartModeRingLayout.radii(width: 430, heightAbove: 100)
-        XCTAssertEqual(short.outer, SmartModeRingLayout.minimumOuterRadius)
-
-        let wide = SmartModeRingLayout.radii(width: 1000, heightAbove: 1000)
-        XCTAssertEqual(wide.outer, SmartModeRingLayout.maximumOuterRadius)
-    }
-
-    /// The radii the band takes on an iPhone 15 Pro Max and an iPhone SE.
-    private let deviceRadii: [(name: String, inner: CGFloat, outer: CGFloat)] = [
-        ("15 Pro Max", 62, 163), ("SE", 62, 142)
-    ]
-
-    /// The fitted corner radius is positive, at most half the thickness, at most the
-    /// clamp, and as round as asked wherever the segment is wide enough.
-    func testTheCornerRadiusIsNearlyRoundAndAlwaysValid() {
-        for device in deviceRadii {
+        for device in devices {
             for count in 2...4 {
-                let layout = SmartModeRingLayout(entryCount: count, innerRadius: device.inner, outerRadius: device.outer)
-                let fitted = layout.fittedCornerRadius(gap: gap, roundness: 0.9)
-                let clamp = layout.maximumCornerRadius(gap: gap)
-                XCTAssertGreaterThan(fitted, 0, "\(device.name) \(count)")
-                XCTAssertLessThanOrEqual(fitted, layout.thickness / 2, "\(device.name) \(count)")
-                XCTAssertLessThanOrEqual(fitted, clamp, "\(device.name) \(count)")
-                XCTAssertEqual(fitted, min(clamp, layout.thickness / 2 * 0.9), accuracy: 0.001)
-                // Clearly rounder than the first band's 10 pt.
-                XCTAssertGreaterThan(fitted, 30, "\(device.name) \(count)")
-            }
-        }
-        // Asking for more than the geometry allows is clamped, never honoured.
-        let narrow = SmartModeRingLayout(entryCount: 4, innerRadius: 62, outerRadius: 142)
-        XCTAssertEqual(narrow.fittedCornerRadius(gap: gap, roundness: 5), narrow.maximumCornerRadius(gap: gap))
-        XCTAssertEqual(narrow.segmentOutline(ofEntry: 1, gap: gap, cornerRadius: 500),
-                       narrow.segmentOutline(ofEntry: 1, gap: gap, cornerRadius: narrow.maximumCornerRadius(gap: gap)))
-        XCTAssertLessThan(narrow.maximumCornerRadius(gap: gap), narrow.thickness / 2)
-    }
-
-    /// With the fitted corners every segment stays one simple loop inside its sector: its
-    /// outline has the area of a segment, not of a shape folded over itself.
-    func testFittedSegmentsDoNotFoldOverThemselves() {
-        for device in deviceRadii {
-            for count in 2...4 {
-                let layout = SmartModeRingLayout(entryCount: count, innerRadius: device.inner, outerRadius: device.outer)
-                let corner = layout.fittedCornerRadius(gap: gap, roundness: 0.9)
+                let layout = device.layout(count)
                 for index in 0..<count {
-                    let outline = layout.segmentOutline(ofEntry: index, gap: gap, cornerRadius: corner)
-                    var area = 0.0
-                    for (a, b) in zip(outline, Array(outline.dropFirst()) + [outline[0]]) {
-                        area += Double(a.x * b.y - b.x * a.y) / 2
-                    }
-                    let range = layout.angleRange(ofEntry: index)
-                    let ring = Double(layout.outerRadius * layout.outerRadius - layout.innerRadius * layout.innerRadius)
-                    let sectorArea = ring * (range.upperBound - range.lowerBound) * .pi / 360
-                    XCTAssertGreaterThan(abs(area), sectorArea * 0.5, "\(device.name) \(count) row \(index)")
-                    XCTAssertLessThan(abs(area), sectorArea, "\(device.name) \(count) row \(index)")
-                    for point in outline {
-                        let degrees = atan2(Double(-point.y), Double(point.x)) * 180 / .pi
-                        XCTAssertTrue(range.contains(degrees), "\(device.name) \(count) row \(index)")
-                    }
+                    let centre = layout.labelCenter(ofEntry: index)
+                    XCTAssertEqual(Double(hypot(centre.x, centre.y)), Double(layout.labelRadius), accuracy: 0.01)
+                    let degrees = atan2(Double(-centre.y), Double(centre.x)) * 180 / .pi
+                    XCTAssertEqual(degrees, layout.centerAngle(ofEntry: index), accuracy: 0.01)
                 }
             }
         }
-    }
-
-    /// The gap is constant in points: the straight part of a radial edge sits exactly half
-    /// the gap from the sector's edge, measured perpendicular to it, all along its length.
-    func testTheGapIsConstantInPoints() {
-        let layout = SmartModeRingLayout(entryCount: 2, innerRadius: 62, outerRadius: 163)
-        let range = layout.angleRange(ofEntry: 1)
-        let corner: CGFloat = 10
-        let outline = layout.segmentOutline(ofEntry: 1, gap: gap, cornerRadius: corner)
-        let radians = range.upperBound * .pi / 180
-        let onEdge = outline.filter { point in
-            let distance = abs(Double(point.x) * sin(radians) + Double(point.y) * cos(radians))
-            return abs(distance - Double(gap) / 2) < 0.01
-        }
-        let radii = onEdge.map { Double(hypot($0.x, $0.y)) }
-        XCTAssertGreaterThanOrEqual(onEdge.count, 2)
-        XCTAssertGreaterThan((radii.max() ?? 0) - (radii.min() ?? 0), Double(layout.thickness - 2 * corner) - 1)
     }
 
     /// At every boundary between two drawn segments the selection switches between exactly
     /// those two rows: what is drawn, and each half of the gap beside it, is that row.
     func testSelectionMatchesTheDrawnSegmentsAtTheirBoundaries() {
-        for device in deviceRadii {
+        for device in devices {
             for count in 2...4 {
-                let layout = SmartModeRingLayout(entryCount: count, innerRadius: device.inner, outerRadius: device.outer)
-                let corner = layout.fittedCornerRadius(gap: gap, roundness: 0.9)
+                let layout = device.layout(count)
                 for index in 0..<count {
                     let range = layout.angleRange(ofEntry: index)
-                    let outline = layout.segmentOutline(ofEntry: index, gap: gap, cornerRadius: corner)
-                    let angles = outline.map { atan2(Double(-$0.y), Double($0.x)) * 180 / .pi }
+                    let angles = outline(layout, index).map { atan2(Double(-$0.y), Double($0.x)) * 180 / .pi }
                     let drawnLow = angles.min() ?? 0
                     let drawnHigh = angles.max() ?? 0
-                    let radius = Double(layout.labelRadius)
                     for degrees in [drawnLow, (drawnLow + drawnHigh) / 2, drawnHigh,
                                     range.lowerBound + 0.01, range.upperBound - 0.01] {
-                        XCTAssertEqual(layout.entryIndex(at: finger(degrees, distance: radius)), index,
+                        XCTAssertEqual(layout.entryIndex(at: finger(degrees, distance: Double(layout.labelRadius))), index,
                                        "\(device.name) \(count) row \(index) at \(degrees)°")
                     }
                 }
