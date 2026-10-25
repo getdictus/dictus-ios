@@ -83,14 +83,16 @@ argent run screenshot --udid <udid> --scale 1 --out ~/dev/dictus-evidence/verify
 | `home.newDictation` | The round mic on Home that starts a dictation (label « Nouvelle dictée »; only with a model) |
 | `voiceNoteReaderClose`, `voiceNoteReaderDelete`, `voiceNoteReaderEmpty`, `voiceNoteReaderOpen`, `voiceNoteReaderInsert` | Keyboard voice-note reader (inside the keyboard, so not in the host's tree) |
 
-Labels that are stable and unique (French device): tabs `Accueil` / `Modèles` / `Réglages` (RadioButtons, no identifier); `Dictus Pro, Pro actif`; the Pro hub rows `Mode intelligent, …`, `Historique, …`, `Vocabulaire, …`, `Messages vocaux, …`; `Langues prises en charge`; `Sons`, `Diagnostic`, `Debug Logs`, `Licences`, `Exporter les logs`; navigation back is the identifier `BackButton`, a modal close `xmark` or the label `Fermer`.
+Labels that are stable and unique (French device): tabs `Accueil` / `Modèles` / `Réglages` (RadioButtons; reach them with `drive.sh tab`, since the Models screen also has a « Modèles » heading); `Dictus Pro, Pro actif`; the Pro hub rows `Mode intelligent, …`, `Historique, …`, `Vocabulaire, …`, `Messages vocaux, …`; `Langues prises en charge`; `Sons`, `Diagnostic`, `Debug Logs`, `Licences`, `Exporter les logs`; navigation back is the identifier `BackButton`, a modal close `xmark` or the label `Fermer`.
 
 **The Dictus keyboard is one opaque element**, `inputView`, in the host app's tree: none of its keys or buttons is listed. `drive.sh kbd <control>` presses them at measured offsets from that frame, and the App Group log is what proves the press landed.
+
+`tap-id` and `tap-label` tap only a unique match. When several elements on screen share the label (or the identifier), they refuse with exit 1 and list every candidate, so the run never taps the wrong one silently: pick the one you mean with `tap-id`. Elements nested on one identical frame count once. The recipes (`full-access`, `select-keyboard`) keep tapping the first match, because Settings repeats its row identifiers on nested elements.
 
 ```bash
 D=.claude/skills/verify-dictus-ios/scripts/drive.sh
 $D tap-id onboarding.primary          # by identifier
-$D tap-label "Modèles"                # by label (tabs: $D tab Modèles)
+$D tap-label "Diagnostic"             # by label (tabs: $D tab Modèles)
 $D wait-id onboarding.back 10         # wait, fail after 10 s
 $D set-default dictus.debugProEntitlementForced -bool YES   # Pro on (Debug build), relaunch
 $D full-access                        # Réglages → Général → Clavier → Claviers → Dictus → Accès complet
@@ -217,9 +219,9 @@ All executable, all run from the repository root, all read the run from the argu
 | --- | --- | --- |
 | `scripts/launch.sh` | `launch.sh [--skip-onboarding] [--lang fr\|en]` | `READY udid=… run=… pid=… screen=…` |
 | `scripts/doctor.sh` | `doctor.sh [run-dir]` | `DOCTOR OK` / `DOCTOR FAIL <n>` |
-| `scripts/drive.sh` | `drive.sh <tap-id\|tap-label\|wait-id\|wait-label\|gone-id\|tab\|tree\|log-mark\|wait-log\|relaunch\|set-default\|full-access\|select-keyboard\|kbd\|type\|space> [args]` | one line per action; exit 1 with `error:` when an element never appears |
+| `scripts/drive.sh` | `drive.sh <tap-id\|tap-label\|wait-id\|wait-label\|gone-id\|tab\|tree\|log-mark\|wait-log\|relaunch\|set-default\|full-access\|select-keyboard\|kbd\|type\|space> [args]` | one line per action; exit 1 with `error:` when an element never appears, and when `tap-id` or `tap-label` matches several elements (the candidates are listed: type, label, identifier, frame) |
 | `scripts/evidence.sh` | `evidence.sh <name> [run-dir]` | `evidence <name>: <path>.png` |
 | `scripts/cleanup.sh` | `cleanup.sh [run-dir]` | `CLEANUP OK udid=… deleted=yes` |
-| `scripts/lib.sh` | sourced, not run | `find_frame`, `wait_for`, `stable_frame`, `tap`, `tap_until`, `wait_log` |
+| `scripts/lib.sh` | sourced, not run | `find_frame`, `find_matches`, `wait_for`, `stable_frame`, `tap`, `tap_unique`, `tap_until`, `wait_log` |
 
 Overrides: `DICTUS_VERIFY_RUN` (run directory), `DICTUS_VERIFY_SESSION` (session name), `DICTUS_VERIFY_EVIDENCE` (evidence root), `DICTUS_VERIFY_DEVICE_TYPE`, `DICTUS_VERIFY_RUNTIME`.

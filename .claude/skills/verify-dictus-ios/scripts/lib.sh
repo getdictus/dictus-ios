@@ -46,7 +46,8 @@ center() { python3 -c "print(round($1 + $2 / 2))"; }
 # find_frame <id|label> <value> — reads an `axe describe-ui` tree on stdin and prints
 # "x y w h" (points) of the first element whose AXUniqueId or AXLabel equals the value.
 # First match, not `axe tap --id`: axe refuses when several elements share an identifier,
-# and Settings repeats its row identifiers on nested elements.
+# and Settings repeats its row identifiers on nested elements. The recipes rely on that;
+# drive.sh's tap-id and tap-label go through tap_unique instead, which refuses to guess.
 find_frame() {
   python3 -c '
 import json, sys
@@ -63,6 +64,35 @@ for root in json.load(sys.stdin):
     walk(root)
 sys.exit(1)
 ' "$1" "$2"
+}
+
+# find_matches <id|label> <value> [type] — reads an `axe describe-ui` tree on stdin and
+# prints one line per element whose AXUniqueId or AXLabel equals the value (and whose type
+# equals `type`, when given): "x y w h", a tab, then a description for error messages.
+# Elements sharing one frame are listed once: a tap at that centre cannot tell them apart.
+# Exits 1 when nothing matches.
+find_matches() {
+  python3 -c '
+import json, sys
+kind, value, wanted = sys.argv[1], sys.argv[2], sys.argv[3]
+key = "AXUniqueId" if kind == "id" else "AXLabel"
+seen = []
+def walk(node):
+    if node.get(key) == value and (not wanted or node.get("type") == wanted):
+        f = node["frame"]
+        frame = (f["x"], f["y"], f["width"], f["height"])
+        if frame not in seen:
+            seen.append(frame)
+            desc = "type=%s label=%r id=%s frame=(%s)" % (
+                node.get("type"), node.get("AXLabel"), node.get("AXUniqueId") or "-",
+                ", ".join("%g" % round(v, 1) for v in frame))
+            print("%s %s %s %s\t%s" % (frame + (desc,)))
+    for child in node.get("children") or []:
+        walk(child)
+for root in json.load(sys.stdin):
+    walk(root)
+sys.exit(0 if seen else 1)
+' "$1" "$2" "${3:-}"
 }
 
 # wait_for <id|label> <value> [timeout seconds] — prints the frame once it appears.
@@ -108,6 +138,32 @@ tap() {
   read -r x y w h <<<"$frame"
   axe tap -x "$(center "$x" "$w")" -y "$(center "$y" "$h")" --udid "$UDID" "$@" >/dev/null \
     || die "axe could not tap $kind '$value'"
+}
+
+# tap_unique <id|label> <value> [type] — tap, but only when exactly one element matches
+# (once the screen is stable); with several, lists them and exits 1 instead of picking one.
+tap_unique() {
+  local kind=$1 value=$2 type=${3:-} what matches count x y w h
+  what="$kind '$value'${type:+ of type $type}"
+  stable_frame "$kind" "$value" >/dev/null || die "no element with $what on screen"
+  matches=$(axe describe-ui --udid "$UDID" 2>/dev/null | find_matches "$kind" "$value" "$type") \
+    || die "no element with $what on screen"
+  count=$(printf '%s\n' "$matches" | wc -l | tr -d ' ')
+  if [ "$count" -gt 1 ]; then
+    {
+      echo "error: $count elements with $what on screen, refusing to guess which to tap:"
+      printf '%s\n' "$matches" | cut -f2 | sed 's/^/  /'
+      if [ "$kind" = label ]; then
+        echo "  use tap-id <identifier> on the one you mean (id=- means it has none)"
+      else
+        echo "  the identifier is not unique on this screen: tap-label, or make it unique in the app"
+      fi
+    } >&2
+    exit 1
+  fi
+  read -r x y w h <<<"${matches%%$'\t'*}"
+  axe tap -x "$(center "$x" "$w")" -y "$(center "$y" "$h")" --udid "$UDID" >/dev/null \
+    || die "axe could not tap $what"
 }
 
 # tap_until <kind> <value> <expect-kind> <expect-value> — taps, requires the expected
