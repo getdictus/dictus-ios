@@ -592,6 +592,23 @@
         }
       }
     },
+    "Apple Intelligence is busy right now. Smart Modes will come back shortly." : {
+      "comment" : "Shown in the Smart Mode fan while the process is rate-limited.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple Intelligence is busy right now. Smart Modes will come back shortly."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple Intelligence est occupé. Les modes reviennent dans un moment."
+          }
+        }
+      }
+    },
     "Apple Intelligence is getting ready" : {
       "comment" : "Onboarding Apple Intelligence step (#683). Title shown on a return to the app while Apple Intelligence is not available. Calm: nothing failed.",
       "localizations" : {
@@ -620,6 +637,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Apple Intelligence est nécessaire pour polir la transcription. Activez-la dans Réglages → Apple Intelligence et Siri. Apple exige que Siri et votre iPhone utilisent la même langue : si Siri est en anglais et votre iPhone en français (ou l’inverse), Apple Intelligence reste désactivée."
+          }
+        }
+      }
+    },
+    "Apple Intelligence is still downloading. Smart Modes will work once it finishes." : {
+      "comment" : "Shown in the Smart Mode fan while the on-device model is downloading.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple Intelligence is still downloading. Smart Modes will work once it finishes."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple Intelligence télécharge encore son modèle. Les modes marcheront ensuite."
           }
         }
       }
@@ -674,6 +708,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "À l’étape 3, Apple affichera une alerte, la même pour tous les claviers."
+          }
+        }
+      }
+    },
+    "Available with Dictus Pro" : {
+      "comment" : "Line under the Home mic's Smart Mode dial when the finger is on a mode that needs a subscription.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Available with Dictus Pro"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Disponible avec Dictus Pro"
           }
         }
       }
@@ -2001,6 +2052,40 @@
         }
       }
     },
+    "Release to dictate: %@" : {
+      "comment" : "Line under the Home mic's Smart Mode dial: lifting the finger starts a dictation in this mode. The placeholder is the mode's name.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Release to dictate: %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Relâchez pour dicter : %@"
+          }
+        }
+      }
+    },
+    "Release to see Dictus Pro" : {
+      "comment" : "Line under the Home mic's Smart Mode dial when the finger is on the Dictus Pro sector.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Release to see Dictus Pro"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Relâchez pour découvrir Dictus Pro"
+          }
+        }
+      }
+    },
     "Remember to call the dentist to move Thursday's appointment." : {
       "comment" : "Onboarding history scene: a saved dictation, today. Contains the searched word 'dentist' (#680).",
       "localizations" : {
@@ -2074,6 +2159,91 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Réunion de chantier : la livraison des fenêtres est repoussée à lundi, le plombier passe mercredi matin, et il faut valider le devis de l’électricien avant vendredi."
+          }
+        }
+      }
+    },
+    "Slide back to %@ to cancel" : {
+      "comment" : "Second line under the Home mic's Smart Mode dial. The placeholder is the mode the mic started on, usually Normal.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Slide back to %@ to cancel"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Revenez sur %@ pour annuler"
+          }
+        }
+      }
+    },
+    "Slide onto a mode to dictate" : {
+      "comment" : "Line under the Home mic while the Smart Mode dial is open and the finger points at nothing yet.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Slide onto a mode to dictate"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Glissez sur un mode pour dicter"
+          }
+        }
+      }
+    },
+    "Smart Modes need iOS 26 or later." : {
+      "comment" : "Shown in the Smart Mode fan when the OS predates Apple Foundation Models.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Smart Modes need iOS 26 or later."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les modes exigent iOS 26 ou plus récent."
+          }
+        }
+      }
+    },
+    "Smart Modes are not available in this build." : {
+      "comment" : "Shown in the Smart Mode fan when the build has no FoundationModels SDK.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Smart Modes are not available in this build."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les modes ne sont pas disponibles dans cette version."
+          }
+        }
+      }
+    },
+    "Smart Modes are unavailable right now." : {
+      "comment" : "Shown in the Smart Mode fan for an unavailability reason this build does not recognise.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Smart Modes are unavailable right now."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les modes sont indisponibles pour le moment."
           }
         }
       }
@@ -2205,6 +2375,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Illimité"
+          }
+        }
+      }
+    },
+    "Use %@" : {
+      "comment" : "VoiceOver action on the Home mic that arms this Smart Mode. The placeholder is the mode's name, or Normal.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Use %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Utiliser %@"
           }
         }
       }
