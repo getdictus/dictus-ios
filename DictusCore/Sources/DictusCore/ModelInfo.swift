@@ -670,6 +670,13 @@ public struct ModelInfo: Identifiable {
     /// The Turbo variant the catalogue offers (issue #408).
     static let turboIdentifier = "openai_whisper-large-v3-v20240930_turbo_632MB"
 
+    /// Both quantized Turbo variants, the offered one and the superseded `_954MB`. Argmax lists
+    /// them for exactly the same devices, so every rule about Turbo applies to both.
+    public static let turboIdentifiers: Set<String> = [
+        turboIdentifier,
+        "openai_whisper-large-v3_turbo_954MB"
+    ]
+
     /// The model to recommend to someone who speaks `spokenLanguage` on `capabilities`
     /// (#649).
     ///
@@ -796,7 +803,6 @@ public struct ModelInfo: Identifiable {
         if capabilities.isPreA14 {
             return Self.preA14SupportedIdentifiers.contains(identifier) ? nil : .hardwareGeneration
         }
-        switch identifier {
         // Both quantized Turbo variants (issue #408): Argmax lists them for exactly
         // the same device families, so they share one rule. The deprecated `_954MB`
         // is matched here too — it is still installed on devices, so the Settings
@@ -806,14 +812,11 @@ public struct ModelInfo: Identifiable {
         // the A14 or the M1 iPads, so a 6 GB iPhone 12 Pro has the memory and lacks the
         // generation. This is the same line `recommendedIdentifier(forSpokenLanguage:on:)`
         // reads through `isA15OrLater`, so the picker and the recommendation agree. It
-        // only greys the Available row: the Downloaded section passes no reason, so an
-        // A14 user who installed Turbo under an earlier build keeps dictating with it.
-        case "openai_whisper-large-v3-v20240930_turbo_632MB", "openai_whisper-large-v3_turbo_954MB":
-            if capabilities.isPreA15 { return .hardwareGeneration }
-            return capabilities.physicalMemoryGB >= 6 ? nil : .insufficientMemory(requiredGB: 6)
-        default:
-            return nil
-        }
+        // only greys the Available row: an A14 user who installed Turbo under an earlier
+        // build is moved off it by `TurboMigration`.
+        guard Self.turboIdentifiers.contains(identifier) else { return nil }
+        if capabilities.isPreA15 { return .hardwareGeneration }
+        return capabilities.physicalMemoryGB >= 6 ? nil : .insufficientMemory(requiredGB: 6)
     }
 
     public func isSupported(on capabilities: DeviceCapabilities) -> Bool {

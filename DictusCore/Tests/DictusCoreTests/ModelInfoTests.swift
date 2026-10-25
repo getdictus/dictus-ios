@@ -643,11 +643,10 @@ final class ModelInfoTests: XCTestCase {
         }
     }
 
-    /// The fallback for an A14 user who installed Turbo under an earlier build: nothing
-    /// moves. The gate greys the Available row only (the Downloaded section passes no
-    /// reason), and the identifier still resolves, so the launch preload keeps Turbo's
-    /// 300 s budget instead of the default and the active model is not rewritten.
-    func testA14UserWithTurboInstalledKeepsAResolvableModel() {
+    /// An A14 user who installed Turbo under an earlier build keeps dictating with it until
+    /// `TurboMigration` has their target ready. Meanwhile the identifier still resolves, so
+    /// the launch preload keeps Turbo's 300 s budget, and the target is never Turbo.
+    func testA14TurboStaysResolvableUntilMigrated() {
         let iphone12Pro = makeCapabilities(ramGB: 6, model: "iPhone13,3")
         for identifier in turboVariants {
             XCTAssertNotNil(ModelInfo.forIdentifier(identifier), identifier)
