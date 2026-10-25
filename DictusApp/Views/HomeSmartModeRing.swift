@@ -4,155 +4,256 @@
 import SwiftUI
 import DictusCore
 
-/// The two parts of the dial's presentation that are still under review.
+/// The dial's visual constants, and the two parts of its presentation still under review.
 ///
-/// Both are drawn, and both are one switch away from gone: the dim over the rest of the
+/// Only drawing and motion live here. Where a row sits, which row a finger is on and the
+/// outline a row is drawn with are `SmartModeRingLayout`'s, in DictusCore, so what is
+/// drawn and what is touched cannot disagree.
+///
+/// Still under review, each one switch away from gone: the blur over the rest of the
 /// dashboard while the ring is open, and the line under the mic saying what the release
 /// will do. Turning either off removes it and nothing else — the ring, the gesture and
 /// VoiceOver's actions do not read them.
 enum HomeSmartModeRingStyle {
 
-    /// Dim the cards and the history hint while the ring is open.
-    static let dimsDashboard = true
+    /// Blur the cards and the history hint behind the dial while it is open. Replaced the
+    /// first version's dim (device feedback, 2026-10-25).
+    static let blursBackdrop = true
 
     /// Show "Release to dictate…" under the mic while the ring is open. Also where an
-    /// unavailable mode says why, so with this off a greyed sector says nothing more.
+    /// unavailable mode says why, so with this off a greyed bean says nothing more.
     static let showsReleaseHint = true
 
-    /// How far the rest of the dashboard fades.
-    static let dimmedOpacity: Double = 0.25
+    // MARK: Backdrop
+
+    static let backdropBlurRadius: CGFloat = 14
+
+    /// A wash of the screen's own background over the blur, so the beans stand out in
+    /// both appearances.
+    static let backdropWashOpacity: Double = 0.25
+
+    /// With Reduce Transparency there is no blur: the wash becomes nearly opaque.
+    static let reducedTransparencyWashOpacity: Double = 0.9
+
+    // MARK: Beans
+
+    /// The empty angle between two neighbouring beans. Drawn only: the selection has no
+    /// gap (`SmartModeRingLayout.entryIndex(at:)`).
+    static let beanGapDegrees: Double = 2.5
+
+    static let labelMaximumWidth: CGFloat = 78
+
+    /// The accent hairline around an unlit bean.
+    static let beanEdgeOpacity: Double = 0.35
+
+    // MARK: Motion
+
+    /// How much the mic grows while the dial is open. It is a render scale around the
+    /// mic's centre, so nothing moves and the recording screen's alignment (#788) holds.
+    static let openMicScale: CGFloat = 1.12
+
+    /// The beans' spring as they come out of the mic, and their stagger: each row starts
+    /// `beanStagger` after the one nearer the top.
+    static let beanSpring = Animation.spring(response: 0.34, dampingFraction: 0.72)
+    static let beanStagger: Double = 0.035
+    static let beanHiddenScale: CGFloat = 0.55
+
+    /// The mic's grow and the dial's close.
+    static let micSpring = Animation.spring(response: 0.3, dampingFraction: 0.68)
+
+    /// Reduce Motion: no spring, no scale, a short crossfade.
+    static let reducedMotionFade = Animation.easeOut(duration: 0.15)
+
+    // MARK: Resting arrows
+
+    /// The keyboard's discovery hint (`ToolbarView.driftingHint`): its breath, 2 s
+    /// `easeInOut` autoreversed, the same curve as the mic's idle glow; its far end of 3;
+    /// its arrow reaching 2.2 times that; its opacity rising from 0.62 by 0.13 per point.
+    static let arrowBreath = Animation.easeInOut(duration: 2).repeatForever(autoreverses: true)
+    static let arrowBreathEnd: CGFloat = 3
+    static let arrowReach: CGFloat = 2.2
+    static let arrowBaseOpacity: Double = 0.62
+    static let arrowOpacityPerPoint: Double = 0.13
+
+    /// The space between each arrow's tip and the mic's halo.
+    static let arrowGapToHalo: CGFloat = 14
 }
 
 extension View {
 
-    /// The dashboard's dim while the ring is open, or nothing when the style turns it off.
-    func homeSmartModeRingDim(_ isRingOpen: Bool) -> some View {
-        opacity(HomeSmartModeRingStyle.dimsDashboard && isRingOpen ? HomeSmartModeRingStyle.dimmedOpacity : 1)
-            .animation(.easeOut(duration: 0.18), value: isRingOpen)
+    /// The dashboard behind the open dial: blurred, or under a near-opaque wash with
+    /// Reduce Transparency, and untouchable either way.
+    func homeSmartModeRingBackdrop(_ isRingOpen: Bool) -> some View {
+        modifier(HomeSmartModeRingBackdrop(isRingOpen: isRingOpen))
+    }
+}
+
+private struct HomeSmartModeRingBackdrop: ViewModifier {
+
+    let isRingOpen: Bool
+
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    private typealias Style = HomeSmartModeRingStyle
+
+    func body(content: Content) -> some View {
+        let isBlurred = isRingOpen && Style.blursBackdrop
+        content
+            .blur(radius: isBlurred && !reduceTransparency ? Style.backdropBlurRadius : 0)
+            .overlay {
+                if isBlurred {
+                    Color.dictusBackground
+                        .opacity(reduceTransparency ? Style.reducedTransparencyWashOpacity : Style.backdropWashOpacity)
+                        .allowsHitTesting(false)
+                }
+            }
+            .animation(reduceMotion ? Style.reducedMotionFade : .easeOut(duration: 0.22), value: isRingOpen)
             .allowsHitTesting(!isRingOpen)
     }
 }
 
 // MARK: - Resting hint
 
-/// What the mic says at rest about the dial behind it: a chevron on each side for "hold,
-/// then slide", and three dots along the top of the halo where the ring will open. No
-/// text: the gesture is the accelerator, and VoiceOver has its own way in.
+/// What the mic says at rest about the dial behind it: an arrow on each side pointing at
+/// the mic, breathing toward it the way the keyboard's "Hold the mic for Smart Modes" arrow
+/// breathes toward the pill. No text: the gesture is the accelerator, and VoiceOver has
+/// its own way in. Still with Reduce Motion.
 struct HomeSmartModeRestHint: View {
 
-    var body: some View {
-        ZStack {
-            // Drawn as shapes, not SF Symbols: inside the mic's background VoiceOver
-            // read the two symbols as « Retour » and « Suivant », hidden or not
-            // (simulator, 2026-10-24). A shape is never an accessibility element.
-            HStack(spacing: 92 + 20) {
-                RestChevron(pointsLeft: true)
-                RestChevron(pointsLeft: false)
-            }
-            .foregroundColor(.dictusAccent.opacity(0.55))
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
-            ForEach([-28.0, 0.0, 28.0], id: \.self) { degrees in
-                Circle()
-                    .fill(Color.dictusAccent.opacity(degrees == 0 ? 0.7 : 0.4))
-                    .frame(width: 4, height: 4)
-                    .offset(HomeSmartModeRing.offset(angle: 90 + degrees, radius: 56))
-            }
+    /// 0 at rest, `arrowBreathEnd` at the far end of the breath. One value for the reach
+    /// and the opacity, as in the keyboard, so the two cannot drift apart.
+    @State private var drift: CGFloat = 0
+
+    private typealias Style = HomeSmartModeRingStyle
+
+    var body: some View {
+        // Drawn as shapes, not SF Symbols: inside the mic's background VoiceOver read
+        // symbols there as « Retour » and « Suivant », hidden or not (simulator,
+        // 2026-10-24). A shape is never an accessibility element.
+        HStack(spacing: DictusHalo.size(isPill: false).width + 2 * Style.arrowGapToHalo) {
+            RestArrow(pointsRight: true)
+                .offset(x: drift * Style.arrowReach)
+            RestArrow(pointsRight: false)
+                .offset(x: -drift * Style.arrowReach)
         }
+        .foregroundStyle(.secondary)
+        .opacity(Style.arrowBaseOpacity + Double(drift) * Style.arrowOpacityPerPoint)
         .allowsHitTesting(false)
         .accessibilityHidden(true)
+        .onAppear(perform: breathe)
+        .onChange(of: reduceMotion) { _, _ in breathe() }
+    }
+
+    private func breathe() {
+        guard !reduceMotion else {
+            withAnimation(nil) { drift = 0 }
+            return
+        }
+        withAnimation(Style.arrowBreath) { drift = Style.arrowBreathEnd }
     }
 }
 
-/// One of the resting hint's chevrons, 7 × 12 pt.
-private struct RestChevron: View {
+/// One resting arrow, the shape of SF Symbols' `arrow.right` / `arrow.left`: a shaft and
+/// an open head, 14 × 10 pt.
+private struct RestArrow: View {
 
-    let pointsLeft: Bool
+    let pointsRight: Bool
 
     var body: some View {
-        ChevronShape(pointsLeft: pointsLeft)
+        RestArrowShape(pointsRight: pointsRight)
             .stroke(style: StrokeStyle(lineWidth: 2, lineCap: .round, lineJoin: .round))
-            .frame(width: 7, height: 12)
+            .frame(width: 14, height: 10)
     }
 }
 
-private struct ChevronShape: Shape {
+private struct RestArrowShape: Shape {
 
-    let pointsLeft: Bool
+    let pointsRight: Bool
 
     func path(in rect: CGRect) -> Path {
+        let tipX = pointsRight ? rect.maxX : rect.minX
+        let tailX = pointsRight ? rect.minX : rect.maxX
+        let headX = pointsRight ? rect.maxX - rect.height / 2 : rect.minX + rect.height / 2
         var path = Path()
-        let tipX = pointsLeft ? rect.minX : rect.maxX
-        let backX = pointsLeft ? rect.maxX : rect.minX
-        path.move(to: CGPoint(x: backX, y: rect.minY))
+        path.move(to: CGPoint(x: tailX, y: rect.midY))
         path.addLine(to: CGPoint(x: tipX, y: rect.midY))
-        path.addLine(to: CGPoint(x: backX, y: rect.maxY))
+        path.move(to: CGPoint(x: headX, y: rect.minY))
+        path.addLine(to: CGPoint(x: tipX, y: rect.midY))
+        path.addLine(to: CGPoint(x: headX, y: rect.maxY))
         return path
     }
 }
 
 // MARK: - The ring
 
-/// The half-ring of modes, centred on the mic and drawn over it.
+/// The half-ring of mode "beans", centred on the mic and drawn behind it.
 ///
-/// It is an overlay on the mic and owns no layout: the mic stays exactly where #788 put
-/// it, which is where the recording screen draws its own button. It takes no touches
-/// either — the finger that opened it is still the mic's gesture, which feeds the
-/// session the positions; this only draws what the session says.
+/// It is a background of the mic and owns no layout: the mic stays exactly where #788
+/// put it, which is where the recording screen draws its own button. It takes no touches
+/// either — the finger that opened it is still the mic's gesture, which feeds the session
+/// the positions; this only draws what the session says, from the layout's own outlines.
 struct HomeSmartModeRing: View {
 
     let session: SmartModeRingSession
 
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    /// False on the first frame, so the beans spring out of the mic.
+    @State private var appeared = false
+
     private typealias Layout = SmartModeRingLayout
+    private typealias Style = HomeSmartModeRingStyle
 
     private static var diameter: CGFloat { Layout.outerRadius * 2 }
 
     var body: some View {
         ZStack {
-            // The track: the whole upper half, so an empty slot reads as part of the
-            // dial rather than as a missing piece.
-            RingSectorShape(
-                range: 0...Layout.sweep,
-                innerRadius: Layout.innerRadius,
-                outerRadius: Layout.outerRadius
-            )
-            .fill(Color.dictusSurface.opacity(0.96))
-            .overlay(
-                RingSectorShape(
-                    range: 0...Layout.sweep,
-                    innerRadius: Layout.innerRadius,
-                    outerRadius: Layout.outerRadius
-                )
-                .stroke(Color.dictusAccent.opacity(0.35), lineWidth: 1)
-            )
-            .shadow(color: .dictusAccent.opacity(0.3), radius: 16)
-
             ForEach(Array(session.entries.enumerated()), id: \.element.id) { index, entry in
-                sector(index: index, entry: entry)
+                bean(index: index, entry: entry)
             }
         }
         .frame(width: Self.diameter, height: Self.diameter)
         .allowsHitTesting(false)
         .accessibilityHidden(true)
         .accessibilityIdentifier("home.smartModeRing")
+        .onAppear { appeared = true }
     }
 
-    private func sector(index: Int, entry: SmartModeFanEntry) -> some View {
-        let range = session.layout.angleRange(ofEntry: index)
+    private func bean(index: Int, entry: SmartModeFanEntry) -> some View {
         let isLit = session.highlightedIndex == index
         let isSelectable = session.isSelectable(index)
-        let mid = (Layout.innerRadius + Layout.outerRadius) / 2 + 4
+        let arc = session.layout.beanArc(ofEntry: index, gapDegrees: Style.beanGapDegrees)
+        let fill = isLit ? Color.dictusAccent : Color.dictusSurface.opacity(isSelectable ? 1 : 0.7)
+        let center = session.layout.labelCenter(ofEntry: index)
+        // Rows nearer the top come out first: index order is nearness order.
+        let entrance = reduceMotion
+            ? Style.reducedMotionFade
+            : Style.beanSpring.delay(Double(index) * Style.beanStagger)
         return ZStack {
-            RingSectorShape(
-                range: (range.lowerBound + 1.5)...(range.upperBound - 1.5),
-                innerRadius: Layout.innerRadius + 3,
-                outerRadius: Layout.outerRadius - 3
-            )
-            .fill(isLit ? Color.dictusAccent : Color.clear)
+            // A hairline of accent under the bean, the first version's ring edge, so a
+            // dark bean still reads on the blurred dark dashboard.
+            BeanShape(arc: arc)
+                .stroke(Color.dictusAccent.opacity(isLit ? 0 : Style.beanEdgeOpacity), style: StrokeStyle(
+                    lineWidth: Layout.beanThickness + 2, lineCap: .round, lineJoin: .round
+                ))
+            BeanShape(arc: arc)
+                .stroke(fill, style: StrokeStyle(
+                    lineWidth: Layout.beanThickness, lineCap: .round, lineJoin: .round
+                ))
+                .shadow(color: isLit ? .dictusAccent.opacity(0.45) : .black.opacity(0.16), radius: isLit ? 12 : 8)
 
             label(entry, isLit: isLit, isSelectable: isSelectable)
-                .frame(width: sectorLabelWidth)
-                .offset(Self.offset(angle: session.layout.centerAngle(ofEntry: index), radius: mid))
+                .frame(width: session.layout.labelWidth(
+                    gapDegrees: Style.beanGapDegrees, maximum: Style.labelMaximumWidth
+                ))
+                .offset(x: center.x, y: center.y)
         }
+        .scaleEffect(appeared || reduceMotion ? 1 : Style.beanHiddenScale)
+        .opacity(appeared ? 1 : 0)
+        .animation(entrance, value: appeared)
         .animation(.easeOut(duration: 0.12), value: isLit)
     }
 
@@ -160,7 +261,7 @@ struct HomeSmartModeRing: View {
     private func label(_ entry: SmartModeFanEntry, isLit: Bool, isSelectable: Bool) -> some View {
         VStack(spacing: 2) {
             Image(systemName: entry.icon)
-                .font(.system(size: 15, weight: .medium))
+                .font(.system(size: 16, weight: .medium))
             Text(HomeSmartModeCopy.shortName(of: entry))
                 .font(.system(size: 12, weight: isLit ? .bold : .semibold))
                 .lineLimit(1)
@@ -179,47 +280,22 @@ struct HomeSmartModeRing: View {
         // actions, which follow the user's text size, carry the same choices.
         .dynamicTypeSize(.large)
     }
-
-    /// The width a label may take: the chord of a slot at the label's radius.
-    private var sectorLabelWidth: CGFloat {
-        let radians = session.layout.slotWidth * .pi / 180
-        return min(72, 2 * 86 * CGFloat(sin(radians / 2)))
-    }
-
-    /// The offset from the ring's centre of the point at `angle` (0 right, 90 up) and
-    /// `radius`.
-    static func offset(angle: Double, radius: CGFloat) -> CGSize {
-        let radians = angle * .pi / 180
-        return CGSize(width: CGFloat(cos(radians)) * radius, height: -CGFloat(sin(radians)) * radius)
-    }
 }
 
-/// An annular sector, angles in `SmartModeRingLayout`'s convention.
-private struct RingSectorShape: Shape {
+/// A bean's centre line from `SmartModeRingLayout.beanArc`, placed on the ring's centre.
+/// Stroked by the caller `beanThickness` wide with round caps, which makes the bean.
+private struct BeanShape: Shape {
 
-    let range: ClosedRange<Double>
-    let innerRadius: CGFloat
-    let outerRadius: CGFloat
+    let arc: [CGPoint]
 
     func path(in rect: CGRect) -> Path {
-        let center = CGPoint(x: rect.midX, y: rect.midY)
-        // Sampled rather than `addArc`, whose `clockwise` flag reads inverted in a
-        // y-down space: one degree per point is smooth at these radii and cannot be
-        // drawn the wrong way round.
-        func point(_ degrees: Double, _ radius: CGFloat) -> CGPoint {
-            let radians = degrees * .pi / 180
-            return CGPoint(x: center.x + CGFloat(cos(radians)) * radius,
-                           y: center.y - CGFloat(sin(radians)) * radius)
-        }
-        let steps = max(2, Int((range.upperBound - range.lowerBound).rounded()))
-        let angles = (0...steps).map {
-            range.lowerBound + (range.upperBound - range.lowerBound) * Double($0) / Double(steps)
-        }
         var path = Path()
-        path.move(to: point(angles[0], outerRadius))
-        angles.dropFirst().forEach { path.addLine(to: point($0, outerRadius)) }
-        angles.reversed().forEach { path.addLine(to: point($0, innerRadius)) }
-        path.closeSubpath()
+        guard let first = arc.first else { return path }
+        let origin = CGPoint(x: rect.midX, y: rect.midY)
+        path.move(to: CGPoint(x: origin.x + first.x, y: origin.y + first.y))
+        // A one-point arc still needs a segment for its round caps to draw a disc.
+        let rest = arc.count > 1 ? Array(arc.dropFirst()) : [first]
+        rest.forEach { path.addLine(to: CGPoint(x: origin.x + $0.x, y: origin.y + $0.y)) }
         return path
     }
 }

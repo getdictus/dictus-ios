@@ -3,22 +3,30 @@
 import CoreGraphics
 import Foundation
 
-/// Where each row of the home picker sits on the half-ring around the mic, and which row
-/// a finger is on.
+/// Where each row of the home picker sits on the half-ring around the mic, which row a
+/// finger is on, and the outline each row is drawn with.
 ///
-/// ### Normal on top, the modes alternating outward
+/// ### The rows share the whole half-circle
 ///
-/// The finger that long-pressed the mic is on the mic's centre. Normal goes straight
-/// above it, the shortest move, and the pinned modes take the next sectors in the fan's
-/// order, alternating left then right so the first pinned mode is as close as the second.
-/// That is the keyboard fan's rule — the nearest row is the cheapest — bent round an arc.
+/// The upper half-circle is cut into one equal sector per row, whatever the number of
+/// rows (2 to 4: Normal and up to three pinned modes). Adjacent sectors touch, so every
+/// angle of the arc belongs to exactly one row: a finger on the small gap drawn between
+/// two rows selects the nearer one, never nothing.
 ///
-/// ### Always an odd number of slots
+/// ### Normal nearest the top, the modes alternating outward
 ///
-/// The ring spans the upper half-circle and is cut into equal slots. With an even number
-/// of rows Normal could not be centred, so the slot count is rounded up to the next odd
-/// number and the outermost right slot stays empty: the dial is symmetric whatever the
-/// user pinned, and Normal is always directly above the finger.
+/// The finger that long-pressed the mic is on the mic's centre. Normal takes the sector
+/// nearest straight up, the shortest move, and the pinned modes take the next nearest in
+/// the fan's order. A tie goes to the left, so with an odd count Normal is centred and the
+/// modes alternate left then right; with an even count Normal sits just left of the top
+/// and the first mode just right of it. That is the keyboard fan's rule — the nearest row
+/// is the cheapest — bent round an arc.
+///
+/// ### One function for touching and for drawing
+///
+/// `angleRange(ofEntry:)` is the sector a finger selects, and `beanArc(ofEntry:…)` is
+/// the bean the view draws inside that same sector. The view adds no geometry of its
+/// own: it only strokes and fills the outline it is given.
 ///
 /// Angles are in degrees, counter-clockwise from the right-hand horizontal, with the y
 /// axis pointing up: 0 is right, 90 is straight above the mic, 180 is left. Points are in
@@ -37,11 +45,18 @@ public struct SmartModeRingLayout: Equatable, Sendable {
     /// The mic's halo (`DictusHalo`, 92 pt across).
     public static let micRadius: CGFloat = 46
 
-    /// The ring's inner and outer radii as drawn. The inner edge hugs the halo with a
-    /// small gap; the outer edge leaves room for an icon and a short name.
-    public static let innerRadius: CGFloat = 52
+    /// The ring's inner and outer radii as drawn. The inner edge clears the halo of the
+    /// mic grown for the dial (`HomeSmartModeRingStyle.openMicScale`); the outer edge
+    /// leaves room for an icon and a short name.
+    public static let innerRadius: CGFloat = 62
 
     public static let outerRadius: CGFloat = 120
+
+    /// The radius a bean's centre line runs along, and the bean's thickness: a bean is
+    /// this arc stroked `beanThickness` wide with round caps.
+    public static var beanRadius: CGFloat { (innerRadius + outerRadius) / 2 }
+
+    public static var beanThickness: CGFloat { outerRadius - innerRadius }
 
     /// The number of rows on the ring.
     public let entryCount: Int
@@ -50,49 +65,45 @@ public struct SmartModeRingLayout: Equatable, Sendable {
         self.entryCount = max(0, entryCount)
     }
 
-    /// The slots the half-ring is cut into: `entryCount`, rounded up to an odd number.
-    public var slotCount: Int {
-        entryCount % 2 == 1 ? entryCount : entryCount + 1
-    }
-
-    /// The angular width of one slot.
+    /// The angular width of one row's sector: the half-circle split evenly.
     public var slotWidth: Double {
-        Self.sweep / Double(max(1, slotCount))
+        Self.sweep / Double(max(1, entryCount))
     }
 
-    /// The signed slot offset of row `index` from the top: 0 for Normal, positive to the
-    /// left, negative to the right.
-    static func slotOffset(ofEntry index: Int) -> Int {
-        guard index > 0 else { return 0 }
-        return index % 2 == 1 ? (index + 1) / 2 : -(index / 2)
+    /// Sectors numbered from the left end of the arc (0) to the right end.
+    private func slotCenter(_ slot: Int) -> Double {
+        Self.sweep - (Double(slot) + 0.5) * slotWidth
     }
 
-    /// The row a signed slot offset holds, or nil for an empty slot.
-    func entryIndex(atSlotOffset offset: Int) -> Int? {
-        let index: Int
-        if offset == 0 {
-            index = 0
-        } else if offset > 0 {
-            index = 2 * offset - 1
-        } else {
-            index = -2 * offset
+    /// The sector each row takes, row order in, slot out. See the type's comment.
+    private var slotOfEntry: [Int] {
+        (0..<entryCount).sorted { lhs, rhs in
+            let left = abs(slotCenter(lhs) - 90)
+            let right = abs(slotCenter(rhs) - 90)
+            if abs(left - right) > 1e-9 { return left < right }
+            return lhs < rhs
         }
-        return index < entryCount ? index : nil
+    }
+
+    /// The sector, numbered from the left end, row `index` sits in.
+    public func slot(ofEntry index: Int) -> Int {
+        slotOfEntry[index]
     }
 
     /// The angle at the centre of row `index`'s sector.
     public func centerAngle(ofEntry index: Int) -> Double {
-        90 + Double(Self.slotOffset(ofEntry: index)) * slotWidth
+        slotCenter(slot(ofEntry: index))
     }
 
-    /// The angles bounding row `index`'s sector, lower first.
+    /// The sector row `index` selects, lower angle first. The sectors of all rows tile
+    /// `0...sweep` with no gap and no overlap.
     public func angleRange(ofEntry index: Int) -> ClosedRange<Double> {
         let center = centerAngle(ofEntry: index)
         return (center - slotWidth / 2)...(center + slotWidth / 2)
     }
 
     /// The row under a finger at `point`, relative to the mic's centre, or nil when the
-    /// finger is still on the mic, below the arc, or on an empty slot.
+    /// finger is still on the mic or well below the arc.
     ///
     /// There is no outer limit: a finger that slid past the ring still points along its
     /// sector, the way a dial keeps turning when the hand drifts off it.
@@ -112,11 +123,52 @@ public struct SmartModeRingLayout: Equatable, Sendable {
             angle = Self.sweep
         }
 
-        let raw = (angle - 90) / slotWidth
-        // An end of the arc sits exactly on a slot's outer edge; keep it in that slot.
-        let half = Double(slotCount / 2)
-        let offset = Int(min(half, max(-half, raw.rounded())))
-        return entryIndex(atSlotOffset: offset)
+        let slot = min(entryCount - 1, max(0, Int((Self.sweep - angle) / slotWidth)))
+        return slotOfEntry.firstIndex(of: slot)
+    }
+
+    /// Where a row's icon and name are centred: the middle of its sector, on the bean's
+    /// centre line. Relative to the mic's centre, y down.
+    public func labelCenter(ofEntry index: Int) -> CGPoint {
+        Self.point(angle: centerAngle(ofEntry: index), radius: Self.beanRadius)
+    }
+
+    /// The width a row's label may take: the chord of its drawn bean on the centre line,
+    /// never more than `maximum`.
+    public func labelWidth(gapDegrees: Double, maximum: CGFloat) -> CGFloat {
+        let chord = 2 * Self.beanRadius * CGFloat(sin((slotWidth - gapDegrees) * .pi / 360))
+        return max(0, min(maximum, chord))
+    }
+
+    /// The centre line row `index` is drawn along, relative to the mic's centre, y down.
+    ///
+    /// The drawn row is a "bean": this arc stroked `beanThickness` wide with **round
+    /// caps**. A round cap is a half-disc of radius `beanThickness / 2` past the line's
+    /// end, so the line stops `asin(cap / beanRadius)` short of each end of the sector,
+    /// less `gapDegrees / 2`: the cap then just meets that limit and two neighbours never
+    /// touch. Rows too narrow for a line draw as a single point, which strokes as a disc.
+    ///
+    /// - Parameters:
+    ///   - gapDegrees: the empty angle drawn between two neighbouring beans.
+    ///   - stepDegrees: the sampling of the arc; one degree is smooth at these radii.
+    public func beanArc(ofEntry index: Int,
+                        gapDegrees: Double,
+                        stepDegrees: Double = 1) -> [CGPoint] {
+        let range = angleRange(ofEntry: index)
+        let cap = asin(min(1, Double(Self.beanThickness / 2 / Self.beanRadius))) * 180 / .pi
+        var from = range.lowerBound + gapDegrees / 2 + cap
+        var to = range.upperBound - gapDegrees / 2 - cap
+        if from > to { from = (from + to) / 2; to = from }
+        let steps = max(1, Int(((to - from) / stepDegrees).rounded(.up)))
+        return (0...steps).map { step in
+            Self.point(angle: from + (to - from) * Double(step) / Double(steps), radius: Self.beanRadius)
+        }
+    }
+
+    /// The point at `angle` and `radius` from the mic's centre, y down.
+    static func point(angle: Double, radius: CGFloat) -> CGPoint {
+        let radians = angle * .pi / 180
+        return CGPoint(x: CGFloat(cos(radians)) * radius, y: -CGFloat(sin(radians)) * radius)
     }
 }
 

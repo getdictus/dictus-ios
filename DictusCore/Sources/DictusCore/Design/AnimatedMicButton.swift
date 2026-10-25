@@ -71,6 +71,11 @@ public struct AnimatedMicButton: View {
     /// recording and transcribing keep their own fills.
     public let face: MicFace?
 
+    /// Whether the button shrinks and fades under the finger. True everywhere but on the
+    /// Home mic while its Smart Mode dial is open (#489): the finger is still down, so the
+    /// press would keep the mic shrunk while the dial grows it.
+    public let showsPressFeedback: Bool
+
     public let onTap: () -> Void
 
     public init(status: DictationStatus,
@@ -78,12 +83,14 @@ public struct AnimatedMicButton: View {
                 badge: SmartModeBadge? = nil,
                 animatesIdleGlow: Bool = true,
                 face: MicFace? = nil,
+                showsPressFeedback: Bool = true,
                 onTap: @escaping () -> Void) {
         self.status = status
         self.isPill = isPill
         self.badge = badge
         self.animatesIdleGlow = animatesIdleGlow
         self.face = face
+        self.showsPressFeedback = showsPressFeedback
         self.onTap = onTap
     }
 
@@ -188,7 +195,8 @@ public struct AnimatedMicButton: View {
                 armedBadge
             }
         }
-        .buttonStyle(GlassPressStyle(pressedScale: 0.88))
+        .buttonStyle(GlassPressStyle(pressedScale: showsPressFeedback ? 0.88 : 1,
+                                     pressedOpacity: showsPressFeedback ? 0.85 : 1))
         .disabled(!isTappable)
         .onChange(of: status) { newStatus in
             handleStatusChange(from: previousStatus, to: newStatus)

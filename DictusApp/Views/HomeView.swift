@@ -109,7 +109,7 @@ struct HomeView: View {
                     dashboardCards
                 }
             }
-            .homeSmartModeRingDim(ringSession != nil)
+            .homeSmartModeRingBackdrop(ringSession != nil)
 
             // The primary action, a round mic since #788. At the bottom of the content
             // rather than among the cards: it is within thumb reach, it stays put when
@@ -136,9 +136,9 @@ struct HomeView: View {
                     EmptyView()
                 }
             }
-            // Gone rather than dimmed while the dial's line is drawn over it.
+            // Gone rather than blurred while the dial's line is drawn over it.
             .opacity(ringSession != nil && HomeSmartModeRingStyle.showsReleaseHint ? 0 : 1)
-            .homeSmartModeRingDim(ringSession != nil)
+            .homeSmartModeRingBackdrop(ringSession != nil)
         }
         .padding()
         .background(Color.dictusBackground.ignoresSafeArea())
@@ -382,13 +382,15 @@ struct HomeView: View {
         newDictationButton
             // The ring and the resting hint behind the mic, so the mic draws over both.
             // Outside the button's accessibility modifiers on purpose: inside them, the
-            // chevrons inherited the mic's identifier and read as three more mics.
+            // resting hint's symbols inherited the mic's identifier and read as more mics.
             .background {
                 if let ringSession {
                     HomeSmartModeRing(session: ringSession)
+                        // The beans spring out on their own (`HomeSmartModeRing`); this is
+                        // the way back into the mic, on release or cancel.
                         .transition(reduceMotion
                                     ? .opacity
-                                    : .opacity.combined(with: .scale(scale: 0.85)))
+                                    : .opacity.combined(with: .scale(scale: HomeSmartModeRingStyle.beanHiddenScale)))
                 } else if smartModeMic.isOffered {
                     HomeSmartModeRestHint()
                 }
@@ -425,7 +427,8 @@ struct HomeView: View {
         AnimatedMicButton(
             status: .idle,
             badge: ringSession == nil ? smartModeMic.effectiveMode?.badge : nil,
-            face: micFace
+            face: micFace,
+            showsPressFeedback: ringSession == nil
         ) {
             // The release of a long press still arrives here as a tap when the finger
             // lifts on the mic. The dial being open, or having just closed, is what says
@@ -434,6 +437,12 @@ struct HomeView: View {
             guard !isRingBusy else { return }
             startDictation()
         }
+        // The mic grows while the dial is open, around its own centre: a render scale,
+        // so the layout, the anchor the recording screen lines up on (#788) and the
+        // dial's geometry do not move.
+        .scaleEffect(ringSession != nil && !reduceMotion ? HomeSmartModeRingStyle.openMicScale : 1)
+        .animation(reduceMotion ? HomeSmartModeRingStyle.reducedMotionFade : HomeSmartModeRingStyle.micSpring,
+                   value: ringSession != nil)
         // The dial's gesture: hold for the keyboard fan's 0.35 s, then slide. Simultaneous
         // rather than high-priority so a plain tap pays no delay, the fan's own reasoning
         // (`ToolbarView.micPill`). The drag is measured in the dashboard's space so the
@@ -536,9 +545,10 @@ struct HomeView: View {
     /// per-frame path of the drag.
     private func openRing() {
         guard let picker = SmartModeHomePicker.current() else { return }
-        // The fan's own haptic on opening (`KeyboardSmartModeState.open`).
-        HapticFeedback.keyTapped()
-        withAnimation(.easeOut(duration: 0.18)) {
+        // A firmer impact than the selection ticks that follow, so the hand tells
+        // "it opened" from "it moved".
+        HapticFeedback.longPressRecognized()
+        withAnimation(reduceMotion ? HomeSmartModeRingStyle.reducedMotionFade : HomeSmartModeRingStyle.micSpring) {
             ringSession = SmartModeRingSession(picker: picker)
         }
         PersistentLog.log(.diagnosticProbe(
@@ -580,7 +590,7 @@ struct HomeView: View {
 
     private func closeRing(cancelled: Bool) {
         ringClosedAt = Date()
-        withAnimation(.easeOut(duration: 0.15)) {
+        withAnimation(reduceMotion ? HomeSmartModeRingStyle.reducedMotionFade : HomeSmartModeRingStyle.micSpring) {
             ringSession = nil
         }
         if cancelled {
