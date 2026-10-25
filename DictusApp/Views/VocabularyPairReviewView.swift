@@ -47,7 +47,6 @@ struct VocabularyPairReviewView: View {
                         Image(systemName: "plus.circle.fill")
                             .foregroundColor(.green)
                     }
-                    .accessibilityIdentifier("vocabulary.pair.review.added")
                 } header: {
                     Text("What Dictus writes instead")
                 } footer: {
