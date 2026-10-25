@@ -5,27 +5,40 @@ import DictusCore
 
 /// What **Accept** on a suggested pair opens: one sentence saying which change it is
 /// (a variant added to a term, or a new term from a word typed on the keyboard), then
-/// the term and its variants with the new one marked. **Add** stores exactly that;
+/// the term and the new variant in two fields, filled in and editable, with the
+/// term's existing variants listed. **Add** stores exactly what the sentence says;
 /// **Cancel** stores nothing.
 ///
 /// ### Why a screen and not a direct write
 ///
 /// A variant rewrites every future dictation that contains it, and a wrong one is
 /// noticed only when it has already changed someone's text. So nothing is added
-/// silently (#512): the user sees exactly what the entry becomes before it does.
+/// silently (#512): the user sees exactly what the entry becomes before it does, and
+/// can fix a suggestion that is nearly right (capitals of a learned word, one word
+/// too many) instead of refusing it.
 struct VocabularyPairReviewView: View {
-
-    let pair: VocabularyPair
 
     @StateObject private var store = VocabularyStore.shared
     @Environment(\.dismiss) private var dismiss
 
+    @State private var term: String
+    @State private var variant: String
     @State private var saveFailed = false
 
-    /// What Add would store, from the vocabulary as it is now. Nil if a term the pair
-    /// belonged to was deleted while the suggestion was on screen.
+    init(pair: VocabularyPair) {
+        _term = State(initialValue: pair.canonical)
+        _variant = State(initialValue: pair.observed)
+    }
+
+    /// What Add would store from the two fields, against the vocabulary as it is now.
+    /// Nil when it would change nothing: Add is then disabled and the sheet says so.
     private var acceptance: VocabularyPairAcceptance? {
-        VocabularyPairAcceptance(pair, vocabulary: store.entries)
+        VocabularyPairAcceptance(term: term, variant: variant, vocabulary: store.entries)
+    }
+
+    /// The stored term the variant would join, for its existing variants.
+    private var stored: VocabularyEntry? {
+        store.entry(matchingTerm: term)
     }
 
     /// A new term needs room; a variant added to a term does not.
@@ -36,40 +49,40 @@ struct VocabularyPairReviewView: View {
 
     var body: some View {
         Form {
-            if let acceptance {
-                let entry = acceptance.entry
-                Section {
-                    summary(acceptance)
+            Section {
+                summary
+                    .fontWeight(.semibold)
+                    .accessibilityIdentifier("vocabulary.pair.review.summary")
+            }
+
+            Section {
+                TextField("Which term?", text: $term)
+                    .autocorrectionDisabled()
+                    .textInputAutocapitalization(.never)
+                    .accessibilityIdentifier("vocabulary.pair.review.term")
+            } header: {
+                Text("The correct spelling")
+            }
+
+            Section {
+                ForEach(stored?.variants ?? [], id: \.self) { existing in
+                    Text(verbatim: existing)
+                        .foregroundColor(.secondary)
+                }
+                Label {
+                    TextField("How does Dictus write it instead?", text: $variant)
+                        .autocorrectionDisabled()
+                        .textInputAutocapitalization(.never)
                         .fontWeight(.semibold)
-                        .accessibilityIdentifier("vocabulary.pair.review.summary")
+                        .accessibilityIdentifier("vocabulary.pair.review.variant")
+                } icon: {
+                    Image(systemName: "plus.circle.fill")
+                        .foregroundColor(.green)
                 }
-
-                Section {
-                    Text(verbatim: entry.term)
-                } header: {
-                    Text("The correct spelling")
-                }
-
-                Section {
-                    ForEach(entry.variants.filter { $0 != pair.observed }, id: \.self) { variant in
-                        Text(verbatim: variant)
-                            .foregroundColor(.secondary)
-                    }
-                    Label {
-                        Text(verbatim: pair.observed)
-                            .fontWeight(.semibold)
-                    } icon: {
-                        Image(systemName: "plus.circle.fill")
-                            .foregroundColor(.green)
-                    }
-                } header: {
-                    Text("What Dictus writes instead")
-                } footer: {
-                    footer(entry)
-                }
-            } else {
-                Text("This term is no longer in your vocabulary.")
-                    .foregroundColor(.secondary)
+            } header: {
+                Text("What Dictus writes instead")
+            } footer: {
+                footer
             }
         }
         .navigationTitle("Check the change")
@@ -86,28 +99,36 @@ struct VocabularyPairReviewView: View {
         }
     }
 
-    private func summary(_ acceptance: VocabularyPairAcceptance) -> Text {
+    private var summary: Text {
         switch acceptance {
         case .newTerm(let entry):
-            return Text("New term “\(entry.term)”, with the variant “\(pair.observed)”.")
+            return Text("New term “\(entry.term)”, with the variant “\(variantText)”.")
         case .addVariant(let entry):
-            return Text("Variant “\(pair.observed)” added to “\(entry.term)”.")
+            return Text("Variant “\(variantText)” added to “\(entry.term)”.")
+        case nil:
+            return Text("Nothing would change. Check the term and the variant.")
         }
     }
 
+    private var variantText: String {
+        variant.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
     @ViewBuilder
-    private func footer(_ entry: VocabularyEntry) -> some View {
+    private var footer: some View {
         if saveFailed {
             Text("Could not save. Your device may be out of storage.")
                 .foregroundColor(.red)
         } else if exceedsLimit {
             Text("You have reached the limit of \(VocabularyStore.maxEntries) terms. Delete one to add another.")
                 .foregroundColor(.red)
-        } else if entry.isEnabled {
-            Text("From now on, when Dictus writes “\(pair.observed)”, it writes “\(entry.term)” instead.")
-        } else {
-            Text("Already in your vocabulary, switched off. The variant is added but applies only once you switch the term back on.")
-                .foregroundColor(.orange)
+        } else if let entry = acceptance?.entry {
+            if entry.isEnabled {
+                Text("From now on, when Dictus writes “\(variantText)”, it writes “\(entry.term)” instead.")
+            } else {
+                Text("Already in your vocabulary, switched off. The variant is added but applies only once you switch the term back on.")
+                    .foregroundColor(.orange)
+            }
         }
     }
 

@@ -428,13 +428,13 @@
         }
       }
     },
-    "Accept shows the change before adding it. Edit opens the term so you can adjust the variant. Ignore hides the suggestion for good." : {
-      "comment" : "Vocabulary suggestions sheet, footer of the term variants section (#512 step 2).",
+    "Accept shows the change before adding it, and lets you adjust it. Ignore hides the suggestion for good." : {
+      "comment" : "Vocabulary suggestions sheet, footer of the pairs section (#512 step 2).",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Accepter montre le changement avant de l’ajouter. Modifier ouvre le terme pour ajuster la variante. Ignorer masque la suggestion définitivement."
+            "value" : "Accepter montre le changement avant de l’ajouter, et permet de l’ajuster. Ignorer masque la suggestion définitivement."
           }
         }
       }
@@ -2087,6 +2087,17 @@
         }
       }
     },
+    "Nothing would change. Check the term and the variant." : {
+      "comment" : "Vocabulary suggestion review sheet: the edited fields would store nothing new (empty, variant equal to the term, or already there) (#512 step 2).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rien ne changerait. Vérifiez le terme et la variante."
+          }
+        }
+      }
+    },
     "One long press, one Smart Mode" : {
       "comment" : "Onboarding Smart Modes scene: title (#679).",
       "localizations" : {
@@ -2419,17 +2430,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ensuite, à chaque vocal"
-          }
-        }
-      }
-    },
-    "This term is no longer in your vocabulary." : {
-      "comment" : "Vocabulary suggestion review sheet, when the term was deleted while the suggestion was open (#512 step 2).",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ce terme n’est plus dans votre vocabulaire."
           }
         }
       }

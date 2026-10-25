@@ -282,6 +282,43 @@ final class VocabularyPairSuggestionsTests: XCTestCase {
         XCTAssertNil(VocabularyPairAcceptance(term: "grokbot", variant: "", vocabulary: []), "new term with no variant")
     }
 
+    // MARK: - One analysis, off the main thread
+
+    func testTheAnalysisIsStepOneThenThePairs() throws {
+        let texts = ["cloud code est lent", "cloud code encore", "grok boat est lent", "grok boat encore"]
+        let terms = [try entry("Claude Code")]
+        let analysis = try XCTUnwrap(VocabularySuggestionAnalysis.run(
+            records: records(texts), vocabulary: terms, learnedWords: ["grokbot"], ignored: [],
+            isKnownWord: Self.isKnown
+        ))
+        XCTAssertEqual(analysis.pairs, suggestions(texts, terms: terms, learned: ["grokbot"]))
+        XCTAssertEqual(analysis.pairs.map(\.observed), ["cloud code", "grok boat"])
+    }
+
+    func testACancelledAnalysisReturnsNothing() async throws {
+        let terms = [try entry("Claude Code")]
+        let records = records(["cloud code est lent", "cloud code encore"])
+        let task = Task.detached { () -> VocabularySuggestionAnalysis? in
+            withUnsafeCurrentTask { $0?.cancel() }
+            return VocabularySuggestionAnalysis.run(records: records, vocabulary: terms, learnedWords: [],
+                                                    ignored: [], isKnownWord: Self.isKnown)
+        }
+        let result = await task.value
+        XCTAssertNil(result)
+    }
+
+    func testTheAnalysisRunsOffTheMainThread() async throws {
+        let terms = [try entry("Claude Code")]
+        let records = records(["cloud code est lent", "cloud code encore"])
+        let result = await Task.detached { () -> (VocabularySuggestionAnalysis?, Bool) in
+            let analysis = VocabularySuggestionAnalysis.run(records: records, vocabulary: terms, learnedWords: [],
+                                                            ignored: [], isKnownWord: Self.isKnown)
+            return (analysis, Thread.isMainThread)
+        }.value
+        XCTAssertFalse(result.1)
+        XCTAssertEqual(result.0?.pairs.map(\.observed), ["cloud code"])
+    }
+
     // MARK: - Ignore
 
     func testAnIgnoredPairStaysIgnored() throws {

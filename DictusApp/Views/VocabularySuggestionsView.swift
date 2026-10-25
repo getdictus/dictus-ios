@@ -11,20 +11,25 @@ import DictusCore
 /// (`cloud code` for the term `Claude Code`, `grok boat` for the learned word
 /// `grokbot`), from `VocabularyPairGenerator.suggestions`: terms first, then learned
 /// words step 1 does not already suggest. The spelling is certain, so each row offers
-/// **Accept**, which shows the change before storing it (`VocabularyPairReviewView`:
-/// a variant added to a term, or a new term from a learned word), **Edit**, which
-/// opens the term sheet with both fields filled in, and **Ignore**. Then the words
+/// **Accept**, which shows the change, editable, before storing it
+/// (`VocabularyPairReviewView`: a variant added to a term, or a new term from a
+/// learned word), and **Ignore**. Then the words
 /// the keyboard learned from the user's typing that the engine wrote differently: **Add** opens #723's sheet with both the term and the
 /// spellings seen filled in. Then the unknown words History alone turned up, weaker
 /// evidence: **Add** fills only the spellings, and the user types the correct one.
 /// **Ignore** hides a suggestion for good. The numbering runs across both sections,
 /// because the go/no-go reads the top ten whatever their kind.
 ///
-/// ### When it mines again
+/// ### When it mines again, and where
 ///
-/// On open, after an **Ignore**, and when the vocabulary changes, which is how an
-/// accepted word leaves the list: both miners exclude every stored variant. A sheet
-/// cancelled on **Add** or **Accept** changes nothing, and the suggestion stays.
+/// On open, after an **Ignore**, when the review sheet closes, and when the
+/// vocabulary changes (debounced), which is how an accepted word leaves the list:
+/// both miners exclude every stored variant.
+///
+/// Off the main actor (`VocabularySuggestionAnalysis`): on device it took 0.5 to 2 s
+/// at 50 to 80 dictations, and the screen froze for all of it. Only the dictionary
+/// verdicts touch the main thread (`KnownWordVerdicts`). A new run cancels the one in
+/// flight, and the list on screen stays usable until the new result replaces it.
 struct VocabularySuggestionsView: View {
 
     @StateObject private var history = TranscriptionHistoryStore.shared
@@ -43,6 +48,9 @@ struct VocabularySuggestionsView: View {
 
     /// The variant whose change is on screen before it is stored, or nil.
     @State private var reviewing: VocabularyPair?
+
+    /// The analysis in flight, cancelled when a newer one starts.
+    @State private var analysis: Task<Void, Never>?
 
     private let ignoreList = VocabularySuggestionIgnoreList()
 
@@ -64,7 +72,7 @@ struct VocabularySuggestionsView: View {
                         } header: {
                             Text("Your spellings, written differently")
                         } footer: {
-                            Text("Accept shows the change before adding it. Edit opens the term so you can adjust the variant. Ignore hides the suggestion for good.")
+                            Text("Accept shows the change before adding it, and lets you adjust it. Ignore hides the suggestion for good.")
                         }
                     }
                     if !paired.isEmpty {
@@ -105,22 +113,24 @@ struct VocabularySuggestionsView: View {
                 Button("Done") { dismiss() }
             }
         }
-        .task { mine() }
-        .onChange(of: vocabulary.entries) { _, _ in mine() }
+        .task { analyze() }
+        // Debounced: one edit of the vocabulary can publish more than once.
+        .onChange(of: vocabulary.entries) { _, _ in analyze(after: 300) }
         .sheet(item: $editing) { subject in
             NavigationStack {
                 VocabularyEditorView(subject: subject)
             }
         }
-        .sheet(item: $reviewing) { pair in
+        // Re-mined on close as well: an Add that stored nothing new publishes no change.
+        .sheet(item: $reviewing, onDismiss: { analyze() }, content: { pair in
             NavigationStack {
                 VocabularyPairReviewView(pair: pair)
             }
             .presentationDetents([.medium, .large])
-        }
+        })
     }
 
-    /// One pair: the user's spelling, what Dictus wrote, the count, three actions.
+    /// One pair: the user's spelling, what Dictus wrote, the count, two actions.
     private func row(_ pair: VocabularyPair, rank: Int) -> some View {
         HStack(alignment: .firstTextBaseline, spacing: 12) {
             Text(verbatim: "\(rank)")
@@ -144,22 +154,19 @@ struct VocabularySuggestionsView: View {
                 }
 
                 // Ids carry the row's rank, so a screen of several rows never holds two
-                // equal ids: `vocabulary.pair.<rank>.accept`, `.edit`, `.ignore`.
+                // equal ids: `vocabulary.pair.<rank>.accept`, `.ignore`. No Edit: the
+                // review sheet Accept opens is editable.
                 HStack(spacing: 20) {
                     Button("Accept") { reviewing = pair }
                         .accessibilityIdentifier("vocabulary.pair.\(rank).accept")
-                    Button("Edit") {
-                        editing = .observed(variant: pair.observed, term: pair.canonical)
-                    }
-                    .accessibilityIdentifier("vocabulary.pair.\(rank).edit")
                     Button("Ignore") {
                         ignoreList.ignore(pair)
-                        mine()
+                        analyze()
                     }
                     .foregroundColor(.secondary)
                     .accessibilityIdentifier("vocabulary.pair.\(rank).ignore")
                 }
-                // Borderless, or the whole row is one button and a tap fires all three.
+                // Borderless, or the whole row is one button and a tap fires both.
                 .buttonStyle(.borderless)
                 .padding(.top, 2)
             }
@@ -217,54 +224,96 @@ struct VocabularySuggestionsView: View {
 
     private func ignore(_ suggestion: VocabularySuggestion) {
         ignoreList.ignore(suggestion)
-        mine()
+        analyze()
     }
 
-    /// Run the miner over the whole History.
+    /// Run both miners over the whole History, off the main actor.
     ///
-    /// On the main actor because `UITextChecker` is UIKit. It is asked once per
-    /// distinct unusual spelling, not once per word, and the time is logged so a slow
-    /// History shows up in an export. Counts only: no word leaves this screen.
+    /// The inputs are read here, on the main actor: the learned words re-read first
+    /// (the keyboard writes them from its own process, and this one's copy is from
+    /// whenever the app launched), the History, the vocabulary and the ignore list.
+    /// The time is logged so a slow History shows up in an export; counts only, no
+    /// word leaves this screen. DEBUG builds also log the longest stretch the main
+    /// thread went without running during the analysis (`mainGapMs`).
     ///
-    /// The learned words are re-read first: the keyboard writes them from its own
-    /// process, and this one's copy is from whenever the app launched.
-    private func mine() {
-        let start = Date()
+    /// - Parameter delay: milliseconds to wait first, cancelled by a newer call.
+    private func analyze(after delay: UInt64 = 0) {
+        analysis?.cancel()
         UserDictionary.shared.reload()
         let learnedWords = Array(UserDictionary.shared.allLearnedWords.keys)
         let records = history.records
-        let dictionary = VocabularySuggestionDictionary(records: records)
+        let entries = vocabulary.entries
         let ignored = ignoreList.keys
-        let stepOne = VocabularySuggestionMiner { dictionary.isKnown($0) }.suggestions(
-            from: records,
-            learnedWords: learnedWords,
-            vocabulary: vocabulary.entries,
-            ignored: ignored
-        )
-        // Step 1 first: a learned word it suggests is not a pair source (one word,
-        // one rule; see `VocabularyPairGenerator.suggestions`).
-        let found = VocabularyPairGenerator { dictionary.isKnown($0) }.suggestions(
-            from: records,
-            vocabulary: vocabulary.entries,
-            learnedWords: learnedWords,
-            stepOne: stepOne,
-            ignored: ignored
-        )
-        // A spelling already offered as a pair is not offered again below as an
-        // unknown word on its own.
-        let offered = Set(found.map { VocabularySuggestionMiner.fold($0.observed) })
-        let result = stepOne.filter { !$0.forms.contains { offered.contains(VocabularySuggestionMiner.fold($0)) } }
-        pairs = found
-        suggestions = result
-        // `learned` is logged so a device run with no paired suggestion can be told
-        // apart: an empty learned set, or learned words the engine already spells right.
-        let paired = result.filter(\.isPaired).count
-        let elapsed = Int(Date().timeIntervalSince(start) * 1000)
-        PersistentLog.log(.diagnosticProbe(
-            component: "VocabularySuggestions",
-            instanceID: "mine",
-            action: "mined",
-            details: "records=\(records.count) learned=\(learnedWords.count) shown=\(result.count) paired=\(paired) termVariants=\(found.filter { $0.source == .vocabulary }.count) learnedPairs=\(found.filter { $0.source == .learned }.count) ms=\(elapsed)"
-        ))
+        let verdicts = KnownWordVerdicts(records: records)
+        analysis = Task {
+            if delay > 0 { try? await Task.sleep(nanoseconds: delay * 1_000_000) }
+            guard !Task.isCancelled else { return }
+            let start = Date()
+            #if DEBUG
+            let watch = MainThreadWatch()
+            #endif
+            let result = await Self.run(records: records, vocabulary: entries, learnedWords: learnedWords,
+                                        ignored: ignored, verdicts: verdicts)
+            #if DEBUG
+            let mainGap = " mainGapMs=\(watch.stop())"
+            #else
+            let mainGap = ""
+            #endif
+            guard let result, !Task.isCancelled else { return }
+            pairs = result.pairs
+            suggestions = result.stepOne
+            // `learned` is logged so a device run with no paired suggestion can be told
+            // apart: an empty learned set, or learned words the engine already spells right.
+            let paired = result.stepOne.filter(\.isPaired).count
+            let elapsed = Int(Date().timeIntervalSince(start) * 1000)
+            PersistentLog.log(.diagnosticProbe(
+                component: "VocabularySuggestions",
+                instanceID: "mine",
+                action: "mined",
+                details: "records=\(records.count) learned=\(learnedWords.count) shown=\(result.stepOne.count) paired=\(paired) termVariants=\(result.pairs.filter { $0.source == .vocabulary }.count) learnedPairs=\(result.pairs.filter { $0.source == .learned }.count) ms=\(elapsed)\(mainGap)"
+            ))
+        }
+    }
+
+    /// The analysis itself. `nonisolated` and `async`, so it runs on the cooperative
+    /// pool rather than the main actor, and stays a child of the task that awaits it:
+    /// cancelling that task cancels this one.
+    private nonisolated static func run(records: [TranscriptionRecord],
+                                        vocabulary: [VocabularyEntry],
+                                        learnedWords: [String],
+                                        ignored: Set<String>,
+                                        verdicts: KnownWordVerdicts) async -> VocabularySuggestionAnalysis? {
+        VocabularySuggestionAnalysis.run(records: records, vocabulary: vocabulary, learnedWords: learnedWords,
+                                         ignored: ignored, isKnownWord: verdicts.isKnown)
     }
 }
+
+#if DEBUG
+/// How long the main thread went without running, while an analysis ran: a 10 ms
+/// heartbeat on the main actor, and the longest gap between two beats. A frozen main
+/// thread shows as one gap as long as the freeze.
+@MainActor
+private final class MainThreadWatch {
+
+    private var beat: Task<Void, Never>?
+    private var longestGap: TimeInterval = 0
+
+    init() {
+        beat = Task { @MainActor [weak self] in
+            var last = Date()
+            while !Task.isCancelled {
+                try? await Task.sleep(nanoseconds: 10_000_000)
+                let now = Date()
+                self?.longestGap = max(self?.longestGap ?? 0, now.timeIntervalSince(last))
+                last = now
+            }
+        }
+    }
+
+    /// Stops the heartbeat and returns the longest gap, in milliseconds.
+    func stop() -> Int {
+        beat?.cancel()
+        return Int(longestGap * 1000)
+    }
+}
+#endif
