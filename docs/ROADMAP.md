@@ -36,8 +36,9 @@ Take the first line that is not struck through. Status (who is on what): [Projec
 18. ~~#726 — end-of-trial recap: words dictated + time saved, dictation counter for every user~~ — merged in PR #753 (2026-10-21)
 19. ~~#727 — README: free dictation + optional Pro, no free-forever promise~~ — merged in PR #729 (2026-10-13), ahead of #279: promote to main only with #279
 20. ~~#758 — App Store slide 1: redraw the hero woman to match the onboarding intro's character (bob, hands, phone held out, trousers)~~ — merged in PR #759 (2026-10-22)
-21. #279 — flip `PremiumFlags.paywallVisible` and walk all four entry points, plus #593's iPad and EN checks
-22. #769 — cut chore: remove the bundled `JointDecisionv3.mlmodelc` from DictusApp
+21. #380 — User-configurable audio session inactivity timeout (Immediately / 1 / 5 / 10 default / 30 min / 1 h / Unlimited), also governs prewarm
+22. #279 — flip `PremiumFlags.paywallVisible` and walk all four entry points, plus #593's iPad and EN checks
+23. #769 — cut chore: remove the bundled `JointDecisionv3.mlmodelc` from DictusApp
 
 Done in this lane: #530, #414, #490, #518, #80, #536, #523 `Structuré`, #572 `Message`, #571 `Résumé`, #575, #215, #620 voice notes. Closed 2026-10-10 as done or superseded: #79, #439.
 
