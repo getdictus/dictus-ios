@@ -106,6 +106,43 @@ public enum SpellingSimilarity {
         return lhs == rhs || phoneticKey(span) == phoneticKey(learned)
     }
 
+    /// How close a span of one to three words is to a canonical spelling of any
+    /// length, for the step 2 pair generator (#512). Lower is closer; nil when the two
+    /// are not a candidate pair.
+    ///
+    /// ### Why this is looser than `spanMatches`, on purpose
+    ///
+    /// `spanMatches` refuses an edit distance because every word of a span may be an
+    /// ordinary word, and step 1 has no second opinion: what it pairs, it suggests.
+    /// Step 2 exists for exactly the case that rule cannot reach: `cloud code` for
+    /// `Claude Code` is two real words, two edits from the term, and neither equal
+    /// skeletons nor equal phonetic keys. Its second opinion is the user: the app
+    /// offers only the closest pairs seen more than once
+    /// (`VocabularyPairGenerator.suggestions`), and stores one only on **Accept**.
+    ///
+    /// - 0: equal skeletons (`whisper kit` for `WhisperKit`, `stephane` for `Stéphane`).
+    /// - 1: equal phonetic keys (`her mes` for `Hermes`).
+    /// - 1 + d: `d` edits between the skeletons or between the phonetic keys,
+    ///   whichever is smaller, within `allowedEdits`.
+    ///
+    /// Five letters at least on each side when the span has more than one word, as for
+    /// `spanMatches`: two short words joined (`de la`) spell too many things.
+    public static func spanScore(_ span: String, canonical: String, wordCount: Int) -> Int? {
+        let lhs = skeleton(span), rhs = skeleton(canonical)
+        let floor = wordCount > 1 ? 5 : 3
+        guard lhs.count >= floor, rhs.count >= 3 else { return nil }
+        if lhs == rhs { return 0 }
+        let lhsKey = phoneticKey(span), rhsKey = phoneticKey(canonical)
+        if lhsKey == rhsKey, lhsKey.count >= 3 { return 1 }
+        let allowed = allowedEdits(lhs, rhs)
+        guard abs(lhs.count - rhs.count) <= allowed || abs(lhsKey.count - rhsKey.count) <= allowed else { return nil }
+        let distance = min(
+            editDistance(lhs, rhs, atMost: allowed),
+            editDistance(lhsKey, rhsKey, atMost: allowed)
+        )
+        return distance <= allowed ? 1 + distance : nil
+    }
+
     /// Whether two folded spellings are close enough to be one unknown word misheard
     /// twice. The grouping of the history-only suggestions, which have no learned
     /// word to anchor them; kept as tight as before (one edit up to six characters).
