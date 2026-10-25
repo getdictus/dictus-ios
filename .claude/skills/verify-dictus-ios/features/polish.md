@@ -23,7 +23,7 @@
 ```bash
 .claude/skills/verify-dictus-ios/scripts/launch.sh --skip-onboarding
 .claude/skills/verify-dictus-ios/scripts/drive.sh tab Réglages
-.claude/skills/verify-dictus-ios/scripts/drive.sh tap-label "Polir la transcription"
+axe tap --label "Polir la transcription" --element-type CheckBox --wait-timeout 5 --udid <udid>   # the switch; a tap on the row's title does not flip it
 .claude/skills/verify-dictus-ios/scripts/drive.sh tree | grep -A3 '"Polir la transcription"'   # AXValue flips
 ```
 
