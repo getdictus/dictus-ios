@@ -522,6 +522,7 @@ class UnifiedAudioEngine: ObservableObject {
                 appState: "\(appState.rawValue)",
                 target: self
             )
+            LiveActivityManager.shared.settleAfterInterruption(engineWarm: engine.isRunning)  // #353
 
         @unknown default:
             return
@@ -1982,6 +1983,7 @@ extension UnifiedAudioEngine: InterruptionResumeTarget {
         engine.stop()
 
         logHapticsAllowance(context: "interruptionBegan")
+        LiveActivityManager.shared.handleInterruptionBegan()  // #353: pause, before the post below
 
         // Notify in-process listeners (LiveActivityManager, DictationCoordinator)
         // immediately. Darwin notification mirrors for cross-process consumers
