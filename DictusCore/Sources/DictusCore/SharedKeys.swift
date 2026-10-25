@@ -164,6 +164,11 @@ public enum SharedKeys {
     /// Whether Live Activity (Dynamic Island + Lock Screen) is enabled, default true
     public static let liveActivityEnabled = "dictus.liveActivityEnabled"
 
+    // Inactivity timeout (issue #380)
+    /// Raw value of `WarmEngineTimeoutOption`: how long the warm audio engine waits after
+    /// a dictation before releasing. Missing means the 10-minute default.
+    public static let warmEngineTimeout = "dictus.warmEngineTimeout"
+
     // Post-STT polish (issue #141)
     /// Whether the polish layer runs between STT final output and App Group write, default false.
     /// Off by default — round 1 is opt-in measurement. See ADR 0002.

@@ -75,7 +75,13 @@ public enum LogEvent: Sendable {
     /// The audio server died (`mediaServicesWereLostNotification`, #775). Its reset follows.
     case audioMediaServicesLost
     case audioMediaServicesReset
-    case warmStateReleased(idleSeconds: Int)
+    /// The warm engine and its session were torn down. `reason` names the path:
+    /// `idleTimeout`, `wallClockBackstop`, or `immediately-<what ended>` (#380).
+    case warmStateReleased(idleSeconds: Int, reason: String)
+    /// The engine went warm-idle and the inactivity timeout was applied (#380): the user's
+    /// option, and the timer actually armed (`none` for Unlimited). This is the line that
+    /// proves, in a device log, which timeout a release was measured against.
+    case idleReleaseArmed(option: String, timerSeconds: Int?, context: String)
     case warmStateRestored(context: String)
     /// The value `AVAudioSession` actually reports for
     /// `allowHapticsAndSystemSoundsDuringRecording` after a session transition
@@ -684,7 +690,7 @@ public enum LogEvent: Sendable {
         case .audioEngineStarted, .audioEngineStopped, .audioSessionConfigured, .audioSessionFailed,
              .audioSessionActivationFailed, .audioInterruptionBegan, .audioInterruptionEnded, .audioRouteChanged,
              .audioMediaServicesLost, .audioMediaServicesReset, .warmStateReleased, .warmStateRestored,
-             .audioHapticsAllowance, .audioHapticsAllowanceFailed,
+             .idleReleaseArmed, .audioHapticsAllowance, .audioHapticsAllowanceFailed,
              .audioInputMuted, .audioInputMuteFailed:
             return .audio
         case .transcriptionStarted, .transcriptionCompleted, .transcriptionFailed, .recordingTooShort,
@@ -830,7 +836,7 @@ public enum LogEvent: Sendable {
              .waveformAppeared, .waveformDisappeared, .waveformRefreshIDChanged,
              .waveformEnergyTransition, .overlayBodyEvaluated, .overlayRecreated,
              .audioInterruptionEnded, .audioRouteChanged,
-             .warmStateReleased, .warmStateRestored, .audioHapticsAllowance, .audioInputMuted,
+             .warmStateReleased, .idleReleaseArmed, .warmStateRestored, .audioHapticsAllowance, .audioInputMuted,
              .userDictionaryEvicted, .userDictionaryReset, .userDictionaryMigrated,
              .userDictionaryStaleDiscarded, .userDictionaryPruned:
             return .info
@@ -928,8 +934,10 @@ public enum LogEvent: Sendable {
             return "reason=\(reason) details=\(details)"
         case .audioMediaServicesLost, .audioMediaServicesReset:
             return ""
-        case .warmStateReleased(let idleSeconds):
-            return "idleSeconds=\(idleSeconds)"
+        case .warmStateReleased(let idleSeconds, let reason):
+            return "idleSeconds=\(idleSeconds) reason=\(reason)"
+        case .idleReleaseArmed(let option, let timerSeconds, let context):
+            return "option=\(option) timerSeconds=\(timerSeconds.map(String.init) ?? "none") context=\(context)"
         case .warmStateRestored(let context):
             return "context=\(context)"
         case .audioHapticsAllowance(let context, let allowed):
@@ -1288,6 +1296,7 @@ extension LogEvent {
         case .audioMediaServicesLost: return "audioMediaServicesLost"
         case .audioMediaServicesReset: return "audioMediaServicesReset"
         case .warmStateReleased: return "warmStateReleased"
+        case .idleReleaseArmed: return "idleReleaseArmed"
         case .warmStateRestored: return "warmStateRestored"
         case .audioHapticsAllowance: return "audioHapticsAllowance"
         case .audioHapticsAllowanceFailed: return "audioHapticsAllowanceFailed"

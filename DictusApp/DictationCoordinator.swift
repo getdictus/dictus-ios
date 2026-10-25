@@ -1471,7 +1471,8 @@ class DictationCoordinator: ObservableObject {
             stopStageWatchdog()
         }
 
-        DarwinNotificationCenter.post(DarwinNotificationName.statusChanged)
+        // Posts `statusChanged`, then lets an ended dictation release the engine (#380).
+        announceStatusChange(newStatus)
     }
 
     /// Verify audio samples are actually being captured after startRecording.
@@ -1940,6 +1941,30 @@ private extension DictationCoordinator {
                 details: wrapped.diagnosticDescription
             ))
             throw wrapped
+        }
+    }
+}
+
+// MARK: - Inactivity timeout seams (#380)
+
+// WHY an extension in this file rather than members of the class: the class body sits
+// exactly at the `type_body_length` budget of #146, and an extension in the same file
+// still reaches the private `audioEngine`, which `DictationCoordinator+WarmEngineTimeout.swift`
+// cannot. Seams rather than exposing the engine, for the reason
+// `configureAudioSessionForWarmUp` gives.
+extension DictationCoordinator {
+    func applyIdleTimeoutChangeToEngine() { audioEngine.applyIdleTimeoutChange() }
+
+    func releaseWarmEngine(reason: String) { audioEngine.releaseWarmState(reason: reason) }
+
+    /// The tail of `updateStatus`: tell the keyboard, then, when the dictation is over
+    /// (failed, cancelled, dismissed), release the engine if the timeout is Immediately.
+    /// `.ready` is not over for a keyboard dictation, and the hand-off check inside
+    /// `releaseWarmStateIfImmediate` is what keeps it warm for the keyboard's polish.
+    func announceStatusChange(_ newStatus: DictationStatus) {
+        DarwinNotificationCenter.post(DarwinNotificationName.statusChanged)
+        if !DictationSessionLivenessPolicy.isActive(newStatus) {
+            releaseWarmStateIfImmediate(after: "status-\(newStatus.rawValue)")
         }
     }
 }

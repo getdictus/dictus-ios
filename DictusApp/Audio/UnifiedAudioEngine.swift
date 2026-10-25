@@ -297,41 +297,23 @@ class UnifiedAudioEngine: ObservableObject {
     /// or a successful `warmUp()` — and cancelled at the start of any new
     /// recording. If it ever fires, `releaseWarmState()` tears down the engine +
     /// session so the device stops paying for `UIBackgroundModes:audio`.
-    private var idleReleaseWorkItem: DispatchWorkItem?
+    ///
+    /// This and the two properties below are internal, not private, because the code
+    /// that arms them lives in `UnifiedAudioEngine+IdleRelease.swift`.
+    var idleReleaseWorkItem: DispatchWorkItem?
 
     /// Time at which the engine entered the warm-idle state: a recording ended
     /// (`collectSamples` / `cancelDictation`) or a warm-up completed with nobody
     /// recording. Used to compute how long the engine sat idle before being
-    /// released — emitted in the `warmStateReleased(idleSeconds:)` log event for
+    /// released — emitted in the `warmStateReleased(idleSeconds:reason:)` log event for
     /// tuning the timeout — and as the anchor for the wall-clock backstop.
     /// Nil means "not warm-idle": either never armed, or a recording is running.
-    private var lastIdleStartTime: Date?
+    var lastIdleStartTime: Date?
 
     /// The interval the currently-armed release was scheduled with. Kept so the
-    /// wall-clock backstop measures against the same window the timer used,
-    /// rather than assuming the post-dictation one.
-    private var armedIdleReleaseInterval: TimeInterval = UnifiedAudioEngine.idleReleaseInterval
-
-    /// Idle window after which the warm engine + session are released, when the
-    /// warm state followed a real dictation. Hardcoded for this iteration; a
-    /// user-facing setting will land as a follow-up (issue #106 out-of-scope).
-    /// 10 minutes balances UX (warm starts feel instant within a normal
-    /// "back-and-forth dictation session") against battery drain (3.3%/h
-    /// baseline drops to ~0%/h after release).
-    ///
-    /// Read from `WarmEngineTimeout` since #620, the one place #380's user setting
-    /// will plug into.
-    private static var idleReleaseInterval: TimeInterval { WarmEngineTimeout.interval }
-
-    /// Idle window applied when the engine was warmed WITHOUT a preceding
-    /// dictation: launch pre-load, `didBecomeActive` re-warm, explicit `warmUp()`.
-    ///
-    /// WHY a separate constant that currently holds the same value: #256 leaves
-    /// open whether a user who merely opened the app deserves a shorter window
-    /// than one who just dictated. That is a product call, not an implementation
-    /// one, so this ships with the conservative answer (identical windows) and a
-    /// single line to change if the maintainer decides otherwise.
-    private static var warmUpIdleReleaseInterval: TimeInterval { idleReleaseInterval }
+    /// wall-clock backstop measures against the same window the timer used, even
+    /// after the user changed the setting. Nil is Unlimited: nothing is ever due.
+    var armedIdleReleaseInterval: TimeInterval?
 
     /// Sample gating flag read from the audio thread.
     /// WHY nonisolated(unsafe): Read from audio callback thread (single reader pattern).
@@ -873,7 +855,19 @@ class UnifiedAudioEngine: ObservableObject {
             // Re-arm before returning. `cancelIdleRelease()` above dropped
             // whatever was pending, and leaving without re-arming is how the
             // engine used to end up warm forever.
-            scheduleIdleRelease(after: Self.warmUpIdleReleaseInterval)
+            scheduleIdleRelease(context: "warmUp-alreadyRunning")
+            return
+        }
+
+        // Immediately keeps no standby (#380 decision 2), so a warm-up that is not a
+        // dictation has nothing to warm: starting the engine here would only open the
+        // session for the release to close it again. The next dictation starts the
+        // engine itself, as it does after any release.
+        //
+        // Returning rather than throwing, for the reason the permission gate below
+        // gives: the model load around this call is fine, and must publish `.ready`.
+        if WarmEngineTimeout.option() == .immediately {
+            PersistentLog.log(.engineWarmUpSkipped(context: "unifiedEngine-warmUp", reason: "timeout=immediately"))
             return
         }
 
@@ -900,7 +894,7 @@ class UnifiedAudioEngine: ObservableObject {
         // NOT in a `defer`: on a `startEngine()` throw we are not warm, and
         // arming a release for an engine that never started would only produce a
         // misleading `warmStateReleased` ten minutes later.
-        scheduleIdleRelease(after: Self.warmUpIdleReleaseInterval)
+        scheduleIdleRelease(context: "warmUp")
     }
 
     /// Begin recording: purge idle audio and start accumulating samples.
@@ -980,7 +974,7 @@ class UnifiedAudioEngine: ObservableObject {
 
         // Arm the idle-release timer (issue #106 Phase B). If the user starts a
         // new recording or warms up before the timer fires, it gets cancelled.
-        scheduleIdleRelease(after: Self.idleReleaseInterval)
+        scheduleIdleRelease(context: "collectSamples")
 
         return samples
     }
@@ -1070,63 +1064,6 @@ class UnifiedAudioEngine: ObservableObject {
 
     // MARK: - Idle Release (issue #106 Phase B)
 
-    /// Arm the idle-release work item. Idempotent by construction: it cancels any
-    /// prior timer first, so the extra call sites added for #256 can never stack
-    /// timers — the last caller to arm always owns the only pending work item.
-    /// The work runs on the main queue after `interval` elapses with no recording
-    /// activity. Must be called from MainActor context.
-    ///
-    /// - Parameter interval: how long the engine may sit warm and idle. Callers
-    ///   pass `idleReleaseInterval` after a dictation and
-    ///   `warmUpIdleReleaseInterval` when the warm state was entered without one.
-    /// - Parameter idleSince: when the window started. Now, except for an interruption
-    ///   resume, which re-arms the window the interruption cut short (#353): the release
-    ///   then fires at that window's deadline, and the anchor the wall-clock backstop and
-    ///   `warmStateReleased idleSeconds` read stays the original one.
-    private func scheduleIdleRelease(after interval: TimeInterval, idleSince: Date = Date()) {
-        cancelIdleRelease()
-        lastIdleStartTime = idleSince
-        armedIdleReleaseInterval = interval
-
-        let work = DispatchWorkItem { [weak self] in
-            MainActor.assumeIsolated {
-                self?.releaseWarmState(reason: "idleTimeout")
-            }
-        }
-        idleReleaseWorkItem = work
-        let remaining = max(0, interval - Date().timeIntervalSince(idleSince))
-        DispatchQueue.main.asyncAfter(deadline: .now() + remaining, execute: work)
-    }
-
-    /// Re-arm the idle release from now, if one is armed (#620).
-    ///
-    /// A shared voice note transcribed in the background runs in this process only
-    /// because the warm engine keeps it alive (`UIBackgroundModes: audio`). Releasing
-    /// the engine mid-note would let iOS suspend the app with the note half done. A
-    /// voice note is the user using Dictus, so it earns the same window a dictation
-    /// does: the release is pushed back by one full idle interval, never pulled
-    /// forward, and nothing happens when the engine is not warm-idle — there is no
-    /// warm state to extend, and starting one from the background is what iOS forbids.
-    func extendWarmWindow() {
-        guard idleReleaseWorkItem != nil else { return }
-        scheduleIdleRelease(after: Self.idleReleaseInterval)
-    }
-
-    /// Cancel a pending idle release. Safe to call when none is armed.
-    ///
-    /// WHY it also clears `lastIdleStartTime`: the anchor is only meaningful while
-    /// a release is armed. Every caller here (`startRecording`, `stopEngine`,
-    /// `deactivateSession`, `forceRestart`, interruption and media-services-reset
-    /// handling) is leaving the warm-idle state, so keeping the old timestamp let
-    /// the wall-clock backstop measure an idle age that had already ended — most
-    /// dangerously during an active recording, where the next `didBecomeActive`
-    /// could have released the engine mid-sentence (issue #256).
-    private func cancelIdleRelease() {
-        idleReleaseWorkItem?.cancel()
-        idleReleaseWorkItem = nil
-        lastIdleStartTime = nil
-    }
-
     /// Wall-clock backstop for the asyncAfter timer. If iOS suspended the main
     /// queue while we were backgrounded, `scheduleIdleRelease`'s `asyncAfter`
     /// can fire late or get coalesced. The DictationCoordinator's
@@ -1200,9 +1137,13 @@ class UnifiedAudioEngine: ObservableObject {
         converter = nil
         lastUnconvertibleInputFormat = nil
         lastIdleStartTime = nil
+        // Cancelled, not just dropped (#380): Immediately releases from outside the
+        // timer, and a backstop left scheduled would fire into whatever warm state
+        // the next dictation builds, after `startRecording` could no longer reach it.
+        idleReleaseWorkItem?.cancel()
         idleReleaseWorkItem = nil
 
-        PersistentLog.log(.warmStateReleased(idleSeconds: idleSeconds))
+        PersistentLog.log(.warmStateReleased(idleSeconds: idleSeconds, reason: reason))
 
         // The user-visible claim of #293 is "haptics came back on their own about
         // ten minutes later". This line is what dates the other end of that
@@ -1965,8 +1906,13 @@ extension UnifiedAudioEngine: InterruptionResumeTarget {
     /// running muted, whatever iOS has done to its I/O since; not armed means cold.
     var engineStateForInterruption: InterruptedEngineState {
         if isRecording { return .recording }
-        guard idleReleaseWorkItem != nil, let idleSince = lastIdleStartTime else { return .cold }
-        return .standby(idleSince: idleSince, interval: armedIdleReleaseInterval)
+        // Batch resolution #803 × #807: the warm-idle marker is the idle anchor, which
+        // #380's Unlimited sets without arming a timer, and which every stopping path
+        // clears (`cancelIdleRelease`). Unlimited has no deadline: a finite horizon far
+        // beyond any interruption stands for it, since the resume logs its remaining
+        // seconds as an `Int`.
+        guard let idleSince = lastIdleStartTime else { return .cold }
+        return .standby(idleSince: idleSince, interval: armedIdleReleaseInterval ?? Self.unlimitedResumeHorizon)
     }
 
     /// The `.began` teardown, unchanged by #353.
@@ -2014,9 +1960,14 @@ extension UnifiedAudioEngine: InterruptionResumeTarget {
         sessionConfigured = false
     }
 
+    /// Re-arms from the window's original start; the window itself is the inactivity
+    /// setting (#380), the same one `engineStateForInterruption` reported.
     func armIdleRelease(idleSince: Date, interval: TimeInterval) {
-        scheduleIdleRelease(after: interval, idleSince: idleSince)
+        scheduleIdleRelease(context: "interruptionResume", idleSince: idleSince)
     }
+
+    /// Stands for Unlimited's missing deadline in an interruption's standby window.
+    private static let unlimitedResumeHorizon = TimeInterval(Int32.max)
 
     /// Called directly rather than through a notification, as the `.began` teardown is:
     /// the outcome goes into the resume's log line, and `startStandbyActivity()` must run
