@@ -18,21 +18,37 @@ public enum VocabularyPairAcceptance: Equatable {
         }
     }
 
+    /// What Accept stores for the pair as suggested.
+    ///
     /// - Returns: nil when there is nothing to store: a vocabulary pair whose term was
     ///   deleted while the suggestion was on screen, or a pair that makes no entry.
     ///
-    /// The stored term is looked up first, ignoring case like `VocabularyStore`, so a
-    /// learned word the user has since added as a term gains a variant rather than a
-    /// duplicate. A new term keeps the learned word as the keyboard stored it,
-    /// lowercase: History is not asked for its capitals.
+    /// A new term keeps the learned word as the keyboard stored it, lowercase:
+    /// History is not asked for its capitals. The review sheet lets the user fix them.
     public init?(_ pair: VocabularyPair, vocabulary: [VocabularyEntry]) {
-        let needle = pair.canonical.lowercased()
+        let stored = vocabulary.contains { $0.term.lowercased() == pair.canonical.lowercased() }
+        guard stored || pair.source == .learned else { return nil }
+        self.init(term: pair.canonical, variant: pair.observed, vocabulary: vocabulary)
+    }
+
+    /// What Accept stores once the user has edited the two fields of the review sheet.
+    ///
+    /// The stored term is looked up first, ignoring case like `VocabularyStore`, so a
+    /// term typed with other capitals gains a variant rather than a duplicate entry.
+    /// Otherwise the two fields make a new term.
+    ///
+    /// - Returns: nil when saving would change nothing a dictation goes through: an
+    ///   empty or over-long term, an empty variant, a variant equal to the term, or one
+    ///   the stored term already has (`VocabularyEntry.init?` cleans those away).
+    public init?(term: String, variant: String, vocabulary: [VocabularyEntry]) {
+        let needle = term.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
         if let stored = vocabulary.first(where: { $0.term.lowercased() == needle }) {
-            self = .addVariant(stored.addingVariants([pair.observed]))
+            let updated = stored.addingVariants([variant])
+            guard updated.variants != stored.variants else { return nil }
+            self = .addVariant(updated)
             return
         }
-        guard pair.source == .learned,
-              let entry = VocabularyEntry(term: pair.canonical, variants: [pair.observed]) else { return nil }
+        guard let entry = VocabularyEntry(term: term, variants: [variant]), entry.hasEffect else { return nil }
         self = .newTerm(entry)
     }
 }

@@ -138,7 +138,7 @@ public struct VocabularyPairGenerator {
             knownWords: knownSpellings.map(Self.words(of:)).filter { !$0.isEmpty },
             ignored: ignored
         )
-        var cache: [String: Bool] = [:]
+        var cache = Cache()
         var tallies: [String: PairTally] = [:]
 
         for record in records {
@@ -173,6 +173,8 @@ public struct VocabularyPairGenerator {
         let source: VocabularyPair.CanonicalSource
         /// Its words, lowercase, elision stripped: what "written right" is tested on.
         let words: [String]
+        /// What `spanScore` compares, computed once per run.
+        let keys: SpellingSimilarity.Keys
     }
 
     /// Vocabulary terms in alphabetical order, then learned words not already a term.
@@ -186,11 +188,11 @@ public struct VocabularyPairGenerator {
         for term in terms where seen.insert(VocabularySuggestionMiner.fold(term)).inserted {
             let words = Self.words(of: term)
             guard !words.isEmpty else { continue }
-            result.append(Canonical(text: term, source: .vocabulary, words: words))
+            result.append(Canonical(text: term, source: .vocabulary, words: words, keys: .init(term)))
         }
         for word in VocabularySuggestionMiner.usableLearnedWords(learnedWords, ignored: ignored)
         where seen.insert(VocabularySuggestionMiner.fold(word)).inserted {
-            result.append(Canonical(text: word, source: .learned, words: [word]))
+            result.append(Canonical(text: word, source: .learned, words: [word], keys: .init(word)))
         }
         return result
     }
@@ -204,6 +206,20 @@ public struct VocabularyPairGenerator {
         let length: Int
         let score: Int
         let surface: String
+    }
+
+    /// What one run remembers between sentences: dictionary verdicts, and the keys
+    /// of every span already seen (most spans recur across a History).
+    struct Cache {
+        var known: [String: Bool] = [:]
+        private var spanKeys: [String: SpellingSimilarity.Keys] = [:]
+
+        mutating func keys(of surface: String) -> SpellingSimilarity.Keys {
+            if let keys = spanKeys[surface] { return keys }
+            let keys = SpellingSimilarity.Keys(surface)
+            spanKeys[surface] = keys
+            return keys
+        }
     }
 
     /// What every sentence of one run is compared against.
@@ -236,7 +252,7 @@ public struct VocabularyPairGenerator {
                             ranged: [(token: VocabularySuggestionMiner.Token, range: Range<String.Index>)],
                             clean: String,
                             scan: Scan,
-                            cache: inout [String: Bool]) -> [Match] {
+                            cache: inout Cache) -> [Match] {
         let words = sentence.map { Self.lowered(Self.strippingElision(ranged[$0].token.text)) }
         let canonicals = scan.canonicals
         let writtenRight = canonicals.map { Self.occurrences(of: $0.words, in: words) }
@@ -256,15 +272,17 @@ public struct VocabularyPairGenerator {
                 guard !knownHere.contains(where: { $0.overlaps(covered) }) else { continue }
                 guard !Self.edgeWords.contains(words[offset]),
                       !Self.edgeWords.contains(words[offset + length - 1]) else { continue }
-                guard let surface = spanSurface(parts, cache: &cache) else { continue }
+                guard let surface = spanSurface(parts, cache: &cache.known) else { continue }
                 guard !scan.known.contains(Self.lowered(surface)),
                       !scan.ignored.contains(VocabularySuggestionMiner.fold(surface)) else { continue }
+                let keys = cache.keys(of: surface)
                 for (index, canonical) in canonicals.enumerated() {
+                    // Score first: it refuses most canonicals on two lengths alone.
+                    guard let score = SpellingSimilarity.spanScore(
+                        keys, canonical: canonical.keys, wordCount: length
+                    ) else { continue }
                     // The term written right, or a span reaching into it, is not a mistake.
                     guard !writtenRight[index].contains(where: { $0.overlaps(covered) }) else { continue }
-                    guard let score = SpellingSimilarity.spanScore(
-                        surface, canonical: canonical.text, wordCount: length
-                    ) else { continue }
                     matches.append(Match(canonical: index, start: sentence[offset], length: length,
                                          score: score, surface: surface))
                 }

@@ -253,6 +253,35 @@ final class VocabularyPairSuggestionsTests: XCTestCase {
         XCTAssertNil(VocabularyPairAcceptance(pair, vocabulary: []))
     }
 
+    // MARK: - Accept with the review sheet's fields edited
+
+    func testEditedFieldsMakeANewTerm() throws {
+        let acceptance = try XCTUnwrap(VocabularyPairAcceptance(term: " GrokBot ", variant: "grok bot", vocabulary: []))
+        guard case .newTerm(let created) = acceptance else { return XCTFail("expected a new term, got \(acceptance)") }
+        XCTAssertEqual(created.term, "GrokBot", "the user's capitals, trimmed")
+        XCTAssertEqual(created.variants, ["grok bot"])
+    }
+
+    func testAnEditedTermWithOtherCapitalsMergesIntoTheStoredOne() throws {
+        let stored = try entry("Claude Code", ["clode code"])
+        let acceptance = try XCTUnwrap(VocabularyPairAcceptance(term: "claude CODE", variant: "cloud coat", vocabulary: [stored]))
+        XCTAssertEqual(acceptance, .addVariant(stored.addingVariants(["cloud coat"])))
+        XCTAssertEqual(acceptance.entry.id, stored.id)
+        XCTAssertEqual(acceptance.entry.term, "Claude Code", "the stored spelling is kept")
+    }
+
+    func testAnEditWithNoEffectIsRefused() throws {
+        let stored = try entry("Claude Code", ["clode code"])
+        XCTAssertNil(VocabularyPairAcceptance(term: "Claude Code", variant: "clode code", vocabulary: [stored]),
+                     "variant already there")
+        XCTAssertNil(VocabularyPairAcceptance(term: "Claude Code", variant: "CLODE CODE", vocabulary: [stored]),
+                     "variant already there, other case")
+        XCTAssertNil(VocabularyPairAcceptance(term: "Claude Code", variant: "  ", vocabulary: [stored]), "empty variant")
+        XCTAssertNil(VocabularyPairAcceptance(term: "grokbot", variant: "grokbot", vocabulary: []), "variant equal to the term")
+        XCTAssertNil(VocabularyPairAcceptance(term: "", variant: "grok bot", vocabulary: []), "empty term")
+        XCTAssertNil(VocabularyPairAcceptance(term: "grokbot", variant: "", vocabulary: []), "new term with no variant")
+    }
+
     // MARK: - Ignore
 
     func testAnIgnoredPairStaysIgnored() throws {
