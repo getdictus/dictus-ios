@@ -26,7 +26,7 @@ Captures are in [`docs/agents/screens/`](../../../../docs/agents/screens/), one 
 | `app.history` | History sheet (empty state) | Pro on, Accueil → tap-label Historique | history | [oui](../../../../docs/agents/screens/app.history.png) |
 | `app.history.detail` | Transcription detail | History → a row (needs a transcription) | history, vocabulary | non |
 | `app.models` | Tab Modèles | tab Modèles | models.transcription | [oui](../../../../docs/agents/screens/app.models.png) |
-| `app.models.languages` | Supported languages sheet | Modèles → tap-label « Langues prises en charge » | models.transcription | [oui](../../../../docs/agents/screens/app.models.languages.png) |
+| `app.models.languages` | Supported languages sheet | Modèles → the Small (quantifié) card's ⓘ (see models.transcription) | models.transcription | [oui](../../../../docs/agents/screens/app.models.languages.png) |
 | `app.models.loading` | Full-screen model preparation: « On prépare votre modèle », download then « Optimisation pour cet iPhone » | Modèles → tap-label « Small (quantifié) » (a real download, see models.transcription) | models.transcription | [oui](../../../../docs/agents/screens/app.models.loading.png) |
 | `app.settings` | Tab Réglages | tab Réglages | keyboard.languages, polish, typing.*, live-activity, diagnostics.logs | [oui](../../../../docs/agents/screens/app.settings.png) |
 | `app.settings.sounds` | Réglages → Sons | Réglages, scroll, tap-label Sons | feedback.sounds-haptics | [oui](../../../../docs/agents/screens/app.settings.sounds.png) |
