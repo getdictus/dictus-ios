@@ -177,7 +177,7 @@ Two lists. The first is what an agent proves alone with this skill; the second i
 | Typing | Suggestions, autocorrect on space, undo, accents, dead keys, learned words, reset | `typing.*`, `learned-words.*`, `kbd.suggestions` |
 | Keyboard surfaces | Languages panel, layouts, number row, 123 and `#+=` pages, emoji picker, recents, search | `keyboard.*`, `emoji.*`, `kbd.panel`, `kbd.numbers`, `kbd.symbols`, `kbd.emoji` |
 | Settings and switches | Every preference changes and persists through the App Group (sounds, haptics, polish, Live Activity, history, vocabulary, voice notes) | `sounds.toggle`, `sounds.volume`, `sounds.per-event`, `haptics.toggle`, `polish.toggle`, `live-activity.toggle`, `smart-modes.toggle`, `history.toggle`, `vocabulary.toggle`, `voice-notes.toggle` |
-| Pro, Debug-forced | Hub, Smart Mode pins, fan opening (greyed), vocabulary add/edit/delete, history and voice-note reader empty states | `pro.hub`, `smart-modes.fan`, `smart-modes.pin`, `vocabulary.add`/`edit`/`delete`/`reset`, `history.list` (empty), `voice-notes.reader` (empty) |
+| Pro, Debug-forced | Hub, Smart Mode pins, fan opening (greyed), vocabulary add/edit/delete, variants of your terms on a seeded History (accept with review, edit, ignore, cap at 5), history and voice-note reader empty states | `pro.hub`, `smart-modes.fan`, `smart-modes.pin`, `vocabulary.add`/`edit`/`delete`/`reset`, `vocabulary.term-variants`, `history.list` (empty), `voice-notes.reader` (empty) |
 | Models | Catalogue, download (real traffic), preparation screen, select, delete, retry, languages sheet; A12/A13 refusal on a device created as `iPhone-11` | `models.*` except the RAM halves of `models.device-gating` and `models.recommended`; `app.models.loading` (screen, not timing) |
 | Diagnostics | Log view, export sheet opens, App Group check (signed build) | `diagnostics.*` |
 
@@ -185,7 +185,7 @@ Two lists. The first is what an agent proves alone with this skill; the second i
 
 | Area | Why the simulator cannot prove it | IDs |
 | --- | --- | --- |
-| Real voice and microphone | A simulator records the Mac's input device: the room, or a synthesized `say` clip. A real voice, its accent and the text quality, and what depends on them (a filled history, the vocabulary effect, voice-note transcription) | `dictation.in-app`, `app.recording`, `history.detail`, `vocabulary.apply`, `voice-notes.transcribe` |
+| Real voice and microphone | A simulator records the Mac's input device: the room, or a synthesized `say` clip. A real voice, its accent and the text quality, and what depends on them (a filled history, the vocabulary effect, voice-note transcription) | `dictation.in-app`, `app.recording`, `history.detail`, `vocabulary.apply`, `vocabulary.term-variants` (rows from a real History), `voice-notes.transcribe` |
 | Audio routing | AirPods, Bluetooth headsets, wired input, route changes and interruptions mid-recording: the simulator has only the Mac's devices | `dictation.start`, `dictation.in-app`, `voice-notes.transcribe` |
 | Keyboard memory and jetsam | The extension's ~50 MB ceiling and its kills are device figures; simulator `memMB` carries no verdict | `dictation.keyboard`, `kbd.*` (memory only) |
 | Keyboard height and dead zones | The declared height constraint (#166) and touch dead zones | `kbd.keys` |
