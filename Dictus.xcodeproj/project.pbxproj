@@ -61,6 +61,7 @@
 		AA000042 /* WhisperKit in Frameworks */ = {isa = PBXBuildFile; productRef = AA900020 /* WhisperKit */; };
 		AA000043 /* RecordingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100043 /* RecordingView.swift */; };
 		AA000045 /* UnifiedAudioEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100045 /* UnifiedAudioEngine.swift */; };
+		AA000390 /* UnifiedAudioEngine+IdleRelease.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100390 /* UnifiedAudioEngine+IdleRelease.swift */; };
 		AA000200 /* ObjCExceptionCatcher.m in Sources */ = {isa = PBXBuildFile; fileRef = AA100200 /* ObjCExceptionCatcher.m */; };
 		AA361002 /* TextProxyIdentity.m in Sources */ = {isa = PBXBuildFile; fileRef = AA361001 /* TextProxyIdentity.m */; };
 		AA023004 /* HostArbiterActivation.m in Sources */ = {isa = PBXBuildFile; fileRef = AA023003 /* HostArbiterActivation.m */; };
@@ -297,6 +298,7 @@
 		AA1003B0 /* DictationFailureMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DictationFailureMessage.swift; sourceTree = "<group>"; };
 		AA100043 /* RecordingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingView.swift; sourceTree = "<group>"; };
 		AA100045 /* UnifiedAudioEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnifiedAudioEngine.swift; sourceTree = "<group>"; };
+		AA100390 /* UnifiedAudioEngine+IdleRelease.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UnifiedAudioEngine+IdleRelease.swift"; sourceTree = "<group>"; };
 		AA100200 /* ObjCExceptionCatcher.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ObjCExceptionCatcher.m; sourceTree = "<group>"; };
 		AA361001 /* TextProxyIdentity.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TextProxyIdentity.m; sourceTree = "<group>"; };
 		AA023003 /* HostArbiterActivation.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = HostArbiterActivation.m; sourceTree = "<group>"; };
@@ -681,6 +683,7 @@
 				AA1000F0 /* SpeechModelProtocol.swift */,
 				AA100041 /* TranscriptionService.swift */,
 				AA100045 /* UnifiedAudioEngine.swift */,
+				AA100390 /* UnifiedAudioEngine+IdleRelease.swift */,
 				AA1003A1 /* WhisperComputeOptions.swift */,
 				AA1003B0 /* DictationFailureMessage.swift */,
 				AA100201 /* ObjCExceptionCatcher.h */,
@@ -1316,6 +1319,7 @@
 				AA00P205 /* PolishDebugView.swift in Sources */,
 				AA00P207 /* PolishDebugExporter.swift in Sources */,
 				AA000045 /* UnifiedAudioEngine.swift in Sources */,
+				AA000390 /* UnifiedAudioEngine+IdleRelease.swift in Sources */,
 				AA000200 /* ObjCExceptionCatcher.m in Sources */,
 				AA000041 /* TranscriptionService.swift in Sources */,
 				AA0003A1 /* WhisperComputeOptions.swift in Sources */,
