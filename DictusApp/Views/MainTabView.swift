@@ -166,7 +166,16 @@ struct MainTabView: View {
     /// the engine from under them. The next activation tries again.
     private func runTurboMigrationIfFree() {
         guard mayRaiseWhatsNew else { return }
-        Task { await turboMigration.run(modelManager: modelManager) }
+        Task { await turboMigration.run(modelManager: modelManager, isIdle: { mayRaiseWhatsNew }) }
+    }
+
+    /// Arms the notice once the activation has settled. A request made during the launch is
+    /// dropped by SwiftUI, which writes `false` back (simulator, 2026-10-25), and an immediate
+    /// re-arm on `.active` still lands inside a relaunch.
+    private func armTurboNotice() async {
+        guard turboMigration.notice != nil else { return }
+        try? await Task.sleep(for: .seconds(1))
+        showsTurboNotice = turboMigration.notice != nil
     }
 
     private static var turboNoticeTitle: String {
@@ -348,18 +357,14 @@ struct MainTabView: View {
         .onChange(of: preparation != nil || isColdStartMode || whatsNewSteps != nil) { _, blocked in
             voiceNotes.mainScreenBlocked = blocked
         }
-        // #660: run at launch, at every activation (`.active` above), and when a finished
-        // download moves a waiting migration on.
+        // #660: run at launch, at every activation (`.active` above), and whenever an input a
+        // waiting migration needs arrives: a finished download, a load, the end of a dictation.
         .onAppear { runTurboMigrationIfFree() }
         .onChange(of: modelManager.downloadedModels) { _, _ in runTurboMigrationIfFree() }
-        // A request to present made during the launch is dropped by SwiftUI, which writes
-        // `false` back (simulator, 2026-10-25). So the flag is armed once the launch has
-        // settled, re-armed at every activation, and only OK consumes the notice.
-        .task(id: turboMigration.notice) {
-            guard turboMigration.notice != nil else { return }
-            try? await Task.sleep(for: .seconds(1))
-            showsTurboNotice = true
-        }
+        .onChange(of: modelManager.modelLoadState) { _, _ in runTurboMigrationIfFree() }
+        .onChange(of: coordinator.status) { _, _ in runTurboMigrationIfFree() }
+        // Armed when the notice appears and at every activation; only OK consumes it.
+        .task(id: turboMigration.notice) { await armTurboNotice() }
         .alert(
             Self.turboNoticeTitle,
             isPresented: Binding(
@@ -369,7 +374,7 @@ struct MainTabView: View {
             presenting: turboMigration.notice,
             actions: { _ in
                 Button("OK") {
-                    turboMigration.notice = nil
+                    turboMigration.dismissNotice()
                     PersistentLog.log(.turboMigration(step: "messageShown", model: activeModelIdentifier))
                 }
             },
@@ -487,7 +492,7 @@ struct MainTabView: View {
                     trialCoordinator.evaluate(canPresent: mayRaiseTrialScreens)
                 }
                 runTurboMigrationIfFree()
-                showsTurboNotice = turboMigration.notice != nil
+                Task { await armTurboNotice() }
             }
             if newPhase == .background {
                 isColdStartMode = false

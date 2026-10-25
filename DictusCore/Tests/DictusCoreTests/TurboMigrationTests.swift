@@ -11,15 +11,19 @@ final class TurboMigrationTests: XCTestCase {
     private let small = "openai_whisper-small"
 
     /// A device the actions are applied to, run the way the app runs the machine: step,
-    /// perform every action, persist the phase, and go on while a step has actions.
+    /// perform every action, persist the phase, and go on while the step says so.
     private struct Device {
         var isPreA15 = true
         var active: String?
         var downloaded: [String]
         var target: String
         var onWiFi = true
+        var idle = true
         var downloadInFlight = false
         var downloadFails = false
+        /// The model loaded in this launch. A switch or a finished download leaves the new
+        /// active model unloaded until `load()`, like the app's asynchronous preload.
+        var loaded: String?
         var phase: TurboMigration.Phase = .notStarted
         var notices: [TurboMigration.Notice] = []
         var log: [TurboMigration.Action] = []
@@ -32,8 +36,25 @@ final class TurboMigrationTests: XCTestCase {
                 target: target,
                 targetStatus: downloadInFlight ? .downloading
                     : downloaded.contains(target) ? .ready : .missing,
-                isOnUnmeteredNetwork: onWiFi
+                isOnUnmeteredNetwork: onWiFi,
+                isIdle: idle,
+                isActiveModelLoaded: active != nil && loaded == active
             )
+        }
+
+        /// The preload of the active model finishes.
+        mutating func load() { loaded = active }
+
+        /// What the app sees over time: a run, then the load it started, then the run that
+        /// load triggers.
+        @discardableResult
+        mutating func runAndLoad() -> [TurboMigration.State] {
+            var states = run()
+            if loaded != active {
+                load()
+                states += run()
+            }
+            return states
         }
 
         /// One app run: a launch, an activation, or a change to the downloaded list.
@@ -48,7 +69,7 @@ final class TurboMigrationTests: XCTestCase {
                     guard perform(action) else { return states }
                 }
                 phase = step.phase
-                if step.actions.isEmpty { return states }
+                if !step.continues { return states }
             }
             XCTFail("the migration did not settle")
             return states
@@ -73,7 +94,7 @@ final class TurboMigrationTests: XCTestCase {
     }
 
     private func a14(active: String?, downloaded: [String], target: String? = nil) -> Device {
-        Device(active: active, downloaded: downloaded, target: target ?? parakeet)
+        Device(active: active, downloaded: downloaded, target: target ?? parakeet, loaded: active)
     }
 
     // MARK: - Who it applies to
@@ -100,7 +121,7 @@ final class TurboMigrationTests: XCTestCase {
     func testBothTurboVariantsAreMigrated() {
         var device = a14(active: legacyTurbo, downloaded: [legacyTurbo, parakeet])
 
-        device.run()
+        device.runAndLoad()
 
         XCTAssertEqual(device.active, parakeet)
         XCTAssertEqual(device.downloaded, [parakeet])
@@ -111,7 +132,12 @@ final class TurboMigrationTests: XCTestCase {
     func testTargetAlreadyDownloadedSwitchesImmediately() {
         var device = a14(active: turbo, downloaded: [turbo, parakeet])
 
-        XCTAssertEqual(device.run(), [.started, .readyToSwitch, .switched, .done])
+        // The switch ends the run; the target's load is what lets Turbo go.
+        XCTAssertEqual(device.run(), [.started, .readyToSwitch])
+        XCTAssertEqual(device.active, parakeet)
+        XCTAssertEqual(device.downloaded, [turbo, parakeet], "Turbo stays until the target has loaded")
+        device.load()
+        XCTAssertEqual(device.run(), [.switched, .done])
         XCTAssertEqual(device.active, parakeet)
         XCTAssertEqual(device.downloaded, [parakeet])
         XCTAssertEqual(device.notices, [.switched(to: parakeet)])
@@ -121,7 +147,7 @@ final class TurboMigrationTests: XCTestCase {
     func testTargetMissingOnWiFiDownloadsThenSwitches() {
         var device = a14(active: turbo, downloaded: [turbo])
 
-        XCTAssertEqual(device.run(), [.started, .pendingDownload, .switched, .done])
+        XCTAssertEqual(device.runAndLoad(), [.started, .pendingDownload, .waitingForLoad, .switched, .done])
         XCTAssertEqual(device.active, parakeet)
         XCTAssertEqual(device.downloaded, [parakeet])
         XCTAssertEqual(device.notices, [.pending(to: parakeet)])
@@ -141,7 +167,7 @@ final class TurboMigrationTests: XCTestCase {
 
         // Back on Wi-Fi: the download runs and the switch follows.
         device.onWiFi = true
-        XCTAssertEqual(device.run(), [.pendingDownload, .switched, .done])
+        XCTAssertEqual(device.runAndLoad(), [.pendingDownload, .waitingForLoad, .switched, .done])
         XCTAssertEqual(device.active, parakeet)
         XCTAssertEqual(device.notices.count, 1)
     }
@@ -156,7 +182,7 @@ final class TurboMigrationTests: XCTestCase {
         XCTAssertEqual(device.phase, .started)
 
         device.downloadFails = false
-        XCTAssertEqual(device.run(), [.pendingDownload, .switched, .done])
+        XCTAssertEqual(device.runAndLoad(), [.pendingDownload, .waitingForLoad, .switched, .done])
         XCTAssertEqual(device.active, parakeet)
     }
 
@@ -169,7 +195,7 @@ final class TurboMigrationTests: XCTestCase {
                     var device = a14(active: turbo, downloaded: targetDownloaded ? [turbo, parakeet] : [turbo])
                     device.onWiFi = onWiFi
                     device.downloadFails = downloadFails
-                    device.run()
+                    device.runAndLoad()
                     let deleted = device.log.contains { action in
                         if case .deleteModels(let ids) = action { return !ids.isEmpty }
                         return false
@@ -203,7 +229,7 @@ final class TurboMigrationTests: XCTestCase {
         device.run()
 
         device.active = small
-        XCTAssertEqual(device.run(), [.switched, .done])
+        XCTAssertEqual(device.runAndLoad(), [.waitingForLoad, .switched, .done])
         XCTAssertEqual(device.downloaded, [small])
         XCTAssertEqual(device.active, small)
     }
@@ -212,7 +238,7 @@ final class TurboMigrationTests: XCTestCase {
 
     func testNoReplayOnceDone() {
         var device = a14(active: turbo, downloaded: [turbo, parakeet])
-        device.run()
+        device.runAndLoad()
         XCTAssertEqual(device.phase, .done)
         let actionsSoFar = device.log.count
 
@@ -238,7 +264,7 @@ final class TurboMigrationTests: XCTestCase {
         device.downloadInFlight = false
         device.downloaded.append(parakeet)
         device.active = parakeet
-        XCTAssertEqual(device.run(), [.switched, .done])
+        XCTAssertEqual(device.runAndLoad(), [.waitingForLoad, .switched, .done])
         XCTAssertEqual(device.downloaded, [parakeet])
         XCTAssertTrue(device.notices.isEmpty, "the notice was the first process's")
     }
@@ -263,14 +289,67 @@ final class TurboMigrationTests: XCTestCase {
             var device = a14(active: turbo, downloaded: path.targetDownloaded ? [turbo, parakeet] : [turbo])
             device.onWiFi = path.onWiFi
             device.downloadFails = path.failsFirst
-            device.run()
+            device.runAndLoad()
             device.onWiFi = true
             device.downloadFails = false
-            device.run()
-            device.run()
+            device.runAndLoad()
+            device.runAndLoad()
             XCTAssertEqual(device.phase, .done, "\(path)")
             XCTAssertEqual(device.notices.count, 1, "\(path)")
         }
+    }
+
+    // MARK: - Never under a dictation, never before the target has loaded
+
+    func testADictationHoldsTheSwitchAndTheDeletion() {
+        var device = a14(active: turbo, downloaded: [turbo, parakeet])
+        device.idle = false
+
+        XCTAssertEqual(device.run(), [.started, .waitingForIdle])
+        XCTAssertEqual(device.active, turbo, "the engine is not switched under a dictation")
+
+        device.idle = true
+        XCTAssertEqual(device.run(), [.readyToSwitch])
+        device.load()
+        device.idle = false
+        XCTAssertEqual(device.run(), [.waitingForIdle])
+        XCTAssertTrue(device.downloaded.contains(turbo), "no deletion under a dictation")
+
+        device.idle = true
+        XCTAssertEqual(device.run(), [.switched, .done])
+        XCTAssertEqual(device.downloaded, [parakeet])
+    }
+
+    func testADownloadThatLandsDuringADictationDeletesNothingUntilItEnds() {
+        var device = a14(active: turbo, downloaded: [turbo])
+        device.run()
+        // The download finished and ModelManager adopted the target while a dictation ran.
+        device.idle = false
+        device.load()
+        XCTAssertEqual(device.run(), [.waitingForIdle])
+        XCTAssertTrue(device.downloaded.contains(turbo))
+    }
+
+    func testATargetThatNeverLoadsKeepsTurboOnTheDevice() {
+        var device = a14(active: turbo, downloaded: [turbo, parakeet])
+        device.run()
+        device.run()
+        device.run()
+
+        XCTAssertEqual(device.active, parakeet)
+        XCTAssertTrue(device.downloaded.contains(turbo))
+        XCTAssertEqual(device.phase, .started, "the migration stays open until the target loads")
+    }
+
+    // MARK: - The persisted notice
+
+    func testNoticeSurvivesARoundTripThroughItsStoredValue() {
+        for notice in [TurboMigration.Notice.switched(to: parakeet), .pending(to: small)] {
+            XCTAssertEqual(TurboMigration.Notice(storedValue: notice.storedValue), notice)
+        }
+        XCTAssertNil(TurboMigration.Notice(storedValue: ""))
+        XCTAssertNil(TurboMigration.Notice(storedValue: "switched:"))
+        XCTAssertNil(TurboMigration.Notice(storedValue: "other:\(parakeet)"))
     }
 
     // MARK: - The target
