@@ -95,6 +95,30 @@ final class InterruptionResumeTests: XCTestCase {
         XCTAssertTrue(lines(named: "warmStateRestored").first?.contains("liveActivity=skippedForeground") ?? false)
     }
 
+    /// The device case of 2026-10-25: a dictation left the engine in #430 standby (running,
+    /// input muted, release armed), and the call's I/O stop reached `isRunning` before
+    /// `.began` reached the handler. The first version read that as cold.
+    func testMutedStandbyWhoseIOTheCallStoppedFirstIsResumedMuted() {
+        engine.enterStandby(idleSince: start, interval: tenMinutes)
+        XCTAssertTrue(engine.inputMuted)
+        clock = start.addingTimeInterval(60)
+        engine.running = false
+
+        recovery.began(target: engine)
+        XCTAssertEqual(recovery.interrupted, .standby(idleSince: start, interval: tenMinutes))
+        clock = clock.addingTimeInterval(15)
+        let restored = recovery.ended(shouldResume: true, appIsActive: false, appState: "2", target: engine)
+
+        XCTAssertTrue(restored)
+        XCTAssertTrue(engine.isEngineRunning)
+        XCTAssertTrue(engine.inputMuted)
+        XCTAssertTrue(engine.liveActivityShown)
+        XCTAssertEqual(engine.armedIdleSince, start)
+        XCTAssertEqual(engine.armedInterval, tenMinutes)
+        XCTAssertEqual(lines(named: "engineWarmUpSkipped"), [])
+        XCTAssertEqual(lines(named: "audioInterruptionEnded"), ["shouldResume=true restored=true"])
+    }
+
     // MARK: 3. ended without shouldResume
 
     func testEndedWithoutShouldResumeRestartsNothing() {
@@ -204,6 +228,18 @@ final class InterruptionResumeTests: XCTestCase {
         XCTAssertEqual(lines(named: "engineWarmUpSkipped"), ["context=interruptionResume reason=wasRecording"])
     }
 
+    func testEngineReleasedBeforeTheCallStaysCold() {
+        engine.enterStandby(idleSince: start, interval: tenMinutes)
+        engine.releaseWarmState()
+        recovery.began(target: engine)
+
+        let restored = recovery.ended(shouldResume: true, appIsActive: false, appState: "2", target: engine)
+
+        XCTAssertFalse(restored)
+        XCTAssertFalse(engine.isEngineRunning)
+        XCTAssertEqual(lines(named: "engineWarmUpSkipped"), ["context=interruptionResume reason=wasCold"])
+    }
+
     func testEndedWithoutABeganIsTreatedAsCold() {
         let restored = recovery.ended(shouldResume: true, appIsActive: false, appState: "2", target: engine)
 
@@ -250,6 +286,16 @@ private final class FakeEngine: InterruptionResumeTarget {
     var muteSucceeds = true
     private(set) var calls: [String] = []
 
+    /// The idle release ran: engine stopped by us, nothing armed.
+    func releaseWarmState() {
+        running = false
+        inputMuted = false
+        sessionActive = false
+        liveActivityShown = false
+        armedIdleSince = nil
+        armedInterval = nil
+    }
+
     func enterStandby(idleSince: Date, interval: TimeInterval) {
         running = true
         inputMuted = true
@@ -259,8 +305,9 @@ private final class FakeEngine: InterruptionResumeTarget {
         armedInterval = interval
     }
 
+    /// Same rule as `UnifiedAudioEngine`: our flags, not `running`, which iOS may have
+    /// cleared before `.began` arrives.
     var engineStateForInterruption: InterruptedEngineState {
-        guard running else { return .cold }
         if recording { return .recording }
         guard let armedIdleSince, let armedInterval else { return .cold }
         return .standby(idleSince: armedIdleSince, interval: armedInterval)

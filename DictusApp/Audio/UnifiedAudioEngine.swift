@@ -475,7 +475,9 @@ class UnifiedAudioEngine: ObservableObject {
                 return "\(value)"
             } ?? "unknown"
 
-            PersistentLog.log(.audioInterruptionBegan(reason: reason))
+            // `engineRunning` is what iOS left of the I/O by the time this runs, which is not
+            // what decides a resume (see `engineStateForInterruption`, #353).
+            PersistentLog.log(.audioInterruptionBegan(reason: "\(reason) engineRunning=\(engine.isRunning)"))
             // Reads whether the engine was in standby, then runs `tearDownForInterruption()`.
             interruptionRecovery.began(target: self)
 
@@ -1945,11 +1947,23 @@ extension UnifiedAudioEngine {
 /// DictusCore and tested there, these are the calls they make.
 extension UnifiedAudioEngine: InterruptionResumeTarget {
 
+    /// Read from our own flags, never from `engine.isRunning`.
+    ///
+    /// WHY (#353, device 2026-10-25): the first version started with
+    /// `guard engine.isRunning else { return .cold }`, and on Pierre's iPhone every call
+    /// ended in `engineWarmUpSkipped reason=wasCold` straight after a dictation had left the
+    /// engine in standby. A call takes the I/O hardware and changes its format, and the
+    /// engine stops itself when its I/O does (`AVAudioEngine.h`, configuration change):
+    /// by the time `.began` reaches the main queue, `isRunning` can already be false. It
+    /// describes what iOS did, not the state the interruption found.
+    ///
+    /// The armed idle release is the state we own: it is armed only on entering warm-idle
+    /// (`warmUp`, `collectSamples`), and every path of ours that stops the engine cancels
+    /// it first (`stopEngine`, `deactivateSession`, `forceRestart`, `releaseWarmState`,
+    /// the interruption and media-services teardowns). Armed means we left the engine
+    /// running muted, whatever iOS has done to its I/O since; not armed means cold.
     var engineStateForInterruption: InterruptedEngineState {
-        guard engine.isRunning else { return .cold }
         if isRecording { return .recording }
-        // Standby is the warm-idle state with its release armed. A running engine with
-        // nothing armed is not one the 10-minute window bounds, so it is not resumed.
         guard idleReleaseWorkItem != nil, let idleSince = lastIdleStartTime else { return .cold }
         return .standby(idleSince: idleSince, interval: armedIdleReleaseInterval)
     }

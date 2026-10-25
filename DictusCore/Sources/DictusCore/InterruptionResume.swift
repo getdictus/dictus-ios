@@ -8,7 +8,9 @@ import Foundation
 /// What the engine was doing at the moment an interruption began, read before the
 /// `.began` teardown erases it.
 public enum InterruptedEngineState: Equatable, Sendable {
-    /// The engine was not running: nothing warm to bring back.
+    /// Nothing of ours left the engine warm (no idle release armed): nothing to bring back.
+    /// Not read from `AVAudioEngine.isRunning`, which a call can clear before `.began`
+    /// is delivered (#353, device 2026-10-25).
     case cold
     /// A dictation was capturing. The interruption fails it, as before #353, and a
     /// resume must never restart a recording behind the user's back.
@@ -74,7 +76,7 @@ public enum InterruptionResumePolicy {
 /// tests pass a fake.
 @MainActor
 public protocol InterruptionResumeTarget: AnyObject {
-    /// The engine's state right now, read at `.began` before any teardown.
+    /// The state our code left the engine in, read at `.began` before any teardown.
     var engineStateForInterruption: InterruptedEngineState { get }
     var isEngineRunning: Bool { get }
     /// The `.began` teardown: stop the engine, drop the idle release, tell the Live
