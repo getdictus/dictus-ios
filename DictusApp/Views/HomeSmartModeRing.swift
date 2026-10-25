@@ -37,12 +37,18 @@ enum HomeSmartModeRingStyle {
 
     // MARK: Segments
 
-    /// The constant gap, in points, drawn between two neighbouring segments. Drawn only:
+    /// The constant gap, in points, drawn between two neighbouring segments, measured
+    /// perpendicular to their facing edges (the same at every radius). Drawn only:
     /// the selection has no gap (`SmartModeRingLayout.entryIndex(at:)`).
     static let segmentGap: CGFloat = 4
 
-    /// How round a segment's four corners are.
-    static let segmentCornerRadius: CGFloat = 10
+    /// How round a segment's corners are, as a share of fully round (half the band's
+    /// thickness). `SmartModeRingLayout.fittedCornerRadius` turns it into points and
+    /// clamps it so narrow segments (four rows on an iPhone SE) stay valid.
+    static let segmentRoundness: CGFloat = 0.9
+
+    /// Space kept between a label and its segment's sides.
+    static let labelPadding: CGFloat = 6
 
     static let labelMaximumWidth: CGFloat = 96
 
@@ -235,7 +241,9 @@ struct HomeSmartModeRing: View {
         let isLit = session.highlightedIndex == index
         let isSelectable = session.isSelectable(index)
         let outline = session.layout.segmentOutline(
-            ofEntry: index, gap: Style.segmentGap, cornerRadius: Style.segmentCornerRadius
+            ofEntry: index,
+            gap: Style.segmentGap,
+            cornerRadius: session.layout.fittedCornerRadius(gap: Style.segmentGap, roundness: Style.segmentRoundness)
         )
         let fill = isLit ? Color.dictusAccent : Color.dictusSurface.opacity(isSelectable ? 1 : 0.7)
         let center = session.layout.labelCenter(ofEntry: index)
@@ -254,7 +262,7 @@ struct HomeSmartModeRing: View {
 
             label(entry, isLit: isLit, isSelectable: isSelectable)
                 .frame(width: session.layout.labelWidth(
-                    gap: Style.segmentGap, cornerRadius: Style.segmentCornerRadius, maximum: Style.labelMaximumWidth
+                    gap: Style.segmentGap, padding: Style.labelPadding, maximum: Style.labelMaximumWidth
                 ))
                 .offset(x: center.x, y: center.y)
         }

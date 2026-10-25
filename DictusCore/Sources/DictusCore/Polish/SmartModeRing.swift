@@ -13,14 +13,13 @@ import Foundation
 /// angle of the arc belongs to exactly one row: a finger on the small gap drawn between
 /// two rows selects the nearer one, never nothing.
 ///
-/// ### Normal nearest the top, the modes alternating outward
+/// ### Normal always last, bottom right
 ///
-/// The finger that long-pressed the mic is on the mic's centre. Normal takes the sector
-/// nearest straight up, the shortest move, and the pinned modes take the next nearest in
-/// the fan's order. A tie goes to the left, so with an odd count Normal is centred and the
-/// modes alternate left then right; with an even count Normal sits just left of the top
-/// and the first mode just right of it. That is the keyboard fan's rule — the nearest row
-/// is the cheapest — bent round an arc.
+/// Normal takes the last sector, at the right end of the arc, whatever the number of
+/// rows: the thumb of a right hand reaches it with the shortest slide, and it is in the
+/// same place every time the dial opens (device feedback, 2026-10-25). The other rows
+/// keep the fan's order and fill the sectors from the left. Row 0 is Normal, as in
+/// `SmartModeFanLayout.entries`.
 ///
 /// ### One function for touching and for drawing
 ///
@@ -103,14 +102,11 @@ public struct SmartModeRingLayout: Equatable, Sendable {
         Self.sweep - (Double(slot) + 0.5) * slotWidth
     }
 
-    /// The sector each row takes, row order in, slot out. See the type's comment.
+    /// The sector each row takes, row order in, slot out: Normal (row 0) in the last
+    /// sector, the other rows from the left in their order. See the type's comment.
     private var slotOfEntry: [Int] {
-        (0..<entryCount).sorted { lhs, rhs in
-            let left = abs(slotCenter(lhs) - 90)
-            let right = abs(slotCenter(rhs) - 90)
-            if abs(left - right) > 1e-9 { return left < right }
-            return lhs < rhs
-        }
+        guard entryCount > 0 else { return [] }
+        return [entryCount - 1] + Array(0..<(entryCount - 1))
     }
 
     /// The sector, numbered from the left end, row `index` sits in.
@@ -161,10 +157,46 @@ public struct SmartModeRingLayout: Equatable, Sendable {
     }
 
     /// The width a row's label may take: the chord of its segment at the label's radius,
-    /// less the gap and the two corners, never more than `maximum`.
-    public func labelWidth(gap: CGFloat, cornerRadius: CGFloat, maximum: CGFloat) -> CGFloat {
+    /// less the gap and `padding` on each side, never more than `maximum`.
+    ///
+    /// Measured at mid-radius because that is where a segment is widest once its corners
+    /// are nearly fully round: the corner circles are centred close to that radius.
+    public func labelWidth(gap: CGFloat, padding: CGFloat, maximum: CGFloat) -> CGFloat {
         let chord = 2 * labelRadius * CGFloat(sin(slotWidth * .pi / 360))
-        return max(0, min(maximum, chord - gap - 2 * cornerRadius))
+        return max(0, min(maximum, chord - gap - 2 * padding))
+    }
+
+    /// The band's radial thickness.
+    public var thickness: CGFloat { outerRadius - innerRadius }
+
+    /// The largest corner radius a segment can take with `gap` between segments without
+    /// its outline folding over itself.
+    ///
+    /// Three limits, the smallest wins:
+    ///
+    /// - **Half the thickness.** An outer and an inner corner share each radial edge; at
+    ///   half the thickness they meet and the edge has zero length (fully round ends).
+    /// - **The inner arc.** The two inner corners must not cross: each is a circle of
+    ///   radius `c` centred at `innerRadius + c`, `gap / 2 + c` from its edge, so they
+    ///   meet when `gap / 2 + c = (innerRadius + c) · sin(slot / 2)`, i.e.
+    ///   `c ≤ (innerRadius · sin(slot / 2) − gap / 2) / (1 − sin(slot / 2))`.
+    /// - **The outer arc**, the same way with centres at `outerRadius − c`:
+    ///   `c ≤ (outerRadius · sin(slot / 2) − gap / 2) / (1 + sin(slot / 2))`.
+    ///
+    /// Half a point is kept back from each so the arcs between corners never vanish.
+    public func maximumCornerRadius(gap: CGFloat) -> CGFloat {
+        let half = Double(gap) / 2
+        let sine = sin(slotWidth * .pi / 360)
+        let byThickness = Double(thickness) / 2
+        let byInner = sine < 1 ? (Double(innerRadius) * sine - half) / (1 - sine) : byThickness
+        let byOuter = (Double(outerRadius) * sine - half) / (1 + sine)
+        return CGFloat(max(0, min(byThickness, byInner, byOuter) - 0.5))
+    }
+
+    /// The corner radius for segments `roundness` of fully round (1 = half the thickness),
+    /// clamped to `maximumCornerRadius(gap:)`.
+    public func fittedCornerRadius(gap: CGFloat, roundness: CGFloat) -> CGFloat {
+        min(thickness / 2 * max(0, min(1, roundness)), maximumCornerRadius(gap: gap))
     }
 
     /// The outline of row `index`'s band segment, relative to the mic's centre, y down.
@@ -172,11 +204,13 @@ public struct SmartModeRingLayout: Equatable, Sendable {
     /// A segment is the annulus between `innerRadius` and `outerRadius` over the row's
     /// sector, with two changes:
     ///
-    /// - **A constant gap.** Each radial edge is the sector's edge moved `gap / 2` into
-    ///   the segment, parallel to it, so two neighbours are separated by `gap` points at
-    ///   every radius (an angular inset would widen toward the outside).
+    /// - **A constant gap, in points.** Each radial edge is the sector's edge moved
+    ///   `gap / 2` into the segment, parallel to it. Two neighbours' facing edges are then
+    ///   `gap` points apart, measured perpendicular to them, at every radius — the chord
+    ///   across the gap, not an angle (an angular inset would widen toward the outside).
     /// - **Rounded corners.** Each of the four corners is a circle of `cornerRadius`
     ///   tangent to its edge and to its arc: inside the outer arc, outside the inner one.
+    ///   `cornerRadius` is clamped to `maximumCornerRadius(gap:)`.
     ///
     /// The arcs and corners are sampled every `stepDegrees`, so the outline is a closed
     /// polygon the view fills as is. Every point lies inside the sector, between the
@@ -187,7 +221,7 @@ public struct SmartModeRingLayout: Equatable, Sendable {
                                stepDegrees: Double = 1) -> [CGPoint] {
         let range = angleRange(ofEntry: index)
         let half = Double(gap) / 2
-        let corner = Double(max(0, min(cornerRadius, (outerRadius - innerRadius) / 2 - 0.5)))
+        let corner = Double(max(0, min(cornerRadius, maximumCornerRadius(gap: gap))))
         let outer = Double(outerRadius)
         let inner = Double(innerRadius)
 
