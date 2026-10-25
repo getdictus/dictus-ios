@@ -70,6 +70,7 @@
 		AA423004 /* SmartModeDisplayName.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA423003 /* SmartModeDisplayName.swift */; };
 		AA423002 /* SmartModeDisplayName.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA423001 /* SmartModeDisplayName.swift */; };
 		AA000050 /* ModelManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100050 /* ModelManager.swift */; };
+		AA000660 /* TurboMigrationRunner.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100660 /* TurboMigrationRunner.swift */; };
 		AA000052 /* ModelRepoDownloader.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100052 /* ModelRepoDownloader.swift */; };
 		AA055801 /* ParakeetCacheRepair.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA155801 /* ParakeetCacheRepair.swift */; };
 		AA055803 /* NemotronEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA155803 /* NemotronEngine.swift */; };
@@ -309,6 +310,7 @@
 		AA100201 /* ObjCExceptionCatcher.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ObjCExceptionCatcher.h; sourceTree = "<group>"; };
 		AA100202 /* DictusApp-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "DictusApp-Bridging-Header.h"; sourceTree = "<group>"; };
 		AA100050 /* ModelManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelManager.swift; sourceTree = "<group>"; };
+		AA100660 /* TurboMigrationRunner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TurboMigrationRunner.swift; sourceTree = "<group>"; };
 		AA100052 /* ModelRepoDownloader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelRepoDownloader.swift; sourceTree = "<group>"; };
 		AA155801 /* ParakeetCacheRepair.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParakeetCacheRepair.swift; sourceTree = "<group>"; };
 		AA155803 /* NemotronEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NemotronEngine.swift; sourceTree = "<group>"; };
@@ -761,6 +763,7 @@
 			isa = PBXGroup;
 			children = (
 				AA100050 /* ModelManager.swift */,
+				AA100660 /* TurboMigrationRunner.swift */,
 				AA100052 /* ModelRepoDownloader.swift */,
 				AA155801 /* ParakeetCacheRepair.swift */,
 				AA155804 /* FluidAudioDownloadRoute.swift */,
@@ -1318,6 +1321,7 @@
 				AA0003B0 /* DictationFailureMessage.swift in Sources */,
 				AA000043 /* RecordingView.swift in Sources */,
 				AA000050 /* ModelManager.swift in Sources */,
+				AA000660 /* TurboMigrationRunner.swift in Sources */,
 				AA000052 /* ModelRepoDownloader.swift in Sources */,
 				AA055801 /* ParakeetCacheRepair.swift in Sources */,
 				AA055803 /* NemotronEngine.swift in Sources */,
