@@ -119,6 +119,9 @@ public struct AnimatedMicButton: View {
     @State private var showSuccessFlash: Bool = false
     @State private var previousStatus: DictationStatus = .idle
 
+    /// Reduce Motion stills the idle glow, as `animatesIdleGlow == false` does (#489).
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
     /// Circle mode: 72pt diameter. Pill mode: 56x36 capsule for keyboard toolbar.
     private var buttonWidth: CGFloat { isPill ? 56 : 72 }
     private var buttonHeight: CGFloat { isPill ? 36 : 72 }
@@ -201,6 +204,10 @@ public struct AnimatedMicButton: View {
         .onChange(of: status) { newStatus in
             handleStatusChange(from: previousStatus, to: newStatus)
             previousStatus = newStatus
+        }
+        .onChange(of: reduceMotion) { _ in
+            guard isTappable else { return }
+            startIdleAnimation()
         }
         .onAppear {
             startIdleAnimation()
@@ -362,13 +369,16 @@ public struct AnimatedMicButton: View {
     private func startIdleAnimation() {
         pulseScale = 1.0
 
-        guard animatesIdleGlow else {
+        guard animatesIdleGlow, !reduceMotion else {
             // 0.45 is the midpoint of the 0.3-0.6 range the animation sweeps, so the
             // static ring reads as the average of what was breathing there rather than
             // as either extreme -- neither a glow that looks extinguished nor one stuck
             // at its peak. Assigned outside `withAnimation` on purpose: the whole point
-            // is that Core Animation is left with nothing live to composite (#510).
-            glowOpacity = 0.45
+            // is that Core Animation is left with nothing live to composite (#510). The
+            // transaction also stops a glow already breathing when Reduce Motion turns on.
+            var still = Transaction()
+            still.disablesAnimations = true
+            withTransaction(still) { glowOpacity = 0.45 }
             return
         }
 

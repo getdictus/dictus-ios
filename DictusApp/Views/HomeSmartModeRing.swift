@@ -21,30 +21,38 @@ enum HomeSmartModeRingStyle {
     static let blursBackdrop = true
 
     /// Show "Release to dictate…" under the mic while the ring is open. Also where an
-    /// unavailable mode says why, so with this off a greyed bean says nothing more.
+    /// unavailable mode says why, so with this off a greyed segment says nothing more.
     static let showsReleaseHint = true
 
     // MARK: Backdrop
 
     static let backdropBlurRadius: CGFloat = 14
 
-    /// A wash of the screen's own background over the blur, so the beans stand out in
+    /// A wash of the screen's own background over the blur, so the segments stand out in
     /// both appearances.
     static let backdropWashOpacity: Double = 0.25
 
     /// With Reduce Transparency there is no blur: the wash becomes nearly opaque.
     static let reducedTransparencyWashOpacity: Double = 0.9
 
-    // MARK: Beans
+    // MARK: Segments
 
-    /// The empty angle between two neighbouring beans. Drawn only: the selection has no
-    /// gap (`SmartModeRingLayout.entryIndex(at:)`).
-    static let beanGapDegrees: Double = 2.5
+    /// The constant gap, in points, drawn between two neighbouring segments. Drawn only:
+    /// the selection has no gap (`SmartModeRingLayout.entryIndex(at:)`).
+    static let segmentGap: CGFloat = 4
 
-    static let labelMaximumWidth: CGFloat = 78
+    /// How round a segment's four corners are.
+    static let segmentCornerRadius: CGFloat = 10
 
-    /// The accent hairline around an unlit bean.
-    static let beanEdgeOpacity: Double = 0.35
+    static let labelMaximumWidth: CGFloat = 96
+
+    /// The accent hairline around an unlit segment, so a dark segment still reads on the
+    /// blurred dark dashboard.
+    static let segmentEdgeOpacity: Double = 0.35
+
+    /// The room the band leaves above itself, below whatever is at the top of the Home
+    /// screen, when it is sized (`SmartModeRingLayout.radii`).
+    static let topClearance: CGFloat = 12
 
     // MARK: Motion
 
@@ -52,11 +60,12 @@ enum HomeSmartModeRingStyle {
     /// mic's centre, so nothing moves and the recording screen's alignment (#788) holds.
     static let openMicScale: CGFloat = 1.12
 
-    /// The beans' spring as they come out of the mic, and their stagger: each row starts
-    /// `beanStagger` after the one nearer the top.
-    static let beanSpring = Animation.spring(response: 0.34, dampingFraction: 0.72)
-    static let beanStagger: Double = 0.035
-    static let beanHiddenScale: CGFloat = 0.55
+    /// The segments' spring as they come out of the mic, and their cascade: each row
+    /// starts `segmentStagger` after the one nearer the top, so the band opens from the
+    /// centre outward.
+    static let segmentSpring = Animation.spring(response: 0.36, dampingFraction: 0.74)
+    static let segmentStagger: Double = 0.045
+    static let segmentHiddenScale: CGFloat = 0.6
 
     /// The mic's grow and the dial's close.
     static let micSpring = Animation.spring(response: 0.3, dampingFraction: 0.68)
@@ -189,7 +198,8 @@ private struct RestArrowShape: Shape {
 
 // MARK: - The ring
 
-/// The half-ring of mode "beans", centred on the mic and drawn behind it.
+/// The half-circle band of modes, centred on the mic and drawn behind it: one band split
+/// into a segment per row.
 ///
 /// It is a background of the mic and owns no layout: the mic stays exactly where #788
 /// put it, which is where the recording screen draws its own button. It takes no touches
@@ -201,101 +211,99 @@ struct HomeSmartModeRing: View {
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
-    /// False on the first frame, so the beans spring out of the mic.
+    /// False on the first frame, so the segments spring out of the mic.
     @State private var appeared = false
 
-    private typealias Layout = SmartModeRingLayout
     private typealias Style = HomeSmartModeRingStyle
 
-    private static var diameter: CGFloat { Layout.outerRadius * 2 }
+    private var diameter: CGFloat { session.layout.outerRadius * 2 }
 
     var body: some View {
         ZStack {
             ForEach(Array(session.entries.enumerated()), id: \.element.id) { index, entry in
-                bean(index: index, entry: entry)
+                segment(index: index, entry: entry)
             }
         }
-        .frame(width: Self.diameter, height: Self.diameter)
+        .frame(width: diameter, height: diameter)
         .allowsHitTesting(false)
         .accessibilityHidden(true)
         .accessibilityIdentifier("home.smartModeRing")
         .onAppear { appeared = true }
     }
 
-    private func bean(index: Int, entry: SmartModeFanEntry) -> some View {
+    private func segment(index: Int, entry: SmartModeFanEntry) -> some View {
         let isLit = session.highlightedIndex == index
         let isSelectable = session.isSelectable(index)
-        let arc = session.layout.beanArc(ofEntry: index, gapDegrees: Style.beanGapDegrees)
+        let outline = session.layout.segmentOutline(
+            ofEntry: index, gap: Style.segmentGap, cornerRadius: Style.segmentCornerRadius
+        )
         let fill = isLit ? Color.dictusAccent : Color.dictusSurface.opacity(isSelectable ? 1 : 0.7)
         let center = session.layout.labelCenter(ofEntry: index)
         // Rows nearer the top come out first: index order is nearness order.
         let entrance = reduceMotion
             ? Style.reducedMotionFade
-            : Style.beanSpring.delay(Double(index) * Style.beanStagger)
+            : Style.segmentSpring.delay(Double(index) * Style.segmentStagger)
         return ZStack {
-            // A hairline of accent under the bean, the first version's ring edge, so a
-            // dark bean still reads on the blurred dark dashboard.
-            BeanShape(arc: arc)
-                .stroke(Color.dictusAccent.opacity(isLit ? 0 : Style.beanEdgeOpacity), style: StrokeStyle(
-                    lineWidth: Layout.beanThickness + 2, lineCap: .round, lineJoin: .round
-                ))
-            BeanShape(arc: arc)
-                .stroke(fill, style: StrokeStyle(
-                    lineWidth: Layout.beanThickness, lineCap: .round, lineJoin: .round
-                ))
+            SegmentShape(outline: outline)
+                .fill(fill)
+                .overlay(
+                    SegmentShape(outline: outline)
+                        .stroke(Color.dictusAccent.opacity(isLit ? 0 : Style.segmentEdgeOpacity), lineWidth: 1)
+                )
                 .shadow(color: isLit ? .dictusAccent.opacity(0.45) : .black.opacity(0.16), radius: isLit ? 12 : 8)
 
             label(entry, isLit: isLit, isSelectable: isSelectable)
                 .frame(width: session.layout.labelWidth(
-                    gapDegrees: Style.beanGapDegrees, maximum: Style.labelMaximumWidth
+                    gap: Style.segmentGap, cornerRadius: Style.segmentCornerRadius, maximum: Style.labelMaximumWidth
                 ))
                 .offset(x: center.x, y: center.y)
         }
-        .scaleEffect(appeared || reduceMotion ? 1 : Style.beanHiddenScale)
+        .scaleEffect(appeared || reduceMotion ? 1 : Style.segmentHiddenScale)
         .opacity(appeared ? 1 : 0)
         .animation(entrance, value: appeared)
         .animation(.easeOut(duration: 0.12), value: isLit)
     }
 
-    /// An icon and the fan's short name, with the fan's `PRO` / `Off` tag under it.
+    /// An icon and the fan's short name, with the fan's `PRO` / `Off` tag under it, on one
+    /// line each.
     private func label(_ entry: SmartModeFanEntry, isLit: Bool, isSelectable: Bool) -> some View {
-        VStack(spacing: 2) {
+        VStack(spacing: 3) {
             Image(systemName: entry.icon)
-                .font(.system(size: 16, weight: .medium))
+                .font(.system(size: 18, weight: .medium))
             Text(HomeSmartModeCopy.shortName(of: entry))
-                .font(.system(size: 12, weight: isLit ? .bold : .semibold))
+                .font(.system(size: 14, weight: isLit ? .bold : .semibold))
                 .lineLimit(1)
                 .minimumScaleFactor(0.6)
             if let tag = HomeSmartModeCopy.tagLabel(session.picker.tag(for: entry)) {
                 Text(tag)
-                    .font(.system(size: 8, weight: .bold))
+                    .font(.system(size: 9, weight: .bold))
                     .textCase(.uppercase)
+                    .lineLimit(1)
                     .opacity(0.8)
             }
         }
         .foregroundColor(isLit ? .white : .primary)
         .opacity(isSelectable ? 1 : 0.35)
-        // The ring's labels stay at one size: the dial is a 240 pt object around a 92 pt
-        // mic and cannot grow with Dynamic Type without covering the cards. VoiceOver's
-        // actions, which follow the user's text size, carry the same choices.
+        // The ring's labels stay at one size: the band already spans most of the screen's
+        // width and cannot grow with Dynamic Type. VoiceOver's actions, which follow the
+        // user's text size, carry the same choices.
         .dynamicTypeSize(.large)
     }
 }
 
-/// A bean's centre line from `SmartModeRingLayout.beanArc`, placed on the ring's centre.
-/// Stroked by the caller `beanThickness` wide with round caps, which makes the bean.
-private struct BeanShape: Shape {
+/// A closed outline from `SmartModeRingLayout.segmentOutline`, placed on the ring's
+/// centre: a band segment with rounded corners, filled as is.
+private struct SegmentShape: Shape {
 
-    let arc: [CGPoint]
+    let outline: [CGPoint]
 
     func path(in rect: CGRect) -> Path {
         var path = Path()
-        guard let first = arc.first else { return path }
+        guard let first = outline.first else { return path }
         let origin = CGPoint(x: rect.midX, y: rect.midY)
         path.move(to: CGPoint(x: origin.x + first.x, y: origin.y + first.y))
-        // A one-point arc still needs a segment for its round caps to draw a disc.
-        let rest = arc.count > 1 ? Array(arc.dropFirst()) : [first]
-        rest.forEach { path.addLine(to: CGPoint(x: origin.x + $0.x, y: origin.y + $0.y)) }
+        outline.dropFirst().forEach { path.addLine(to: CGPoint(x: origin.x + $0.x, y: origin.y + $0.y)) }
+        path.closeSubpath()
         return path
     }
 }

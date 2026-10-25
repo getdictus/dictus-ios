@@ -150,37 +150,45 @@ final class SmartModeRingTests: XCTestCase {
         XCTAssertNil(ring.targetEntry)
     }
 
-    /// A finger that slid past the ring's outer edge still points along its sector.
-    func testFarPastTheRingStillPointsAlongTheSector() throws {
+    /// A little past the band's outer edge still points at the segment; well past it,
+    /// nothing, and lifting there cancels.
+    func testTheRadialHitRangeEndsABitPastTheBand() throws {
         var ring = try session(pinned: [try mode(english)])
-        ring.move(to: onRow(ring, try index(ring, english), distance: 400))
+        let row = try index(ring, english)
+        let outer = Double(ring.layout.outerRadius)
+
+        ring.move(to: onRow(ring, row, distance: Double(SmartModeRingLayout.micRadius) + 2))
         XCTAssertEqual(ring.targetEntry?.id, english)
+        ring.move(to: onRow(ring, row, distance: outer + Double(SmartModeRingLayout.outerSlack) - 2))
+        XCTAssertEqual(ring.targetEntry?.id, english)
+        ring.move(to: onRow(ring, row, distance: outer + Double(SmartModeRingLayout.outerSlack) + 30))
+        XCTAssertNil(ring.targetEntry)
+        XCTAssertEqual(ring.commit(), .cancel)
     }
 
     // MARK: - What is drawn
 
-    /// The drawn bean comes from the same sector as the selection: its centre line,
-    /// stroked with round caps of half the bean's thickness, stays inside the sector minus
-    /// half the gap at each end. So two neighbours never overlap, and the gap between them
-    /// is only drawn: the selection has none.
-    func testEachBeanIsDrawnInsideItsOwnSector() {
-        let gap = 2.5
-        let cap = Double(SmartModeRingLayout.beanThickness / 2)
+    private let gap: CGFloat = 4
+    private let corner: CGFloat = 10
+
+    /// Each drawn segment lies over its own sector, between the band's radii, and at
+    /// least half the gap from both of the sector's edges at every radius: neighbours are
+    /// separated by a constant gap and never overlap.
+    func testEachSegmentIsDrawnInsideItsOwnSectorWithAConstantGap() {
         for count in 2...4 {
-            let layout = SmartModeRingLayout(entryCount: count)
+            let layout = SmartModeRingLayout(entryCount: count, innerRadius: 62, outerRadius: 160)
             for index in 0..<count {
                 let range = layout.angleRange(ofEntry: index)
-                let arc = layout.beanArc(ofEntry: index, gapDegrees: gap)
-                XCTAssertFalse(arc.isEmpty)
-                for point in arc {
-                    let radius = Double((point.x * point.x + point.y * point.y).squareRoot())
-                    XCTAssertEqual(radius, Double(SmartModeRingLayout.beanRadius), accuracy: 0.01)
-                    // A round cap reaches `cap` from the line in every direction: it must
-                    // not cross either limit ray.
-                    for edge in [range.lowerBound + gap / 2, range.upperBound - gap / 2] {
+                let outline = layout.segmentOutline(ofEntry: index, gap: gap, cornerRadius: corner)
+                XCTAssertGreaterThan(outline.count, 8)
+                for point in outline {
+                    let radius = (point.x * point.x + point.y * point.y).squareRoot()
+                    XCTAssertGreaterThanOrEqual(radius + 0.01, layout.innerRadius)
+                    XCTAssertLessThanOrEqual(radius - 0.01, layout.outerRadius)
+                    for edge in [range.lowerBound, range.upperBound] {
                         let radians = edge * .pi / 180
                         let distance = abs(Double(point.x) * sin(radians) + Double(point.y) * cos(radians))
-                        XCTAssertGreaterThanOrEqual(distance + 0.01, cap, "count \(count) row \(index)")
+                        XCTAssertGreaterThanOrEqual(distance + 0.01, Double(gap) / 2, "count \(count) row \(index)")
                     }
                     let degrees = atan2(Double(-point.y), Double(point.x)) * 180 / .pi
                     XCTAssertTrue(range.contains(degrees), "count \(count) row \(index) at \(degrees)°")
@@ -189,20 +197,77 @@ final class SmartModeRingTests: XCTestCase {
         }
     }
 
-    /// The beans are centred in their sectors, so the drawing is spread along the whole
-    /// half-circle: the leftmost bean's centre is in the left end sector and the rightmost
-    /// in the right one.
-    func testTheBeansSpreadAcrossTheWholeArc() {
+    /// The segments are band pieces, not bubbles: each reaches both radii, its straight
+    /// edges run the band's full thickness bar the corners, and together they span the
+    /// half-circle from left to right with only the gaps missing.
+    func testTheSegmentsFormOneContinuousBand() {
         for count in 2...4 {
-            let layout = SmartModeRingLayout(entryCount: count)
-            let centres = (0..<count).map { index -> Double in
-                let arc = layout.beanArc(ofEntry: index, gapDegrees: 2.5)
-                let mid = arc[arc.count / 2]
-                return atan2(Double(-mid.y), Double(mid.x)) * 180 / .pi
-            }.sorted()
-            XCTAssertEqual(centres.first ?? -1, 90 / Double(count), accuracy: 0.6, "count \(count)")
-            XCTAssertEqual(centres.last ?? -1, 180 - 90 / Double(count), accuracy: 0.6, "count \(count)")
+            let layout = SmartModeRingLayout(entryCount: count, innerRadius: 62, outerRadius: 160)
+            var lowest = 180.0
+            var highest = 0.0
+            for index in 0..<count {
+                let outline = layout.segmentOutline(ofEntry: index, gap: gap, cornerRadius: corner)
+                let radii = outline.map { Double(($0.x * $0.x + $0.y * $0.y).squareRoot()) }
+                XCTAssertEqual(radii.min() ?? 0, Double(layout.innerRadius), accuracy: 0.5)
+                XCTAssertEqual(radii.max() ?? 0, Double(layout.outerRadius), accuracy: 0.5)
+                let angles = outline.map { atan2(Double(-$0.y), Double($0.x)) * 180 / .pi }
+                lowest = min(lowest, angles.min() ?? 180)
+                highest = max(highest, angles.max() ?? 0)
+                // The outer arc covers the sector less the gap and the corners, nothing
+                // more: the segment is as wide as its share of the half-circle.
+                let range = layout.angleRange(ofEntry: index)
+                let span = (angles.max() ?? 0) - (angles.min() ?? 0)
+                XCTAssertGreaterThan(span, (range.upperBound - range.lowerBound) * 0.9, "count \(count) row \(index)")
+            }
+            // Only half a gap is missing at each end of the half-circle.
+            XCTAssertLessThan(lowest, 2.5, "count \(count)")
+            XCTAssertGreaterThan(highest, 177.5, "count \(count)")
         }
+    }
+
+    /// The corners are rounded with the given radius: no point of the outline sits in the
+    /// sharp corner a square segment would have.
+    func testTheCornersAreRounded() {
+        let layout = SmartModeRingLayout(entryCount: 3, innerRadius: 62, outerRadius: 160)
+        let range = layout.angleRange(ofEntry: 0)
+        let outline = layout.segmentOutline(ofEntry: 0, gap: gap, cornerRadius: corner)
+        // The sharp outer corner: on the outer arc, half a gap from the low edge.
+        let sharpDegrees = range.lowerBound + asin(Double(gap) / 2 / 160) * 180 / .pi
+        let sharp = CGPoint(x: cos(sharpDegrees * .pi / 180) * 160, y: -sin(sharpDegrees * .pi / 180) * 160)
+        let nearest = outline.map { hypot($0.x - sharp.x, $0.y - sharp.y) }.min() ?? 0
+        // A corner of radius r cuts the sharp point by r(√2 − 1) at a right angle.
+        XCTAssertGreaterThan(Double(nearest), Double(corner) * 0.35)
+    }
+
+    /// Labels sit at mid-angle of their sector and mid-radius of the band.
+    func testLabelsAreCentredInTheirSegments() {
+        for count in 2...4 {
+            let layout = SmartModeRingLayout(entryCount: count, innerRadius: 62, outerRadius: 160)
+            for index in 0..<count {
+                let centre = layout.labelCenter(ofEntry: index)
+                XCTAssertEqual(Double(hypot(centre.x, centre.y)), 111, accuracy: 0.01)
+                let degrees = atan2(Double(-centre.y), Double(centre.x)) * 180 / .pi
+                XCTAssertEqual(degrees, layout.centerAngle(ofEntry: index), accuracy: 0.01)
+            }
+        }
+    }
+
+    /// The band is sized from the screen: about three quarters of the width, clamped, and
+    /// never taller than the room above the mic. The inner radius does not move.
+    func testTheRadiiFollowTheScreen() {
+        let proMax = SmartModeRingLayout.radii(width: 430, heightAbove: 600)
+        XCTAssertEqual(proMax.outer, 430 * SmartModeRingLayout.widthShare / 2, accuracy: 0.01)
+        XCTAssertEqual(proMax.inner, SmartModeRingLayout.fittedInnerRadius)
+
+        let se = SmartModeRingLayout.radii(width: 375, heightAbove: 400)
+        XCTAssertEqual(se.outer, 375 * SmartModeRingLayout.widthShare / 2, accuracy: 0.01)
+        XCTAssertLessThan(se.outer, proMax.outer)
+
+        let short = SmartModeRingLayout.radii(width: 430, heightAbove: 100)
+        XCTAssertEqual(short.outer, SmartModeRingLayout.minimumOuterRadius)
+
+        let wide = SmartModeRingLayout.radii(width: 1000, heightAbove: 1000)
+        XCTAssertEqual(wide.outer, SmartModeRingLayout.maximumOuterRadius)
     }
 
     // MARK: - Release

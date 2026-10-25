@@ -24,8 +24,8 @@ import Foundation
 ///
 /// ### One function for touching and for drawing
 ///
-/// `angleRange(ofEntry:)` is the sector a finger selects, and `beanArc(ofEntry:…)` is
-/// the bean the view draws inside that same sector. The view adds no geometry of its
+/// `angleRange(ofEntry:)` is the sector a finger selects, and `segmentOutline(ofEntry:…)`
+/// is the band segment the view draws over that same sector. The view adds no geometry of its
 /// own: it only strokes and fills the outline it is given.
 ///
 /// Angles are in degrees, counter-clockwise from the right-hand horizontal, with the y
@@ -41,28 +41,56 @@ public struct SmartModeRingLayout: Equatable, Sendable {
     /// A thumb sliding to the outermost mode naturally overshoots the horizontal.
     public static let endTolerance: Double = 30
 
-    /// The radius inside which the finger is still on the mic, and points at nothing.
-    /// The mic's halo (`DictusHalo`, 92 pt across).
-    public static let micRadius: CGFloat = 46
+    /// The radius inside which the finger is still on the mic, and points at nothing:
+    /// the halo of the mic grown for the dial (92 pt × `HomeSmartModeRingStyle.openMicScale`).
+    public static let micRadius: CGFloat = 52
 
-    /// The ring's inner and outer radii as drawn. The inner edge clears the halo of the
-    /// mic grown for the dial (`HomeSmartModeRingStyle.openMicScale`); the outer edge
-    /// leaves room for an icon and a short name.
-    public static let innerRadius: CGFloat = 62
+    /// How far past the band's outer edge a finger still points at its segment. Further
+    /// out, it points at nothing and lifting there cancels.
+    public static let outerSlack: CGFloat = 48
 
-    public static let outerRadius: CGFloat = 120
+    /// The band's default radii, for a 390 pt wide screen. On a device, `radii(…)` derives
+    /// them from the room the Home screen has.
+    public static let defaultInnerRadius: CGFloat = 62
+    public static let defaultOuterRadius: CGFloat = 146
 
-    /// The radius a bean's centre line runs along, and the bean's thickness: a bean is
-    /// this arc stroked `beanThickness` wide with round caps.
-    public static var beanRadius: CGFloat { (innerRadius + outerRadius) / 2 }
+    /// The band's inner radius is fixed: a small gap around the grown mic.
+    public static let fittedInnerRadius: CGFloat = 62
 
-    public static var beanThickness: CGFloat { outerRadius - innerRadius }
+    /// The band's outer diameter as a share of the screen's width, and its bounds.
+    public static let widthShare: CGFloat = 0.76
+    public static let minimumOuterRadius: CGFloat = 132
+    public static let maximumOuterRadius: CGFloat = 176
+
+    /// The band's radii for a Home screen `width` points wide, with `heightAbove` points
+    /// between the mic's centre and the top of the area the band may cover.
+    ///
+    /// The outer diameter is `widthShare` of the width, no taller than the room above the
+    /// mic, and clamped to `minimumOuterRadius...maximumOuterRadius`. The inner radius
+    /// stays put, so a smaller screen gets a thinner band rather than a band that crowds
+    /// the mic.
+    public static func radii(width: CGFloat, heightAbove: CGFloat) -> (inner: CGFloat, outer: CGFloat) {
+        let byWidth = width * widthShare / 2
+        let outer = min(maximumOuterRadius, max(minimumOuterRadius, min(byWidth, heightAbove)))
+        return (fittedInnerRadius, outer)
+    }
+
+    /// The band's inner and outer radii as drawn.
+    public let innerRadius: CGFloat
+    public let outerRadius: CGFloat
+
+    /// The radius a row's label is centred on: the middle of the band.
+    public var labelRadius: CGFloat { (innerRadius + outerRadius) / 2 }
 
     /// The number of rows on the ring.
     public let entryCount: Int
 
-    public init(entryCount: Int) {
+    public init(entryCount: Int,
+                innerRadius: CGFloat = SmartModeRingLayout.defaultInnerRadius,
+                outerRadius: CGFloat = SmartModeRingLayout.defaultOuterRadius) {
         self.entryCount = max(0, entryCount)
+        self.innerRadius = innerRadius
+        self.outerRadius = max(outerRadius, innerRadius + 1)
     }
 
     /// The angular width of one row's sector: the half-circle split evenly.
@@ -103,14 +131,13 @@ public struct SmartModeRingLayout: Equatable, Sendable {
     }
 
     /// The row under a finger at `point`, relative to the mic's centre, or nil when the
-    /// finger is still on the mic or well below the arc.
-    ///
-    /// There is no outer limit: a finger that slid past the ring still points along its
-    /// sector, the way a dial keeps turning when the hand drifts off it.
+    /// finger is still on the mic, well below the arc, or well past the band
+    /// (`outerSlack`). The gaps drawn between segments belong to the segments: the
+    /// sectors touch.
     public func entryIndex(at point: CGPoint) -> Int? {
         guard entryCount > 0 else { return nil }
         let distance = (point.x * point.x + point.y * point.y).squareRoot()
-        guard distance > Self.micRadius else { return nil }
+        guard distance > Self.micRadius, distance <= outerRadius + Self.outerSlack else { return nil }
 
         var angle = atan2(Double(-point.y), Double(point.x)) * 180 / .pi
         // Lower-left quadrant reads as just past 180, not as just past -90.
@@ -127,42 +154,95 @@ public struct SmartModeRingLayout: Equatable, Sendable {
         return slotOfEntry.firstIndex(of: slot)
     }
 
-    /// Where a row's icon and name are centred: the middle of its sector, on the bean's
-    /// centre line. Relative to the mic's centre, y down.
+    /// Where a row's icon and name are centred: mid-angle of its sector, mid-radius of
+    /// the band. Relative to the mic's centre, y down.
     public func labelCenter(ofEntry index: Int) -> CGPoint {
-        Self.point(angle: centerAngle(ofEntry: index), radius: Self.beanRadius)
+        Self.point(angle: centerAngle(ofEntry: index), radius: labelRadius)
     }
 
-    /// The width a row's label may take: the chord of its drawn bean on the centre line,
-    /// never more than `maximum`.
-    public func labelWidth(gapDegrees: Double, maximum: CGFloat) -> CGFloat {
-        let chord = 2 * Self.beanRadius * CGFloat(sin((slotWidth - gapDegrees) * .pi / 360))
-        return max(0, min(maximum, chord))
+    /// The width a row's label may take: the chord of its segment at the label's radius,
+    /// less the gap and the two corners, never more than `maximum`.
+    public func labelWidth(gap: CGFloat, cornerRadius: CGFloat, maximum: CGFloat) -> CGFloat {
+        let chord = 2 * labelRadius * CGFloat(sin(slotWidth * .pi / 360))
+        return max(0, min(maximum, chord - gap - 2 * cornerRadius))
     }
 
-    /// The centre line row `index` is drawn along, relative to the mic's centre, y down.
+    /// The outline of row `index`'s band segment, relative to the mic's centre, y down.
     ///
-    /// The drawn row is a "bean": this arc stroked `beanThickness` wide with **round
-    /// caps**. A round cap is a half-disc of radius `beanThickness / 2` past the line's
-    /// end, so the line stops `asin(cap / beanRadius)` short of each end of the sector,
-    /// less `gapDegrees / 2`: the cap then just meets that limit and two neighbours never
-    /// touch. Rows too narrow for a line draw as a single point, which strokes as a disc.
+    /// A segment is the annulus between `innerRadius` and `outerRadius` over the row's
+    /// sector, with two changes:
     ///
-    /// - Parameters:
-    ///   - gapDegrees: the empty angle drawn between two neighbouring beans.
-    ///   - stepDegrees: the sampling of the arc; one degree is smooth at these radii.
-    public func beanArc(ofEntry index: Int,
-                        gapDegrees: Double,
-                        stepDegrees: Double = 1) -> [CGPoint] {
+    /// - **A constant gap.** Each radial edge is the sector's edge moved `gap / 2` into
+    ///   the segment, parallel to it, so two neighbours are separated by `gap` points at
+    ///   every radius (an angular inset would widen toward the outside).
+    /// - **Rounded corners.** Each of the four corners is a circle of `cornerRadius`
+    ///   tangent to its edge and to its arc: inside the outer arc, outside the inner one.
+    ///
+    /// The arcs and corners are sampled every `stepDegrees`, so the outline is a closed
+    /// polygon the view fills as is. Every point lies inside the sector, between the
+    /// radii, and at least `gap / 2` from both of the sector's edges.
+    public func segmentOutline(ofEntry index: Int,
+                               gap: CGFloat,
+                               cornerRadius: CGFloat,
+                               stepDegrees: Double = 1) -> [CGPoint] {
         let range = angleRange(ofEntry: index)
-        let cap = asin(min(1, Double(Self.beanThickness / 2 / Self.beanRadius))) * 180 / .pi
-        var from = range.lowerBound + gapDegrees / 2 + cap
-        var to = range.upperBound - gapDegrees / 2 - cap
-        if from > to { from = (from + to) / 2; to = from }
-        let steps = max(1, Int(((to - from) / stepDegrees).rounded(.up)))
-        return (0...steps).map { step in
-            Self.point(angle: from + (to - from) * Double(step) / Double(steps), radius: Self.beanRadius)
+        let half = Double(gap) / 2
+        let corner = Double(max(0, min(cornerRadius, (outerRadius - innerRadius) / 2 - 0.5)))
+        let outer = Double(outerRadius)
+        let inner = Double(innerRadius)
+
+        typealias Vector = (x: Double, y: Double)
+        func unit(_ degrees: Double) -> Vector {
+            (cos(degrees * .pi / 180), sin(degrees * .pi / 180))
         }
+        func add(_ a: Vector, _ b: Vector, _ k: Double) -> Vector { (a.x + b.x * k, a.y + b.y * k) }
+        func scale(_ a: Vector, _ k: Double) -> Vector { (a.x * k, a.y * k) }
+        func length(_ a: Vector) -> Double { (a.x * a.x + a.y * a.y).squareRoot() }
+        func angle(_ a: Vector) -> Double { atan2(a.y, a.x) * 180 / .pi }
+
+        /// The corner on the edge at `edge`, `inward` pointing into the segment, touching
+        /// the circle of `radius` from inside (outer arc) or outside (inner arc).
+        struct Corner { let center: Vector; let onArc: Vector; let onEdge: Vector }
+        func makeCorner(edge: Double, inward: Double, radius: Double, insideCircle: Bool) -> Corner {
+            let along = unit(edge)
+            let normal = scale(unit(edge + 90), inward)
+            let toCenter = insideCircle ? radius - corner : radius + corner
+            let offset = half + corner
+            let distance = max(0, toCenter * toCenter - offset * offset).squareRoot()
+            let center = add(scale(along, distance), normal, offset)
+            let onArc = scale(center, radius / max(length(center), 1e-9))
+            let onEdge = add(scale(along, distance), normal, half)
+            return Corner(center: center, onArc: onArc, onEdge: onEdge)
+        }
+        /// The short way round `center` from `start` to `end`.
+        func sweep(from start: Vector, to end: Vector, around center: Vector, radius: Double) -> [Vector] {
+            let from = angle((start.x - center.x, start.y - center.y))
+            var delta = angle((end.x - center.x, end.y - center.y)) - from
+            while delta > 180 { delta -= 360 }
+            while delta < -180 { delta += 360 }
+            let steps = max(1, Int((abs(delta) / stepDegrees).rounded(.up)))
+            return (0...steps).map { step in
+                add(center, unit(from + delta * Double(step) / Double(steps)), radius)
+            }
+        }
+        func arc(radius: Double, from start: Double, to end: Double) -> [Vector] {
+            let steps = max(1, Int((abs(end - start) / stepDegrees).rounded(.up)))
+            return (0...steps).map { scale(unit(start + (end - start) * Double($0) / Double(steps)), radius) }
+        }
+
+        let lowOuter = makeCorner(edge: range.lowerBound, inward: 1, radius: outer, insideCircle: true)
+        let highOuter = makeCorner(edge: range.upperBound, inward: -1, radius: outer, insideCircle: true)
+        let highInner = makeCorner(edge: range.upperBound, inward: -1, radius: inner, insideCircle: false)
+        let lowInner = makeCorner(edge: range.lowerBound, inward: 1, radius: inner, insideCircle: false)
+
+        var points: [Vector] = []
+        points += arc(radius: outer, from: angle(lowOuter.onArc), to: angle(highOuter.onArc))
+        points += sweep(from: highOuter.onArc, to: highOuter.onEdge, around: highOuter.center, radius: corner)
+        points += sweep(from: highInner.onEdge, to: highInner.onArc, around: highInner.center, radius: corner)
+        points += arc(radius: inner, from: angle(highInner.onArc), to: angle(lowInner.onArc))
+        points += sweep(from: lowInner.onArc, to: lowInner.onEdge, around: lowInner.center, radius: corner)
+        points += sweep(from: lowOuter.onEdge, to: lowOuter.onArc, around: lowOuter.center, radius: corner)
+        return points.map { CGPoint(x: $0.x, y: -$0.y) }
     }
 
     /// The point at `angle` and `radius` from the mic's centre, y down.
@@ -253,9 +333,13 @@ public struct SmartModeRingSession: Equatable, Sendable {
     /// The row under the finger, selectable or not, or nil.
     public private(set) var targetIndex: Int?
 
-    public init(picker: SmartModeHomePicker) {
+    public init(picker: SmartModeHomePicker,
+                innerRadius: CGFloat = SmartModeRingLayout.defaultInnerRadius,
+                outerRadius: CGFloat = SmartModeRingLayout.defaultOuterRadius) {
         self.picker = picker
-        self.layout = SmartModeRingLayout(entryCount: picker.entries.count)
+        self.layout = SmartModeRingLayout(
+            entryCount: picker.entries.count, innerRadius: innerRadius, outerRadius: outerRadius
+        )
         self.startIndex = picker.entries.firstIndex { $0.id == picker.effectiveIdentifier } ?? 0
         self.targetIndex = nil
     }

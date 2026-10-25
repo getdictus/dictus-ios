@@ -53,6 +53,9 @@ struct HomeView: View {
     /// its centre.
     @State private var micFrame: CGRect = .zero
 
+    /// The dashboard's width, which the dial's band is sized from (#489).
+    @State private var dashboardWidth: CGFloat = 0
+
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
@@ -142,6 +145,11 @@ struct HomeView: View {
         }
         .padding()
         .background(Color.dictusBackground.ignoresSafeArea())
+        .onGeometryChange(for: CGFloat.self) { proxy in
+            proxy.size.width
+        } action: { width in
+            dashboardWidth = width
+        }
         .coordinateSpace(.named(Self.dashboardSpace))
         // The swipe itself. Attached to the whole dashboard rather than to the hint,
         // because the issue asks for a swipe up "from the home screen" — the hint
@@ -386,11 +394,11 @@ struct HomeView: View {
             .background {
                 if let ringSession {
                     HomeSmartModeRing(session: ringSession)
-                        // The beans spring out on their own (`HomeSmartModeRing`); this is
+                        // The segments spring out on their own (`HomeSmartModeRing`); this is
                         // the way back into the mic, on release or cancel.
                         .transition(reduceMotion
                                     ? .opacity
-                                    : .opacity.combined(with: .scale(scale: HomeSmartModeRingStyle.beanHiddenScale)))
+                                    : .opacity.combined(with: .scale(scale: HomeSmartModeRingStyle.segmentHiddenScale)))
                 } else if smartModeMic.isOffered {
                     HomeSmartModeRestHint()
                 }
@@ -545,15 +553,24 @@ struct HomeView: View {
     /// per-frame path of the drag.
     private func openRing() {
         guard let picker = SmartModeHomePicker.current() else { return }
+        // Sized now, from the screen it opens on: about three quarters of the width, no
+        // taller than the room above the mic.
+        let radii = SmartModeRingLayout.radii(
+            width: dashboardWidth,
+            heightAbove: micFrame.midY - HomeSmartModeRingStyle.topClearance
+        )
         // A firmer impact than the selection ticks that follow, so the hand tells
         // "it opened" from "it moved".
         HapticFeedback.longPressRecognized()
         withAnimation(reduceMotion ? HomeSmartModeRingStyle.reducedMotionFade : HomeSmartModeRingStyle.micSpring) {
-            ringSession = SmartModeRingSession(picker: picker)
+            ringSession = SmartModeRingSession(
+                picker: picker, innerRadius: radii.inner, outerRadius: radii.outer
+            )
         }
         PersistentLog.log(.diagnosticProbe(
             component: "HomeView", instanceID: "-", action: "smartModeRingOpened",
-            details: "entries=\(picker.entries.count) armed=\(picker.armedIdentifier ?? "normal")"
+            details: "entries=\(picker.entries.count) armed=\(picker.armedIdentifier ?? "normal") "
+                + "radii=\(Int(radii.inner))-\(Int(radii.outer))"
         ))
     }
 
