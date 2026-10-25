@@ -9,7 +9,8 @@ final class VocabularyPairSuggestionsTests: XCTestCase {
 
     private static let dictionary: Set<String> = [
         "cloud", "code", "est", "lent", "le", "encore", "on", "parle", "de", "avec", "et",
-        "grok", "boat", "dick", "thus", "whisper", "kid"
+        "grok", "boat", "dick", "thus", "whisper", "kid",
+        "je", "me", "demande", "si", "ça", "marche", "crois", "super", "teste", "fall", "the", "is", "slow"
     ]
 
     private static let isKnown: (String) -> Bool = { dictionary.contains($0.lowercased()) }
@@ -69,6 +70,53 @@ final class VocabularyPairSuggestionsTests: XCTestCase {
         let result = suggestions(["kentrabolixumrtv est lent", "kentrabolixumrtv encore"],
                                  terms: [try entry("Kentrabolixum")])
         XCTAssertEqual(result, [])
+    }
+
+    // MARK: - Where a span starts and stops (device feedback, 2026-10-25)
+
+    func testTheDeviceCaseYieldsNoPair() throws {
+        // `superwhisper` was accepted from step 1 with the variant `super whisper`.
+        // Step 2 then offered `super whisper je` and `Super Whisper et`, which would
+        // have eaten the `je` and the `et` of every later dictation.
+        let terms = [try entry("superwhisper", ["super whisper"])]
+        let texts = [
+            "Je teste super whisper, je me demande si ça marche.",
+            "super whisper je crois",
+            "Super Whisper et WhisperFlow",
+            "Dictus, Super Whisper et Whisper Fall"
+        ]
+        XCTAssertEqual(suggestions(texts, terms: terms), [])
+        let raw = generator.pairs(from: records(texts), vocabulary: terms, ignored: [])
+        XCTAssertFalse(raw.contains { $0.observed.lowercased().contains("super whisper") },
+                       "no span reaches into a stored variant: \(raw.map(\.observed))")
+    }
+
+    func testTheLegitCaseStillPairsAfterTheNewRules() throws {
+        let result = suggestions(["cloud code est lent", "on parle de cloud code"], terms: [try entry("Claude Code")])
+        XCTAssertEqual(result.map(\.observed), ["cloud code"])
+    }
+
+    func testASpanNeverCrossesAComma() throws {
+        let terms = [try entry("Claude Code")]
+        XCTAssertEqual(suggestions(["cloud, code est lent", "on parle de cloud, code"], terms: terms), [])
+        XCTAssertEqual(suggestions(["cloud code, est lent", "cloud code, encore"], terms: terms).map(\.observed),
+                       ["cloud code"], "a comma after the span is fine")
+    }
+
+    func testASpanNeverStartsOrEndsWithAFunctionWord() throws {
+        XCTAssertTrue(VocabularyPairGenerator.edgeWords.isSuperset(of: ["je", "et", "le", "the", "and", "a"]))
+        // `le grokbot` and `grokbot the` would score as close as `grokbot` itself.
+        let pairs = generator.pairs(from: records(["le grokbott est lent", "grokbott the slow"]), vocabulary: [],
+                                    learnedWords: ["grokbot"], ignored: [])
+        XCTAssertEqual(pairs.map(\.observed), ["grokbott"])
+    }
+
+    func testOneRowPerCanonicalTheBestPair() throws {
+        let terms = [try entry("Claude Code")]
+        let texts = ["claudecode est lent", "claudecode encore", "cloud code est lent", "cloud code encore"]
+        XCTAssertEqual(generator.pairs(from: records(texts), vocabulary: terms, ignored: []).count, 2)
+        let result = suggestions(texts, terms: terms)
+        XCTAssertEqual(result.map(\.observed), ["claudecode"], "same letters (0) beats two edits (3)")
     }
 
     // MARK: - Sources

@@ -35,6 +35,10 @@ extension VocabularyPairGenerator {
     /// so it keeps the word; dropping the word rather than single spans means the
     /// same word never shows in two sections, whatever its spellings.
     ///
+    /// ### One row per word
+    ///
+    /// Only the best pair of each canonical is offered.
+    ///
     /// No model judges the pairs: the thresholds above do, and the user confirms
     /// each one before anything is stored.
     public func suggestions(from records: [TranscriptionRecord],
@@ -55,6 +59,10 @@ extension VocabularyPairGenerator {
         }
         // `pairs` is already in the generator's order: a stable split by source keeps it.
         let ordered = kept.filter { $0.source == .vocabulary } + kept.filter { $0.source == .learned }
-        return Array(ordered.prefix(Self.suggestionLimit))
+        // One row per spelling, its best pair: two spellings of one word are two
+        // guesses at the same mistake, and accepting one re-mines the other.
+        var seen = Set<String>()
+        let best = ordered.filter { seen.insert(VocabularySuggestionMiner.fold($0.canonical)).inserted }
+        return Array(best.prefix(Self.suggestionLimit))
     }
 }

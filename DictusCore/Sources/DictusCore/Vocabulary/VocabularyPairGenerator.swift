@@ -131,9 +131,11 @@ public struct VocabularyPairGenerator {
                       limit: Int = VocabularyPairGenerator.defaultLimit) -> [VocabularyPair] {
         let canonicals = Self.canonicals(vocabulary: vocabulary, learnedWords: learnedWords, ignored: ignored)
         guard !canonicals.isEmpty else { return [] }
+        let knownSpellings = vocabulary.flatMap { [$0.term] + $0.variants }
         let scan = Scan(
             canonicals: canonicals,
-            known: Set(vocabulary.flatMap { [$0.term] + $0.variants }.map(Self.lowered)),
+            known: Set(knownSpellings.map(Self.lowered)),
+            knownWords: knownSpellings.map(Self.words(of:)).filter { !$0.isEmpty },
             ignored: ignored
         )
         var cache: [String: Bool] = [:]
@@ -143,7 +145,7 @@ public struct VocabularyPairGenerator {
             let clean = VocabularySuggestionMiner.cleaned(record.text)
             let ranged = VocabularySuggestionMiner.rangedTokens(inClean: clean)
             for sentence in Self.sentences(ranged) {
-                let matches = candidates(in: sentence, ranged: ranged, scan: scan, cache: &cache)
+                let matches = candidates(in: sentence, ranged: ranged, clean: clean, scan: scan, cache: &cache)
                 for match in Self.nonOverlapping(matches) {
                     let canonical = canonicals[match.canonical]
                     let key = Self.idPrefix + VocabularySuggestionMiner.fold(canonical.text)
@@ -182,7 +184,7 @@ public struct VocabularyPairGenerator {
         var result: [Canonical] = []
         let terms = vocabulary.map(\.term).sorted { lowered($0) < lowered($1) }
         for term in terms where seen.insert(VocabularySuggestionMiner.fold(term)).inserted {
-            let words = VocabularySuggestionMiner.tokens(in: term).map { lowered(strippingElision($0.text)) }
+            let words = Self.words(of: term)
             guard !words.isEmpty else { continue }
             result.append(Canonical(text: term, source: .vocabulary, words: words))
         }
@@ -209,29 +211,54 @@ public struct VocabularyPairGenerator {
         let canonicals: [Canonical]
         /// Every stored term and variant, `lowered`: spans already known.
         let known: Set<String>
+        /// The same spellings as words (`words(of:)`): a span touching one of them
+        /// where it stands in a sentence is not a mistake either.
+        let knownWords: [[String]]
         let ignored: Set<String>
     }
 
     /// Every span of the sentence near a canonical, before overlaps are resolved.
     ///
-    /// `sentence` holds indices into `ranged`. "Written right" is found on the
-    /// sentence's words lowercased with elision stripped, position for position.
+    /// `sentence` holds indices into `ranged`. "Written right" and "already known" are
+    /// found on the sentence's words lowercased with elision stripped, position for
+    /// position.
+    ///
+    /// ### Where a span may start and stop (#512, device feedback 2026-10-25)
+    ///
+    /// A variant is replaced wherever it appears, so a span carrying one extra word
+    /// would eat that word: `super whisper je` stored for `superwhisper` turns every
+    /// "super whisper je crois" into "superwhisper crois". So a span:
+    /// - never touches a stored term or variant where it stands in the sentence: the
+    ///   known part is already handled, the rest is a neighbour;
+    /// - never crosses punctuation (a comma ends it as a full stop does);
+    /// - never starts or ends with a function word (`edgeWords`).
     private func candidates(in sentence: [Int],
                             ranged: [(token: VocabularySuggestionMiner.Token, range: Range<String.Index>)],
+                            clean: String,
                             scan: Scan,
                             cache: inout [String: Bool]) -> [Match] {
         let words = sentence.map { Self.lowered(Self.strippingElision(ranged[$0].token.text)) }
         let canonicals = scan.canonicals
         let writtenRight = canonicals.map { Self.occurrences(of: $0.words, in: words) }
+        let knownHere = scan.knownWords.flatMap { Self.occurrences(of: $0, in: words) }
+        // Whether only blanks stand between a word and the next one.
+        let joinedToNext = sentence.indices.map { position in
+            position + 1 < sentence.count && clean[ranged[sentence[position]].range.upperBound
+                ..< ranged[sentence[position + 1]].range.lowerBound].allSatisfy(\.isWhitespace)
+        }
         var matches: [Match] = []
         for offset in sentence.indices {
             for length in 1...Self.longestSpan where offset + length <= sentence.count {
+                if length > 1, !joinedToNext[offset + length - 2] { break }
                 let parts = sentence[offset..<offset + length].map { ranged[$0].token.text }
                 if parts.contains(where: { $0.contains(where: \.isNumber) }) { break }
+                let covered = offset..<offset + length
+                guard !knownHere.contains(where: { $0.overlaps(covered) }) else { continue }
+                guard !Self.edgeWords.contains(words[offset]),
+                      !Self.edgeWords.contains(words[offset + length - 1]) else { continue }
                 guard let surface = spanSurface(parts, cache: &cache) else { continue }
                 guard !scan.known.contains(Self.lowered(surface)),
                       !scan.ignored.contains(VocabularySuggestionMiner.fold(surface)) else { continue }
-                let covered = offset..<offset + length
                 for (index, canonical) in canonicals.enumerated() {
                     // The term written right, or a span reaching into it, is not a mistake.
                     guard !writtenRight[index].contains(where: { $0.overlaps(covered) }) else { continue }
@@ -256,6 +283,21 @@ public struct VocabularyPairGenerator {
         var words = parts
         words[0] = Self.strippingElision(words[0])
         return words.joined(separator: " ")
+    }
+
+    /// Words a span may not start or end with, French and English: pronouns,
+    /// articles, conjunctions, prepositions. Inside a span they are fine
+    /// (`chat de gpt`), at its edge they are a neighbour the span swallowed.
+    static let edgeWords: Set<String> = [
+        "je", "tu", "il", "elle", "on", "nous", "vous", "ils", "elles", "et", "ou", "de", "du",
+        "des", "le", "la", "les", "un", "une", "à", "au", "aux", "en", "que", "qui", "ce", "se",
+        "i", "you", "it", "he", "she", "we", "they", "and", "or", "of", "the", "a", "an", "to",
+        "in", "at", "for", "is"
+    ]
+
+    /// A spelling as the words a sentence is compared on: lowercase, elision stripped.
+    static func words(of text: String) -> [String] {
+        VocabularySuggestionMiner.tokens(in: text).map { lowered(strippingElision($0.text)) }
     }
 
     /// Where `needle` stands in `haystack`, as ranges of positions.
