@@ -41,6 +41,7 @@ Take the first line that is not struck through. Status (who is on what): [Projec
 23. ~~#769 — cut chore: remove the bundled `JointDecisionv3.mlmodelc` from DictusApp~~
 24. #489 — Smart Modes can only be armed from the keyboard, and the app gives no sign which one is running
 25. #793 — End-of-trial paywall: "Continue for free" opened Safari once
+26. #512 — Analyze transcription history to suggest personal vocabulary and replacement rules — step 2 UI
 
 Done in this lane: #530, #414, #490, #518, #80, #536, #523 `Structuré`, #572 `Message`, #571 `Résumé`, #575, #215, #620 voice notes. Closed 2026-10-10 as done or superseded: #79, #439.
 
