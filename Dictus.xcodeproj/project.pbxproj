@@ -41,6 +41,7 @@
 		AA000361 /* DictationHandoff.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100361 /* DictationHandoff.swift */; };
 		AA000428 /* DictationCoordinator+ModelLoad.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100428 /* DictationCoordinator+ModelLoad.swift */; };
 		AA000775 /* DictationCoordinator+SessionActivation.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100775 /* DictationCoordinator+SessionActivation.swift */; };
+		AA000380 /* DictationCoordinator+WarmEngineTimeout.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100380 /* DictationCoordinator+WarmEngineTimeout.swift */; };
 		AA000007 /* KeyboardState.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA10000B /* KeyboardState.swift */; };
 		AA0000F7 /* KeyboardLifecycleProbe.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000F6 /* KeyboardLifecycleProbe.swift */; };
 		AA023002 /* HostAppResolver.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA023001 /* HostAppResolver.swift */; };
@@ -60,6 +61,7 @@
 		AA000042 /* WhisperKit in Frameworks */ = {isa = PBXBuildFile; productRef = AA900020 /* WhisperKit */; };
 		AA000043 /* RecordingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100043 /* RecordingView.swift */; };
 		AA000045 /* UnifiedAudioEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100045 /* UnifiedAudioEngine.swift */; };
+		AA000390 /* UnifiedAudioEngine+IdleRelease.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100390 /* UnifiedAudioEngine+IdleRelease.swift */; };
 		AA000200 /* ObjCExceptionCatcher.m in Sources */ = {isa = PBXBuildFile; fileRef = AA100200 /* ObjCExceptionCatcher.m */; };
 		AA361002 /* TextProxyIdentity.m in Sources */ = {isa = PBXBuildFile; fileRef = AA361001 /* TextProxyIdentity.m */; };
 		AA023004 /* HostArbiterActivation.m in Sources */ = {isa = PBXBuildFile; fileRef = AA023003 /* HostArbiterActivation.m */; };
@@ -280,6 +282,7 @@
 		AA100361 /* DictationHandoff.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DictationHandoff.swift; sourceTree = "<group>"; };
 		AA100428 /* DictationCoordinator+ModelLoad.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DictationCoordinator+ModelLoad.swift"; sourceTree = "<group>"; };
 		AA100775 /* DictationCoordinator+SessionActivation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DictationCoordinator+SessionActivation.swift"; sourceTree = "<group>"; };
+		AA100380 /* DictationCoordinator+WarmEngineTimeout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DictationCoordinator+WarmEngineTimeout.swift"; sourceTree = "<group>"; };
 		AA10000B /* KeyboardState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardState.swift; sourceTree = "<group>"; };
 		AA1000F6 /* KeyboardLifecycleProbe.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardLifecycleProbe.swift; sourceTree = "<group>"; };
 		AA023001 /* HostAppResolver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HostAppResolver.swift; sourceTree = "<group>"; };
@@ -295,6 +298,7 @@
 		AA1003B0 /* DictationFailureMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DictationFailureMessage.swift; sourceTree = "<group>"; };
 		AA100043 /* RecordingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingView.swift; sourceTree = "<group>"; };
 		AA100045 /* UnifiedAudioEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnifiedAudioEngine.swift; sourceTree = "<group>"; };
+		AA100390 /* UnifiedAudioEngine+IdleRelease.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UnifiedAudioEngine+IdleRelease.swift"; sourceTree = "<group>"; };
 		AA100200 /* ObjCExceptionCatcher.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ObjCExceptionCatcher.m; sourceTree = "<group>"; };
 		AA361001 /* TextProxyIdentity.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TextProxyIdentity.m; sourceTree = "<group>"; };
 		AA023003 /* HostArbiterActivation.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = HostArbiterActivation.m; sourceTree = "<group>"; };
@@ -559,6 +563,7 @@
 				AA423003 /* SmartModeDisplayName.swift */,
 				AA100428 /* DictationCoordinator+ModelLoad.swift */,
 				AA100775 /* DictationCoordinator+SessionActivation.swift */,
+				AA100380 /* DictationCoordinator+WarmEngineTimeout.swift */,
 				AA1000F5 /* LiveActivityManager.swift */,
 				SS400001 /* Subscription */,
 				AA400007 /* Audio */,
@@ -678,6 +683,7 @@
 				AA1000F0 /* SpeechModelProtocol.swift */,
 				AA100041 /* TranscriptionService.swift */,
 				AA100045 /* UnifiedAudioEngine.swift */,
+				AA100390 /* UnifiedAudioEngine+IdleRelease.swift */,
 				AA1003A1 /* WhisperComputeOptions.swift */,
 				AA1003B0 /* DictationFailureMessage.swift */,
 				AA100201 /* ObjCExceptionCatcher.h */,
@@ -1305,6 +1311,7 @@
 				AA423004 /* SmartModeDisplayName.swift in Sources */,
 				AA000428 /* DictationCoordinator+ModelLoad.swift in Sources */,
 				AA000775 /* DictationCoordinator+SessionActivation.swift in Sources */,
+				AA000380 /* DictationCoordinator+WarmEngineTimeout.swift in Sources */,
 				AA0000F5 /* LiveActivityManager.swift in Sources */,
 				AA00P201 /* PolishAvailability.swift in Sources */,
 				AA00P203 /* PolishCoordinator.swift in Sources */,
@@ -1312,6 +1319,7 @@
 				AA00P205 /* PolishDebugView.swift in Sources */,
 				AA00P207 /* PolishDebugExporter.swift in Sources */,
 				AA000045 /* UnifiedAudioEngine.swift in Sources */,
+				AA000390 /* UnifiedAudioEngine+IdleRelease.swift in Sources */,
 				AA000200 /* ObjCExceptionCatcher.m in Sources */,
 				AA000041 /* TranscriptionService.swift in Sources */,
 				AA0003A1 /* WhisperComputeOptions.swift in Sources */,

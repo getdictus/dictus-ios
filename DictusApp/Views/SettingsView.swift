@@ -62,6 +62,12 @@ struct SettingsView: View {
     @AppStorage(SharedKeys.liveActivityEnabled, store: UserDefaults(suiteName: AppGroup.identifier))
     private var liveActivityEnabled = true
 
+    /// The inactivity timeout (#380). `@AppStorage` stores an enum with a `String` raw
+    /// value as that string, and reads an unknown one back as the default, which is the
+    /// same fallback `WarmEngineTimeout.option()` applies on the engine's side.
+    @AppStorage(SharedKeys.warmEngineTimeout, store: UserDefaults(suiteName: AppGroup.identifier))
+    private var warmEngineTimeout: WarmEngineTimeoutOption = .defaultOption
+
     /// Post-STT polish toggle (issue #141). Off by default — opt-in measurement at round 1.
     @AppStorage(SharedKeys.polishEnabled, store: UserDefaults(suiteName: AppGroup.identifier))
     private var polishEnabled = false
@@ -389,6 +395,17 @@ struct SettingsView: View {
                             LiveActivityManager.shared.stopStandbyActivity()
                         }
                     }
+
+                // Beside the Live Activity toggle because it decides how long the standby
+                // pill lasts (#380). Applied at once: a warm engine re-arms on the new value.
+                Picker("Inactivity timeout", selection: $warmEngineTimeout) {
+                    ForEach(WarmEngineTimeoutOption.allCases, id: \.self) { option in
+                        Text(warmEngineTimeoutLabel(for: option)).tag(option)
+                    }
+                }
+                .onChange(of: warmEngineTimeout) { _, _ in
+                    DictationCoordinator.shared.warmEngineTimeoutDidChange()
+                }
             } header: {
                 Text("Keyboard")
             } footer: {
@@ -409,6 +426,9 @@ struct SettingsView: View {
                 if !liveActivityEnabled {
                     Text("Dynamic Island and Lock Screen notification are disabled.")
                 }
+                // No exact timing promised: iOS can end a background app earlier, and
+                // Unlimited means exactly that, not "forever".
+                Text("The inactivity timeout is how long Dictus stays ready after your last dictation. A shorter one saves battery and ends the Dynamic Island sooner. A longer one starts your next keyboard dictation faster. Unlimited lasts until iOS ends it.")
             }
 
             #if DEBUG
@@ -683,6 +703,20 @@ struct SettingsView: View {
             return "Polish isn't available in this build of Dictus."
         case .other(let reason):
             return "Apple Intelligence is unavailable (\(reason))."
+        }
+    }
+
+    /// Picker label per inactivity timeout preset (#380). In the view, as a
+    /// `LocalizedStringKey`, so the catalog looks each one up.
+    private func warmEngineTimeoutLabel(for option: WarmEngineTimeoutOption) -> LocalizedStringKey {
+        switch option {
+        case .immediately: return "Immediately"
+        case .oneMinute: return "1 min"
+        case .fiveMinutes: return "5 min"
+        case .tenMinutes: return "10 min"
+        case .thirtyMinutes: return "30 min"
+        case .oneHour: return "1 hour"
+        case .unlimited: return "Unlimited"
         }
     }
 

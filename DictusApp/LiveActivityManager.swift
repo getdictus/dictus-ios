@@ -1297,8 +1297,11 @@ extension LiveActivityManager {
         // An interruption that never posts `.ended` (or whose `.ended` is lost to a
         // suspended process) would leave the pill paused for good. The engine's window
         // is the longest a resume could still happen, so the pause ends there.
+        // Batch resolution #803 × #807: the window is now the inactivity setting (#380);
+        // Unlimited has none, so the former fixed 10 minutes stands in for it.
+        let pauseLimit = WarmEngineTimeout.option().idleTimerInterval ?? 10 * 60
         interruptionPauseTimeout = Task { [weak self] in
-            try? await Task.sleep(for: .seconds(WarmEngineTimeout.interval))
+            try? await Task.sleep(for: .seconds(pauseLimit))
             guard !Task.isCancelled, let self, self.isPausedForInterruption else { return }
             self.endActivityForAudioInterruption(reason: "interruptionTimeout")
         }
