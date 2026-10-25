@@ -13,7 +13,7 @@ Last reviewed: 2026-10-22.
 | App Store | **1.9.0 (build 36)**, released 2026-09-24 with a phased rollout, tag `v1.9.0` |
 | Current cycle | **2.0.0**, the Dictus Pro launch. No 2.0.0 build cut yet: `develop` still says 1.9.0 (36) |
 | Gate | The open lines of [ROADMAP.md](ROADMAP.md) "Now": #649 onboarding, #512 step 2, #279 the flip, #769 the cut chore |
-| `PremiumFlags.paywallVisible` | `false` on `develop`; #279 flips it |
+| `PremiumFlags.paywallVisible` | `true` on `develop` since PR #776 (2026-10-24, refs #279) |
 
 What shipped since the last review, one line each (the detail is on the issues and in git history):
 
