@@ -11,8 +11,10 @@ extension DictationCoordinator {
 
     /// Make sure the audio session is active before a cold start reaches the engine.
     ///
-    /// The rule is `AudioSessionActivationPolicy`; this runs it. A start whose first
-    /// activation worked returns at once and logs nothing extra.
+    /// The rule is `AudioSessionActivationPolicy` and the loop is `AudioSessionActivationRun`,
+    /// both in DictusCore where they are tested; this hands them the engine, the session
+    /// generation and the keyboard's status. A start whose first activation worked returns at
+    /// once and logs nothing extra.
     ///
     /// - Parameters:
     ///   - firstActivation: how `configureAudioSession()` went in `startDictation`.
@@ -34,63 +36,21 @@ extension DictationCoordinator {
         // body stays inside its #146 length budget.
         guard mayReport(session, "cold start") else { return false }
 
-        var lastError: Error?
-        if case .failure(let error) = firstActivation { lastError = error }
-        var failedAttempts = lastError == nil ? 0 : 1
-        var hasWaitedForReset = false
-
-        while true {
-            let decision = AudioSessionActivationPolicy.decide(
-                activated: lastError == nil,
-                failedAttempts: failedAttempts,
-                mediaServicesLost: engine.mediaServicesLost,
-                hasWaitedForReset: hasWaitedForReset
-            )
-
-            switch decision {
-            case .startRecording:
-                if failedAttempts > 0 {
-                    logActivation("sessionActivationRecovered",
-                                  "failedAttempts=\(failedAttempts) afterReset=\(hasWaitedForReset)")
-                }
-                return true
-
-            case .fail:
-                // `.fail` is only decided for a failed activation, so `lastError` is set.
-                throw lastError ?? AudioEngineError.sessionActivationFailed(step: .setActive, status: "unknown")
-
-            case .retryActivation(let delayMs):
-                logActivation("sessionActivationRetry", "failedAttempts=\(failedAttempts) delayMs=\(delayMs)")
-                guard await sleepUnlessCancelled(milliseconds: delayMs) else { return false }
-
-            case .waitForMediaServicesReset(let timeoutMs):
-                let started = Date()
-                while engine.mediaServicesLost && Date().timeIntervalSince(started) * 1000 < Double(timeoutMs) {
-                    guard await sleepUnlessCancelled(milliseconds: 50) else { return false }
-                }
-                hasWaitedForReset = true
-                let waitedMs = Int(Date().timeIntervalSince(started) * 1000)
-                logActivation("sessionActivationWaitedForReset",
-                              "waitedMs=\(waitedMs) timeoutMs=\(timeoutMs) reset=\(!engine.mediaServicesLost)")
-
-                // The keyboard may have given up during the wait. Starting now would record
-                // for a dictation nobody is looking at.
-                let keyboardStatus = defaults.string(forKey: SharedKeys.dictationStatus) ?? "nil"
-                if origin == .keyboard && keyboardStatus != DictationStatus.requested.rawValue {
-                    logActivation("sessionActivationDropped", "keyboardStatus=\(keyboardStatus)")
-                    return false
-                }
-            }
-
-            guard mayReport(session, "session activation retry") else { return false }
-            do {
-                try engine.configureAudioSession()
-                lastError = nil
-            } catch {
-                lastError = error
-                failedAttempts += 1
-            }
-        }
+        let run = AudioSessionActivationRun(
+            activate: { try engine.configureAudioSession() },
+            mediaServicesLost: { engine.mediaServicesLost },
+            mediaServicesResetCount: { engine.mediaServicesResetCount },
+            sleep: { await self.sleepUnlessCancelled(milliseconds: $0) },
+            isStillWanted: { self.mayReport(session, $0) },
+            reasonToDropAfterWait: {
+                // The keyboard may have given up during the wait.
+                let keyboardStatus = self.defaults.string(forKey: SharedKeys.dictationStatus) ?? "nil"
+                guard origin == .keyboard && keyboardStatus != DictationStatus.requested.rawValue else { return nil }
+                return "keyboardStatus=\(keyboardStatus)"
+            },
+            log: { self.logActivation($0, $1) }
+        )
+        return try await run.run(after: firstActivation)
     }
 
     /// Sleep, or return `false` when the start's task was cancelled during the pause.
