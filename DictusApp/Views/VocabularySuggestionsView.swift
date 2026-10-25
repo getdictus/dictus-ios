@@ -7,12 +7,14 @@ import DictusCore
 ///
 /// ### Three sections, one numbering (#512)
 ///
-/// First, step 2: spans History wrote near one of the user's own terms (`cloud code`
-/// for `Claude Code`), from `VocabularyPairGenerator`. The term is certain, so each
-/// row offers **Accept**, which shows the change before storing the variant
-/// (`VocabularyPairReviewView`), **Edit**, which opens the term's sheet with the
-/// variant filled in, and **Ignore**. Then the words the keyboard learned from the user's typing that the engine
-/// wrote differently: **Add** opens #723's sheet with both the term and the
+/// First, step 2: spans History wrote near a spelling the user wrote themselves
+/// (`cloud code` for the term `Claude Code`, `grok boat` for the learned word
+/// `grokbot`), from `VocabularyPairGenerator.suggestions`: terms first, then learned
+/// words step 1 does not already suggest. The spelling is certain, so each row offers
+/// **Accept**, which shows the change before storing it (`VocabularyPairReviewView`:
+/// a variant added to a term, or a new term from a learned word), **Edit**, which
+/// opens the term sheet with both fields filled in, and **Ignore**. Then the words
+/// the keyboard learned from the user's typing that the engine wrote differently: **Add** opens #723's sheet with both the term and the
 /// spellings seen filled in. Then the unknown words History alone turned up, weaker
 /// evidence: **Add** fills only the spellings, and the user types the correct one.
 /// **Ignore** hides a suggestion for good. The numbering runs across both sections,
@@ -60,7 +62,7 @@ struct VocabularySuggestionsView: View {
                                 row(pair, rank: index + 1)
                             }
                         } header: {
-                            Text("Variants of your terms")
+                            Text("Your spellings, written differently")
                         } footer: {
                             Text("Accept shows the change before adding it. Edit opens the term so you can adjust the variant. Ignore hides the suggestion for good.")
                         }
@@ -118,7 +120,7 @@ struct VocabularySuggestionsView: View {
         }
     }
 
-    /// One variant of a term: the term, what Dictus wrote, the count, three actions.
+    /// One pair: the user's spelling, what Dictus wrote, the count, three actions.
     private func row(_ pair: VocabularyPair, rank: Int) -> some View {
         HStack(alignment: .firstTextBaseline, spacing: 12) {
             Text(verbatim: "\(rank)")
@@ -135,18 +137,27 @@ struct VocabularySuggestionsView: View {
                 Text("In \(pair.dictationCount) dictations")
                     .font(.dictusCaption)
                     .foregroundColor(.secondary)
+                if pair.source == .learned {
+                    Text("Typed on your keyboard, not yet a term")
+                        .font(.dictusCaption)
+                        .foregroundColor(.secondary)
+                }
 
+                // Ids carry the row's rank, so a screen of several rows never holds two
+                // equal ids: `vocabulary.pair.<rank>.accept`, `.edit`, `.ignore`.
                 HStack(spacing: 20) {
                     Button("Accept") { reviewing = pair }
-                        .accessibilityIdentifier("vocabulary.pair.accept")
+                        .accessibilityIdentifier("vocabulary.pair.\(rank).accept")
                     Button("Edit") {
                         editing = .observed(variant: pair.observed, term: pair.canonical)
                     }
+                    .accessibilityIdentifier("vocabulary.pair.\(rank).edit")
                     Button("Ignore") {
                         ignoreList.ignore(pair)
                         mine()
                     }
                     .foregroundColor(.secondary)
+                    .accessibilityIdentifier("vocabulary.pair.\(rank).ignore")
                 }
                 // Borderless, or the whole row is one button and a tap fires all three.
                 .buttonStyle(.borderless)
@@ -224,18 +235,25 @@ struct VocabularySuggestionsView: View {
         let records = history.records
         let dictionary = VocabularySuggestionDictionary(records: records)
         let ignored = ignoreList.keys
-        let generator = VocabularyPairGenerator { dictionary.isKnown($0) }
-        let found = generator.suggestions(from: records, vocabulary: vocabulary.entries, ignored: ignored)
-        let miner = VocabularySuggestionMiner { dictionary.isKnown($0) }
-        // A spelling already offered as a variant of a term is not offered again
-        // below as a word on its own.
-        let offered = Set(found.map { VocabularySuggestionMiner.fold($0.observed) })
-        let result = miner.suggestions(
+        let stepOne = VocabularySuggestionMiner { dictionary.isKnown($0) }.suggestions(
             from: records,
             learnedWords: learnedWords,
             vocabulary: vocabulary.entries,
             ignored: ignored
-        ).filter { !$0.forms.contains { offered.contains(VocabularySuggestionMiner.fold($0)) } }
+        )
+        // Step 1 first: a learned word it suggests is not a pair source (one word,
+        // one rule; see `VocabularyPairGenerator.suggestions`).
+        let found = VocabularyPairGenerator { dictionary.isKnown($0) }.suggestions(
+            from: records,
+            vocabulary: vocabulary.entries,
+            learnedWords: learnedWords,
+            stepOne: stepOne,
+            ignored: ignored
+        )
+        // A spelling already offered as a pair is not offered again below as an
+        // unknown word on its own.
+        let offered = Set(found.map { VocabularySuggestionMiner.fold($0.observed) })
+        let result = stepOne.filter { !$0.forms.contains { offered.contains(VocabularySuggestionMiner.fold($0)) } }
         pairs = found
         suggestions = result
         // `learned` is logged so a device run with no paired suggestion can be told
@@ -246,7 +264,7 @@ struct VocabularySuggestionsView: View {
             component: "VocabularySuggestions",
             instanceID: "mine",
             action: "mined",
-            details: "records=\(records.count) learned=\(learnedWords.count) shown=\(result.count) paired=\(paired) termVariants=\(found.count) ms=\(elapsed)"
+            details: "records=\(records.count) learned=\(learnedWords.count) shown=\(result.count) paired=\(paired) termVariants=\(found.filter { $0.source == .vocabulary }.count) learnedPairs=\(found.filter { $0.source == .learned }.count) ms=\(elapsed)"
         ))
     }
 }

@@ -2000,6 +2000,17 @@
         }
       }
     },
+    "New term “%@”, with the variant “%@”." : {
+      "comment" : "Vocabulary suggestion review sheet: Accept creates a term from a keyboard-learned word. First argument: the term; second: the variant (#512 step 2).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nouveau terme « %1$@ », avec la variante « %2$@ »."
+          }
+        }
+      }
+    },
     "Next" : {
       "localizations" : {
         "fr" : {
@@ -2434,6 +2445,17 @@
         }
       }
     },
+    "Typed on your keyboard, not yet a term" : {
+      "comment" : "Vocabulary suggestion row: the correct spelling comes from a word the keyboard learned, and Accept creates the term (#512 step 2).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tapé au clavier, pas encore un terme"
+          }
+        }
+      }
+    },
     "Unlimited" : {
       "comment" : "Inactivity timeout preset: no timer, until iOS ends the app.",
       "localizations" : {
@@ -2462,13 +2484,13 @@
         }
       }
     },
-    "Variants of your terms" : {
-      "comment" : "Vocabulary suggestions sheet, header of the section of spans History wrote near one of the user's terms (#512 step 2).",
+    "Variant “%@” added to “%@”." : {
+      "comment" : "Vocabulary suggestion review sheet: Accept adds a variant to an existing term. First argument: the variant; second: the term (#512 step 2).",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Variantes de vos termes"
+            "value" : "Variante « %1$@ » ajoutée à « %2$@ »."
           }
         }
       }
@@ -2524,6 +2546,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Vous venez de les voir : choisissez-en trois. Ils vous attendront d’un appui long sur le micro."
+          }
+        }
+      }
+    },
+    "Your spellings, written differently" : {
+      "comment" : "Vocabulary suggestions sheet, header of the section of spans History wrote near a term or a keyboard-learned word (#512 step 2).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vos orthographes, écrites autrement"
           }
         }
       }
