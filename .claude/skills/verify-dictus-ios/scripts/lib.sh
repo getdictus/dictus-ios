@@ -71,37 +71,42 @@ sys.exit(1)
 # equals `type`, when given): "x y w h", a tab, a description for error messages, a tab,
 # then `on` or `off` (whether the frame centre lies on the screen, the first root's frame:
 # a list keeps rows laid out below the fold, and a tap there lands on nothing).
-# Elements sharing one frame are listed once: a tap at that centre cannot tell them apart.
+# A match whose frame contains another match is dropped for the inner one: a Settings row
+# (Button) and its title (StaticText), or a tab and its icon, are one control, and a tap at
+# the inner centre lands in both. Frames are compared to 0.1 pt (a SwiftUI button and its
+# wrapping group can differ in the 14th decimal). Disjoint matches all stay.
 # Exits 1 when nothing matches.
 find_matches() {
   python3 -c '
 import json, sys
 kind, value, wanted = sys.argv[1], sys.argv[2], sys.argv[3]
 key = "AXUniqueId" if kind == "id" else "AXLabel"
-seen = []
-screen = None
+matches = []
 def walk(node):
     if node.get(key) == value and (not wanted or node.get("type") == wanted):
         f = node["frame"]
-        frame = (f["x"], f["y"], f["width"], f["height"])
-        if frame not in seen:
-            seen.append(frame)
-            desc = "type=%s label=%r id=%s frame=(%s)" % (
-                node.get("type"), node.get("AXLabel"), node.get("AXUniqueId") or "-",
-                ", ".join("%g" % round(v, 1) for v in frame))
-            cx, cy = frame[0] + frame[2] / 2, frame[1] + frame[3] / 2
-            sx, sy, sw, sh = screen
-            onscreen = sx <= cx < sx + sw and sy <= cy < sy + sh
-            print("%s %s %s %s\t%s\t%s" % (frame + (desc, "on" if onscreen else "off")))
+        frame = tuple(round(v, 1) for v in (f["x"], f["y"], f["width"], f["height"]))
+        if frame not in [m[0] for m in matches]:
+            matches.append((frame, node))
     for child in node.get("children") or []:
         walk(child)
+def contains(a, b):
+    return (a[0] <= b[0] and a[1] <= b[1]
+            and b[0] + b[2] <= a[0] + a[2] and b[1] + b[3] <= a[1] + a[3])
 roots = json.load(sys.stdin)
-if roots:
-    f = roots[0]["frame"]
-    screen = (f["x"], f["y"], f["width"], f["height"])
 for root in roots:
     walk(root)
-sys.exit(0 if seen else 1)
+sx, sy, sw, sh = (roots[0]["frame"][k] for k in ("x", "y", "width", "height")) if roots else (0, 0, 0, 0)
+for frame, node in matches:
+    if any(other != frame and contains(frame, other) for other, _ in matches):
+        continue
+    desc = "type=%s label=%r id=%s frame=(%s)" % (
+        node.get("type"), node.get("AXLabel"), node.get("AXUniqueId") or "-",
+        ", ".join("%g" % v for v in frame))
+    cx, cy = frame[0] + frame[2] / 2, frame[1] + frame[3] / 2
+    onscreen = sx <= cx < sx + sw and sy <= cy < sy + sh
+    print("%s %s %s %s\t%s\t%s" % (frame + (desc, "on" if onscreen else "off")))
+sys.exit(0 if matches else 1)
 ' "$1" "$2" "${3:-}"
 }
 
