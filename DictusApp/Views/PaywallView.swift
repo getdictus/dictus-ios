@@ -471,11 +471,16 @@ struct PaywallView: View {
         .padding(.top, 2)
     }
 
+    /// Each part goes through the catalog first (#279): `ProFeature`'s strings are
+    /// English keys, and `accessibilityLabel(_:)` reads a `String` verbatim, so the
+    /// combined label was the one English line on a French paywall.
     private func accessibilityLabel(for feature: ProFeature) -> String {
+        let name = String(localized: String.LocalizationValue(feature.displayName))
+        let description = String(localized: String.LocalizationValue(feature.paywallDescription))
         guard let notice = feature.unsupportedNotice else {
-            return "\(feature.displayName): \(feature.paywallDescription)"
+            return "\(name): \(description)"
         }
-        return "\(feature.displayName): \(feature.paywallDescription). \(notice)"
+        return "\(name): \(description). \(String(localized: String.LocalizationValue(notice)))"
     }
 
     /// Icon color per feature (Smart Mode = accent, others = accent highlight; #789).
