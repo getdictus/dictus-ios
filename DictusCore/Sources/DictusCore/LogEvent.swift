@@ -64,6 +64,11 @@ public enum LogEvent: Sendable {
     case audioEngineStopped
     case audioSessionConfigured(category: String)
     case audioSessionFailed(error: String)
+    /// `setCategory` or `setActive(true)` threw while activating the audio session (#775).
+    /// `status` is `code` with its four-character code when it spells one (`'!int'`,
+    /// `'msrv'`). `context` is the session state at the throw: the loss flag and the route.
+    case audioSessionActivationFailed(step: String, domain: String, code: Int, status: String,
+                                      errorDescription: String, context: String)
     case audioInterruptionBegan(reason: String)
     case audioInterruptionEnded(shouldResume: Bool, restored: Bool)
     case audioRouteChanged(reason: String, details: String)
@@ -677,7 +682,7 @@ public enum LogEvent: Sendable {
              .dictationStateReconciled:
             return .dictation
         case .audioEngineStarted, .audioEngineStopped, .audioSessionConfigured, .audioSessionFailed,
-             .audioInterruptionBegan, .audioInterruptionEnded, .audioRouteChanged,
+             .audioSessionActivationFailed, .audioInterruptionBegan, .audioInterruptionEnded, .audioRouteChanged,
              .audioMediaServicesLost, .audioMediaServicesReset, .warmStateReleased, .warmStateRestored,
              .audioHapticsAllowance, .audioHapticsAllowanceFailed,
              .audioInputMuted, .audioInputMuteFailed:
@@ -768,7 +773,7 @@ public enum LogEvent: Sendable {
             return discarded.isEmpty ? .notice : .warning
 
         // Errors
-        case .dictationFailed, .audioSessionFailed, .transcriptionFailed,
+        case .dictationFailed, .audioSessionFailed, .audioSessionActivationFailed, .transcriptionFailed,
              .modelDownloadFailed, .modelDeleteFailed,
              .liveActivityFailed, .subscriptionError, .idleInvariantViolation,
              .modelDownloadIntegrityFailed:
@@ -912,6 +917,9 @@ public enum LogEvent: Sendable {
             return "category=\(category)"
         case .audioSessionFailed(let error):
             return "error=\(error)"
+        case .audioSessionActivationFailed(let step, let domain, let code, let status, let errorDescription, let context):
+            return "step=\(step) domain=\(domain) code=\(code) status=\(status) "
+                + "description=\"\(errorDescription)\" \(context)"
         case .audioInterruptionBegan(let reason):
             return "reason=\(reason)"
         case .audioInterruptionEnded(let shouldResume, let restored):
@@ -1273,6 +1281,7 @@ extension LogEvent {
         case .audioEngineStopped: return "audioEngineStopped"
         case .audioSessionConfigured: return "audioSessionConfigured"
         case .audioSessionFailed: return "audioSessionFailed"
+        case .audioSessionActivationFailed: return "audioSessionActivationFailed"
         case .audioInterruptionBegan: return "audioInterruptionBegan"
         case .audioInterruptionEnded: return "audioInterruptionEnded"
         case .audioRouteChanged: return "audioRouteChanged"
