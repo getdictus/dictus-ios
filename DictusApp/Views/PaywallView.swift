@@ -928,6 +928,9 @@ struct PaywallView: View {
                 .dictusGlass()
         }
         .buttonStyle(GlassPressStyle())
+        // Distinct from the monthly offer's own "Continue for free" (#793): with the
+        // offer up, both share a label, and a tap by label can land on this one.
+        .accessibilityIdentifier("paywall.continueForFree")
     }
 
     // MARK: - Bottom Links
@@ -962,6 +965,9 @@ struct PaywallView: View {
             }
             .font(.dictusCaption)
             .foregroundColor(.secondary)
+            // A gap between the way out above and the links (#793), so a tap just
+            // under "Continue for free" cannot open Safari.
+            .padding(.top, 8)
         }
     }
 
