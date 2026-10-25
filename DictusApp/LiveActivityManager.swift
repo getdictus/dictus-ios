@@ -102,7 +102,27 @@ class LiveActivityManager {
     }
 
     /// Current Live Activity instance. nil if no activity is running.
-    private var currentActivity: Activity<DictusLiveActivityAttributes>?
+    /// A pause belongs to the activity it was put on: any other activity, or none,
+    /// starts unpaused, whichever path replaced or ended it (#353).
+    private var currentActivity: Activity<DictusLiveActivityAttributes>? {
+        didSet {
+            guard currentActivity?.id != oldValue?.id else { return }
+            isPausedForInterruption = false
+            interruptionPauseTimeout?.cancel()
+        }
+    }
+
+    /// The standby pill shows its paused content: an audio interruption stopped the
+    /// engine and has not ended yet (#353). The phase stays `.standby`, so the next
+    /// dictation finds the activity exactly as it would without the call.
+    private var isPausedForInterruption = false
+
+    /// Ends a pause the interruption never ended (see `handleInterruptionBegan`).
+    private var interruptionPauseTimeout: Task<Void, Never>?
+
+    /// Set by `handleInterruptionBegan()` for the `dictusAudioSessionInterrupted` the
+    /// engine posts right after calling it, which must not end the paused pill.
+    private var handledInterruptionNotices = 0
 
     /// Tracks the current phase via a formal state machine with validated transitions.
     /// WHY: Even if DictationCoordinator guards its sinks, this provides a second
@@ -193,7 +213,11 @@ class LiveActivityManager {
             queue: .main
         ) { [weak self] _ in
             Task { @MainActor in
-                self?.endActivityForAudioInterruption()
+                // An interruption's `.began` was already handled, synchronously, by
+                // `handleInterruptionBegan()` (#353). A media services reset posts the
+                // same notification on its own and still ends the activity.
+                guard let self, !self.consumeHandledInterruptionNotice() else { return }
+                self.endActivityForAudioInterruption()
             }
         }
 
@@ -215,7 +239,7 @@ class LiveActivityManager {
     /// Tear down the Live Activity because the audio session was interrupted.
     /// Force-syncs internal state before issuing the async `activity.end` so a
     /// concurrent `transitionToRecording` can't resurrect the dead activity.
-    func endActivityForAudioInterruption() {
+    func endActivityForAudioInterruption(reason: String = "audioInterrupted") {
         guard let activity = currentActivity else {
             // No activity to end, but reset state in case it was leaked.
             currentPhase = .idle
@@ -230,7 +254,7 @@ class LiveActivityManager {
         currentActivity = nil
         currentPhase = .idle
         syncStateMachine(to: .idle)
-        PersistentLog.log(.liveActivityEnded(reason: "audioInterrupted"))
+        PersistentLog.log(.liveActivityEnded(reason: reason))
 
         Task {
             let finalState = DictusLiveActivityAttributes.ContentState(phase: .failed)
@@ -1101,7 +1125,9 @@ extension LiveActivityManager {
 
     /// The standby content, carrying the voice note ring when there is one.
     fileprivate var standbyState: DictusLiveActivityAttributes.ContentState {
-        DictusLiveActivityAttributes.ContentState(phase: .standby, voiceNote: voiceNoteContent)
+        DictusLiveActivityAttributes.ContentState(
+            phase: .standby, voiceNote: voiceNoteContent, paused: isPausedForInterruption ? true : nil
+        )
     }
 
     /// Whether a Live Activity is there to show progress on. What the share
@@ -1245,5 +1271,79 @@ extension LiveActivityManager {
     private func alertLog(_ action: String) {
         PersistentLog.log(.diagnosticProbe(component: "VoiceNote", instanceID: "island", action: "alert-\(action)",
                                            details: "phase=\(currentPhase.rawValue) ready=\(voiceNoteContent?.readyCount ?? 0)"))
+    }
+}
+
+// MARK: - Audio interruption (#353)
+
+/// WHY an extension in this file: like the voice notes above, it reads the manager's
+/// private state, and the type body is at its length budget. The decisions are
+/// `LiveActivityInterruptionPolicy`, tested in DictusCore.
+extension LiveActivityManager {
+
+    /// `.began`: pause the standby pill, or end a dictation's activity as before.
+    /// Called by the engine's interruption teardown just before it posts
+    /// `dictusAudioSessionInterrupted`; the observer of that post skips it.
+    func handleInterruptionBegan() {
+        handledInterruptionNotices += 1
+        let action = LiveActivityInterruptionPolicy.atBegan(
+            hasActivity: currentActivity != nil, phase: mapToStateMachinePhase(currentPhase)
+        )
+        guard action == .pause else {
+            endActivityForAudioInterruption()
+            return
+        }
+        setPausedForInterruption(true)
+        // An interruption that never posts `.ended` (or whose `.ended` is lost to a
+        // suspended process) would leave the pill paused for good. The engine's window
+        // is the longest a resume could still happen, so the pause ends there.
+        // Batch resolution #803 × #807: the window is now the inactivity setting (#380);
+        // Unlimited has none, so the former fixed 10 minutes stands in for it.
+        let pauseLimit = WarmEngineTimeout.option().idleTimerInterval ?? 10 * 60
+        interruptionPauseTimeout = Task { [weak self] in
+            try? await Task.sleep(for: .seconds(pauseLimit))
+            guard !Task.isCancelled, let self, self.isPausedForInterruption else { return }
+            self.endActivityForAudioInterruption(reason: "interruptionTimeout")
+        }
+    }
+
+    /// `.ended`, after the engine's resume was tried: resume the paused pill over a warm
+    /// engine, end it over a cold one. Never requests an activity. Returns the log token.
+    @discardableResult
+    func settleAfterInterruption(engineWarm: Bool) -> String {
+        let action = LiveActivityInterruptionPolicy.atEnded(
+            isPaused: isPausedForInterruption, hasActivity: currentActivity != nil, engineWarm: engineWarm
+        )
+        switch action {
+        case .resume:
+            setPausedForInterruption(false)
+            return "resumed"
+        case .end:
+            endActivityForAudioInterruption(reason: "interruptionFailed")
+            return "ended"
+        case .pause, .none:
+            return currentActivity == nil ? "none" : "unchanged"
+        }
+    }
+
+    /// Whether the `dictusAudioSessionInterrupted` being observed is one
+    /// `handleInterruptionBegan()` already answered.
+    private func consumeHandledInterruptionNotice() -> Bool {
+        guard handledInterruptionNotices > 0 else { return false }
+        handledInterruptionNotices -= 1
+        return true
+    }
+
+    /// Push the standby content with the pause flag. `Activity.update` is allowed from
+    /// the background, where `Activity.request` is not.
+    private func setPausedForInterruption(_ paused: Bool) {
+        guard let activity = currentActivity else { return }
+        isPausedForInterruption = paused
+        if !paused { interruptionPauseTimeout?.cancel() }
+        PersistentLog.log(.liveActivityTransition(
+            from: paused ? "standby" : "paused", to: paused ? "paused" : "standby"
+        ))
+        let content = ActivityContent(state: standbyState, staleDate: Date().addingTimeInterval(staleInterval))
+        Task { await activity.update(content) }
     }
 }
