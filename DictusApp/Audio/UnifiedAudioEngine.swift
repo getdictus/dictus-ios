@@ -4,6 +4,7 @@
 // transcribe(audioArray:) which accepts any [Float] 16kHz mono array.
 import Foundation
 @preconcurrency import AVFoundation
+import UIKit
 import DictusCore
 
 extension Notification.Name {
@@ -273,6 +274,12 @@ class UnifiedAudioEngine: ObservableObject {
     /// event (Siri → ringing call back-to-back), which would leave a dangling tap.
     private var isHandlingInterruption = false
 
+    /// Carries the standby an interruption found from `.began` to `.ended`, and decides
+    /// whether `.shouldResume` brings it back (#353). The rules are in DictusCore.
+    private let interruptionRecovery = AudioInterruptionRecovery(
+        describe: { DictationFailureMessage.diagnostic(for: $0) }
+    )
+
     /// Generation counter for the underlying AVAudioEngine instance. Bumped on
     /// `handleMediaServicesReset` when we replace the engine. The audio tap closure
     /// captures the generation it was installed under — if a buffer arrives after
@@ -432,9 +439,11 @@ class UnifiedAudioEngine: ObservableObject {
     /// Activity must dismiss because a dead session means the next dictation will
     /// be a cold start, not a warm start (issue #106).
     ///
-    /// On `.ended` with `.shouldResume`: try to reactivate and re-warm. If recovery
-    /// fails (rare — usually means the OS still holds the audio resource), we leave
-    /// the engine cold and accept that the next dictation pays the cold-start cost.
+    /// On `.ended` with `.shouldResume`: if the engine was in standby when the
+    /// interruption began and its idle window has not run out, reactivate, restart it
+    /// muted and bring the standby Live Activity back (#353). If the restart fails
+    /// (from the background iOS may still refuse the input, `kAUStartIO`), the engine
+    /// stays cold and the next dictation pays the cold-start cost, as before.
     private func handleInterruption(_ note: Notification) {
         // Re-entry guard: a second interruption arriving before we finish handling
         // the previous one (Siri → ringing call back-to-back) would leave a dangling
@@ -466,45 +475,26 @@ class UnifiedAudioEngine: ObservableObject {
                 return "\(value)"
             } ?? "unknown"
 
-            isInterrupted = true
-            isRecording = false
-            isRecordingFlag = false
-            cancelIdleRelease()
-
-            // Stop the engine so the next start() reinstalls the tap with a fresh
-            // hardware format. Don't deactivate the session — iOS will do that for us
-            // and re-asks ownership when the interruption ends.
-            engine.inputNode.removeTap(onBus: 0)
-            engine.stop()
-
-            PersistentLog.log(.audioInterruptionBegan(reason: reason))
-            logHapticsAllowance(context: "interruptionBegan")
-
-            // Notify in-process listeners (LiveActivityManager, DictationCoordinator)
-            // immediately. Darwin notification mirrors for cross-process consumers
-            // (keyboard ext) so they can stop trusting the warm-state contract.
-            NotificationCenter.default.post(name: .dictusAudioSessionInterrupted, object: nil)
-            DarwinNotificationCenter.post(DarwinNotificationName.audioSessionInterrupted)
+            // `engineRunning` is what iOS left of the I/O by the time this runs, which is not
+            // what decides a resume (see `engineStateForInterruption`, #353).
+            PersistentLog.log(.audioInterruptionBegan(reason: "\(reason) engineRunning=\(engine.isRunning)"))
+            // Reads whether the engine was in standby, then runs `tearDownForInterruption()`.
+            interruptionRecovery.began(target: self)
 
         case .ended:
             let optionsRaw = userInfo[AVAudioSessionInterruptionOptionKey] as? UInt ?? 0
             let options = AVAudioSession.InterruptionOptions(rawValue: optionsRaw)
             let shouldResume = options.contains(.shouldResume)
 
-            // We deliberately do NOT auto-resume here even when shouldResume is true.
+            // Before #353 this branch never resumed, and logged a literal `restored: false`.
+            // The reason was the orange indicator: re-warming re-opened the input, iOS showed
+            // the microphone in use with no Dictus pill to explain it. #430 removed that
+            // reason: a warm engine now runs with its input muted and shows no indicator. So
+            // a standby that `.shouldResume` interrupts comes back, muted, with its pill and
+            // the rest of its idle window. A recording, a cold engine, an expired window, or
+            // an `.ended` without `.shouldResume` still leave the engine cold, and the
+            // natural re-warm paths (didBecomeActive, the cold-start dictation) take over.
             //
-            // WHY: the user just finished a phone call (or whatever interruption);
-            // they have not asked to dictate. Eagerly re-warming the engine
-            // re-activates AVAudioSession, which iOS surfaces as the orange mic
-            // indicator in its Dynamic Island — but our Live Activity is already
-            // dismissed (Phase A correctly tears it down on .began). The combination
-            // is the worst of both: audio resources held + no Dictus UX visible.
-            //
-            // Instead, leave the engine cold and rely on the natural re-warm paths:
-            //  - if user reopens the app, DictationCoordinator's didBecomeActive
-            //    observer calls warmUp.
-            //  - if user taps the keyboard mic, the cold-start dictation path
-            //    starts the engine fresh.
             // The interruption is over, so the flag that says one is in flight must say
             // so — that is its documented meaning, and until #459 nothing here cleared
             // it. The only clear was at the end of a successful `startEngine`, which was
@@ -518,16 +508,21 @@ class UnifiedAudioEngine: ObservableObject {
             // when the call ends, so the other half of the guard's conjunction falls and
             // the latch never closes — but that is iOS saving us, not us being correct.
             //
-            // Clearing here does NOT resume anything: the engine stays cold on purpose,
-            // for the reason above. It says the audio layer is no longer degraded, which
-            // is true, and lets the next mic tap try. The clear in `startEngine` stays —
-            // it answers a different question (this start succeeded, so we are healthy)
-            // and covers the interruptions that never deliver an `.ended` at all.
+            // Clearing here does not resume anything by itself: it says the audio layer is
+            // no longer degraded, which is true, and lets the next mic tap try. The clear in
+            // `startEngine` stays — it answers a different question (this start succeeded,
+            // so we are healthy) and covers the interruptions that never deliver an `.ended`.
             isInterrupted = false
 
-            // Either way, the warm-state contract matches reality and the orange
-            // mic only appears when the user actually wants to record (issue #106).
-            PersistentLog.log(.audioInterruptionEnded(shouldResume: shouldResume, restored: false))
+            // Logs the outcome and `audioInterruptionEnded`, whose `restored` is now measured.
+            let appState = UIApplication.shared.applicationState
+            interruptionRecovery.ended(
+                shouldResume: shouldResume,
+                appIsActive: appState == .active,
+                appState: "\(appState.rawValue)",
+                target: self
+            )
+            LiveActivityManager.shared.settleAfterInterruption(engineWarm: engine.isRunning)  // #353
 
         @unknown default:
             return
@@ -622,6 +617,8 @@ class UnifiedAudioEngine: ObservableObject {
         isInterrupted = true
         isRecording = false
         isRecordingFlag = false
+        // The rebuilt stack has nothing warm in it; an `.ended` after this resumes nothing.
+        interruptionRecovery.forget()
 
         NotificationCenter.default.post(name: .dictusAudioSessionInterrupted, object: nil)
         DarwinNotificationCenter.post(DarwinNotificationName.audioSessionInterrupted)
@@ -1017,6 +1014,8 @@ class UnifiedAudioEngine: ObservableObject {
     /// Call when user explicitly stops all audio (e.g., Power button in Dynamic Island).
     func deactivateSession() {
         cancelIdleRelease()
+        // The user stopped standby: an interruption ending later must not restart it (#353).
+        interruptionRecovery.forget()
         isRecording = false
         isRecordingFlag = false
         engine.inputNode.removeTap(onBus: 0)
@@ -1080,9 +1079,13 @@ class UnifiedAudioEngine: ObservableObject {
     /// - Parameter interval: how long the engine may sit warm and idle. Callers
     ///   pass `idleReleaseInterval` after a dictation and
     ///   `warmUpIdleReleaseInterval` when the warm state was entered without one.
-    private func scheduleIdleRelease(after interval: TimeInterval) {
+    /// - Parameter idleSince: when the window started. Now, except for an interruption
+    ///   resume, which re-arms the window the interruption cut short (#353): the release
+    ///   then fires at that window's deadline, and the anchor the wall-clock backstop and
+    ///   `warmStateReleased idleSeconds` read stays the original one.
+    private func scheduleIdleRelease(after interval: TimeInterval, idleSince: Date = Date()) {
         cancelIdleRelease()
-        lastIdleStartTime = Date()
+        lastIdleStartTime = idleSince
         armedIdleReleaseInterval = interval
 
         let work = DispatchWorkItem { [weak self] in
@@ -1091,7 +1094,8 @@ class UnifiedAudioEngine: ObservableObject {
             }
         }
         idleReleaseWorkItem = work
-        DispatchQueue.main.asyncAfter(deadline: .now() + interval, execute: work)
+        let remaining = max(0, interval - Date().timeIntervalSince(idleSince))
+        DispatchQueue.main.asyncAfter(deadline: .now() + remaining, execute: work)
     }
 
     /// Re-arm the idle release from now, if one is armed (#620).
@@ -1168,6 +1172,9 @@ class UnifiedAudioEngine: ObservableObject {
             isWarm: engine.isRunning || sessionConfigured,
             isRecording: isRecording
         ) else { return }
+
+        // Released on purpose: an interruption ending later must not bring it back (#353).
+        interruptionRecovery.forget()
 
         let idleSeconds: Int = {
             guard let started = lastIdleStartTime else { return 0 }
@@ -1932,5 +1939,89 @@ extension UnifiedAudioEngine {
         case .pendingCall:
             return "CallKit reports a call that is ringing or connecting"
         }
+    }
+}
+
+// MARK: - Interruption Resume (issue #353)
+
+/// The engine half of `AudioInterruptionRecovery`: the decision and its order are in
+/// DictusCore and tested there, these are the calls they make.
+extension UnifiedAudioEngine: InterruptionResumeTarget {
+
+    /// Read from our own flags, never from `engine.isRunning`.
+    ///
+    /// WHY (#353, device 2026-10-25): the first version started with
+    /// `guard engine.isRunning else { return .cold }`, and on Pierre's iPhone every call
+    /// ended in `engineWarmUpSkipped reason=wasCold` straight after a dictation had left the
+    /// engine in standby. A call takes the I/O hardware and changes its format, and the
+    /// engine stops itself when its I/O does (`AVAudioEngine.h`, configuration change):
+    /// by the time `.began` reaches the main queue, `isRunning` can already be false. It
+    /// describes what iOS did, not the state the interruption found.
+    ///
+    /// The armed idle release is the state we own: it is armed only on entering warm-idle
+    /// (`warmUp`, `collectSamples`), and every path of ours that stops the engine cancels
+    /// it first (`stopEngine`, `deactivateSession`, `forceRestart`, `releaseWarmState`,
+    /// the interruption and media-services teardowns). Armed means we left the engine
+    /// running muted, whatever iOS has done to its I/O since; not armed means cold.
+    var engineStateForInterruption: InterruptedEngineState {
+        if isRecording { return .recording }
+        guard idleReleaseWorkItem != nil, let idleSince = lastIdleStartTime else { return .cold }
+        return .standby(idleSince: idleSince, interval: armedIdleReleaseInterval)
+    }
+
+    /// The `.began` teardown, unchanged by #353.
+    func tearDownForInterruption() {
+        isInterrupted = true
+        isRecording = false
+        isRecordingFlag = false
+        cancelIdleRelease()
+
+        // Stop the engine so the next start() reinstalls the tap with a fresh
+        // hardware format. Don't deactivate the session — iOS will do that for us
+        // and re-asks ownership when the interruption ends.
+        engine.inputNode.removeTap(onBus: 0)
+        engine.stop()
+
+        logHapticsAllowance(context: "interruptionBegan")
+        LiveActivityManager.shared.handleInterruptionBegan()  // #353: pause, before the post below
+
+        // Notify in-process listeners (LiveActivityManager, DictationCoordinator)
+        // immediately. Darwin notification mirrors for cross-process consumers
+        // (keyboard ext) so they can stop trusting the warm-state contract.
+        NotificationCenter.default.post(name: .dictusAudioSessionInterrupted, object: nil)
+        DarwinNotificationCenter.post(DarwinNotificationName.audioSessionInterrupted)
+    }
+
+    func reactivateSession() throws {
+        try configureAudioSession()
+    }
+
+    /// The same start-then-mute order as `warmUp()`, the one #430 measured on device.
+    func startEngineAtRest() throws -> Bool {
+        try startEngine(context: "interruptionResume")
+        muteInputIfIdle(context: "interruptionResume")
+        return AVAudioApplication.shared.isInputMuted
+    }
+
+    /// Back to what a failed resume found: engine stopped, input unmuted (the two full
+    /// teardowns unmute too, #430), session released. `sessionConfigured` goes false so
+    /// the next start activates again, as it does after the idle release.
+    func abandonResume() {
+        engine.inputNode.removeTap(onBus: 0)
+        engine.stop()
+        try? setInputMuted(false, context: "interruptionResume-abandon")
+        try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
+        sessionConfigured = false
+    }
+
+    func armIdleRelease(idleSince: Date, interval: TimeInterval) {
+        scheduleIdleRelease(after: interval, idleSince: idleSince)
+    }
+
+    /// Called directly rather than through a notification, as the `.began` teardown is:
+    /// the outcome goes into the resume's log line, and `startStandbyActivity()` must run
+    /// synchronously, while iOS still lets this process request an activity.
+    func restartStandbyLiveActivity() -> String {
+        LiveActivityManager.shared.startStandbyActivity().reason
     }
 }
