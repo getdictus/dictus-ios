@@ -9,7 +9,8 @@
 #   tap-id <identifier>            tap the element whose AXUniqueId matches
 #   tap-label <label>              tap the element whose AXLabel matches
 #                                  both refuse (exit 1, candidates listed) when several
-#                                  elements match; a label clash is resolved with tap-id
+#                                  elements match; a label clash is resolved with tap-id.
+#                                  They also refuse an element off screen: scroll first
 #   wait-id <identifier> [secs]    wait until it is on screen (default 15 s)
 #   wait-label <label> [secs]
 #   gone-id <identifier> [secs]    wait until it has left the screen

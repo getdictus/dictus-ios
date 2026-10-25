@@ -87,7 +87,7 @@ Labels that are stable and unique (French device): tabs `Accueil` / `Modèles` /
 
 **The Dictus keyboard is one opaque element**, `inputView`, in the host app's tree: none of its keys or buttons is listed. `drive.sh kbd <control>` presses them at measured offsets from that frame, and the App Group log is what proves the press landed.
 
-`tap-id` and `tap-label` tap only a unique match. When several elements on screen share the label (or the identifier), they refuse with exit 1 and list every candidate, so the run never taps the wrong one silently: pick the one you mean with `tap-id`. Elements nested on one identical frame count once. The recipes (`full-access`, `select-keyboard`) keep tapping the first match, because Settings repeats its row identifiers on nested elements.
+`tap-id` and `tap-label` tap only a unique match. When several elements on screen share the label (or the identifier), they refuse with exit 1 and list every candidate, so the run never taps the wrong one silently: pick the one you mean with `tap-id`. Elements nested on one identical frame count once. They also refuse an element whose centre is off screen (a list lays out rows below the fold, and `axe` would tap whatever sits at the edge, a Subscribe button included): scroll it into view first. The recipes (`full-access`, `select-keyboard`) keep tapping the first match, because Settings repeats its row identifiers on nested elements.
 
 ```bash
 D=.claude/skills/verify-dictus-ios/scripts/drive.sh
@@ -219,7 +219,7 @@ All executable, all run from the repository root, all read the run from the argu
 | --- | --- | --- |
 | `scripts/launch.sh` | `launch.sh [--skip-onboarding] [--lang fr\|en]` | `READY udid=… run=… pid=… screen=…` |
 | `scripts/doctor.sh` | `doctor.sh [run-dir]` | `DOCTOR OK` / `DOCTOR FAIL <n>` |
-| `scripts/drive.sh` | `drive.sh <tap-id\|tap-label\|wait-id\|wait-label\|gone-id\|tab\|tree\|log-mark\|wait-log\|relaunch\|set-default\|full-access\|select-keyboard\|kbd\|type\|space> [args]` | one line per action; exit 1 with `error:` when an element never appears, and when `tap-id` or `tap-label` matches several elements (the candidates are listed: type, label, identifier, frame) |
+| `scripts/drive.sh` | `drive.sh <tap-id\|tap-label\|wait-id\|wait-label\|gone-id\|tab\|tree\|log-mark\|wait-log\|relaunch\|set-default\|full-access\|select-keyboard\|kbd\|type\|space> [args]` | one line per action; exit 1 with `error:` when an element never appears, and when `tap-id` or `tap-label` matches several elements (the candidates are listed: type, label, identifier, frame) or one that is off screen |
 | `scripts/evidence.sh` | `evidence.sh <name> [run-dir]` | `evidence <name>: <path>.png` |
 | `scripts/cleanup.sh` | `cleanup.sh [run-dir]` | `CLEANUP OK udid=… deleted=yes` |
 | `scripts/lib.sh` | sourced, not run | `find_frame`, `find_matches`, `wait_for`, `stable_frame`, `tap`, `tap_unique`, `tap_until`, `wait_log` |

@@ -68,7 +68,9 @@ sys.exit(1)
 
 # find_matches <id|label> <value> [type] — reads an `axe describe-ui` tree on stdin and
 # prints one line per element whose AXUniqueId or AXLabel equals the value (and whose type
-# equals `type`, when given): "x y w h", a tab, then a description for error messages.
+# equals `type`, when given): "x y w h", a tab, a description for error messages, a tab,
+# then `on` or `off` (whether the frame centre lies on the screen, the first root's frame:
+# a list keeps rows laid out below the fold, and a tap there lands on nothing).
 # Elements sharing one frame are listed once: a tap at that centre cannot tell them apart.
 # Exits 1 when nothing matches.
 find_matches() {
@@ -77,6 +79,7 @@ import json, sys
 kind, value, wanted = sys.argv[1], sys.argv[2], sys.argv[3]
 key = "AXUniqueId" if kind == "id" else "AXLabel"
 seen = []
+screen = None
 def walk(node):
     if node.get(key) == value and (not wanted or node.get("type") == wanted):
         f = node["frame"]
@@ -86,10 +89,17 @@ def walk(node):
             desc = "type=%s label=%r id=%s frame=(%s)" % (
                 node.get("type"), node.get("AXLabel"), node.get("AXUniqueId") or "-",
                 ", ".join("%g" % round(v, 1) for v in frame))
-            print("%s %s %s %s\t%s" % (frame + (desc,)))
+            cx, cy = frame[0] + frame[2] / 2, frame[1] + frame[3] / 2
+            sx, sy, sw, sh = screen
+            onscreen = sx <= cx < sx + sw and sy <= cy < sy + sh
+            print("%s %s %s %s\t%s\t%s" % (frame + (desc, "on" if onscreen else "off")))
     for child in node.get("children") or []:
         walk(child)
-for root in json.load(sys.stdin):
+roots = json.load(sys.stdin)
+if roots:
+    f = roots[0]["frame"]
+    screen = (f["x"], f["y"], f["width"], f["height"])
+for root in roots:
     walk(root)
 sys.exit(0 if seen else 1)
 ' "$1" "$2" "${3:-}"
@@ -142,6 +152,7 @@ tap() {
 
 # tap_unique <id|label> <value> [type] — tap, but only when exactly one element matches
 # (once the screen is stable); with several, lists them and exits 1 instead of picking one.
+# Also exits 1 when that one element is off screen, rather than tapping nothing.
 tap_unique() {
   local kind=$1 value=$2 type=${3:-} what matches count x y w h
   what="$kind '$value'${type:+ of type $type}"
@@ -160,6 +171,9 @@ tap_unique() {
       fi
     } >&2
     exit 1
+  fi
+  if [ "${matches##*$'\t'}" = off ]; then
+    die "the element with $what is off screen at $(printf '%s' "$matches" | cut -f2 | sed 's/.* frame=//'): scroll it into view first"
   fi
   read -r x y w h <<<"${matches%%$'\t'*}"
   axe tap -x "$(center "$x" "$w")" -y "$(center "$y" "$h")" --udid "$UDID" >/dev/null \
