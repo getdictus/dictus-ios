@@ -50,31 +50,32 @@ public struct SmartModeRingLayout: Equatable, Sendable {
 
     /// The band's default radii, as on an iPhone 15 Pro Max. On a device, `radii(…)`
     /// derives them from the room the Home screen has.
-    public static let defaultInnerRadius: CGFloat = 90
-    public static let defaultOuterRadius: CGFloat = 154
+    public static let defaultInnerRadius: CGFloat = 62
+    public static let defaultOuterRadius: CGFloat = 203
 
-    /// The band's outer diameter as a share of the screen's width, and its bounds.
-    public static let widthShare: CGFloat = 0.718
-    public static let minimumOuterRadius: CGFloat = 125
-    public static let maximumOuterRadius: CGFloat = 166
+    /// The band starts just outside the grown mic: its halo (46 pt × 1.12) plus 10 pt.
+    public static let fittedInnerRadius: CGFloat = 62
 
-    /// The inner radius as a share of the outer one. The band is thin and stands clear of
-    /// the mic, so that even a quarter of the half-circle (four rows, 45°) has an inner
-    /// edge longer than the band is thick: a segment then reads as a piece of one ring,
-    /// not as a wedge (device feedback on round 4, 2026-10-25).
-    public static let innerShare: CGFloat = 90.0 / 154.0
+    /// How close the band may come to the screen's sides and to the content above.
+    public static let edgeMargin: CGFloat = 12
 
-    /// The band's radii for a Home screen `width` points wide, with `heightAbove` points
-    /// between the mic's centre and the top of the area the band may cover.
+    /// Bounds on the outer radius, for screens far from a phone's.
+    public static let minimumOuterRadius: CGFloat = 120
+    public static let maximumOuterRadius: CGFloat = 230
+
+    /// The band's radii for a Home screen `width` points wide, its mic centred, with
+    /// `heightAbove` points between the mic's centre and the content above.
     ///
-    /// The outer diameter is `widthShare` of the width, no taller than the room above the
-    /// mic, clamped to `minimumOuterRadius...maximumOuterRadius`, rounded to the point;
-    /// the inner radius is `innerShare` of it. 90–154 pt on an iPhone 15 Pro Max, 79–135
-    /// pt on an iPhone SE, whatever the number of rows.
+    /// As large as the screen allows: the inner edge just outside the grown mic, the
+    /// outer edge `edgeMargin` from the screen's sides and from the content above, so the
+    /// segments get the room (device feedback on round 5, 2026-10-25: much larger
+    /// buttons, a smaller gap to the mic). 62–203 pt on an iPhone 15 Pro Max, 62–175 pt
+    /// on an iPhone SE.
     public static func radii(width: CGFloat, heightAbove: CGFloat) -> (inner: CGFloat, outer: CGFloat) {
-        let byWidth = width * widthShare / 2
-        let outer = min(maximumOuterRadius, max(minimumOuterRadius, min(byWidth, heightAbove))).rounded()
-        return ((outer * innerShare).rounded(), outer)
+        let byWidth = width / 2 - edgeMargin
+        let byHeight = heightAbove - edgeMargin
+        let outer = min(maximumOuterRadius, max(minimumOuterRadius, min(byWidth, byHeight))).rounded(.down)
+        return (fittedInnerRadius, outer)
     }
 
     /// The band's inner and outer radii as drawn.
@@ -183,17 +184,20 @@ public struct SmartModeRingLayout: Equatable, Sendable {
     /// - **Inner:** `innerCorner`, but never more than `innerEdgeShare` of the inner
     ///   edge, so a short inner edge keeps a straight part and the segment does not turn
     ///   into a wedge.
-    /// - **Outer:** `outerShare` of the band's thickness.
+    /// - **Outer:** `outerShare` of the band's thickness, never more than `outerMaximum`:
+    ///   on a thick band a share alone would round the outer corners so far that they
+    ///   carve V-shaped holes between neighbours.
     ///
     /// Both then go through `clampedCorners(gap:inner:outer:)`.
     public func fittedCorners(gap: CGFloat,
                               innerCorner: CGFloat,
                               innerEdgeShare: CGFloat,
-                              outerShare: CGFloat) -> (inner: CGFloat, outer: CGFloat) {
+                              outerShare: CGFloat,
+                              outerMaximum: CGFloat) -> (inner: CGFloat, outer: CGFloat) {
         clampedCorners(
             gap: gap,
             inner: min(innerCorner, innerEdgeLength(gap: gap) * innerEdgeShare),
-            outer: thickness * outerShare
+            outer: min(outerMaximum, thickness * outerShare)
         )
     }
 
@@ -248,7 +252,16 @@ public struct SmartModeRingLayout: Equatable, Sendable {
                                innerCornerRadius: CGFloat,
                                outerCornerRadius: CGFloat,
                                stepDegrees: Double = 1) -> [CGPoint] {
-        let range = angleRange(ofEntry: index)
+        outline(over: angleRange(ofEntry: index), gap: gap, innerCornerRadius: innerCornerRadius,
+                outerCornerRadius: outerCornerRadius, stepDegrees: stepDegrees)
+    }
+
+    /// The outline over any `range` of the band.
+    private func outline(over range: ClosedRange<Double>,
+                         gap: CGFloat,
+                         innerCornerRadius: CGFloat,
+                         outerCornerRadius: CGFloat,
+                         stepDegrees: Double = 1) -> [CGPoint] {
         let half = Double(gap) / 2
         let corners = clampedCorners(gap: gap, inner: innerCornerRadius, outer: outerCornerRadius)
         let innerCorner = Double(corners.inner)

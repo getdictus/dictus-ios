@@ -42,27 +42,40 @@ enum HomeSmartModeRingStyle {
     /// the selection has no gap (`SmartModeRingLayout.entryIndex(at:)`).
     static let segmentGap: CGFloat = 4
 
-    /// A segment's corners: small on the inner arc (8 pt, at most a fifth of the inner
+    /// A segment's corners: small on the inner arc (10 pt, at most a quarter of the inner
     /// edge), larger on the outer arc (0.3 of the band's thickness). Rounder outer corners
     /// carved visible V-shaped holes between neighbours near the arc (round 5 captures,
     /// 2026-10-25). `SmartModeRingLayout.fittedCorners` turns these into points and
     /// clamps them.
-    static let innerCornerRadius: CGFloat = 8
-    static let innerCornerEdgeShare: CGFloat = 0.2
+    static let innerCornerRadius: CGFloat = 10
+    static let innerCornerEdgeShare: CGFloat = 0.25
     static let outerCornerThicknessShare: CGFloat = 0.3
+    static let outerCornerMaximum: CGFloat = 20
 
     /// Space kept between a label and its segment's sides.
     static let labelPadding: CGFloat = 6
 
-    static let labelMaximumWidth: CGFloat = 96
+    static let labelMaximumWidth: CGFloat = 112
 
-    /// The accent hairline around an unlit segment, so a dark segment still reads on the
-    /// blurred dark dashboard.
-    static let segmentEdgeOpacity: Double = 0.35
+    // MARK: Glass
+
+    /// A grey veil under each unlit segment's glass, so the segments read apart from the
+    /// blurred dashboard without turning into white or black buttons.
+    static let glassVeilLight: Double = 0.10
+    static let glassVeilDark: Double = 0.07
+
+    /// The hairline that outlines each unlit segment: a soft grey in light appearance,
+    /// where a white edge read too strong, a faint white in dark.
+    static let segmentEdgeLight: Double = 0.10
+    static let segmentEdgeDark: Double = 0.14
+
+    /// Labels on unlit segments: the primary colour, softened, so they stay readable
+    /// on glass without going black or white.
+    static let labelOpacity: Double = 0.66
 
     /// The room the band leaves above itself, below whatever is at the top of the Home
     /// screen, when it is sized (`SmartModeRingLayout.radii`).
-    static let topClearance: CGFloat = 12
+    static let topClearance: CGFloat = 0
 
     // MARK: Motion
 
@@ -220,13 +233,27 @@ struct HomeSmartModeRing: View {
     let session: SmartModeRingSession
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
+    @Environment(\.colorScheme) private var colorScheme
 
     /// False on the first frame, so the segments spring out of the mic.
     @State private var appeared = false
 
     private typealias Style = HomeSmartModeRingStyle
 
-    private var diameter: CGFloat { session.layout.outerRadius * 2 }
+    private var layout: SmartModeRingLayout { session.layout }
+
+    private var diameter: CGFloat { layout.outerRadius * 2 }
+
+    private var corners: (inner: CGFloat, outer: CGFloat) {
+        layout.fittedCorners(
+            gap: Style.segmentGap,
+            innerCorner: Style.innerCornerRadius,
+            innerEdgeShare: Style.innerCornerEdgeShare,
+            outerShare: Style.outerCornerThicknessShare,
+            outerMaximum: Style.outerCornerMaximum
+        )
+    }
 
     var body: some View {
         ZStack {
@@ -241,77 +268,100 @@ struct HomeSmartModeRing: View {
         .onAppear { appeared = true }
     }
 
+    // MARK: Segments
+
     private func segment(index: Int, entry: SmartModeFanEntry) -> some View {
         let isLit = session.highlightedIndex == index
         let isSelectable = session.isSelectable(index)
-        let corners = session.layout.fittedCorners(
-            gap: Style.segmentGap,
-            innerCorner: Style.innerCornerRadius,
-            innerEdgeShare: Style.innerCornerEdgeShare,
-            outerShare: Style.outerCornerThicknessShare
-        )
-        let outline = session.layout.segmentOutline(
-            ofEntry: index,
-            gap: Style.segmentGap,
-            innerCornerRadius: corners.inner,
-            outerCornerRadius: corners.outer
-        )
-        let fill = isLit ? Color.dictusAccent : Color.dictusSurface.opacity(isSelectable ? 1 : 0.7)
-        let center = session.layout.labelCenter(ofEntry: index)
+        let shape = SegmentShape(outline: layout.segmentOutline(
+            ofEntry: index, gap: Style.segmentGap,
+            innerCornerRadius: corners.inner, outerCornerRadius: corners.outer
+        ))
         // Rows nearer the top come out first: index order is nearness order.
         let entrance = reduceMotion
             ? Style.reducedMotionFade
             : Style.segmentSpring.delay(Double(index) * Style.segmentStagger)
         return ZStack {
-            SegmentShape(outline: outline)
-                .fill(fill)
-                .overlay(
-                    SegmentShape(outline: outline)
-                        .stroke(Color.dictusAccent.opacity(isLit ? 0 : Style.segmentEdgeOpacity), lineWidth: 1)
-                )
-                .shadow(color: isLit ? .dictusAccent.opacity(0.45) : .black.opacity(0.16), radius: isLit ? 12 : 8)
-
+            segmentSurface(shape, isLit: isLit)
             label(entry, isLit: isLit, isSelectable: isSelectable)
-                .frame(width: session.layout.labelWidth(
-                    gap: Style.segmentGap, padding: Style.labelPadding, maximum: Style.labelMaximumWidth
-                ))
-                .offset(x: center.x, y: center.y)
+                .frame(width: labelWidth)
+                .offset(x: layout.labelCenter(ofEntry: index).x, y: layout.labelCenter(ofEntry: index).y)
         }
         .scaleEffect(appeared || reduceMotion ? 1 : Style.segmentHiddenScale)
         .opacity(appeared ? 1 : 0)
         .animation(entrance, value: appeared)
-        .animation(.easeOut(duration: 0.12), value: isLit)
+        .animation(.easeOut(duration: 0.14), value: isLit)
+    }
+
+    @ViewBuilder
+    private func segmentSurface(_ shape: SegmentShape, isLit: Bool) -> some View {
+        if isLit {
+            shape.fill(Color.dictusAccent)
+                .shadow(color: .dictusAccent.opacity(0.35), radius: 14)
+        } else {
+            glass(shape)
+        }
+    }
+
+    /// Glass, or with Reduce Transparency a soft opaque grey.
+    @ViewBuilder
+    private func glass<S: Shape>(_ shape: S) -> some View {
+        if reduceTransparency {
+            shape.fill(Color.dictusSurface.opacity(0.92))
+                .overlay(shape.stroke(Color.primary.opacity(0.08), lineWidth: 1))
+        } else {
+            // A grey veil under the glass keeps it soft on the light dashboard, where bare
+            // glass read as bright white buttons (v6 captures, 2026-10-25).
+            let isDark = colorScheme == .dark
+            shape.fill(Color.primary.opacity(isDark ? Style.glassVeilDark : Style.glassVeilLight))
+                .dictusGlass(in: shape)
+                .overlay(shape.stroke(
+                    isDark ? Color.white.opacity(Style.segmentEdgeDark) : Color.primary.opacity(Style.segmentEdgeLight),
+                    lineWidth: 1
+                ))
+        }
+    }
+
+    // MARK: Labels
+
+    private var labelWidth: CGFloat {
+        layout.labelWidth(gap: Style.segmentGap, padding: Style.labelPadding, maximum: Style.labelMaximumWidth)
     }
 
     /// An icon and the fan's short name, with the fan's `PRO` / `Off` tag under it, on one
-    /// line each.
+    /// line each. Soft at rest — the primary colour at `labelOpacity`, never black or white —
+    /// and white on the lit segment.
     private func label(_ entry: SmartModeFanEntry, isLit: Bool, isSelectable: Bool) -> some View {
         VStack(spacing: 3) {
             Image(systemName: entry.icon)
-                .font(.system(size: 18, weight: .medium))
+                .font(.system(size: 22, weight: .regular))
             Text(HomeSmartModeCopy.shortName(of: entry))
-                .font(.system(size: 14, weight: isLit ? .bold : .semibold))
+                .font(.system(size: 16, weight: isLit ? .semibold : .medium))
                 .lineLimit(1)
                 .minimumScaleFactor(0.6)
             if let tag = HomeSmartModeCopy.tagLabel(session.picker.tag(for: entry)) {
                 Text(tag)
-                    .font(.system(size: 9, weight: .bold))
+                    .font(.system(size: 9, weight: .semibold))
                     .textCase(.uppercase)
                     .lineLimit(1)
-                    .opacity(0.8)
+                    .opacity(0.6)
             }
         }
-        .foregroundColor(isLit ? .white : .primary)
-        .opacity(isSelectable ? 1 : 0.35)
-        // The ring's labels stay at one size: the band already spans most of the screen's
-        // width and cannot grow with Dynamic Type. VoiceOver's actions, which follow the
-        // user's text size, carry the same choices.
+        .foregroundStyle(labelStyle(isLit: isLit))
+        .opacity(isSelectable ? 1 : 0.4)
+        // The ring's labels stay at one size: the band already spans the screen's width
+        // and cannot grow with Dynamic Type. VoiceOver's actions, which follow the user's
+        // text size, carry the same choices.
         .dynamicTypeSize(.large)
+    }
+
+    private func labelStyle(isLit: Bool) -> AnyShapeStyle {
+        if isLit { return AnyShapeStyle(Color.white) }
+        return AnyShapeStyle(Color.primary.opacity(Style.labelOpacity))
     }
 }
 
-/// A closed outline from `SmartModeRingLayout.segmentOutline`, placed on the ring's
-/// centre: a band segment with rounded corners, filled as is.
+/// A closed outline from `SmartModeRingLayout`, placed on the ring's centre.
 private struct SegmentShape: Shape {
 
     let outline: [CGPoint]

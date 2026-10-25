@@ -167,10 +167,10 @@ final class SmartModeRingTests: XCTestCase {
         }
     }
 
-    /// The view's corner rule: 8 pt inner corners (at most a fifth of the inner edge),
-    /// outer corners 0.3 of the thickness.
+    /// The view's corner rule: 10 pt inner corners (at most a quarter of the inner edge),
+    /// outer corners 0.3 of the thickness and at most 20 pt.
     private func corners(_ layout: SmartModeRingLayout) -> (inner: CGFloat, outer: CGFloat) {
-        layout.fittedCorners(gap: gap, innerCorner: 8, innerEdgeShare: 0.2, outerShare: 0.3)
+        layout.fittedCorners(gap: gap, innerCorner: 10, innerEdgeShare: 0.25, outerShare: 0.3, outerMaximum: 20)
     }
 
     private func outline(_ layout: SmartModeRingLayout, _ index: Int) -> [CGPoint] {
@@ -179,30 +179,28 @@ final class SmartModeRingTests: XCTestCase {
                                      innerCornerRadius: corners.inner, outerCornerRadius: corners.outer)
     }
 
-    /// One rule for every count: a thin band standing clear of the mic, 90–154 pt on an
-    /// iPhone 15 Pro Max and 79–135 pt on an iPhone SE, clamped on other widths, and
-    /// never taller than the room above the mic.
-    func testTheBandIsThinAndClearOfTheMic() {
+    /// One rule for every count: the band starts just outside the grown mic and reaches
+    /// to 12 pt from the screen's sides, 62–203 pt on an iPhone 15 Pro Max and 62–175 pt
+    /// on an iPhone SE, and never closer than 12 pt to the content above.
+    func testTheBandFillsTheRoomAroundTheMic() {
         let proMax = SmartModeRingLayout.radii(width: 430, heightAbove: 600)
-        XCTAssertEqual(proMax.inner, 90)
-        XCTAssertEqual(proMax.outer, 154)
+        XCTAssertEqual(proMax.inner, 62)
+        XCTAssertEqual(proMax.outer, 203)
         let se = SmartModeRingLayout.radii(width: 375, heightAbove: 400)
-        XCTAssertEqual(se.inner, 79)
-        XCTAssertEqual(se.outer, 135)
+        XCTAssertEqual(se.inner, 62)
+        XCTAssertEqual(se.outer, 175)
 
-        XCTAssertEqual(SmartModeRingLayout.radii(width: 430, heightAbove: 100).outer,
+        XCTAssertEqual(SmartModeRingLayout.radii(width: 430, heightAbove: 150).outer, 138)
+        XCTAssertEqual(SmartModeRingLayout.radii(width: 430, heightAbove: 50).outer,
                        SmartModeRingLayout.minimumOuterRadius)
         XCTAssertEqual(SmartModeRingLayout.radii(width: 1000, heightAbove: 1000).outer,
                        SmartModeRingLayout.maximumOuterRadius)
 
-        for device in devices {
-            for count in 2...4 {
-                let layout = device.layout(count)
-                // Clear of the grown mic's halo, and even with four rows a segment's inner
-                // edge is longer than the band is thick: a piece of a ring, not a wedge.
-                XCTAssertGreaterThan(layout.innerRadius, SmartModeRingLayout.micRadius + 20, device.name)
-                XCTAssertGreaterThan(layout.innerEdgeLength(gap: gap), layout.thickness, "\(device.name) \(count)")
-            }
+        for (width, radii) in [(CGFloat(430), proMax), (375, se)] {
+            // 8 to 12 pt outside the grown mic's halo (46 pt × 1.12), 12 pt from the sides.
+            let gapToMic = radii.inner - 46 * 1.12
+            XCTAssertTrue((8...12).contains(gapToMic), "\(gapToMic)")
+            XCTAssertLessThanOrEqual(radii.outer + SmartModeRingLayout.edgeMargin, width / 2)
         }
     }
 
@@ -213,8 +211,8 @@ final class SmartModeRingTests: XCTestCase {
             for count in 2...4 {
                 let layout = device.layout(count)
                 let fitted = corners(layout)
-                XCTAssertEqual(fitted.inner, min(8, layout.innerEdgeLength(gap: gap) * 0.2), accuracy: 0.001)
-                XCTAssertEqual(fitted.outer, layout.thickness * 0.3, accuracy: 0.001, "\(device.name) \(count)")
+                XCTAssertEqual(fitted.inner, min(10, layout.innerEdgeLength(gap: gap) * 0.25), accuracy: 0.001)
+                XCTAssertEqual(fitted.outer, min(20, layout.thickness * 0.3), accuracy: 0.001, "\(device.name) \(count)")
                 XCTAssertGreaterThan(fitted.inner, 0)
                 XCTAssertGreaterThan(fitted.outer, fitted.inner, "\(device.name) \(count)")
                 XCTAssertLessThan(fitted.inner + fitted.outer, layout.thickness)
