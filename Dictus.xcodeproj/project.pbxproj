@@ -20,6 +20,7 @@
 		AA489002 /* HomeSmartModeRing.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA489001 /* HomeSmartModeRing.swift */; };
 		AA800081 /* VocabularyListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA800181 /* VocabularyListView.swift */; };
 		AA512071 /* VocabularySuggestionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA512171 /* VocabularySuggestionsView.swift */; };
+		AA512079 /* VocabularyPairReviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA512179 /* VocabularyPairReviewView.swift */; };
 		AA512072 /* VocabularySuggestionDictionary.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA512172 /* VocabularySuggestionDictionary.swift */; };
 		SS000009 /* PaywallPresentation.swift in Sources */ = {isa = PBXBuildFile; fileRef = SS100009 /* PaywallPresentation.swift */; };
 		AA700070 /* HistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA700170 /* HistoryView.swift */; };
@@ -425,6 +426,7 @@
 		AA489001 /* HomeSmartModeRing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeSmartModeRing.swift; sourceTree = "<group>"; };
 		AA800181 /* VocabularyListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyListView.swift; sourceTree = "<group>"; };
 		AA512171 /* VocabularySuggestionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularySuggestionsView.swift; sourceTree = "<group>"; };
+		AA512179 /* VocabularyPairReviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyPairReviewView.swift; sourceTree = "<group>"; };
 		AA512172 /* VocabularySuggestionDictionary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularySuggestionDictionary.swift; sourceTree = "<group>"; };
 		SS100009 /* PaywallPresentation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaywallPresentation.swift; sourceTree = "<group>"; };
 		AA700170 /* HistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryView.swift; sourceTree = "<group>"; };
@@ -740,6 +742,7 @@
 				AA489001 /* HomeSmartModeRing.swift */,
 				AA800181 /* VocabularyListView.swift */,
 				AA512171 /* VocabularySuggestionsView.swift */,
+				AA512179 /* VocabularyPairReviewView.swift */,
 				AA512172 /* VocabularySuggestionDictionary.swift */,
 				SS100009 /* PaywallPresentation.swift */,
 				AA700170 /* HistoryView.swift */,
@@ -1402,6 +1405,7 @@
 				AA489002 /* HomeSmartModeRing.swift in Sources */,
 				AA800081 /* VocabularyListView.swift in Sources */,
 				AA512071 /* VocabularySuggestionsView.swift in Sources */,
+				AA512079 /* VocabularyPairReviewView.swift in Sources */,
 				AA512072 /* VocabularySuggestionDictionary.swift in Sources */,
 				SS000009 /* PaywallPresentation.swift in Sources */,
 				AA700070 /* HistoryView.swift in Sources */,
