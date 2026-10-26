@@ -235,7 +235,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@: konnte nicht angewendet werden. Versuch es noch einmal."
+            "value" : "%@: konnte nicht angewendet werden. Versuch es noch mal."
           }
         },
         "es" : {
@@ -1115,7 +1115,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Apple Intelligence está ocupado. Los modos volverán en un momento."
+            "value" : "Apple Intelligence está ocupado ahora. Los modos volverán en breve."
           }
         },
         "fr" : {
@@ -1212,7 +1212,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Apple Intelligence aún está descargando su modelo. Los modos funcionarán después."
+            "value" : "Apple Intelligence aún descarga su modelo. Los modos funcionarán después."
           }
         },
         "fr" : {
@@ -4330,7 +4330,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Modi erfordern iOS 26 oder neuer."
+            "value" : "Die Modi erfordern iOS 26 oder neuer."
           }
         },
         "en" : {
@@ -4359,7 +4359,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Modi sind in diesem Build nicht verfügbar."
+            "value" : "Die Modi sind in dieser Version nicht verfügbar."
           }
         },
         "en" : {
@@ -4388,7 +4388,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Modi sind gerade nicht verfügbar."
+            "value" : "Die Modi sind gerade nicht verfügbar."
           }
         },
         "en" : {
@@ -10398,7 +10398,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Das Mikrofon wird von einem Anruf belegt. Versuch es nach dem Anruf noch einmal."
+            "value" : "Das Mikrofon ist durch einen Anruf belegt. Versuch es nach dem Anruf noch mal."
           }
         },
         "es" : {
@@ -10862,7 +10862,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Diese Datei hat kein Audioformat, das Dictus lesen kann."
+            "value" : "Diese Datei ist kein Audioformat, das Dictus lesen kann."
           }
         },
         "es" : {
@@ -10955,7 +10955,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Diese Sprachnachricht ist länger als 10 Minuten, die Höchstdauer, die Dictus transkribiert."
+            "value" : "Diese Sprachnachricht ist länger als 10 Minuten, die maximale Länge, die Dictus transkribiert."
           }
         },
         "es" : {
@@ -11401,7 +11401,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dictus-Bereitschaft beenden"
+            "value" : "Bereitschaftsmodus von Dictus deaktivieren"
           }
         },
         "es" : {
