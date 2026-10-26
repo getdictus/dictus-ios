@@ -7,7 +7,7 @@
 
 ## Sub-features
 
-- `vocabulary.add`: « Ajouter un terme »: the correct spelling and how Dictus mishears it.
+- `vocabulary.add`: « Ajouter un terme »: the correct spelling and, optionally, how Dictus mishears it. A term saved alone lists as « En attente d’erreurs à corriger » and replaces nothing (#819).
 - `vocabulary.edit`: Edit a term.
 - `vocabulary.delete`: Delete a term.
 - `vocabulary.reset`: « Réinitialiser le vocabulaire ».
@@ -18,7 +18,7 @@
 ## How to get to it (user POV)
 
 1. With Pro, Dictus → Réglages → Dictus Pro → Vocabulaire.
-2. Tap « Ajouter un terme », type the word and how it comes out wrong, save.
+2. Tap « Ajouter un terme », type the word and, if known, how it comes out wrong, save.
 
 ## Driving it with axe + Argent
 
