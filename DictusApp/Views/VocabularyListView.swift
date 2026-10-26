@@ -118,7 +118,7 @@ struct VocabularyListView: View {
                 Button {
                     showSuggestions = true
                 } label: {
-                    Label("Suggestions from History", systemImage: "text.magnifyingglass")
+                    Label("Analyze my transcriptions", systemImage: "text.magnifyingglass")
                 }
             } footer: {
                 Text("Words from your History that Dictus may be getting wrong.")

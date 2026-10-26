@@ -65,3 +65,40 @@ struct VocabularySuggestionDictionary {
         return false
     }
 }
+
+/// `VocabularySuggestionDictionary.isKnown` callable from any thread, for the analysis
+/// that now runs off the main actor (#512, 2.1 s main-thread freeze on device).
+///
+/// `UITextChecker` is UIKit, so each verdict is still asked on the main thread, once
+/// per distinct word (a few hundred per analysis), and remembered. The main thread
+/// gets short separate slices instead of the whole analysis.
+final class KnownWordVerdicts: @unchecked Sendable {
+
+    private let dictionary: VocabularySuggestionDictionary
+    private let lock = NSLock()
+    private var verdicts: [String: Bool] = [:]
+
+    @MainActor
+    init(records: [TranscriptionRecord]) {
+        dictionary = VocabularySuggestionDictionary(records: records)
+    }
+
+    func isKnown(_ word: String) -> Bool {
+        lock.lock()
+        let remembered = verdicts[word]
+        lock.unlock()
+        if let remembered { return remembered }
+        let verdict: Bool
+        if Thread.isMainThread {
+            verdict = MainActor.assumeIsolated { dictionary.isKnown(word) }
+        } else {
+            // Never called while the main thread waits on the analysis: the view
+            // awaits it, which leaves the main thread free to run this.
+            verdict = DispatchQueue.main.sync { MainActor.assumeIsolated { dictionary.isKnown(word) } }
+        }
+        lock.lock()
+        verdicts[word] = verdict
+        lock.unlock()
+        return verdict
+    }
+}
