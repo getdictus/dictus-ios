@@ -164,16 +164,16 @@ final class ModelInfoTests: XCTestCase {
     }
 
     func testTurboGatedOutOnLowRamDevices() {
-        // iPhone 12 / iPhone SE tier: 4 GB RAM — Turbo must not be runnable.
+        // iPhone SE 3rd gen: an A15 with 4 GB RAM — Turbo must not be runnable.
         // Issue #369: it stays LISTED, disabled with a reason, instead of vanishing.
-        let iphone12 = makeCapabilities(ramGB: 4, model: "iPhone13,2")
+        let iphoneSE3 = makeCapabilities(ramGB: 4, model: "iPhone14,6")
         guard let turbo = ModelInfo.forIdentifier("openai_whisper-large-v3-v20240930_turbo_632MB") else {
             XCTFail("openai_whisper-large-v3-v20240930_turbo_632MB is missing from the catalogue")
             return
         }
-        XCTAssertFalse(turbo.isSupported(on: iphone12))
-        XCTAssertEqual(turbo.incompatibilityReason(on: iphone12), .insufficientMemory(requiredGB: 6))
-        XCTAssertTrue(ModelInfo.available(on: iphone12).map(\.identifier).contains("openai_whisper-large-v3-v20240930_turbo_632MB"))
+        XCTAssertFalse(turbo.isSupported(on: iphoneSE3))
+        XCTAssertEqual(turbo.incompatibilityReason(on: iphoneSE3), .insufficientMemory(requiredGB: 6))
+        XCTAssertTrue(ModelInfo.available(on: iphoneSE3).map(\.identifier).contains("openai_whisper-large-v3-v20240930_turbo_632MB"))
     }
 
     func testTurboAvailableOnSixGBPlusDevices() {
@@ -312,6 +312,7 @@ final class ModelInfoTests: XCTestCase {
     func testIncompatibilityReasonNamesTheRightConstraint() {
         let iphone11 = makeCapabilities(ramGB: 4, model: "iPhone12,1")
         let a14 = makeCapabilities(ramGB: 4, model: "iPhone13,2")
+        let a15 = makeCapabilities(ramGB: 4, model: "iPhone14,6")
         guard let small = ModelInfo.forIdentifier("openai_whisper-small") else {
             XCTFail("openai_whisper-small is missing from the catalogue")
             return
@@ -324,9 +325,11 @@ final class ModelInfoTests: XCTestCase {
         // Old chip, not memory: an iPhone 11 has the RAM, it lacks the generation.
         XCTAssertEqual(small.incompatibilityReason(on: iphone11), .hardwareGeneration)
         XCTAssertEqual(turbo.incompatibilityReason(on: iphone11), .hardwareGeneration)
-        // Right generation, not enough memory.
-        XCTAssertEqual(turbo.incompatibilityReason(on: a14), .insufficientMemory(requiredGB: 6))
+        // Old chip for Turbo, not memory (#660): the A14 is below the line Argmax draws.
+        XCTAssertEqual(turbo.incompatibilityReason(on: a14), .hardwareGeneration)
         XCTAssertNil(small.incompatibilityReason(on: a14))
+        // Right generation, not enough memory.
+        XCTAssertEqual(turbo.incompatibilityReason(on: a15), .insufficientMemory(requiredGB: 6))
     }
 
     func testIsSupportedOnA12A13AcceptsOnlyTinyAndBase() {
@@ -440,7 +443,12 @@ final class ModelInfoTests: XCTestCase {
 
         let m1 = makeCapabilities(ramGB: 8, model: "iPad13,4")
         XCTAssertEqual(ModelInfo.available(on: m1).map(\.identifier), ModelInfo.all.map(\.identifier))
-        XCTAssertTrue(ModelInfo.available(on: m1).allSatisfy { $0.isSupported(on: m1) })
+        // #660: Argmax's M1 entry omits Turbo, so that row alone is listed disabled.
+        for model in ModelInfo.available(on: m1) {
+            let expected: ModelInfo.IncompatibilityReason? =
+                model.identifier == turbo632 ? .hardwareGeneration : nil
+            XCTAssertEqual(model.incompatibilityReason(on: m1), expected, model.identifier)
+        }
     }
 
     /// The iPhone side of the same rule must not move: A12/A13 keep Base, A14 keeps
@@ -558,6 +566,96 @@ final class ModelInfoTests: XCTestCase {
         }
     }
 
+    // MARK: - Issue #660: Turbo needs an A15, whatever the RAM
+
+    private let turboVariants = ["openai_whisper-large-v3-v20240930_turbo_632MB",
+                                 "openai_whisper-large-v3_turbo_954MB"]
+
+    /// The A14 iPhones and the A14/M1 iPads, at the RAM they ship with: Argmax lists
+    /// neither Turbo variant for any of them, so 6 GB and more does not help.
+    func testTurboRefusedOnA14AndOlderWhateverTheRam() {
+        let devices = [
+            makeCapabilities(ramGB: 4, model: "iPhone13,1"),   // iPhone 12 mini
+            makeCapabilities(ramGB: 4, model: "iPhone13,2"),   // iPhone 12
+            makeCapabilities(ramGB: 6, model: "iPhone13,3"),   // iPhone 12 Pro
+            makeCapabilities(ramGB: 6, model: "iPhone13,4"),   // iPhone 12 Pro Max
+            makeCapabilities(ramGB: 4, model: "iPad13,2"),     // iPad Air 4 (A14)
+            makeCapabilities(ramGB: 8, model: "iPad13,8"),     // iPad Pro 12.9" M1
+            makeCapabilities(ramGB: 16, model: "iPad13,11"),   // iPad Pro M1, 16 GB
+            makeCapabilities(ramGB: 4, model: "iPhone12,1"),   // iPhone 11
+            makeCapabilities(ramGB: 3, model: "iPhone11,8")    // iPhone XR
+        ]
+        for identifier in turboVariants {
+            guard let turbo = ModelInfo.forIdentifier(identifier) else {
+                return XCTFail("\(identifier) is missing from the catalogue")
+            }
+            for device in devices {
+                XCTAssertEqual(turbo.incompatibilityReason(on: device), .hardwareGeneration,
+                               "\(identifier) on \(device.deviceModelIdentifier)")
+            }
+        }
+    }
+
+    /// The A15 line and up, from the iPhone 13 family and the SE 3 to a future family.
+    func testTurboOfferedOnA15AndNewerWithSixGB() {
+        let devices = [
+            makeCapabilities(ramGB: 6, model: "iPhone14,2"),   // iPhone 13 Pro
+            makeCapabilities(ramGB: 6, model: "iPhone14,3"),   // iPhone 13 Pro Max
+            makeCapabilities(ramGB: 6, model: "iPhone14,7"),   // iPhone 14
+            makeCapabilities(ramGB: 6, model: "iPhone15,2"),   // iPhone 14 Pro
+            makeCapabilities(ramGB: 8, model: "iPhone16,2"),   // iPhone 15 Pro Max
+            makeCapabilities(ramGB: 8, model: "iPhone17,1"),   // iPhone 16 Pro
+            makeCapabilities(ramGB: 12, model: "iPhone18,1"),  // iPhone 17 Pro
+            makeCapabilities(ramGB: 12, model: "iPhone19,1"),  // a family not released yet
+            makeCapabilities(ramGB: 8, model: "iPad14,3")      // iPad Pro M2
+        ]
+        for identifier in turboVariants {
+            guard let turbo = ModelInfo.forIdentifier(identifier) else {
+                return XCTFail("\(identifier) is missing from the catalogue")
+            }
+            for device in devices {
+                XCTAssertNil(turbo.incompatibilityReason(on: device),
+                             "\(identifier) on \(device.deviceModelIdentifier)")
+            }
+        }
+    }
+
+    /// The iPhone 13 and the iPhone SE 3rd gen have the chip and not the memory (4 GB):
+    /// the A15 line does not lift the RAM rule, and they are refused on memory, as before.
+    func testA15WithFourGBIsStillRefusedOnMemory() {
+        for model in ["iPhone14,5", "iPhone14,6"] {
+            for identifier in turboVariants {
+                XCTAssertEqual(ModelInfo.forIdentifier(identifier)?
+                                   .incompatibilityReason(on: makeCapabilities(ramGB: 4, model: model)),
+                               .insufficientMemory(requiredGB: 6), "\(identifier) on \(model)")
+            }
+        }
+    }
+
+    /// Identifiers that are neither iPhone nor iPad keep the RAM rule alone, as before
+    /// #660: a Mac, a simulator reporting its host architecture, a test placeholder.
+    func testNonIPhoneOrIPadIdentifiersKeepTheRamRule() {
+        for model in ["arm64", "x86_64", "Mac15,3", "iPhoneTest,1"] {
+            XCTAssertNil(ModelInfo.forIdentifier(turbo632)?.incompatibilityReason(on: makeCapabilities(ramGB: 8, model: model)),
+                         model)
+            XCTAssertEqual(ModelInfo.forIdentifier(turbo632)?.incompatibilityReason(on: makeCapabilities(ramGB: 4, model: model)),
+                           .insufficientMemory(requiredGB: 6), model)
+        }
+    }
+
+    /// An A14 user who installed Turbo under an earlier build keeps dictating with it until
+    /// `TurboMigration` has their target ready. Meanwhile the identifier still resolves, so
+    /// the launch preload keeps Turbo's 300 s budget, and the target is never Turbo.
+    func testA14TurboStaysResolvableUntilMigrated() {
+        let iphone12Pro = makeCapabilities(ramGB: 6, model: "iPhone13,3")
+        for identifier in turboVariants {
+            XCTAssertNotNil(ModelInfo.forIdentifier(identifier), identifier)
+            XCTAssertEqual(ModelInfo.preloadDeadlineSeconds(for: identifier), 300, identifier)
+        }
+        XCTAssertNotEqual(ModelInfo.recommendedIdentifier(for: iphone12Pro), turbo632)
+        XCTAssertNotEqual(ModelInfo.recommendedIdentifier(forSpokenLanguage: "zh", on: iphone12Pro), turbo632)
+    }
+
     // MARK: - Issue #408: the Turbo swap and the users left on the old variant
 
     private let turbo632 = "openai_whisper-large-v3-v20240930_turbo_632MB"
@@ -666,12 +764,15 @@ final class ModelInfoTests: XCTestCase {
             return
         }
         let a14 = makeCapabilities(ramGB: 4, model: "iPhone13,2")
+        let iphoneSE3 = makeCapabilities(ramGB: 4, model: "iPhone14,6")
         let iphone15ProMax = makeCapabilities(ramGB: 8, model: "iPhone16,2")
 
         // Argmax lists both variants for exactly the same device families, so the
         // gate must not diverge between them.
-        XCTAssertEqual(old.incompatibilityReason(on: a14), .insufficientMemory(requiredGB: 6))
-        XCTAssertEqual(new.incompatibilityReason(on: a14), .insufficientMemory(requiredGB: 6))
+        XCTAssertEqual(old.incompatibilityReason(on: a14), .hardwareGeneration)
+        XCTAssertEqual(new.incompatibilityReason(on: a14), .hardwareGeneration)
+        XCTAssertEqual(old.incompatibilityReason(on: iphoneSE3), .insufficientMemory(requiredGB: 6))
+        XCTAssertEqual(new.incompatibilityReason(on: iphoneSE3), .insufficientMemory(requiredGB: 6))
         XCTAssertNil(old.incompatibilityReason(on: iphone15ProMax))
         XCTAssertNil(new.incompatibilityReason(on: iphone15ProMax))
     }

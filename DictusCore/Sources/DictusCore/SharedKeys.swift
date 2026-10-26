@@ -402,6 +402,14 @@ public enum SharedKeys {
     /// `DictationTally`.
     public static let dictationTally = "dictus.dictationTally"
 
+    // MARK: - Turbo migration (#660)
+    /// String, a `TurboMigration.Phase` raw value: how far this install has moved off
+    /// Whisper Turbo on a device below the A15. Absent means `notStarted`.
+    public static let turboMigrationPhase = "dictus.turboMigrationPhase"
+    /// String, a `TurboMigration.Notice` stored value: the one-time message, kept until the
+    /// user dismisses it.
+    public static let turboMigrationNotice = "dictus.turboMigrationNotice"
+
     // MARK: - Retired keys
     /// The #357 probe's arming flag, removed with the probe in #361. Kept as a
     /// literal, and only here, so DictusApp can delete it from the App Group on

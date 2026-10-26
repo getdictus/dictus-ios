@@ -20,6 +20,8 @@ struct MainTabView: View {
     @EnvironmentObject var trialCoordinator: ProTrialCoordinator
     @EnvironmentObject var proStatus: ProStatusManager
     @StateObject private var modelManager = ModelManager()
+    @StateObject private var turboMigration = TurboMigrationRunner()
+    @State private var showsTurboNotice = false
 
     @State private var selectedTab: Int = 0
 
@@ -157,6 +159,42 @@ struct MainTabView: View {
     /// tabs and would be torn down with them.
     private var mayRaiseWhatsNew: Bool {
         !isColdStartMode && preparation == nil && coordinator.status == .idle && !showsPaywall
+    }
+
+    /// Moves a device below the A15 off Whisper Turbo (#660), but never under a dictation,
+    /// a cold start or a preparation screen: switching the active model there would pull
+    /// the engine from under them. The next activation tries again.
+    private func runTurboMigrationIfFree() {
+        guard mayRaiseWhatsNew else { return }
+        Task { await turboMigration.run(modelManager: modelManager, isIdle: { mayRaiseWhatsNew }) }
+    }
+
+    /// Arms the notice once the activation has settled. A request made during the launch is
+    /// dropped by SwiftUI, which writes `false` back (simulator, 2026-10-25), and an immediate
+    /// re-arm on `.active` still lands inside a relaunch.
+    private func armTurboNotice() async {
+        guard turboMigration.notice != nil else { return }
+        try? await Task.sleep(for: .seconds(1))
+        showsTurboNotice = turboMigration.notice != nil
+    }
+
+    private static var turboNoticeTitle: String {
+        DeviceCapabilities.current().deviceModelIdentifier.hasPrefix("iPad")
+            ? String(localized: "Whisper Turbo isn't supported on this iPad")
+            : String(localized: "Whisper Turbo isn't supported on this iPhone")
+    }
+
+    private static func turboNoticeMessage(_ notice: TurboMigration.Notice) -> String {
+        switch notice {
+        case .switched(let identifier):
+            return String(localized: "Dictus switched you to \(Self.modelName(identifier)).")
+        case .pending(let identifier):
+            return String(localized: "Dictus will switch you to \(Self.modelName(identifier)) once it has downloaded over Wi-Fi. Until then, Turbo keeps working.")
+        }
+    }
+
+    private static func modelName(_ identifier: String) -> String {
+        ModelInfo.forIdentifier(identifier)?.localizedDisplayName ?? identifier
     }
 
     /// Shows What's new if it is due and nothing owns the display (#685). Returns whether
@@ -319,6 +357,29 @@ struct MainTabView: View {
         .onChange(of: preparation != nil || isColdStartMode || whatsNewSteps != nil) { _, blocked in
             voiceNotes.mainScreenBlocked = blocked
         }
+        // #660: run at launch, at every activation (`.active` above), and whenever an input a
+        // waiting migration needs arrives: a finished download, a load, the end of a dictation.
+        .onAppear { runTurboMigrationIfFree() }
+        .onChange(of: modelManager.downloadedModels) { _, _ in runTurboMigrationIfFree() }
+        .onChange(of: modelManager.modelLoadState) { _, _ in runTurboMigrationIfFree() }
+        .onChange(of: coordinator.status) { _, _ in runTurboMigrationIfFree() }
+        // Armed when the notice appears and at every activation; only OK consumes it.
+        .task(id: turboMigration.notice) { await armTurboNotice() }
+        .alert(
+            Self.turboNoticeTitle,
+            isPresented: Binding(
+                get: { showsTurboNotice && turboMigration.notice != nil && mayRaiseTrialScreens },
+                set: { showsTurboNotice = $0 }
+            ),
+            presenting: turboMigration.notice,
+            actions: { _ in
+                Button("OK") {
+                    turboMigration.dismissNotice()
+                    PersistentLog.log(.turboMigration(step: "messageShown", model: activeModelIdentifier))
+                }
+            },
+            message: { notice in Text(Self.turboNoticeMessage(notice)) }
+        )
         .onOpenURL { url in
             // Whatever this URL asks for, What's new does not take its place (#685). If it
             // was drawn before the URL was known, it has not been recorded yet (it is, once
@@ -430,6 +491,8 @@ struct MainTabView: View {
                 if !presentWhatsNewIfDue() {
                     trialCoordinator.evaluate(canPresent: mayRaiseTrialScreens)
                 }
+                runTurboMigrationIfFree()
+                Task { await armTurboNotice() }
             }
             if newPhase == .background {
                 isColdStartMode = false

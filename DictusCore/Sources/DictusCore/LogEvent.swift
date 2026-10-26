@@ -143,6 +143,10 @@ public enum LogEvent: Sendable {
     case modelCompilationCompleted(name: String, durationMs: Int)
     case modelDeleted(name: String, engine: String)
     case modelDeleteFailed(name: String, error: String)
+    /// A step of moving a pre-A15 device off Whisper Turbo (#660). `step` is a
+    /// `TurboMigration.State` raw value, or one of the outcomes the app adds around it
+    /// (`downloadFailed`, `turboFilesDeleted`, `messageShown`).
+    case turboMigration(step: String, model: String)
     case modelPrewarmStarted(name: String)
     case modelCleanupPerformed(name: String, reason: String)
     case modelPrewarmPeakMemory(modelName: String, peakMB: Int)
@@ -699,6 +703,7 @@ public enum LogEvent: Sendable {
         case .modelDownloadStarted, .modelDownloadCompleted, .modelDownloadFailed,
              .modelSelected, .modelCompilationStarted, .modelCompilationCompleted,
              .modelDeleted, .modelDeleteFailed, .modelPrewarmStarted, .modelCleanupPerformed,
+             .turboMigration,
              .modelPrewarmPeakMemory, .modelPrewarmTimeout, .modelLoadStateChanged,
              .modelDownloadProgress, .modelDownloadStalled, .modelDownloadSizeMismatch,
              .modelReconciledFromDisk,
@@ -818,7 +823,7 @@ public enum LogEvent: Sendable {
              .modelDownloadStarted, .modelDownloadCompleted, .modelDownloadProgress,
              .modelSelected, .modelCompilationStarted, .modelCompilationCompleted,
              .modelDeleted, .modelPrewarmStarted, .modelCleanupPerformed,
-             .modelReconciledFromDisk,
+             .modelReconciledFromDisk, .turboMigration,
              .modelDownloadResumed, .modelDownloadSessionRestored,
              // A handful of lines per relaunch and per cancel, never per byte: they are
              // the diagnosis #690 is waiting on, so they must survive a level filter.
@@ -981,6 +986,8 @@ public enum LogEvent: Sendable {
             return "name=\(name) engine=\(engine)"
         case .modelDeleteFailed(let name, let error):
             return "name=\(name) error=\(error)"
+        case .turboMigration(let step, let model):
+            return "step=\(step) model=\(model)"
         case .modelPrewarmStarted(let name):
             return "name=\(name)"
         case .modelCleanupPerformed(let name, let reason):
@@ -1314,6 +1321,7 @@ extension LogEvent {
         case .modelCompilationCompleted: return "modelCompilationCompleted"
         case .modelDeleted: return "modelDeleted"
         case .modelDeleteFailed: return "modelDeleteFailed"
+        case .turboMigration: return "turboMigration"
         case .modelPrewarmStarted: return "modelPrewarmStarted"
         case .modelCleanupPerformed: return "modelCleanupPerformed"
         case .modelReconciledFromDisk: return "modelReconciledFromDisk"

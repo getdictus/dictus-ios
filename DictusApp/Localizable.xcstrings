@@ -1683,6 +1683,17 @@
         }
       }
     },
+    "Dictus switched you to %@." : {
+      "comment" : "One-time message after Whisper Turbo was replaced on a device below the A15 (#660). Argument: the model now in use (Parakeet v3).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dictus est passé à %@."
+          }
+        }
+      }
+    },
     "Dictus uses it to reach the Dictus app." : {
       "comment" : "Full Access explainer sheet, first point, bold lead (#704).",
       "localizations" : {
@@ -1690,6 +1701,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Dictus s’en sert pour joindre l’app Dictus."
+          }
+        }
+      }
+    },
+    "Dictus will switch you to %@ once it has downloaded over Wi-Fi. Until then, Turbo keeps working." : {
+      "comment" : "One-time message on a device below the A15 whose replacement for Whisper Turbo still has to download (#660). Argument: the model it will switch to (Parakeet v3).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dictus passera à %@ dès que le modèle sera téléchargé en Wi-Fi. D’ici là, Turbo continue de fonctionner."
           }
         }
       }
@@ -6115,6 +6137,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Quel terme ?"
+          }
+        }
+      }
+    },
+    "Whisper Turbo isn't supported on this iPad" : {
+      "comment" : "Title of the one-time message moving an iPad below the M2 off Whisper Turbo (#660).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Whisper Turbo n’est pas pris en charge sur cet iPad"
+          }
+        }
+      }
+    },
+    "Whisper Turbo isn't supported on this iPhone" : {
+      "comment" : "Title of the one-time message moving an iPhone below the A15 off Whisper Turbo (#660).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Whisper Turbo n’est pas pris en charge sur cet iPhone"
           }
         }
       }
