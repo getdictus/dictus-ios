@@ -15,7 +15,8 @@ import DictusCore
 /// - .ready + not active -> select as active model
 /// - .notDownloaded -> start download
 /// - .error -> relaunch the download in place (issue #235)
-/// - .downloading / .prewarming -> card disabled (no tap)
+/// - .downloading / .prewarming -> card disabled (no tap); a download shows a cancel
+///   button in the corner (issue #493)
 ///
 /// WHY no separate buttons:
 /// Removing "Choisir", download arrow, and trash buttons simplifies the UI.
@@ -110,6 +111,18 @@ struct ModelCardView: View {
         }
     }
 
+    /// Whether the card offers to cancel its download (issue #493). The preparation screen
+    /// usually covers the card while it downloads and carries the same button; the card's
+    /// is for when that screen is held off (a dictation in flight, #458).
+    private var showsCancelDownload: Bool {
+        modelManager.canCancelDownload(model.identifier)
+    }
+
+    /// How many controls sit in the top-trailing corner, for the room the badge row leaves.
+    private var trailingControlCount: CGFloat {
+        1 + (showsOverflowMenu ? 1 : 0) + (showsCancelDownload ? 1 : 0)
+    }
+
     /// Whether this model can actually be deleted right now.
     /// Mirrors the swipe-to-delete rules in ModelManagerView: never the active
     /// model, never the last downloaded one.
@@ -149,6 +162,9 @@ struct ModelCardView: View {
             // whether or not the state-dependent overflow menu is present.
             // The menu slides in to its left instead of pushing ⓘ around.
             HStack(spacing: 0) {
+                if showsCancelDownload {
+                    cancelDownloadButton
+                }
                 if showsOverflowMenu {
                     overflowMenu
                 }
@@ -184,6 +200,25 @@ struct ModelCardView: View {
                 .contentShape(Rectangle())
         }
         .accessibilityLabel("Supported languages")
+    }
+
+    // MARK: - Cancel download (issue #493)
+
+    /// Stops the download and forgets it, so the next launch does not resume it. Outside the
+    /// card's Button label like the other corner controls, which is what lets it receive a
+    /// tap while the card itself is disabled for the download.
+    private var cancelDownloadButton: some View {
+        Button {
+            Task { await modelManager.cancelDownload(model.identifier) }
+        } label: {
+            Image(systemName: "xmark.circle")
+                .font(.title3)
+                .foregroundStyle(.secondary)
+                .padding(overflowTapPadding)
+                .contentShape(Rectangle())
+        }
+        .accessibilityLabel(Text("Cancel download", comment: "Button on the model preparation screen and the model card that stops a model download and deletes what it fetched (issue #493)."))
+        .accessibilityIdentifier("modelCard.\(model.identifier).cancelDownload")
     }
 
     // MARK: - Overflow menu (issue #193)
@@ -264,8 +299,9 @@ struct ModelCardView: View {
             }
             // Reserve room for the overlaid top-trailing controls so badges
             // never slide underneath them on narrow screens. The ⓘ button is
-            // always present (one width); the ellipsis menu adds a second.
-            .padding(.trailing, showsOverflowMenu ? overflowReservedWidth * 2 : overflowReservedWidth)
+            // always present (one width); the ellipsis menu and the cancel
+            // button each add one.
+            .padding(.trailing, overflowReservedWidth * trailingControlCount)
 
             // Row 2: Localized description
             Text(model.localizedDescription)
