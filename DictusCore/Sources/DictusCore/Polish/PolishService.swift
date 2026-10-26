@@ -112,6 +112,9 @@ public final class PolishService {
     /// Intelligence on) takes effect without an app relaunch.
     private var activeEngine: PolishEngineProtocol {
         if let fixedEngine { return fixedEngine }
+        #if DEBUG
+        if defaults.bool(forKey: SharedKeys.debugPolishRefusalForced) { return DebugRefusingPolishEngine() }
+        #endif
         if let appleFMEngine, PolishAvailability.isAppleFMAvailable {
             return appleFMEngine
         }

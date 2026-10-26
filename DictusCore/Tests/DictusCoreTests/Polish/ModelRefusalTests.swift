@@ -131,3 +131,20 @@ private struct RefusingStubEngine: PolishEngineProtocol {
 
     func failureReason(for error: Error) -> PolishFailureReason { reason }
 }
+
+#if DEBUG
+/// The Debug-only switch the #455 simulator capture runs on.
+final class DebugRefusingPolishEngineTests: XCTestCase {
+
+    func testItRefusesWithApplesSafetyRefusal() async {
+        let result = await PolishPipeline.transform(
+            preprocessed: "Ok, petit test ?",
+            engine: DebugRefusingPolishEngine(),
+            job: PolishJob(task: .natural, promptLanguage: .french, languageAgnosticPath: false)
+        )
+        XCTAssertEqual(result.outcome, .engineFailed)
+        XCTAssertEqual(result.failureReason, .safetyRefusal)
+        XCTAssertEqual(SharedKeys.debugPolishRefusalForced, "dictus.debugPolishRefusalForced")
+    }
+}
+#endif
