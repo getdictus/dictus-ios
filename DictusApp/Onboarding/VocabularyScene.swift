@@ -56,14 +56,15 @@ struct VocabularySceneCard: View {
     }
 }
 
-/// The scene: the Vocabulary screen as `VocabularyListView` draws it, with its editor
-/// sheet (`VocabularyEditorView`) coming up for a new term (`VocabularySceneScript`).
+/// The scene: the Vocabulary screen as `VocabularyListView` draws it, its suggestions
+/// sheet (`VocabularySuggestionsView`) and the review sheet a suggestion's *Accept* opens
+/// (`VocabularyPairReviewView`), in the order `VocabularySceneScript` plays them (#829).
 ///
-/// WHAT IS REAL AND WHAT IS DRAWN (#649 decision 13): the screen is the app's, so it
-/// repeats the list's sections, rows, footer and button with their own strings, read from
-/// the same catalog keys, and the switches are SwiftUI's own `Toggle`. It is not the view
-/// itself: `VocabularyListView` reads and writes the user's real vocabulary, and a scene
-/// must not touch the user's data. The navigation bar and the sheet's frame are iOS's.
+/// WHAT IS REAL AND WHAT IS DRAWN (#649 decision 13): the screens are the app's, so they
+/// repeat their sections, rows, footers and buttons with their own strings, read from the
+/// same catalog keys, and the switches are SwiftUI's own `Toggle`. They are not the views
+/// themselves: those read and write the user's real vocabulary and History, and a scene
+/// must not touch the user's data. The navigation bars and the sheets' frames are iOS's.
 ///
 /// Drawn for a 402 pt wide iPhone, then scaled to the card as one picture.
 struct VocabularyScene: View {
@@ -75,11 +76,12 @@ struct VocabularyScene: View {
 
     /// The width the mock-ups are drawn at.
     private static let screenWidth = SmartModesSceneMetrics.screenWidth
-    /// The part of the screen the card shows: its top, down to under *Add a term*.
-    static let screenHeight: CGFloat = 560
+    /// The part of the screen the card shows: its top, down to under *Analyze my
+    /// transcriptions*.
+    static let screenHeight: CGFloat = 640
 
     var body: some View {
-        let frame = Script.frame(at: time, term: VocabularySceneText.newTerm, variants: VocabularySceneText.newVariants)
+        let frame = Script.frame(at: time)
         GeometryReader { geometry in
             screen(frame)
                 .frame(width: Self.screenWidth, height: Self.screenHeight, alignment: .top)
@@ -101,20 +103,31 @@ struct VocabularyScene: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
             .background(Color.dictusBackground)
 
-            if frame.editorIsOpen {
+            if frame.suggestionsAreOpen {
                 Color.black.opacity(0.2)
                     .transition(.opacity)
-                VocabularySceneEditor(frame: frame, time: time)
+                VocabularySceneSuggestions(frame: frame)
                     .padding(.top, 34)
+                    .transition(.move(edge: .bottom))
+            }
+
+            if frame.reviewIsOpen {
+                Color.black.opacity(0.2)
+                    .transition(.opacity)
+                VocabularySceneReview()
+                    .padding(.top, 150)
                     .transition(.move(edge: .bottom))
             }
         }
         .sceneFinger(frame.finger)
-        .animation(.easeOut(duration: 0.35), value: frame.editorIsOpen)
+        .animation(.easeOut(duration: 0.35), value: frame.suggestionsAreOpen)
+        .animation(.easeOut(duration: 0.35), value: frame.reviewIsOpen)
+        .animation(.easeInOut(duration: 0.35), value: frame.suggestionIsListed)
         .animation(.easeInOut(duration: 0.35), value: frame.newTermIsListed)
     }
 
-    /// `VocabularyListView`'s list: the feature's switch, the terms, the footer, *Add a term*.
+    /// `VocabularyListView`'s list: the feature's switch, the terms, the footer, *Add a
+    /// term*, then *Analyze my transcriptions* and its footer.
     private func list(_ frame: Script.Frame) -> some View {
         VStack(alignment: .leading, spacing: 0) {
             // `ProFeatureSwitchSection(feature: .vocabulary)`.
@@ -150,7 +163,20 @@ struct VocabularyScene: View {
                 Spacer()
             }
             .sceneGroup()
-            .sceneTapTarget(Target.addTerm)
+            .padding(.bottom, 24)
+
+            SceneListRow {
+                Label("Analyze my transcriptions", systemImage: "text.magnifyingglass")
+                    .foregroundStyle(Color.dictusAccent)
+                Spacer()
+            }
+            .sceneGroup()
+            .sceneTapTarget(Target.analyze)
+            Text("Words from your History that Dictus may be getting wrong.")
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+                .padding(.horizontal, 20)
+                .padding(.top, 8)
         }
         .padding(.horizontal, 16)
         .padding(.top, 8)
@@ -180,7 +206,7 @@ struct VocabularyScene: View {
 
 // MARK: - Text
 
-/// The scene's terms: two already in the list, the one the finger adds.
+/// The scene's terms: two already in the list, the one the suggestion adds.
 enum VocabularySceneText {
     struct Entry {
         let term: String
@@ -194,7 +220,7 @@ enum VocabularySceneText {
         Entry(term: "Kubernetes", variants: "cubernetes")
     ]
 
-    /// The term the finger adds.
+    /// The term the suggestion adds: the spelling typed on the keyboard.
     static let newTerm = "Dr Nguyen"
 
     /// What Dictus writes instead of it, in the user's language.
@@ -203,19 +229,17 @@ enum VocabularySceneText {
                comment: "Onboarding vocabulary scene: how the transcription writes the title 'Dr Nguyen' out in full, typed as the variant the term replaces (#680).")
     }
 
+    /// In how many dictations the suggestion says Dictus wrote it that way.
+    static let dictationCount = 3
+
     static var newEntry: Entry { Entry(term: newTerm, variants: newVariants) }
 }
 
-// MARK: - Editor
+// MARK: - Sheets
 
-/// `VocabularyEditorView` in its sheet: *Cancel*, *New term*, *Save*, then the two fields
-/// with their headers and footers, typed by the finger.
-private struct VocabularySceneEditor: View {
-    let frame: VocabularySceneScript.Frame
-    /// Seconds into the loop, for the cursor's blink.
-    let time: Double
-
-    private typealias Target = VocabularySceneScript.Target
+/// A sheet's frame: the grabber, then its content on the background, rounded on top.
+private struct VocabularySceneSheet<Content: View>: View {
+    @ViewBuilder let content: Content
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -224,34 +248,7 @@ private struct VocabularySceneEditor: View {
                 .frame(width: 36, height: 5)
                 .frame(maxWidth: .infinity)
                 .padding(.top, 6)
-            SceneNavigationBar(title: Text("New term"), leading: .text(Text("Cancel"))) {
-                Text("Save")
-                    .fontWeight(.semibold)
-                    .foregroundStyle(frame.canSave ? Color.dictusAccent : Color.secondary.opacity(0.6))
-                    .sceneTapTarget(Target.save)
-            }
-
-            VStack(alignment: .leading, spacing: 0) {
-                SceneSectionHeader(text: Text("The correct spelling"))
-                field(frame.term, placeholder: Text("Which term?"), isFocused: frame.focusedField == .termField)
-                    .sceneTapTarget(Target.termField)
-                footer(Text("The spelling Dictus should write."), isWarning: false)
-
-                SceneSectionHeader(text: Text("What Dictus writes instead"))
-                    .padding(.top, 12)
-                field(frame.variants, placeholder: Text("How does Dictus write it instead?"),
-                      isFocused: frame.focusedField == .variantsField)
-                    .sceneTapTarget(Target.variantsField)
-                // `VocabularyEditorView`'s footer rule: the neutral line while a term is typed
-                // with nothing it replaces (#819).
-                if variantsMissing {
-                    footer(Text("Optional. Without a misspelling, this term changes nothing yet. Add one when you spot it."),
-                           isWarning: false)
-                } else {
-                    footer(Text("Separated by commas. Dictus replaces each of them with your spelling."), isWarning: false)
-                }
-            }
-            .padding(.horizontal, 16)
+            content
             Spacer(minLength: 0)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
@@ -260,42 +257,136 @@ private struct VocabularySceneEditor: View {
                 .fill(Color.dictusBackground)
         )
     }
+}
 
-    /// `VocabularyEditorView.variantsMissing`: a term the model accepts, with no variant.
-    private var variantsMissing: Bool {
-        VocabularyEntry(term: frame.term, variants: VocabularyEntry.variants(fromLine: frame.variants))?.hasEffect == false
+/// `VocabularySuggestionsView` with one suggestion: a word typed on the keyboard that
+/// Dictus writes differently, with *Accept* and *Ignore*. Once accepted, its empty state.
+private struct VocabularySceneSuggestions: View {
+    let frame: VocabularySceneScript.Frame
+
+    private typealias Target = VocabularySceneScript.Target
+
+    var body: some View {
+        VocabularySceneSheet {
+            SceneNavigationBar(title: Text("Suggestions from History"), leading: .none) {
+                Text("Done")
+                    .fontWeight(.semibold)
+                    .sceneTapTarget(Target.done)
+            }
+
+            VStack(alignment: .leading, spacing: 0) {
+                if frame.suggestionIsListed {
+                    SceneSectionHeader(text: Text("Your spellings, written differently"))
+                    suggestion
+                        .sceneGroup()
+                    Text("Accept shows the change before adding it, and lets you adjust it. Ignore hides the suggestion for good.")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                        .padding(.horizontal, 20)
+                        .padding(.top, 8)
+                } else {
+                    Text("No suggestions for now. A suggestion appears here when Dictus writes one of your terms differently in at least two dictations, writes differently a word you typed on the keyboard, or when an unknown word comes back in at least two dictations.")
+                        .font(.dictusCaption)
+                        .foregroundStyle(.secondary)
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 14)
+                        .sceneGroup()
+                        .transition(.opacity)
+                }
+            }
+            .padding(.horizontal, 16)
+            .padding(.top, 8)
+        }
     }
 
-    private func field(_ text: String, placeholder: Text, isFocused: Bool) -> some View {
-        SceneListRow {
-            HStack(spacing: 1) {
-                if text.isEmpty {
-                    if isFocused { cursor }
-                    placeholder.foregroundStyle(.tertiary)
-                } else {
-                    Text(verbatim: text).foregroundStyle(.primary)
-                    if isFocused { cursor }
+    /// `VocabularySuggestionsView.row(_: VocabularyPair, rank:)` for a learned word.
+    private var suggestion: some View {
+        HStack(alignment: .firstTextBaseline, spacing: 12) {
+            Text(verbatim: "1")
+                .font(.dictusCaption.monospacedDigit())
+                .foregroundColor(.secondary)
+                .frame(minWidth: 18, alignment: .trailing)
+
+            VStack(alignment: .leading, spacing: 6) {
+                Text(verbatim: VocabularySceneText.newTerm)
+                    .foregroundColor(.primary)
+                Text("Written as: \(VocabularySceneText.newVariants)")
+                    .font(.dictusCaption)
+                    .foregroundColor(.secondary)
+                Text("In \(VocabularySceneText.dictationCount) dictations")
+                    .font(.dictusCaption)
+                    .foregroundColor(.secondary)
+                Text("Typed on your keyboard, not yet a term")
+                    .font(.dictusCaption)
+                    .foregroundColor(.secondary)
+                HStack(spacing: 20) {
+                    Text("Accept")
+                        .foregroundStyle(Color.dictusAccent)
+                        .sceneTapTarget(Target.accept)
+                    Text("Ignore")
+                        .foregroundStyle(.secondary)
                 }
+                .padding(.top, 2)
             }
             Spacer(minLength: 0)
         }
-        .sceneGroup()
+        .font(.system(size: 17))
+        .padding(.horizontal, 20)
+        .padding(.vertical, 12)
     }
+}
 
-    /// The text cursor, blinking once a second like UIKit's.
-    private var cursor: some View {
-        Capsule()
-            .fill(Color.dictusAccent)
-            .frame(width: 2, height: 22)
-            .opacity(time.truncatingRemainder(dividingBy: 1) < 0.5 ? 1 : 0)
-    }
+/// `VocabularyPairReviewView` for the accepted suggestion: what the change is, the term,
+/// the new variant, and *Add*.
+private struct VocabularySceneReview: View {
+    private typealias Target = VocabularySceneScript.Target
 
-    private func footer(_ text: Text, isWarning: Bool) -> some View {
-        text
-            .font(.footnote)
-            .foregroundStyle(isWarning ? Color.orange : Color.secondary)
-            .padding(.horizontal, 20)
-            .padding(.top, 8)
+    private var term: String { VocabularySceneText.newTerm }
+    private var variant: String { VocabularySceneText.newVariants }
+
+    var body: some View {
+        VocabularySceneSheet {
+            SceneNavigationBar(title: Text("Check the change"), leading: .text(Text("Cancel"))) {
+                Text("Add")
+                    .fontWeight(.semibold)
+                    .sceneTapTarget(Target.add)
+            }
+
+            VStack(alignment: .leading, spacing: 0) {
+                SceneListRow {
+                    Text("New term “\(term)”, with the variant “\(variant)”.")
+                        .fontWeight(.semibold)
+                        .padding(.vertical, 12)
+                    Spacer(minLength: 0)
+                }
+                .sceneGroup()
+                .padding(.bottom, 20)
+
+                SceneSectionHeader(text: Text("The correct spelling"))
+                SceneListRow {
+                    Text(verbatim: term)
+                    Spacer(minLength: 0)
+                }
+                .sceneGroup()
+                .padding(.bottom, 20)
+
+                SceneSectionHeader(text: Text("What Dictus writes instead"))
+                SceneListRow {
+                    Image(systemName: "plus.circle.fill")
+                        .foregroundColor(.green)
+                    Text(verbatim: variant)
+                        .fontWeight(.semibold)
+                    Spacer(minLength: 0)
+                }
+                .sceneGroup()
+                Text("From now on, when Dictus writes “\(variant)”, it writes “\(term)” instead.")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+                    .padding(.horizontal, 20)
+                    .padding(.top, 8)
+            }
+            .padding(.horizontal, 16)
+        }
     }
 }
 
@@ -358,6 +449,8 @@ struct SceneNavigationBar<Trailing: View>: View {
         case close
         /// A word, in a glass capsule.
         case text(Text)
+        /// Nothing: a sheet whose only button is on the trailing side.
+        case none
     }
 
     let title: Text
@@ -392,6 +485,8 @@ struct SceneNavigationBar<Trailing: View>: View {
                 .padding(.horizontal, 14)
                 .frame(height: 44)
                 .dictusGlass(in: Capsule())
+        case .none:
+            EmptyView()
         }
     }
 

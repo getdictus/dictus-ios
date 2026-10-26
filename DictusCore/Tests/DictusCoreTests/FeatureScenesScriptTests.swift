@@ -214,11 +214,13 @@ final class FeatureScenesScriptTests: XCTestCase {
     // MARK: - Vocabulary
 
     private typealias Vocabulary = VocabularySceneScript
-    private let term = "Dr Nguyen"
-    private let variants = "docteur Nguyen"
 
     private func vocabulary(at time: Double) -> Vocabulary.Frame {
-        Vocabulary.frame(at: time, term: term, variants: variants)
+        Vocabulary.frame(at: time)
+    }
+
+    private func vocabularyTap(_ target: Vocabulary.Target) -> SceneTap<Vocabulary.Target>? {
+        Vocabulary.taps.first { $0.target == target }
     }
 
     func testVocabularyTapsDoNotOverlap() {
@@ -227,53 +229,60 @@ final class FeatureScenesScriptTests: XCTestCase {
         XCTAssertLessThanOrEqual(Vocabulary.loopSeconds, 20)
     }
 
-    func testSaveFollowsTheRealEntryRule() {
-        // #819: a term alone is saved, to watch; only the term is required.
-        XCTAssertTrue(Vocabulary.canSave(term: "Dr Nguyen", variants: ""))
-        XCTAssertFalse(Vocabulary.canSave(term: "", variants: "docteur Nguyen"))
-        XCTAssertFalse(Vocabulary.canSave(term: "   ", variants: "docteur Nguyen"))
-        XCTAssertTrue(Vocabulary.canSave(term: "Dr Nguyen", variants: "Dr Nguyen"))
-        XCTAssertTrue(Vocabulary.canSave(term: "Dr Nguyen", variants: "d"))
+    /// The #512 flow, in its order (#829): Analyze, Accept, Add, Done.
+    func testTheVocabularyTapsFollowTheSuggestionFlow() {
+        XCTAssertEqual(Vocabulary.taps.map(\.target), [.analyze, .accept, .add, .done])
     }
 
-    func testSaveIsTappedOnlyOnceEnabled() {
-        let save = Vocabulary.taps.first { $0.target == .save }
-        let frame = vocabulary(at: save?.press ?? 0)
-        XCTAssertTrue(frame.editorIsOpen)
-        XCTAssertTrue(frame.canSave)
-        XCTAssertEqual(frame.term, term)
-        XCTAssertEqual(frame.variants, variants)
-        // It lit up with the term, before any variant (#819), and was grey before.
-        let variantsTap = Vocabulary.taps.first { $0.target == .variantsField }
-        XCTAssertTrue(vocabulary(at: variantsTap?.press ?? 0).canSave)
-        let termTap = Vocabulary.taps.first { $0.target == .termField }
-        XCTAssertFalse(vocabulary(at: termTap?.press ?? 0).canSave)
+    func testAnalyzeOpensTheSuggestionsWithTheSuggestion() {
+        let analyze = vocabularyTap(.analyze)
+        XCTAssertFalse(vocabulary(at: analyze?.press ?? 0).suggestionsAreOpen)
+        let after = vocabulary(at: analyze?.release ?? 0)
+        XCTAssertTrue(after.suggestionsAreOpen)
+        XCTAssertTrue(after.suggestionIsListed)
+        XCTAssertFalse(after.reviewIsOpen)
     }
 
-    func testTheFieldsAreTypedInOrder() {
-        let termTap = Vocabulary.taps.first { $0.target == .termField }
-        XCTAssertEqual(vocabulary(at: termTap?.release ?? 0).focusedField, .termField)
-        XCTAssertEqual(vocabulary(at: termTap?.release ?? 0).term, "")
-        XCTAssertEqual(vocabulary(at: 3.4).term, term)
-        XCTAssertEqual(vocabulary(at: 3.4).variants, "")
-        XCTAssertEqual(vocabulary(at: 5.7).variants, variants)
-        XCTAssertEqual(vocabulary(at: 5.7).focusedField, .variantsField)
+    func testAcceptOpensTheReviewOverTheSuggestions() {
+        let accept = vocabularyTap(.accept)
+        let pressed = vocabulary(at: accept?.press ?? 0)
+        XCTAssertTrue(pressed.suggestionsAreOpen)
+        XCTAssertTrue(pressed.suggestionIsListed)
+        XCTAssertFalse(pressed.reviewIsOpen)
+        let after = vocabulary(at: accept?.release ?? 0)
+        XCTAssertTrue(after.reviewIsOpen)
+        XCTAssertTrue(after.suggestionsAreOpen)
+        XCTAssertFalse(after.newTermIsListed)
     }
 
-    func testSavingListsTheNewTermThenTheLoopRemovesIt() {
-        let save = Vocabulary.taps.first { $0.target == .save }
-        let after = vocabulary(at: (save?.release ?? 0) + 0.01)
-        XCTAssertFalse(after.editorIsOpen)
+    func testAddStoresTheTermAndTheSuggestionLeaves() {
+        let add = vocabularyTap(.add)
+        XCTAssertTrue(vocabulary(at: add?.press ?? 0).reviewIsOpen)
+        let after = vocabulary(at: (add?.release ?? 0) + 0.01)
+        XCTAssertFalse(after.reviewIsOpen)
+        XCTAssertTrue(after.suggestionsAreOpen)
+        XCTAssertFalse(after.suggestionIsListed)
+        XCTAssertTrue(after.newTermIsListed)
+    }
+
+    func testDoneShowsTheListWithTheNewTermThenTheLoopRemovesIt() {
+        let done = vocabularyTap(.done)
+        let after = vocabulary(at: (done?.release ?? 0) + 0.01)
+        XCTAssertFalse(after.suggestionsAreOpen)
         XCTAssertTrue(after.newTermIsListed)
         XCTAssertFalse(vocabulary(at: 0).newTermIsListed)
-        XCTAssertFalse(vocabulary(at: Vocabulary.loopSeconds - 0.01).newTermIsListed)
-        XCTAssertFalse(vocabulary(at: Vocabulary.loopSeconds - 0.01).editorIsOpen)
+        XCTAssertTrue(vocabulary(at: 0).suggestionIsListed)
+        let end = vocabulary(at: Vocabulary.loopSeconds - 0.01)
+        XCTAssertFalse(end.newTermIsListed)
+        XCTAssertFalse(end.suggestionsAreOpen)
+        XCTAssertFalse(end.reviewIsOpen)
     }
 
     func testTheVocabularyStillIsTheListWithTheNewTerm() {
         let still = vocabulary(at: Vocabulary.stillSeconds)
         XCTAssertTrue(still.newTermIsListed)
-        XCTAssertFalse(still.editorIsOpen)
+        XCTAssertFalse(still.suggestionsAreOpen)
+        XCTAssertFalse(still.reviewIsOpen)
         XCTAssertNil(still.finger)
     }
 
