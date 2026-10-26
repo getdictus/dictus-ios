@@ -4,6 +4,18 @@
     "Done" : {
       "comment" : "Dynamic Island, compact pill: the dictation finished and its text was inserted. Shown for about a second; keep it short, the pill grows with the text (#664).",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fertig"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Listo"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -15,6 +27,18 @@
     "Error" : {
       "comment" : "Live Activity, expanded Dynamic Island and Lock Screen: the dictation failed (#664).",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fehler"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Error"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -26,6 +50,18 @@
     "On" : {
       "comment" : "Live Activity, compact pill, expanded Dynamic Island and Lock Screen: Dictus standby is on, ready to record. Keep it short, the pill grows with the text (#664).",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktiv"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Activo"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -37,6 +73,18 @@
     "Paused" : {
       "comment" : "Live Activity, expanded Dynamic Island and Lock Screen: Dictus standby is paused by a phone call or another app taking the audio, and comes back when it ends (#353). Keep it short.",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pausiert"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En pausa"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -48,6 +96,18 @@
     "Processing..." : {
       "comment" : "Live Activity, expanded Dynamic Island and Lock Screen: the Smart mode runs on the transcript (#267, #664). Translations end on the single ellipsis character (…), which never splits across two lines.",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verarbeitung…"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Procesando…"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -59,6 +119,18 @@
     "Rec" : {
       "comment" : "Dynamic Island, compact pill: recording in progress. An abbreviation; keep it short, the pill grows with the text (#664).",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aufn."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Grab."
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -70,6 +142,18 @@
     "Recording..." : {
       "comment" : "Live Activity, expanded Dynamic Island: recording in progress (#664). Translations end on the single ellipsis character (…), which never splits across two lines.",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aufnahme…"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Grabando…"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -81,6 +165,18 @@
     "Stop Standby" : {
       "comment" : "Title of the Live Activity intent behind the power button: turns Dictus standby off (#664).",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bereitschaft beenden"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Detener modo de espera"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -92,6 +188,18 @@
     "Transcribing..." : {
       "comment" : "Live Activity, expanded Dynamic Island and Lock Screen: the recording is being transcribed (#664). Translations end on the single ellipsis character (…), which never splits across two lines.",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transkribiert…"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transcribiendo…"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -103,6 +211,18 @@
     "Transcription ready" : {
       "comment" : "Live Activity, expanded Dynamic Island and Lock Screen: the transcription is done. On the Lock Screen it is replaced by the text itself when there is one (#664).",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transkription fertig"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transcripción lista"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -114,6 +234,18 @@
     "Turn off Dictus standby mode" : {
       "comment" : "Description of the Live Activity intent behind the power button (#664).",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bereitschaftsmodus von Dictus deaktivieren"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Desactivar el modo de espera de Dictus"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",

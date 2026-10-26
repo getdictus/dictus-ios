@@ -5,10 +5,22 @@
       "comment" : "Explanation shown in iOS's microphone permission alert (#736).",
       "extractionState" : "extracted_with_value",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dictus braucht Zugriff auf das Mikrofon, um deine Stimme zu transkribieren."
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Dictus needs microphone access to transcribe your voice."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dictus necesita acceso al micrófono para transcribir tu voz."
           }
         },
         "fr" : {

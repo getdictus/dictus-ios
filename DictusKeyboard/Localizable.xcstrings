@@ -4,6 +4,18 @@
     "%@ is unavailable. Dictated as Normal." : {
       "comment" : "Shown after a dictation whose armed Smart Mode did not run for a reason the user cannot act on. The placeholder is the mode's name.",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ ist nicht verfügbar. Als Normal diktiert."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ no está disponible. Dictado como Normal."
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -15,6 +27,18 @@
     "%@ needs Dictus Pro. Dictated as Normal." : {
       "comment" : "Shown after a dictation whose armed Smart Mode did not run for lack of a Pro subscription. The placeholder is the mode's name.",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ erfordert Dictus Pro. Als Normal diktiert."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ requiere Dictus Pro. Dictado como Normal."
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -26,6 +50,18 @@
     "%@ · off" : {
       "comment" : "Toolbar label for an armed Smart Mode that will not run, so the dictation goes in as Normal. The placeholder is the mode's name.",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ · aus"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ · inactivo"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -37,6 +73,18 @@
     "%@: Apple Intelligence does not support the dictated language (%@)." : {
       "comment" : "Shown when an armed Smart Mode could not run because the language the user dictated is outside the set Apple Intelligence reads. First placeholder is the mode's name, second is the dictated language.",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@: Apple Intelligence unterstützt die diktierte Sprache (%@) nicht."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@: Apple Intelligence no admite el idioma dictado (%@)."
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -48,6 +96,18 @@
     "%@: could not be applied, text inserted as dictated." : {
       "comment" : "Shown when an armed Smart Mode was refused by a guardrail and the untransformed text was inserted instead. The placeholder is the mode's name.",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@: konnte nicht angewendet werden, Text unverändert eingefügt."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@: no se pudo aplicar, texto insertado tal cual."
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -59,6 +119,18 @@
     "%@: could not be applied. Try again." : {
       "comment" : "Shown when an armed Smart Mode fails and nothing is inserted. The placeholder is the mode's name.",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@: konnte nicht angewendet werden. Versuch es noch mal."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@: no se pudo aplicar. Inténtalo de nuevo."
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -70,6 +142,18 @@
     "%@: dictation too short, text inserted as dictated." : {
       "comment" : "Shown when an armed Smart Mode declined a dictation for being shorter than the mode's floor, so the text went in as dictated. The placeholder is the mode's name.",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@: Diktat zu kurz, Text unverändert eingefügt."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@: dictado demasiado corto, texto insertado tal cual."
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -81,6 +165,18 @@
     "%@: too long, text inserted as dictated." : {
       "comment" : "Shown when a Smart Mode hit the context ceiling and the untransformed text was inserted instead. The placeholder is the mode's name.",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@: zu lang, Text unverändert eingefügt."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@: demasiado largo, texto insertado tal cual."
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -92,6 +188,18 @@
     "%@: too long. Try a shorter dictation." : {
       "comment" : "Shown when a Smart Mode hit the context ceiling and could not fall back, so nothing was inserted. The placeholder is the mode's name.",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@: zu lang. Versuch ein kürzeres Diktat."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@: demasiado largo. Prueba con un dictado más corto."
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -104,9 +212,67 @@
       "comment" : "The text for the \"ABC\" button in the emoji category bar.",
       "isCommentAutoGenerated" : true
     },
+    "Activities" : {
+      "comment" : "Emoji picker section header, shown uppercased above the grid.",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktivitäten"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Actividades"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Activités"
+          }
+        }
+      }
+    },
+    "Animals & Nature" : {
+      "comment" : "Emoji picker section header, shown uppercased above the grid.",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tiere und Natur"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Animales y naturaleza"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Animaux et nature"
+          }
+        }
+      }
+    },
     "Apple Intelligence is busy right now. Smart Modes will come back shortly." : {
       "comment" : "Shown in the Smart Mode fan while the process is rate-limited.",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple Intelligence ist gerade ausgelastet. Die Modi sind gleich wieder da."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple Intelligence está ocupado ahora. Los modos volverán en breve."
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -118,6 +284,18 @@
     "Apple Intelligence is off. %@ was dictated as Normal." : {
       "comment" : "Shown after a dictation whose armed Smart Mode did not run because Apple Intelligence is switched off. The placeholder is the mode's name.",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple Intelligence ist aus. %@ wurde als Normal diktiert."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple Intelligence está desactivado. %@ se dictó como Normal."
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -129,6 +307,18 @@
     "Apple Intelligence is still downloading. %@ was dictated as Normal." : {
       "comment" : "Shown after a dictation whose armed Smart Mode did not run because the on-device model is still downloading. The placeholder is the mode's name.",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple Intelligence wird noch geladen. %@ wurde als Normal diktiert."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple Intelligence aún se está descargando. %@ se dictó como Normal."
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -140,6 +330,18 @@
     "Apple Intelligence is still downloading. Smart Modes will work once it finishes." : {
       "comment" : "Shown in the Smart Mode fan while the on-device model is downloading.",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple Intelligence lädt noch sein Modell. Die Modi funktionieren danach."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple Intelligence aún descarga su modelo. Los modos funcionarán después."
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -151,6 +353,18 @@
     "Choose a Smart Mode" : {
       "comment" : "Toolbar title shown while the long-press Smart Mode fan is open.",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wähle einen Modus"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elige un modo"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -162,6 +376,18 @@
     "Close" : {
       "comment" : "Accessibility label of the keyboard voice note reader's close button (#637).",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schließen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cerrar"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -172,6 +398,18 @@
     },
     "Close menu" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Menü schließen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cerrar menú"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -183,6 +421,18 @@
     "Delete voice note" : {
       "comment" : "Accessibility label of the keyboard voice note reader's button that removes the note from the keyboard; it stays in the app (#639).",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sprachnachricht löschen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eliminar mensaje de voz"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -194,6 +444,18 @@
     "Dictation unavailable on this device" : {
       "comment" : "Keyboard toolbar note beside the disabled mic on a device whose chip is too old to dictate from the keyboard (#635).",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diktieren auf diesem Gerät nicht verfügbar"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dictado no disponible en este dispositivo"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -215,6 +477,18 @@
     },
     "Enable Full Access in Settings > Keyboards > Dictus to use dictation." : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erlaube vollen Zugriff unter Einstellungen > Tastaturen > Dictus, um zu diktieren."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Activa el acceso total en Ajustes > Teclados > Dictus para usar el dictado."
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -223,8 +497,66 @@
         }
       }
     },
+    "Flags" : {
+      "comment" : "Emoji picker section header, shown uppercased above the grid.",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Flaggen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Banderas"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Drapeaux"
+          }
+        }
+      }
+    },
+    "Food & Drink" : {
+      "comment" : "Emoji picker section header, shown uppercased above the grid.",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Essen und Trinken"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comida y bebida"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nourriture et boissons"
+          }
+        }
+      }
+    },
     "Full access required" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voller Zugriff erforderlich"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Acceso total requerido"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -236,6 +568,18 @@
     "Hold the mic for Smart Modes" : {
       "comment" : "Toolbar hint teaching the long-press gesture that opens the Smart Mode fan.",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mikrofon für Modi gedrückt halten"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mantén el micro para los modos"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -247,6 +591,18 @@
     "Insert" : {
       "comment" : "Primary button of the keyboard's voice note reader: writes the transcript into the text field (#637).",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Einfügen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Insertar"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -257,6 +613,18 @@
     },
     "Keyboard language" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tastatursprache"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Idioma del teclado"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -267,6 +635,18 @@
     },
     "Keyboard menu" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tastaturmenü"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Menú del teclado"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -278,6 +658,18 @@
     "Layout" : {
       "comment" : "Column header in the keyboard panel, above the per-language layout pills (issue #272).",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Layout"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Distribución"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -289,6 +681,18 @@
     "List" : {
       "comment" : "Name of the Smart Mode that turns spoken ideas into concise bullet points. Renamed from Notes on 2026-08-27.",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Liste"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lista"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -299,6 +703,18 @@
     },
     "Listening..." : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hört zu..."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escuchando..."
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -310,6 +726,18 @@
     "Long press: languages & settings" : {
       "comment" : "Toolbar hint, right of the menu button, teaching that a long press on it opens the keyboard panel (languages, layouts, settings). An arrow pointing at the menu button precedes it (#639).",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lange drücken: Sprachen & Einstellungen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mantén pulsado: idiomas y ajustes"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -321,6 +749,18 @@
     "Message" : {
       "comment" : "Name of the Smart Mode that rewrites a dictation as the short blocks the speaker would have typed to a person (#572).",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nachricht"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mensaje"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -332,6 +772,18 @@
     "No recent voice note" : {
       "comment" : "Keyboard voice note reader, opened by a long press on the menu button when no shared voice note is waiting (#639).",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keine aktuelle Sprachnachricht"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ningún mensaje de voz reciente"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -342,6 +794,18 @@
     },
     "No results" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keine Ergebnisse"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sin resultados"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -353,6 +817,18 @@
     "Normal" : {
       "comment" : "The Smart Mode fan row that clears the armed mode and returns to the free polish.",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Normal"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Normal"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -361,9 +837,44 @@
         }
       }
     },
+    "Objects" : {
+      "comment" : "Emoji picker section header, shown uppercased above the grid.",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Objekte"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Objetos"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Objets"
+          }
+        }
+      }
+    },
     "Off" : {
       "comment" : "Marker on the Smart Mode fan row the user armed, when that mode will not run and the dictation goes in as Normal.",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aus"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inactivo"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -374,6 +885,18 @@
     },
     "Open Dictus" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dictus öffnen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abrir Dictus"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -385,6 +908,18 @@
     "Open in Dictus" : {
       "comment" : "Accessibility label of the keyboard voice note reader's button that opens the note in the app (#637).",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In Dictus öffnen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abrir en Dictus"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -395,10 +930,45 @@
     },
     "Open Settings" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Einstellungen öffnen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abrir Ajustes"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ouvrir Réglages"
+          }
+        }
+      }
+    },
+    "People" : {
+      "comment" : "Emoji picker section header, shown uppercased above the grid.",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Personen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Personas"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Personnes"
           }
         }
       }
@@ -417,6 +987,18 @@
     "Pick your Smart Modes in Dictus." : {
       "comment" : "Shown when the long-press fan is opened with no modes pinned.",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wähle deine Modi in Dictus."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elige tus modos en Dictus."
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -428,6 +1010,18 @@
     "Polish is temporarily unavailable." : {
       "comment" : "Toolbar state shown when polish has stopped calling its engine for the rest of the app process (issue #315).",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Verfeinerung ist vorübergehend nicht verfügbar."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El pulido no está disponible temporalmente."
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -439,6 +1033,24 @@
     "Pro · %lld days left" : {
       "comment" : "Keyboard panel pill in the last two days of the free Dictus Pro trial. The number is the days left, 1 or 2.",
       "localizations" : {
+        "de" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Pro · noch %lld Tag"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Pro · noch %lld Tage"
+                }
+              }
+            }
+          }
+        },
         "en" : {
           "variations" : {
             "plural" : {
@@ -452,6 +1064,24 @@
                 "stringUnit" : {
                   "state" : "translated",
                   "value" : "Pro · %lld days left"
+                }
+              }
+            }
+          }
+        },
+        "es" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Pro · queda %lld día"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Pro · quedan %lld días"
                 }
               }
             }
@@ -480,6 +1110,18 @@
     "Processing..." : {
       "comment" : "Recording overlay caption while the LLM stage runs on the transcript (issue #267).",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verarbeitung..."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Procesando..."
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -488,9 +1130,44 @@
         }
       }
     },
+    "Recents" : {
+      "comment" : "Emoji picker section header for recently used emoji (issue #418).",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zuletzt verwendet"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recientes"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Récents"
+          }
+        }
+      }
+    },
     "Recording interrupted. Please try again." : {
       "comment" : "Toolbar message shown when the keyboard clears a recording whose app was terminated (issue #261).",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aufnahme unterbrochen. Versuch es noch mal."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Grabación interrumpida. Inténtalo de nuevo."
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -501,6 +1178,18 @@
     },
     "Search Emoji" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Emoji suchen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Buscar emoji"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -512,6 +1201,18 @@
     "Share a voice message to Dictus from a messaging app, and its transcript will show up here." : {
       "comment" : "Keyboard voice note reader's empty state: how a voice note gets here (#639).",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Teile eine Sprachnachricht aus einer Messaging-App mit Dictus, und ihre Transkription erscheint hier."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comparte un mensaje de voz con Dictus desde una app de mensajería y su transcripción aparecerá aquí."
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -523,6 +1224,18 @@
     "Smart Modes are not available in this build." : {
       "comment" : "Shown in the Smart Mode fan when the build has no FoundationModels SDK.",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Modi sind in dieser Version nicht verfügbar."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los modos no están disponibles en esta versión."
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -534,6 +1247,18 @@
     "Smart Modes are off. %@ was dictated as Normal." : {
       "comment" : "Shown after a dictation whose armed Smart Mode did not run because the user switched Smart Modes off. The placeholder is the mode's name.",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Modi sind aus. %@ wurde als Normal diktiert."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los modos están desactivados. %@ se dictó como Normal."
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -545,6 +1270,18 @@
     "Smart Modes are off. Turn them back on in Dictus." : {
       "comment" : "Shown in the Smart Mode fan when a subscriber has switched Smart Modes off in Settings.",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Modi sind aus. Aktiviere sie wieder in Dictus."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los modos están desactivados. Vuelve a activarlos en Dictus."
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -556,6 +1293,18 @@
     "Smart Modes are part of Dictus Pro." : {
       "comment" : "Shown in the Smart Mode fan when the device can run Smart Modes but the user has no Pro subscription.",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Modi sind Teil von Dictus Pro."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los modos forman parte de Dictus Pro."
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -567,6 +1316,18 @@
     "Smart Modes are unavailable right now." : {
       "comment" : "Shown in the Smart Mode fan for an unavailability reason this build does not recognise.",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Modi sind gerade nicht verfügbar."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los modos no están disponibles ahora."
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -578,6 +1339,18 @@
     "Smart Modes need Apple Intelligence, which this iPhone does not support." : {
       "comment" : "Shown in the Smart Mode fan on hardware that cannot run Apple Foundation Models.",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Modi erfordern Apple Intelligence, das dieses iPhone nicht unterstützt."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los modos requieren Apple Intelligence, que este iPhone no admite."
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -589,6 +1362,18 @@
     "Smart Modes need Apple Intelligence. Turn it on in Settings." : {
       "comment" : "Shown in the Smart Mode fan when Apple Intelligence is switched off.",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Modi erfordern Apple Intelligence. Aktiviere es in den Einstellungen."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los modos requieren Apple Intelligence. Actívalo en Ajustes."
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -600,6 +1385,18 @@
     "Smart Modes need iOS 26 or later." : {
       "comment" : "Shown in the Smart Mode fan when the OS predates Apple Foundation Models.",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Modi erfordern iOS 26 oder neuer."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los modos requieren iOS 26 o posterior."
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -608,9 +1405,44 @@
         }
       }
     },
+    "Smileys" : {
+      "comment" : "Emoji picker section header, shown uppercased above the grid.",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Smileys"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Emoticonos"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Smileys"
+          }
+        }
+      }
+    },
     "Structured" : {
       "comment" : "Name of the Smart Mode that rewrites a long dictation as clear written paragraphs (#523).",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Strukturiert"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Estructurado"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -621,6 +1453,18 @@
     },
     "Starting..." : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Startet..."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Iniciando..."
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -632,6 +1476,18 @@
     "Summary" : {
       "comment" : "Name of the Smart Mode that condenses a dictation into its gist, in a few sentences of prose (#571).",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zusammenfassung"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Resumen"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -640,9 +1496,44 @@
         }
       }
     },
+    "Symbols" : {
+      "comment" : "Emoji picker section header, shown uppercased above the grid.",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Symbole"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Símbolos"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Symboles"
+          }
+        }
+      }
+    },
     "The microphone is busy on a call. Try again once the call ends." : {
       "comment" : "Toolbar message shown when the keyboard declines a mic tap because a call holds the microphone (issues #313, #483). Same sentence as DictusApp's.",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das Mikrofon ist durch einen Anruf belegt. Versuch es nach dem Anruf noch mal."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El micrófono está ocupado por una llamada. Inténtalo de nuevo cuando termine."
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -654,6 +1545,18 @@
     "Too short for a list." : {
       "comment" : "Shown when the List Smart Mode produced fewer than two items, so the dictation went in with the normal polish instead.",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zu kurz für eine Liste."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Demasiado corto para una lista."
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -664,6 +1567,18 @@
     },
     "Transcribing..." : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transkribiert..."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transcribiendo..."
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -672,9 +1587,44 @@
         }
       }
     },
+    "Travel" : {
+      "comment" : "Emoji picker section header, shown uppercased above the grid.",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reisen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Viajes"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voyages"
+          }
+        }
+      }
+    },
     "Undo" : {
       "comment" : "Toolbar control that removes the dictation text just inserted.",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Widerrufen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deshacer"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -686,6 +1636,18 @@
     "Undo dictation insertion" : {
       "comment" : "Accessibility label for the toolbar control that removes the dictation text just inserted.",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Einfügen des Diktats widerrufen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deshacer la inserción del dictado"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -696,31 +1658,226 @@
     },
     "accessibility.backspace" : {
       "comment" : "Accessibility label for the backspace key.",
-      "isCommentAutoGenerated" : true
+      "isCommentAutoGenerated" : true,
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Löschen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Borrar"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Supprimer"
+          }
+        }
+      }
     },
     "accessibility.moreLetters" : {
       "comment" : "Accessibility label for a keyboard key that toggles between showing more letters and numbers on a numeric keypad.",
-      "isCommentAutoGenerated" : true
+      "isCommentAutoGenerated" : true,
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Buchstaben"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Letters"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Letras"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lettres"
+          }
+        }
+      }
     },
-    "accessibility.moreNumbers" : {},
+    "accessibility.moreNumbers" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zahlen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Numbers"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Números"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chiffres"
+          }
+        }
+      }
+    },
     "accessibility.moreSymbols" : {
       "comment" : "Accessibility label for a keyboard key that switches to a numeric or symbol page.",
-      "isCommentAutoGenerated" : true
+      "isCommentAutoGenerated" : true,
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Symbole"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Symbols"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Símbolos"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Symboles"
+          }
+        }
+      }
     },
     "accessibility.nextKeyboard" : {
       "comment" : "Accessibility label for the \"Next Keyboard\" button in the keyboard.",
-      "isCommentAutoGenerated" : true
+      "isCommentAutoGenerated" : true,
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nächste Tastatur"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Next keyboard"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Siguiente teclado"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clavier suivant"
+          }
+        }
+      }
     },
     "accessibility.shift" : {
       "comment" : "Accessibility label for the shift key.",
-      "isCommentAutoGenerated" : true
+      "isCommentAutoGenerated" : true,
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Umschalt"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shift"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mayúsculas"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Majuscule"
+          }
+        }
+      }
     },
     "accessibility.space" : {
       "comment" : "Accessibility label for the spacebar.",
-      "isCommentAutoGenerated" : true
+      "isCommentAutoGenerated" : true,
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Leerzeichen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Space"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Espacio"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Espace"
+          }
+        }
+      }
     },
     "space" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Leerzeichen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "espacio"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
