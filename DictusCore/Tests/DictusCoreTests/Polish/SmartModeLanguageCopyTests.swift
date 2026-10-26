@@ -83,13 +83,13 @@ final class SmartModeLanguageCopyTests: XCTestCase {
     // MARK: - Both catalogues translate it
 
     /// Every UI language the app ships. `Dictus.xcodeproj` declares `knownRegions =
-    /// (en, fr, Base)`; the keyboard's catalogue carries `fr` against the English
-    /// source, the app's carries `en` and `fr`. A sentence added to one and not the
-    /// other reaches a French user in English.
+    /// (en, fr, de, es, Base)` since #418; the keyboard's catalogue carries `fr`, `de`
+    /// and `es` against the English source, the app's carries all four. A sentence added
+    /// to one and not the other reaches a French, German or Spanish user in English.
     func testEveryUILanguageTranslatesTheSentence() throws {
         for (path, expected) in [
-            ("DictusKeyboard/Localizable.xcstrings", Set(["fr"])),
-            ("DictusApp/Localizable.xcstrings", Set(["en", "fr"]))
+            ("DictusKeyboard/Localizable.xcstrings", Set(["fr", "de", "es"])),
+            ("DictusApp/Localizable.xcstrings", Set(["en", "fr", "de", "es"]))
         ] {
             let entry = try XCTUnwrap(catalogue(at: path)[Self.catalogueKey],
                                       "\(path) has no entry for the language refusal")

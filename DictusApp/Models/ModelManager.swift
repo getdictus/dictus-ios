@@ -985,7 +985,7 @@ class ModelManager: ObservableObject {
                 cleanupModelFiles(identifier)
             }
 
-            PersistentLog.log(.modelDownloadFailed(name: identifier, error: error.localizedDescription))
+            PersistentLog.log(.modelDownloadFailed(name: identifier, error: DictationFailureMessage.diagnostic(for: error)))
             throw error
         }
     }
@@ -1218,7 +1218,7 @@ class ModelManager: ObservableObject {
             // WhisperKit path had to be taught in #405, and this path has had it since
             // #210. There is no `ModelCleanupPolicy` call to make here because there is
             // no branch — nothing on this path deletes anything, ever.
-            PersistentLog.log(.modelDownloadFailed(name: identifier, error: error.localizedDescription))
+            PersistentLog.log(.modelDownloadFailed(name: identifier, error: DictationFailureMessage.diagnostic(for: error)))
             if isCompletingInstalledModel {
                 PersistentLog.log(.diagnosticProbe(
                     component: route.repairLogComponent,
@@ -1520,20 +1520,26 @@ extension ModelManager {
 }
 
 /// Errors specific to model management operations.
-enum ModelManagerError: Error, LocalizedError {
+enum ModelManagerError: Error, DiagnosableError {
     case cannotDeleteLastModel
     case noContainer
     case parakeetUnavailable
     case prewarmTimeout(seconds: Int)
 
+    /// User-facing text. Reaches the model card through `ModelState.error` (issue #418):
+    /// the English sentences these cases used to return were written for a log, and a
+    /// French or German user read them verbatim.
     var errorDescription: String? {
         switch self {
         case .cannotDeleteLastModel:
-            return "Cannot delete the last remaining model"
+            return String(localized: "Keep at least one model. Download another one before deleting this one.",
+                          comment: "Shown when the user tries to delete their only downloaded model (issue #418).")
         case .noContainer:
-            return "App Group container not available"
+            return String(localized: "Dictus could not reach its storage. Restart the app and try again.",
+                          comment: "Shown when the App Group container is unavailable (issue #418).")
         case .parakeetUnavailable:
-            return "Parakeet requires iOS 17+ or FluidAudio is not linked"
+            return String(localized: "This model needs a newer version of iOS. Choose another model.",
+                          comment: "Shown on a model card when the Parakeet engine cannot run on this device (issue #418).")
         case .prewarmTimeout(let seconds):
             // WHY this no longer says the optimization "did not complete" (issue #427):
             // it did, almost every time. The old guard could not interrupt the compile,
@@ -1548,6 +1554,20 @@ enum ModelManagerError: Error, LocalizedError {
             // still on the Neural Engine, so "in a moment" is as precise as we can
             // honestly be.
             return String(localized: "Optimization did not finish within \(seconds)s. It is still running, so try again in a moment.")
+        }
+    }
+
+    /// English technical detail for the log. Never shown to the user.
+    var diagnosticDescription: String {
+        switch self {
+        case .cannotDeleteLastModel:
+            return "cannot delete the last remaining model"
+        case .noContainer:
+            return "App Group container not available"
+        case .parakeetUnavailable:
+            return "Parakeet requires iOS 17+ or FluidAudio is not linked"
+        case .prewarmTimeout(let seconds):
+            return "prewarm did not finish within \(seconds)s"
         }
     }
 

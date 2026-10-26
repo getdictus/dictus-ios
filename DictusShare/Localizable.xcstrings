@@ -4,6 +4,18 @@
     "Close" : {
       "extractionState" : "manual",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schließen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cerrar"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -16,6 +28,18 @@
       "comment" : "Share extension: the note was refused; the reason follows (#620).",
       "extractionState" : "manual",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dictus kann diese Datei nicht transkribieren"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dictus no puede transcribir este archivo"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -28,6 +52,18 @@
       "comment" : "Share extension: the file could not be read or copied (#620).",
       "extractionState" : "manual",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dictus konnte diese Datei nicht empfangen."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dictus no pudo recibir este archivo."
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -40,6 +76,18 @@
       "comment" : "Share extension, warm path with a Live Activity (#620).",
       "extractionState" : "manual",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verfolge sie in der Dynamic Island oder auf dem Sperrbildschirm und tippe darauf, wenn sie fertig ist."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Síguela en la Dynamic Island o en la pantalla bloqueada y tócala cuando termine."
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -63,6 +111,18 @@
       "comment" : "Share extension, warm path without a Live Activity (#620).",
       "extractionState" : "manual",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Öffne Dictus, wenn du sie lesen möchtest."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abre Dictus cuando quieras leerla."
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -75,6 +135,18 @@
       "comment" : "Share extension, cold path: the app is not running and cannot be opened from here (#620).",
       "extractionState" : "manual",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Öffne Dictus, deine Sprachnachricht wartet"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abre Dictus, tu mensaje de voz te espera"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -87,6 +159,18 @@
       "comment" : "Share extension, cold path, several notes (#620).",
       "extractionState" : "manual",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Öffne Dictus, deine Sprachnachrichten warten"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abre Dictus, tus mensajes de voz te esperan"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -99,6 +183,18 @@
       "comment" : "Share extension: copying the voice note (#620).",
       "extractionState" : "manual",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wird an Dictus gesendet…"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enviando a Dictus…"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -111,6 +207,18 @@
       "comment" : "Share extension, cold path (#620).",
       "extractionState" : "manual",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Transkription startet, sobald du die App öffnest."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La transcripción empieza en cuanto abras la app."
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -123,6 +231,18 @@
       "comment" : "Share extension: the shared file is not a recognised audio container (#620).",
       "extractionState" : "manual",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diese Datei ist kein Audioformat, das Dictus lesen kann."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Este archivo no tiene un formato de audio que Dictus pueda leer."
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -135,6 +255,18 @@
       "comment" : "Share extension: over the 10-minute cap (#620).",
       "extractionState" : "manual",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diese Sprachnachricht ist länger als 10 Minuten, die maximale Länge, die Dictus transkribiert."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Este mensaje de voz dura más de 10 minutos, el máximo que Dictus transcribe."
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -147,6 +279,18 @@
       "comment" : "Share extension: no entitlement, and the paywall is hidden so no subscription may be named (#620, #236).",
       "extractionState" : "manual",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das Transkribieren von Sprachnachrichten ist in dieser Version von Dictus nicht verfügbar."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La transcripción de mensajes de voz no está disponible en esta versión de Dictus."
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -159,6 +303,18 @@
       "comment" : "Share extension: the user has no Pro entitlement and the paywall is visible (#620).",
       "extractionState" : "manual",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das Transkribieren von Sprachnachrichten ist Teil von Dictus Pro. Öffne Dictus, um mehr zu erfahren."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La transcripción de mensajes de voz forma parte de Dictus Pro. Abre Dictus para saber más."
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -171,6 +327,18 @@
       "comment" : "Share extension, warm path (#620).",
       "extractionState" : "manual",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deine Sprachnachricht wird transkribiert"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transcribiendo tu mensaje de voz"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -183,6 +351,18 @@
       "comment" : "Share extension, warm path, several notes (#620).",
       "extractionState" : "manual",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deine Sprachnachrichten werden transkribiert"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transcribiendo tus mensajes de voz"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
@@ -195,6 +375,18 @@
       "comment" : "Share extension: a Pro user switched voice notes off in the Dictus Pro hub (#216).",
       "extractionState" : "manual",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sprachnachrichten sind ausgeschaltet. Aktiviere sie wieder in Dictus unter Dictus Pro."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los mensajes de voz están desactivados. Vuelve a activarlos en Dictus, en Dictus Pro."
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",

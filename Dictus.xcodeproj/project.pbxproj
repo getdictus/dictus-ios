@@ -1140,6 +1140,8 @@
 			knownRegions = (
 				en,
 				fr,
+				de,
+				es,
 				Base,
 			);
 			mainGroup = AA400000;

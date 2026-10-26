@@ -89,7 +89,8 @@ struct EmojiPickerView: View {
     private var sectionInfos: [CategoryInfo] {
         var infos: [CategoryInfo] = []
         if !recentEmojis.isEmpty {
-            infos.append(CategoryInfo(id: "recents", name: "Récents", icon: "clock", representativeEmoji: nil))
+            let recents = String(localized: "Recents", comment: "Emoji picker section header for recently used emoji (issue #418).")
+            infos.append(CategoryInfo(id: "recents", name: recents, icon: "clock", representativeEmoji: nil))
         }
         for cat in categories {
             infos.append(CategoryInfo(id: cat.id, name: cat.name, icon: cat.icon, representativeEmoji: cat.representativeEmoji))

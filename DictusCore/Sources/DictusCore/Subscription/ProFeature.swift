@@ -46,16 +46,6 @@ public enum ProFeature: String, CaseIterable {
         }
     }
 
-    /// Localized description shown on paywall feature cards (French).
-    public var paywallDescriptionFR: String {
-        switch self {
-        case .smartMode: return "Reformulez vos textes avec une IA embarqu\u{00E9}e"
-        case .history: return "Recherchez et exportez toutes vos transcriptions"
-        case .vocabulary: return "Apprenez \u{00E0} Dictus vos termes techniques"
-        case .voiceNotes: return "Transcrivez les messages vocaux que vous recevez"
-        }
-    }
-
     /// App Group UserDefaults key for per-feature enable/disable toggle.
     public var settingsKey: String {
         switch self {
