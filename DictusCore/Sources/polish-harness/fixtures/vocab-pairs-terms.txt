@@ -1,0 +1,7 @@
+# Synthetic Personal Vocabulary for `polish-harness vocabpairs` (#512 step 2).
+# One entry per line: `Term` or `Term = variant, variant` (the variants the device entry holds).
+Claude Code = clod code
+Parakeet = parakit
+WhisperKit = wisper kit
+Kubernetes = cubernetes
+Stéphane = stefan

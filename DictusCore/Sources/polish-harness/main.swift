@@ -11,6 +11,8 @@
 //   swift run polish-harness eval  <fixtures.json> [--instructions <prompt.txt>]
 //   swift run polish-harness ab    <fixtures.json> [--a <promptA.txt>] [--b <promptB.txt>]
 //   swift run polish-harness vocabulary <corpus.json>   (#80, no model, deterministic)
+//   swift run polish-harness vocabpairs <export.json> --terms <terms.txt> --out <pairs.txt>   (#512, no model)
+//   swift run polish-harness vocabjudge <pairs.txt>   (#512, Apple FM only when the labels ask for it)
 //
 // `--lang <code>` (#439) reroutes every fixture in the file: "auto" sends a
 // per-language set through the Auto-detect path, "fr" pins an auto set to French.
@@ -113,7 +115,7 @@ func corpusPaths(in args: [String], valuedOptions: Set<String> = []) -> [String]
 }
 
 let args = Array(CommandLine.arguments.dropFirst())
-guard let command = args.first, ["show", "eval", "ab", "prompt", "paragraph", "fidelity", "summary", "guardrail", "target", "vocabulary", "lostword", "langcheck"].contains(command), args.count >= 2 else {
+guard let command = args.first, ["show", "eval", "ab", "prompt", "paragraph", "fidelity", "summary", "guardrail", "target", "vocabulary", "lostword", "langcheck", "vocabpairs", "vocabjudge"].contains(command), args.count >= 2 else {
     print("""
     polish-harness — off-device polish eval (macOS + Apple Intelligence)
 
@@ -129,6 +131,8 @@ guard let command = args.first, ["show", "eval", "ab", "prompt", "paragraph", "f
       guardrail <corpus.json> [<corpus.json> …] [--segments] [--sweep] [--anchors]
       target    <corpus.json> [<corpus.json> …] [--sweep] [--floor N]
       vocabulary <corpus.json> [<corpus.json> …]
+      vocabpairs <export.json> --terms <terms.txt> [--learned <words.txt>] --out <pairs.txt>
+      vocabjudge <pairs.txt>
       lostword  <pairs.jsonl>   (#575, no model: recorded outputs through the pipeline)
       langcheck <corpus-or-capture.json> [… ] --fixtures <fixtures.json> [--fixtures …] --out <readings.jsonl>
 
@@ -170,6 +174,11 @@ guard let command = args.first, ["show", "eval", "ab", "prompt", "paragraph", "f
     vocabulary (#80) replays the custom-vocabulary replacement pass over committed
     term/transcript pairs and checks idempotence. Deterministic, drives no model.
     Corpus in docs/research/80-vocabulary/.
+
+    vocabpairs / vocabjudge (#512 step 2) measure the vocabulary pair generator on a
+    polish journal export. vocabpairs writes the first 20 pairs to a file OUTSIDE any
+    repository (it holds dictation text) to label v/f; vocabjudge applies the go/no-go
+    and calls Apple FM as the judge only when fewer than 17 of 20 are true.
 
     target (#456) scores the polish TARGET election — which language the model is
     told to write in — against committed, hand-labelled raw transcripts, and
@@ -259,7 +268,7 @@ let fixtures: [Fixture]
 // with the transcripts they rewrite, none of which is a fixture, so those three
 // have nothing to load here. `--lang` (#439) reroutes what IS loaded,
 // so it stays inside the loading branch.
-if ["guardrail", "target", "vocabulary", "lostword", "langcheck"].contains(command)
+if ["guardrail", "target", "vocabulary", "lostword", "langcheck", "vocabpairs", "vocabjudge"].contains(command)
     || (command == "fidelity" && isModelFreeFidelity) {
     fixtures = []
 } else {
@@ -311,7 +320,7 @@ guard #available(macOS 26.0, *) else {
 #if canImport(FoundationModels)
 // `prompt` never runs a model — it prints the bytes one would be sent — so it is
 // usable on a machine with Apple Intelligence off, which is the point of it.
-if command != "prompt", command != "guardrail", command != "vocabulary", command != "lostword", command != "langcheck",
+if !["prompt", "guardrail", "vocabulary", "lostword", "langcheck", "vocabpairs", "vocabjudge"].contains(command),
    !(command == "fidelity" && isModelFreeFidelity), engineKind == "apple-fm" {
     switch SystemLanguageModel.default.availability {
     case .available:
@@ -1051,6 +1060,12 @@ case "vocabulary":
 // #598. Records the language check's readings on committed outputs. Drives no model.
 case "langcheck":
     runLanguageCheckReadings()
+// #512 step 2. `vocabpairs` drives no model. `vocabjudge` asks Apple Intelligence for
+// nothing until the labels say the judge has to run, and checks availability then.
+case "vocabpairs":
+    runVocabularyPairs()
+case "vocabjudge":
+    await runVocabularyJudge()
 // #575. Replays recorded outputs through the shipped pipeline with an engine that
 // returns them verbatim. Drives no model, like the three above.
 case "lostword":
