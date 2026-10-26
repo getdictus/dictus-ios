@@ -35,4 +35,11 @@ public struct VocabularySuggestionIgnoreList {
         let stored = keys.union(added)
         defaults.set(stored.sorted(), forKey: SharedKeys.vocabularySuggestionsIgnored)
     }
+
+    /// Remember a step 2 pair as ignored (#512): its id only, so the span can still
+    /// be offered for another term, and the term keeps its other suggestions.
+    public func ignore(_ pair: VocabularyPair) {
+        let stored = keys.union([pair.id])
+        defaults.set(stored.sorted(), forKey: SharedKeys.vocabularySuggestionsIgnored)
+    }
 }
