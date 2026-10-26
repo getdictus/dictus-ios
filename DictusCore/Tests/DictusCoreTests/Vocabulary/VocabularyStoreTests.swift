@@ -150,6 +150,14 @@ final class VocabularyStoreTests: XCTestCase {
                        "it must load, and it must still say it does nothing")
     }
 
+    /// #819: a term saved on its own, to watch, is written and survives a relaunch.
+    func testATermAddedWithoutVariantsIsWrittenAndReloaded() {
+        XCTAssertTrue(makeStore().add(entry("Kafé Krème")))
+        let reloaded = makeStore()
+        XCTAssertEqual(reloaded.entries.map(\.term), ["Kafé Krème"])
+        XCTAssertEqual(reloaded.entries.first?.variants, [])
+    }
+
     func testTheStoreLivesInTheAppGroupContainerBesideTheHistory() {
         // The reason is #428: shared `UserDefaults` survives a reinstall with no way
         // out, and a corrupted vocabulary would too. A file has Reset vocabulary.

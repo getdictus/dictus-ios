@@ -73,27 +73,27 @@ final class VocabularyEntryTests: XCTestCase {
         XCTAssertEqual(VocabularyEntry(term: "Kubernetes", variants: parsed)?.variants, [])
     }
 
-    // MARK: - What an entry is worth storing (#536)
+    // MARK: - What an entry does (#536, #819)
 
-    /// The rule the add sheet enforces, at the level a test can reach it: SwiftUI
-    /// views live in DictusApp, which has no test target, so the predicate lives on
-    /// the model and `VocabularyEditorView.canSave` is one call to it.
+    /// What the list row reads to say a term is waiting for a misspelling (#819):
+    /// SwiftUI views live in DictusApp, which has no test target, so the predicate
+    /// lives on the model.
     func testAnEntryWithNoVariantsHasNoEffect() {
         XCTAssertEqual(VocabularyEntry(term: "Systeko")?.hasEffect, false)
         XCTAssertEqual(VocabularyEntry(term: "Systeko", variants: ["systéko"])?.hasEffect, true)
     }
 
-    /// A line of nothing but separators is refused by the sheet for free: the entry
-    /// is constructible, so `canSave` cannot lean on `init?` here.
+    /// A line of nothing but separators is a term saved on its own: the entry is
+    /// constructible and listed as waiting, never as replacing an empty string.
     func testALineOfSeparatorsProducesAnEntryWithNoEffect() {
         let parsed = VocabularyEntry.variants(fromLine: " , ,, ")
         XCTAssertEqual(VocabularyEntry(term: "Systeko", variants: parsed)?.hasEffect, false)
     }
 
-    /// **The separation #536 depends on.** `hasEffect` decides what is worth saving;
+    /// **The separation #819 depends on.** `hasEffect` decides what the row says;
     /// `isValid` decides what may be stored, and the store filters on it at every
-    /// load. Merging them would delete every variant-less entry written before this
-    /// change, on the next launch, with nothing on screen to say so.
+    /// load. Merging them would delete every term saved on its own, on the next
+    /// launch, with nothing on screen to say so.
     func testAnEntryWithNoVariantsIsStillValid() {
         guard let entry = VocabularyEntry(term: "Systeko") else {
             return XCTFail("entry should be constructible")

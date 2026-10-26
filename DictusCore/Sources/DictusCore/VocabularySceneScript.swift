@@ -8,14 +8,14 @@ import Foundation
 /// THE STORY: the list holds two terms, each with *Replaces: …* and its switch. The
 /// finger taps *Add a term*; the real editor sheet comes up (`VocabularyEditorView`); the
 /// finger types the correct spelling, then what Dictus writes instead; *Save* lights up
-/// once the entry would change a transcript, and the finger taps it. The sheet goes down
+/// once the term is typed, and the finger taps it. The sheet goes down
 /// and the new term is in the list, switched on. It stays a while, then leaves, so the
 /// loop starts again on the two terms it opened on.
 ///
-/// WHY *SAVE* IS DECIDED BY `VocabularyEntry`: the real sheet refuses an entry with no
-/// variant (#536), so its *Save* stays grey until the second field has text. The scene
-/// asks the model the same question rather than restating the rule, so the drawing
-/// cannot light the button where the app would not.
+/// WHY *SAVE* IS DECIDED BY `VocabularyEntry`: the real sheet saves any term the model
+/// accepts, with or without a variant (#819), so its *Save* lights up with the first
+/// field. The scene asks the model the same question rather than restating the rule, so
+/// the drawing cannot light the button where the app would not.
 public enum VocabularySceneScript {
 
     /// What the drawn finger taps.
@@ -95,10 +95,10 @@ public enum VocabularySceneScript {
     }
 
     /// Whether the real editor would enable *Save* for these two fields: an entry
-    /// `VocabularyEntry` accepts, that would change a transcript (`hasEffect`, #536).
-    /// The scene's term is never already in the list, so the duplicate check is moot.
+    /// `VocabularyEntry` accepts, variants optional (#819). The scene's term is never
+    /// already in the list, so the duplicate check is moot.
     public static func canSave(term: String, variants: String) -> Bool {
-        VocabularyEntry(term: term, variants: VocabularyEntry.variants(fromLine: variants))?.hasEffect ?? false
+        VocabularyEntry(term: term, variants: VocabularyEntry.variants(fromLine: variants)) != nil
     }
 
     private static func focusedField(at time: Double) -> Target? {

@@ -228,10 +228,11 @@ final class FeatureScenesScriptTests: XCTestCase {
     }
 
     func testSaveFollowsTheRealEntryRule() {
-        // #536: a term alone changes nothing, so the real sheet keeps Save grey.
-        XCTAssertFalse(Vocabulary.canSave(term: "Dr Nguyen", variants: ""))
+        // #819: a term alone is saved, to watch; only the term is required.
+        XCTAssertTrue(Vocabulary.canSave(term: "Dr Nguyen", variants: ""))
         XCTAssertFalse(Vocabulary.canSave(term: "", variants: "docteur Nguyen"))
-        XCTAssertFalse(Vocabulary.canSave(term: "Dr Nguyen", variants: "Dr Nguyen"))
+        XCTAssertFalse(Vocabulary.canSave(term: "   ", variants: "docteur Nguyen"))
+        XCTAssertTrue(Vocabulary.canSave(term: "Dr Nguyen", variants: "Dr Nguyen"))
         XCTAssertTrue(Vocabulary.canSave(term: "Dr Nguyen", variants: "d"))
     }
 
@@ -242,9 +243,11 @@ final class FeatureScenesScriptTests: XCTestCase {
         XCTAssertTrue(frame.canSave)
         XCTAssertEqual(frame.term, term)
         XCTAssertEqual(frame.variants, variants)
-        // And it was grey while only the term was typed.
+        // It lit up with the term, before any variant (#819), and was grey before.
         let variantsTap = Vocabulary.taps.first { $0.target == .variantsField }
-        XCTAssertFalse(vocabulary(at: variantsTap?.press ?? 0).canSave)
+        XCTAssertTrue(vocabulary(at: variantsTap?.press ?? 0).canSave)
+        let termTap = Vocabulary.taps.first { $0.target == .termField }
+        XCTAssertFalse(vocabulary(at: termTap?.press ?? 0).canSave)
     }
 
     func testTheFieldsAreTypedInOrder() {
