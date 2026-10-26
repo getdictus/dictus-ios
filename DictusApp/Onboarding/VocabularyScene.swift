@@ -37,10 +37,12 @@ struct VocabularySceneCard: View {
              comment: "Onboarding vocabulary scene: title (#680).")
     }
 
-    /// The line under the title, shared the same way.
+    /// The line under the title, shared the same way. It explains the loop rather than
+    /// announcing the feature (#829): keyboard corrections are learned, offered as terms,
+    /// then applied to dictations.
     static var line: Text {
-        Text("Note a name and the way Dictus gets it wrong. Next time, it will write it your way.",
-             comment: "Onboarding vocabulary scene: the line under the title (#680).")
+        Text("Correct your words in the Dictus keyboard: it learns them. Dictus suggests them for your vocabulary, on your iPhone, and adds nothing without you. After that, your dictations write them your way.",
+             comment: "Onboarding vocabulary scene: the line under the title, also shown in What's New and the \"See the demo\" sheet. Explains the loop: corrections typed in the keyboard are learned, suggested as vocabulary terms (never added automatically), then applied to dictations (#680, #829).")
     }
 
     var body: some View {

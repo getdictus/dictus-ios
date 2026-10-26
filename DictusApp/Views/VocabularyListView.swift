@@ -62,7 +62,14 @@ struct VocabularyListView: View {
             ProFeatureSwitchSection(feature: .vocabulary)
 
             // What the feature does, and its demo (#686).
-            ProFeatureHowItWorksSection(feature: .vocabulary, isAvailable: isAvailable)
+            // Its own paragraph, like Voice notes: this screen is where the suggestions
+            // live, so it names the button that finds them (#829).
+            ProFeatureHowItWorksSection(
+                feature: .vocabulary,
+                explanation: Text("Correct your words in the Dictus keyboard: it learns them. Tap Analyze my transcriptions: Dictus compares them with your dictations and suggests terms to accept, edit or ignore. Nothing is added without you, and everything stays on your iPhone. Your terms then correct your dictations automatically.",
+                                  comment: "Vocabulary screen: the paragraph of the \"How it works\" card. 'Analyze my transcriptions' is the button further down the same screen (#829)."),
+                isAvailable: isAvailable
+            )
 
             Section {
                 if store.isEmpty {
