@@ -1,5 +1,5 @@
 // DictusCore/Sources/DictusCore/Vocabulary/VocabularyPairGenerator+Suggestions.swift
-// The few pairs the app offers as new variants of a vocabulary term (#512, step 2 UI).
+// The few pairs the app offers from the user's own spellings (#512, step 2 UI).
 import Foundation
 
 extension VocabularyPairGenerator {
@@ -15,30 +15,54 @@ extension VocabularyPairGenerator {
     public static let suggestionMinDictations = 2
 
     /// The sheet shows few rows, so each one is worth reading.
-    public static let suggestionLimit = 5
+    public static let suggestionLimit = 10
 
-    /// What **Analyze my transcriptions** offers: new variants for the user's own
-    /// vocabulary terms, closest first.
+    /// What **Analyze my transcriptions** offers, best first.
     ///
-    /// ### Why vocabulary terms only
+    /// ### Where the correct spelling comes from
     ///
-    /// A term is a spelling the user wrote down, so the canonical is certain and the
-    /// only open question is the span. Learned words are left to step 1's paired
-    /// section, which matches them more strictly; offering them here too would show the
-    /// same word twice under two rules.
+    /// Only from what the user wrote themselves, never from History: first the
+    /// Personal Vocabulary terms, then the words the keyboard learned from their
+    /// typing (`UserDictionary`, stored lowercase). Every vocabulary pair ranks before
+    /// every learned-word pair, since a term is a spelling the user wrote down on
+    /// purpose; within a source, the generator's order (closest, more dictations,
+    /// more occurrences, most recent).
     ///
-    /// No model judges the pairs: the cautious thresholds above do, and the user
-    /// confirms each one before anything is stored.
+    /// ### One word, one rule
+    ///
+    /// A learned word step 1 already suggests (`stepOne`, its paired rows) is not a
+    /// canonical here at all. Step 1 is the stricter rule and was validated on device,
+    /// so it keeps the word; dropping the word rather than single spans means the
+    /// same word never shows in two sections, whatever its spellings.
+    ///
+    /// ### One row per word
+    ///
+    /// Only the best pair of each canonical is offered.
+    ///
+    /// No model judges the pairs: the thresholds above do, and the user confirms
+    /// each one before anything is stored.
     public func suggestions(from records: [TranscriptionRecord],
                             vocabulary: [VocabularyEntry],
+                            learnedWords: [String] = [],
+                            stepOne: [VocabularySuggestion] = [],
                             ignored: Set<String>) -> [VocabularyPair] {
-        Array(
-            pairs(from: records, vocabulary: vocabulary, ignored: ignored, limit: .max)
-                .filter {
-                    $0.score <= Self.suggestionMaxScore
-                        && $0.dictationCount >= Self.suggestionMinDictations
-                }
-                .prefix(Self.suggestionLimit)
+        let coveredByStepOne = stepOne.filter(\.isPaired).map(\.id)
+        let found = pairs(
+            from: records,
+            vocabulary: vocabulary,
+            learnedWords: learnedWords,
+            ignored: ignored.union(coveredByStepOne),
+            limit: .max
         )
+        let kept = found.filter {
+            $0.score <= Self.suggestionMaxScore && $0.dictationCount >= Self.suggestionMinDictations
+        }
+        // `pairs` is already in the generator's order: a stable split by source keeps it.
+        let ordered = kept.filter { $0.source == .vocabulary } + kept.filter { $0.source == .learned }
+        // One row per spelling, its best pair: two spellings of one word are two
+        // guesses at the same mistake, and accepting one re-mines the other.
+        var seen = Set<String>()
+        let best = ordered.filter { seen.insert(VocabularySuggestionMiner.fold($0.canonical)).inserted }
+        return Array(best.prefix(Self.suggestionLimit))
     }
 }

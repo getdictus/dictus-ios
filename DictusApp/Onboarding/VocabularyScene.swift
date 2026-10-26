@@ -240,10 +240,11 @@ private struct VocabularySceneEditor: View {
                 field(frame.variants, placeholder: Text("How does Dictus write it instead?"),
                       isFocused: frame.focusedField == .variantsField)
                     .sceneTapTarget(Target.variantsField)
-                // `VocabularyEditorView`'s footer rule: the orange line while a term is typed
-                // with nothing it replaces (#536).
+                // `VocabularyEditorView`'s footer rule: the neutral line while a term is typed
+                // with nothing it replaces (#819).
                 if variantsMissing {
-                    footer(Text("Add at least one. A term on its own changes nothing Dictus writes."), isWarning: true)
+                    footer(Text("Optional. Without a misspelling, this term changes nothing yet. Add one when you spot it."),
+                           isWarning: false)
                 } else {
                     footer(Text("Separated by commas. Dictus replaces each of them with your spelling."), isWarning: false)
                 }

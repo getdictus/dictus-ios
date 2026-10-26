@@ -33,6 +33,15 @@ final class VocabularyReplacerTests: XCTestCase {
         XCTAssertEqual(VocabularyReplacer.apply(raw, entries: [entry("Kubernetes", [])]), raw)
     }
 
+    /// #819: a term saved to watch emits nothing, so it must not count as a term
+    /// the pass can emit. Before, `Kubernetes Engine` on its own dropped the
+    /// lowercase fix of `Kubernetes`, whose variant sits inside it.
+    func testATermWithNoVariantsDoesNotBlockAVariantInsideIt() {
+        let entries = [entry("Kubernetes Engine", []), entry("Kubernetes", ["kubernetes"])]
+        XCTAssertEqual(VocabularyReplacer.apply("on passe sur kubernetes", entries: entries),
+                       "on passe sur Kubernetes")
+    }
+
     func testADisabledEntryDoesNothing() {
         let raw = "on passe sur cubernetes demain"
         let entries = [entry("Kubernetes", ["cubernetes"], enabled: false)]

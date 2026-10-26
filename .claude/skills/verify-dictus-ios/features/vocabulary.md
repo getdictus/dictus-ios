@@ -7,20 +7,20 @@
 
 ## Sub-features
 
-- `vocabulary.add`: « Ajouter un terme »: the correct spelling and how Dictus mishears it.
+- `vocabulary.add`: « Ajouter un terme »: the correct spelling and the variant, if known (how Dictus mishears it). A term saved alone lists as « En attente d’erreurs à corriger » and replaces nothing (#819).
 - `vocabulary.edit`: Edit a term.
 - `vocabulary.delete`: Delete a term.
 - `vocabulary.reset`: « Réinitialiser le vocabulaire ».
-- `vocabulary.suggestions`: « Analyser mes transcriptions » opens « Suggestions depuis l'historique »: words the user corrected, offered, never imposed.
-- `vocabulary.term-variants`: the sheet's first section, « Variantes de vos termes » (#512 step 2): spans History wrote close to one of the user's terms (`cloud code` for `Claude Code`), seen in at least two dictations, at most 5 rows. Each row: « Accepter » opens « Avant l'ajout », which shows the term, its variants and the new one in green before « Ajouter » stores it; « Modifier » opens the term sheet with the variant filled in; « Ignorer » hides the row for good.
+- `vocabulary.suggestions`: « Analyser mes transcriptions » opens « Suggestions depuis l’historique »: words the user corrected, offered, never imposed.
+- `vocabulary.term-variants`: the sheet's first section, « Vos orthographes, écrites autrement » (#512 step 2): spans History wrote close to a spelling the user wrote themselves (`cloud code` for the term `Claude Code`), seen in at least two dictations, one row per spelling, at most 10 rows. Terms come first, including a term saved without a variant (#819); then words the keyboard learned, marked « Tapé au clavier, pas encore un terme ». Each row has « Accepter » and « Ignorer », no « Modifier ». « Accepter » opens « Avant l’ajout »: one sentence saying the change, then the term and the new variant in two editable fields (the term's existing variants listed above the new one), « Annuler » / « Ajouter ». « Ajouter » adds the variant to the term (a pending term stops being pending), or creates a new term from a learned word. « Ignorer » hides the row for good.
 - `vocabulary.apply`: Terms are applied to every transcription.
 - `vocabulary.toggle`: « Vocabulaire » on/off switch.
 
 ## How to get to it (user POV)
 
 1. With Pro, Dictus → Réglages → Dictus Pro → Vocabulaire.
-2. Tap « Ajouter un terme », type the word and how it comes out wrong, save.
-3. Tap « Analyser mes transcriptions »: the suggestions from History, variants of your terms first.
+2. Tap « Ajouter un terme », type the word and, if known, how it comes out wrong, save.
+3. Tap « Analyser mes transcriptions »: the suggestions from History, your own spellings written differently first.
 
 ## Driving it with axe + Argent
 
@@ -28,7 +28,7 @@
 .claude/skills/verify-dictus-ios/scripts/launch.sh --skip-onboarding
 .claude/skills/verify-dictus-ios/scripts/drive.sh set-default dictus.debugProEntitlementForced -bool YES
 .claude/skills/verify-dictus-ios/scripts/drive.sh tab Réglages
-.claude/skills/verify-dictus-ios/scripts/drive.sh tap-label "Dictus Pro, Pro actif"
+.claude/skills/verify-dictus-ios/scripts/drive.sh tap-label "Dictus Pro, Pro actif"   # during the trial: "Dictus Pro, Pro · 14 jours restants"
 .claude/skills/verify-dictus-ios/scripts/drive.sh tap-label "Vocabulaire, Apprenez à Dictus vos termes techniques, Activé"
 .claude/skills/verify-dictus-ios/scripts/drive.sh tap-label "Ajouter un terme"
 .claude/skills/verify-dictus-ios/scripts/evidence.sh vocabulary-term-editor
@@ -38,7 +38,7 @@ Type into the focused field with `axe type 'Dr Nguyen' --udid <udid>`.
 
 ### Variants of your terms (`vocabulary.term-variants`)
 
-Nothing records: the vocabulary and History are written into the App Group container with the app stopped, the way PR #814 was checked. `seed` takes the terms (`term=variant,variant;…`) and the dictations (`text|text|…`), clears the ignore list, then relaunches the app in French, which reads them. `open_suggestions` goes from the tab bar to the sheet. `expect_rows <n>` counts the « Accepter » buttons on screen and fails on any other count.
+Nothing records: the vocabulary and History are written into the App Group container with the app stopped, the way PR #814 was checked. `seed` takes the terms (`term=variant,variant;…`, `term=` for a term without a variant) and the dictations (`text|text|…`), clears the ignore list, then relaunches the app in French, which reads them. `open_vocabulary` goes from the tab bar to Vocabulaire, `open_suggestions` on to the sheet. Each row's buttons carry its rank, from 1 down the first section: `vocabulary.pair.<rank>.accept` and `vocabulary.pair.<rank>.ignore`. `expect_rows <n>` counts the `.accept` identifiers on screen (only the rows that fit) and fails on any other count.
 
 ```bash
 export DICTUS_VERIFY_RUN=<run dir from the READY line>
@@ -55,7 +55,7 @@ group, terms, texts = sys.argv[1:]
 now = datetime.datetime.now(datetime.timezone.utc).replace(microsecond=0)
 iso = lambda d: d.isoformat().replace("+00:00", "Z")
 vocabulary = [{"id": str(uuid.uuid4()).upper(), "term": t.split("=")[0],
-               "variants": t.split("=")[1].split(","), "isEnabled": True, "dateAdded": iso(now)}
+               "variants": [v for v in t.split("=")[1].split(",") if v], "isEnabled": True, "dateAdded": iso(now)}
               for t in terms.split(";")]
 history = [{"id": str(uuid.uuid4()).upper(), "text": text, "language": "fr", "durationSeconds": 5,
             "createdAt": iso(now - datetime.timedelta(minutes=i)), "sttProvider": "PK"}
@@ -67,95 +67,103 @@ PY
     "$GROUP_DIR/Library/Preferences/group.solutions.pivi.dictus.plist" dictus.vocabularySuggestionsIgnored 2>/dev/null || true
   $D relaunch -AppleLanguages '(fr)' -AppleLocale fr_FR   # French UI on any device
 }
-open_suggestions() {
-  $D tab Réglages
-  $D tap-label "Dictus Pro, Pro actif"
+open_vocabulary() {
+  local pro
+  $D tab Réglages; sleep 1
+  # « Dictus Pro, Pro actif », or « Dictus Pro, Pro · 14 jours restants » while the trial runs.
+  pro=$($D tree | python3 -c '
+import json, sys
+def walk(n):
+    if n.get("type") == "Button" and (n.get("AXLabel") or "").startswith("Dictus Pro, "): print(n["AXLabel"]); sys.exit()
+    for c in n.get("children") or []: walk(c)
+for r in json.load(sys.stdin): walk(r)')
+  $D tap-label "$pro"
   $D tap-label "Vocabulaire, Apprenez à Dictus vos termes techniques, Activé"
   $D wait-label "Vos termes"
+}
+open_suggestions() {
   # Below the terms: with several, the list renders the button only once scrolled to.
   axe swipe --start-x 200 --start-y 700 --end-x 200 --end-y 200 --udid "$UDID" >/dev/null; sleep 1
   $D tap-label "Analyser mes transcriptions"
-  $D wait-label "Variantes de vos termes" 10
-}
-# The row's « Modifier » and « Ignorer » have no identifier, and the Vocabulaire screen
-# under the sheet has its own « Modifier »: tap the one on the line of the row's
-# `vocabulary.pair.accept` (one row on screen, so that identifier is unique).
-tap_in_row() {
-  local xy
-  xy=$($D tree | python3 -c '
-import json, sys
-label = sys.argv[1]
-nodes = []
-def walk(n):
-    nodes.append(n)
-    for c in n.get("children") or []: walk(c)
-for r in json.load(sys.stdin): walk(r)
-accept = [n["frame"] for n in nodes if n.get("AXUniqueId") == "vocabulary.pair.accept"]
-assert len(accept) == 1, "%d rows on screen, expected 1" % len(accept)
-ay = accept[0]["y"] + accept[0]["height"] / 2
-hits = [n["frame"] for n in nodes if n.get("AXLabel") == label and n.get("type") == "Button"
-        and n["frame"]["y"] <= ay <= n["frame"]["y"] + n["frame"]["height"]]
-assert len(hits) == 1, "%d %r buttons on the row" % (len(hits), label)
-f = hits[0]
-print(round(f["x"] + f["width"] / 2), round(f["y"] + f["height"] / 2))' "$1") || return 1
-  axe tap -x "${xy% *}" -y "${xy#* }" --udid "$UDID" >/dev/null && echo "tapped row's $1 at $xy"
+  $D wait-label "Vos orthographes, écrites autrement" 10
 }
 expect_rows() {
   local n
   n=$($D tree | python3 -c '
-import json, sys
+import json, re, sys
 def walk(n):
-    return (n.get("AXUniqueId") == "vocabulary.pair.accept") + sum(walk(c) for c in n.get("children") or [])
+    own = bool(re.fullmatch(r"vocabulary\.pair\.\d+\.accept", n.get("AXUniqueId") or ""))
+    return own + sum(walk(c) for c in n.get("children") or [])
 print(sum(walk(r) for r in json.load(sys.stdin)))')
   [ "$n" = "$1" ] && echo "rows $n" || { echo "error: $n rows, expected $1" >&2; return 1; }
 }
+# Whether the review sheet's « Ajouter » is enabled: prints yes or no. The identifier is on
+# a Group wrapper too, always enabled: read the Button.
+add_enabled() {
+  $D tree | python3 -c '
+import json, sys
+def find(n):
+    if n.get("AXUniqueId") == "vocabulary.pair.review.confirm" and n.get("type") == "Button": return n
+    for c in n.get("children") or []:
+        f = find(c)
+        if f: return f
+hits = [f for f in (find(r) for r in json.load(sys.stdin)) if f]
+print(("yes" if hits[0].get("enabled") else "no") if hits else "error: no confirm button")'
+}
+variants() {
+  python3 -c 'import json,sys; print({e["term"]: e["variants"] for e in json.load(open(sys.argv[1]))})' "$GROUP_DIR/vocabulary.json"
+}
 
-# 1. At most 5 rows: seven terms, each misheard (last letter doubled) in two dictations.
+# 1. At most 10 rows: twelve terms, each misheard (last letter doubled) in two dictations.
 T="" X=""
-for n in Zorvalix Kentrabo Plimdora Quastemi Brunzeta Vothrami Dashkelo; do
+for n in Zorvalix Kentrabo Plimdora Quastemi Brunzeta Vothrami Dashkelo Fenturak Glimsoda Hartvelo Joskarin Lunderfo; do
   h=$(echo "$n" | tr '[:upper:]' '[:lower:]')${n: -1}
   T="$T;$n=${h}z" X="$X|$h est lent|$h encore"
 done
 seed "${T#;}" "${X#|}"
 M=$($D log-mark)
-open_suggestions
-$D wait-log 'VocabularySuggestions .*termVariants=5' 10 "$M"
-expect_rows 5
+open_vocabulary; open_suggestions
+$D wait-log 'VocabularySuggestions .*termVariants=10' 10 "$M"
 $E vocabulary-suggestions-cap
+# Ten rows do not fit on screen: scroll to the last one. No row 11 (rank 11 would be a
+# step 1 row, which has no identifier).
+axe swipe --start-x 200 --start-y 700 --end-x 200 --end-y 250 --udid "$UDID" >/dev/null; sleep 1
+$D wait-id vocabulary.pair.10.accept
+$D gone-id vocabulary.pair.11.accept
 
-# 2. Accept: one term, `cloud code` in three dictations.
-SEED_TERMS="Claude Code=clode code"
+# 2. Accept, Annuler, an emptied variant, then Ajouter: one term, `cloud code` in three dictations.
 SEED_TEXTS="cloud code est lent|on parle de cloud code|cloud code encore|le reste est bon|rien à signaler"
-seed "$SEED_TERMS" "$SEED_TEXTS"
+seed "Claude Code=clode code" "$SEED_TEXTS"
 M=$($D log-mark)
-open_suggestions
+open_vocabulary; open_suggestions
 $D wait-log 'VocabularySuggestions .*termVariants=1' 10 "$M"
 $D wait-label "Écrit : cloud code"
 expect_rows 1
 $E vocabulary-suggestions
-$D tap-id vocabulary.pair.accept
+$D tap-id vocabulary.pair.1.accept
 $D wait-label "Avant l’ajout"
+$D wait-label "Variante « cloud code » ajoutée à « Claude Code »."
 $D wait-label "Désormais, quand Dictus écrit « cloud code », il écrit « Claude Code » à la place."
 $E vocabulary-pair-review
 $D tap-label Annuler                                  # stores nothing
 $D gone-id vocabulary.pair.review.confirm
-if grep -q 'cloud code' "$GROUP_DIR/vocabulary.json"; then echo "error: stored on Annuler" >&2; false; else echo "not stored"; fi
-$D tap-id vocabulary.pair.accept
+variants                                              # → {'Claude Code': ['clode code']}
+$D tap-id vocabulary.pair.1.accept
+$D tap-id vocabulary.pair.review.variant              # empty the variant (12 backspaces)
+axe key-sequence --keycodes 42,42,42,42,42,42,42,42,42,42,42,42 --udid "$UDID" >/dev/null
+$D wait-label "Rien ne changerait. Vérifiez le terme et la variante."
+[ "$(add_enabled)" = no ] && echo "Ajouter disabled" || { echo "error: Ajouter not disabled on an empty variant" >&2; false; }
+axe type 'cloud code' --udid "$UDID" >/dev/null       # back as suggested
+$D wait-label "Variante « cloud code » ajoutée à « Claude Code »."
 $D tap-id vocabulary.pair.review.confirm              # « Ajouter »
-$D gone-id vocabulary.pair.accept                     # the row leaves the list
-python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))[0]["variants"])' "$GROUP_DIR/vocabulary.json"
-# → ['clode code', 'cloud code']
+$D gone-id vocabulary.pair.1.accept                   # the row leaves the list
+variants                                              # → {'Claude Code': ['clode code', 'cloud code']}
 
-# 3. Edit, then Ignore, on the same row (seeded again, ignore list cleared).
-seed "$SEED_TERMS" "$SEED_TEXTS"
-open_suggestions
-tap_in_row Modifier
-$D wait-label "Déjà dans votre vocabulaire. Cette variante y sera ajoutée."
-$E vocabulary-pair-edit
-$D tap-label Annuler                                  # the row stays
-$D wait-id vocabulary.pair.accept
-tap_in_row Ignorer
-$D gone-id vocabulary.pair.accept
+# 3. Ignore, on the same row (seeded again, ignore list cleared).
+seed "Claude Code=clode code" "$SEED_TEXTS"
+open_vocabulary; open_suggestions
+$D tap-id vocabulary.pair.1.ignore
+$D gone-id vocabulary.pair.1.accept
 ignored=no                                            # the defaults flush takes a moment
 for _ in 1 2 3 4 5 6 7 8 9 10; do
   xcrun simctl spawn "$UDID" defaults read "$GROUP_DIR/Library/Preferences/group.solutions.pivi.dictus.plist" \
@@ -164,18 +172,34 @@ for _ in 1 2 3 4 5 6 7 8 9 10; do
 done
 if [ "$ignored" = yes ]; then echo "ignored: pair:claude code|cloud code"; else echo "error: ignore not stored" >&2; false; fi
 $D tap-label OK                                       # close, open again: still hidden
-sleep 1; $E vocabulary-list                          # once the sheet has slid away
+sleep 1; $E vocabulary-list                           # once the sheet has slid away
 $D tap-label "Analyser mes transcriptions"
 $D wait-label "Suggestions depuis l’historique"; sleep 2; expect_rows 0
+
+# 4. A term saved without a variant (#819) is pending; accepting its suggestion ends that.
+seed "Claude Code=" "$SEED_TEXTS"
+open_vocabulary
+$D wait-label "En attente d’erreurs à corriger"
+$E vocabulary-pending
+open_suggestions
+$D tap-id vocabulary.pair.1.accept
+$D wait-label "Variante « cloud code » ajoutée à « Claude Code »."
+$D tap-id vocabulary.pair.review.confirm
+$D gone-id vocabulary.pair.1.accept
+variants                                              # → {'Claude Code': ['cloud code']}
+$D tap-label OK
+$D wait-label "Remplace : cloud code"                 # no longer « En attente d’erreurs à corriger »
 ```
 
 ## Gotchas
 
 - **Not drivable in the simulator:** whether a term actually fixes a transcription (needs a recording). FluidAudio's vocabulary boosting is English-only; the French correction path is the post-pass.
 - Suggestions stay empty without history. A seeded History proves the screens and the store writes, not whether real dictations produce rows worth adding: that go/no-go is on Pierre's iPhone, on his own History.
-- `vocabulary.pair.accept` is on **every** variant row, and « Modifier » / « Ignorer » have no identifier: `tap-id` refuses as soon as two rows are on screen. That is why steps 2 and 3 seed a single term; with several rows, only the cap is checked (by counting), and no row is tapped.
-- `tap-label Modifier` refuses even with one row: the Vocabulaire screen under the sheet keeps its toolbar « Modifier » in the tree. `tap_in_row` taps the button with that label on the line of the row's `vocabulary.pair.accept`, by its frame. It is a coordinate tap anchored on an identifier, and the first thing to replace if the rows get their own identifiers (e.g. `vocabulary.pair.edit`, `vocabulary.pair.ignore`).
-- The sheet still reads « Suggestions depuis l'historique »: only the Vocabulaire button was renamed « Analyser mes transcriptions ».
-- « Modifier » on a variant opens « Nouveau terme » with both fields filled and the footer « Déjà dans votre vocabulaire. Cette variante y sera ajoutée. »: saving adds the variant to the existing term, it does not create a second one.
-- In step 1, the sixth and seventh terms are past the cap: their spellings can come back lower down, in « Absents du dictionnaire, vus dans plusieurs dictées », which is step 1's miner and expected.
+- Row identifiers carry the rank (`vocabulary.pair.<rank>.accept`, `.ignore`), so rows on screen never share one and `tap-id` works with any number of rows. The numbering runs on through the two step 1 sections below, whose « Ajouter » / « Ignorer » have no identifier.
+- No « Modifier » on a row: the review sheet is the edit path. Its two fields, `vocabulary.pair.review.term` and `vocabulary.pair.review.variant`, come filled in and editable, and the sentence on top (`vocabulary.pair.review.summary`) follows what they hold. When they would change nothing (empty variant, variant equal to the term, or one the term already has), it reads « Rien ne changerait. Vérifiez le terme et la variante. » and « Ajouter » is disabled.
+- A term typed in the review sheet with other capitals than a stored one gains the variant; it does not create a second term.
+- A term saved without a variant lists as « En attente d’erreurs à corriger » and replaces nothing. The generator still looks for its spelling, so it gets suggestions like any term, and accepting one makes it list as « Remplace : … ».
+- Learned-word rows (« Tapé au clavier, pas encore un terme »; the review sheet then reads « Nouveau terme « … », avec la variante « … ». ») are not seeded here: they need words in the keyboard's learned dictionary. The recipe covers vocabulary terms only.
+- The sheet's title is « Suggestions depuis l’historique » and the review sheet's « Avant l’ajout », both with a typographic apostrophe: `wait-label` needs it.
+- In step 1, the eleventh and twelfth terms are past the cap: their spellings can come back lower down, in « Absents du dictionnaire, vus dans plusieurs dictées », which is step 1's miner and expected.
 - `seed` overwrites `vocabulary.json` and `transcription_history.json` and deletes the ignore list. That is harmless on the device `launch.sh` created for the run. On any other device (e.g. `Dictus Smoke`), copy the two files out first and put them back afterwards.

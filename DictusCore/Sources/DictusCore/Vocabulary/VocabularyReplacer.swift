@@ -209,8 +209,10 @@ public enum VocabularyReplacer {
 
         // The two filters that make the pass idempotent, in the order that keeps
         // them cheap: drop a needle already claimed, then drop one that lives inside
-        // a term this pass can emit.
-        let terms = enabled.map(ResolvedTerm.init)
+        // a term this pass can emit. An entry with no variants emits nothing (#819:
+        // a term saved to watch), so its term cannot start a cycle and must not drop
+        // another entry's variant that happens to sit inside it.
+        let terms = enabled.filter(\.hasEffect).map(ResolvedTerm.init)
         var claimed = Set<String>()
         var rules: [Rule] = []
         for rule in candidates {
