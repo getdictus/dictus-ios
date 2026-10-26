@@ -37,7 +37,7 @@ Take the first line that is not struck through. Status (who is on what): [Projec
 19. ~~#727 — README: free dictation + optional Pro, no free-forever promise~~ — merged in PR #729 (2026-10-13), ahead of #279: promote to main only with #279
 20. ~~#758 — App Store slide 1: redraw the hero woman to match the onboarding intro's character (bob, hands, phone held out, trousers)~~ — merged in PR #759 (2026-10-22)
 21. ~~#380 — User-configurable audio session inactivity timeout (Immediately / 1 / 5 / 10 default / 30 min / 1 h / Unlimited), also governs prewarm~~ — merged in PR #807 (2026-10-25)
-22. ~~#279 — flip `PremiumFlags.paywallVisible` and walk all four entry points, plus #593's iPad and EN checks~~ — merged in PR #776 (flag, 2026-10-24) and PR #791 (entry points, 2026-10-25)
+22. #279 — flip `PremiumFlags.paywallVisible` and walk all four entry points, plus #593's iPad and EN checks — merged in PR #776 and PR #791, device test pending
 23. ~~#769 — cut chore: remove the bundled `JointDecisionv3.mlmodelc` from DictusApp~~
 24. ~~#489 — Smart Modes can only be armed from the keyboard, and the app gives no sign which one is running~~ — merged in PR #795 (2026-10-25)
 25. ~~#793 — End-of-trial paywall: "Continue for free" opened Safari once~~ — merged in PR #812 (2026-10-25)
