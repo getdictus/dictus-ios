@@ -11,7 +11,7 @@
 - `vocabulary.edit`: Edit a term.
 - `vocabulary.delete`: Delete a term.
 - `vocabulary.reset`: « Réinitialiser le vocabulaire ».
-- `vocabulary.suggestions`: « Analyser mes transcriptions » opens « Suggestions depuis l’historique »: words the user corrected, offered, never imposed.
+- `vocabulary.suggestions`: « Analyser mes transcriptions » opens « Suggestions depuis l’historique »: words the user corrected, offered, never imposed. The screen's « Comment ça marche » card explains it and names the button (#829).
 - `vocabulary.term-variants`: the sheet's first section, « Vos orthographes, écrites autrement » (#512 step 2): spans History wrote close to a spelling the user wrote themselves (`cloud code` for the term `Claude Code`), seen in at least two dictations, one row per spelling, at most 10 rows. Terms come first, including a term saved without a variant (#819); then words the keyboard learned, marked « Tapé au clavier, pas encore un terme ». Each row has « Accepter » and « Ignorer », no « Modifier ». « Accepter » opens « Avant l’ajout »: one sentence saying the change, then the term and the new variant in two editable fields (the term's existing variants listed above the new one), « Annuler » / « Ajouter ». « Ajouter » adds the variant to the term (a pending term stops being pending), or creates a new term from a learned word. « Ignorer » hides the row for good.
 - `vocabulary.apply`: Terms are applied to every transcription.
 - `vocabulary.toggle`: « Vocabulaire » on/off switch.
