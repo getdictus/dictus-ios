@@ -286,7 +286,7 @@ struct MainTabView: View {
                 )
                 .paywallCover(
                     isPresented: $trialCoordinator.showsEndOfTrialPaywall,
-                    framing: trialCoordinator.endOfTrialPaywallFraming
+                    trialEnd: trialCoordinator.endOfTrialPaywall
                 )
                 .onAppear {
                     trialCoordinator.evaluate(canPresent: mayRaiseTrialScreens)

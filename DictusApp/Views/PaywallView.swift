@@ -24,9 +24,15 @@ struct PaywallView: View {
     @EnvironmentObject var proStatus: ProStatusManager
     @Environment(\.dismiss) private var dismiss
 
-    /// Why this paywall is up (#593). `.standard` for every entry point the user
-    /// chose; `.trialEnded` for the one the app opens once when the trial is over.
-    var framing: PaywallFraming = .standard
+    /// Set when the app opened this paywall because the trial is over (#593), with
+    /// how it is framed (#837); nil for every entry point the user chose.
+    var trialEnd: ProTrialEndPaywall?
+
+    /// Why this paywall is up. `.trialEnded` only for the end-of-trial framing; a
+    /// reinstall over an ended trial gets the ordinary one (#837).
+    private var framing: PaywallFraming {
+        trialEnd == .trialEnded ? .trialEnded : .standard
+    }
 
     /// Selected plan, tracked by product ID (never by array index: StoreKit's
     /// product order is unspecified). Yearly is preselected per the pricing
@@ -867,13 +873,13 @@ struct PaywallView: View {
     // MARK: - Monthly offer on close (#724)
 
     /// Every way out of the paywall the user can take: the cross and "Continue for
-    /// free". On the end-of-trial paywall, once the user has seen the plans, the first
-    /// one shows the monthly offer instead of closing
+    /// free". On the paywall the app opened at the trial's end, once the user has seen
+    /// the plans, the first one shows the monthly offer instead of closing
     /// (`ProPaywallPlans.offersMonthlyOnClose`); from the recap, everywhere else, and
     /// the second time, it closes.
     private func close() {
         guard ProPaywallPlans.offersMonthlyOnClose(
-            isEndOfTrialPaywall: framing == .trialEnded,
+            trialEndPaywall: trialEnd,
             sawPlans: showsOffers,
             isPaid: proStatus.isPaid,
             monthlyLoaded: subscriptionManager.monthlyProduct != nil,

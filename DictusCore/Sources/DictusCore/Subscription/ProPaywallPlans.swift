@@ -43,10 +43,12 @@ public enum ProPaywallPlans {
 
     /// Whether closing the paywall shows the monthly offer instead of closing.
     ///
-    /// Only on the end-of-trial paywall: closing a paywall the user opened from
-    /// Settings, the home card or a locked feature never nags. That paywall is itself
-    /// shown once (`ProTrialPolicy.endOfTrialPaywallDue`), and `alreadyOffered` makes
-    /// the offer once within it, so a user meets it at most once, ever.
+    /// Only on the paywall the app opens when the trial is over: closing a paywall the
+    /// user opened from Settings, the home card or a locked feature never nags. That
+    /// paywall is itself shown once (`ProTrialPolicy.endOfTrialPaywallDue`), and
+    /// `alreadyOffered` makes the offer once within it, so a user meets it at most
+    /// once, ever. Both of its framings make the offer: after a reinstall over an ended
+    /// trial it opens as the ordinary paywall (#837), and closing it still offers.
     ///
     /// WHY only once the plans were seen: the end-of-trial paywall opens on a recap
     /// that names no price. A user who leaves from there has declined nothing yet, and
@@ -54,17 +56,23 @@ public enum ProPaywallPlans {
     /// of #724).
     ///
     /// - Parameters:
-    ///   - isEndOfTrialPaywall: the paywall the app opened when the trial ended.
-    ///   - sawPlans: the user moved past the recap to the plans and their prices.
+    ///   - trialEndPaywall: how the paywall the app opened when the trial ended is
+    ///     framed, or nil for a paywall the user opened.
+    ///   - sawPlans: the user moved past the recap to the plans and their prices. The
+    ///     ordinary framing has no recap: it opens on the plans.
     ///   - isPaid: a user who bought, or restored, has nothing left to be offered.
     ///   - monthlyLoaded: the offer names a StoreKit price, never a written one, so
     ///     with no monthly product there is nothing to offer.
     ///   - alreadyOffered: the offer was shown during this presentation.
-    public static func offersMonthlyOnClose(isEndOfTrialPaywall: Bool,
+    public static func offersMonthlyOnClose(trialEndPaywall: ProTrialEndPaywall?,
                                             sawPlans: Bool,
                                             isPaid: Bool,
                                             monthlyLoaded: Bool,
                                             alreadyOffered: Bool) -> Bool {
-        isEndOfTrialPaywall && sawPlans && !isPaid && monthlyLoaded && !alreadyOffered
+        guard let trialEndPaywall, !isPaid, monthlyLoaded, !alreadyOffered else { return false }
+        switch trialEndPaywall {
+        case .trialEnded: return sawPlans
+        case .standard: return true
+        }
     }
 }

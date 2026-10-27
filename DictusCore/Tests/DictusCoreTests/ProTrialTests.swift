@@ -458,6 +458,9 @@ final class ProTrialTests: XCTestCase {
         XCTAssertTrue(reinstalled.trialState.isExpired)
         XCTAssertTrue(reinstalled.endOfTrialPaywallDue, "the paywall still opens after onboarding")
         XCTAssertEqual(reinstalled.endOfTrialPaywall, .standard)
+        XCTAssertTrue(ProPaywallPlans.offersMonthlyOnClose(
+            trialEndPaywall: reinstalled.endOfTrialPaywall, sawPlans: false, isPaid: reinstalled.isPaid,
+            monthlyLoaded: true, alreadyOffered: false), "closing it offers the monthly plan")
 
         XCTAssertFalse(reinstalled.mayStartTrial)
         XCTAssertFalse(reinstalled.startTrialIfEligible(), "no second trial")
@@ -498,6 +501,12 @@ final class ProTrialTests: XCTestCase {
         nextLaunch.reconcileTrial()
         XCTAssertTrue(nextLaunch.endOfTrialPaywallDue)
         XCTAssertEqual(nextLaunch.endOfTrialPaywall, .trialEnded)
+        XCTAssertFalse(ProPaywallPlans.offersMonthlyOnClose(
+            trialEndPaywall: nextLaunch.endOfTrialPaywall, sawPlans: false, isPaid: false,
+            monthlyLoaded: true, alreadyOffered: false), "unchanged: not from the recap")
+        XCTAssertTrue(ProPaywallPlans.offersMonthlyOnClose(
+            trialEndPaywall: nextLaunch.endOfTrialPaywall, sawPlans: true, isPaid: false,
+            monthlyLoaded: true, alreadyOffered: false), "unchanged: once the plans were seen")
     }
 
     /// An empty App Group with nothing in the Keychain is a first install: one trial, once.
