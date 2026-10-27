@@ -31,7 +31,7 @@ Out of the map on purpose: the "Developer" section of Réglages (Debug builds on
 
 ## All IDs
 
-Every ID in this map, in one table: the 18 features first, then their 109 sub-features (in the order of the feature files), then the 53 screens of [screens.md](screens.md) — 180 IDs in all. **Gratuit/Pro** is the tier of the feature the ID belongs to. **Spécifique iOS** is « oui » when the ID has no Android equivalent to compare against: the keyboard-to-app hand-off and Full Access (an iOS keyboard extension cannot record and must ask for Full Access), return to the host app, Apple Intelligence (polish), the Dynamic Island (Live Activity, stopping standby), and the App Group check.
+Every ID in this map, in one table: the 18 features first, then their 110 sub-features (in the order of the feature files), then the 53 screens of [screens.md](screens.md) — 181 IDs in all. **Gratuit/Pro** is the tier of the feature the ID belongs to. **Spécifique iOS** is « oui » when the ID has no Android equivalent to compare against: the keyboard-to-app hand-off and Full Access (an iOS keyboard extension cannot record and must ask for Full Access), return to the host app, Apple Intelligence (polish), the Dynamic Island (Live Activity, stopping standby), and the App Group check.
 
 | ID | Gratuit/Pro | Spécifique iOS |
 | --- | --- | --- |
@@ -139,6 +139,7 @@ Every ID in this map, in one table: the 18 features first, then their 109 sub-fe
 | `live-activity.stop-standby` | Gratuit | oui |
 | `live-activity.controls` | Gratuit | oui |
 | `live-activity.toggle` | Gratuit | oui |
+| `live-activity.inactivity-timeout` | Gratuit | oui |
 | `onboarding.welcome` | Gratuit | non |
 | `onboarding.language` | Gratuit | non |
 | `onboarding.keyboard-setup` | Gratuit | oui |
