@@ -1358,6 +1358,28 @@
         }
       }
     },
+    "Correct your words in the Dictus keyboard: it learns them. Dictus suggests them for your vocabulary, on your iPhone, and adds nothing without you. After that, your dictations write them your way." : {
+      "comment" : "Onboarding vocabulary scene: the line under the title, also shown in What's New and the \"See the demo\" sheet. Explains the loop: corrections typed in the keyboard are learned, suggested as vocabulary terms (never added automatically), then applied to dictations (#680, #829).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Corrigez vos mots dans le clavier Dictus : il les apprend. Dictus vous les propose pour votre vocabulaire, sur votre iPhone, et n’ajoute rien sans vous. Ensuite, vos dictées les écrivent à votre façon."
+          }
+        }
+      }
+    },
+    "Correct your words in the Dictus keyboard: it learns them. Tap Analyze my transcriptions: Dictus compares them with your dictations and suggests terms to accept, edit or ignore. Nothing is added without you, and everything stays on your iPhone. Your terms then correct your dictations automatically." : {
+      "comment" : "Vocabulary screen: the paragraph of the \"How it works\" card. 'Analyze my transcriptions' is the button further down the same screen (#829).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Corrigez vos mots dans le clavier Dictus : il les apprend. Touchez Analyser mes transcriptions : Dictus les compare à vos dictées et vous propose des termes à accepter, modifier ou ignorer. Rien n’est ajouté sans vous, et tout reste sur votre iPhone. Vos termes corrigent ensuite vos dictées automatiquement."
+          }
+        }
+      }
+    },
     "Could not save. Your device may be out of storage." : {
       "comment" : "Shown in the vocabulary editor when the store refused to write the entry to disk.",
       "localizations" : {
@@ -2122,17 +2144,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Absents du dictionnaire, vus dans plusieurs dictées"
-          }
-        }
-      }
-    },
-    "Note a name and the way Dictus gets it wrong. Next time, it will write it your way." : {
-      "comment" : "Onboarding vocabulary scene: the line under the title (#680).",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Notez un nom et la façon dont Dictus l’écrit de travers. La prochaine fois, il l’écrira à votre façon."
           }
         }
       }
