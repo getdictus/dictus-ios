@@ -27,10 +27,19 @@
 #
 # Prerequisites:
 #   - `asc` installed and authenticated (`asc auth doctor` all green).
-#   - The API key's .p8 readable at $ASC_KEY_PATH below. It must NOT live in
-#     ~/Downloads, ~/Desktop or ~/Documents: macOS TCC blocks a terminal from
-#     reading those, and the failure looks like "Operation not permitted" on a
-#     file `ls` can see perfectly well.
+#   - Two environment variables naming the App Store Connect API key. Both are
+#     shown in App Store Connect > Users and Access > Integrations >
+#     App Store Connect API (Team Keys tab). They are the names `asc` itself
+#     reads, so exporting them also serves as its fallback credentials.
+#       ASC_KEY_ID     the key's Key ID (10 characters)
+#       ASC_ISSUER_ID  the Issuer ID shown above the keys table (a UUID)
+#     e.g. in ~/.zshrc:
+#       export ASC_KEY_ID=<your-key-id>
+#       export ASC_ISSUER_ID=<your-issuer-id>
+#   - The API key's .p8 readable at ~/.asc/keys/AuthKey_<ASC_KEY_ID>.p8. It must
+#     NOT live in ~/Downloads, ~/Desktop or ~/Documents: macOS TCC blocks a
+#     terminal from reading those, and the failure looks like "Operation not
+#     permitted" on a file `ls` can see perfectly well.
 #
 # Usage:
 #   scripts/upload-testflight.sh          # after scripts/cut-testflight.sh
@@ -43,8 +52,18 @@ cd "$REPO_ROOT"
 PB=/usr/libexec/PlistBuddy
 
 ASC_APP_ID="6761262378"
-ASC_KEY_ID="JM7UBBWY67"
-ASC_ISSUER_ID="10faa72b-f025-4a36-a7f7-ef2ef12ac984"
+# Key ID and Issuer ID come from the environment, never from this file. Checked
+# before anything else runs, so a missing one costs nothing.
+require_env() {
+  if [ -z "$2" ]; then
+    echo "error: $1 is not set." >&2
+    echo "  Find it in App Store Connect > Users and Access > Integrations >" >&2
+    echo "  App Store Connect API, then: export $1=$3" >&2
+    exit 1
+  fi
+}
+require_env ASC_KEY_ID "${ASC_KEY_ID:-}" "<your-key-id>"
+require_env ASC_ISSUER_ID "${ASC_ISSUER_ID:-}" "<your-issuer-id>"
 ASC_KEY_PATH="$HOME/.asc/keys/AuthKey_${ASC_KEY_ID}.p8"
 
 VERSION=$($PB -c "Print :CFBundleShortVersionString" DictusApp/Info.plist)
