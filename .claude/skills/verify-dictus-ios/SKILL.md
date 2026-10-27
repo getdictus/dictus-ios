@@ -178,7 +178,7 @@ Two lists. The first is what an agent proves alone with this skill; the second i
 | Keyboard surfaces | Languages panel, layouts, number row, 123 and `#+=` pages, emoji picker, recents, search | `keyboard.*`, `emoji.*`, `kbd.panel`, `kbd.numbers`, `kbd.symbols`, `kbd.emoji` |
 | Settings and switches | Every preference changes and persists through the App Group (sounds, haptics, polish, Live Activity, history, vocabulary, voice notes) | `sounds.toggle`, `sounds.volume`, `sounds.per-event`, `haptics.toggle`, `polish.toggle`, `live-activity.toggle`, `smart-modes.toggle`, `history.toggle`, `vocabulary.toggle`, `voice-notes.toggle` |
 | Pro, Debug-forced | Hub, Smart Mode pins, fan opening (greyed), vocabulary add/edit/delete, history and voice-note reader empty states | `pro.hub`, `smart-modes.fan`, `smart-modes.pin`, `vocabulary.add`/`edit`/`delete`/`reset`, `history.list` (empty), `voice-notes.reader` (empty) |
-| Models | Catalogue, download (real traffic), preparation screen, select, delete, retry, languages sheet; A12/A13 refusal on a device created as `iPhone-11` | `models.*` except the RAM halves of `models.device-gating` and `models.recommended`; `app.models.loading` (screen, not timing) |
+| Models | Catalogue, download (real traffic), preparation screen, select, delete, retry, languages sheet; A12/A13 refusal on a device created as `iPhone-11`, Turbo refusal on one created as `iPhone-12-Pro` (#660) | `models.*` except the RAM halves of `models.device-gating` and `models.recommended`; `app.models.loading` (screen, not timing) |
 | Diagnostics | Log view, export sheet opens, App Group check (signed build) | `diagnostics.*` |
 
 ### iPhone: needs Pierre's phone
