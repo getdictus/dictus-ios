@@ -287,7 +287,10 @@ struct MainTabView: View {
                     onDismiss: { trialCoordinator.announcementDismissed() },
                     content: { announcement in ProTrialAnnouncementView(announcement: announcement) }
                 )
-                .paywallCover(isPresented: $trialCoordinator.showsEndOfTrialPaywall, framing: .trialEnded)
+                .paywallCover(
+                    isPresented: $trialCoordinator.showsEndOfTrialPaywall,
+                    trialEnd: trialCoordinator.endOfTrialPaywall
+                )
                 .onAppear {
                     trialCoordinator.evaluate(canPresent: mayRaiseTrialScreens)
                 }
