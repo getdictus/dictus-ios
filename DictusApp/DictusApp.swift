@@ -571,6 +571,15 @@ struct DictusApp: App {
 
         switch url.host {
         case "dictate":
+            // #827: before onboarding is done, the app only comes forward. No cold-start
+            // flag, no dictation (there is no model yet), no return to the host app: the
+            // user stays on onboarding. Safety net for a keyboard built before the gate.
+            guard hasCompletedOnboarding else {
+                PersistentLog.log(.dictationDeferred(reason: "dictate URL before onboarding, staying on onboarding"))
+                Self.hasBeenActive = true
+                return
+            }
+
             // Single source of truth for what the keyboard is asking (issue #264).
             let keyboardIntent = KeyboardDictationURL.intent(from: url)
             let isFromKeyboard = keyboardIntent != nil

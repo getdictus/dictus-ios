@@ -88,9 +88,12 @@ struct MainTabView: View {
     /// intent nil and lands on the tab navigation with nothing added to the path.
     init() {
         let launchIntent = ColdStartLaunch.intent
-        _isColdStartMode = State(initialValue: launchIntent == .record)
+        // #827: a launch from the keyboard before onboarding is done raises neither
+        // screen; onboarding is what the user must see.
+        let onboarded = KeyboardOnboardingGate.isOnboardingCompleted()
+        _isColdStartMode = State(initialValue: onboarded && launchIntent == .record)
         _preparation = State(
-            initialValue: launchIntent == .prepare
+            initialValue: onboarded && launchIntent == .prepare
                 ? PreparationPresentation(
                     modelIdentifier: Self.persistedActiveModelIdentifier,
                     context: .keyboardColdStart
@@ -341,6 +344,8 @@ struct MainTabView: View {
             // public and the app must not be the half of the pair that trusts it.
             if KeyboardOpenURL.intent(from: url) == .pro {
                 guard PremiumFlags.paywallVisible else { return }
+                // #827: never a paywall over onboarding, whatever keyboard sent this.
+                guard KeyboardOnboardingGate.isOnboardingCompleted() else { return }
                 // Logged because the two halves of this live in different processes:
                 // the keyboard records that it opened the URL, and this is the line
                 // that says the app received it and answered.
@@ -353,6 +358,13 @@ struct MainTabView: View {
             }
 
             guard let intent = KeyboardDictationURL.intent(from: url) else { return }
+
+            // #827: before onboarding is done a dictation URL raises nothing here — no
+            // cold-start overlay, no preparation screen. Onboarding stays on screen.
+            guard KeyboardOnboardingGate.isOnboardingCompleted() else {
+                Self.hasHandledURL = true
+                return
+            }
 
             if intent == .prepare {
                 // #458's rule applies here too. This overlay sits BELOW `RecordingView`
