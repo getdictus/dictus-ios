@@ -15,6 +15,7 @@
 - `dictation.handoff`: The keyboard hands the recording to the app (warm through a notification, cold through the `dictus://dictate` URL after 500 ms), because the extension's memory limit keeps audio out of it.
 - `dictation.requires-full-access`: Without Full Access the mic is disabled and the bar reads « Accès complet requis ».
 - `dictation.device-gating`: Refused on devices too old to transcribe (A12/A13 iPhones: « Dictation unavailable on this device »).
+- `dictation.onboarding-gate`: Before onboarding is finished (#827), the mic (and the long-press mode rows) in another app only opens Dictus on onboarding: no recording, no error, no return to the host. Long-press → Dictus Pro opens onboarding, not the paywall. Inside Dictus (the onboarding practice field) dictation is allowed. Log: `<KBD> … micTapOpensOnboarding` / `micTapAllowedBeforeOnboarding reason=…`.
 
 ## How to get to it (user POV)
 
@@ -24,7 +25,7 @@
 
 ## Driving it with axe + Argent
 
-This is the recipe the skill was proven on (no model installed, so the chain must end in the expected failure):
+This is the recipe the skill was proven on (no model installed, so the chain must end in the expected failure). It needs onboarding finished — `launch.sh --skip-onboarding` — or, since #827, the mic only opens onboarding:
 
 ```bash
 .claude/skills/verify-dictus-ios/scripts/drive.sh full-access
