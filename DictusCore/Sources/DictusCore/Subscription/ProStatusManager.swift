@@ -199,8 +199,23 @@ public final class ProStatusManager: ObservableObject {
     /// Bring the App Group mirror in line with the Keychain. DictusApp calls this once
     /// per launch, before anything asks whether a trial may start, so a reinstall finds
     /// its old trial rather than a fresh "never started".
+    ///
+    /// A trial restored that way and already over is noted in the App Group, so the
+    /// paywall its end opens is the ordinary one (#837). Noted rather than recomputed:
+    /// from the next launch on the mirror is no longer empty, and onboarding may span
+    /// several launches.
     public func reconcileTrial() {
-        environment.store.reconcile()
+        let appGroupWasEmpty = environment.store.mirroredRecord == nil
+        let restored = environment.store.reconcile()
+        if ProTrialPolicy.endedBeforeThisInstall(
+            appGroupWasEmpty: appGroupWasEmpty, restored: restored, now: environment.now()
+        ) {
+            environment.defaults.set(true, forKey: SharedKeys.proTrialEndedBeforeInstall)
+            PersistentLog.log(.diagnosticProbe(
+                component: "proTrial", instanceID: "0", action: "restoredEndedBeforeInstall",
+                details: "endsAt=\(Int(restored?.endsAt.timeIntervalSince1970 ?? 0))"
+            ))
+        }
         refreshFromAppGroup()
     }
 
@@ -303,6 +318,14 @@ public final class ProStatusManager: ObservableObject {
         )
     }
 
+    /// How the end-of-trial paywall is framed: the ordinary paywall for a trial that
+    /// ended before this install (#837).
+    public var endOfTrialPaywall: ProTrialEndPaywall {
+        ProTrialPolicy.endOfTrialPaywall(
+            endedBeforeThisInstall: environment.defaults.bool(forKey: SharedKeys.proTrialEndedBeforeInstall)
+        )
+    }
+
     /// Record that the end-of-trial paywall was shown, so it never opens by itself again.
     public func markEndOfTrialPaywallShown() {
         environment.defaults.set(true, forKey: SharedKeys.proTrialEndPaywallShown)
@@ -332,6 +355,7 @@ public final class ProStatusManager: ObservableObject {
         environment.store.debugReset()
         ProTrialUsage.debugReset(in: environment.defaults)
         environment.defaults.removeObject(forKey: SharedKeys.proTrialEndPaywallShown)
+        environment.defaults.removeObject(forKey: SharedKeys.proTrialEndedBeforeInstall)
         refreshFromAppGroup()
     }
     #endif

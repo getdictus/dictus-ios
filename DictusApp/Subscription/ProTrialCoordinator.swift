@@ -51,6 +51,10 @@ final class ProTrialCoordinator: ObservableObject {
     /// Whether the end-of-trial paywall is on screen.
     @Published var showsEndOfTrialPaywall = false
 
+    /// How that paywall opens: the ordinary paywall when the trial ended before this
+    /// install, which has nothing to recap (#837).
+    @Published private(set) var endOfTrialPaywallFraming: PaywallFraming = .trialEnded
+
     private let proStatus: ProStatusManager
 
     /// Set when onboarding completes in this process, so the announcement reads as
@@ -115,11 +119,12 @@ final class ProTrialCoordinator: ObservableObject {
             // Marked on presentation, not on dismissal: "shown once" has to hold even
             // if the process dies with the paywall on screen.
             proStatus.markEndOfTrialPaywallShown()
+            endOfTrialPaywallFraming = proStatus.endOfTrialPaywall == .standard ? .standard : .trialEnded
             showsEndOfTrialPaywall = true
             let usage = proStatus.trialUsage
             PersistentLog.log(.diagnosticProbe(
                 component: "proTrial", instanceID: "0", action: "endOfTrialPaywallShown",
-                details: "usage=\(usage.smartModeUses)/\(usage.vocabularyFixes) words=\(usage.wordsDictated) audioSec=\(usage.audioSeconds)"
+                details: "framing=\(endOfTrialPaywallFraming == .standard ? "standard" : "trialEnded") usage=\(usage.smartModeUses)/\(usage.vocabularyFixes) words=\(usage.wordsDictated) audioSec=\(usage.audioSeconds)"
             ))
         }
     }

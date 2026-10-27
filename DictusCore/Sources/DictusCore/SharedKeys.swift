@@ -389,6 +389,9 @@ public enum SharedKeys {
     public static let proTrialEndsAt = "dictus.proTrialEndsAt"
     /// Bool: the end-of-trial paywall has been shown. It is shown once (#593).
     public static let proTrialEndPaywallShown = "dictus.proTrialEndPaywallShown"
+    /// Bool: the launch reconcile restored, into an empty App Group, a trial that had
+    /// already ended (a reinstall). Its end-of-trial paywall is the ordinary one (#837).
+    public static let proTrialEndedBeforeInstall = "dictus.proTrialEndedBeforeInstall"
     /// Int: Smart Mode dictations that succeeded while the trial ran. Written by
     /// whichever process ran the mode, read by the end-of-trial recap.
     public static let proTrialSmartModeUses = "dictus.proTrialSmartModeUses"
