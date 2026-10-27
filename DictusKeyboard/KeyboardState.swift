@@ -601,28 +601,6 @@ class KeyboardState: ObservableObject {
         presentAreaMode(areaMode == .panel ? .keys : .panel)
     }
 
-    // MARK: - Opening DictusApp from the panel
-
-    /// Open DictusApp on a particular screen (#241, #404).
-    ///
-    /// `intent` travels in the URL, and since #404 the app actually routes on it:
-    /// `.pro` lands on the paywall. It used to be a free-form `String` and the app had
-    /// no `open` route at all, so the Pro entries opened the app on whatever screen
-    /// happened to be showing and the user had to find the paywall themselves. The
-    /// vocabulary is `KeyboardOpenIntent` and the URL is built by `KeyboardOpenURL`,
-    /// which the app parses with the same type — this target has no test bundle, and a
-    /// string interpolated here against a string matched over there is exactly the
-    /// cross-process contract that drifted.
-    ///
-    /// Goes through `openDictusURL`, i.e. `extensionContext` first: that is the
-    /// documented path for an app extension, and SwiftUI's `openURL` has no
-    /// success result and can fail silently in a keyboard extension.
-    func openDictusApp(intent: KeyboardOpenIntent, voiceNoteID: UUID? = nil) {
-        guard let url = KeyboardOpenURL.url(intent: intent, voiceNoteID: voiceNoteID) else { return }
-        logProbe("openDictusApp", details: "intent=\(intent.rawValue)")
-        openDictusURL(url)
-    }
-
     // MARK: - Recording commands (keyboard -> app)
 
     /// Request DictusApp to stop recording and begin transcription.
@@ -1416,6 +1394,11 @@ class KeyboardState: ObservableObject {
             outcome: "tap-\(resolution?.reason ?? "no-controller")"
         ))
 
+        // #827: before onboarding is done, a tap from another app only opens Dictus.
+        // Here, after the host is known and before anything is requested of the app:
+        // nothing to undo, no Darwin post, no URL that asks for a dictation or a return.
+        guard !refuseMicTapBeforeOnboarding(hostId: pendingHostId) else { return }
+
         // A new dictation ends the previous one's undo offer, whatever comes of it.
         invalidateDictationUndo(reason: "new-dictation")
 
@@ -1520,27 +1503,6 @@ class KeyboardState: ObservableObject {
     private func deferRecordingForModelPreparation(reason: String) {
         PersistentLog.log(.dictationDeferred(reason: reason))
         openModelPreparation()
-    }
-
-    /// Prefer the extension context because the SwiftUI openURL callback has no
-    /// success result and can fail silently in a keyboard extension.
-    private func openDictusURL(_ url: URL) {
-        if controller?.extensionContext != nil {
-            openURLFromExtension(url) { [weak self] succeeded in
-                guard !succeeded else { return }
-                PersistentLog.log(.diagnosticProbe(
-                    component: "KeyboardState",
-                    instanceID: self?.instanceID ?? "unknown",
-                    action: "extensionURLFallback",
-                    details: "extensionContext.open returned false"
-                ))
-                DispatchQueue.main.async { [weak self] in
-                    self?.openURL?(url)
-                }
-            }
-        } else if let openURL {
-            openURL(url)
-        }
     }
 
     /// Write "requested" status to App Group before triggering URL.
@@ -1996,5 +1958,88 @@ extension KeyboardState {
         logProbe("micTapRejectedUnsupportedDevice", details: sessionDetails())
         HapticFeedback.actionRefused()
         return true
+    }
+}
+
+// MARK: - Onboarding gate (#827)
+
+extension KeyboardState {
+
+    /// Decline a dictation while onboarding is not done, and open Dictus instead.
+    ///
+    /// The decision is `KeyboardOnboardingGate`'s, where every combination is tested.
+    /// When it refuses, Dictus opens with `intent=settings`: no route, no `hostId`, so the
+    /// app comes forward on onboarding and sends nobody back. The mic tap and the Smart
+    /// Mode fan's mode rows both reach here through `startRecording`.
+    ///
+    /// - Returns: `true` when the tap was refused and the caller must stop.
+    func refuseMicTapBeforeOnboarding(hostId: String?) -> Bool {
+        let decision = KeyboardOnboardingGate.decide(
+            onboardingCompleted: KeyboardOnboardingGate.isOnboardingCompleted(in: defaults),
+            hostId: hostId,
+            appPhase: AppScenePhaseProbe.currentPhase(from: defaults)
+        )
+        guard !decision.allowsAction else {
+            if decision != .onboardingComplete {
+                logProbe("micTapAllowedBeforeOnboarding", details: "reason=\(decision.rawValue)")
+            }
+            return false
+        }
+        logProbe("micTapOpensOnboarding", details: "host=\(hostId ?? "unknown") \(AppScenePhaseProbe.describe())")
+        pendingHostId = nil
+        openDictusApp(intent: .settings)
+        return true
+    }
+}
+
+// MARK: - Opening DictusApp from the panel
+
+extension KeyboardState {
+
+    /// Open DictusApp on a particular screen (#241, #404).
+    ///
+    /// `intent` travels in the URL, and since #404 the app actually routes on it:
+    /// `.pro` lands on the paywall. It used to be a free-form `String` and the app had
+    /// no `open` route at all, so the Pro entries opened the app on whatever screen
+    /// happened to be showing and the user had to find the paywall themselves. The
+    /// vocabulary is `KeyboardOpenIntent` and the URL is built by `KeyboardOpenURL`,
+    /// which the app parses with the same type — this target has no test bundle, and a
+    /// string interpolated here against a string matched over there is exactly the
+    /// cross-process contract that drifted.
+    ///
+    /// Goes through `openDictusURL`, i.e. `extensionContext` first: that is the
+    /// documented path for an app extension, and SwiftUI's `openURL` has no
+    /// success result and can fail silently in a keyboard extension.
+    func openDictusApp(intent: KeyboardOpenIntent, voiceNoteID: UUID? = nil) {
+        // #827: no paywall over onboarding. `.settings` has no route, so the app comes
+        // forward and onboarding stays on screen.
+        let intent = KeyboardOnboardingGate.openIntent(
+            intent,
+            onboardingCompleted: KeyboardOnboardingGate.isOnboardingCompleted(in: defaults)
+        )
+        guard let url = KeyboardOpenURL.url(intent: intent, voiceNoteID: voiceNoteID) else { return }
+        logProbe("openDictusApp", details: "intent=\(intent.rawValue)")
+        openDictusURL(url)
+    }
+
+    /// Prefer the extension context because the SwiftUI openURL callback has no
+    /// success result and can fail silently in a keyboard extension.
+    private func openDictusURL(_ url: URL) {
+        if controller?.extensionContext != nil {
+            openURLFromExtension(url) { [weak self] succeeded in
+                guard !succeeded else { return }
+                PersistentLog.log(.diagnosticProbe(
+                    component: "KeyboardState",
+                    instanceID: self?.instanceID ?? "unknown",
+                    action: "extensionURLFallback",
+                    details: "extensionContext.open returned false"
+                ))
+                DispatchQueue.main.async { [weak self] in
+                    self?.openURL?(url)
+                }
+            }
+        } else if let openURL {
+            openURL(url)
+        }
     }
 }
