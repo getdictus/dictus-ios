@@ -1205,7 +1205,7 @@ class DictationCoordinator: ObservableObject {
                     appState: "\(appState.rawValue)",
                     engineRunning: self.audioEngine.isEngineRunning
                 ))
-                self.startDictation(origin: .keyboard)
+                self.startKeyboardDictationUnlessBeforeOnboarding(appState: appState)
                 // A warm start from the keyboard never brings the app forward, so none
                 // of the lifecycle reconciliations run: catch up on the voice note
                 // receipts here too (#639). After the start, so it costs the recording
@@ -1966,5 +1966,29 @@ extension DictationCoordinator {
         if !DictationSessionLivenessPolicy.isActive(newStatus) {
             releaseWarmStateIfImmediate(after: "status-\(newStatus.rawValue)")
         }
+    }
+}
+
+// MARK: - Onboarding gate (#827)
+
+extension DictationCoordinator {
+
+    /// Start the dictation the keyboard asked for over the Darwin notification, unless
+    /// onboarding is not done and the app is not in the foreground.
+    ///
+    /// Safety net for a keyboard built before #827, or one that read a stale app phase:
+    /// before onboarding there is no model, so a dictation started here would fail and
+    /// leave its error behind. The onboarding test dictation is unaffected — it runs with
+    /// the app active, which `KeyboardOnboardingGate.appMayStartKeyboardDictation` lets
+    /// through.
+    func startKeyboardDictationUnlessBeforeOnboarding(appState: UIApplication.State) {
+        guard KeyboardOnboardingGate.appMayStartKeyboardDictation(
+            onboardingCompleted: KeyboardOnboardingGate.isOnboardingCompleted(in: defaults),
+            appIsActive: appState == .active
+        ) else {
+            PersistentLog.log(.dictationDeferred(reason: "keyboard start before onboarding with app not active"))
+            return
+        }
+        startDictation(origin: .keyboard)
     }
 }
