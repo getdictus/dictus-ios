@@ -138,6 +138,10 @@ enum AudioEngineError: Error, DiagnosableError {
 // same rationale calls the highest-risk change available. Scoped here, and only here.
 // swiftlint:disable:next type_body_length
 class UnifiedAudioEngine: ObservableObject {
+    /// `userInfo` key of `dictusAudioSessionInterrupted`: a `DictationInterruptionCause`
+    /// raw value, so the dictation can tell a call from a media services reset (#851).
+    nonisolated static let interruptionCauseKey = "cause"
+
     // MARK: - Published State
 
     /// Whether the user is actively recording (samples being accumulated).
@@ -602,7 +606,10 @@ class UnifiedAudioEngine: ObservableObject {
         // The rebuilt stack has nothing warm in it; an `.ended` after this resumes nothing.
         interruptionRecovery.forget()
 
-        NotificationCenter.default.post(name: .dictusAudioSessionInterrupted, object: nil)
+        NotificationCenter.default.post(
+            name: .dictusAudioSessionInterrupted, object: nil,
+            userInfo: [Self.interruptionCauseKey: DictationInterruptionCause.mediaServicesReset.rawValue]
+        )
         DarwinNotificationCenter.post(DarwinNotificationName.audioSessionInterrupted)
     }
 
@@ -1934,7 +1941,10 @@ extension UnifiedAudioEngine: InterruptionResumeTarget {
         // Notify in-process listeners (LiveActivityManager, DictationCoordinator)
         // immediately. Darwin notification mirrors for cross-process consumers
         // (keyboard ext) so they can stop trusting the warm-state contract.
-        NotificationCenter.default.post(name: .dictusAudioSessionInterrupted, object: nil)
+        NotificationCenter.default.post(
+            name: .dictusAudioSessionInterrupted, object: nil,
+            userInfo: [Self.interruptionCauseKey: DictationInterruptionCause.interruption.rawValue]
+        )
         DarwinNotificationCenter.post(DarwinNotificationName.audioSessionInterrupted)
     }
 

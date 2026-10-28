@@ -1289,7 +1289,13 @@ extension LiveActivityManager {
         let action = LiveActivityInterruptionPolicy.atBegan(
             hasActivity: currentActivity != nil, phase: mapToStateMachinePhase(currentPhase)
         )
-        guard action == .pause else {
+        switch action {
+        case .pause:
+            break
+        case .none where currentActivity != nil:
+            // A dictation's pill: the coordinator drives it from here (#851).
+            return
+        default:
             endActivityForAudioInterruption()
             return
         }
@@ -1305,6 +1311,14 @@ extension LiveActivityManager {
             guard !Task.isCancelled, let self, self.isPausedForInterruption else { return }
             self.endActivityForAudioInterruption(reason: "interruptionTimeout")
         }
+    }
+
+    /// The dictation an interruption cut short failed (#851): end its pill, which
+    /// `handleInterruptionBegan()` left to it. The paused standby pill is not a
+    /// dictation's and is left alone.
+    func endDictationActivityForAudioInterruption() {
+        guard [.recording, .transcribing, .processing].contains(currentPhase) else { return }
+        endActivityForAudioInterruption()
     }
 
     /// `.ended`, after the engine's resume was tried: resume the paused pill over a warm
