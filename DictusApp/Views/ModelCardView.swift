@@ -230,7 +230,17 @@ struct ModelCardView: View {
                 // Generous padding enlarges the tap target toward ~44pt.
                 .padding(overflowTapPadding)
                 .contentShape(Rectangle())
+                .modifier(IdentityGlassLabel())
         }
+        // Issue #844: on iOS 26 a dismissed menu's presentation could redraw
+        // detached from its card, a translucent ghost fixed on screen while the
+        // List scrolled. Workaround reported for that SwiftUI bug: a button-style
+        // menu rendered in its own compositing group, inside its own glass
+        // container. The label keeps its explicit font and colour, so nothing
+        // changes on screen.
+        .menuStyle(.button)
+        .compositingGroup()
+        .modifier(MenuGlassContainer())
         .accessibilityLabel("Model options")
     }
 
@@ -431,6 +441,35 @@ struct ModelCardView: View {
                     .foregroundColor(.orange)
             }
             .help(message)
+        }
+    }
+}
+
+// MARK: - Menu glass isolation (issue #844)
+
+/// Gives the overflow menu's label an invisible glass identity on iOS 26, so the
+/// menu's presentation morphs from a glass source it owns rather than from the
+/// card's glass. No-op before iOS 26, where the bug does not exist.
+private struct IdentityGlassLabel: ViewModifier {
+    func body(content: Content) -> some View {
+        if #available(iOS 26, *) {
+            content.glassEffect(.identity)
+        } else {
+            content
+        }
+    }
+}
+
+/// Wraps the overflow menu in its own `GlassEffectContainer` on iOS 26, which
+/// keeps its presentation out of the card's glass and the List's scrolling.
+private struct MenuGlassContainer: ViewModifier {
+    func body(content: Content) -> some View {
+        if #available(iOS 26, *) {
+            GlassEffectContainer {
+                content
+            }
+        } else {
+            content
         }
     }
 }
