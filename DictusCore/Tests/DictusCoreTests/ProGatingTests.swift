@@ -238,4 +238,28 @@ final class ProGatingTests: XCTestCase {
         XCTAssertEqual(event.name, "subscriptionError")
         XCTAssertEqual(event.message, "action=purchase error=cancelled")
     }
+
+    /// A failed purchase names its product and the bridged NSError (#842): the
+    /// localized text is shared by several StoreKit errors.
+    func testSubscriptionErrorPurchaseCarriesProductDomainAndCode() {
+        let event = LogEvent.subscriptionError(
+            action: "purchase",
+            error: "Cannot process the request",
+            product: "solutions.pivi.dictus.pro.monthly",
+            domain: "SKErrorDomain",
+            code: 0
+        )
+        XCTAssertEqual(
+            event.message,
+            "action=purchase product=solutions.pivi.dictus.pro.monthly"
+                + " error=Cannot process the request domain=SKErrorDomain code=0"
+        )
+    }
+
+    /// `loadProducts` and `restore` pass none of the new fields, so their line
+    /// stays byte-identical to the two-field form.
+    func testSubscriptionErrorWithoutOptionalFieldsIsUnchanged() {
+        let event = LogEvent.subscriptionError(action: "restore", error: "offline")
+        XCTAssertEqual(event.message, "action=restore error=offline")
+    }
 }
