@@ -49,7 +49,7 @@ How the campaign runs:
 - **The onboarding rebuild is in the gate.** #450 was descoped out of the launch on 2026-09-05; on 2026-10-04 Pierre merged #450, #494 and #451 into #649, one onboarding rebuild that gates 2.0.0. Its sub-issues #675-#686 are closed; its acceptance criteria are audited before the cut.
 - **The 2.0.0 App Store listing is ready, not uploaded.** #643 produced the screenshots and copy for en-GB, fr-FR, de-DE and es-ES (PR #645), with slide 1 redrawn in #758 (PR #759). They go to App Store Connect with the 2.0.0 submission, and they describe Pro and the trial, so they ship only with #279.
 
-Open, to settle before the flag flips: the last day of the lifetime founder window in `PremiumFlags` (#350), which depends on a release date that does not exist yet.
+Settled on 2026-10-28: 2.0.0 launches the lifetime at 149,99 € only, with no launch discount and no deadline to announce (PR #848). The price itself is set in App Store Connect.
 
 ## Standing rules
 
