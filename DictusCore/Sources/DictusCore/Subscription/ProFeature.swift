@@ -20,7 +20,7 @@ public enum ProFeature: String, CaseIterable {
     public var displayName: String {
         switch self {
         case .smartMode: return "Smart Mode"
-        case .history: return "History"
+        case .history: return "History search"
         case .vocabulary: return "Vocabulary"
         case .voiceNotes: return "Voice notes"
         }
@@ -40,7 +40,7 @@ public enum ProFeature: String, CaseIterable {
     public var paywallDescription: String {
         switch self {
         case .smartMode: return "Reformulate your text with on-device AI"
-        case .history: return "Search and export all your transcriptions"
+        case .history: return "Find any past dictation in seconds"
         case .vocabulary: return "Teach Dictus your technical terms"
         case .voiceNotes: return "Transcribe the voice messages you receive"
         }
@@ -50,7 +50,7 @@ public enum ProFeature: String, CaseIterable {
     public var paywallDescriptionFR: String {
         switch self {
         case .smartMode: return "Reformulez vos textes avec une IA embarqu\u{00E9}e"
-        case .history: return "Recherchez et exportez toutes vos transcriptions"
+        case .history: return "Retrouvez n\u{2019}importe quelle dict\u{00E9}e en quelques secondes"
         case .vocabulary: return "Apprenez \u{00E0} Dictus vos termes techniques"
         case .voiceNotes: return "Transcrivez les messages vocaux que vous recevez"
         }

@@ -3047,6 +3047,29 @@
         }
       }
     },
+    "Find any past dictation in seconds" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Finde jedes frühere Diktat in Sekunden"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Encuentra cualquier dictado anterior en segundos"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Retrouvez n’importe quelle dictée en quelques secondes"
+          }
+        }
+      }
+    },
     "Follow keyboard language" : {
       "comment" : "Transcription language picker option: STT tracks the keyboard language, the default (issue #226).",
       "localizations" : {
@@ -3295,6 +3318,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "L’historique fait partie de Dictus Pro"
+          }
+        }
+      }
+    },
+    "History search" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verlaufssuche"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Búsqueda en el historial"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recherche dans l’historique"
           }
         }
       }
@@ -4786,17 +4832,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Dites quelque chose…"
-          }
-        }
-      }
-    },
-    "Search and export all your transcriptions" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Recherchez et exportez toutes vos transcriptions"
           }
         }
       }

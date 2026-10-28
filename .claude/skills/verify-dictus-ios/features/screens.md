@@ -36,7 +36,7 @@ Captures are in [`docs/agents/screens/`](../../../../docs/agents/screens/), one 
 | `app.settings.polish-debug` | Polish debug screen | Réglages → tap « Version » five times | polish | non |
 | `app.pro.hub` | Dictus Pro hub | Pro on, Réglages → tap-label « Dictus Pro, Pro actif » | pro.subscription | [oui](../../../../docs/agents/screens/app.pro.hub.png) |
 | `app.pro.smart-modes` | Pro → Mode intelligent (pinned modes) | hub → « Mode intelligent, … » | smart-modes | [oui](../../../../docs/agents/screens/app.pro.smart-modes.png) |
-| `app.pro.history` | Pro → Historique (switch, demo) | hub → « Historique, … » | history | [oui](../../../../docs/agents/screens/app.pro.history.png) |
+| `app.pro.history` | Pro → Historique (switch, demo) | hub → « Recherche dans l’historique, … » | history | [oui](../../../../docs/agents/screens/app.pro.history.png) |
 | `app.pro.vocabulary` | Pro → Vocabulaire (switch, « Comment ça marche » card that names « Analyser mes transcriptions », terms with « Remplace : … » or « En attente d’erreurs à corriger », « Ajouter un terme », « Analyser mes transcriptions ») | hub → « Vocabulaire, … » | vocabulary | [oui](../../../../docs/agents/screens/app.pro.vocabulary.png) |
 | `app.pro.vocabulary.term-editor` | « Nouveau terme » sheet | Vocabulaire → « Ajouter un terme » | vocabulary | non |
 | `app.pro.vocabulary.suggestions` | « Suggestions depuis l’historique » sheet, « Vos orthographes, écrites autrement » first (Accepter / Ignorer, ids `vocabulary.pair.<rank>.accept` / `.ignore`) | Vocabulaire → « Analyser mes transcriptions » (seeded History, see vocabulary) | vocabulary | [oui](../../../../docs/agents/screens/app.pro.vocabulary.suggestions.png) |
