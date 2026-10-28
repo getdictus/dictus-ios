@@ -78,27 +78,13 @@ final class ProProductCatalogTests: XCTestCase {
     }
 
     func testPricesMatchThePricingDecision() throws {
-        // #54 revised 2026-08-14: 4,99 € monthly, 39,99 € yearly, 79,99 € lifetime
-        // during the founder window. The lifetime goes to 149,99 € afterwards,
-        // which is an App Store Connect change and never a change to this file.
+        // #54 revised 2026-08-14: 4,99 € monthly, 39,99 € yearly. Decided
+        // 2026-10-28: 2.0 launches the lifetime at 149,99 € with no founder
+        // offer, so the local configuration carries that price from day one.
         let config = try storeKitConfiguration()
         XCTAssertEqual(config.subscriptions[ProProductID.monthly]?["displayPrice"] as? String, "4.99")
         XCTAssertEqual(config.subscriptions[ProProductID.yearly]?["displayPrice"] as? String, "39.99")
-        XCTAssertEqual(config.nonConsumables[ProProductID.lifetime]?["displayPrice"] as? String, "79.99")
-    }
-
-    // MARK: - Founder window
-
-    func testFounderWindowShipsUnscheduled() {
-        // The window opens one month from the release that ships the first Pro
-        // feature (#79), which has no date. Setting this locally is how the
-        // founder copy gets reviewed, so guard against committing that date:
-        // it would announce a deadline the App Store price change will not
-        // honour, and an unhonoured deadline burns every later scarcity claim.
-        XCTAssertNil(
-            PremiumFlags.lifetimeFounderOfferEnd,
-            "Set this only in the release that opens the founder window (#350)"
-        )
+        XCTAssertEqual(config.nonConsumables[ProProductID.lifetime]?["displayPrice"] as? String, "149.99")
     }
 
     // MARK: - Helpers

@@ -96,7 +96,7 @@ struct PaywallView: View {
     /// WHY the cheapest rather than a preference order: `products` is sorted
     /// ascending by price, so a failed fetch can only ever demote the user to a
     /// cheaper plan. Falling onto the lifetime because the yearly went missing
-    /// would put a 79,99 € one-off under a button the user thought said 39,99 €.
+    /// would put a 149,99 € one-off under a button the user thought said 39,99 €.
     private func reconcileSelection() {
         guard selectedProduct == nil,
               let cheapest = subscriptionManager.products.first else { return }
@@ -530,7 +530,7 @@ struct PaywallView: View {
                 planCard(
                     product: lifetime,
                     title: "Lifetime",
-                    subtitle: founderOfferLabel,
+                    subtitle: nil,
                     badge: nil
                 )
                 lifetimeScopeFootnote
@@ -568,10 +568,9 @@ struct PaywallView: View {
 
     /// What the lifetime purchase covers, verbatim from the #350 decision.
     ///
-    /// WHY it always renders next to the row, rather than behind a disclosure
-    /// or only during the founder window: a promise cannot be narrowed after
-    /// someone has bought against it, so the boundary has to be visible before
-    /// the first sale.
+    /// WHY it always renders next to the row, rather than behind a disclosure:
+    /// a promise cannot be narrowed after someone has bought against it, so the
+    /// boundary has to be visible before the first sale.
     ///
     /// WHY the boundary is drawn at who pays to run the feature, not at where
     /// it runs: a feature pointed at a server the user provides costs the
@@ -589,46 +588,6 @@ struct PaywallView: View {
             .padding(.horizontal, 4)
     }
 
-    /// Founder-window line under the lifetime price, e.g. "Founder offer until
-    /// 12 September 2026."
-    ///
-    /// WHY nil rather than a placeholder while the window is unscheduled: the
-    /// end date is only knowable once the first Pro release is scheduled
-    /// (#79), and an announcement missing its date is worse than none.
-    ///
-    /// WHY it goes through `LifetimeFounderWindow` rather than reading the
-    /// constant directly: the build outlives the window. The price rises in
-    /// App Store Connect on the announced day, but a user who has not updated
-    /// keeps running this build, and the line has to retire itself rather than
-    /// contradict the price shown right above it.
-    ///
-    /// WHY it names no later price, although "149,99 € ensuite" was the approved
-    /// wording and is the more persuasive line: StoreKit gives us the *current*
-    /// price in the buyer's own currency through `displayPrice`, but the future
-    /// price is not a product yet, so it could only be written into the string —
-    /// and a US buyer would read a dollar amount on the row with "149,99 €
-    /// afterwards" underneath, a currency they will never be charged in. The
-    /// amount on a non-euro storefront is not ours to state either: App Store
-    /// Connect derives it from Apple's price matrix and readjusts it as rates
-    /// move. For a window lasting weeks, being correct everywhere beats being
-    /// persuasive. The deadline carries the scarcity, and the rise is visible
-    /// on the row itself once it happens.
-    ///
-    /// The alternative considered and deliberately not built, still open: a
-    /// second, never-offered StoreKit product holding the future price, so that
-    /// `displayPrice` would render it in the right currency everywhere. It
-    /// burns a permanent product identifier for a line that shows for weeks.
-    ///
-    /// Either way this announces a future increase and not a reduction, which
-    /// is what keeps it clear of the Omnibus directive (art. L.112-1-1): a
-    /// struck-through reference price would have to have actually been charged
-    /// in the previous 30 days, and 149,99 € never was.
-    private var founderOfferLabel: Text? {
-        guard let end = LifetimeFounderWindow.announcedEnd() else { return nil }
-        let date = end.formatted(.dateTime.day().month(.wide).year())
-        return Text("Founder offer until \(date).")
-    }
-
     private func planCard(
         product: Product,
         title: LocalizedStringKey,
@@ -640,8 +599,7 @@ struct PaywallView: View {
             selectedProductID = product.id
         } label: {
             // Name and price share one line, so a plan with nothing more to say
-            // — the monthly, the lifetime outside its founder window — is a
-            // single-line row. Stacking them cost two rows for every plan and
+            // — the monthly, the lifetime — is a single-line row. Stacking them cost two rows for every plan and
             // left a wide empty column on the right; with three plans that ran
             // the CTA off the bottom of a 6.1-inch screen.
             HStack(spacing: 10) {
@@ -675,7 +633,7 @@ struct PaywallView: View {
                 // already says Yearly / Monthly / Lifetime, and repeating it
                 // here was what broke the column. Right-aligning three prices
                 // only lines them up if they end on the same token; "39,99 €/an"
-                // next to "4,99 €/mois" and "79,99 €" ends on three different
+                // next to "4,99 €/mois" and "149,99 €" ends on three different
                 // ones, so the amounts — the only part being compared — each
                 // started at a different x. Ending every row on "€" fixes that,
                 // and monospaced digits then hold the digit columns themselves
@@ -714,7 +672,7 @@ struct PaywallView: View {
     }
 
     /// A plan's price carrying its own period, e.g. "39,99 €/an" — or, for the
-    /// lifetime non-consumable, "79,99 €" with no period at all.
+    /// lifetime non-consumable, "149,99 €" with no period at all.
     ///
     /// Used by the CTA only. The plan rows show the bare amount, because their
     /// titles already name the period and repeating it there cost the price
