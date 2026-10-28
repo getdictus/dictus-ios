@@ -215,7 +215,7 @@ struct MainTabView: View {
                 // WHY SwipeBackOverlayView instead of inline code:
                 // The overlay has its own animation state and bilingual logic -- keeping it
                 // in a separate file follows "one file = one responsibility".
-                SwipeBackOverlayView()
+                SwipeBackOverlayView(isPreparingMicrophone: coordinator.isRecoveringAudioSession)
             } else if let whatsNewSteps {
                 // What's new for existing users (#685), in place of the tabs. Below the
                 // two branches above: a dictation from the keyboard still takes the screen.
