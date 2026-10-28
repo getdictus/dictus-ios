@@ -480,7 +480,10 @@ public enum LogEvent: Sendable {
     case coldStartStranded(keyboardStatus: String, action: String)
 
     // MARK: Subscription
-    case subscriptionError(action: String, error: String)
+    /// `product`, `domain` and `code` are only set by a failed purchase (#842): the
+    /// localized text alone is shared by several StoreKit errors and does not say
+    /// which product failed. Left `nil`, they add nothing to the message.
+    case subscriptionError(action: String, error: String, product: String? = nil, domain: String? = nil, code: Int? = nil)
 
     // MARK: Log Management
     case logExportCompleted(durationMs: Int, sizeBytes: Int)
@@ -1172,8 +1175,9 @@ public enum LogEvent: Sendable {
             return "keyboardStatus=\(keyboardStatus) action=\(action)"
 
         // Subscription
-        case .subscriptionError(let action, let error):
-            return "action=\(action) error=\(error)"
+        case .subscriptionError(let action, let error, let product, let domain, let code):
+            return "action=\(action)\(product.map { " product=\($0)" } ?? "") error=\(error)"
+                + "\(domain.map { " domain=\($0)" } ?? "")\(code.map { " code=\($0)" } ?? "")"
 
         // Log Management
         case .logExportCompleted(let durationMs, let sizeBytes):
