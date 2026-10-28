@@ -444,26 +444,16 @@ struct DictusApp: App {
     /// usually terminated moments after this runs, so an `info` line would not survive
     /// to explain itself, and `no-scheme` is this project's only report channel for a
     /// host nobody has mapped — there is no analytics, the debug log is it (#255).
-    /// How long the return may wait for recording to have actually started.
-    ///
-    /// **A ceiling, not a wait.** It is bounded by the window in which a freshly
-    /// foregrounded app may still call `open()` — about 300 ms, past which iOS refuses
-    /// with "Application is neither visible nor entitled" and the user gets *no* return
-    /// at all. 250 ms keeps margin under that.
-    ///
-    /// Do not raise it to "make the wait more reliable": every millisecond added is
-    /// borrowed from the only thing that makes the feature work, and a return that never
-    /// happens is a worse failure than a dictation missing its first syllable. If a
-    /// capture keeps showing `recState=idle waitedMs=250`, the answer is not a longer
-    /// ceiling — it is that the engine cannot start inside the window at all, and the fix
-    /// moves to starting it sooner rather than waiting for it longer.
+    /// How long the return may wait for recording to have actually started. The value and
+    /// why it must not be raised live with `ForegroundAudioRecoveryPolicy`, next to the one
+    /// case that holds past it (#853), so a test can pin the common path to it.
     ///
     /// Note the ceiling is not the elapsed time: `asyncAfter` is a floor, not a deadline,
     /// and a simulator under load turned 250 into a measured `waitedMs=305`. The return
     /// still succeeded at 305 ms, which is mild evidence the foreground window is more
     /// forgiving than the ~300 ms figure — but not evidence to spend, and `waitedMs=` is
     /// on the line precisely so the real distribution can be read instead of assumed.
-    private static let recordingWaitCeilingMs = 250
+    private static let recordingWaitCeilingMs = ForegroundAudioRecoveryPolicy.recordingWaitCeilingMilliseconds
 
     private func returnToHostApp(hostId: String?, coordinator: DictationCoordinator) {
         guard let hostId else {
@@ -483,6 +473,7 @@ struct DictusApp: App {
         let startedAt = Date()
         var readyCancellable: AnyCancellable?
         var observedCancellable: AnyCancellable?
+        var failedCancellable: AnyCancellable?
         var hasOpened = false
 
         // Both paths funnel here, and the first one to arrive wins. Whichever it is, the
@@ -493,6 +484,8 @@ struct DictusApp: App {
             hasOpened = true
             readyCancellable?.cancel()
             readyCancellable = nil
+            failedCancellable?.cancel()
+            failedCancellable = nil
 
             // Emitted **before** the open, not in its completion handler, and that
             // matters for reading a log. The outcome line below can only be written once
@@ -523,7 +516,37 @@ struct DictusApp: App {
             .sink { _ in openNow(trigger: "recording") }
 
         DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(Self.recordingWaitCeilingMs)) {
-            openNow(trigger: "ceiling")
+            guard !hasOpened else { return }
+            // #853: a cold start whose audio session is recovering (its activation refused
+            // with `'msrv'`, the audio server resetting) cannot record inside 250 ms. The
+            // reset took ~2.8 s on device, and opening the host app at the ceiling sent the
+            // start to the background, where iOS refused it. So that one start holds the
+            // foreground until it records or fails, under a ceiling of its own. Sampled here
+            // rather than at the hand-off so a loss posted in between still counts; every
+            // other start opens exactly as before.
+            let decision = ForegroundAudioRecoveryPolicy.returnAtCeiling(
+                sessionNeedsRecovery: coordinator.isRecoveringAudioSession)
+            guard case .hold(let holdCeilingMs) = decision else {
+                openNow(trigger: "ceiling")
+                return
+            }
+            let waitedMs = Int(Date().timeIntervalSince(startedAt) * 1000)
+            PersistentLog.log(.hostReturn(
+                hostId: hostId,
+                outcome: "holding reason=audioSessionRecovering waitedMs=\(waitedMs) holdCeilingMs=\(holdCeilingMs)"
+            ))
+            // `.recording` is already covered by `readyCancellable`. A failure opens too:
+            // the keyboard is where its "tap again" is read. `dropFirst` skips the replayed
+            // current value, which can be a previous dictation's `.failed` on a process that
+            // outlived it (the engine-dead restart).
+            failedCancellable = coordinator.$status
+                .dropFirst()
+                .first { $0 == .failed }
+                .receive(on: DispatchQueue.main)
+                .sink { _ in openNow(trigger: "failed") }
+            DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(max(0, holdCeilingMs - waitedMs))) {
+                openNow(trigger: "holdCeiling")
+            }
         }
 
         // Independently of who opens, record *when* recording actually begins. This is

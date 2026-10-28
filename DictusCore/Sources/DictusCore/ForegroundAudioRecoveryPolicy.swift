@@ -39,7 +39,8 @@ public enum ForegroundAudioRecoveryPolicy {
     /// probed further. 250 ms keeps margin under it.
     ///
     /// Do not raise it to "make the wait more reliable": every millisecond added is borrowed
-    /// from the only thing that makes the feature work on the common path. If a capture keeps
+    /// from the only thing that makes the feature work, and a return that never happens is a
+    /// worse failure than a dictation missing its first syllable. If a capture keeps
     /// showing `recState=idle waitedMs=250`, the answer is not a longer ceiling, it is that
     /// the engine cannot start inside the window at all, and the fix moves to starting it
     /// sooner rather than waiting for it longer.
