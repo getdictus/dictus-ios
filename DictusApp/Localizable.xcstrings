@@ -4655,6 +4655,18 @@
     "Requires Apple Intelligence (iPhone 15 Pro or later, iOS 26)" : {
       "comment" : "Paywall notice on a feature card the current device cannot run.",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erfordert Apple Intelligence (iPhone 15 Pro oder neuer, iOS 26)"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Requiere Apple Intelligence (iPhone 15 Pro o posterior, iOS 26)"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",

@@ -36,9 +36,9 @@ public enum ProTrialPolicy {
     ///   which is `SmartModeUnavailableReason.isRecoverable` read as a capability
     ///   question: `deviceNotEligible` and `osTooOld` (and `sdkMissing`) are the
     ///   definitive reasons, and a device in one of them never gets a trial, new user
-    ///   or existing. On such a device Pro is History and Vocabulary only, and Pierre
-    ///   does not want to push a subscription that light. A capable iPhone with Apple
-    ///   Intelligence switched off **is** capable and gets the trial.
+    ///   or existing. On such a device Pro is History, Vocabulary and voice notes only,
+    ///   and Pierre does not want to push a subscription that light. A capable iPhone
+    ///   with Apple Intelligence switched off **is** capable and gets the trial.
     /// - **No second trial.** Anything but `.neverStarted` refuses, whatever the rest
     ///   says. The Keychain behind `ProTrialStore` is what makes `.neverStarted` true
     ///   only once per device.
