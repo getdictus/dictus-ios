@@ -169,3 +169,29 @@ extension UIApplication.State {
         }
     }
 }
+
+#if DEBUG
+/// DEBUG builds only: refuses every audio session activation with `'msrv'` for a while after
+/// the first one of the process, so a simulator, whose audio server never resets, can show
+/// the #853 path (the held host return and "Preparing the microphone…").
+///
+/// Off unless the key is set, on the device under test:
+/// `xcrun simctl spawn <udid> defaults write com.pivi.dictus debugSimulateAudioServerResetMs -int 2500`.
+/// 2500 ms outlasts the activation retry (250 ms) and ends inside the reset wait (3 s), so
+/// the activation after the wait works, as it did on the 2026-10-28 device capture. Turn it
+/// off with `defaults delete com.pivi.dictus debugSimulateAudioServerResetMs`.
+enum SimulatedAudioServerReset {
+    private static let defaultsKey = "debugSimulateAudioServerResetMs"
+    private static var firstActivation: Date?
+
+    static func throwWhileActive() throws {
+        let windowMs = UserDefaults.standard.integer(forKey: defaultsKey)
+        guard windowMs > 0 else { return }
+        let start = firstActivation ?? Date()
+        firstActivation = start
+        guard Date().timeIntervalSince(start) * 1000 < Double(windowMs) else { return }
+        // 'msrv', what `setCategory` threw on device while the audio server was going down.
+        throw NSError(domain: NSOSStatusErrorDomain, code: 1_836_282_486)
+    }
+}
+#endif

@@ -701,7 +701,12 @@ class UnifiedAudioEngine: ObservableObject {
             try AudioSessionActivationPolicy.perform(
                 step,
                 context: { "mediaServicesLost=\(mediaServicesLost) \(routeStateDescription())" },
-                call
+                {
+                    #if DEBUG
+                    try SimulatedAudioServerReset.throwWhileActive()
+                    #endif
+                    try call()
+                }
             )
         } catch let failure as AudioSessionActivationFailure {
             throw AudioEngineError.sessionActivationFailed(step: failure.step, status: failure.status)
