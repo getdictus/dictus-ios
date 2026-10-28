@@ -4281,6 +4281,24 @@
     "Preparing the microphone…" : {
       "comment" : "Swipe-back overlay title while a cold start waits for iOS to bring the audio system back, which can take about three seconds; replaces 'Dictation in progress' until recording starts (issue #853).",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mikrofon wird vorbereitet…"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Preparing the microphone…"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Preparando el micrófono…"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
