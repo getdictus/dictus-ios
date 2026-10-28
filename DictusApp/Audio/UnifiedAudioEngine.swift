@@ -1283,15 +1283,23 @@ class UnifiedAudioEngine: ObservableObject {
         } catch {
             inputNode.removeTap(onBus: 0)
             let reason = (error as NSError).localizedDescription
-            PersistentLog.log(.dictationFailed(error: "engine.start NSException: \(reason)"))
+            // `appState=` for the reason given on the throw below (#853).
+            let appState = UIApplication.shared.applicationState.sceneMarker.rawValue
+            PersistentLog.log(.dictationFailed(error: "engine.start NSException: \(reason) appState=\(appState)"))
             throw AudioEngineError.installTapFailed(call: .engineStart, reason: reason)
         }
         if let swiftStartError {
             inputNode.removeTap(onBus: 0)
             // The last silent throw in this function before #123. AUIOClient_StartIO
             // failures land here and left nothing in the log to date them by.
+            //
+            // `appState=` because iOS refuses this start from outside the foreground with
+            // the same `2003329396` it gives for a session that is not up (#853): without
+            // it, telling the two apart meant rebuilding the app's lifecycle from the lines
+            // around it.
+            let appState = UIApplication.shared.applicationState.sceneMarker.rawValue
             PersistentLog.log(.dictationFailed(
-                error: "engine.start failed: \((swiftStartError as NSError).localizedDescription)"
+                error: "engine.start failed: \((swiftStartError as NSError).localizedDescription) appState=\(appState)"
             ))
             throw swiftStartError
         }

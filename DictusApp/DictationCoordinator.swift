@@ -696,7 +696,12 @@ class DictationCoordinator: ObservableObject {
         // engine for nothing, then said the microphone was missing. The cold start below
         // hands it to `activateSessionForColdStart`, which retries or fails with "tap again".
         // The warm path needs no retry: its running engine means the session is up.
-        let firstActivation = Result { try audioEngine.configureAudioSession() }
+        //
+        // The helper also raises `isRecoveringAudioSession` for a cold start whose activation
+        // was refused (#853). It has to be here, before the cold start's defer below: the
+        // host return reads it at its 250 ms ceiling, which in the capture lands before
+        // `didBecomeActive` retries, so this call's own `'msrv'` is the only signal by then.
+        let firstActivation = activateSessionAtStart(engine: audioEngine)
 
         // The session these start paths belong to. `ensureMicrophonePermission` is
         // an await even when permission is already granted, so a cancel queued on
