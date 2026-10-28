@@ -83,9 +83,12 @@ DICTUS PRO
 
 Pro añade los Smart Modes, los audios en el teclado, un historial de tus dictados y tu propio vocabulario para nombres y términos técnicos.
 
-Prueba Pro gratis durante 14 días. No hay nada que contratar y nada se renueva: al cabo de 14 días, Dictus vuelve a la versión gratuita y te pregunta si quieres quedarte con Pro. Tu historial y tu vocabulario se conservan. La prueba se ofrece en los iPhone que pueden usar los Smart Modes. El dictado y el teclado siguen siendo gratis.
+Prueba Pro gratis durante 14 días. La prueba no requiere ningún pago y no se renueva: al cabo de 14 días, Dictus vuelve a la versión gratuita y te ofrece quedarte con Pro, con una suscripción mensual o anual, o con una compra única de por vida. Tu historial y tu vocabulario se conservan. La prueba se ofrece en los iPhone que pueden usar los Smart Modes. El dictado y el teclado siguen siendo gratis.
 
-Dictus no recopila ningún dato. Política de privacidad: getdictus.com/privacy
+Para quedarte con Pro, elige una suscripción mensual o anual de renovación automática, o la compra única de por vida, que no es una suscripción. El precio y el periodo de cada opción se muestran en la app y en el App Store para tu país. El pago se carga en tu cuenta de Apple al confirmar la compra. La suscripción se renueva automáticamente por el mismo periodo salvo que desactives la renovación automática al menos 24 horas antes del final del periodo en curso; la renovación se cobra en las 24 horas anteriores a ese final. Gestiona o cancela tu suscripción en los ajustes de tu cuenta de Apple.
+
+Términos de uso: https://getdictus.com/en/terms
+Dictus no recopila ningún dato. Política de privacidad: https://getdictus.com/en/privacy
 ```
 
 ## Length check
@@ -98,4 +101,4 @@ Measured with `python3` (`len()` for characters, UTF-8 bytes for the keywords, w
 | Subtitle | 30 | 29 |
 | Promotional text | 170 | 148 |
 | Keywords (bytes) | 100 | 99 |
-| Description | 4000 | 2964 |
+| Description | 4000 | 3690 |

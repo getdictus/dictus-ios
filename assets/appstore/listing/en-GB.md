@@ -88,9 +88,12 @@ DICTUS PRO
 
 Pro adds Smart Modes, voice notes in your keyboard, a history of your dictations, and your own vocabulary for names and technical terms.
 
-Try Pro free for 14 days. There is nothing to subscribe to and nothing renews: when the 14 days end, Dictus goes back to the free version and asks if you want to keep Pro. Your history and vocabulary are kept. The trial is offered on iPhones that can run Smart Modes. Dictation and the keyboard stay free.
+Try Pro free for 14 days. The trial needs no payment and does not renew: when the 14 days end, Dictus goes back to the free version and offers to keep Pro, monthly, yearly or as a one-time lifetime purchase. Your history and vocabulary are kept. The trial is offered on iPhones that can run Smart Modes. Dictation and the keyboard stay free.
 
-Dictus collects no data. Privacy policy: getdictus.com/privacy
+To keep Pro, choose a monthly or yearly auto-renewable subscription, or the one-time lifetime purchase, which is not a subscription. The price and period of each plan are shown in the app and on the App Store for your country. Payment is charged to your Apple Account when you confirm the purchase. A subscription renews automatically for the same period unless auto-renewal is turned off at least 24 hours before the end of the current period; your account is charged for the renewal within the 24 hours before that end. Manage or cancel your subscription in your Apple Account settings.
+
+Terms of use: https://getdictus.com/en/terms
+Dictus collects no data. Privacy policy: https://getdictus.com/en/privacy
 ```
 
 ### Facts to re-check before staging
@@ -103,7 +106,7 @@ Each sentence above makes a claim the build has to back. Checked against the cod
 | Translate targets: French, English, German, Spanish | `SupportedLanguage.allCases` |
 | Apple Intelligence: iPhone 15 Pro or later, iOS 26 or later | #79 ("Pro gating"); **to confirm against Apple's current device list** |
 | Pro = Smart Modes, voice notes, history, vocabulary | `ProFeature` (`smartMode`, `voiceNotes`, `history`, `vocabulary`) |
-| 14-day reverse trial, nothing renews, data kept, no trial where Smart Modes can never run | `ProTrial.durationDays = 14`, `ProTrialPolicy` (definitive reasons), #593 decisions 1 and 2 |
+| 14-day reverse trial, the trial needs no payment and does not renew, data kept, no trial where Smart Modes can never run | `ProTrial.durationDays = 14`, `ProTrialPolicy` (definitive reasons), #593 decisions 1 and 2 |
 | Voice notes: share sheet, transcript in the keyboard, one-tap insert | #620, #637, #639 |
 | "Dictation and the keyboard stay free" | `ProFeature` gates only the four features above |
 | 40+ languages at good or fair quality (Whisper good 25 + fair 19, plus Maltese via Parakeet = 45); Parakeet 25 European; Whisper close to 100 | `ModelLanguageSupport.swift` (`whisperTierGroups`, `parakeetV3`), #488; also slide 6 |
@@ -129,4 +132,4 @@ Each sentence above makes a claim the build has to back. Checked against the cod
 | Subtitle | 30 | 30 |
 | Promotional text | 170 | 163 |
 | Keywords (bytes) | 100 | 100 |
-| Description | 4000 | 2665 |
+| Description | 4000 | 3347 |
