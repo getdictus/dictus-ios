@@ -23,6 +23,10 @@ final class LogPrivacyTests: XCTestCase {
             .transcriptionCompleted(durationMs: 2500, wordCount: 42, confidence: 0.916),
             .transcriptionCompleted(durationMs: 3400, wordCount: 214, confidence: 0.916,
                                     retry: DriftRetryStats(spans: 3, wins: 2, durationMs: 2210)),
+            // The one deliberate exception (#861): the text of a span the drift retry
+            // replaced, and nothing of the dictation around it.
+            .driftRetrySpanReplaced(startMs: 11_520, endMs: 18_960, before: "english9 english10",
+                                    after: "français français"),
             .transcriptionFailed(error: "modelNotLoaded"),
             // #80's pass reports counters only. A term the user typed is their own
             // vocabulary, and a character count of the transcript is not the transcript.
