@@ -58,6 +58,9 @@ public enum LogEvent: Sendable {
     /// (a fresh process owns no session by construction, so it needs no heartbeat
     /// to reach its verdict).
     case dictationStateReconciled(source: String, staleStatus: String, heartbeatAgeMs: Int)
+    /// An audio interruption reached an active dictation (#851). `samples` is the audio
+    /// the engine held at that moment (16 kHz), and `decision` what was done with it.
+    case recordingInterrupted(status: String, samples: Int, decision: InterruptedDictationDecision)
 
     // MARK: Audio
     case audioEngineStarted
@@ -365,6 +368,9 @@ public enum LogEvent: Sendable {
     case overlayHidden(status: String)
     case statusChanged(from: String, to: String, source: String)
     case watchdogReset(source: String, staleState: String)
+    /// The app's stage watchdog fired late, after a suspension, and was armed again
+    /// instead of cancelling the dictation (#851).
+    case stageWatchdogRearmed(status: String, lateBySeconds: Int, sinceStageStartSeconds: Int)
     /// Issue #60: a path tried to enter .idle while the engine was still capturing.
     case idleInvariantViolation(from: String, engineRunning: Bool)
     case rapidTapRejected
@@ -684,87 +690,6 @@ public enum LogEvent: Sendable {
 
     // MARK: - Computed Properties
 
-    /// The subsystem this event belongs to, derived from the case.
-    public var subsystem: Subsystem {
-        switch self {
-        case .dictationStarted, .dictationCompleted, .dictationFailed, .dictationDeferred,
-             .dictationStateReconciled:
-            return .dictation
-        case .audioEngineStarted, .audioEngineStopped, .audioSessionConfigured, .audioSessionFailed,
-             .audioSessionActivationFailed, .audioInterruptionBegan, .audioInterruptionEnded, .audioRouteChanged,
-             .audioMediaServicesLost, .audioMediaServicesReset, .warmStateReleased, .warmStateRestored,
-             .idleReleaseArmed, .audioHapticsAllowance, .audioHapticsAllowanceFailed,
-             .audioInputMuted, .audioInputMuteFailed:
-            return .audio
-        case .transcriptionStarted, .transcriptionCompleted, .transcriptionFailed, .recordingTooShort,
-             .transcriptionPerformance:
-            return .transcription
-        case .modelDownloadStarted, .modelDownloadCompleted, .modelDownloadFailed,
-             .modelSelected, .modelCompilationStarted, .modelCompilationCompleted,
-             .modelDeleted, .modelDeleteFailed, .modelPrewarmStarted, .modelCleanupPerformed,
-             .modelPrewarmPeakMemory, .modelPrewarmTimeout, .modelLoadStateChanged,
-             .modelDownloadProgress, .modelDownloadStalled, .modelDownloadSizeMismatch,
-             .modelReconciledFromDisk,
-             .modelDownloadResumed, .modelDownloadRangeRejected, .modelDownloadChunk,
-             .modelDownloadIntegrityFailed, .modelDownloadSessionRestored,
-             .modelDownloadOffline, .modelDownloadTaskState, .modelDownloadBackgroundTaskSilent,
-             .modelDownloadTaskCancelled, .modelDownloadOrphanedChunks:
-            return .model
-        case .keyboardDidAppear, .keyboardDidDisappear, .keyboardMicTapped, .keyboardTextInserted,
-             .hostReturn,
-             .keyRepeatStarted, .keyRepeatStopped,
-             .overlayShown, .overlayHidden, .rapidTapRejected,
-             .dictationMessageSet, .dictationMessageDisplayed, .dictationMessageCleared,
-             .waveformAppeared, .waveformDisappeared, .waveformHeartbeat, .waveformStall,
-             .waveformRefreshIDChanged, .waveformEnergyTransition, .waveformTimelineNotFiring,
-             .overlayBodyEvaluated, .overlayTimerStarted, .overlayTimerStopped, .overlayRecreated,
-             .diagnosticProbe,
-             .userDictionaryWordLearned, .userDictionaryEvicted, .userDictionaryReset,
-             .userDictionaryMigrated, .userDictionaryStaleDiscarded, .userDictionaryPruned:
-            return .keyboard
-        case .statusChanged, .watchdogReset, .idleInvariantViolation:
-            return .dictation
-        case .engineWarmUpAttempt, .engineWarmUpSuccess, .engineWarmUpFailed,
-             .engineWarmUpSkipped,
-             .engineStateSnapshot, .engineCollectResult, .engineDarwinStartReceived:
-            return .audio
-        case .onboardingScenePhaseChanged, .onboardingKeyboardCheckStarted,
-             .onboardingKeyboardDetected, .onboardingKeyboardNotFound,
-             .onboardingKeyboardCheckSkipped, .onboardingKeyboardRetry,
-             .onboardingFullAccessLinkOpened, .onboardingFullAccessExplainerOpened,
-             .onboardingDictusKeyboardActivated, .onboardingGlobeTutorialTextDetected,
-             .onboardingGlobeTutorialSkipped, .onboardingAppleIntelligenceChecked,
-             .onboardingAppleIntelligenceDeferred, .onboardingAppleIntelligenceSettingUpShown,
-             .onboardingAppleIntelligenceBecameAvailable,
-             .onboardingSmartModesPicked, .onboardingSmartModePickSkipped,
-             .onboardingSceneSequenceSkipped, .onboardingWentBack, .onboardingStopStandbyShown:
-            return .lifecycle
-        case .coldStartURLReceived, .coldStartFlagSet, .coldStartRetry, .coldStartDarwinFallback,
-             .coldStartStranded:
-            return .lifecycle
-        case .logExportCompleted:
-            return .lifecycle
-        case .subscriptionError:
-            return .lifecycle
-        case .liveActivityStarted, .liveActivityTransition, .liveActivityFailed, .liveActivityEnded,
-             .liveActivityStandbySkipped:
-            return .lifecycle
-        case .appLaunched, .appLaunchState, .appBackgroundSessionEvents, .appDidBecomeActive,
-             .appWillResignActive,
-             .appDidEnterBackground, .appWhisperKitLoaded, .deviceCapabilitySnapshot:
-            return .lifecycle
-        // Polish is the stage after the STT result and before the App Group
-        // write, so it reads with the transcription stream rather than as a
-        // subsystem of its own (#315).
-        case .polishEngineFailed, .polishEngineUnavailable, .polishHandoff,
-             .polishInputLanguageRefused,
-             .polishInsertionRefused, .polishCallSuperseded,
-             .smartModeRefused, .smartModeSkipped, .vocabularyApplied,
-             .translateEngineCall:
-            return .transcription
-        }
-    }
-
     /// Log level derived from the event type.
     /// Failures = error, deferred/warnings = warning, starts/completes = info,
     /// stops/internal state = debug.
@@ -794,8 +719,8 @@ public enum LogEvent: Sendable {
             return .notice
 
         // Warnings
-        case .dictationDeferred, .dictationStateReconciled,
-             .watchdogReset, .engineWarmUpFailed, .recordingTooShort,
+        case .dictationDeferred, .dictationStateReconciled, .recordingInterrupted,
+             .watchdogReset, .stageWatchdogRearmed, .engineWarmUpFailed, .recordingTooShort,
              .waveformStall, .waveformTimelineNotFiring,
              .coldStartDarwinFallback, .coldStartStranded, .modelPrewarmTimeout,
              .audioInterruptionBegan, .audioMediaServicesLost, .audioMediaServicesReset,
@@ -918,6 +843,9 @@ public enum LogEvent: Sendable {
             return "reason=\(reason)"
         case .dictationStateReconciled(let source, let staleStatus, let heartbeatAgeMs):
             return "source=\(source) staleStatus=\(staleStatus) heartbeatAgeMs=\(heartbeatAgeMs)"
+        case .recordingInterrupted(let status, let samples, let decision):
+            let seconds = String(format: "%.2f", Double(samples) / 16000.0)
+            return "status=\(status) samples=\(samples) seconds=\(seconds) decision=\(decision.rawValue)"
 
         // Audio
         case .audioEngineStarted, .audioEngineStopped:
@@ -1131,6 +1059,8 @@ public enum LogEvent: Sendable {
             return "from=\(from) to=\(to) source=\(source)"
         case .watchdogReset(let source, let staleState):
             return "source=\(source) staleState=\(staleState)"
+        case .stageWatchdogRearmed(let status, let lateBy, let sinceStart):
+            return "status=\(status) lateBySeconds=\(lateBy) sinceStageStart=\(sinceStart)"
         case .idleInvariantViolation(let from, let engineRunning):
             return "from=\(from) engineRunning=\(engineRunning)"
         case .rapidTapRejected:
@@ -1277,10 +1207,92 @@ public enum LogEvent: Sendable {
     }
 }
 
-// The case-name table lives in an extension, not the enum body, for the reason the
-// keyboard's large types do it: the body is at SwiftLint's `type_body_length` budget
-// (650), and #648's `translateEngineCall` put it over. Same file, same table.
+// The case-name and subsystem tables live in an extension, not the enum body, for the
+// reason the keyboard's large types do it: the body is at SwiftLint's `type_body_length`
+// budget (650). #648's `translateEngineCall` put it over and moved the names; #851's
+// `recordingInterrupted` did again and moved the subsystems. Same file, same tables.
 extension LogEvent {
+    /// The subsystem this event belongs to, derived from the case.
+    public var subsystem: Subsystem {
+        switch self {
+        case .dictationStarted, .dictationCompleted, .dictationFailed, .dictationDeferred,
+             .dictationStateReconciled, .recordingInterrupted:
+            return .dictation
+        case .audioEngineStarted, .audioEngineStopped, .audioSessionConfigured, .audioSessionFailed,
+             .audioSessionActivationFailed, .audioInterruptionBegan, .audioInterruptionEnded, .audioRouteChanged,
+             .audioMediaServicesLost, .audioMediaServicesReset, .warmStateReleased, .warmStateRestored,
+             .idleReleaseArmed, .audioHapticsAllowance, .audioHapticsAllowanceFailed,
+             .audioInputMuted, .audioInputMuteFailed:
+            return .audio
+        case .transcriptionStarted, .transcriptionCompleted, .transcriptionFailed, .recordingTooShort,
+             .transcriptionPerformance:
+            return .transcription
+        case .modelDownloadStarted, .modelDownloadCompleted, .modelDownloadFailed,
+             .modelSelected, .modelCompilationStarted, .modelCompilationCompleted,
+             .modelDeleted, .modelDeleteFailed, .modelPrewarmStarted, .modelCleanupPerformed,
+             .modelPrewarmPeakMemory, .modelPrewarmTimeout, .modelLoadStateChanged,
+             .modelDownloadProgress, .modelDownloadStalled, .modelDownloadSizeMismatch,
+             .modelReconciledFromDisk,
+             .modelDownloadResumed, .modelDownloadRangeRejected, .modelDownloadChunk,
+             .modelDownloadIntegrityFailed, .modelDownloadSessionRestored,
+             .modelDownloadOffline, .modelDownloadTaskState, .modelDownloadBackgroundTaskSilent,
+             .modelDownloadTaskCancelled, .modelDownloadOrphanedChunks:
+            return .model
+        case .keyboardDidAppear, .keyboardDidDisappear, .keyboardMicTapped, .keyboardTextInserted,
+             .hostReturn,
+             .keyRepeatStarted, .keyRepeatStopped,
+             .overlayShown, .overlayHidden, .rapidTapRejected,
+             .dictationMessageSet, .dictationMessageDisplayed, .dictationMessageCleared,
+             .waveformAppeared, .waveformDisappeared, .waveformHeartbeat, .waveformStall,
+             .waveformRefreshIDChanged, .waveformEnergyTransition, .waveformTimelineNotFiring,
+             .overlayBodyEvaluated, .overlayTimerStarted, .overlayTimerStopped, .overlayRecreated,
+             .diagnosticProbe,
+             .userDictionaryWordLearned, .userDictionaryEvicted, .userDictionaryReset,
+             .userDictionaryMigrated, .userDictionaryStaleDiscarded, .userDictionaryPruned:
+            return .keyboard
+        case .statusChanged, .watchdogReset, .stageWatchdogRearmed, .idleInvariantViolation:
+            return .dictation
+        case .engineWarmUpAttempt, .engineWarmUpSuccess, .engineWarmUpFailed,
+             .engineWarmUpSkipped,
+             .engineStateSnapshot, .engineCollectResult, .engineDarwinStartReceived:
+            return .audio
+        case .onboardingScenePhaseChanged, .onboardingKeyboardCheckStarted,
+             .onboardingKeyboardDetected, .onboardingKeyboardNotFound,
+             .onboardingKeyboardCheckSkipped, .onboardingKeyboardRetry,
+             .onboardingFullAccessLinkOpened, .onboardingFullAccessExplainerOpened,
+             .onboardingDictusKeyboardActivated, .onboardingGlobeTutorialTextDetected,
+             .onboardingGlobeTutorialSkipped, .onboardingAppleIntelligenceChecked,
+             .onboardingAppleIntelligenceDeferred, .onboardingAppleIntelligenceSettingUpShown,
+             .onboardingAppleIntelligenceBecameAvailable,
+             .onboardingSmartModesPicked, .onboardingSmartModePickSkipped,
+             .onboardingSceneSequenceSkipped, .onboardingWentBack, .onboardingStopStandbyShown:
+            return .lifecycle
+        case .coldStartURLReceived, .coldStartFlagSet, .coldStartRetry, .coldStartDarwinFallback,
+             .coldStartStranded:
+            return .lifecycle
+        case .logExportCompleted:
+            return .lifecycle
+        case .subscriptionError:
+            return .lifecycle
+        case .liveActivityStarted, .liveActivityTransition, .liveActivityFailed, .liveActivityEnded,
+             .liveActivityStandbySkipped:
+            return .lifecycle
+        case .appLaunched, .appLaunchState, .appBackgroundSessionEvents, .appDidBecomeActive,
+             .appWillResignActive,
+             .appDidEnterBackground, .appWhisperKitLoaded, .deviceCapabilitySnapshot:
+            return .lifecycle
+        // Polish is the stage after the STT result and before the App Group
+        // write, so it reads with the transcription stream rather than as a
+        // subsystem of its own (#315).
+        case .polishEngineFailed, .polishEngineUnavailable, .polishHandoff,
+             .polishInputLanguageRefused,
+             .polishInsertionRefused, .polishCallSuperseded,
+             .smartModeRefused, .smartModeSkipped, .vocabularyApplied,
+             .translateEngineCall:
+            return .transcription
+        }
+    }
+
     /// Event name as it appears in the log line (matches the enum case name).
     public var name: String {
         switch self {
@@ -1289,6 +1301,7 @@ extension LogEvent {
         case .dictationFailed: return "dictationFailed"
         case .dictationDeferred: return "dictationDeferred"
         case .dictationStateReconciled: return "dictationStateReconciled"
+        case .recordingInterrupted: return "recordingInterrupted"
         case .audioEngineStarted: return "audioEngineStarted"
         case .audioEngineStopped: return "audioEngineStopped"
         case .audioSessionConfigured: return "audioSessionConfigured"
@@ -1374,6 +1387,7 @@ extension LogEvent {
         case .overlayHidden: return "overlayHidden"
         case .statusChanged: return "statusChanged"
         case .watchdogReset: return "watchdogReset"
+        case .stageWatchdogRearmed: return "stageWatchdogRearmed"
         case .idleInvariantViolation: return "idleInvariantViolation"
         case .rapidTapRejected: return "rapidTapRejected"
         case .waveformAppeared: return "waveformAppeared"

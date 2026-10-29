@@ -58,7 +58,9 @@ class DictationCoordinator: ObservableObject {
     /// The status it was armed for is captured by the timer's own closure, which
     /// re-checks it before firing -- a stage that has handed over to the next one
     /// must not be torn down by the previous one's timer.
-    private var stageWatchdog: Timer?
+    var stageWatchdog: Timer?
+    /// When the stage `stageWatchdog` covers began, kept across its re-arms (#851).
+    var stageWatchdogStageStart = Date()
 
     private var whisperKit: WhisperKit?
     private var currentModelName: String?
@@ -467,18 +469,19 @@ class DictationCoordinator: ObservableObject {
             }
         }
 
-        // Cancel any in-flight dictation when the audio session is interrupted
+        // End any in-flight dictation when the audio session is interrupted
         // (phone call, Siri, etc.) or media services are reset. UnifiedAudioEngine
-        // already tore down the engine; we just need to clean up the dictation
-        // pipeline state and notify the keyboard that the recording failed
-        // (issue #106).
+        // already tore down the engine; what happens to the dictation is
+        // `InterruptedDictationPolicy`'s call (issues #106, #851).
         NotificationCenter.default.addObserver(
             forName: .dictusAudioSessionInterrupted,
             object: nil,
             queue: .main
-        ) { [weak self] _ in
+        ) { [weak self] notification in
+            let rawCause = notification.userInfo?[UnifiedAudioEngine.interruptionCauseKey] as? String
+            let cause = rawCause.flatMap(DictationInterruptionCause.init(rawValue:)) ?? .interruption
             Task { @MainActor in
-                self?.handleAudioInterruptionDuringDictation()
+                self?.handleAudioInterruptionDuringDictation(cause: cause)
             }
         }
 
@@ -514,6 +517,9 @@ class DictationCoordinator: ObservableObject {
                 // expired during the suspension. Must happen BEFORE warmUp below,
                 // otherwise we'd warm an engine that should be released.
                 self.audioEngine.enforceIdleReleaseIfDue()
+
+                // A stage the app was suspended in restarts its watchdog's delay (#851).
+                self.restartStageWatchdogAfterSuspension()
 
                 // Recover DI if it was lost (Activity.request fails from background on cold start).
                 // Must happen BEFORE pendingColdStartDictation so transitionToRecording finds an activity.
@@ -865,7 +871,9 @@ class DictationCoordinator: ObservableObject {
     /// in the dictation pipeline — only WhisperKit via keyboard.
     private let minimumRecordingDuration: TimeInterval = 0.5
 
-    func stopDictation() {
+    /// - Parameter playsStopSound: false when an audio interruption ended the recording
+    ///   (#851): the stop sound would play over the call that cut it.
+    func stopDictation(playsStopSound: Bool = true) {
         // Issue #144 re-entry guard: refuse if a transcription is already in flight.
         // Without this, tapping stop multiple times during a long model swap (e.g.
         // turbo load) spawned 3+ concurrent transcribe() calls that cancelled each
@@ -923,7 +931,7 @@ class DictationCoordinator: ObservableObject {
                 // Arm watchdog: if DI fails to leave .recording, force recovery after 10s.
                 // If transitionToTranscribing succeeded, the watchdog's guard exits harmlessly.
                 LiveActivityManager.shared.startRecordingWatchdog()
-                SoundFeedbackService.playRecordStop()
+                if playsStopSound { SoundFeedbackService.playRecordStop() }
 
                 // The engine is shared with the voice note queue since #620. Taken
                 // before the model load and handed back once the transcript exists, so
@@ -1127,46 +1135,6 @@ class DictationCoordinator: ObservableObject {
         }
         updateStatus(.idle)
         // Keep lastResult so HomeView can display the last transcription card.
-    }
-
-    /// Handle an audio session interruption that fired while dictation was active.
-    ///
-    /// UnifiedAudioEngine has already stopped the engine and posted the in-process
-    /// notification. We only need to clean up the dictation pipeline: cancel the
-    /// in-flight task, drop accumulated samples, write a "failed" status to App
-    /// Group so the keyboard's overlay closes, and notify the user via the Live
-    /// Activity (LiveActivityManager handles its own end via the same notification).
-    /// Issue #106.
-    private func handleAudioInterruptionDuringDictation() {
-        // Same predicate as `resetStatus` and for the same reason (#267).
-        let wasActive = DictationSessionLivenessPolicy.isActive(status)
-        guard wasActive else {
-            // Engine died while idle — nothing to roll back. The standby DI is
-            // dismissed by LiveActivityManager via the same notification.
-            return
-        }
-
-        // Same reasoning as `cancelDictation`: this teardown ends the session, so
-        // the task must not report into it afterwards (#267). The `.failed` written
-        // below is this handler speaking, not the task, and is not gated.
-        sessionGeneration.abandonSession()
-        dictationTask?.cancel()
-        dictationTask = nil
-        isTranscribingInFlight = false
-        stopStageWatchdog()
-
-        bufferEnergy = []
-        bufferSeconds = 0
-        cleanupRecordingKeys()
-        endPolishHandoff(abandonedAs: "interrupted")
-
-        // updateStatus(.failed) handles both the App Group write and the Darwin
-        // statusChanged post — no manual duplication needed (issue #106 review).
-        updateStatus(.failed)
-
-        if #available(iOS 14.0, *) {
-            DictusLogger.app.warning("Dictation cancelled by audio session interruption")
-        }
     }
 
     // MARK: - Private Helpers
@@ -1373,62 +1341,6 @@ class DictationCoordinator: ObservableObject {
             return false
         }
         return true
-    }
-
-    // MARK: - Stage Watchdog
-
-    /// How long a post-recording stage may run before it is declared stuck.
-    /// Nil for statuses no stage watchdog covers.
-    ///
-    /// WHY 30s for transcription: WhisperKit transcription of a typical dictation
-    /// (<60s audio) should complete in under 10s even on older devices. 30s provides
-    /// generous margin while still catching genuinely stuck transcriptions.
-    ///
-    /// WHY 60s for the LLM stage (#267) and not the same 30s: generation time scales
-    /// with the output, which is exactly why this stage was split out, and the cost
-    /// of firing early is higher here than during transcription -- the transcript
-    /// already exists and the recovery below throws it away with the rest of the
-    /// session. The number is a last-resort unfreeze, not a latency budget.
-    private func stageWatchdogTimeout(for status: DictationStatus) -> TimeInterval? {
-        switch status {
-        case .transcribing:
-            return 30
-        case .processing:
-            return 60
-        case .idle, .requested, .recording, .ready, .failed:
-            return nil
-        }
-    }
-
-    /// Log source for a fired stage watchdog. `appTranscription` is unchanged from
-    /// before #267 so log lines written by older builds keep meaning what they meant.
-    private func stageWatchdogSource(for status: DictationStatus) -> String {
-        status == .processing ? "appProcessing" : "appTranscription"
-    }
-
-    private func startStageWatchdog(for status: DictationStatus) {
-        stopStageWatchdog()
-        guard let timeout = stageWatchdogTimeout(for: status) else { return }
-        stageWatchdog = Timer.scheduledTimer(withTimeInterval: timeout, repeats: false) { [weak self] _ in
-            guard let self = self else { return }
-            DispatchQueue.main.async {
-                guard self.status == status else { return }
-                if self.shouldDeferStageWatchdog(for: status) {
-                    self.startStageWatchdog(for: status)
-                    return
-                }
-                PersistentLog.log(.watchdogReset(
-                    source: self.stageWatchdogSource(for: status),
-                    staleState: status.rawValue
-                ))
-                self.cancelDictation()
-            }
-        }
-    }
-
-    private func stopStageWatchdog() {
-        stageWatchdog?.invalidate()
-        stageWatchdog = nil
     }
 
     /// Write dictation status to App Group so the keyboard can observe it.
@@ -1990,5 +1902,70 @@ extension DictationCoordinator {
             return
         }
         startDictation(origin: .keyboard)
+    }
+}
+
+// MARK: - Audio interruption (#106, #851)
+
+/// WHY an extension in this file: the handler reads the coordinator's private state,
+/// and the class body is at its length budget (#146).
+extension DictationCoordinator {
+
+    /// Handle an audio session interruption that fired while dictation was active.
+    ///
+    /// UnifiedAudioEngine has already stopped the engine and posted the in-process
+    /// notification. The captured audio is still in the engine (#851): a recording
+    /// is stopped as if the user had tapped stop, and transcribed; a transcription
+    /// already running goes on, it no longer needs the microphone. Only a dictation
+    /// with nothing to keep fails: cancel the in-flight task, write a "failed"
+    /// status to App Group so the keyboard's overlay closes, and end the Live
+    /// Activity. Issue #106.
+    private func handleAudioInterruptionDuringDictation(cause: DictationInterruptionCause) {
+        // Same predicate as `resetStatus` and for the same reason (#267).
+        let wasActive = DictationSessionLivenessPolicy.isActive(status)
+        guard wasActive else {
+            // Engine died while idle — nothing to roll back. The standby DI is
+            // LiveActivityManager's; only a dictation pill with no dictation left
+            // behind it (a desync) is ended here.
+            LiveActivityManager.shared.endDictationActivityForAudioInterruption()
+            return
+        }
+
+        let samples = audioEngine.currentSampleCount
+        let decision = InterruptedDictationPolicy.decide(
+            status: status, cause: cause, capturedSeconds: Double(samples) / 16000.0, minimum: minimumRecordingDuration
+        )
+        PersistentLog.log(.recordingInterrupted(status: status.rawValue, samples: samples, decision: decision))
+
+        guard decision == .fail else {
+            // The stop path collects the samples and gives a clip under the minimum
+            // the "no words" notice, exactly as for a stop tapped a beat early. A
+            // transcription already running is simply left alone.
+            if decision != .letTranscriptionFinish { stopDictation(playsStopSound: false) }
+            return
+        }
+
+        // Same reasoning as `cancelDictation`: this teardown ends the session, so
+        // the task must not report into it afterwards (#267). The `.failed` written
+        // below is this handler speaking, not the task, and is not gated.
+        sessionGeneration.abandonSession()
+        dictationTask?.cancel()
+        dictationTask = nil
+        isTranscribingInFlight = false
+        stopStageWatchdog()
+
+        bufferEnergy = []
+        bufferSeconds = 0
+        cleanupRecordingKeys()
+        endPolishHandoff(abandonedAs: "interrupted")
+
+        // updateStatus(.failed) handles both the App Group write and the Darwin
+        // statusChanged post — no manual duplication needed (issue #106 review).
+        updateStatus(.failed)
+        LiveActivityManager.shared.endDictationActivityForAudioInterruption()
+
+        if #available(iOS 14.0, *) {
+            DictusLogger.app.warning("Dictation cancelled by audio session interruption")
+        }
     }
 }
