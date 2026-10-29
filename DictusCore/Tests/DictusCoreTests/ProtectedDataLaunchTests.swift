@@ -235,9 +235,11 @@ final class PendingLogLinesTests: XCTestCase {
         try super.setUpWithError()
         directory = FileManager.default.temporaryDirectory
             .appendingPathComponent("dictus_unwritable_\(UUID().uuidString)")
-        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        // Both URLs before anything can throw: `tearDown` runs after a failed setUp and
+        // unwraps them.
         fileURL = FileManager.default.temporaryDirectory
             .appendingPathComponent("dictus_pending_\(UUID().uuidString).log")
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
         PersistentLog.resetCollapseStateForTesting()
     }
 
