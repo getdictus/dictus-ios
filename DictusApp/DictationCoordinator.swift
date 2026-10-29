@@ -614,6 +614,9 @@ class DictationCoordinator: ObservableObject {
         // that makes it so. Clearing here — rather than when a surface reads it — is
         // what lets both the keyboard and the app read it, in either order.
         DictationErrorChannel.clear()
+        // And the previous dictation's "text is in the Dictus app" banner (#860): a new
+        // dictation is the user moving on. The keyboard clears it at its own mic tap too.
+        RecoveredTranscriptionChannel.clear()
         bufferEnergy = []
         bufferSeconds = 0
         // Cancel any polish still running from the previous dictation (#141).

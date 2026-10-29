@@ -52,6 +52,14 @@ struct ToolbarView: View {
     /// away only when a fresh app process clears it.
     var showsPolishUnavailable: Bool = false
 
+    /// Whether a dictation the document refused has its text waiting in DictusApp
+    /// (#860). A state like the one above: no timer, gone on tap or on the next
+    /// dictation.
+    var showsRecoveredTranscription: Bool = false
+
+    /// Opens DictusApp on the recovered text.
+    var onRecoveredTranscriptionTap: (() -> Void)?
+
     var suggestions: [String] = []
     var suggestionMode: SuggestionMode = .idle
     var onSuggestionTap: ((Int) -> Void)?
@@ -282,6 +290,7 @@ struct ToolbarView: View {
         ToolbarCentreSlot.resolve(
             isChoosingMode: isSmartModeFanOpen,
             errorMessage: statusMessage,
+            recoveredTranscriptionPending: showsRecoveredTranscription,
             offersDictationUndo: showsDictationUndo,
             hasSuggestions: !suggestions.isEmpty,
             dictationUnavailable: !supportsDictation,
@@ -300,6 +309,8 @@ struct ToolbarView: View {
             fanTitle
         case .error(let message):
             errorMessage(message)
+        case .recoveredTranscription:
+            recoveredTranscriptionBanner
         case .dictationUndo:
             dictationUndoButton
             Spacer()
@@ -828,6 +839,39 @@ struct ToolbarView: View {
         }
         .buttonStyle(GlassPressStyle())
         .accessibilityLabel(Text("Undo dictation insertion"))
+    }
+
+    /// A dictation's text was produced and never typed, and is in DictusApp (#860).
+    ///
+    /// Accent, like Undo, because it is the other control in this slot that acts on a
+    /// dictation; not red, for #313's reason. The copy names where the text is and not
+    /// why it was interrupted: the cause is out of scope, and the app is the remedy.
+    /// Two lines at `.caption` fit the 52 pt bar, so the declared height cannot move
+    /// (#166).
+    private var recoveredTranscriptionBanner: some View {
+        Button {
+            HapticFeedback.keyTapped()
+            onRecoveredTranscriptionTap?()
+        } label: {
+            HStack(spacing: 6) {
+                Text("Dictation interrupted. Your text is in the Dictus app.")
+                    .font(.caption)
+                    .fontWeight(.medium)
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.85)
+                    .multilineTextAlignment(.leading)
+                Image(systemName: "arrow.up.forward.app")
+                    .font(.system(size: 13, weight: .semibold))
+            }
+            .foregroundColor(.dictusAccent)
+            .padding(.horizontal, 12)
+            .frame(maxWidth: .infinity, minHeight: iconDiameter)
+            .background(Capsule().fill(Color.dictusAccent.opacity(0.12)))
+            .frame(height: 44)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(GlassPressStyle())
+        .accessibilityIdentifier("keyboard.recoveredTranscriptionBanner")
     }
 
     /// Polish is not running, and will not run again until DictusApp restarts (#315).
