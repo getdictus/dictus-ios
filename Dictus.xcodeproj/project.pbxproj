@@ -44,6 +44,7 @@
 		AA000428 /* DictationCoordinator+ModelLoad.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100428 /* DictationCoordinator+ModelLoad.swift */; };
 		AA000775 /* DictationCoordinator+SessionActivation.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100775 /* DictationCoordinator+SessionActivation.swift */; };
 		AA000380 /* DictationCoordinator+WarmEngineTimeout.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100380 /* DictationCoordinator+WarmEngineTimeout.swift */; };
+		AA000851 /* DictationCoordinator+StageWatchdog.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100851 /* DictationCoordinator+StageWatchdog.swift */; };
 		AA000007 /* KeyboardState.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA10000B /* KeyboardState.swift */; };
 		AA0000F7 /* KeyboardLifecycleProbe.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000F6 /* KeyboardLifecycleProbe.swift */; };
 		AA023002 /* HostAppResolver.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA023001 /* HostAppResolver.swift */; };
@@ -285,6 +286,7 @@
 		AA100428 /* DictationCoordinator+ModelLoad.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DictationCoordinator+ModelLoad.swift"; sourceTree = "<group>"; };
 		AA100775 /* DictationCoordinator+SessionActivation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DictationCoordinator+SessionActivation.swift"; sourceTree = "<group>"; };
 		AA100380 /* DictationCoordinator+WarmEngineTimeout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DictationCoordinator+WarmEngineTimeout.swift"; sourceTree = "<group>"; };
+		AA100851 /* DictationCoordinator+StageWatchdog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DictationCoordinator+StageWatchdog.swift"; sourceTree = "<group>"; };
 		AA10000B /* KeyboardState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardState.swift; sourceTree = "<group>"; };
 		AA1000F6 /* KeyboardLifecycleProbe.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardLifecycleProbe.swift; sourceTree = "<group>"; };
 		AA023001 /* HostAppResolver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HostAppResolver.swift; sourceTree = "<group>"; };
@@ -568,6 +570,7 @@
 				AA100428 /* DictationCoordinator+ModelLoad.swift */,
 				AA100775 /* DictationCoordinator+SessionActivation.swift */,
 				AA100380 /* DictationCoordinator+WarmEngineTimeout.swift */,
+				AA100851 /* DictationCoordinator+StageWatchdog.swift */,
 				AA1000F5 /* LiveActivityManager.swift */,
 				SS400001 /* Subscription */,
 				AA400007 /* Audio */,
@@ -1318,6 +1321,7 @@
 				AA000428 /* DictationCoordinator+ModelLoad.swift in Sources */,
 				AA000775 /* DictationCoordinator+SessionActivation.swift in Sources */,
 				AA000380 /* DictationCoordinator+WarmEngineTimeout.swift in Sources */,
+				AA000851 /* DictationCoordinator+StageWatchdog.swift in Sources */,
 				AA0000F5 /* LiveActivityManager.swift in Sources */,
 				AA00P201 /* PolishAvailability.swift in Sources */,
 				AA00P203 /* PolishCoordinator.swift in Sources */,

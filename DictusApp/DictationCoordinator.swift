@@ -58,7 +58,9 @@ class DictationCoordinator: ObservableObject {
     /// The status it was armed for is captured by the timer's own closure, which
     /// re-checks it before firing -- a stage that has handed over to the next one
     /// must not be torn down by the previous one's timer.
-    private var stageWatchdog: Timer?
+    var stageWatchdog: Timer?
+    /// When the stage `stageWatchdog` covers began, kept across its re-arms (#851).
+    var stageWatchdogStageStart = Date()
 
     private var whisperKit: WhisperKit?
     private var currentModelName: String?
@@ -515,6 +517,9 @@ class DictationCoordinator: ObservableObject {
                 // expired during the suspension. Must happen BEFORE warmUp below,
                 // otherwise we'd warm an engine that should be released.
                 self.audioEngine.enforceIdleReleaseIfDue()
+
+                // A stage the app was suspended in restarts its watchdog's delay (#851).
+                self.restartStageWatchdogAfterSuspension()
 
                 // Recover DI if it was lost (Activity.request fails from background on cold start).
                 // Must happen BEFORE pendingColdStartDictation so transitionToRecording finds an activity.
@@ -1336,62 +1341,6 @@ class DictationCoordinator: ObservableObject {
             return false
         }
         return true
-    }
-
-    // MARK: - Stage Watchdog
-
-    /// How long a post-recording stage may run before it is declared stuck.
-    /// Nil for statuses no stage watchdog covers.
-    ///
-    /// WHY 30s for transcription: WhisperKit transcription of a typical dictation
-    /// (<60s audio) should complete in under 10s even on older devices. 30s provides
-    /// generous margin while still catching genuinely stuck transcriptions.
-    ///
-    /// WHY 60s for the LLM stage (#267) and not the same 30s: generation time scales
-    /// with the output, which is exactly why this stage was split out, and the cost
-    /// of firing early is higher here than during transcription -- the transcript
-    /// already exists and the recovery below throws it away with the rest of the
-    /// session. The number is a last-resort unfreeze, not a latency budget.
-    private func stageWatchdogTimeout(for status: DictationStatus) -> TimeInterval? {
-        switch status {
-        case .transcribing:
-            return 30
-        case .processing:
-            return 60
-        case .idle, .requested, .recording, .ready, .failed:
-            return nil
-        }
-    }
-
-    /// Log source for a fired stage watchdog. `appTranscription` is unchanged from
-    /// before #267 so log lines written by older builds keep meaning what they meant.
-    private func stageWatchdogSource(for status: DictationStatus) -> String {
-        status == .processing ? "appProcessing" : "appTranscription"
-    }
-
-    private func startStageWatchdog(for status: DictationStatus) {
-        stopStageWatchdog()
-        guard let timeout = stageWatchdogTimeout(for: status) else { return }
-        stageWatchdog = Timer.scheduledTimer(withTimeInterval: timeout, repeats: false) { [weak self] _ in
-            guard let self = self else { return }
-            DispatchQueue.main.async {
-                guard self.status == status else { return }
-                if self.shouldDeferStageWatchdog(for: status) {
-                    self.startStageWatchdog(for: status)
-                    return
-                }
-                PersistentLog.log(.watchdogReset(
-                    source: self.stageWatchdogSource(for: status),
-                    staleState: status.rawValue
-                ))
-                self.cancelDictation()
-            }
-        }
-    }
-
-    private func stopStageWatchdog() {
-        stageWatchdog?.invalidate()
-        stageWatchdog = nil
     }
 
     /// Write dictation status to App Group so the keyboard can observe it.

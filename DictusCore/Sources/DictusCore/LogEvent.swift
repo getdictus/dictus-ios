@@ -368,6 +368,9 @@ public enum LogEvent: Sendable {
     case overlayHidden(status: String)
     case statusChanged(from: String, to: String, source: String)
     case watchdogReset(source: String, staleState: String)
+    /// The app's stage watchdog fired late, after a suspension, and was armed again
+    /// instead of cancelling the dictation (#851).
+    case stageWatchdogRearmed(status: String, lateBySeconds: Int, sinceStageStartSeconds: Int)
     /// Issue #60: a path tried to enter .idle while the engine was still capturing.
     case idleInvariantViolation(from: String, engineRunning: Bool)
     case rapidTapRejected
@@ -717,7 +720,7 @@ public enum LogEvent: Sendable {
 
         // Warnings
         case .dictationDeferred, .dictationStateReconciled, .recordingInterrupted,
-             .watchdogReset, .engineWarmUpFailed, .recordingTooShort,
+             .watchdogReset, .stageWatchdogRearmed, .engineWarmUpFailed, .recordingTooShort,
              .waveformStall, .waveformTimelineNotFiring,
              .coldStartDarwinFallback, .coldStartStranded, .modelPrewarmTimeout,
              .audioInterruptionBegan, .audioMediaServicesLost, .audioMediaServicesReset,
@@ -1056,6 +1059,8 @@ public enum LogEvent: Sendable {
             return "from=\(from) to=\(to) source=\(source)"
         case .watchdogReset(let source, let staleState):
             return "source=\(source) staleState=\(staleState)"
+        case .stageWatchdogRearmed(let status, let lateBy, let sinceStart):
+            return "status=\(status) lateBySeconds=\(lateBy) sinceStageStart=\(sinceStart)"
         case .idleInvariantViolation(let from, let engineRunning):
             return "from=\(from) engineRunning=\(engineRunning)"
         case .rapidTapRejected:
@@ -1245,7 +1250,7 @@ extension LogEvent {
              .userDictionaryWordLearned, .userDictionaryEvicted, .userDictionaryReset,
              .userDictionaryMigrated, .userDictionaryStaleDiscarded, .userDictionaryPruned:
             return .keyboard
-        case .statusChanged, .watchdogReset, .idleInvariantViolation:
+        case .statusChanged, .watchdogReset, .stageWatchdogRearmed, .idleInvariantViolation:
             return .dictation
         case .engineWarmUpAttempt, .engineWarmUpSuccess, .engineWarmUpFailed,
              .engineWarmUpSkipped,
@@ -1382,6 +1387,7 @@ extension LogEvent {
         case .overlayHidden: return "overlayHidden"
         case .statusChanged: return "statusChanged"
         case .watchdogReset: return "watchdogReset"
+        case .stageWatchdogRearmed: return "stageWatchdogRearmed"
         case .idleInvariantViolation: return "idleInvariantViolation"
         case .rapidTapRejected: return "rapidTapRejected"
         case .waveformAppeared: return "waveformAppeared"
