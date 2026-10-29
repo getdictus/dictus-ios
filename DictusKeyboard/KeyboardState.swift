@@ -106,8 +106,18 @@ class KeyboardState: ObservableObject {
             if dictationStatus != .processing {
                 holdsLocalProcessingStage = false
             }
+            // Sixth (#862): the keyboard's last step of the stop timing trace, the
+            // moment it sees the app's `.transcribing`. Any other status ends the trace,
+            // so a stop the app never acted on cannot time a later dictation.
+            if let trace = pendingStopTrace, oldValue != dictationStatus, dictationStatus != .recording {
+                if dictationStatus == .transcribing { trace.log("keyboardTranscribing") }
+                pendingStopTrace = nil
+            }
         }
     }
+
+    /// The stop tap this process is timing, until the app's `.transcribing` reaches it (#862).
+    private var pendingStopTrace: StopTimingTrace?
 
     /// The app error this keyboard has already put on its toolbar.
     ///
@@ -607,6 +617,7 @@ class KeyboardState: ObservableObject {
     /// Uses the Darwin notification + Bool flag pattern: write the flag first,
     /// then post the notification so the app reads the flag when it handles the notification.
     func requestStop() {
+        let tapTime = Date()
         logProbe("requestStop", details: sessionDetails())
 
         // A stop tapped by a keyboard that never started this dictation (#261). The
@@ -626,9 +637,18 @@ class KeyboardState: ObservableObject {
             if reconcileIfOrphaned(source: "keyboard-stop") { return }
         }
 
+        // The tap travels with the flag, written first so the app that reads the flag
+        // finds it (#862). The trace is the keyboard's session id and the tap's wall-clock
+        // time, never anything the user said.
+        let trace = StopTimingTrace.tapped(sessionID: activeSessionID ?? "none", at: tapTime)
+        PersistentLog.log(trace.event("tap", at: tapTime))
+        trace.write(to: defaults)
+        pendingStopTrace = trace
+
         defaults.set(true, forKey: SharedKeys.stopRequested)
         defaults.synchronize()
         DarwinNotificationCenter.post(DarwinNotificationName.stopRecording)
+        trace.log("stopPosted")
         HapticFeedback.recordingStopped()
     }
 

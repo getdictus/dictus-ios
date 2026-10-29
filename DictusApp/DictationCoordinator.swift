@@ -871,9 +871,12 @@ class DictationCoordinator: ObservableObject {
     /// in the dictation pipeline — only WhisperKit via keyboard.
     private let minimumRecordingDuration: TimeInterval = 0.5
 
-    /// - Parameter playsStopSound: false when an audio interruption ended the recording
-    ///   (#851): the stop sound would play over the call that cut it.
-    func stopDictation(playsStopSound: Bool = true) {
+    /// - Parameters:
+    ///   - playsStopSound: false when an audio interruption ended the recording
+    ///     (#851): the stop sound would play over the call that cut it.
+    ///   - stopTrace: the keyboard's stop tap, when a tap is what stopped it. Each step
+    ///     up to the start of transcription logs its delay from that tap (#862).
+    func stopDictation(playsStopSound: Bool = true, stopTrace: StopTimingTrace? = nil) {
         // Issue #144 re-entry guard: refuse if a transcription is already in flight.
         // Without this, tapping stop multiple times during a long model swap (e.g.
         // turbo load) spawned 3+ concurrent transcribe() calls that cancelled each
@@ -896,7 +899,10 @@ class DictationCoordinator: ObservableObject {
         dictationTask = Task {
             defer { self.isTranscribingInFlight = false }
             do {
+                // Also where the engine goes quiet: it stays warm, and `collectSamples`
+                // mutes its input (#430), so there is no separate engine-stop step.
                 let samples = audioEngine.collectSamples()
+                stopTrace?.log("samplesCollected")
 
                 guard !samples.isEmpty else {
                     // Logged before the session gate, like `recordingTooShort` below:
@@ -927,11 +933,13 @@ class DictationCoordinator: ObservableObject {
                 }
 
                 updateStatus(.transcribing)
+                stopTrace?.log("statusTranscribing")
                 LiveActivityManager.shared.transitionToTranscribing()
                 // Arm watchdog: if DI fails to leave .recording, force recovery after 10s.
                 // If transitionToTranscribing succeeded, the watchdog's guard exits harmlessly.
                 LiveActivityManager.shared.startRecordingWatchdog()
                 if playsStopSound { SoundFeedbackService.playRecordStop() }
+                stopTrace?.log("stopFeedbackDone")
 
                 // The engine is shared with the voice note queue since #620. Taken
                 // before the model load and handed back once the transcript exists, so
@@ -947,6 +955,7 @@ class DictationCoordinator: ObservableObject {
                 enterNeuralEngineWait()
                 await EngineAccessGate.shared.acquire(.dictation)
                 leaveNeuralEngineWait()
+                stopTrace?.log("engineAcquired")
                 var holdsEngine = true
                 let releaseEngine = {
                     guard holdsEngine else { return }
@@ -961,6 +970,7 @@ class DictationCoordinator: ObservableObject {
                 // Wrapped, not just called: this is the one place in a dictation that
                 // can queue on hardware someone else holds (finding 2).
                 try await waitingForNeuralEngine { try await self.ensureEngineReady() }
+                stopTrace?.log("modelReady")
 
                 // One language-policy snapshot per dictation (#226): mode,
                 // keyboard language, engine, and model are captured HERE and
@@ -988,6 +998,8 @@ class DictationCoordinator: ObservableObject {
                 // silent, which for a translation means their own language comes
                 // back with nothing saying why.
                 let smartMode = SmartModeStore.resolveArmedMode()
+                // The last step: `transcriptionStarted` is the service's first line.
+                stopTrace?.log("transcriptionStarted")
 
                 // Custom vocabulary (#80 decision 5), and this is the only place it
                 // can go. `transcribe` returns from more than one branch depending
@@ -1142,13 +1154,19 @@ class DictationCoordinator: ObservableObject {
     /// Register Darwin notification observers for keyboard stop/cancel signals.
     private func observeKeyboardSignals() {
         DarwinNotificationCenter.addObserver(for: DarwinNotificationName.stopRecording) { [weak self] in
+            // Taken before the hop to the main queue (#862): the gap between this line
+            // and `appMainHop` is the time the main thread kept the stop waiting.
+            let stopTrace = AppGroup.defaults.bool(forKey: SharedKeys.stopRequested)
+                ? StopTimingTrace.take(from: AppGroup.defaults) : nil
+            stopTrace?.log("appReceived")
             DispatchQueue.main.async {
                 guard let self = self else { return }
                 let requested = self.defaults.bool(forKey: SharedKeys.stopRequested)
                 if requested {
+                    stopTrace?.log("appMainHop")
                     self.defaults.set(false, forKey: SharedKeys.stopRequested)
                     self.defaults.synchronize()
-                    self.stopDictation()
+                    self.stopDictation(stopTrace: stopTrace)
                 }
             }
         }
@@ -1941,7 +1959,12 @@ extension DictationCoordinator {
             // The stop path collects the samples and gives a clip under the minimum
             // the "no words" notice, exactly as for a stop tapped a beat early. A
             // transcription already running is simply left alone.
-            if decision != .letTranscriptionFinish { stopDictation(playsStopSound: false) }
+            //
+            // Timed like a tap (#862), from this handler and under `sessionID=interruption`:
+            // the main-thread stalls logged after an interruption fall in this window.
+            if decision != .letTranscriptionFinish {
+                stopDictation(playsStopSound: false, stopTrace: .tapped(sessionID: "interruption"))
+            }
             return
         }
 
