@@ -265,7 +265,8 @@ extension ParakeetEngine {
             let durationMs = Int(Date().timeIntervalSince(start) * 1000)
             for replaced in outcome.replacements {
                 PersistentLog.log(.driftRetrySpanReplaced(startMs: replaced.startMs, endMs: replaced.endMs,
-                                                          before: replaced.before, after: replaced.after))
+                                                          before: replaced.before, after: replaced.after,
+                                                          channel: .current))
             }
             return (outcome.text, DriftRetryStats(spans: outcome.spans, wins: outcome.wins, durationMs: durationMs))
         } catch {

@@ -92,7 +92,8 @@ final class DriftRetryTests: XCTestCase {
         XCTAssertTrue(replaced.after.contains("français"), replaced.after)
 
         let line = LogEvent.driftRetrySpanReplaced(startMs: replaced.startMs, endMs: replaced.endMs,
-                                                   before: replaced.before, after: replaced.after).payload()
+                                                   before: replaced.before, after: replaced.after,
+                                                   channel: .testBuild).payload()
         XCTAssertTrue(line.hasPrefix("INFO    [transcription] <"), line)
         XCTAssertTrue(line.contains(
             "driftRetrySpanReplaced startMs=\(replaced.startMs) endMs=\(replaced.endMs) "

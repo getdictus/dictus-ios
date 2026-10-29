@@ -132,10 +132,14 @@ public enum LogEvent: Sendable {
     case transcriptionCompleted(durationMs: Int, wordCount: Int, confidence: Float?, language: String? = nil, promptId: Int? = nil, detectedLanguage: String? = nil, retry: DriftRetryStats? = nil)
     /// One span the drift retry replaced (#861): where it sits in the audio, in ms from the
     /// start of the engine call, and its text before and after. **The one transcription
-    /// line that carries transcript text**, and only the replaced span's: without it a log
-    /// says a retry won but not what it wrote, so a guardrail refusal downstream cannot be
-    /// traced back to it. Spans the first pass kept log nothing.
-    case driftRetrySpanReplaced(startMs: Int, endMs: Int, before: String, after: String)
+    /// line that carries transcript text**, and only the replaced span's, and only in a
+    /// test build (`channel` `.testBuild`: Debug, TestFlight): without it a log says a
+    /// retry won but not what it wrote, so a guardrail refusal downstream cannot be traced
+    /// back to it. The App Store build writes the two lengths in characters instead.
+    /// `channel` defaults to `.appStore`, the side that writes no text. Spans the first
+    /// pass kept log nothing.
+    case driftRetrySpanReplaced(startMs: Int, endMs: Int, before: String, after: String,
+                                channel: BuildChannel = .appStore)
     case transcriptionFailed(error: String)
     case recordingTooShort(durationMs: Int)
     case transcriptionPerformance(modelName: String, audioDurationMs: Int, transcriptionDurationMs: Int, peakMemoryMB: Int)
@@ -900,8 +904,13 @@ public enum LogEvent: Sendable {
             let languageFields = [language.map { "language=\($0)" }, promptId.map { "promptId=\($0)" }, detected.map { "detected=\($0)" }]
                 .compactMap { $0 }.map { " \($0)" }.joined()
             return "duration=\(durationMs)ms words=\(wordCount)\(confidenceField)\(languageFields)\(retry.map { " \($0.logFields)" } ?? "")"
-        case .driftRetrySpanReplaced(let startMs, let endMs, let before, let after):
-            return "startMs=\(startMs) endMs=\(endMs) before=\"\(before)\" after=\"\(after)\""
+        case .driftRetrySpanReplaced(let startMs, let endMs, let before, let after, let channel):
+            switch channel {
+            case .testBuild:
+                return "startMs=\(startMs) endMs=\(endMs) before=\"\(before)\" after=\"\(after)\""
+            case .appStore:
+                return "startMs=\(startMs) endMs=\(endMs) beforeLen=\(before.count) afterLen=\(after.count)"
+            }
         case .transcriptionFailed(let error):
             return "error=\(error)"
         case .recordingTooShort(let durationMs):
