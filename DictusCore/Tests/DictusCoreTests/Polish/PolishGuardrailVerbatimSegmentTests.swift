@@ -5,36 +5,52 @@ import XCTest
 
 /// The device case of 2026-10-29: a French `smart.message` dictation holding the
 /// code-switch `It's a folie.`, which the per-segment language check refused although
-/// the transcript carries it word for word. The texts around it are rebuilt, the
-/// segment is the device one.
+/// the transcript carries it word for word. The texts around it are rebuilt.
+///
+/// Whether `It's a folie.` alone reads as confident English depends on the OS's
+/// recogniser: 0.964 on the Mac this was written on, under the 0.85 floor on the CI
+/// runner. So the device segment pins the match itself, and the refusal is pinned on a
+/// longer code-switch that reads English everywhere.
 final class PolishGuardrailVerbatimSegmentTests: XCTestCase {
 
-    /// The transcript, cased and spaced the way Parakeet left it: lower-case opening
-    /// and a double space inside the segment.
-    private let raw = "salut Marc, je viens de recevoir le devis du garage pour la voiture. "
-        + "it's  a folie. Je vais demander un deuxième avis avant de signer quoi que ce soit."
+    // MARK: - The device segment
 
-    /// The output: one line per sentence, the segment re-cased and given a typographic
-    /// apostrophe.
+    /// The transcript's casing, a double space and a straight apostrophe on one side; the
+    /// output's re-casing and typographic apostrophe on the other.
+    func testTheDeviceSegmentMatchesItsTranscriptThroughCaseSpacesAndApostrophe() {
+        let spoken = PolishGuardrail.verbatimKey("salut Marc, le devis est arrivé. it's  a folie. Je rappelle demain.")
+        XCTAssertTrue(spoken.contains(PolishGuardrail.verbatimKey("It\u{2019}s a folie.")))
+        XCTAssertTrue(spoken.contains(PolishGuardrail.verbatimKey("It's a\u{00A0}folie.")))
+        XCTAssertFalse(spoken.contains(PolishGuardrail.verbatimKey("It's a real folie.")))
+    }
+
+    // MARK: - The check
+
+    /// Parakeet's casing and a double space inside the code-switch.
+    private let raw = "salut Marc, je viens de recevoir le devis du garage pour la voiture. "
+        + "honestly,  it's a folie, I can't believe they want that much for it. "
+        + "Je vais demander un deuxième avis avant de signer quoi que ce soit."
+
+    /// One line per sentence; the code-switch re-cased with a typographic apostrophe.
     private let polished = """
     Salut Marc,
     Je viens de recevoir le devis du garage pour la voiture.
-    It’s a folie.
+    Honestly, it\u{2019}s a folie, I can't believe they want that much for it.
     Je vais demander un deuxième avis avant de signer quoi que ce soit.
     """
 
-    /// The same output with a line the transcript does not hold.
+    /// The same output with an English line the transcript does not hold.
     private let invented = """
     Salut Marc,
     Je viens de recevoir le devis du garage pour la voiture.
-    It's a real disaster.
+    Honestly, this quote is a complete disaster and I will not pay it.
     Je vais demander un deuxième avis avant de signer quoi que ce soit.
     """
 
     func testTheSegmentIsRefusedWhenTheCheckIsNotGivenTheTranscript() {
         XCTAssertFalse(
             PolishGuardrail.detectedLanguageMatches(polished: polished, inputLanguageCode: "fr"),
-            "precondition: read alone, the segment is a confident English reading"
+            "precondition: read alone, the code-switch is a confident English reading"
         )
     }
 
@@ -48,7 +64,8 @@ final class PolishGuardrailVerbatimSegmentTests: XCTestCase {
         XCTAssertFalse(PolishGuardrail.detectedLanguageMatches(polished: invented, target: .french, raw: raw))
     }
 
-    /// Wired through the pipeline on the mode the device case ran.
+    // MARK: - Through the pipeline, on the device case's mode
+
     func testTheMessageModeDeliversTheVerbatimSegment() async {
         let result = await PolishPipeline.transform(
             preprocessed: raw, engine: FixedOutputEngine(output: polished),
