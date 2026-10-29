@@ -1897,8 +1897,8 @@ extension DictationCoordinator {
 
 extension DictationCoordinator {
 
-    /// Decide a keyboard stop or cancel, clear its flag when it was set, and log it when it
-    /// is not acted on, or acted on with the flag reading false.
+    /// Decide a keyboard stop or cancel, clear its flag when it is acted on, and log it when
+    /// it is not acted on, or acted on with the flag reading false.
     ///
     /// WHY BOTH LOG LINES: before #868 an ignored stop left nothing in the log, and twelve
     /// taps in a row read as the app never receiving them. `stopIgnored` / `cancelIgnored`
@@ -1907,12 +1907,12 @@ extension DictationCoordinator {
     func mayActOnKeyboardSignal(_ signal: KeyboardSignal, flagKey: String) -> Bool {
         let requested = defaults.bool(forKey: flagKey)
         let decision = KeyboardSignalPolicy.decide(signal, flagRequested: requested, status: status)
-        if requested {
-            defaults.set(false, forKey: flagKey)
-            defaults.synchronize()
-        }
         switch decision {
         case .honor:
+            // Always, even when it read false: in a stale view the keyboard's `true` is on
+            // disk, and only this write can clear it for the next session.
+            defaults.set(false, forKey: flagKey)
+            defaults.synchronize()
             if !requested {
                 PersistentLog.log(.diagnosticProbe(
                     component: "KeyboardSignal",

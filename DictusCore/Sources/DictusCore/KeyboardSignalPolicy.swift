@@ -43,8 +43,11 @@ public enum KeyboardSignalPolicy {
             if status == .recording { return .honor }
         case .cancel:
             // The keyboard drops to idle as soon as it posts a cancel, so the app honors
-            // it at any stage of the dictation, as the flag path always did.
-            if DictationSessionLivenessPolicy.isActive(status) { return .honor }
+            // it while the audio is still being captured. Not during `transcribing` or
+            // `processing`: `KeyboardState.reconcileAbandonedDictation` also posts a
+            // cancel, for a recording it judged stale, and honoring that without its flag
+            // would throw away a transcription that is about to arrive.
+            if status == .requested || status == .recording { return .honor }
         }
         return .ignore(reason: "flagFalse status=\(status.rawValue)")
     }

@@ -26,10 +26,10 @@ final class ProtectedDataLaunchTests: XCTestCase {
         }
     }
 
-    func testACancelWithoutTheFlagIsHonoredWhileADictationIsActive() {
+    func testACancelWithoutTheFlagIsHonoredOnlyWhileAudioIsCaptured() {
         for status in DictationStatus.allCases {
             let decision = KeyboardSignalPolicy.decide(.cancel, flagRequested: false, status: status)
-            if DictationSessionLivenessPolicy.isActive(status) {
+            if status == .requested || status == .recording {
                 XCTAssertEqual(decision, .honor, "\(status)")
             } else {
                 XCTAssertEqual(decision, .ignore(reason: "flagFalse status=\(status.rawValue)"), "\(status)")
@@ -76,22 +76,90 @@ final class ProtectedDataLaunchTests: XCTestCase {
 
     // MARK: - ProtectedDataLaunchWork
 
-    func testLaunchWorkWaitsForProtectedDataAndRunsOnce() {
-        final class Switch: ProtectedDataAvailability {
-            var isProtectedDataAvailable = false
-        }
-        let availability = Switch()
+    func testLaunchWorkWaitsForTrustedReadsAndRunsOnce() {
+        var ready = false
         var runs = 0
-        let work = ProtectedDataLaunchWork(availability: availability) { runs += 1 }
+        let work = ProtectedDataLaunchWork(isReady: { ready }) { runs += 1 }
 
         XCTAssertFalse(work.runIfAvailable())
         XCTAssertEqual(runs, 0)
 
-        availability.isProtectedDataAvailable = true
+        ready = true
         XCTAssertTrue(work.runIfAvailable())
         XCTAssertFalse(work.runIfAvailable(), "an activation after the first must not run it again")
         XCTAssertEqual(runs, 1)
         XCTAssertTrue(work.hasRun)
+    }
+
+    // MARK: - AppGroupReadCheck
+
+    private let unlocked = FixedProtectedData(isProtectedDataAvailable: true)
+
+    func testReadStateFromTheFile() {
+        let file: [String: Any] = [SharedKeys.hasCompletedOnboarding: true, SharedKeys.language: "en"]
+
+        let locked = LockableAppGroupStore(values: file, isLocked: true)
+        XCTAssertEqual(
+            AppGroupReadCheck.state(of: locked, protectedData: FixedProtectedData(isProtectedDataAvailable: false), fileValues: file),
+            .protected
+        )
+        XCTAssertEqual(
+            AppGroupReadCheck.state(of: locked, protectedData: unlocked, fileValues: file),
+            .stale(missingKeys: [SharedKeys.hasCompletedOnboarding, SharedKeys.language])
+        )
+
+        let fresh = LockableAppGroupStore(values: file, isLocked: false)
+        XCTAssertEqual(AppGroupReadCheck.state(of: fresh, protectedData: unlocked, fileValues: file), .trusted)
+        XCTAssertEqual(AppGroupReadCheck.state(of: locked, protectedData: unlocked, fileValues: nil), .trusted, "no file: a new install")
+        XCTAssertEqual(
+            AppGroupReadCheck.state(of: locked, protectedData: unlocked, fileValues: ["dictus.dictationStatus": "idle"]),
+            .trusted,
+            "only witness keys decide: runtime keys come and go"
+        )
+    }
+
+    func testFileValuesReadsAPlistWithoutUserDefaults() throws {
+        let url = FileManager.default.temporaryDirectory
+            .appendingPathComponent("dictus_file_values_\(UUID().uuidString).plist")
+        defer { try? FileManager.default.removeItem(at: url) }
+        let data = try PropertyListSerialization.data(
+            fromPropertyList: [SharedKeys.language: "en", SharedKeys.hasCompletedOnboarding: true],
+            format: .binary,
+            options: 0
+        )
+        try data.write(to: url)
+
+        let values = try XCTUnwrap(AppGroupReadCheck.fileValues(at: url))
+        XCTAssertEqual(values[SharedKeys.language] as? String, "en")
+        XCTAssertEqual(values[SharedKeys.hasCompletedOnboarding] as? Bool, true)
+        XCTAssertNil(AppGroupReadCheck.fileValues(at: nil))
+    }
+
+    func testSettingsFallbackKeepsSettingsAndLeavesRuntimeState() {
+        let fallback = AppGroupReadCheck.settingsFallback(from: [
+            SharedKeys.language: "en",
+            SharedKeys.liveActivityEnabled: false,
+            SharedKeys.stopRequested: true,
+            SharedKeys.dictationStatus: "recording"
+        ])
+        XCTAssertEqual(Set(fallback.keys), [SharedKeys.language, SharedKeys.liveActivityEnabled])
+    }
+
+    /// The stale process's fix relies on this: a fallback registered on one instance is
+    /// read by another instance of the suite, the way `AppGroup.defaults` builds a new one
+    /// per access, and a value written later still wins.
+    func testARegisteredFallbackReachesEveryInstanceAndYieldsToAWrite() throws {
+        let suiteName = "dictus.tests.protectedDataLaunch.fallback"
+        let first = try XCTUnwrap(UserDefaults(suiteName: suiteName))
+        first.removePersistentDomain(forName: suiteName)
+        defer { first.removePersistentDomain(forName: suiteName) }
+
+        first.register(defaults: ["dictus.tests.fallbackLanguage": "en"])
+        let second = try XCTUnwrap(UserDefaults(suiteName: suiteName))
+        XCTAssertEqual(second.string(forKey: "dictus.tests.fallbackLanguage"), "en")
+
+        second.set("de", forKey: "dictus.tests.fallbackLanguage")
+        XCTAssertEqual(first.string(forKey: "dictus.tests.fallbackLanguage"), "de")
     }
 
     // MARK: - ProtectedDataProbe

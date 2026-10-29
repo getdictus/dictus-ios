@@ -268,7 +268,7 @@ public enum PersistentLog {
             activeModel: activeModel,
             codeRevision: codeRevision,
             retainedWindow: retainedWindow(of: content),
-            launch: launchSummary
+            launch: launchSummary.value
         )
         return header + content
     }
@@ -293,9 +293,21 @@ public enum PersistentLog {
     }
 
     /// How the exporting process was launched, for the export header (#868): the
-    /// `appLaunched` fields that say whether it started before first unlock. Set once by
-    /// DictusApp at launch; nil in the keyboard, which exports nothing.
-    public static var launchSummary: String?
+    /// `appLaunched` fields that say whether it started before first unlock. Set by
+    /// DictusApp at launch; empty in the keyboard, which exports nothing.
+    public static let launchSummary = LaunchSummary()
+
+    /// A `String?` behind a lock, so the launch summary is a `let` and safe to reach from
+    /// any thread under Swift 6. `@unchecked` because the lock is what makes it `Sendable`.
+    public final class LaunchSummary: @unchecked Sendable {
+        private let lock = NSLock()
+        private var stored: String?
+
+        public var value: String? {
+            get { lock.withLock { stored } }
+            set { lock.withLock { stored = newValue } }
+        }
+    }
 
     /// First timestamp, last timestamp, line count and byte size of the retained
     /// file, as a single header line.

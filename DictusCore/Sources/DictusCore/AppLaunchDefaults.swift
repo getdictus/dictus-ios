@@ -12,10 +12,12 @@ public enum AppLaunchDefaults {
     /// WHY at launch: `@AppStorage` defaults live in memory only, and the transcription
     /// service and the keyboard read the stored value. `if nil` keeps a user's own choice.
     ///
-    /// WHY NOTHING BEFORE FIRST UNLOCK: every key reads nil then, so `if nil` is true for
-    /// all of them and the user's language and Live Activity choice would be replaced by
-    /// the defaults. The caller runs this again once protected data is available.
+    /// WHY ONLY ON A TRUSTED READ: before the first unlock, and in a process whose view
+    /// stayed stale after it (#868), every key reads nil, so `if nil` is true for all of
+    /// them and the user's language and Live Activity choice would be replaced by the
+    /// defaults. The caller runs this again later; see `AppGroupReadCheck`.
     ///
+    /// - Parameter fileValues: the App Group preferences file, `AppGroupReadCheck.fileValues`.
     /// - Returns: whether the writes were attempted.
     @discardableResult
     public static func writeMissingDefaults(
@@ -23,7 +25,8 @@ public enum AppLaunchDefaults {
         protectedData: ProtectedDataAvailability,
         fileValues: [String: Any]? = nil
     ) -> Bool {
-        guard protectedData.isProtectedDataAvailable else { return false }
+        let state = AppGroupReadCheck.state(of: store, protectedData: protectedData, fileValues: fileValues)
+        guard state == .trusted else { return false }
         if store.string(forKey: SharedKeys.language) == nil {
             store.set("fr", forKey: SharedKeys.language)
         }
@@ -36,14 +39,22 @@ public enum AppLaunchDefaults {
     /// Whether onboarding is done, as the App Group says, or nil when it cannot say yet.
     ///
     /// Nil before first unlock, because the empty read would say false and false shows
-    /// onboarding to a user who finished it. Once readable, a missing key reads false,
-    /// as `KeyboardOnboardingGate.isOnboardingCompleted` explains.
+    /// onboarding to a user who finished it. From the file when the store's view is stale.
+    /// Otherwise from the store, where a missing key reads false, as
+    /// `KeyboardOnboardingGate.isOnboardingCompleted` explains.
     public static func onboardingCompleted(
         in store: AppGroupStore,
         protectedData: ProtectedDataAvailability,
         fileValues: [String: Any]? = nil
     ) -> Bool? {
-        guard protectedData.isProtectedDataAvailable else { return nil }
-        return store.object(forKey: SharedKeys.hasCompletedOnboarding) as? Bool ?? false
+        let key = SharedKeys.hasCompletedOnboarding
+        switch AppGroupReadCheck.state(of: store, protectedData: protectedData, fileValues: fileValues) {
+        case .protected:
+            return nil
+        case .stale:
+            return fileValues?[key] as? Bool ?? false
+        case .trusted:
+            return store.object(forKey: key) as? Bool ?? false
+        }
     }
 }

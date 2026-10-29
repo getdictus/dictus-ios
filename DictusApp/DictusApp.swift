@@ -146,12 +146,37 @@ struct DictusApp: App {
     /// Whether the App Group can be read, for every launch decision that depends on it.
     private static let protectedData = SystemProtectedData()
 
-    /// The App Group writes and reads of the launch, run once protected data is available
-    /// (#868): in `init` on an ordinary launch, later on a launch iOS made at boot.
+    /// The App Group writes and reads of the launch, run once the App Group reads can be
+    /// trusted (#868): in `init` on an ordinary launch, later on a launch iOS made at boot,
+    /// never in a process whose view stays stale.
     private static let appGroupLaunchWork = ProtectedDataLaunchWork(
-        availability: DictusApp.protectedData,
+        isReady: { DictusApp.appGroupRead().state == .trusted },
         work: { DictusApp.runAppGroupLaunchWork() }
     )
+
+    /// The App Group preferences file, read directly, and what it says about this
+    /// process's `UserDefaults` view (#868). Not read at all before first unlock.
+    private static func appGroupRead() -> (state: AppGroupReadState, file: [String: Any]?) {
+        let file = protectedData.isProtectedDataAvailable
+            ? AppGroupReadCheck.fileValues(at: ProtectedDataProbe.appGroupPreferencesURL)
+            : nil
+        let state = AppGroupReadCheck.state(of: AppGroup.defaults, protectedData: protectedData, fileValues: file)
+        return (state, file)
+    }
+
+    /// A stale view takes the user's settings from the file, as in-memory fallbacks, and
+    /// says so in the log (#868). Writes nothing: see `AppGroupReadCheck.settingsFallback`.
+    private static func adoptFileSettingsIfStale(_ read: (state: AppGroupReadState, file: [String: Any]?), trigger: String) {
+        guard case .stale(let missingKeys) = read.state else { return }
+        let fallback = AppGroupReadCheck.settingsFallback(from: read.file)
+        AppGroup.defaults.register(defaults: fallback)
+        PersistentLog.log(.diagnosticProbe(
+            component: "AppGroup",
+            instanceID: "0",
+            action: "appGroupStale",
+            details: "trigger=\(trigger) missing=\(missingKeys.joined(separator: ",")) adopted=\(fallback.count)"
+        ))
+    }
 
     init() {
         // FluidAudio never downloads on its own (#558). Before anything else in the
@@ -172,19 +197,27 @@ struct DictusApp: App {
         // Whether this launch happened before the first unlock after a boot (#868). Its
         // diagnostic writes a test key, so it waits for protected data like every other
         // App Group write of the launch; `catchUpOnProtectedData` runs it then.
+        // A stale view (`AppGroupReadCheck`) reports `appGroup=stale` and runs no diagnostic.
         let protectedDataAvailable = Self.protectedData.isProtectedDataAvailable
         let activePrewarm = ProcessInfo.processInfo.environment["ActivePrewarm"] == "1"
-        let diagnostic = protectedDataAvailable ? AppGroupDiagnostic.run() : nil
-        let appGroup = diagnostic.map { $0.isHealthy ? "healthy" : "unhealthy" } ?? "deferred"
+        let launchRead = Self.appGroupRead()
+        let diagnostic = launchRead.state == .trusted ? AppGroupDiagnostic.run() : nil
+        let appGroup: String
+        switch launchRead.state {
+        case .protected: appGroup = "deferred"
+        case .stale: appGroup = "stale"
+        case .trusted: appGroup = diagnostic?.isHealthy == true ? "healthy" : "unhealthy"
+        }
         PersistentLog.log(.appLaunched(
             version: version,
             protectedData: protectedDataAvailable,
             activePrewarm: activePrewarm,
             appGroup: appGroup
         ))
-        PersistentLog.launchSummary =
+        PersistentLog.launchSummary.value =
             "protectedData=\(protectedDataAvailable) activePrewarm=\(activePrewarm) appGroup=\(appGroup)"
         DictusLogger.app.info("AppGroup diagnostic: \(appGroup, privacy: .public)")
+        Self.adoptFileSettingsIfStale(launchRead, trigger: "appLaunch")
 
         // Complete a Parakeet cache the 0.15 loader cannot use, before the coordinator's
         // launch preload can reach it (#558): layer 0 moves a 0.12 cache into the folder 0.15
@@ -259,7 +292,8 @@ struct DictusApp: App {
         Self.appGroupLaunchWork.runIfAvailable()
         _hasCompletedOnboarding = State(initialValue: AppLaunchDefaults.onboardingCompleted(
             in: AppGroup.defaults,
-            protectedData: Self.protectedData
+            protectedData: Self.protectedData,
+            fileValues: launchRead.file
         ))
 
         // Initialize Pro subscription management.
@@ -309,7 +343,11 @@ struct DictusApp: App {
 
         // `language = "fr"` and `liveActivityEnabled = true` when missing, so the
         // transcription service and the Live Activity read a stored value.
-        AppLaunchDefaults.writeMissingDefaults(to: AppGroup.defaults, protectedData: protectedData)
+        AppLaunchDefaults.writeMissingDefaults(
+            to: AppGroup.defaults,
+            protectedData: protectedData,
+            fileValues: appGroupRead().file
+        )
 
         // Freeze the layout an updating install is already typing on, before anything can
         // change the active language (#272). The migration is idempotent and also runs from
@@ -322,6 +360,7 @@ struct DictusApp: App {
     /// Run the launch work a boot launch deferred, and read the onboarding flag again
     /// (#868). Called when protected data becomes available and at every activation.
     private func catchUpOnProtectedData(trigger: String) {
+        Self.adoptFileSettingsIfStale(Self.appGroupRead(), trigger: trigger)
         if Self.appGroupLaunchWork.runIfAvailable() {
             let result = AppGroupDiagnostic.run()
             PersistentLog.log(.diagnosticProbe(
@@ -334,14 +373,16 @@ struct DictusApp: App {
         refreshOnboardingFlag()
     }
 
-    /// Read the onboarding flag from the App Group again.
+    /// Read the onboarding flag from the App Group again: from the file when this
+    /// process's view of it is stale (#868).
     ///
     /// - Returns: whether onboarding is done, as far as this process can tell.
     @discardableResult
     private func refreshOnboardingFlag() -> Bool {
         let stored = AppLaunchDefaults.onboardingCompleted(
             in: AppGroup.defaults,
-            protectedData: Self.protectedData
+            protectedData: Self.protectedData,
+            fileValues: Self.appGroupRead().file
         )
         if let stored, stored != hasCompletedOnboarding {
             hasCompletedOnboarding = stored
