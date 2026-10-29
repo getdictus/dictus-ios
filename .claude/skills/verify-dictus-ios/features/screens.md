@@ -17,7 +17,7 @@ Captures are in [`docs/agents/screens/`](../../../../docs/agents/screens/), one 
 | `app.onboarding.history-scene` | Onboarding scene: « Tout se retrouve » | … -string historyScene | onboarding, history | [oui](../../../../docs/agents/screens/app.onboarding.history-scene.png) |
 | `app.onboarding.model-preparation` | Onboarding: model download and preparation | … -string modelPreparation (starts a download) | onboarding, models.transcription | non |
 | `app.onboarding.microphone` | Onboarding: « Dictus a besoin du micro » | … -string microphonePrompt | onboarding | [oui](../../../../docs/agents/screens/app.onboarding.microphone.png) |
-| `app.onboarding.first-dictation` | Onboarding: « Essayez maintenant » practice field | … -string firstDictation | onboarding, dictation.keyboard | [oui](../../../../docs/agents/screens/app.onboarding.first-dictation.png) |
+| `app.onboarding.first-dictation` | Onboarding: « Essayez maintenant » practice field, keyboard open, globe animation in the drawn iPhone above Apple's keyboard (#845) | … -string firstDictation | onboarding, dictation.keyboard | [oui](../../../../docs/agents/screens/app.onboarding.first-dictation.png) |
 | `app.onboarding.stop-standby` | Onboarding: « Pour arrêter Dictus » | … -string stopStandby | onboarding, live-activity | [oui](../../../../docs/agents/screens/app.onboarding.stop-standby.png) |
 | `app.onboarding.completion` | Onboarding: « C'est prêt » | … -string completion | onboarding | [oui](../../../../docs/agents/screens/app.onboarding.completion.png) |
 | `app.whats-new` | What's new (existing user behind 2.0.0) | set-default dictus.hasCompletedOnboarding -bool YES, then dictus.lastVersionSeen -string 1.8.0 | onboarding | [oui](../../../../docs/agents/screens/app.whats-new.png) |

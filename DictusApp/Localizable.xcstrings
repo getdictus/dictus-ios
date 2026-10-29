@@ -5392,24 +5392,60 @@
         }
       }
     },
-    "Tap the field, switch to the Dictus keyboard, then dictate whatever you like." : {
-      "comment" : "Onboarding first dictation (#678).",
+    "Tap the field to open your keyboard" : {
+      "comment" : "Onboarding first dictation (#845).",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tippe auf das Feld, um deine Tastatur zu öffnen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap the field to open your keyboard"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toca el campo para abrir tu teclado"
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Touchez le champ, passez au clavier Dictus, puis dictez ce que vous voulez."
+            "value" : "Touchez le champ pour ouvrir votre clavier"
           }
         }
       }
     },
-    "Tap the field, switch to the Dictus keyboard, then type a few words." : {
-      "comment" : "Onboarding first dictation (#678).",
+    "Your keyboard opens below." : {
+      "comment" : "Onboarding first dictation (#845).",
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deine Tastatur öffnet sich unten."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your keyboard opens below."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu teclado se abre abajo."
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Touchez le champ, passez au clavier Dictus, puis tapez quelques mots."
+            "value" : "Votre clavier s’ouvre en dessous."
           }
         }
       }
