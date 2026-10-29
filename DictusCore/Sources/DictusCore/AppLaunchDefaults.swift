@@ -20,7 +20,8 @@ public enum AppLaunchDefaults {
     @discardableResult
     public static func writeMissingDefaults(
         to store: AppGroupStore,
-        protectedData: ProtectedDataAvailability
+        protectedData: ProtectedDataAvailability,
+        fileValues: [String: Any]? = nil
     ) -> Bool {
         guard protectedData.isProtectedDataAvailable else { return false }
         if store.string(forKey: SharedKeys.language) == nil {
@@ -39,7 +40,8 @@ public enum AppLaunchDefaults {
     /// as `KeyboardOnboardingGate.isOnboardingCompleted` explains.
     public static func onboardingCompleted(
         in store: AppGroupStore,
-        protectedData: ProtectedDataAvailability
+        protectedData: ProtectedDataAvailability,
+        fileValues: [String: Any]? = nil
     ) -> Bool? {
         guard protectedData.isProtectedDataAvailable else { return nil }
         return store.object(forKey: SharedKeys.hasCompletedOnboarding) as? Bool ?? false

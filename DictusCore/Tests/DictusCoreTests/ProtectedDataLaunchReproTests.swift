@@ -4,8 +4,9 @@
 import XCTest
 @testable import DictusCore
 
-/// An App Group store whose reads come back empty while it is locked, the way the App
-/// Group `UserDefaults` does before first unlock. Writes always land, and are counted.
+/// An App Group store whose reads come back empty while `isLocked`, the way the App Group
+/// `UserDefaults` does before first unlock, and, in #868's log B, for the rest of the
+/// process's life after it. Writes always land, and are counted.
 final class LockableAppGroupStore: AppGroupStore {
     var values: [String: Any]
     var isLocked: Bool
@@ -93,5 +94,31 @@ final class ProtectedDataLaunchReproTests: XCTestCase {
         XCTAssertEqual(AppLaunchDefaults.onboardingCompleted(in: store, protectedData: unlocked), true)
         XCTAssertEqual(store.string(forKey: SharedKeys.language), "en")
         XCTAssertEqual(store.object(forKey: SharedKeys.liveActivityEnabled) as? Bool, false)
+    }
+
+    /// The case #868 actually observed: the device is unlocked, the preferences file opens
+    /// and holds the user's values, and the process's `UserDefaults` view still reads
+    /// nothing. Its writes do reach the disk, so every `if nil` default would replace a
+    /// real setting, and onboarding would come back.
+    func testUnlockedWithStaleReadsWritesNothingAndKeepsOnboardingDone() {
+        let store = existingUserStore(isLocked: true)
+        let file = store.values
+
+        let wrote = AppLaunchDefaults.writeMissingDefaults(to: store, protectedData: unlocked, fileValues: file)
+        let onboarding = AppLaunchDefaults.onboardingCompleted(in: store, protectedData: unlocked, fileValues: file)
+
+        XCTAssertFalse(wrote, "a stale view must not run the launch writes")
+        XCTAssertEqual(store.keysWrittenWhileLocked, [], "no default may be written over the file's values")
+        XCTAssertEqual(onboarding, true, "the file says onboarding is done: it must not be shown")
+    }
+
+    /// `KeyboardState.reconcileAbandonedDictation` posts a cancel for a stale recording.
+    /// When the app is already transcribing, a cancel whose flag reads false must not throw
+    /// away the transcription that is about to arrive.
+    func testACancelWithoutTheFlagDuringTranscriptionIsIgnored() {
+        XCTAssertEqual(
+            KeyboardSignalPolicy.decide(.cancel, flagRequested: false, status: .transcribing),
+            .ignore(reason: "flagFalse status=transcribing")
+        )
     }
 }
