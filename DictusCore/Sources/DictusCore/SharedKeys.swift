@@ -53,6 +53,11 @@ public enum SharedKeys {
     public static let waveformEnergy = "dictus.waveformEnergy"
     /// Bool flag set by keyboard to request recording stop
     public static let stopRequested = "dictus.stopRequested"
+    /// Double: wall-clock time of the keyboard's stop tap, seconds since 1970 (#862).
+    /// Read and written only through `StopTimingTrace`.
+    public static let stopTapEpoch = "dictus.stopTapEpoch"
+    /// String: the keyboard session id the stop tap above belongs to (#862).
+    public static let stopTapSessionID = "dictus.stopTapSessionID"
     /// Bool flag set by keyboard to request recording cancellation
     public static let cancelRequested = "dictus.cancelRequested"
     /// Double: elapsed recording seconds, updated at ~5Hz during recording
