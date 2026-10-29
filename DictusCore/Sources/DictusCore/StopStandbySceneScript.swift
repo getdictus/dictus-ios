@@ -10,17 +10,18 @@ import Foundation
 /// - **Island.** The compact island (logo bars, *On*). The finger touches and holds it;
 ///   after iOS's long press the island expands to the standby layout (logo, *Dictus / On*,
 ///   power and mic). The finger lifts, slides to the power button and taps it: the
-///   activity ends and the island shrinks back to the bare camera cut-out. A few seconds
-///   later the standby comes back, as it does after the next dictation, and the loop
-///   starts again from that picture.
+///   activity ends and the island shrinks back to the bare camera cut-out. It stays bare
+///   for the last second; the standby comes back with the next loop, as it does after the
+///   next dictation.
 /// - **Lock Screen**, on an iPhone without an island (`DeviceCapabilities.hasDynamicIsland`):
 ///   the standby banner under the clock, with the same power button. The finger taps it
-///   and the banner goes. Nothing to long-press there: the Lock Screen view shows the
-///   buttons as it is.
+///   and the banner goes until the next loop. Nothing to long-press there: the Lock Screen
+///   view shows the buttons as it is.
 ///
 /// WHY IN DICTUSCORE: the app target has no test bundle. What the scene must not get wrong
 /// is the order of the gesture (no tap on a button that is not on screen yet, no expansion
-/// before the long press has lasted) and that the loop closes on itself; both are tested.
+/// before the long press has lasted) and that the loop's seam is the standby coming back;
+/// both are tested.
 public enum StopStandbySceneScript {
 
     /// Which picture the step draws.
@@ -35,9 +36,10 @@ public enum StopStandbySceneScript {
         }
     }
 
-    /// One pass of either scene: 10 s, the low end of decision 14's 10 to 20 s. The
-    /// gesture itself takes four; the rest shows the island gone, then back.
-    public static let loopSeconds: Double = 10
+    /// One pass of either scene: 3 s, under decision 14's 10 to 20 s on purpose (#858): the
+    /// 10 s pass held 4.5 s of empty island. The gesture takes two; the last second shows
+    /// the island gone, and the next pass brings the standby back.
+    public static let loopSeconds: Double = 3
 
     /// How long iOS wants a finger on the island before it expands. Not published by
     /// Apple; half a second is the system's usual long press, and what the scene teaches
@@ -57,36 +59,32 @@ public enum StopStandbySceneScript {
     /// The beats of the island scene, in seconds from the start of the loop.
     enum IslandBeat {
         /// The finger comes onto the compact island and presses.
-        static let fingerIn: Double = 1.2
-        static let press: Double = 1.6
+        static let fingerIn: Double = 0.05
+        static let press: Double = 0.3
         /// iOS expands the island once the press has lasted.
         static let expands: Double = press + longPressSeconds
         /// The finger lifts; the island stays expanded.
-        static let lift: Double = 2.5
+        static let lift: Double = 1.0
         /// It slides from the island's centre to the power button.
-        static let travelStart: Double = 2.8
-        static let travelEnd: Double = 3.4
-        /// It taps the power button: the activity ends.
-        static let tapPress: Double = 3.65
-        static let tapRelease: Double = 3.9
-        /// The standby comes back, as after the next dictation.
-        static let returns: Double = 8.4
+        static let travelStart: Double = 1.1
+        static let travelEnd: Double = 1.6
+        /// It taps the power button: the activity ends until the loop starts again.
+        static let tapPress: Double = 1.8
+        static let tapRelease: Double = 2.0
     }
 
     /// The beats of the Lock Screen scene, in seconds from the start of the loop.
     enum LockScreenBeat {
         /// The finger comes onto the power button.
-        static let fingerIn: Double = 1.4
+        static let fingerIn: Double = 0.25
         static let fingerSettled: Double = fingerIn + fade
-        /// It taps it: the banner goes.
-        static let tapPress: Double = 2.3
-        static let tapRelease: Double = 2.55
-        /// The banner comes back, as after the next dictation.
-        static let returns: Double = 7.6
+        /// It taps it, on the island scene's beat: the banner goes until the loop starts again.
+        static let tapPress: Double = 1.8
+        static let tapRelease: Double = 2.0
     }
 
     /// How long the finger takes to appear and to go.
-    static let fade: Double = 0.3
+    static let fade: Double = 0.25
 
     /// What of the standby Live Activity is on screen.
     public enum Activity: Equatable, Sendable {
@@ -105,7 +103,7 @@ public enum StopStandbySceneScript {
         case island = 1
         /// "Long press": from the press to the expansion and the lift.
         case longPress = 2
-        /// "Stop": from the slide to the power button until the island comes back.
+        /// "Stop": from the slide to the power button until the loop starts again.
         case stop = 3
     }
 
@@ -145,7 +143,7 @@ public enum StopStandbySceneScript {
     private static func islandFrame(at time: Double) -> Frame {
         typealias Beat = IslandBeat
         let activity: Activity
-        if time < Beat.expands || time >= Beat.returns {
+        if time < Beat.expands {
             activity = .compact
         } else if time < Beat.tapRelease {
             activity = .expanded
@@ -154,7 +152,7 @@ public enum StopStandbySceneScript {
         }
 
         let chip: Chip
-        if time < Beat.press || time >= Beat.returns {
+        if time < Beat.press {
             chip = .island
         } else if time < Beat.travelStart {
             chip = .longPress
@@ -182,7 +180,7 @@ public enum StopStandbySceneScript {
 
     private static func lockScreenFrame(at time: Double) -> Frame {
         typealias Beat = LockScreenBeat
-        let isShown = time < Beat.tapRelease || time >= Beat.returns
+        let isShown = time < Beat.tapRelease
         let isPowerLit = time >= Beat.fingerIn && time < Beat.tapRelease
 
         var finger: Finger?

@@ -77,7 +77,7 @@ public enum OnboardingStep: String, CaseIterable, Sendable {
     /// one (`DeviceCapabilities.hasDynamicIsland`), on the Lock Screen.
     ///
     /// WHY RIGHT AFTER THE FIRST DICTATION: that dictation is what puts the standby island
-    /// up for real, so it is the moment the orange dot the user will ask about appears.
+    /// up for real, so it is the moment the standby the user will ask about appears.
     /// Shown on every iPhone: every iPhone gets the standby, the Lock Screen view at least.
     /// Passed over on an iPad (`passedOver(on:)`), where iPadOS shows no Live Activity.
     case stopStandby

@@ -1096,6 +1096,17 @@
         }
       }
     },
+    "Between dictations, Dictus stays ready. To stop it, hold the island, then tap the power button." : {
+      "comment" : "Onboarding, how to stop Dictus step, iPhone with a Dynamic Island: the line under the title. 'The island' is the Dynamic Island (#681, #858).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Entre deux dictées, Dictus reste prêt. Pour l’arrêter, appui long sur l’île, puis le bouton d’arrêt."
+          }
+        }
+      }
+    },
     "Between dictations, Dictus stays ready. To stop it, tap the power button on the Lock Screen." : {
       "comment" : "Onboarding, how to stop Dictus step, iPhone without a Dynamic Island: the line under the title (#681).",
       "localizations" : {
@@ -1103,17 +1114,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Entre deux dictées, Dictus reste prêt. Pour l’arrêter, touchez le bouton d’arrêt sur l’écran verrouillé."
-          }
-        }
-      }
-    },
-    "Between dictations, Dictus stays ready: that's the orange dot. To stop it, touch and hold the island." : {
-      "comment" : "Onboarding, how to stop Dictus step, iPhone with a Dynamic Island: the line under the title. 'The island' is the Dynamic Island; the orange dot is iOS's microphone indicator (#681).",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Entre deux dictées, Dictus reste prêt : c’est le point orange. Pour l’arrêter, appuyez longuement sur l’île."
           }
         }
       }

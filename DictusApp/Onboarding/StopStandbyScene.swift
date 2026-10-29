@@ -6,8 +6,8 @@ import DictusCore
 /// The onboarding step that shows how to stop Dictus's standby (#681, #649 decision 19,
 /// mock-ups `11-arreter-dictus-dynamic-island` and `11b-arreter-dictus-ecran-verrouille`).
 ///
-/// WHY THIS STEP: between dictations Dictus keeps its engine warm, which is the orange
-/// microphone dot, and users keep asking how to turn it off. The control exists, the power
+/// WHY THIS STEP: between dictations Dictus keeps its engine warm, shown by the standby
+/// Live Activity, and users keep asking how to turn it off. The control exists, the power
 /// button of the standby Live Activity (`StopStandbyIntent`), but it sits behind a long
 /// press on the island and nobody finds it. The step comes right after the first dictation,
 /// the moment that standby appears for real.
@@ -57,8 +57,8 @@ struct StopStandbyPage: View {
     private var line: Text {
         switch variant {
         case .island:
-            return Text("Between dictations, Dictus stays ready: that's the orange dot. To stop it, touch and hold the island.",
-                        comment: "Onboarding, how to stop Dictus step, iPhone with a Dynamic Island: the line under the title. 'The island' is the Dynamic Island; the orange dot is iOS's microphone indicator (#681).")
+            return Text("Between dictations, Dictus stays ready. To stop it, hold the island, then tap the power button.",
+                        comment: "Onboarding, how to stop Dictus step, iPhone with a Dynamic Island: the line under the title. 'The island' is the Dynamic Island (#681, #858).")
         case .lockScreen:
             return Text("Between dictations, Dictus stays ready. To stop it, tap the power button on the Lock Screen.",
                         comment: "Onboarding, how to stop Dictus step, iPhone without a Dynamic Island: the line under the title (#681).")
