@@ -499,7 +499,22 @@ public enum LogEvent: Sendable {
     case logExportCompleted(durationMs: Int, sizeBytes: Int)
 
     // MARK: Lifecycle
-    case appLaunched(version: String)
+    /// The first line of every DictusApp process.
+    ///
+    /// The three optional fields say whether the launch happened before first unlock
+    /// (#868), where the App Group reads empty and its file cannot be opened:
+    /// - `protectedData`: `UIApplication.isProtectedDataAvailable` in `App.init`.
+    /// - `activePrewarm`: whether iOS prewarmed the process (`ActivePrewarm` set in its
+    ///   environment), the system launch suspected at boot.
+    /// - `appGroup`: the `AppGroupDiagnostic` result, `healthy` or `unhealthy`, or
+    ///   `deferred` when it waits for protected data; its later result is a
+    ///   `diagnosticProbe component=AppGroupDiagnostic` line.
+    case appLaunched(
+        version: String,
+        protectedData: Bool? = nil,
+        activePrewarm: Bool? = nil,
+        appGroup: String? = nil
+    )
     /// The application state one main-loop turn after `didFinishLaunching` (#707), as a
     /// hint at who made the launch.
     ///
@@ -1036,8 +1051,12 @@ public enum LogEvent: Sendable {
             return "reason=\(reason) isEnabled=\(isEnabled) areActivitiesEnabled=\(activitiesEnabled) activityState=\(activityState?.rawValue ?? "none")"
 
         // Lifecycle
-        case .appLaunched(let version):
-            return "version=\(version)"
+        case .appLaunched(let version, let protectedData, let activePrewarm, let appGroup):
+            var fields = "version=\(version)"
+            if let protectedData { fields += " protectedData=\(protectedData)" }
+            if let activePrewarm { fields += " activePrewarm=\(activePrewarm)" }
+            if let appGroup { fields += " appGroup=\(appGroup)" }
+            return fields
         case .appLaunchState(let state):
             return "state=\(state)"
         case .appBackgroundSessionEvents(let identifier):

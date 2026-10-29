@@ -12,12 +12,17 @@ public enum AppLaunchDefaults {
     /// WHY at launch: `@AppStorage` defaults live in memory only, and the transcription
     /// service and the keyboard read the stored value. `if nil` keeps a user's own choice.
     ///
+    /// WHY NOTHING BEFORE FIRST UNLOCK: every key reads nil then, so `if nil` is true for
+    /// all of them and the user's language and Live Activity choice would be replaced by
+    /// the defaults. The caller runs this again once protected data is available.
+    ///
     /// - Returns: whether the writes were attempted.
     @discardableResult
     public static func writeMissingDefaults(
         to store: AppGroupStore,
         protectedData: ProtectedDataAvailability
     ) -> Bool {
+        guard protectedData.isProtectedDataAvailable else { return false }
         if store.string(forKey: SharedKeys.language) == nil {
             store.set("fr", forKey: SharedKeys.language)
         }
@@ -28,10 +33,15 @@ public enum AppLaunchDefaults {
     }
 
     /// Whether onboarding is done, as the App Group says, or nil when it cannot say yet.
+    ///
+    /// Nil before first unlock, because the empty read would say false and false shows
+    /// onboarding to a user who finished it. Once readable, a missing key reads false,
+    /// as `KeyboardOnboardingGate.isOnboardingCompleted` explains.
     public static func onboardingCompleted(
         in store: AppGroupStore,
         protectedData: ProtectedDataAvailability
     ) -> Bool? {
-        store.object(forKey: SharedKeys.hasCompletedOnboarding) as? Bool ?? false
+        guard protectedData.isProtectedDataAvailable else { return nil }
+        return store.object(forKey: SharedKeys.hasCompletedOnboarding) as? Bool ?? false
     }
 }

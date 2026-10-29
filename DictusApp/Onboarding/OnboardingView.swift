@@ -23,7 +23,7 @@ import DictusCore
 /// prerequisite is properly set up before the user reaches the test recording step.
 ///
 /// WHY @Binding isComplete:
-/// The parent (DictusApp.swift) owns `hasCompletedOnboarding` via @AppStorage.
+/// The parent (DictusApp.swift) owns `hasCompletedOnboarding` and writes it to the App Group.
 /// When the last page (the completion step) finishes, it sets isComplete = true,
 /// which writes to App Group UserDefaults and dismisses the fullScreenCover.
 ///

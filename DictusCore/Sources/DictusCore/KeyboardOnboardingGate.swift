@@ -91,4 +91,40 @@ public enum KeyboardOnboardingGate {
     public static func appMayStartKeyboardDictation(onboardingCompleted: Bool, appIsActive: Bool) -> Bool {
         onboardingCompleted || appIsActive
     }
+
+    /// What DictusApp does with a `dictus://dictate` URL.
+    public enum DictateURLRoute: Equatable, Sendable {
+        /// The keyboard asks for a model warm-up only (#262): no recording.
+        case prepare
+        /// Onboarding is not done and the keyboard serves another app: stay on onboarding.
+        case stayOnOnboarding
+        /// Record.
+        case dictate
+    }
+
+    /// The route for one `dictus://dictate` URL.
+    ///
+    /// WHY `prepare` COMES FIRST (#868): it records nothing and has no model to fail on, so
+    /// the #827 rule (no dictation, no error before onboarding) has nothing to refuse there.
+    /// With the guard in front, a process that read the onboarding flag wrong also refused
+    /// the warm-up the keyboard asked for, and every later tap asked again.
+    ///
+    /// WHY A HOST OF DICTUS GOES THROUGH: it is the onboarding test dictation, which the
+    /// keyboard sends by URL when the app's audio engine is not running. Same rule as
+    /// `decide(onboardingCompleted:hostId:appPhase:)`.
+    ///
+    /// - Parameters:
+    ///   - intent: `KeyboardDictationURL.intent(from:)`, nil for a URL that is not the
+    ///     keyboard's (the widget's).
+    ///   - hostId: `KeyboardDictationURL.hostId(from:)`.
+    ///   - onboardingCompleted: the flag as the app last read it.
+    public static func dictateURLRoute(
+        intent: KeyboardDictationIntent?,
+        hostId: String?,
+        onboardingCompleted: Bool
+    ) -> DictateURLRoute {
+        if intent == .prepare { return .prepare }
+        if onboardingCompleted || hostId == dictusHostId { return .dictate }
+        return .stayOnOnboarding
+    }
 }

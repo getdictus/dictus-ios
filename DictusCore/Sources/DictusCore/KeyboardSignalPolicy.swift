@@ -16,6 +16,14 @@ public enum KeyboardSignalDecision: Equatable, Sendable {
 }
 
 /// Decides a Darwin `stopRecording` / `cancelRecording` notification.
+///
+/// WHY THE NOTIFICATION DECIDES AND NOT THE FLAG: only the keyboard posts these two
+/// notifications, and only after writing the flag. A process started before first unlock
+/// can go on reading the flag as false for its whole life (#868, log B: twelve stop taps,
+/// no reaction, no log line). So while a dictation the signal can end is running, the
+/// notification is acted on whatever the flag reads. The flag still settles the other
+/// case: outside such a dictation a true flag is honored as before, and a false one is a
+/// repeat or a late signal, ignored with a reason.
 public enum KeyboardSignalPolicy {
 
     /// - Parameters:
@@ -27,6 +35,17 @@ public enum KeyboardSignalPolicy {
         flagRequested: Bool,
         status: DictationStatus
     ) -> KeyboardSignalDecision {
-        flagRequested ? .honor : .ignore(reason: "flagFalse")
+        if flagRequested { return .honor }
+        switch signal {
+        case .stop:
+            // Only a recording can be stopped: a stop during `transcribing` is a repeat
+            // tap, which `stopDictation`'s own guard would refuse anyway.
+            if status == .recording { return .honor }
+        case .cancel:
+            // The keyboard drops to idle as soon as it posts a cancel, so the app honors
+            // it at any stage of the dictation, as the flag path always did.
+            if DictationSessionLivenessPolicy.isActive(status) { return .honor }
+        }
+        return .ignore(reason: "flagFalse status=\(status.rawValue)")
     }
 }

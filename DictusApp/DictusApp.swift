@@ -133,17 +133,25 @@ struct DictusApp: App {
     /// it to the screens that read it.
     @StateObject private var history = TranscriptionHistoryStore.shared
 
-    /// Onboarding completion flag stored in App Group for cross-process access.
+    /// Onboarding completion flag, as last read from the App Group. Nil while it cannot be
+    /// read: before the first unlock after a boot (#868).
     ///
-    /// WHY AppStorage with suiteName instead of plain @State:
-    /// AppStorage with the App Group suite persists the value across app launches AND
-    /// makes it accessible to the keyboard extension if needed. The `store:` parameter
-    /// points to the shared UserDefaults container.
-    ///
-    /// Default is `false` — first-time users see the onboarding flow.
-    /// Set to `true` when user completes the 5-step onboarding.
-    @AppStorage(SharedKeys.hasCompletedOnboarding, store: UserDefaults(suiteName: AppGroup.identifier))
-    private var hasCompletedOnboarding = false
+    /// WHY NOT `@AppStorage`: it read the flag once, at launch, and a process iOS started
+    /// before the first unlock read it empty, showed onboarding to a user who had finished
+    /// it, and kept that for its whole life. This is read again when protected data becomes
+    /// available, at every activation and before a `dictate` URL is routed
+    /// (`refreshOnboardingFlag`), and written through `onboardingCompletedBinding`.
+    @State private var hasCompletedOnboarding: Bool?
+
+    /// Whether the App Group can be read, for every launch decision that depends on it.
+    private static let protectedData = SystemProtectedData()
+
+    /// The App Group writes and reads of the launch, run once protected data is available
+    /// (#868): in `init` on an ordinary launch, later on a launch iOS made at boot.
+    private static let appGroupLaunchWork = ProtectedDataLaunchWork(
+        availability: DictusApp.protectedData,
+        work: { DictusApp.runAppGroupLaunchWork() }
+    )
 
     init() {
         // FluidAudio never downloads on its own (#558). Before anything else in the
@@ -161,14 +169,22 @@ struct DictusApp: App {
 
         PersistentLog.source = "APP"
         let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "?"
-        PersistentLog.log(.appLaunched(version: version))
-
-        // What's new's key (#685), before `MainTabView` asks whether it is due. A launch
-        // that has not completed onboarding is a new install: recorded as up to date now,
-        // so its onboarding is never followed by What's new. An existing user's first
-        // launch of 2.0.0 is left due, and recorded once What's new is on screen. A device
-        // that can never run Smart Modes has no scene to show, and is recorded now.
-        WhatsNew.recordLaunch(deviceCanRunSmartModes: SmartModeAvailability.deviceIsCapable)
+        // Whether this launch happened before the first unlock after a boot (#868). Its
+        // diagnostic writes a test key, so it waits for protected data like every other
+        // App Group write of the launch; `catchUpOnProtectedData` runs it then.
+        let protectedDataAvailable = Self.protectedData.isProtectedDataAvailable
+        let activePrewarm = ProcessInfo.processInfo.environment["ActivePrewarm"] == "1"
+        let diagnostic = protectedDataAvailable ? AppGroupDiagnostic.run() : nil
+        let appGroup = diagnostic.map { $0.isHealthy ? "healthy" : "unhealthy" } ?? "deferred"
+        PersistentLog.log(.appLaunched(
+            version: version,
+            protectedData: protectedDataAvailable,
+            activePrewarm: activePrewarm,
+            appGroup: appGroup
+        ))
+        PersistentLog.launchSummary =
+            "protectedData=\(protectedDataAvailable) activePrewarm=\(activePrewarm) appGroup=\(appGroup)"
+        DictusLogger.app.info("AppGroup diagnostic: \(appGroup, privacy: .public)")
 
         // Complete a Parakeet cache the 0.15 loader cannot use, before the coordinator's
         // launch preload can reach it (#558): layer 0 moves a 0.12 cache into the folder 0.15
@@ -238,44 +254,13 @@ struct DictusApp: App {
         // a fresh start.
         LiveActivityManager.shared.cleanupStaleActivities()
 
-        // Retire App Group keys nothing reads any more (#361 removed the #357 probe's
-        // arming flag). A device where the debug toggle was left on carries a `true`
-        // for a key that no longer exists in code, and this is the only process that
-        // owns hygiene over shared state.
-        SharedKeys.clearRetiredKeys()
-
-        let result = AppGroupDiagnostic.run()
-        DictusLogger.app.info(
-            "AppGroup diagnostic: healthy=\(result.isHealthy, privacy: .public)"
-        )
-
-        // Read n-gram diagnostic written by keyboard extension
-        if let ngramDiag = UserDefaults(suiteName: AppGroup.identifier)?.string(forKey: "ngramDiagnostic") {
-            DictusLogger.app.info("ngramDiagnostic: \(ngramDiag, privacy: .public)")
-        }
-
-        // Persist language default so TranscriptionService always reads "fr"
-        // even before user visits Settings. @AppStorage defaults are in-memory only
-        // and never written to UserDefaults until the Picker is interacted with.
-        // WHY `if nil` check: Only write if the key doesn't exist yet. If user already
-        // set a language preference (e.g., "en"), don't overwrite it.
-        let defaults = UserDefaults(suiteName: AppGroup.identifier)
-        if defaults?.string(forKey: SharedKeys.language) == nil {
-            defaults?.set("fr", forKey: SharedKeys.language)
-        }
-        // Freeze the layout an updating install is already typing on, before anything can
-        // change the active language (#272). The migration is idempotent and also runs from
-        // the first layout read in either process — the keyboard extension can run before
-        // this app is ever launched again — so this call is only about doing it as early as
-        // possible on the app side.
-        KeyboardLayoutPreference.migrateToPerLanguageLayoutsIfNeeded()
-
-        // Register liveActivityEnabled default as true for existing users.
-        // WHY: UserDefaults.bool(forKey:) returns false for missing keys.
-        // Without this, existing users upgrading would see Live Activity disabled.
-        if defaults?.object(forKey: SharedKeys.liveActivityEnabled) == nil {
-            defaults?.set(true, forKey: SharedKeys.liveActivityEnabled)
-        }
+        // On an ordinary launch the App Group work runs here, in `init`, as it always did.
+        // Before the first unlock it waits for `catchUpOnProtectedData` (#868).
+        Self.appGroupLaunchWork.runIfAvailable()
+        _hasCompletedOnboarding = State(initialValue: AppLaunchDefaults.onboardingCompleted(
+            in: AppGroup.defaults,
+            protectedData: Self.protectedData
+        ))
 
         // Initialize Pro subscription management.
         // WHY explicit _proStatus / _subscriptionManager initialization:
@@ -300,6 +285,82 @@ struct DictusApp: App {
         VoiceNoteProcessor.shared.start()
     }
 
+    /// The launch's App Group reads and writes, which an empty read before the first
+    /// unlock would turn into defaults written over the user's settings (#868). Runs once
+    /// per process, through `appGroupLaunchWork`.
+    private static func runAppGroupLaunchWork() {
+        // What's new's key (#685), before `MainTabView` asks whether it is due. A launch
+        // that has not completed onboarding is a new install: recorded as up to date now,
+        // so its onboarding is never followed by What's new. An existing user's first
+        // launch of 2.0.0 is left due, and recorded once What's new is on screen. A device
+        // that can never run Smart Modes has no scene to show, and is recorded now.
+        WhatsNew.recordLaunch(deviceCanRunSmartModes: SmartModeAvailability.deviceIsCapable)
+
+        // Retire App Group keys nothing reads any more (#361 removed the #357 probe's
+        // arming flag). A device where the debug toggle was left on carries a `true`
+        // for a key that no longer exists in code, and this is the only process that
+        // owns hygiene over shared state.
+        SharedKeys.clearRetiredKeys()
+
+        // Read n-gram diagnostic written by keyboard extension
+        if let ngramDiag = AppGroup.defaults.string(forKey: "ngramDiagnostic") {
+            DictusLogger.app.info("ngramDiagnostic: \(ngramDiag, privacy: .public)")
+        }
+
+        // `language = "fr"` and `liveActivityEnabled = true` when missing, so the
+        // transcription service and the Live Activity read a stored value.
+        AppLaunchDefaults.writeMissingDefaults(to: AppGroup.defaults, protectedData: protectedData)
+
+        // Freeze the layout an updating install is already typing on, before anything can
+        // change the active language (#272). The migration is idempotent and also runs from
+        // the first layout read in either process — the keyboard extension can run before
+        // this app is ever launched again — so this call is only about doing it as early as
+        // possible on the app side.
+        KeyboardLayoutPreference.migrateToPerLanguageLayoutsIfNeeded()
+    }
+
+    /// Run the launch work a boot launch deferred, and read the onboarding flag again
+    /// (#868). Called when protected data becomes available and at every activation.
+    private func catchUpOnProtectedData(trigger: String) {
+        if Self.appGroupLaunchWork.runIfAvailable() {
+            let result = AppGroupDiagnostic.run()
+            PersistentLog.log(.diagnosticProbe(
+                component: "AppGroupDiagnostic",
+                instanceID: "0",
+                action: "deferredLaunchWorkRan",
+                details: "trigger=\(trigger) healthy=\(result.isHealthy)"
+            ))
+        }
+        refreshOnboardingFlag()
+    }
+
+    /// Read the onboarding flag from the App Group again.
+    ///
+    /// - Returns: whether onboarding is done, as far as this process can tell.
+    @discardableResult
+    private func refreshOnboardingFlag() -> Bool {
+        let stored = AppLaunchDefaults.onboardingCompleted(
+            in: AppGroup.defaults,
+            protectedData: Self.protectedData
+        )
+        if let stored, stored != hasCompletedOnboarding {
+            hasCompletedOnboarding = stored
+        }
+        return stored ?? hasCompletedOnboarding ?? false
+    }
+
+    /// What `OnboardingView` sets once onboarding is done: the App Group first, so the
+    /// keyboard and the next read agree, then this process's copy.
+    private var onboardingCompletedBinding: Binding<Bool> {
+        Binding(
+            get: { hasCompletedOnboarding == true },
+            set: { completed in
+                AppGroup.defaults.set(completed, forKey: SharedKeys.hasCompletedOnboarding)
+                hasCompletedOnboarding = completed
+            }
+        )
+    }
+
     @Environment(\.scenePhase) private var scenePhase
 
     var body: some Scene {
@@ -313,6 +374,17 @@ struct DictusApp: App {
                 .onOpenURL { url in
                     handleIncomingURL(url)
                 }
+                .onReceive(NotificationCenter.default.publisher(
+                    for: UIApplication.protectedDataDidBecomeAvailableNotification
+                )) { _ in
+                    PersistentLog.log(.diagnosticProbe(
+                        component: "ProtectedData",
+                        instanceID: "0",
+                        action: "becameAvailable",
+                        details: ""
+                    ))
+                    catchUpOnProtectedData(trigger: "protectedDataDidBecomeAvailable")
+                }
                 .onChange(of: scenePhase) { phase in
                     // #281 probe: publish the phase before anything else in this
                     // closure, so the keyboard extension reads a value that is at
@@ -324,6 +396,7 @@ struct DictusApp: App {
                     switch phase {
                     case .active:
                         PersistentLog.log(.appDidBecomeActive)
+                        catchUpOnProtectedData(trigger: "didBecomeActive")
                         // #620's cold path: a voice note shared while the app was not
                         // running starts now, with the list on screen.
                         VoiceNoteProcessor.shared.appBecameActive()
@@ -380,25 +453,30 @@ struct DictusApp: App {
                         break
                     }
                 }
-                .onChange(of: hasCompletedOnboarding) { completed in
+                .onChange(of: hasCompletedOnboarding) { previous, current in
+                    // Only the user finishing onboarding, `false` to `true`. A boot launch
+                    // that reads the flag once protected data is available goes from nil
+                    // to `true` (#868): that user finished long ago, and must not get the
+                    // new user's trial announcement.
+                    guard previous == false, current == true else { return }
                     // WHY this notification:
                     // MainTabView's HomeView mounts BEHIND the fullScreenCover before
                     // onboarding completes. Its onAppear fires early with stale state.
                     // When onboarding finishes and the cover dismisses, onAppear does NOT
                     // re-fire. This notification tells HomeView to refresh model state.
-                    if completed {
-                        NotificationCenter.default.post(
-                            name: Notification.Name("DictusOnboardingCompleted"),
-                            object: nil
-                        )
-                        // A new user's trial is announced, and started, at the end of
-                        // onboarding (#593): after the first successful dictation, not
-                        // at install, because the model download can take minutes.
-                        trialCoordinator.onboardingCompleted()
-                    }
+                    NotificationCenter.default.post(
+                        name: Notification.Name("DictusOnboardingCompleted"),
+                        object: nil
+                    )
+                    // A new user's trial is announced, and started, at the end of
+                    // onboarding (#593): after the first successful dictation, not
+                    // at install, because the model download can take minutes.
+                    trialCoordinator.onboardingCompleted()
                 }
-                .fullScreenCover(isPresented: .constant(!hasCompletedOnboarding)) {
-                    OnboardingView(isComplete: $hasCompletedOnboarding)
+                // Shown only for a flag READ as false: nil (not readable yet) is not a
+                // reason to show onboarding (#868).
+                .fullScreenCover(isPresented: .constant(hasCompletedOnboarding == false)) {
+                    OnboardingView(isComplete: onboardingCompletedBinding)
                         .environmentObject(coordinator)
                         .environmentObject(proStatus)
                         .environmentObject(subscriptionManager)
@@ -571,20 +649,18 @@ struct DictusApp: App {
 
         switch url.host {
         case "dictate":
-            // #827: before onboarding is done, the app only comes forward. No cold-start
-            // flag, no dictation (there is no model yet), no return to the host app: the
-            // user stays on onboarding. Safety net for a keyboard built before the gate.
-            guard hasCompletedOnboarding else {
-                PersistentLog.log(.dictationDeferred(reason: "dictate URL before onboarding, staying on onboarding"))
-                Self.hasBeenActive = true
-                return
-            }
-
             // Single source of truth for what the keyboard is asking (issue #264).
             let keyboardIntent = KeyboardDictationURL.intent(from: url)
             let isFromKeyboard = keyboardIntent != nil
 
-            if keyboardIntent == .prepare {
+            // The flag is read again here rather than trusted from launch (#868), and a
+            // `prepare` is routed before the #827 rule, which has nothing to refuse in it.
+            switch KeyboardOnboardingGate.dictateURLRoute(
+                intent: keyboardIntent,
+                hostId: KeyboardDictationURL.hostId(from: url),
+                onboardingCompleted: refreshOnboardingFlag()
+            ) {
+            case .prepare:
                 DictusLogger.app.info("Keyboard requested model preparation without recording")
                 PersistentLog.log(.dictationDeferred(reason: "keyboard prepare-only URL"))
                 NotificationCenter.default.post(
@@ -592,6 +668,16 @@ struct DictusApp: App {
                     object: nil
                 )
                 return
+            case .stayOnOnboarding:
+                // #827: before onboarding is done, the app only comes forward. No
+                // cold-start flag, no dictation (there is no model yet), no return to the
+                // host app: the user stays on onboarding. Safety net for a keyboard built
+                // before the gate.
+                PersistentLog.log(.dictationDeferred(reason: "dictate URL before onboarding, staying on onboarding"))
+                Self.hasBeenActive = true
+                return
+            case .dictate:
+                break
             }
 
             // Did this dictation take the foreground away from the app the user was
@@ -686,6 +772,12 @@ struct DictusApp: App {
             break
         }
     }
+}
+
+/// `UIApplication.isProtectedDataAvailable` behind the DictusCore seam (#868). Main
+/// thread only, like every `UIApplication` property.
+struct SystemProtectedData: ProtectedDataAvailability {
+    var isProtectedDataAvailable: Bool { UIApplication.shared.isProtectedDataAvailable }
 }
 
 extension ScenePhase {
