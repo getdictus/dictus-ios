@@ -94,6 +94,26 @@ final class ProtectedDataLaunchTests: XCTestCase {
         XCTAssertTrue(work.hasRun)
     }
 
+    // MARK: - ProtectedDataProbe
+
+    func testTheProbeTellsAnUnreadableFileFromAReadableOrMissingOne() throws {
+        let url = FileManager.default.temporaryDirectory
+            .appendingPathComponent("dictus_probe_\(UUID().uuidString).plist")
+        defer {
+            try? FileManager.default.setAttributes([.posixPermissions: 0o644], ofItemAtPath: url.path)
+            try? FileManager.default.removeItem(at: url)
+        }
+        XCTAssertTrue(ProtectedDataProbe.canOpen(url), "no file yet: a new install")
+        XCTAssertTrue(ProtectedDataProbe.canOpen(nil), "no container")
+
+        try Data("x".utf8).write(to: url)
+        XCTAssertTrue(ProtectedDataProbe.canOpen(url))
+
+        // Unreadable, the way a protected file is before first unlock.
+        try FileManager.default.setAttributes([.posixPermissions: 0o000], ofItemAtPath: url.path)
+        XCTAssertFalse(ProtectedDataProbe.canOpen(url))
+    }
+
     // MARK: - Warmth marker
 
     func testWarmthSurvivesADownloadThatFindsEveryFileOnDisk() throws {

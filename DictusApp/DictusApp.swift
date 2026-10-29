@@ -774,10 +774,16 @@ struct DictusApp: App {
     }
 }
 
-/// `UIApplication.isProtectedDataAvailable` behind the DictusCore seam (#868). Main
-/// thread only, like every `UIApplication` property.
+/// Whether protected data is available, behind the DictusCore seam (#868). Main thread
+/// only, like every `UIApplication` property.
+///
+/// The file probe is what answers in `App.init`, where `isProtectedDataAvailable` still
+/// reads false on an ordinary launch (`ProtectedDataProbe`).
 struct SystemProtectedData: ProtectedDataAvailability {
-    var isProtectedDataAvailable: Bool { UIApplication.shared.isProtectedDataAvailable }
+    var isProtectedDataAvailable: Bool {
+        UIApplication.shared.isProtectedDataAvailable
+            || ProtectedDataProbe.canOpen(ProtectedDataProbe.appGroupPreferencesURL)
+    }
 }
 
 extension ScenePhase {

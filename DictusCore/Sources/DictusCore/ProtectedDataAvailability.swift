@@ -27,3 +27,31 @@ public protocol AppGroupStore: AnyObject {
 }
 
 extension UserDefaults: AppGroupStore {}
+
+/// Whether a file protected until first unlock can be opened yet (#868).
+///
+/// WHY A FILE AND NOT ONLY `UIApplication.isProtectedDataAvailable`: in `App.init` that
+/// property reads false on every launch, because the application has not finished
+/// launching (measured on the iOS 26.5 simulator on 2026-10-29: `protectedData=false` on
+/// a launch from the home screen). The App Group's preferences file is protected until
+/// first unlock like every file in the container, and opening it tells the two launches
+/// apart from the first line of `init`.
+public enum ProtectedDataProbe {
+
+    /// The App Group's `UserDefaults` file.
+    public static var appGroupPreferencesURL: URL? {
+        AppGroup.containerURL?
+            .appendingPathComponent("Library/Preferences/\(AppGroup.identifier).plist")
+    }
+
+    /// Whether the file at `url` can be opened for reading.
+    ///
+    /// True when there is no such file: a new install has nothing protected to misread.
+    /// Its existence can be checked before first unlock, only its content is protected.
+    public static func canOpen(_ url: URL?) -> Bool {
+        guard let url, FileManager.default.fileExists(atPath: url.path) else { return true }
+        guard let handle = try? FileHandle(forReadingFrom: url) else { return false }
+        try? handle.close()
+        return true
+    }
+}
