@@ -373,6 +373,10 @@ public enum LogEvent: Sendable {
     case overlayShown(status: String)
     case overlayHidden(status: String)
     case statusChanged(from: String, to: String, source: String)
+    /// One step of the path from the keyboard's stop tap to the start of transcription
+    /// (#862), in milliseconds since the tap. Both processes write it against the same
+    /// tap, read from the App Group; see `StopTimingTrace`.
+    case stopTiming(step: String, sinceTapMs: Int, sessionID: String)
     case watchdogReset(source: String, staleState: String)
     /// The app's stage watchdog fired late, after a suspension, and was armed again
     /// instead of cancelling the dictation (#851).
@@ -766,7 +770,7 @@ public enum LogEvent: Sendable {
              .liveActivityStarted, .liveActivityTransition, .liveActivityEnded,
              .liveActivityStandbySkipped,
              .coldStartURLReceived, .coldStartFlagSet, .coldStartRetry,
-             .overlayShown, .overlayHidden, .statusChanged,
+             .overlayShown, .overlayHidden, .statusChanged, .stopTiming,
              .waveformAppeared, .waveformDisappeared, .waveformRefreshIDChanged,
              .waveformEnergyTransition, .overlayBodyEvaluated, .overlayRecreated,
              .audioInterruptionEnded, .audioRouteChanged,
@@ -1065,6 +1069,8 @@ public enum LogEvent: Sendable {
             return "status=\(status)"
         case .statusChanged(let from, let to, let source):
             return "from=\(from) to=\(to) source=\(source)"
+        case .stopTiming(let step, let sinceTapMs, let sessionID):
+            return "step=\(step) sinceTapMs=\(sinceTapMs) sessionID=\(sessionID)"
         case .watchdogReset(let source, let staleState):
             return "source=\(source) staleState=\(staleState)"
         case .stageWatchdogRearmed(let status, let lateBy, let sinceStart):
@@ -1258,7 +1264,7 @@ extension LogEvent {
              .userDictionaryWordLearned, .userDictionaryEvicted, .userDictionaryReset,
              .userDictionaryMigrated, .userDictionaryStaleDiscarded, .userDictionaryPruned:
             return .keyboard
-        case .statusChanged, .watchdogReset, .stageWatchdogRearmed, .idleInvariantViolation:
+        case .statusChanged, .stopTiming, .watchdogReset, .stageWatchdogRearmed, .idleInvariantViolation:
             return .dictation
         case .engineWarmUpAttempt, .engineWarmUpSuccess, .engineWarmUpFailed,
              .engineWarmUpSkipped,
@@ -1395,6 +1401,7 @@ extension LogEvent {
         case .overlayShown: return "overlayShown"
         case .overlayHidden: return "overlayHidden"
         case .statusChanged: return "statusChanged"
+        case .stopTiming: return "stopTiming"
         case .watchdogReset: return "watchdogReset"
         case .stageWatchdogRearmed: return "stageWatchdogRearmed"
         case .idleInvariantViolation: return "idleInvariantViolation"
