@@ -1959,7 +1959,12 @@ extension DictationCoordinator {
             // The stop path collects the samples and gives a clip under the minimum
             // the "no words" notice, exactly as for a stop tapped a beat early. A
             // transcription already running is simply left alone.
-            if decision != .letTranscriptionFinish { stopDictation(playsStopSound: false) }
+            //
+            // Timed like a tap (#862), from this handler and under `sessionID=interruption`:
+            // the main-thread stalls logged after an interruption fall in this window.
+            if decision != .letTranscriptionFinish {
+                stopDictation(playsStopSound: false, stopTrace: .tapped(sessionID: "interruption"))
+            }
             return
         }
 
