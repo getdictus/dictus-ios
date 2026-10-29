@@ -15,7 +15,7 @@
 - `onboarding.smart-mode-pick`: Pick three Smart Modes.
 - `onboarding.model-download`: Download and prepare the recommended model.
 - `onboarding.microphone`: Microphone permission.
-- `onboarding.first-dictation`: A first dictation in a practice field. The field focuses itself and the keyboard opens with no tap; the drawn globe animation (`onboarding.firstDictation.animation`) shows only once Apple's keyboard is up, between the field and the keyboard; Dictus's keyboard shows the mic banner (`onboarding.firstDictation.banner`). No focus within 1 s: « Touchez le champ pour ouvrir votre clavier », no animation. After 15 s on another keyboard without Dictus: « Continuer » (`onboarding.firstDictation.continue`) next to Skip. Three characters typed or dictated once Dictus has been up complete the step (#845).
+- `onboarding.first-dictation`: A first dictation in a practice field. The field focuses itself and the keyboard opens with no tap; the globe animation, in the bottom of the onboarding's drawn iPhone (`onboarding.firstDictation.animation`), shows only once Apple's keyboard is up, between the field and the keyboard; Dictus's keyboard shows the mic banner (`onboarding.firstDictation.banner`). No focus within 1 s: « Touchez le champ pour ouvrir votre clavier », no animation. After 15 s on another keyboard without Dictus: « Continuer » (`onboarding.firstDictation.continue`) next to Skip. Three characters typed or dictated once Dictus has been up complete the step (#845).
 - `onboarding.stop-standby`: How to stop Dictus from the Dynamic Island.
 - `onboarding.completion`: « C'est prêt ».
 - `onboarding.resume`: An interrupted onboarding resumes at the same step.
