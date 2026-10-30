@@ -182,6 +182,20 @@ final class AutocorrectRejectionMemoryTests: XCTestCase {
         XCTAssertEqual(AutocorrectRejectionMemory.positionKey(prefix: "la  \n"), "la")
     }
 
+    // MARK: - The suggestion bar
+
+    func testTheBarHidesTheCorrectionOnlyAtTheRefusedPosition() {
+        // Review of #874: the bar kept refused spellings in one global set, so the
+        // same typo typed elsewhere showed no correction, while space still made it.
+        applyCorrection("la montagnr", to: "montagne")
+        erase(from: "la montagne ", to: "la ")
+
+        XCTAssertFalse(memory.previewsCorrection(context: "la montagnr"))
+        XCTAssertTrue(memory.previewsCorrection(context: "la montagnr. Une montagnr"))
+        XCTAssertEqual(commit("la montagnr. Une montagnr", proposing: "montagne"), .correct,
+                       "the bar previews what space does")
+    }
+
     // MARK: - Undo
 
     func testUndoThenMovingOnLearnsTheRestoredWord() {

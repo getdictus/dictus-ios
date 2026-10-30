@@ -193,6 +193,16 @@ public final class AutocorrectRejectionMemory {
         return .keep(countUsage: true)
     }
 
+    /// Whether the suggestion bar may preview a correction for the word at the
+    /// caret. Extracted as the bridge does it today: a word typed at a refused
+    /// position joins a set of words whose correction the bar no longer shows.
+    public func previewsCorrection(context: String?) -> Bool {
+        guard let (prefix, word) = Self.wordAtCursor(context: context) else { return true }
+        if isRejected(prefix: prefix) { barHiddenWords.insert(word.lowercased()) }
+        return !barHiddenWords.contains(word.lowercased())
+    }
+    private var barHiddenWords: Set<String> = []
+
     /// Whether a correction refused at the position after `prefix` is remembered.
     public func isRejected(prefix: Substring) -> Bool {
         rejected.contains(Self.positionKey(prefix: prefix))
