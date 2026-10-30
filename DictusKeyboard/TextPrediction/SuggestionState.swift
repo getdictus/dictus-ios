@@ -59,10 +59,13 @@ class SuggestionState: ObservableObject {
     /// Set when autocorrect fires on space, cleared on next space or undo tap.
     @Published var pendingUndo: AutocorrectState?
 
-    /// Words the user has rejected autocorrection for (undo'd).
-    /// After undo, the same word should not be re-corrected on the next space.
-    /// Cleared when the user starts typing a new word.
+    /// Words the suggestion bar must not show a correction for, while they are typed.
+    /// Cleared when the user starts typing a new word. What is applied on space is
+    /// decided by `rejectionMemory`, which outlives the word.
     var rejectedWords: Set<String> = []
+
+    /// Where in the current document the user refused an autocorrection (#872).
+    let rejectionMemory = AutocorrectRejectionMemory()
 
     /// Policy derived from the host field's input traits (#200).
     /// Refreshed on the main thread by DictusKeyboardBridge/KeyboardViewController
