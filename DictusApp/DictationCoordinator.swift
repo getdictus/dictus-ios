@@ -1161,25 +1161,19 @@ class DictationCoordinator: ObservableObject {
             stopTrace?.log("appReceived")
             DispatchQueue.main.async {
                 guard let self = self else { return }
-                let requested = self.defaults.bool(forKey: SharedKeys.stopRequested)
-                if requested {
-                    stopTrace?.log("appMainHop")
-                    self.defaults.set(false, forKey: SharedKeys.stopRequested)
-                    self.defaults.synchronize()
-                    self.stopDictation(stopTrace: stopTrace)
-                }
+                // The notification decides while recording, the flag only deduplicates
+                // (#868): a process started before first unlock can read it false forever.
+                guard self.mayActOnKeyboardSignal(.stop, flagKey: SharedKeys.stopRequested) else { return }
+                stopTrace?.log("appMainHop")
+                self.stopDictation(stopTrace: stopTrace)
             }
         }
 
         DarwinNotificationCenter.addObserver(for: DarwinNotificationName.cancelRecording) { [weak self] in
             DispatchQueue.main.async {
                 guard let self = self else { return }
-                let requested = self.defaults.bool(forKey: SharedKeys.cancelRequested)
-                if requested {
-                    self.defaults.set(false, forKey: SharedKeys.cancelRequested)
-                    self.defaults.synchronize()
-                    self.cancelDictation()
-                }
+                guard self.mayActOnKeyboardSignal(.cancel, flagKey: SharedKeys.cancelRequested) else { return }
+                self.cancelDictation()
             }
         }
 
@@ -1895,6 +1889,47 @@ extension DictationCoordinator {
         DarwinNotificationCenter.post(DarwinNotificationName.statusChanged)
         if !DictationSessionLivenessPolicy.isActive(newStatus) {
             releaseWarmStateIfImmediate(after: "status-\(newStatus.rawValue)")
+        }
+    }
+}
+
+// MARK: - Keyboard stop and cancel (#868)
+
+extension DictationCoordinator {
+
+    /// Decide a keyboard stop or cancel, clear its flag when it is acted on, and log it when
+    /// it is not acted on, or acted on with the flag reading false.
+    ///
+    /// WHY BOTH LOG LINES: before #868 an ignored stop left nothing in the log, and twelve
+    /// taps in a row read as the app never receiving them. `stopIgnored` / `cancelIgnored`
+    /// say a signal arrived and why nothing happened; `…HonoredWithoutFlag` says the App
+    /// Group read was stale, which is the evidence a launch before first unlock leaves.
+    func mayActOnKeyboardSignal(_ signal: KeyboardSignal, flagKey: String) -> Bool {
+        let requested = defaults.bool(forKey: flagKey)
+        let decision = KeyboardSignalPolicy.decide(signal, flagRequested: requested, status: status)
+        switch decision {
+        case .honor:
+            // Always, even when it read false: in a stale view the keyboard's `true` is on
+            // disk, and only this write can clear it for the next session.
+            defaults.set(false, forKey: flagKey)
+            defaults.synchronize()
+            if !requested {
+                PersistentLog.log(.diagnosticProbe(
+                    component: "KeyboardSignal",
+                    instanceID: signal.rawValue,
+                    action: "\(signal.rawValue)HonoredWithoutFlag",
+                    details: "status=\(status.rawValue)"
+                ))
+            }
+            return true
+        case .ignore(let reason):
+            PersistentLog.log(.diagnosticProbe(
+                component: "KeyboardSignal",
+                instanceID: signal.rawValue,
+                action: "\(signal.rawValue)Ignored",
+                details: "reason=\(reason)"
+            ))
+            return false
         }
     }
 }
