@@ -124,6 +124,28 @@ final class AutocorrectRejectionMemoryTests: XCTestCase {
                        "coming back to a document does not bring its refusals back")
     }
 
+    func testErasingPastThePositionForgetsIt() {
+        // Measured on the simulator: `Le batrau` refused by Undo, the field erased,
+        // then a new message starting `Le soleik` was kept and `soleik` learned,
+        // because the new word sat after the same `Le`. Once the text before a
+        // refused word is erased, that position no longer exists.
+        applyCorrection("Le batrau", to: "bateau")
+        memory.correctionUndone(prefix: "Le ", original: "batrau")
+        erase(from: "Le batrau ", to: "")
+
+        XCTAssertEqual(commit("Le soleik", proposing: "soleil"), .correct)
+        XCTAssertNil(memory.movingOn(context: "Le batrau "), "the restored word is gone too")
+    }
+
+    func testErasingPastAnAppliedCorrectionStopsWatchingIt() {
+        applyCorrection("Le batrau", to: "bateau")
+        erase(from: "Le bateau ", to: "")
+
+        // A new `Le` followed by a backspace into a word is not a refusal of `bateau`.
+        XCTAssertNil(memory.textDeleted(context: "Le bat"))
+        XCTAssertEqual(commit("Le batrau", proposing: "bateau"), .correct)
+    }
+
     func testTheSameDocumentKeepsItsMemory() {
         applyCorrection("la montagnr", to: "montagne")
         erase(from: "la montagne ", to: "la ")
