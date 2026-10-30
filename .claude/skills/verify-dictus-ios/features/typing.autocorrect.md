@@ -14,6 +14,7 @@
 - `typing.accents`: Long-press a letter for its accents.
 - `typing.dead-keys`: Dead keys compose accented letters.
 - `typing.autocorrect-toggle`: « Correction automatique » switch in Réglages → Clavier.
+- `typing.contacts-and-replacements`: Contact names and iOS text replacements (#873). A contact name or a phrase-only replacement is never corrected, a lowercase contact name takes its casing (`zofiak` → `Zofiak`), a shortcut is replaced by its phrase with the undo chip (`qqc` → `Quelque chose` at sentence start).
 
 ## How to get to it (user POV)
 
@@ -50,4 +51,5 @@ The proof is two facts together: the field's value becomes `Bonjour ` and the lo
 - Safari's address bar turns suggestions off: typing there shows no suggestion bar. Test in Rappels.
 - Reset the user dictionary first (`typing.learned-words`): a learned word silently changes what autocorrect does.
 - `axe type` does not exercise autocorrect: it sends hardware keyboard events that reach the field without going through the extension. `drive.sh type` taps the Dictus keys instead (lowercase a–z, AZERTY letters page, offsets measured on iPhone 17).
+- `typing.contacts-and-replacements`: create the contact in Contacts and the replacement in Réglages → Général → Clavier → Remplacement, then make the keyboard reappear: the lexicon is read in `viewWillAppear`. The Debug log prints `NOTE lexicon loaded: <n> shortcuts, <n> words`, then `AUTOCORRECT-SKIP ... reason=lexicon` or `AUTOCORRECT branch=lexicon`. Measured 2026-10-30 on iOS 27.0 (#873).
 - Host spell-check underlines are not a usable probe in the simulator (`docs/agents/simulator.md` §8).
