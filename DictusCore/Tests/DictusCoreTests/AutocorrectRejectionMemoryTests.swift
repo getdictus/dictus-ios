@@ -166,6 +166,19 @@ final class AutocorrectRejectionMemoryTests: XCTestCase {
         XCTAssertEqual(commit("Le batrau", proposing: "bateau"), .correct)
     }
 
+    func testAMessageSentByTheHostForgetsItsRefusals() {
+        // Measured on the simulator (risk 3 of #874): `la voitude` refused, the
+        // message sent, then `la maisob` in the next message was kept and learned.
+        // Messages empties the field itself and keeps the same documentIdentifier,
+        // so no backspace and no new document told the memory the text was gone.
+        applyCorrection("la voitude", to: "voiture")
+        erase(from: "la voiture ", to: "la ")
+        XCTAssertEqual(commit("la voitude", proposing: "voiture"), .keepAndLearn)
+
+        memory.documentEmptied()
+        XCTAssertEqual(commit("la maisob", proposing: "maison"), .correct)
+    }
+
     func testWithoutADocumentIdentifierTwoFieldsDoNotShareRefusals() {
         // Review of #874: a host may give no `documentIdentifier`. Two such fields
         // looked like one document, so a refusal in the first one kept, and

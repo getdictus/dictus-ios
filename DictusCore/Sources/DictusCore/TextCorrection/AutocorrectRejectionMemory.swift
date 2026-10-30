@@ -121,6 +121,9 @@ public final class AutocorrectRejectionMemory {
         offsets.removeAll()
     }
 
+    /// The host emptied the document without a backspace from this keyboard.
+    public func documentEmptied() {}
+
     /// Dictus replaced the word after `prefix` with `corrected`.
     public func correctionApplied(prefix: Substring, corrected: String) {
         let key = remember(prefix)
