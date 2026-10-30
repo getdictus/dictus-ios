@@ -556,7 +556,6 @@ struct KeyboardRootView: View {
 
         if suggestionState.mode == .corrections {
             if index == 0 {
-                suggestionState.rejectedWords.insert(suggestion.lowercased())
                 keepTypedWord(proxy: proxy)
                 // #548: reported, but deliberately NOT treated as a settling boundary.
                 // Adding `noteBoundaryInserted` here would change when suspicion
@@ -683,8 +682,6 @@ struct KeyboardRootView: View {
         )
         AutocorrectDebugLog.autocorrectRefused(corrected: undo.correctedWord, by: "undo")
         #endif
-
-        suggestionState.rejectedWords.insert(undo.originalWord.lowercased())
 
         // A refusal, but nothing is learned on the tap (#872). The restored word is
         // often itself a typo the user fixes next (`crayin` → `crayim`), and learning

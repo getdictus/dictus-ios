@@ -383,10 +383,6 @@ final class DictusKeyboardBridge: NSObject,
     /// NOTE: Haptic and click fire in GiellaKeyboardView.touchesBegan() for ALL keys
     /// on touchDown, so neither is emitted here.
     private func handleInputKey(_ character: String) {
-        // Clear rejected words when starting a new word
-        if suggestionState?.currentWord.isEmpty == true {
-            suggestionState?.rejectedWords.removeAll()
-        }
         learnWordMovedPast()
 
         // A comma, a full stop and the like end the word before them (#872): it is
@@ -428,7 +424,6 @@ final class DictusKeyboardBridge: NSObject,
 
         // Trigger suggestion update after every character input.
         let context = controller?.textDocumentProxy.documentContextBeforeInput
-        keepRefusedCorrectionOffTheBar(context: context)
         suggestionState?.updateAsync(context: context)
     }
 
@@ -472,7 +467,6 @@ final class DictusKeyboardBridge: NSObject,
         updateAccentKeyDisplay()
         let context = controller?.textDocumentProxy.documentContextBeforeInput
         noteDeletion(before: contextBefore, after: context)
-        keepRefusedCorrectionOffTheBar(context: context)
         suggestionState?.updateAsync(context: context)
     }
 
@@ -594,7 +588,6 @@ final class DictusKeyboardBridge: NSObject,
             )
             #endif
             suggestionState?.clear()
-            suggestionState?.rejectedWords.removeAll()
             let ctx = controller?.textDocumentProxy.documentContextBeforeInput
             suggestionState?.updatePredictions(context: ctx)
             updateCapitalization()
@@ -642,9 +635,7 @@ final class DictusKeyboardBridge: NSObject,
         // WHY updatePredictions instead of updateAsync: After finishing a word,
         // the user wants to see predicted next words (n-gram), not completions
         // for a partial word (which doesn't exist yet after a space).
-        // Also clear rejected words -- the user has moved on to a new word.
         suggestionState?.clear()
-        suggestionState?.rejectedWords.removeAll()
         let context = controller?.textDocumentProxy.documentContextBeforeInput
         suggestionState?.updatePredictions(context: context)
 
@@ -1055,7 +1046,6 @@ final class DictusKeyboardBridge: NSObject,
         // Trigger n-gram predictions after autocorrection too.
         // The corrected word + space is now in the proxy — predict what comes next.
         state.clear()
-        state.rejectedWords.removeAll()
         let correctedContext = controller?.textDocumentProxy.documentContextBeforeInput
         state.updatePredictions(context: correctedContext)
         updateCapitalization()
@@ -1097,14 +1087,6 @@ final class DictusKeyboardBridge: NSObject,
         #if DEBUG
         AutocorrectDebugLog.autocorrectRefused(corrected: corrected, by: "backspace")
         #endif
-    }
-
-    /// At a refused position the bar must not preview a correction the space will
-    /// not make. The bar reads `rejectedWords`, so the word being typed goes there.
-    private func keepRefusedCorrectionOffTheBar(context: String?) {
-        guard let (prefix, word) = AutocorrectRejectionMemory.wordAtCursor(context: context),
-              rejectionMemory?.isRejected(prefix: prefix) == true else { return }
-        suggestionState?.rejectedWords.insert(word.lowercased())
     }
 
     /// The space closes the undo window of the correction before it, except the
