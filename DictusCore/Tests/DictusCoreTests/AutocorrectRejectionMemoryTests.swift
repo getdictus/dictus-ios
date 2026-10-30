@@ -166,6 +166,18 @@ final class AutocorrectRejectionMemoryTests: XCTestCase {
         XCTAssertEqual(commit("Le batrau", proposing: "bateau"), .correct)
     }
 
+    func testWithoutADocumentIdentifierTwoFieldsDoNotShareRefusals() {
+        // Review of #874: a host may give no `documentIdentifier`. Two such fields
+        // looked like one document, so a refusal in the first one kept, and
+        // learned, a typo typed after the same text in the second.
+        memory.enter(document: nil)
+        applyCorrection("la montagnr", to: "montagne")
+        erase(from: "la montagne ", to: "la ")
+
+        memory.enter(document: nil)  // the next event, maybe in another field
+        XCTAssertEqual(commit("la montagnr", proposing: "montagne"), .correct)
+    }
+
     func testTheSameDocumentKeepsItsMemory() {
         applyCorrection("la montagnr", to: "montagne")
         erase(from: "la montagne ", to: "la ")
