@@ -223,6 +223,25 @@ final class AutocorrectRejectionMemoryTests: XCTestCase {
         XCTAssertNil(memory.movingOn(context: "le batrau "), "learned once")
     }
 
+    func testUndoThenAPredictionTapStillLearnsTheRestoredWord() {
+        // Review of #874: after Undo, tapping a prediction inserts `est ` in one go.
+        // The next keystroke then sees `est` at the caret, not `batrau`, and the
+        // restored word was never learned.
+        applyCorrection("le batrau", to: "bateau")
+        memory.correctionUndone(prefix: "le ", original: "batrau")
+
+        XCTAssertEqual(memory.movingOn(context: "le batrau est "), "batrau")
+    }
+
+    func testUndoBeforeAPunctuationMarkThenMovingOnLearnsTheRestoredWord() {
+        // Review of #874: Undo of `cuisinr,` → `cuisine,` restores `cuisinr,`, and
+        // `cuisinr, ` does not end with the restored word.
+        applyCorrection("la cuisinr", to: "cuisine")
+        memory.correctionUndone(prefix: "la ", original: "cuisinr")
+
+        XCTAssertEqual(memory.movingOn(context: "la cuisinr, "), "cuisinr")
+    }
+
     func testUndoAloneLearnsNothing() {
         applyCorrection("le batrau", to: "bateau")
         memory.correctionUndone(prefix: "le ", original: "batrau")
