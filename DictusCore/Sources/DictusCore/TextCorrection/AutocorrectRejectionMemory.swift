@@ -121,26 +121,21 @@ public final class AutocorrectRejectionMemory {
     }
 
     /// Called after every backspace with the context before and after it. Returns
-    /// the correction it took as refused, if the backspace went into one: the
-    /// context now ends with a strict beginning of the corrected word, at its
-    /// position. A backspace that only removes the space after the word is not a
-    /// refusal. A nil context reads as empty.
+    /// the correction it took as refused, if the backspace erased at least one
+    /// letter of it, at its position. Erasing the space after the word, or the
+    /// space before it with the caret moved back, is not a refusal. A nil context
+    /// reads as empty.
     @discardableResult
     public func textDeleted(before: String?, after: String?) -> String? {
         let context = after ?? ""
         forgetPositions(beyond: Self.trimmed(Substring(context)).count)
         for (index, correction) in applied.enumerated().reversed() {
-            let letters = Array(correction.corrected)
-            for kept in 0..<letters.count {
-                let fragment = String(letters[0..<kept])
-                guard context.hasSuffix(fragment) else { continue }
-                let prefix = context.dropLast(fragment.count)
-                if Self.positionKey(prefix: prefix) == correction.key {
-                    applied.remove(at: index)
-                    reject(correction.key)
-                    return correction.corrected
-                }
-            }
+            guard let had = Self.lettersAtCaret(of: correction, in: before ?? ""), had > 0,
+                  let left = Self.lettersAtCaret(of: correction, in: context), left < had
+            else { continue }
+            applied.remove(at: index)
+            reject(correction.key)
+            return correction.corrected
         }
         return nil
     }
@@ -204,6 +199,19 @@ public final class AutocorrectRejectionMemory {
     }
 
     // MARK: - Private
+
+    /// How many letters of the corrected word sit right before the caret, at its
+    /// position (trailing whitespace ignored). Nil when the caret is elsewhere.
+    private static func lettersAtCaret(of correction: Applied, in context: String) -> Int? {
+        let text = trimmed(Substring(context))
+        let letters = Array(correction.corrected)
+        for kept in stride(from: letters.count, through: 0, by: -1) {
+            let fragment = String(letters[0..<kept])
+            guard text.hasSuffix(fragment) else { continue }
+            if positionKey(prefix: text.dropLast(fragment.count)) == correction.key { return kept }
+        }
+        return nil
+    }
 
     /// The key of the position after `prefix`, with its offset noted for erasure.
     private func remember(_ prefix: Substring) -> String {
