@@ -115,7 +115,9 @@ Every ID in this map, in one table: the 18 features first, then their 111 sub-fe
 | `voice-notes.progress-activity` | Pro | oui |
 | `typing.suggestions` | Gratuit | non |
 | `typing.autocorrect-on-space` | Gratuit | non |
+| `typing.autocorrect-on-punctuation` | Gratuit | non |
 | `typing.undo-correction` | Gratuit | non |
+| `typing.refused-correction` | Gratuit | non |
 | `typing.auto-full-stop` | Gratuit | non |
 | `typing.accents` | Gratuit | non |
 | `typing.dead-keys` | Gratuit | non |
