@@ -1260,6 +1260,8 @@ class KeyboardViewController: UIInputViewController {
         KeyboardState.shared.revalidateDictationUndo()
         // Invalidate autocorrect undo on external text changes (paste, cursor tap, host autocorrect).
         bridge?.suggestionState?.pendingUndo = nil
+        // A sent message empties the field under the same documentIdentifier (#872).
+        bridge?.hostTextChanged()
         // When text changes externally (paste, cursor move, autocorrect by host app),
         // recheck autocapitalization. This ensures shift state stays correct even when
         // the user moves the cursor to a different position in the text.

@@ -99,12 +99,31 @@ public final class AutocorrectRejectionMemory {
         return (context.dropLast(last.count), last)
     }
 
+    /// False in a host that gives no document identifier: nothing is remembered
+    /// from one event to the next there.
+    public var remembersRefusals: Bool { document != nil }
+
     // MARK: - Events
 
     /// Starts over when the keyboard is editing another document.
+    ///
+    /// The identifier alone is not enough: Messages empties its field when a
+    /// message is sent and keeps the identifier, so the bridge also calls
+    /// `documentEmptied` when the host leaves the document empty.
+    ///
+    /// A nil identifier starts over every time (review of #874). Nothing the
+    /// extension sees tells two such fields apart, and sharing refusals between
+    /// them keeps and learns typos. Those hosts get no refusal memory at all: a
+    /// refused correction is made again, as before #872.
     public func enter(document id: String?) {
-        guard id != document else { return }
+        guard id == nil || id != document else { return }
         document = id
+        documentEmptied()
+    }
+
+    /// The host emptied the document without a backspace from this keyboard: no
+    /// remembered position exists any more (risk 3 of #874, a sent message).
+    public func documentEmptied() {
         applied.removeAll()
         rejected.removeAll()
         restoredByUndo.removeAll()
@@ -120,25 +139,22 @@ public final class AutocorrectRejectionMemory {
         if applied.count > Self.watchedCorrections { applied.removeFirst() }
     }
 
-    /// Called after every backspace with the context it left. Returns the
-    /// correction it took as refused, if the backspace went into one: the context
-    /// now ends with a strict beginning of the corrected word, at its position. A
-    /// backspace that only removes the space after the word is not a refusal.
+    /// Called after every backspace with the context before and after it. Returns
+    /// the correction it took as refused, if the backspace erased at least one
+    /// letter of it, at its position. Erasing the space after the word, or the
+    /// space before it with the caret moved back, is not a refusal. A nil context
+    /// reads as empty.
     @discardableResult
-    public func textDeleted(context: String) -> String? {
+    public func textDeleted(before: String?, after: String?) -> String? {
+        let context = after ?? ""
         forgetPositions(beyond: Self.trimmed(Substring(context)).count)
         for (index, correction) in applied.enumerated().reversed() {
-            let letters = Array(correction.corrected)
-            for kept in 0..<letters.count {
-                let fragment = String(letters[0..<kept])
-                guard context.hasSuffix(fragment) else { continue }
-                let prefix = context.dropLast(fragment.count)
-                if Self.positionKey(prefix: prefix) == correction.key {
-                    applied.remove(at: index)
-                    reject(correction.key)
-                    return correction.corrected
-                }
-            }
+            guard let had = Self.lettersAtCaret(of: correction, in: before ?? ""), had > 0,
+                  let left = Self.lettersAtCaret(of: correction, in: context), left < had
+            else { continue }
+            applied.remove(at: index)
+            reject(correction.key)
+            return correction.corrected
         }
         return nil
     }
@@ -153,27 +169,41 @@ public final class AutocorrectRejectionMemory {
     }
 
     /// The user tapped the typed word, quoted in slot 0 of the corrections row.
-    public func typedWordKept(prefix: Substring) {
+    /// `word` is the word at the caret and `rowWord` the one the row was built
+    /// for. Returns whether the tap is taken as a refusal, the word to be learned.
+    @discardableResult
+    public func typedWordKept(prefix: Substring, word: String, rowWord: String) -> Bool {
+        // A caret move does not refresh the row: a row built for another word
+        // would refuse, and teach, whatever word the caret now ends (review of #874).
+        guard word.lowercased() == rowWord.lowercased() else { return false }
         reject(remember(prefix))
+        return true
     }
 
-    /// Called before a character, a space or a return is inserted. When the cursor
-    /// sits after whitespace that follows a word restored by Undo, the user has
-    /// moved on and kept that word: it is returned, to be learned.
+    /// Called before anything is inserted. When a word restored by Undo is still
+    /// in place, unchanged, and the caret has left it (a space, a punctuation
+    /// mark, a prediction tap's word), the user kept it: it is returned, to be
+    /// learned. The word the caret ends on is still being typed and is skipped.
     public func movingOn(context: String?) -> String? {
-        guard let context, let last = context.last, last.isWhitespace else { return nil }
-        guard let (prefix, word) = Self.wordAtCursor(context: String(Self.trimmed(Substring(context))))
-        else { return nil }
-        let key = Self.positionKey(prefix: prefix)
-        guard let restored = restoredByUndo[key],
-              restored.lowercased() == word.lowercased() else { return nil }
-        restoredByUndo[key] = nil
-        return word
+        guard let context, !restoredByUndo.isEmpty else { return nil }
+        var kept: String?
+        context.enumerateSubstrings(in: context.startIndex..., options: .byWords) { sub, range, _, stop in
+            guard let word = sub, range.upperBound < context.endIndex else { return }
+            let key = Self.positionKey(prefix: context[..<range.lowerBound])
+            guard let restored = self.restoredByUndo[key],
+                  restored.lowercased() == word.lowercased() else { return }
+            self.restoredByUndo[key] = nil
+            kept = word
+            stop = true
+        }
+        return kept
     }
 
     /// What to do with `word`, committed after `prefix` by a space, a punctuation
     /// mark or a return. `proposedCorrection` is what the corrector would apply,
-    /// nil when it keeps the word.
+    /// nil when it keeps the word. `countable` is false when the caller will not
+    /// count the word whatever is decided (autocorrect off, mirror suspect): it is
+    /// then not marked as counted, so a later countable commit still counts.
     ///
     /// A proposal that only changes the casing is no proposal, unless
     /// `allowsCasingChange`: the contacts lexicon recases `zofiak` to "Zofiak"
@@ -182,6 +212,7 @@ public final class AutocorrectRejectionMemory {
         prefix: Substring,
         word: String,
         proposedCorrection: String?,
+        countable: Bool = true,
         allowsCasingChange: Bool = false
     ) -> Decision {
         let key = Self.positionKey(prefix: prefix)
@@ -203,8 +234,16 @@ public final class AutocorrectRejectionMemory {
         if let last = lastCounted, last.key == key, last.word == lowered {
             return .keep(countUsage: false)
         }
-        lastCounted = (remember(prefix), lowered)
+        if countable { lastCounted = (remember(prefix), lowered) }
         return .keep(countUsage: true)
+    }
+
+    /// Whether the suggestion bar may preview a correction for the word at the
+    /// caret: not at a refused position, where space will not make it either.
+    /// Decided by position, like the space bar, never by spelling (review of #874).
+    public func previewsCorrection(context: String?) -> Bool {
+        guard let (prefix, _) = Self.wordAtCursor(context: context) else { return true }
+        return !isRejected(prefix: prefix)
     }
 
     /// Whether a correction refused at the position after `prefix` is remembered.
@@ -213,6 +252,19 @@ public final class AutocorrectRejectionMemory {
     }
 
     // MARK: - Private
+
+    /// How many letters of the corrected word sit right before the caret, at its
+    /// position (trailing whitespace ignored). Nil when the caret is elsewhere.
+    private static func lettersAtCaret(of correction: Applied, in context: String) -> Int? {
+        let text = trimmed(Substring(context))
+        let letters = Array(correction.corrected)
+        for kept in stride(from: letters.count, through: 0, by: -1) {
+            let fragment = String(letters[0..<kept])
+            guard text.hasSuffix(fragment) else { continue }
+            if positionKey(prefix: text.dropLast(fragment.count)) == correction.key { return kept }
+        }
+        return nil
+    }
 
     /// The key of the position after `prefix`, with its offset noted for erasure.
     private func remember(_ prefix: Substring) -> String {
@@ -241,6 +293,8 @@ public final class AutocorrectRejectionMemory {
     private func reject(_ key: String) {
         rejected.removeAll { $0 == key }
         rejected.append(key)
-        if rejected.count > Self.capacity { rejected.removeFirst() }
+        // Every restored word sits at a refused position, so evicting the oldest
+        // refusal with its restore keeps both within `capacity`.
+        if rejected.count > Self.capacity { restoredByUndo[rejected.removeFirst()] = nil }
     }
 }

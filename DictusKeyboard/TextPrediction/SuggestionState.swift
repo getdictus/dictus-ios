@@ -59,12 +59,8 @@ class SuggestionState: ObservableObject {
     /// Set when autocorrect fires on space, cleared on next space or undo tap.
     @Published var pendingUndo: AutocorrectState?
 
-    /// Words the suggestion bar must not show a correction for, while they are typed.
-    /// Cleared when the user starts typing a new word. What is applied on space is
-    /// decided by `rejectionMemory`, which outlives the word.
-    var rejectedWords: Set<String> = []
-
     /// Where in the current document the user refused an autocorrection (#872).
+    /// The bar reads it too, so it never previews a correction space will not make.
     let rejectionMemory = AutocorrectRejectionMemory()
 
     /// Policy derived from the host field's input traits (#200).
@@ -162,7 +158,7 @@ class SuggestionState: ObservableObject {
 
         // Check spell correction first (mirrors what handleSpace will do)
         if autocorrectEnabled,
-           !rejectedWords.contains(partial.lowercased()),
+           rejectionMemory.previewsCorrection(context: context),
            let result = engine.spellCheck(
                partial,
                previousWord: previousWord,
@@ -230,6 +226,9 @@ class SuggestionState: ObservableObject {
         // Cancel previous in-flight computation
         currentSuggestionWork?.cancel()
 
+        // Read on the main thread, like the context: the memory is not thread-safe.
+        let previewsCorrection = rejectionMemory.previewsCorrection(context: context)
+
         let work = DispatchWorkItem { [weak self] in
             guard let self = self else { return }
 
@@ -259,8 +258,7 @@ class SuggestionState: ObservableObject {
 
             // Check spell correction first (mirrors what handleSpace will do)
             let spellResult: (correction: String, alternatives: [String])?
-            if self.autocorrectEnabled,
-               !self.rejectedWords.contains(partial.lowercased()) {
+            if self.autocorrectEnabled, previewsCorrection {
                 spellResult = self.engine.spellCheck(
                     partial,
                     previousWord: previousWord,

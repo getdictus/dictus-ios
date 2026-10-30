@@ -556,8 +556,7 @@ struct KeyboardRootView: View {
 
         if suggestionState.mode == .corrections {
             if index == 0 {
-                suggestionState.rejectedWords.insert(suggestion.lowercased())
-                keepTypedWord(proxy: proxy)
+                keepTypedWord(proxy: proxy, rowWord: suggestion)
                 // #548: reported, but deliberately NOT treated as a settling boundary.
                 // Adding `noteBoundaryInserted` here would change when suspicion
                 // clears, which is behaviour, and #548 is only about what the detector
@@ -684,27 +683,30 @@ struct KeyboardRootView: View {
         AutocorrectDebugLog.autocorrectRefused(corrected: undo.correctedWord, by: "undo")
         #endif
 
-        suggestionState.rejectedWords.insert(undo.originalWord.lowercased())
-
         // A refusal, but nothing is learned on the tap (#872). The restored word is
         // often itself a typo the user fixes next (`crayin` → `crayim`), and learning
         // it here made the typo permanent. The memory learns the word the user ends
         // up committing at this place: the restored one if they move on past it,
         // their edit otherwise. Still one refusal, not two (#287 decision 4).
-        bridge?.rejectionMemory?.correctionUndone(
-            prefix: context[..<range.lowerBound], original: undo.originalWord
-        )
+        guard let memory = bridge?.rejectionMemory else { return }
+        memory.correctionUndone(prefix: context[..<range.lowerBound], original: undo.originalWord)
+        // A host without a document identifier keeps no memory, so nothing could be
+        // learned later: learn on the tap there, as before #872.
+        if !memory.remembersRefusals {
+            UserDictionary.shared.learn(undo.originalWord)
+        }
     }
 
     /// The user tapped the word they typed, quoted in slot 0 of the corrections row:
     /// the correction is refused before it is made, and the word is learned at once,
     /// as on Apple's keyboard (#872). Unlike Undo there is no restored typo to fix
     /// afterwards, since the word is exactly what the user typed and chose.
-    private func keepTypedWord(proxy: UITextDocumentProxy) {
+    private func keepTypedWord(proxy: UITextDocumentProxy, rowWord: String) {
         guard let (prefix, word) = AutocorrectRejectionMemory.wordAtCursor(
             context: proxy.documentContextBeforeInput
         ) else { return }
-        bridge?.rejectionMemory?.typedWordKept(prefix: prefix)
+        guard bridge?.rejectionMemory?.typedWordKept(prefix: prefix, word: word, rowWord: rowWord) == true
+        else { return }
         #if DEBUG
         // Slot 1 of the corrections row is the correction the space would have made.
         let refused = suggestionState.suggestions.count > 1 ? suggestionState.suggestions[1] : ""

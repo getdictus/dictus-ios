@@ -48,8 +48,9 @@ final class AutocorrectRejectionMemoryTests: XCTestCase {
     private func erase(from start: String, to end: String) {
         var text = start
         while text.count > end.count {
+            let before = text
             text.removeLast()
-            memory.textDeleted(context: text)
+            memory.textDeleted(before: before, after: text)
         }
         XCTAssertEqual(text, end)
     }
@@ -83,8 +84,27 @@ final class AutocorrectRejectionMemoryTests: XCTestCase {
         applyCorrection("la montagnr", to: "montagne")
         erase(from: "la montagne ", to: "la montagne")
 
-        XCTAssertNil(memory.textDeleted(context: "la montagne"))
+        XCTAssertNil(memory.textDeleted(before: "la montagne ", after: "la montagne"))
         XCTAssertFalse(memory.isRejected(prefix: "la "))
+    }
+
+    func testErasingOnlyTheSpaceBeforeTheCorrectionIsNotARefusal() {
+        // Review of #874: the caret is moved back to just after `la `, in front of
+        // the corrected word, and the space is erased. No letter of `montagne` went,
+        // so nothing was refused, and a typo typed at that place later is corrected.
+        applyCorrection("la montagnr", to: "montagne")
+
+        XCTAssertNil(memory.textDeleted(before: "la ", after: "la"))
+        XCTAssertFalse(memory.isRejected(prefix: "la "))
+        XCTAssertEqual(commit("la montagnr", proposing: "montagne"), .correct)
+    }
+
+    func testErasingTheWholeCorrectionAtOnceIsARefusal() {
+        // A held backspace deletes `montagne ` in one step: letters went.
+        applyCorrection("la montagnr", to: "montagne")
+
+        XCTAssertEqual(memory.textDeleted(before: "la montagne ", after: "la "), "montagne")
+        XCTAssertEqual(commit("la montagnr", proposing: "montagne"), .keepAndLearn)
     }
 
     func testTheMemorySurvivesErasingTheSpaceBeforeTheWord() {
@@ -145,8 +165,36 @@ final class AutocorrectRejectionMemoryTests: XCTestCase {
         erase(from: "Le bateau ", to: "")
 
         // A new `Le` followed by a backspace into a word is not a refusal of `bateau`.
-        XCTAssertNil(memory.textDeleted(context: "Le bat"))
+        XCTAssertNil(memory.textDeleted(before: "Le bate", after: "Le bat"))
         XCTAssertEqual(commit("Le batrau", proposing: "bateau"), .correct)
+    }
+
+    func testAMessageSentByTheHostForgetsItsRefusals() {
+        // Measured on the simulator (risk 3 of #874): `la voitude` refused, the
+        // message sent, then `la maisob` in the next message was kept and learned.
+        // Messages empties the field itself and keeps the same documentIdentifier,
+        // so no backspace and no new document told the memory the text was gone.
+        applyCorrection("la voitude", to: "voiture")
+        erase(from: "la voiture ", to: "la ")
+        XCTAssertEqual(commit("la voitude", proposing: "voiture"), .keepAndLearn)
+
+        memory.documentEmptied()
+        XCTAssertEqual(commit("la maisob", proposing: "maison"), .correct)
+    }
+
+    func testWithoutADocumentIdentifierTwoFieldsDoNotShareRefusals() {
+        // Review of #874: a host may give no `documentIdentifier`. Two such fields
+        // looked like one document, so a refusal in the first one kept, and
+        // learned, a typo typed after the same text in the second.
+        memory.enter(document: nil)
+        applyCorrection("la montagnr", to: "montagne")
+        erase(from: "la montagne ", to: "la ")
+
+        memory.enter(document: nil)  // the next event, maybe in another field
+        XCTAssertEqual(commit("la montagnr", proposing: "montagne"), .correct)
+        XCTAssertFalse(memory.remembersRefusals)
+        memory.enter(document: "doc-B")
+        XCTAssertTrue(memory.remembersRefusals)
     }
 
     func testTheSameDocumentKeepsItsMemory() {
@@ -165,6 +213,20 @@ final class AutocorrectRejectionMemoryTests: XCTestCase {
         XCTAssertEqual(AutocorrectRejectionMemory.positionKey(prefix: "la  \n"), "la")
     }
 
+    // MARK: - The suggestion bar
+
+    func testTheBarHidesTheCorrectionOnlyAtTheRefusedPosition() {
+        // Review of #874: the bar kept refused spellings in one global set, so the
+        // same typo typed elsewhere showed no correction, while space still made it.
+        applyCorrection("la montagnr", to: "montagne")
+        erase(from: "la montagne ", to: "la ")
+
+        XCTAssertFalse(memory.previewsCorrection(context: "la montagnr"))
+        XCTAssertTrue(memory.previewsCorrection(context: "la montagnr. Une montagnr"))
+        XCTAssertEqual(commit("la montagnr. Une montagnr", proposing: "montagne"), .correct,
+                       "the bar previews what space does")
+    }
+
     // MARK: - Undo
 
     func testUndoThenMovingOnLearnsTheRestoredWord() {
@@ -175,6 +237,25 @@ final class AutocorrectRejectionMemoryTests: XCTestCase {
 
         XCTAssertEqual(memory.movingOn(context: "le batrau "), "batrau")
         XCTAssertNil(memory.movingOn(context: "le batrau "), "learned once")
+    }
+
+    func testUndoThenAPredictionTapStillLearnsTheRestoredWord() {
+        // Review of #874: after Undo, tapping a prediction inserts `est ` in one go.
+        // The next keystroke then sees `est` at the caret, not `batrau`, and the
+        // restored word was never learned.
+        applyCorrection("le batrau", to: "bateau")
+        memory.correctionUndone(prefix: "le ", original: "batrau")
+
+        XCTAssertEqual(memory.movingOn(context: "le batrau est "), "batrau")
+    }
+
+    func testUndoBeforeAPunctuationMarkThenMovingOnLearnsTheRestoredWord() {
+        // Review of #874: Undo of `cuisinr,` → `cuisine,` restores `cuisinr,`, and
+        // `cuisinr, ` does not end with the restored word.
+        applyCorrection("la cuisinr", to: "cuisine")
+        memory.correctionUndone(prefix: "la ", original: "cuisinr")
+
+        XCTAssertEqual(memory.movingOn(context: "la cuisinr, "), "cuisinr")
     }
 
     func testUndoAloneLearnsNothing() {
@@ -220,9 +301,19 @@ final class AutocorrectRejectionMemoryTests: XCTestCase {
     func testTappingTheTypedWordRefusesThePosition() {
         // Scenario 8: `La musiqur`, tap «musiqur». The bridge learns it on the tap;
         // the position is remembered as refused too.
-        memory.typedWordKept(prefix: "La ")
+        XCTAssertTrue(memory.typedWordKept(prefix: "La ", word: "musiqur", rowWord: "musiqur"))
         XCTAssertTrue(memory.isRejected(prefix: "La "))
         XCTAssertEqual(commit("La musiqur", proposing: "musique"), .keepAndLearn)
+    }
+
+    func testAStaleCorrectionsRowRefusesNothing() {
+        // Review of #874: the row was built for `musiqur`, then the caret moved to
+        // the end of `bonjour` without the row refreshing. Tapping slot 0 must not
+        // learn `bonjour` nor refuse its position.
+        XCTAssertFalse(memory.typedWordKept(prefix: "Il dit ", word: "bonjour", rowWord: "musiqur"))
+        XCTAssertFalse(memory.isRejected(prefix: "Il dit "))
+        XCTAssertTrue(memory.typedWordKept(prefix: "La ", word: "Musiqur", rowWord: "musiqur"),
+                      "case does not make a row stale")
     }
 
     // MARK: - #287: no learning without a refused correction
@@ -245,6 +336,24 @@ final class AutocorrectRejectionMemoryTests: XCTestCase {
         XCTAssertEqual(commit("une ECOLR", proposing: nil), .keep(countUsage: true))
         XCTAssertEqual(commit("une ECOLR", proposing: nil), .keep(countUsage: false))
         XCTAssertEqual(commit("une ECOLR. Une ECOLR", proposing: nil), .keep(countUsage: true))
+    }
+
+    func testAWordNotCountedIsNotMarkedAsCounted() {
+        // Review of #874: with autocorrect off or the mirror suspect the bridge does
+        // not count the word, so the next eligible commit there must still count.
+        XCTAssertEqual(memory.commit(prefix: "une ", word: "ECOLR", proposedCorrection: nil, countable: false),
+                       .keep(countUsage: true))
+        XCTAssertEqual(commit("une ECOLR", proposing: nil), .keep(countUsage: true))
+    }
+
+    func testRestoredWordsAreBoundedWithTheRefusals() {
+        // Review of #874: Undo at more positions than `capacity`, never moving on.
+        for index in 0...AutocorrectRejectionMemory.capacity {
+            memory.correctionUndone(prefix: Substring("mot\(index) "), original: "batrau")
+        }
+        XCTAssertNil(memory.movingOn(context: "mot0 batrau "), "the oldest restore went with its refusal")
+        let last = AutocorrectRejectionMemory.capacity
+        XCTAssertEqual(memory.movingOn(context: "mot\(last) batrau "), "batrau")
     }
 
     // MARK: - Word at cursor
