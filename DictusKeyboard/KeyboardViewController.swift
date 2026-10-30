@@ -562,6 +562,10 @@ class KeyboardViewController: UIInputViewController {
         // stale copy or learned words keep bypassing autocorrect.
         UserDictionary.shared.reload()
 
+        // Contact names and text replacements (#873), re-read on every appearance
+        // so a contact or replacement added meanwhile is picked up.
+        suggestionState.refreshSupplementaryLexicon(from: self)
+
         // Set default opening layer from user preference.
         // WHY here not viewDidLoad: viewWillAppear fires each time the keyboard appears,
         // allowing the user to change settings in the app and see the effect immediately.

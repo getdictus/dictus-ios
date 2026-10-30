@@ -334,6 +334,28 @@ class SuggestionState: ObservableObject {
         return engine.spellCheck(word, previousWord: previousWord, isAtSentenceStart: isAtSentenceStart)
     }
 
+    /// Reads the contacts + text replacements lexicon (#873) and hands it to the
+    /// engine. `requestSupplementaryLexicon` needs neither Contacts permission nor
+    /// Full Access.
+    func refreshSupplementaryLexicon(from controller: UIInputViewController) {
+        controller.requestSupplementaryLexicon { [engine] lexicon in
+            let entries = lexicon.entries.map { (userInput: $0.userInput, documentText: $0.documentText) }
+            let supplementary = SupplementaryLexicon(entries: entries)
+            #if DEBUG
+            AutocorrectDebugLog.note(
+                "lexicon loaded: \(supplementary.shortcutCount) shortcuts, \(supplementary.wordCount) words"
+            )
+            #endif
+            engine.setSupplementaryLexicon(supplementary)
+        }
+    }
+
+    /// Whether the lexicon decides `word` (#873). The space handler asks so it
+    /// can apply a casing-only replacement (`zofiak` -> "Zofiak").
+    func isInSupplementaryLexicon(_ word: String) -> Bool {
+        engine.lexiconDecision(for: word) != nil
+    }
+
     /// Resets the suggestion state to idle.
     func clear() {
         suggestions = []

@@ -667,7 +667,11 @@ final class DictusKeyboardBridge: NSObject,
                previousWord: previousWord,
                isAtSentenceStart: atSentenceStart
            ),
-           result.correction.lowercased() != freshWord.lowercased() {
+           result.correction != freshWord,
+           // A casing-only change is applied for lexicon words alone (#873):
+           // `zofiak` -> "Zofiak" for a contact, never a trie recasing.
+           result.correction.lowercased() != freshWord.lowercased()
+               || state.isInSupplementaryLexicon(freshWord) {
             // Boundary-safe replacement (#191): re-read the LIVE context and
             // verify it still ends with the word we plan to replace, with a
             // proper boundary before it. Under proxy desync (rapid delete/retype
