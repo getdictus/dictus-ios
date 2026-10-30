@@ -1074,6 +1074,15 @@ final class DictusKeyboardBridge: NSObject,
         return memory
     }
 
+    /// The host changed the text. When it left the document empty, as Messages does
+    /// on sending without changing the documentIdentifier, nothing remembered is at
+    /// any position any more. `hasText` answers for the whole document, so a caret
+    /// at the start of a non-empty field does not count.
+    func hostTextChanged() {
+        guard let proxy = controller?.textDocumentProxy, !proxy.hasText else { return }
+        rejectionMemory?.documentEmptied()
+    }
+
     /// Learns a word restored by Undo once the user moves on past it unchanged.
     /// Called before anything is inserted after a word boundary.
     private func learnWordMovedPast() {

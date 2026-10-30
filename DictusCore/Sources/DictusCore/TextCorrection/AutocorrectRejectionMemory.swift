@@ -107,6 +107,10 @@ public final class AutocorrectRejectionMemory {
 
     /// Starts over when the keyboard is editing another document.
     ///
+    /// The identifier alone is not enough: Messages empties its field when a
+    /// message is sent and keeps the identifier, so the bridge also calls
+    /// `documentEmptied` when the host leaves the document empty.
+    ///
     /// A nil identifier starts over every time (review of #874). Nothing the
     /// extension sees tells two such fields apart, and sharing refusals between
     /// them keeps and learns typos. Those hosts get no refusal memory at all: a
@@ -114,15 +118,18 @@ public final class AutocorrectRejectionMemory {
     public func enter(document id: String?) {
         guard id == nil || id != document else { return }
         document = id
+        documentEmptied()
+    }
+
+    /// The host emptied the document without a backspace from this keyboard: no
+    /// remembered position exists any more (risk 3 of #874, a sent message).
+    public func documentEmptied() {
         applied.removeAll()
         rejected.removeAll()
         restoredByUndo.removeAll()
         lastCounted = nil
         offsets.removeAll()
     }
-
-    /// The host emptied the document without a backspace from this keyboard.
-    public func documentEmptied() {}
 
     /// Dictus replaced the word after `prefix` with `corrected`.
     public func correctionApplied(prefix: Substring, corrected: String) {
