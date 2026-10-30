@@ -99,11 +99,20 @@ public final class AutocorrectRejectionMemory {
         return (context.dropLast(last.count), last)
     }
 
+    /// False in a host that gives no document identifier: nothing is remembered
+    /// from one event to the next there.
+    public var remembersRefusals: Bool { document != nil }
+
     // MARK: - Events
 
     /// Starts over when the keyboard is editing another document.
+    ///
+    /// A nil identifier starts over every time (review of #874). Nothing the
+    /// extension sees tells two such fields apart, and sharing refusals between
+    /// them keeps and learns typos. Those hosts get no refusal memory at all: a
+    /// refused correction is made again, as before #872.
     public func enter(document id: String?) {
-        guard id != document else { return }
+        guard id == nil || id != document else { return }
         document = id
         applied.removeAll()
         rejected.removeAll()

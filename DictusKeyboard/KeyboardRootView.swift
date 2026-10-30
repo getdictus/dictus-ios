@@ -688,9 +688,13 @@ struct KeyboardRootView: View {
         // it here made the typo permanent. The memory learns the word the user ends
         // up committing at this place: the restored one if they move on past it,
         // their edit otherwise. Still one refusal, not two (#287 decision 4).
-        bridge?.rejectionMemory?.correctionUndone(
-            prefix: context[..<range.lowerBound], original: undo.originalWord
-        )
+        guard let memory = bridge?.rejectionMemory else { return }
+        memory.correctionUndone(prefix: context[..<range.lowerBound], original: undo.originalWord)
+        // A host without a document identifier keeps no memory, so nothing could be
+        // learned later: learn on the tap there, as before #872.
+        if !memory.remembersRefusals {
+            UserDictionary.shared.learn(undo.originalWord)
+        }
     }
 
     /// The user tapped the word they typed, quoted in slot 0 of the corrections row:

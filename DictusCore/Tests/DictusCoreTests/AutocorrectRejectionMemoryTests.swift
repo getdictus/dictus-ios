@@ -176,6 +176,9 @@ final class AutocorrectRejectionMemoryTests: XCTestCase {
 
         memory.enter(document: nil)  // the next event, maybe in another field
         XCTAssertEqual(commit("la montagnr", proposing: "montagne"), .correct)
+        XCTAssertFalse(memory.remembersRefusals)
+        memory.enter(document: "doc-B")
+        XCTAssertTrue(memory.remembersRefusals)
     }
 
     func testTheSameDocumentKeepsItsMemory() {
