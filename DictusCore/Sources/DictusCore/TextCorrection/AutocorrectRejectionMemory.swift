@@ -163,18 +163,23 @@ public final class AutocorrectRejectionMemory {
         reject(remember(prefix))
     }
 
-    /// Called before a character, a space or a return is inserted. When the cursor
-    /// sits after whitespace that follows a word restored by Undo, the user has
-    /// moved on and kept that word: it is returned, to be learned.
+    /// Called before anything is inserted. When a word restored by Undo is still
+    /// in place, unchanged, and the caret has left it (a space, a punctuation
+    /// mark, a prediction tap's word), the user kept it: it is returned, to be
+    /// learned. The word the caret ends on is still being typed and is skipped.
     public func movingOn(context: String?) -> String? {
-        guard let context, let last = context.last, last.isWhitespace else { return nil }
-        guard let (prefix, word) = Self.wordAtCursor(context: String(Self.trimmed(Substring(context))))
-        else { return nil }
-        let key = Self.positionKey(prefix: prefix)
-        guard let restored = restoredByUndo[key],
-              restored.lowercased() == word.lowercased() else { return nil }
-        restoredByUndo[key] = nil
-        return word
+        guard let context, !restoredByUndo.isEmpty else { return nil }
+        var kept: String?
+        context.enumerateSubstrings(in: context.startIndex..., options: .byWords) { sub, range, _, stop in
+            guard let word = sub, range.upperBound < context.endIndex else { return }
+            let key = Self.positionKey(prefix: context[..<range.lowerBound])
+            guard let restored = self.restoredByUndo[key],
+                  restored.lowercased() == word.lowercased() else { return }
+            self.restoredByUndo[key] = nil
+            kept = word
+            stop = true
+        }
+        return kept
     }
 
     /// What to do with `word`, committed after `prefix` by a space, a punctuation

@@ -684,6 +684,7 @@ final class DictusKeyboardBridge: NSObject,
     /// Going through handleSpace() would trigger autocorrect which might
     /// "correct" a perfectly valid prediction.
     func handlePredictionTap(word: String) {
+        learnWordMovedPast()
         let proxy = controller?.textDocumentProxy
         // #548: the edit is reported before the trailing space settles the suspicion.
         // Order matters — settling first would discard whatever this insert revealed.
