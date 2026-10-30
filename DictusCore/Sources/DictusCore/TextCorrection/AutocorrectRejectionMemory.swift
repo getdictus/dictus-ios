@@ -159,8 +159,12 @@ public final class AutocorrectRejectionMemory {
     }
 
     /// The user tapped the typed word, quoted in slot 0 of the corrections row.
-    public func typedWordKept(prefix: Substring) {
+    /// `word` is the word at the caret and `rowWord` the one the row was built
+    /// for. Returns whether the tap is taken as a refusal, the word to be learned.
+    @discardableResult
+    public func typedWordKept(prefix: Substring, word: String, rowWord: String) -> Bool {
         reject(remember(prefix))
+        return true
     }
 
     /// Called before anything is inserted. When a word restored by Undo is still

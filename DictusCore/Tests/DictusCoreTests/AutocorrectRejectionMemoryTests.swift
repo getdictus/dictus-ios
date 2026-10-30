@@ -285,9 +285,19 @@ final class AutocorrectRejectionMemoryTests: XCTestCase {
     func testTappingTheTypedWordRefusesThePosition() {
         // Scenario 8: `La musiqur`, tap «musiqur». The bridge learns it on the tap;
         // the position is remembered as refused too.
-        memory.typedWordKept(prefix: "La ")
+        XCTAssertTrue(memory.typedWordKept(prefix: "La ", word: "musiqur", rowWord: "musiqur"))
         XCTAssertTrue(memory.isRejected(prefix: "La "))
         XCTAssertEqual(commit("La musiqur", proposing: "musique"), .keepAndLearn)
+    }
+
+    func testAStaleCorrectionsRowRefusesNothing() {
+        // Review of #874: the row was built for `musiqur`, then the caret moved to
+        // the end of `bonjour` without the row refreshing. Tapping slot 0 must not
+        // learn `bonjour` nor refuse its position.
+        XCTAssertFalse(memory.typedWordKept(prefix: "Il dit ", word: "bonjour", rowWord: "musiqur"))
+        XCTAssertFalse(memory.isRejected(prefix: "Il dit "))
+        XCTAssertTrue(memory.typedWordKept(prefix: "La ", word: "Musiqur", rowWord: "musiqur"),
+                      "case does not make a row stale")
     }
 
     // MARK: - #287: no learning without a refused correction

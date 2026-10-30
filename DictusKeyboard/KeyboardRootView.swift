@@ -556,7 +556,7 @@ struct KeyboardRootView: View {
 
         if suggestionState.mode == .corrections {
             if index == 0 {
-                keepTypedWord(proxy: proxy)
+                keepTypedWord(proxy: proxy, rowWord: suggestion)
                 // #548: reported, but deliberately NOT treated as a settling boundary.
                 // Adding `noteBoundaryInserted` here would change when suspicion
                 // clears, which is behaviour, and #548 is only about what the detector
@@ -701,11 +701,12 @@ struct KeyboardRootView: View {
     /// the correction is refused before it is made, and the word is learned at once,
     /// as on Apple's keyboard (#872). Unlike Undo there is no restored typo to fix
     /// afterwards, since the word is exactly what the user typed and chose.
-    private func keepTypedWord(proxy: UITextDocumentProxy) {
+    private func keepTypedWord(proxy: UITextDocumentProxy, rowWord: String) {
         guard let (prefix, word) = AutocorrectRejectionMemory.wordAtCursor(
             context: proxy.documentContextBeforeInput
         ) else { return }
-        bridge?.rejectionMemory?.typedWordKept(prefix: prefix)
+        guard bridge?.rejectionMemory?.typedWordKept(prefix: prefix, word: word, rowWord: rowWord) == true
+        else { return }
         #if DEBUG
         // Slot 1 of the corrections row is the correction the space would have made.
         let refused = suggestionState.suggestions.count > 1 ? suggestionState.suggestions[1] : ""
