@@ -439,6 +439,7 @@ final class DictusKeyboardBridge: NSObject,
         // never reached the mirror — the keyboard's prediction went 54 to 53 while the
         // mirror stayed at 49 — and every character count taken off the mirror after
         // that over-counted. Bracketing the call is what catches it.
+        let contextBefore = controller?.textDocumentProxy.documentContextBeforeInput
         let mirrorBefore = mirrorLength()
         controller?.textDocumentProxy.deleteBackward()
         observeMirror(before: mirrorBefore, deleted: 1)
@@ -470,7 +471,7 @@ final class DictusKeyboardBridge: NSObject,
         updateCapitalization()
         updateAccentKeyDisplay()
         let context = controller?.textDocumentProxy.documentContextBeforeInput
-        noteDeletion(context: context)
+        noteDeletion(before: contextBefore, after: context)
         keepRefusedCorrectionOffTheBar(context: context)
         suggestionState?.updateAsync(context: context)
     }
@@ -543,7 +544,7 @@ final class DictusKeyboardBridge: NSObject,
         lastInsertedCharacter = nil
         updateCapitalization()
         let context = controller?.textDocumentProxy.documentContextBeforeInput
-        noteDeletion(context: context)
+        noteDeletion(before: before, after: context)
         suggestionState?.updateAsync(context: context)
     }
 
@@ -1091,8 +1092,8 @@ final class DictusKeyboardBridge: NSObject,
     }
 
     /// Takes a backspace into a correction Dictus made as the user refusing it.
-    private func noteDeletion(context: String?) {
-        guard let context, let corrected = rejectionMemory?.textDeleted(context: context) else { return }
+    private func noteDeletion(before: String?, after: String?) {
+        guard let corrected = rejectionMemory?.textDeleted(before: before, after: after) else { return }
         #if DEBUG
         AutocorrectDebugLog.autocorrectRefused(corrected: corrected, by: "backspace")
         #endif

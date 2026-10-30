@@ -45,8 +45,9 @@ final class AutocorrectRejectionMemoryTests: XCTestCase {
     private func erase(from start: String, to end: String) {
         var text = start
         while text.count > end.count {
+            let before = text
             text.removeLast()
-            memory.textDeleted(context: text)
+            memory.textDeleted(before: before, after: text)
         }
         XCTAssertEqual(text, end)
     }
@@ -80,8 +81,27 @@ final class AutocorrectRejectionMemoryTests: XCTestCase {
         applyCorrection("la montagnr", to: "montagne")
         erase(from: "la montagne ", to: "la montagne")
 
-        XCTAssertNil(memory.textDeleted(context: "la montagne"))
+        XCTAssertNil(memory.textDeleted(before: "la montagne ", after: "la montagne"))
         XCTAssertFalse(memory.isRejected(prefix: "la "))
+    }
+
+    func testErasingOnlyTheSpaceBeforeTheCorrectionIsNotARefusal() {
+        // Review of #874: the caret is moved back to just after `la `, in front of
+        // the corrected word, and the space is erased. No letter of `montagne` went,
+        // so nothing was refused, and a typo typed at that place later is corrected.
+        applyCorrection("la montagnr", to: "montagne")
+
+        XCTAssertNil(memory.textDeleted(before: "la ", after: "la"))
+        XCTAssertFalse(memory.isRejected(prefix: "la "))
+        XCTAssertEqual(commit("la montagnr", proposing: "montagne"), .correct)
+    }
+
+    func testErasingTheWholeCorrectionAtOnceIsARefusal() {
+        // A held backspace deletes `montagne ` in one step: letters went.
+        applyCorrection("la montagnr", to: "montagne")
+
+        XCTAssertEqual(memory.textDeleted(before: "la montagne ", after: "la "), "montagne")
+        XCTAssertEqual(commit("la montagnr", proposing: "montagne"), .keepAndLearn)
     }
 
     func testTheMemorySurvivesErasingTheSpaceBeforeTheWord() {
@@ -142,7 +162,7 @@ final class AutocorrectRejectionMemoryTests: XCTestCase {
         erase(from: "Le bateau ", to: "")
 
         // A new `Le` followed by a backspace into a word is not a refusal of `bateau`.
-        XCTAssertNil(memory.textDeleted(context: "Le bat"))
+        XCTAssertNil(memory.textDeleted(before: "Le bate", after: "Le bat"))
         XCTAssertEqual(commit("Le batrau", proposing: "bateau"), .correct)
     }
 

@@ -120,12 +120,14 @@ public final class AutocorrectRejectionMemory {
         if applied.count > Self.watchedCorrections { applied.removeFirst() }
     }
 
-    /// Called after every backspace with the context it left. Returns the
-    /// correction it took as refused, if the backspace went into one: the context
-    /// now ends with a strict beginning of the corrected word, at its position. A
-    /// backspace that only removes the space after the word is not a refusal.
+    /// Called after every backspace with the context before and after it. Returns
+    /// the correction it took as refused, if the backspace went into one: the
+    /// context now ends with a strict beginning of the corrected word, at its
+    /// position. A backspace that only removes the space after the word is not a
+    /// refusal. A nil context reads as empty.
     @discardableResult
-    public func textDeleted(context: String) -> String? {
+    public func textDeleted(before: String?, after: String?) -> String? {
+        let context = after ?? ""
         forgetPositions(beyond: Self.trimmed(Substring(context)).count)
         for (index, correction) in applied.enumerated().reversed() {
             let letters = Array(correction.corrected)
