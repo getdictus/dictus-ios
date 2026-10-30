@@ -191,8 +191,12 @@ public final class AutocorrectRejectionMemory {
 
     /// What to do with `word`, committed after `prefix` by a space, a punctuation
     /// mark or a return. `proposedCorrection` is what the corrector would apply,
-    /// nil when it keeps the word.
-    public func commit(prefix: Substring, word: String, proposedCorrection: String?) -> Decision {
+    /// nil when it keeps the word. `countable` is false when the caller will not
+    /// count the word whatever is decided (autocorrect off, mirror suspect): it is
+    /// then not marked as counted, so a later countable commit still counts.
+    public func commit(
+        prefix: Substring, word: String, proposedCorrection: String?, countable: Bool = true
+    ) -> Decision {
         let key = Self.positionKey(prefix: prefix)
         let proposes = proposedCorrection.map { $0.lowercased() != word.lowercased() } ?? false
 
@@ -210,7 +214,7 @@ public final class AutocorrectRejectionMemory {
         if let last = lastCounted, last.key == key, last.word == lowered {
             return .keep(countUsage: false)
         }
-        lastCounted = (remember(prefix), lowered)
+        if countable { lastCounted = (remember(prefix), lowered) }
         return .keep(countUsage: true)
     }
 
@@ -269,6 +273,8 @@ public final class AutocorrectRejectionMemory {
     private func reject(_ key: String) {
         rejected.removeAll { $0 == key }
         rejected.append(key)
-        if rejected.count > Self.capacity { rejected.removeFirst() }
+        // Every restored word sits at a refused position, so evicting the oldest
+        // refusal with its restore keeps both within `capacity`.
+        if rejected.count > Self.capacity { restoredByUndo[rejected.removeFirst()] = nil }
     }
 }

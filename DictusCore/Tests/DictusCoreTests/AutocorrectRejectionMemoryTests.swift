@@ -322,6 +322,24 @@ final class AutocorrectRejectionMemoryTests: XCTestCase {
         XCTAssertEqual(commit("une ECOLR. Une ECOLR", proposing: nil), .keep(countUsage: true))
     }
 
+    func testAWordNotCountedIsNotMarkedAsCounted() {
+        // Review of #874: with autocorrect off or the mirror suspect the bridge does
+        // not count the word, so the next eligible commit there must still count.
+        XCTAssertEqual(memory.commit(prefix: "une ", word: "ECOLR", proposedCorrection: nil, countable: false),
+                       .keep(countUsage: true))
+        XCTAssertEqual(commit("une ECOLR", proposing: nil), .keep(countUsage: true))
+    }
+
+    func testRestoredWordsAreBoundedWithTheRefusals() {
+        // Review of #874: Undo at more positions than `capacity`, never moving on.
+        for index in 0...AutocorrectRejectionMemory.capacity {
+            memory.correctionUndone(prefix: Substring("mot\(index) "), original: "batrau")
+        }
+        XCTAssertNil(memory.movingOn(context: "mot0 batrau "), "the oldest restore went with its refusal")
+        let last = AutocorrectRejectionMemory.capacity
+        XCTAssertEqual(memory.movingOn(context: "mot\(last) batrau "), "batrau")
+    }
+
     // MARK: - Word at cursor
 
     func testWordAtCursorNeedsTheContextToEndWithTheWord() {

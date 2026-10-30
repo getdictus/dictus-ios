@@ -921,7 +921,8 @@ final class DictusKeyboardBridge: NSObject,
             : nil
 
         switch memory.commit(
-            prefix: prefix, word: freshWord, proposedCorrection: proposal
+            prefix: prefix, word: freshWord, proposedCorrection: proposal,
+            countable: wordWasEvaluated
         ) {
         case .correct:
             guard let correction = proposal else { return false }
@@ -1076,8 +1077,12 @@ final class DictusKeyboardBridge: NSObject,
     /// Learns a word restored by Undo once the user moves on past it unchanged.
     /// Called before anything is inserted after a word boundary.
     private func learnWordMovedPast() {
-        guard let memory = rejectionMemory,
+        guard let state = suggestionState, let memory = rejectionMemory,
               let word = memory.movingOn(context: controller?.textDocumentProxy.documentContextBeforeInput)
+        else { return }
+        // Same gate as every other learning site: autocorrect ran, and the mirror
+        // can be trusted (#287 decision 8, #530).
+        guard state.autocorrectEnabled, state.hostPolicy.autocorrectAllowed, !mirrorSync.isSuspect
         else { return }
         UserDictionary.shared.learn(word)
     }
