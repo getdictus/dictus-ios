@@ -22,7 +22,10 @@ import Foundation
 ///
 /// Lifetime: RAM only, one document at a time. A new `documentIdentifier` empties
 /// it. Nothing here is cleared when the next word starts, which is what made the
-/// old `rejectedWords` forget a refusal one keystroke after it was made.
+/// old `rejectedWords` forget a refusal one keystroke after it was made. A position
+/// is forgotten when a backspace erases the text before it: the field emptied and a
+/// new message started with the same `Le` is another place, and a key alone would
+/// not tell them apart.
 ///
 /// Learning stays behind the #287 guard: this type only ever asks to learn a word
 /// committed at a position whose correction the user refused. Words never
@@ -63,6 +66,9 @@ public final class AutocorrectRejectionMemory {
     /// user moves past it unchanged, or replaced by what they commit there instead.
     private var restoredByUndo: [String: String] = [:]
     private var lastCounted: (key: String, word: String)?
+    /// Length of the text before each remembered position, whitespace trimmed. A
+    /// backspace that leaves less text than that has erased the position.
+    private var offsets: [String: Int] = [:]
 
     public init() {}
 
@@ -70,11 +76,15 @@ public final class AutocorrectRejectionMemory {
 
     /// The position key of a word whose preceding text is `prefix`.
     public static func positionKey(prefix: Substring) -> String {
-        var end = prefix.endIndex
-        while end > prefix.startIndex, prefix[prefix.index(before: end)].isWhitespace {
-            end = prefix.index(before: end)
+        String(trimmed(prefix).suffix(keyLength))
+    }
+
+    private static func trimmed(_ text: Substring) -> Substring {
+        var end = text.endIndex
+        while end > text.startIndex, text[text.index(before: end)].isWhitespace {
+            end = text.index(before: end)
         }
-        return String(prefix[..<end].suffix(keyLength))
+        return text[..<end]
     }
 
     /// The word the cursor sits at the end of, and the text before it. Nil when
@@ -99,11 +109,12 @@ public final class AutocorrectRejectionMemory {
         rejected.removeAll()
         restoredByUndo.removeAll()
         lastCounted = nil
+        offsets.removeAll()
     }
 
     /// Dictus replaced the word after `prefix` with `corrected`.
     public func correctionApplied(prefix: Substring, corrected: String) {
-        let key = Self.positionKey(prefix: prefix)
+        let key = remember(prefix)
         applied.removeAll { $0.key == key }
         applied.append(Applied(key: key, corrected: corrected))
         if applied.count > Self.watchedCorrections { applied.removeFirst() }
@@ -115,6 +126,7 @@ public final class AutocorrectRejectionMemory {
     /// backspace that only removes the space after the word is not a refusal.
     @discardableResult
     public func textDeleted(context: String) -> String? {
+        forgetPositions(beyond: Self.trimmed(Substring(context)).count)
         for (index, correction) in applied.enumerated().reversed() {
             let letters = Array(correction.corrected)
             for kept in 0..<letters.count {
@@ -134,7 +146,7 @@ public final class AutocorrectRejectionMemory {
     /// The user tapped Undo: `original` is back after `prefix`. It is learned only
     /// once the user moves past it unchanged; editing it learns the edit instead.
     public func correctionUndone(prefix: Substring, original: String) {
-        let key = Self.positionKey(prefix: prefix)
+        let key = remember(prefix)
         applied.removeAll { $0.key == key }
         reject(key)
         restoredByUndo[key] = original
@@ -142,7 +154,7 @@ public final class AutocorrectRejectionMemory {
 
     /// The user tapped the typed word, quoted in slot 0 of the corrections row.
     public func typedWordKept(prefix: Substring) {
-        reject(Self.positionKey(prefix: prefix))
+        reject(remember(prefix))
     }
 
     /// Called before a character, a space or a return is inserted. When the cursor
@@ -150,9 +162,8 @@ public final class AutocorrectRejectionMemory {
     /// moved on and kept that word: it is returned, to be learned.
     public func movingOn(context: String?) -> String? {
         guard let context, let last = context.last, last.isWhitespace else { return nil }
-        var trimmed = Substring(context)
-        while let character = trimmed.last, character.isWhitespace { trimmed = trimmed.dropLast() }
-        guard let (prefix, word) = Self.wordAtCursor(context: String(trimmed)) else { return nil }
+        guard let (prefix, word) = Self.wordAtCursor(context: String(Self.trimmed(Substring(context))))
+        else { return nil }
         let key = Self.positionKey(prefix: prefix)
         guard let restored = restoredByUndo[key],
               restored.lowercased() == word.lowercased() else { return nil }
@@ -181,7 +192,7 @@ public final class AutocorrectRejectionMemory {
         if let last = lastCounted, last.key == key, last.word == lowered {
             return .keep(countUsage: false)
         }
-        lastCounted = (key, lowered)
+        lastCounted = (remember(prefix), lowered)
         return .keep(countUsage: true)
     }
 
@@ -191,6 +202,30 @@ public final class AutocorrectRejectionMemory {
     }
 
     // MARK: - Private
+
+    /// The key of the position after `prefix`, with its offset noted for erasure.
+    private func remember(_ prefix: Substring) -> String {
+        let key = Self.positionKey(prefix: prefix)
+        offsets[key] = Self.trimmed(prefix).count
+        // Every counted word notes an offset; keep only the ones still referenced.
+        if offsets.count > Self.capacity + Self.watchedCorrections + 1 {
+            let referenced = Set(rejected + applied.map(\.key) + restoredByUndo.keys + [key])
+            offsets = offsets.filter { referenced.contains($0.key) }
+        }
+        return key
+    }
+
+    private func forgetPositions(beyond reach: Int) {
+        let erased = Set(offsets.filter { $0.value > reach }.keys)
+        guard !erased.isEmpty else { return }
+        applied.removeAll { erased.contains($0.key) }
+        rejected.removeAll { erased.contains($0) }
+        for key in erased {
+            restoredByUndo[key] = nil
+            offsets[key] = nil
+        }
+        if let last = lastCounted, erased.contains(last.key) { lastCounted = nil }
+    }
 
     private func reject(_ key: String) {
         rejected.removeAll { $0 == key }
