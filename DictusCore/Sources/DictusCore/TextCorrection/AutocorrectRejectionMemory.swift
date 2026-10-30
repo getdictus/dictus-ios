@@ -163,6 +163,9 @@ public final class AutocorrectRejectionMemory {
     /// for. Returns whether the tap is taken as a refusal, the word to be learned.
     @discardableResult
     public func typedWordKept(prefix: Substring, word: String, rowWord: String) -> Bool {
+        // A caret move does not refresh the row: a row built for another word
+        // would refuse, and teach, whatever word the caret now ends (review of #874).
+        guard word.lowercased() == rowWord.lowercased() else { return false }
         reject(remember(prefix))
         return true
     }
