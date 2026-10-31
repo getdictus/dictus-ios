@@ -101,6 +101,15 @@ final class DictusKeyboardBridge: NSObject,
     ///   may re-apply shift if conditions still hold (e.g., still at start of sentence)
     private var isManualShift = false
 
+    /// Whether a character was typed since the symbols pages opened (#504). The space
+    /// bar returns to letters only after one, as Apple's keyboard does: `123` then
+    /// space stays on the page.
+    private var typedOnSymbols = false
+
+    /// Whether caps lock was on when the symbols pages opened, so that the space bar's
+    /// return to letters gives it back (#504).
+    private var capsLockBeforeSymbols = false
+
     /// Last character inserted by the keyboard, tracked locally to avoid IPC latency.
     /// Used by adaptive accent key (Phase 19 Plan 03) and as supplement to proxy reads.
     private(set) var lastInsertedCharacter: String?
@@ -177,6 +186,7 @@ final class DictusKeyboardBridge: NSObject,
             handleBackspace()
 
         case .spacebar:
+            returnToLettersAfterSymbols()
             handleSpace()
 
         case .returnkey:
@@ -414,6 +424,9 @@ final class DictusKeyboardBridge: NSObject,
         if let page = keyboardView?.page, page == .shifted {
             keyboardView?.page = .normal
             isManualShift = false
+        }
+        if let page = keyboardView?.page, page == .symbols1 || page == .symbols2 {
+            typedOnSymbols = true
         }
 
         // Recheck autocapitalization after the character was inserted.
@@ -826,10 +839,23 @@ final class DictusKeyboardBridge: NSObject,
 
         switch kbView.page {
         case .normal, .shifted, .capslock:
+            capsLockBeforeSymbols = kbView.page == .capslock
+            typedOnSymbols = false
             kbView.page = .symbols1
         case .symbols1, .symbols2:
             kbView.page = .normal
         }
+    }
+
+    /// A space that ends a run of symbols returns to letters, as on Apple's keyboard
+    /// (#504). Called before the space is inserted, so that `handleSpace`'s
+    /// autocapitalization check already sees the letters page and shifts it after ". ".
+    private func returnToLettersAfterSymbols() {
+        guard let kbView = keyboardView, typedOnSymbols,
+              kbView.page == .symbols1 || kbView.page == .symbols2 else { return }
+        typedOnSymbols = false
+        kbView.page = capsLockBeforeSymbols ? .capslock : .normal
+        isManualShift = false
     }
 
     /// Handle #+=/123 toggle on symbols pages.
