@@ -163,6 +163,13 @@ public enum SharedKeys {
     /// behaviours; the losing branch and this key are deleted in a follow-up. Inside
     /// the conditional for `debugProEntitlementForced`'s reason.
     public static let debugVoiceNoteAutoOpenDisabled = "dictus.debugVoiceNoteAutoOpenDisabled"
+
+    // Forced model refusal (DEBUG builds only - see PolishService.activeEngine).
+    /// Bool: when true, every polish call throws Apple's safety refusal, so the #455
+    /// copy and the text it keeps can be seen in a simulator, where Apple Intelligence
+    /// does not run, or on a device without a phrase Apple refuses. Inside the
+    /// conditional for `debugProEntitlementForced`'s reason.
+    public static let debugPolishRefusalForced = "dictus.debugPolishRefusalForced"
     #endif
 
     // Live Activity preference

@@ -112,6 +112,9 @@ public final class PolishService {
     /// Intelligence on) takes effect without an app relaunch.
     private var activeEngine: PolishEngineProtocol {
         if let fixedEngine { return fixedEngine }
+        #if DEBUG
+        if defaults.bool(forKey: SharedKeys.debugPolishRefusalForced) { return DebugRefusingPolishEngine() }
+        #endif
         if let appleFMEngine, PolishAvailability.isAppleFMAvailable {
             return appleFMEngine
         }
@@ -454,7 +457,9 @@ public final class PolishService {
             return PolishOutcome(text: returned ?? raw, engineMs: bundle.engineMs)
         }
         let reason = bundle.failureReason?.slug ?? "-"
-        let degraded = PolishPipeline.degradesToFloor(mode, outcome: bundle.outcome)
+        let degraded = PolishPipeline.degradesToFloor(
+            mode, outcome: bundle.outcome, failureReason: bundle.failureReason
+        )
         // Built before the log line, and the log line reads it: the value the surfaces
         // get and the sentence the export carries then cannot describe two different
         // refusals (#580).
