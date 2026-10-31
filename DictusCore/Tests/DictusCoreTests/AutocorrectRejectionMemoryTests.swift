@@ -21,13 +21,16 @@ final class AutocorrectRejectionMemoryTests: XCTestCase {
     /// The keyboard commits `word` at the end of `context` and the corrector
     /// proposes `correction`.
     private func commit(
-        _ context: String, proposing correction: String?
+        _ context: String, proposing correction: String?, allowsCasingChange: Bool = false
     ) -> AutocorrectRejectionMemory.Decision {
         guard let (prefix, word) = AutocorrectRejectionMemory.wordAtCursor(context: context) else {
             XCTFail("no word at the end of \"\(context)\"")
             return .keep(countUsage: false)
         }
-        return memory.commit(prefix: prefix, word: word, proposedCorrection: correction)
+        return memory.commit(
+            prefix: prefix, word: word, proposedCorrection: correction,
+            allowsCasingChange: allowsCasingChange
+        )
     }
 
     /// Dictus applies `typed` → `corrected` at the end of `context`, which ends with `typed`.
@@ -362,5 +365,38 @@ final class AutocorrectRejectionMemoryTests: XCTestCase {
         XCTAssertNil(AutocorrectRejectionMemory.wordAtCursor(context: "la cuisine "))
         XCTAssertNil(AutocorrectRejectionMemory.wordAtCursor(context: ""))
         XCTAssertNil(AutocorrectRejectionMemory.wordAtCursor(context: nil))
+    }
+
+    // MARK: - Casing from the contacts lexicon (#873)
+
+    /// #873 scenario 14: `le zofiak` + space gives `le Zofiak` for a contact.
+    func testALexiconCasingIsACorrection() {
+        XCTAssertEqual(commit("le zofiak", proposing: "Zofiak", allowsCasingChange: true), .correct)
+    }
+
+    /// Outside the lexicon a casing-only proposal stays no proposal, as in #872.
+    func testACasingOnlyProposalIsNoCorrectionOutsideTheLexicon() {
+        XCTAssertEqual(commit("le zofiak", proposing: "Zofiak"), .keep(countUsage: true))
+    }
+
+    /// `Bonjour. Zofiak`: the word already has the lexicon casing.
+    func testAWordAlreadyInTheLexiconCasingIsKept() {
+        XCTAssertEqual(
+            commit("Bonjour. Zofiak", proposing: "Zofiak", allowsCasingChange: true),
+            .keep(countUsage: true)
+        )
+    }
+
+    /// Erasing into `Zofiak` refuses it, like any correction: `zofiak` typed
+    /// again at that place is kept and learned.
+    func testARefusedLexiconCasingStaysRefused() {
+        XCTAssertEqual(commit("le zofiak", proposing: "Zofiak", allowsCasingChange: true), .correct)
+        memory.correctionApplied(prefix: "le ", corrected: "Zofiak")
+        erase(from: "le Zofiak ", to: "le Zofia")
+        erase(from: "le Zofia", to: "le ")
+        XCTAssertEqual(
+            commit("le zofiak", proposing: "Zofiak", allowsCasingChange: true),
+            .keepAndLearn
+        )
     }
 }

@@ -164,7 +164,7 @@ class SuggestionState: ObservableObject {
                previousWord: previousWord,
                isAtSentenceStart: ProperNounGuard.isAtSentenceStart(context: context, word: partial)
            ),
-           result.correction.lowercased() != partial.lowercased() {
+           isVisibleCorrection(result.correction, of: partial) {
             // Standard mobile layout: [original | correction (bold) | alternative],
             // with a learned word claiming the third slot when it extends what
             // was typed (#346). Slot 1 stays the corrector's — see the comment
@@ -292,7 +292,7 @@ class SuggestionState: ObservableObject {
                     self.suggestions = undoSuggestions
                     self.mode = .undoAvailable
                 } else if let result = spellResult,
-                   result.correction.lowercased() != partial.lowercased() {
+                   self.isVisibleCorrection(result.correction, of: partial) {
                     // Spell correction (standard mobile layout), third slot to a
                     // learned word when one extends the typed prefix (#346).
                     // Same function as the sync path so the two agree.
@@ -333,6 +333,35 @@ class SuggestionState: ObservableObject {
         isAtSentenceStart: Bool = true
     ) -> (correction: String, alternatives: [String])? {
         return engine.spellCheck(word, previousWord: previousWord, isAtSentenceStart: isAtSentenceStart)
+    }
+
+    /// Reads the contacts + text replacements lexicon (#873) and hands it to the
+    /// engine. `requestSupplementaryLexicon` needs neither Contacts permission nor
+    /// Full Access.
+    func refreshSupplementaryLexicon(from controller: UIInputViewController) {
+        controller.requestSupplementaryLexicon { [engine] lexicon in
+            let entries = lexicon.entries.map { (userInput: $0.userInput, documentText: $0.documentText) }
+            let supplementary = SupplementaryLexicon(entries: entries)
+            #if DEBUG
+            AutocorrectDebugLog.note(
+                "lexicon loaded: \(supplementary.shortcutCount) shortcuts, \(supplementary.wordCount) words"
+            )
+            #endif
+            engine.setSupplementaryLexicon(supplementary)
+        }
+    }
+
+    /// Whether the bar previews `correction` for `word`. A casing-only change is
+    /// shown for a lexicon word alone (#873), as the space bar applies it there.
+    private func isVisibleCorrection(_ correction: String, of word: String) -> Bool {
+        correction != word
+            && (correction.lowercased() != word.lowercased() || isInSupplementaryLexicon(word))
+    }
+
+    /// Whether the lexicon decides `word` (#873). The space handler asks so it
+    /// can apply a casing-only replacement (`zofiak` -> "Zofiak").
+    func isInSupplementaryLexicon(_ word: String) -> Bool {
+        engine.lexiconDecision(for: word) != nil
     }
 
     /// Resets the suggestion state to idle.

@@ -204,11 +204,21 @@ public final class AutocorrectRejectionMemory {
     /// nil when it keeps the word. `countable` is false when the caller will not
     /// count the word whatever is decided (autocorrect off, mirror suspect): it is
     /// then not marked as counted, so a later countable commit still counts.
+    ///
+    /// A proposal that only changes the casing is no proposal, unless
+    /// `allowsCasingChange`: the contacts lexicon recases `zofiak` to "Zofiak"
+    /// (#873), the trie never recases.
     public func commit(
-        prefix: Substring, word: String, proposedCorrection: String?, countable: Bool = true
+        prefix: Substring,
+        word: String,
+        proposedCorrection: String?,
+        countable: Bool = true,
+        allowsCasingChange: Bool = false
     ) -> Decision {
         let key = Self.positionKey(prefix: prefix)
-        let proposes = proposedCorrection.map { $0.lowercased() != word.lowercased() } ?? false
+        let proposes = proposedCorrection.map {
+            $0 != word && ($0.lowercased() != word.lowercased() || allowsCasingChange)
+        } ?? false
 
         if proposes {
             if rejected.contains(key) {

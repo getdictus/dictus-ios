@@ -922,7 +922,8 @@ final class DictusKeyboardBridge: NSObject,
 
         switch memory.commit(
             prefix: prefix, word: freshWord, proposedCorrection: proposal,
-            countable: wordWasEvaluated
+            countable: wordWasEvaluated,
+            allowsCasingChange: proposal != nil && state.isInSupplementaryLexicon(freshWord)
         ) {
         case .correct:
             guard let correction = proposal else { return false }
