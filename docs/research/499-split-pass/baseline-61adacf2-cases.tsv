@@ -1,0 +1,679 @@
+id	lang	category	typed	expected	result	outcome	cause	start_result	start_outcome	typed_in_trie	left_in_trie	right_in_trie	bigram	left_followers_full
+fr-observed-001	fr	observed	pasmal	pas mal	pas mal	split-correct		Pas mal	split-correct	false	true	true	15814	true
+fr-observed-002	fr	observed	jesuis	je suis	je suis	split-correct		Je suis	split-correct	false	true	true	56609	true
+fr-observed-003	fr	observed	bonjourmonsieur	bonjour monsieur	bonjour monsieur	split-correct		Bonjour monsieur	split-correct	false	true	true	28388	true
+fr-observed-004	fr	observed	cavient	ça vient	cabinet	replaced	other:needs-more-than-a-space	Cabinet	replaced	false	true	true	0	true
+fr-observed-005	fr	observed	motsuivant	mot suivant	poursuivant	replaced	no-bigram:left-word-followers-full	Poursuivant	replaced	false	true	true	0	true
+fr-observed-006	fr	observed	jepense	je pense	je pense	split-correct		Je pense	split-correct	false	true	true	50033	true
+fr-observed-007	fr	observed	pasnmal	pas mal	pas mal	split-correct		Pas mal	split-correct	false	true	true	15814	true
+fr-observed-008	fr	observed	surtoutdune	surtout d'une		nothing	other:needs-more-than-a-space		nothing	false	true	false	0	true
+fr-missed-space-001	fr	missed-space	decette	de cette	recette	replaced	part-too-short	Recette	replaced	false	true	true	56196	true
+fr-missed-space-002	fr	missed-space	unebalayeuse	une balayeuse		nothing	part-not-in-dictionary		nothing	false	true	false	0	true
+fr-missed-space-003	fr	missed-space	sensvraiment	sens vraiment	se vraiment	wrong-split	no-bigram:left-word-followers-full	Se vraiment	wrong-split	false	true	true	0	true
+fr-missed-space-004	fr	missed-space	lapiscine	la piscine	piscine	replaced	no-bigram:left-word-followers-full	Piscine	replaced	false	true	true	0	true
+fr-missed-space-005	fr	missed-space	pasrater	pas rater	passager	replaced	no-bigram:left-word-followers-full	Passager	replaced	false	true	true	0	true
+fr-missed-space-006	fr	missed-space	lemonde	le monde	le monde	split-correct		Le monde	split-correct	false	true	true	54949	true
+fr-missed-space-007	fr	missed-space	lesrecherches	les recherches		nothing	no-bigram:left-word-followers-full		nothing	false	true	true	0	true
+fr-missed-space-008	fr	missed-space	enmeilleure	en meilleure	meilleure	replaced	no-bigram:left-word-followers-full	Meilleure	replaced	false	true	true	0	true
+fr-missed-space-009	fr	missed-space	ellevous	elle vous	enlevons	replaced	no-bigram:left-word-followers-full	Enlevons	replaced	false	true	true	0	true
+fr-missed-space-010	fr	missed-space	lasemaine	la semaine	semaine	replaced	no-bigram:left-word-followers-full	Semaine	replaced	false	true	true	0	true
+fr-missed-space-011	fr	missed-space	celate	cela te	croate	replaced	no-bigram:left-word-followers-full	Croate	replaced	false	true	true	0	true
+fr-missed-space-012	fr	missed-space	pascru	pas cru	accru	replaced	no-bigram:left-word-followers-full	Accru	replaced	false	true	true	0	true
+fr-missed-space-013	fr	missed-space	mêmede	même de	mémère	replaced	part-too-short	Mémère	replaced	false	true	true	50418	true
+fr-missed-space-014	fr	missed-space	payerpour	payer pour	payer pour	split-correct		Payer pour	split-correct	false	true	true	14973	true
+fr-missed-space-015	fr	missed-space	réussirdans	réussir dans	réussir dans	split-correct		Réussir dans	split-correct	false	true	true	11418	true
+fr-missed-space-016	fr	missed-space	prendscomme	prends comme		nothing	no-bigram:left-word-followers-full		nothing	false	true	true	0	true
+fr-missed-space-017	fr	missed-space	setrouve	se trouve	se trouve	split-correct		Se trouve	split-correct	false	true	true	51082	true
+fr-missed-space-018	fr	missed-space	ditmon	dit mon	citron	replaced	no-bigram:left-word-followers-full	Citron	replaced	false	true	true	0	true
+fr-missed-space-019	fr	missed-space	appeléleur	appelé leur		nothing	no-bigram:left-word-followers-full		nothing	false	true	true	0	true
+fr-missed-space-020	fr	missed-space	corpssain	corps sain		nothing	no-bigram:left-word-followers-full		nothing	false	true	true	0	true
+fr-missed-space-021	fr	missed-space	dufrançais	du français	français	replaced	no-bigram:left-word-followers-full	Français	replaced	false	true	true	0	true
+fr-missed-space-022	fr	missed-space	despluies	des pluies		nothing	no-bigram:left-word-followers-full		nothing	false	true	true	0	true
+fr-missed-space-023	fr	missed-space	mauvaisgarçon	mauvais garçon		nothing	no-bigram:left-word-followers-full		nothing	false	true	true	0	true
+fr-missed-space-024	fr	missed-space	ilpense	il pense	immense	replaced	no-bigram:left-word-followers-full	Immense	replaced	false	true	true	0	true
+fr-missed-space-025	fr	missed-space	avendu	a vendu	vendu	replaced	part-too-short	Vendu	replaced	false	true	true	0	true
+fr-missed-space-026	fr	missed-space	surune	sur une	sur une	split-correct		Sur une	split-correct	false	true	true	52971	true
+fr-missed-space-027	fr	missed-space	construitune	construit une	construit une	split-correct		Construit une	split-correct	false	true	true	12808	true
+fr-missed-space-028	fr	missed-space	lacompassion	la compassion	compassion	replaced	no-bigram:left-word-followers-full	Compassion	replaced	false	true	true	0	true
+fr-missed-space-029	fr	missed-space	unbain	un bain	urbain	replaced	no-bigram:left-word-followers-full	Urbain	replaced	false	true	true	0	true
+fr-missed-space-030	fr	missed-space	frissonnaà	frissonna à	frissonna	replaced	part-too-short	Frissonna	replaced	false	true	true	0	false
+fr-missed-space-031	fr	missed-space	leraconter	le raconter	raconter	replaced	no-bigram:left-word-followers-full	Raconter	replaced	false	true	true	0	true
+fr-missed-space-032	fr	missed-space	àcette	à cette	cette	replaced	part-too-short	Cette	replaced	false	true	true	53220	true
+fr-missed-space-033	fr	missed-space	malheureusementpas	malheureusement pas	malheureusement pas	split-correct		Malheureusement pas	split-correct	false	true	true	12808	true
+fr-missed-space-034	fr	missed-space	suisallé	suis allé		nothing	no-bigram:left-word-followers-full		nothing	false	true	true	0	true
+fr-missed-space-035	fr	missed-space	résoudrece	résoudre ce	résoudre ce	split-correct		Résoudre ce	split-correct	false	true	true	16884	true
+fr-missed-space-036	fr	missed-space	nesuis	ne suis	ne suis	split-correct		Ne suis	split-correct	false	true	true	50478	true
+fr-missed-space-037	fr	missed-space	vitela	vite la	vite la	split-correct		Vite la	split-correct	false	true	true	10744	true
+fr-missed-space-038	fr	missed-space	oùtu	où tu	où tu	split-correct		Où tu	split-correct	false	true	true	44833	true
+fr-missed-space-039	fr	missed-space	autennis	au tennis	antennes	replaced	no-bigram:left-word-followers-full	Antennes	replaced	false	true	true	0	true
+fr-missed-space-040	fr	missed-space	toujoursun	toujours un	toujours un	split-correct		Toujours un	split-correct	false	true	true	45066	true
+fr-missed-space-041	fr	missed-space	conseillede	conseille de	conseillère	replaced	part-too-short	Conseillère	replaced	false	true	true	13405	true
+fr-missed-space-042	fr	missed-space	étédifficile	été difficile		nothing	no-bigram:left-word-followers-full		nothing	false	true	true	0	true
+fr-missed-space-043	fr	missed-space	plutoute	plu toute	moumoute	replaced	no-bigram:left-word-has-room	Moumoute	replaced	false	true	true	0	false
+fr-missed-space-044	fr	missed-space	esten	est en	est en	split-correct		Est en	split-correct	false	true	true	51753	true
+fr-missed-space-045	fr	missed-space	grêlonsont	grêlons ont		nothing	no-bigram:left-word-has-room		nothing	false	true	true	0	false
+fr-missed-space-046	fr	missed-space	mehâte	me hâte	ménage	replaced	no-bigram:left-word-followers-full	Ménage	replaced	false	true	true	0	true
+fr-missed-space-047	fr	missed-space	doitregretter	doit regretter		nothing	no-bigram:left-word-followers-full		nothing	false	true	true	0	true
+fr-missed-space-048	fr	missed-space	àtout	à tout	tout	replaced	part-too-short	Tout	replaced	false	true	true	0	true
+fr-missed-space-049	fr	missed-space	nepeut	ne peut	ne peut	split-correct		Ne peut	split-correct	false	true	true	54313	true
+fr-missed-space-050	fr	missed-space	ungénocide	un génocide	génocide	replaced	no-bigram:left-word-followers-full	Génocide	replaced	false	true	true	0	true
+fr-missed-space-051	fr	missed-space	necompte	ne compte	recompte	replaced	no-bigram:left-word-followers-full	Recompte	replaced	false	true	true	0	true
+fr-missed-space-052	fr	missed-space	allergiqueaux	allergique aux		nothing	no-bigram:left-word-has-room		nothing	false	true	true	0	false
+fr-missed-space-053	fr	missed-space	montexte	mon texte	contexte	replaced	no-bigram:left-word-followers-full	Contexte	replaced	false	true	true	0	true
+fr-missed-space-054	fr	missed-space	unmessage	un message	message	replaced	no-bigram:left-word-followers-full	Message	replaced	false	true	true	0	true
+fr-missed-space-055	fr	missed-space	unjour	un jour	un jour	split-correct		Un jour	split-correct	false	true	true	51748	true
+fr-missed-space-056	fr	missed-space	ditespeut	dites peut		nothing	no-bigram:left-word-followers-full		nothing	false	true	true	0	true
+fr-missed-space-057	fr	missed-space	personnesâgées	personnes âgées	perso usagées	wrong-split	other:another-split-won	Perso usagées	wrong-split	false	true	true	17282	true
+fr-missed-space-058	fr	missed-space	estplus	est plus	est plus	split-correct		Est plus	split-correct	false	true	true	49509	true
+fr-missed-space-059	fr	missed-space	peutle	peut le	peut le	split-correct		Peut le	split-correct	false	true	true	25910	true
+fr-missed-space-060	fr	missed-space	unrhume	un rhume	enrhume	replaced	no-bigram:left-word-followers-full	Enrhume	replaced	false	true	true	0	true
+fr-missed-space-061	fr	missed-space	revenude	revenu de	revenue	replaced	part-too-short	Revenue	replaced	false	true	true	13914	true
+fr-missed-space-062	fr	missed-space	quandmême	quand même	quand même	split-correct		Quand même	split-correct	false	true	true	49127	true
+fr-missed-space-063	fr	missed-space	arendu	a rendu	rendu	replaced	part-too-short	Rendu	replaced	false	true	true	0	true
+fr-missed-space-064	fr	missed-space	vousprêter	vous prêter		nothing	no-bigram:left-word-followers-full		nothing	false	true	true	0	true
+fr-missed-space-065	fr	missed-space	ditça	dit ça	dit ça	split-correct		Dit ça	split-correct	false	true	true	32815	true
+fr-missed-space-066	fr	missed-space	pluridisciplinaireset	pluridisciplinaires et		nothing	part-not-in-dictionary		nothing	false	false	true	0	false
+fr-missed-space-067	fr	missed-space	vosfaiblesses	vos faiblesses		nothing	no-bigram:left-word-followers-full		nothing	false	true	true	0	true
+fr-missed-space-068	fr	missed-space	refouléset	refoulés et		nothing	part-not-in-dictionary		nothing	false	false	true	0	false
+fr-missed-space-069	fr	missed-space	dubruit	du bruit	détruit	replaced	no-bigram:left-word-followers-full	Détruit	replaced	false	true	true	0	true
+fr-missed-space-070	fr	missed-space	aucrayon	au crayon	crayon	replaced	no-bigram:left-word-followers-full	Crayon	replaced	false	true	true	0	true
+fr-missed-space-071	fr	missed-space	vagabondantpar	vagabondant par		nothing	part-not-in-dictionary		nothing	false	false	true	0	false
+fr-missed-space-072	fr	missed-space	autrechose	autre chose	autre chose	split-correct		Autre chose	split-correct	false	true	true	48995	true
+fr-missed-space-073	fr	missed-space	queje	que je	que je	split-correct		Que je	split-correct	false	true	true	58517	true
+fr-missed-space-074	fr	missed-space	tousles	tous les	tous les	split-correct		Tous les	split-correct	false	true	true	57265	true
+fr-missed-space-075	fr	missed-space	estégalement	est également		nothing	no-bigram:left-word-followers-full		nothing	false	true	true	0	true
+fr-missed-space-076	fr	missed-space	àprendre	à prendre	prendre	replaced	part-too-short	Prendre	replaced	false	true	true	0	true
+fr-missed-space-077	fr	missed-space	vaislui	vais lui	vais lui	split-correct		Vais lui	split-correct	false	true	true	27282	true
+fr-missed-space-078	fr	missed-space	sije	si je	si je	split-correct		Si je	split-correct	false	true	true	52055	true
+fr-missed-space-079	fr	missed-space	voixsuave	voix suave		nothing	no-bigram:left-word-followers-full		nothing	false	true	true	0	true
+fr-missed-space-080	fr	missed-space	danston	dans ton	caneton	replaced	no-bigram:left-word-followers-full	Caneton	replaced	false	true	true	0	true
+fr-missed-space-081	fr	missed-space	sureux	sur eux	heureux	replaced	no-bigram:left-word-followers-full	Heureux	replaced	false	true	true	0	true
+fr-missed-space-082	fr	missed-space	plusde	plus de	pousse	replaced	part-too-short	Pousse	replaced	false	true	true	54964	true
+fr-missed-space-083	fr	missed-space	estde	est de	entre	replaced	part-too-short	Entre	replaced	false	true	true	52553	true
+fr-missed-space-084	fr	missed-space	mâchédes	mâché des	mâchefer	replaced	no-bigram:left-word-has-room	Mâchefer	replaced	false	true	true	0	false
+fr-missed-space-085	fr	missed-space	proprefils	propre fils		nothing	no-bigram:left-word-followers-full		nothing	false	true	true	0	true
+fr-missed-space-086	fr	missed-space	avonsde	avons de	abonde	replaced	part-too-short	Abonde	replaced	false	true	true	0	true
+fr-missed-space-087	fr	missed-space	véritablemotif	véritable motif		nothing	no-bigram:left-word-followers-full		nothing	false	true	true	0	true
+fr-missed-space-088	fr	missed-space	mepermets	me permets	permets	replaced	no-bigram:left-word-followers-full	Permets	replaced	false	true	true	0	true
+fr-missed-space-089	fr	missed-space	ditque	dit que	dit que	split-correct		Dit que	split-correct	false	true	true	50706	true
+fr-missed-space-090	fr	missed-space	ducorps	du corps	du corps	split-correct		Du corps	split-correct	false	true	true	49612	true
+fr-missed-space-091	fr	missed-space	nepeux	ne peux	ne peux	split-correct		Ne peux	split-correct	false	true	true	50047	true
+fr-missed-space-092	fr	missed-space	deharicots	de haricots	haricots	replaced	part-too-short	Haricots	replaced	false	true	true	0	true
+fr-missed-space-093	fr	missed-space	detéléphone	de téléphone	téléphone	replaced	part-too-short	Téléphone	replaced	false	true	true	0	true
+fr-missed-space-094	fr	missed-space	repérerla	repérer la	repérer la	split-correct		Repérer la	split-correct	false	true	true	12465	true
+fr-missed-space-095	fr	missed-space	rique	ri que	risque	replaced	part-too-short	Risque	replaced	false	true	true	0	false
+fr-missed-space-096	fr	missed-space	soyezpas	soyez pas	soyez pas	split-correct		Soyez pas	split-correct	false	true	true	24724	true
+fr-missed-space-097	fr	missed-space	accourenttous	accourent tous		nothing	no-bigram:left-word-has-room		nothing	false	true	true	0	false
+fr-missed-space-098	fr	missed-space	retourneraià	retournerai à	retournerai	replaced	part-too-short	Retournerai	replaced	false	true	true	0	false
+fr-missed-space-099	fr	missed-space	detemps	de temps	temps	replaced	part-too-short	Temps	replaced	false	true	true	0	true
+fr-missed-space-100	fr	missed-space	retientéveillé	retient éveillé		nothing	no-bigram:left-word-followers-full		nothing	false	true	true	0	true
+fr-missed-space-101	fr	missed-space	chosesous	chose sous		nothing	no-bigram:left-word-followers-full		nothing	false	true	true	0	true
+fr-missed-space-102	fr	missed-space	nesommes	ne sommes	assommés	replaced	no-bigram:left-word-followers-full	Assommés	replaced	false	true	true	0	true
+fr-missed-space-103	fr	missed-space	monentendement	mon entendement		nothing	no-bigram:left-word-followers-full		nothing	false	true	true	0	true
+fr-missed-space-104	fr	missed-space	lebardot	le bardot	le argot	wrong-split	part-not-in-dictionary	Le argot	wrong-split	false	true	false	0	true
+fr-missed-space-105	fr	missed-space	prêtsà	prêts à	prêts	replaced	part-too-short	Prêts	replaced	false	true	true	45157	true
+fr-missed-space-106	fr	missed-space	samémoire	sa mémoire	mémoire	replaced	part-too-short	Mémoire	replaced	false	true	true	0	true
+fr-missed-space-107	fr	missed-space	etle	et le	et le	split-correct		Et le	split-correct	false	true	true	58311	true
+fr-missed-space-108	fr	missed-space	tempsde	temps de	tempête	replaced	part-too-short	Tempête	replaced	false	true	true	52330	true
+fr-missed-space-109	fr	missed-space	estdans	est dans	dedans	replaced	no-bigram:left-word-followers-full	Dedans	replaced	false	true	true	0	true
+fr-missed-space-110	fr	missed-space	jeparle	je parle	reparle	replaced	no-bigram:left-word-followers-full	Reparle	replaced	false	true	true	0	true
+fr-missed-space-111	fr	missed-space	peuxpas	peux pas	peux pas	split-correct		Peux pas	split-correct	false	true	true	48705	true
+fr-missed-space-112	fr	missed-space	cachéça	caché ça	cachera	replaced	no-bigram:left-word-followers-full	Cachera	replaced	false	true	true	0	true
+fr-missed-space-113	fr	missed-space	hurlenttoujours	hurlent toujours	hurle toujours	wrong-split	no-bigram:left-word-has-room	Hurle toujours	wrong-split	false	true	true	0	false
+fr-missed-space-114	fr	missed-space	soufflaitdans	soufflait dans		nothing	no-bigram:left-word-has-room		nothing	false	true	true	0	false
+fr-missed-space-115	fr	missed-space	doissortir	dois sortir	dois sortir	split-correct		Dois sortir	split-correct	false	true	true	23957	true
+fr-missed-space-116	fr	missed-space	crapaudset	crapauds et	crapauds et	split-correct		Crapauds et	split-correct	false	true	true	7125	false
+fr-missed-space-117	fr	missed-space	plantéla	planté la	planté la	split-correct		Planté la	split-correct	false	true	true	3764	false
+fr-missed-space-118	fr	missed-space	unecertaine	une certaine	une certaine	split-correct		Une certaine	split-correct	false	true	true	50555	true
+fr-missed-space-119	fr	missed-space	dutravail	du travail	du travail	split-correct		Du travail	split-correct	false	true	true	50770	true
+fr-missed-space-120	fr	missed-space	quetu	que tu	que tu	split-correct		Que tu	split-correct	false	true	true	55661	true
+fr-missed-space-121	fr	missed-space	enterminale	en terminale	terminale	replaced	no-bigram:left-word-followers-full	Terminale	replaced	false	true	true	0	true
+fr-missed-space-122	fr	missed-space	planeest	plane est	plantes	replaced	no-bigram:left-word-followers-full	Plantes	replaced	false	true	true	0	true
+fr-missed-space-123	fr	missed-space	demal	de mal	deal	replaced	part-too-short	Deal	replaced	false	true	true	0	true
+fr-missed-space-124	fr	missed-space	besoinde	besoin de	besoins	replaced	part-too-short	Besoins	replaced	false	true	true	52279	true
+fr-missed-space-125	fr	missed-space	lamanière	la manière	manière	replaced	no-bigram:left-word-followers-full	Manière	replaced	false	true	true	0	true
+fr-missed-space-126	fr	missed-space	copiesde	copies de	comtesse	replaced	part-too-short	Comtesse	replaced	false	true	true	14795	true
+fr-missed-space-127	fr	missed-space	rarementà	rarement à	rarement	replaced	part-too-short	Rarement	replaced	false	true	true	10890	true
+fr-missed-space-128	fr	missed-space	villefurent	ville furent		nothing	no-bigram:left-word-followers-full		nothing	false	true	true	0	true
+fr-missed-space-129	fr	missed-space	résoudrele	résoudre le	résoudre le	split-correct		Résoudre le	split-correct	false	true	true	18574	true
+fr-missed-space-130	fr	missed-space	jamaisvu	jamais vu	jamais	replaced	part-too-short	Jamais	replaced	false	true	true	45447	true
+fr-missed-space-131	fr	missed-space	contentde	content de	conte de	wrong-split	part-too-short	Conte de	wrong-split	false	true	true	30207	true
+fr-missed-space-132	fr	missed-space	partirde	partir de	partirez	replaced	part-too-short	Partirez	replaced	false	true	true	52009	true
+fr-missed-space-133	fr	missed-space	toutà	tout à	tout	replaced	part-too-short	Tout	replaced	false	true	true	52876	true
+fr-missed-space-134	fr	missed-space	poupéeà	poupée à	poupée	replaced	part-too-short	Poupée	replaced	false	true	true	0	false
+fr-missed-space-135	fr	missed-space	moinsde	moins de	moi de	wrong-split	part-too-short	Moi de	wrong-split	false	true	true	50451	true
+fr-missed-space-136	fr	missed-space	douleurlorsque	douleur lorsque		nothing	no-bigram:left-word-followers-full		nothing	false	true	true	0	true
+fr-missed-space-137	fr	missed-space	agirà	agir à	agira	replaced	part-too-short	Agira	replaced	false	true	true	12183	true
+fr-missed-space-138	fr	missed-space	cetélève	cet élève		nothing	no-bigram:left-word-followers-full		nothing	false	true	true	0	true
+fr-missed-space-139	fr	missed-space	toujoursfatigué	toujours fatigué		nothing	no-bigram:left-word-followers-full		nothing	false	true	true	0	true
+fr-missed-space-140	fr	missed-space	sonoisiveté	son oisiveté		nothing	no-bigram:left-word-followers-full		nothing	false	true	true	0	true
+fr-missed-space-141	fr	missed-space	adolescentsi	adolescent si	adolescents	replaced	no-bigram:left-word-followers-full	Adolescents	replaced	false	true	true	0	true
+fr-missed-space-142	fr	missed-space	sonbateau	son bateau	son bateau	split-correct		Son bateau	split-correct	false	true	true	0	true
+fr-missed-space-143	fr	missed-space	icipour	ici pour		nothing	no-bigram:left-word-followers-full		nothing	false	true	true	0	true
+fr-missed-space-144	fr	missed-space	sonparapluie	son parapluie		nothing	no-bigram:left-word-followers-full		nothing	false	true	true	0	true
+fr-missed-space-145	fr	missed-space	pourraitorganiser	pourrait organiser		nothing	no-bigram:left-word-followers-full		nothing	false	true	true	0	true
+fr-missed-space-146	fr	missed-space	leursparapluies	leurs parapluies		nothing	no-bigram:left-word-followers-full		nothing	false	true	true	0	true
+fr-missed-space-147	fr	missed-space	hontequand	honte quand		nothing	no-bigram:left-word-followers-full		nothing	false	true	true	0	true
+fr-missed-space-148	fr	missed-space	unehistoire	une histoire		nothing	no-bigram:left-word-followers-full		nothing	false	true	true	0	true
+fr-missed-space-149	fr	missed-space	pasdire	pas dire	passiez	replaced	no-bigram:left-word-followers-full	Passiez	replaced	false	true	true	0	true
+fr-missed-space-150	fr	missed-space	étaitinterdit	était interdit		nothing	no-bigram:left-word-followers-full		nothing	false	true	true	0	true
+fr-neighbour-key-001	fr	neighbour-key	unnde	un de	inonde	replaced	part-too-short	Inonde	replaced	false	true	true	51161	true
+fr-neighbour-key-002	fr	neighbour-key	nousbavons	nous avons	nous avons	split-correct		Nous avons	split-correct	false	true	true	54072	true
+fr-neighbour-key-003	fr	neighbour-key	toujoursnprendre	toujours prendre	toujours prendre	split-correct		Toujours prendre	split-correct	false	true	true	0	true
+fr-neighbour-key-004	fr	neighbour-key	debvotre	de votre		nothing	part-too-short		nothing	false	true	true	0	true
+fr-neighbour-key-005	fr	neighbour-key	demandenà	demande à	demandent	replaced	part-too-short	Demandent	replaced	false	true	true	44734	true
+fr-neighbour-key-006	fr	neighbour-key	payerben	payer en	payer en	split-correct		Payer en	split-correct	false	true	true	9904	true
+fr-neighbour-key-007	fr	neighbour-key	lesnfenêtres	les fenêtres	les fenêtres	split-correct		Les fenêtres	split-correct	false	true	true	0	true
+fr-neighbour-key-008	fr	neighbour-key	saventbbien	savent bien	savent bien	split-correct		Savent bien	split-correct	false	true	true	11538	true
+fr-neighbour-key-009	fr	neighbour-key	anfélicité	a félicité	félicité	replaced	part-too-short	Félicité	replaced	false	true	true	0	true
+fr-neighbour-key-010	fr	neighbour-key	pourbla	pour la	pour la	split-correct		Pour la	split-correct	false	true	true	56375	true
+fr-neighbour-key-011	fr	neighbour-key	étaitntrop	était trop	était trop	split-correct		Était trop	split-correct	false	true	true	45490	true
+fr-neighbour-key-012	fr	neighbour-key	vousbsuggère	vous suggère	vous suggère	split-correct		Vous suggère	split-correct	false	true	true	0	true
+fr-neighbour-key-013	fr	neighbour-key	quenvous	que vous	que vous	split-correct		Que vous	split-correct	false	true	true	55753	true
+fr-neighbour-key-014	fr	neighbour-key	estbune	est une	est une	split-correct		Est une	split-correct	false	true	true	53065	true
+fr-neighbour-key-015	fr	neighbour-key	celanavec	cela avec	cela avec	split-correct		Cela avec	split-correct	false	true	true	0	true
+fr-neighbour-key-016	fr	neighbour-key	debchose	de chose		nothing	part-too-short		nothing	false	true	true	0	true
+fr-neighbour-key-017	fr	neighbour-key	égalementnremarqué	également remarqué	également remarqué	split-correct		Également remarqué	split-correct	false	true	true	0	true
+fr-neighbour-key-018	fr	neighbour-key	faitbtout	fait tout	fait tout	split-correct		Fait tout	split-correct	false	true	true	0	true
+fr-neighbour-key-019	fr	neighbour-key	ancouvert	a couvert	découvert	replaced	part-too-short	Découvert	replaced	false	true	true	0	true
+fr-neighbour-key-020	fr	neighbour-key	évitezbles	évitez les	évitez les	split-correct		Évitez les	split-correct	false	true	true	11030	false
+fr-neighbour-key-021	fr	neighbour-key	lanrue	la rue	langue	replaced	correction-preferred	Langue	replaced	false	true	true	0	true
+fr-neighbour-key-022	fr	neighbour-key	êtrebpréservés	être préservés	être préservée	wrong-split	part-not-in-dictionary	Être préservée	wrong-split	false	true	false	0	true
+fr-neighbour-key-023	fr	neighbour-key	sendoit	se doit	se doit	split-correct		Se doit	split-correct	false	true	true	0	true
+fr-neighbour-key-024	fr	neighbour-key	contrariezbpas	contrariez pas		nothing	part-not-in-dictionary		nothing	false	false	true	0	false
+fr-neighbour-key-025	fr	neighbour-key	monnami	mon ami	mon ami	split-correct		Mon ami	split-correct	false	true	true	46316	true
+fr-neighbour-key-026	fr	neighbour-key	bonbnombre	bon nombre	bon nombre	split-correct		Bon nombre	split-correct	false	true	true	0	true
+fr-neighbour-key-027	fr	neighbour-key	formesnles	formes les	formes les	split-correct		Formes les	split-correct	false	true	true	13119	true
+fr-neighbour-key-028	fr	neighbour-key	remplacerbavantageusement	remplacer avantageusement	remplacer avantageusement	split-correct		Remplacer avantageusement	split-correct	false	true	true	0	true
+fr-neighbour-key-029	fr	neighbour-key	fairenun	faire un	faire un	split-correct		Faire un	split-correct	false	true	true	49579	true
+fr-neighbour-key-030	fr	neighbour-key	réglerbcet	régler cet	régler cet	split-correct		Régler cet	split-correct	false	true	true	0	true
+fr-neighbour-key-031	fr	neighbour-key	voyagenen	voyage en	voyage en	split-correct		Voyage en	split-correct	false	true	true	17737	true
+fr-neighbour-key-032	fr	neighbour-key	avoirbun	avoir un	avoir un	split-correct		Avoir un	split-correct	false	true	true	48036	true
+fr-neighbour-key-033	fr	neighbour-key	conditionsnmétéorologiques	conditions météorologiques	conditions météorologiques	split-correct		Conditions météorologiques	split-correct	false	true	true	16347	true
+fr-neighbour-key-034	fr	neighbour-key	coûterabbeaucoup	coûtera beaucoup	coûtera beaucoup	split-correct		Coûtera beaucoup	split-correct	false	true	true	0	false
+fr-neighbour-key-035	fr	neighbour-key	suisnun	suis un	suis un	split-correct		Suis un	split-correct	false	true	true	45323	true
+fr-neighbour-key-036	fr	neighbour-key	debserre	de serre	desserre	replaced	part-too-short	Desserre	replaced	false	true	true	0	true
+fr-neighbour-key-037	fr	neighbour-key	pournune	pour une	pour une	split-correct		Pour une	split-correct	false	true	true	52740	true
+fr-neighbour-key-038	fr	neighbour-key	absentbà	absent à	absenté	replaced	part-too-short	Absenté	replaced	false	true	true	0	true
+fr-neighbour-key-039	fr	neighbour-key	quenje	que je	que je	split-correct		Que je	split-correct	false	true	true	58517	true
+fr-neighbour-key-040	fr	neighbour-key	unebchance	une chance	une chance	split-correct		Une chance	split-correct	false	true	true	0	true
+fr-neighbour-key-041	fr	neighbour-key	parlernà	parler à	parlera	replaced	part-too-short	Parlera	replaced	false	true	true	45122	true
+fr-neighbour-key-042	fr	neighbour-key	lablettre	la lettre	la lettre	split-correct		La lettre	split-correct	false	true	true	0	true
+fr-neighbour-key-043	fr	neighbour-key	soiréenpour	soirée pour	soirée pour	split-correct		Soirée pour	split-correct	false	true	true	0	true
+fr-neighbour-key-044	fr	neighbour-key	damebblanche	dame blanche	dame blanche	split-correct		Dame blanche	split-correct	false	true	true	9500	true
+fr-neighbour-key-045	fr	neighbour-key	pasnbesoin	pas besoin	pas besoin	split-correct		Pas besoin	split-correct	false	true	true	0	true
+fr-neighbour-key-046	fr	neighbour-key	estbrefusée	est refusée	est refusée	split-correct		Est refusée	split-correct	false	true	true	0	true
+fr-neighbour-key-047	fr	neighbour-key	parncomprendre	par comprendre	par comprendre	split-correct		Par comprendre	split-correct	false	true	true	0	true
+fr-neighbour-key-048	fr	neighbour-key	deuxbobjets	deux objets	deux objets	split-correct		Deux objets	split-correct	false	true	true	0	true
+fr-neighbour-key-049	fr	neighbour-key	unenautre	une autre	une autre	split-correct		Une autre	split-correct	false	true	true	52977	true
+fr-neighbour-key-050	fr	neighbour-key	sebrévélera	se révélera	se révélera	split-correct		Se révélera	split-correct	false	true	true	0	true
+fr-neighbour-key-051	fr	neighbour-key	révèlenla	révèle la	révèle la	split-correct		Révèle la	split-correct	false	true	true	12808	true
+fr-neighbour-key-052	fr	neighbour-key	mebsuis	me suis	me suis	split-correct		Me suis	split-correct	false	true	true	51530	true
+fr-neighbour-key-053	fr	neighbour-key	jamaisnà	jamais à	jamais	replaced	part-too-short	Jamais	replaced	false	true	true	18207	true
+fr-neighbour-key-054	fr	neighbour-key	probablementbpas	probablement pas	probablement pas	split-correct		Probablement pas	split-correct	false	true	true	24965	true
+fr-neighbour-key-055	fr	neighbour-key	faitntard	fait tard	fait tard	split-correct		Fait tard	split-correct	false	true	true	0	true
+fr-neighbour-key-056	fr	neighbour-key	desbbiscuits	des biscuits	des biscuits	split-correct		Des biscuits	split-correct	false	true	true	0	true
+fr-neighbour-key-057	fr	neighbour-key	phrasesnen	phrases en	phrases en	split-correct		Phrases en	split-correct	false	true	true	10890	true
+fr-neighbour-key-058	fr	neighbour-key	pasbà	pas à	passa	replaced	part-too-short	Passa	replaced	false	true	true	54510	true
+fr-neighbour-key-059	fr	neighbour-key	denla	de la	cela	replaced	part-too-short	Cela	replaced	false	true	true	65535	true
+fr-neighbour-key-060	fr	neighbour-key	chezbeux	chez eux	chez eux	split-correct		Chez eux	split-correct	false	true	true	45311	true
+fr-neighbour-key-061	fr	neighbour-key	denmerveilleux	de merveilleux		nothing	part-too-short		nothing	false	true	true	0	true
+fr-neighbour-key-062	fr	neighbour-key	donnébde	donné de	données	replaced	part-too-short	Données	replaced	false	true	true	16490	true
+fr-neighbour-key-063	fr	neighbour-key	lantélévision	la télévision	la télévision	split-correct		La télévision	split-correct	false	true	true	0	true
+fr-neighbour-key-064	fr	neighbour-key	sontbhabitées	sont habitées	sont habites	wrong-split	part-not-in-dictionary	Sont habites	wrong-split	false	true	false	0	true
+fr-neighbour-key-065	fr	neighbour-key	pournêtre	pour être	pour être	split-correct		Pour être	split-correct	false	true	true	49962	true
+fr-neighbour-key-066	fr	neighbour-key	comprendrebune	comprendre une	comprendre une	split-correct		Comprendre une	split-correct	false	true	true	0	true
+fr-neighbour-key-067	fr	neighbour-key	punrien	pu rien	pubien	replaced	part-too-short	Pubien	replaced	false	true	true	0	true
+fr-neighbour-key-068	fr	neighbour-key	abquelques	a quelques	quelques	replaced	part-too-short	Quelques	replaced	false	true	true	0	true
+fr-neighbour-key-069	fr	neighbour-key	pasnde	pas de	passe	replaced	part-too-short	Passe	replaced	false	true	true	56328	true
+fr-neighbour-key-070	fr	neighbour-key	toutbet	tout et	tout et	split-correct		Tout et	split-correct	false	true	true	0	true
+fr-neighbour-key-071	fr	neighbour-key	cettenodeur	cette odeur	cette odeur	split-correct		Cette odeur	split-correct	false	true	true	0	true
+fr-neighbour-key-072	fr	neighbour-key	difficilebest	difficile est	difficile est	split-correct		Difficile est	split-correct	false	true	true	0	true
+fr-neighbour-key-073	fr	neighbour-key	venuesnassister	venues assister	venues assister	split-correct		Venues assister	split-correct	false	true	true	3764	true
+fr-neighbour-key-074	fr	neighbour-key	lesblégumes	les légumes	les légumes	split-correct		Les légumes	split-correct	false	true	true	0	true
+fr-neighbour-key-075	fr	neighbour-key	lanvoiler	la voiler	la voiler	split-correct		La voiler	split-correct	false	true	true	0	true
+fr-legit-compound-001	fr	legit-compound	financièrement	financièrement		kept			kept	true				
+fr-legit-compound-002	fr	legit-compound	apporteras	apporteras		kept			kept	true				
+fr-legit-compound-003	fr	legit-compound	prévenons	prévenons		kept			kept	true				
+fr-legit-compound-004	fr	legit-compound	serviras	serviras		kept			kept	true				
+fr-legit-compound-005	fr	legit-compound	bienfait	bienfait		kept			kept	true				
+fr-legit-compound-006	fr	legit-compound	parfait	parfait		kept			kept	true				
+fr-legit-compound-007	fr	legit-compound	soutenue	soutenue		kept			kept	true				
+fr-legit-compound-008	fr	legit-compound	paiement	paiement		kept			kept	true				
+fr-legit-compound-009	fr	legit-compound	sortirais	sortirais		kept			kept	true				
+fr-legit-compound-010	fr	legit-compound	guetter	guetter		kept			kept	true				
+fr-legit-compound-011	fr	legit-compound	formelles	formelles		kept			kept	true				
+fr-legit-compound-012	fr	legit-compound	combien	combien		kept			kept	true				
+fr-legit-compound-013	fr	legit-compound	charnues	charnues		kept			kept	true				
+fr-legit-compound-014	fr	legit-compound	bavardaient	bavardaient		kept			kept	true				
+fr-legit-compound-015	fr	legit-compound	penseraient	penseraient		kept			kept	true				
+fr-legit-compound-016	fr	legit-compound	passionnée	passionnée		kept			kept	true				
+fr-legit-compound-017	fr	legit-compound	starter	starter		kept			kept	true				
+fr-legit-compound-018	fr	legit-compound	montreras	montreras		kept			kept	true				
+fr-legit-compound-019	fr	legit-compound	désordonné	désordonné		kept			kept	true				
+fr-legit-compound-020	fr	legit-compound	prévoit	prévoit		kept			kept	true				
+fr-legit-compound-021	fr	legit-compound	cornemuse	cornemuse		kept			kept	true				
+fr-legit-compound-022	fr	legit-compound	congelé	congelé		kept			kept	true				
+fr-legit-compound-023	fr	legit-compound	prévisible	prévisible		kept			kept	true				
+fr-legit-compound-024	fr	legit-compound	bouleverse	bouleverse		kept			kept	true				
+fr-legit-compound-025	fr	legit-compound	présentes	présentes		kept			kept	true				
+fr-legit-compound-026	fr	legit-compound	préoccupez	préoccupez		kept			kept	true				
+fr-legit-compound-027	fr	legit-compound	prêterais	prêterais		kept			kept	true				
+fr-legit-compound-028	fr	legit-compound	disposées	disposées		kept			kept	true				
+fr-legit-compound-029	fr	legit-compound	violait	violait		kept			kept	true				
+fr-legit-compound-030	fr	legit-compound	disparu	disparu		kept			kept	true				
+fr-legit-compound-031	fr	legit-compound	cassais	cassais		kept			kept	true				
+fr-legit-compound-032	fr	legit-compound	maintiens	maintiens		kept			kept	true				
+fr-legit-compound-033	fr	legit-compound	guinées	guinées		kept			kept	true				
+fr-legit-compound-034	fr	legit-compound	vantant	vantant		kept			kept	true				
+fr-legit-compound-035	fr	legit-compound	irrésistiblement	irrésistiblement		kept			kept	true				
+fr-legit-compound-036	fr	legit-compound	baiserais	baiserais		kept			kept	true				
+fr-legit-compound-037	fr	legit-compound	pressentais	pressentais		kept			kept	true				
+fr-legit-compound-038	fr	legit-compound	échangeâmes	échangeâmes		kept			kept	true				
+fr-legit-compound-039	fr	legit-compound	soulevait	soulevait		kept			kept	true				
+fr-legit-compound-040	fr	legit-compound	comporté	comporté		kept			kept	true				
+fr-legit-compound-041	fr	legit-compound	gagnerais	gagnerais		kept			kept	true				
+fr-legit-compound-042	fr	legit-compound	trahisons	trahisons		kept			kept	true				
+fr-legit-compound-043	fr	legit-compound	monocorde	monocorde		kept			kept	true				
+fr-legit-compound-044	fr	legit-compound	fougère	fougère		kept			kept	true				
+fr-legit-compound-045	fr	legit-compound	préoccupés	préoccupés		kept			kept	true				
+fr-legit-compound-046	fr	legit-compound	cachetons	cachetons		kept			kept	true				
+fr-legit-compound-047	fr	legit-compound	bienséance	bienséance		kept			kept	true				
+fr-legit-compound-048	fr	legit-compound	stockage	stockage		kept			kept	true				
+fr-legit-compound-049	fr	legit-compound	emporterait	emporterait		kept			kept	true				
+fr-legit-compound-050	fr	legit-compound	chérissait	chérissait		kept			kept	true				
+fr-legit-rare-001	fr	legit-rare	agenouillés	agenouillés	agenouillée	false-replacement	single-word-correction	Agenouillée	false-replacement	false				
+fr-legit-rare-002	fr	legit-rare	sainfoin	sainfoin	saindoux	false-replacement	single-word-correction	Saindoux	false-replacement	false				
+fr-legit-rare-003	fr	legit-rare	structurelle	structurelle		kept			kept	false				
+fr-legit-rare-004	fr	legit-rare	débrouillées	débrouillées	débrouilles	false-replacement	single-word-correction	Débrouilles	false-replacement	false				
+fr-legit-rare-005	fr	legit-rare	plateformes	plateformes	plateforme	false-replacement	single-word-correction	Plateforme	false-replacement	false				
+fr-legit-rare-006	fr	legit-rare	vectoriels	vectoriels		kept			kept	false				
+fr-legit-rare-007	fr	legit-rare	effrontément	effrontément	affrontement	false-replacement	single-word-correction	Affrontement	false-replacement	false				
+fr-legit-rare-008	fr	legit-rare	souverainistes	souverainistes		kept			kept	false				
+fr-legit-rare-009	fr	legit-rare	segments	segments	serments	false-replacement	single-word-correction	Serments	false-replacement	false				
+fr-legit-rare-010	fr	legit-rare	appauvrit	appauvrit		kept			kept	false				
+fr-legit-rare-011	fr	legit-rare	courriel	courriel	courrier	false-replacement	single-word-correction	Courrier	false-replacement	false				
+fr-legit-rare-012	fr	legit-rare	corrigée	corrigée	corriger	false-replacement	single-word-correction	Corriger	false-replacement	false				
+fr-legit-rare-013	fr	legit-rare	mendiait	mendiait	mendiant	false-replacement	single-word-correction	Mendiant	false-replacement	false				
+fr-legit-rare-014	fr	legit-rare	protégeront	protégeront	protégerait	false-replacement	single-word-correction	Protégerait	false-replacement	false				
+fr-legit-rare-015	fr	legit-rare	basketball	basketball	baseball	false-replacement	single-word-correction	Baseball	false-replacement	false				
+fr-legit-rare-016	fr	legit-rare	copierez	copierez	coopérez	false-replacement	single-word-correction	Coopérez	false-replacement	false				
+fr-legit-rare-017	fr	legit-rare	attrapées	attrapées	attrapée	false-replacement	single-word-correction	Attrapée	false-replacement	false				
+fr-legit-rare-018	fr	legit-rare	optiques	optiques	optique	false-replacement	single-word-correction	Optique	false-replacement	false				
+fr-legit-rare-019	fr	legit-rare	psychanalystes	psychanalystes	psychanalyste	false-replacement	single-word-correction	Psychanalyste	false-replacement	false				
+fr-legit-rare-020	fr	legit-rare	précipitez	précipitez	précipiter	false-replacement	single-word-correction	Précipiter	false-replacement	false				
+fr-legit-rare-021	fr	legit-rare	renommés	renommés	renommée	false-replacement	single-word-correction	Renommée	false-replacement	false				
+fr-legit-rare-022	fr	legit-rare	contextes	contextes	contexte	false-replacement	single-word-correction	Contexte	false-replacement	false				
+fr-legit-rare-023	fr	legit-rare	blanquette	blanquette	banquette	false-replacement	single-word-correction	Banquette	false-replacement	false				
+fr-legit-rare-024	fr	legit-rare	permuter	permuter	percuter	false-replacement	single-word-correction	Percuter	false-replacement	false				
+fr-legit-rare-025	fr	legit-rare	décapités	décapités	décapitée	false-replacement	single-word-correction	Décapitée	false-replacement	false				
+fr-legit-rare-026	fr	legit-rare	sérendipité	sérendipité		kept			kept	false				
+fr-legit-rare-027	fr	legit-rare	fureteur	fureteur	fureter	false-replacement	single-word-correction	Fureter	false-replacement	false				
+fr-legit-rare-028	fr	legit-rare	exportateur	exportateur	explorateur	false-replacement	single-word-correction	Explorateur	false-replacement	false				
+fr-legit-rare-029	fr	legit-rare	dégourdi	dégourdi	dégourdir	false-replacement	single-word-correction	Dégourdir	false-replacement	false				
+fr-legit-rare-030	fr	legit-rare	ripaille	ripaille	rocaille	false-replacement	single-word-correction	Rocaille	false-replacement	false				
+fr-legit-rare-031	fr	legit-rare	impatientes	impatientes	impatiente	false-replacement	single-word-correction	Impatiente	false-replacement	false				
+fr-legit-rare-032	fr	legit-rare	logogrammes	logogrammes		kept			kept	false				
+fr-legit-rare-033	fr	legit-rare	dévastatrices	dévastatrices	dévastatrice	false-replacement	single-word-correction	Dévastatrice	false-replacement	false				
+fr-legit-rare-034	fr	legit-rare	entendeur	entendeur	entendent	false-replacement	single-word-correction	Entendent	false-replacement	false				
+fr-legit-rare-035	fr	legit-rare	moquèrent	moquèrent	montèrent	false-replacement	single-word-correction	Montèrent	false-replacement	false				
+fr-legit-rare-036	fr	legit-rare	introvertie	introvertie		kept			kept	false				
+fr-legit-rare-037	fr	legit-rare	suspectée	suspectée	suspecter	false-replacement	single-word-correction	Suspecter	false-replacement	false				
+fr-legit-rare-038	fr	legit-rare	interviewé	interviewé	interview	false-replacement	single-word-correction	Interview	false-replacement	false				
+fr-legit-rare-039	fr	legit-rare	sioniste	sioniste	soliste	false-replacement	single-word-correction	Soliste	false-replacement	false				
+fr-legit-rare-040	fr	legit-rare	falsification	falsification		kept			kept	false				
+fr-legit-rare-041	fr	legit-rare	hurluberlu	hurluberlu		kept			kept	false				
+fr-legit-rare-042	fr	legit-rare	herbivores	herbivores		kept			kept	false				
+fr-legit-rare-043	fr	legit-rare	draconiennes	draconiennes		kept			kept	false				
+fr-legit-rare-044	fr	legit-rare	réutilisation	réutilisation	utilisation	false-replacement	single-word-correction	Utilisation	false-replacement	false				
+fr-legit-rare-045	fr	legit-rare	diététicienne	diététicienne		kept			kept	false				
+fr-legit-rare-046	fr	legit-rare	dévoilés	dévoilés	dévoiler	false-replacement	single-word-correction	Dévoiler	false-replacement	false				
+fr-legit-rare-047	fr	legit-rare	intoxications	intoxications	intoxication	false-replacement	single-word-correction	Intoxication	false-replacement	false				
+fr-legit-rare-048	fr	legit-rare	découragés	découragés	décourager	false-replacement	single-word-correction	Décourager	false-replacement	false				
+fr-legit-rare-049	fr	legit-rare	achetèrent	achetèrent	arrêtèrent	false-replacement	single-word-correction	Arrêtèrent	false-replacement	false				
+fr-legit-rare-050	fr	legit-rare	attirants	attirants	attirante	false-replacement	single-word-correction	Attirante	false-replacement	false				
+en-missed-space-001	en	missed-space	aproblem	a problem	problem	replaced	part-too-short	Problem	replaced	false	true	true	0	true
+en-missed-space-002	en	missed-space	dancingwith	dancing with	dancing with	split-correct		Dancing with	split-correct	false	true	true	15385	true
+en-missed-space-003	en	missed-space	isgoing	is going	ongoing	replaced	part-too-short	Ongoing	replaced	false	true	true	0	true
+en-missed-space-004	en	missed-space	hasabsolutely	has absolutely		nothing	no-bigram:left-word-followers-full		nothing	false	true	true	0	true
+en-missed-space-005	en	missed-space	wantto	want to	santo	replaced	part-too-short	Santo	replaced	false	true	true	55547	true
+en-missed-space-006	en	missed-space	itnow	it now	know	replaced	part-too-short	Know	replaced	false	true	true	0	true
+en-missed-space-007	en	missed-space	iscold	is cold	idols	replaced	part-too-short	Idols	replaced	false	true	true	0	true
+en-missed-space-008	en	missed-space	ofstuff	of stuff	stuff	replaced	part-too-short	Stuff	replaced	false	true	true	0	true
+en-missed-space-009	en	missed-space	goingto	going to	goings	replaced	part-too-short	Goings	replaced	false	true	true	55603	true
+en-missed-space-010	en	missed-space	bearsin	bears in	pearson	replaced	part-too-short	Pearson	replaced	false	true	true	10572	true
+en-missed-space-011	en	missed-space	adozen	a dozen	dozen	replaced	part-too-short	Dozen	replaced	false	true	true	0	true
+en-missed-space-012	en	missed-space	atthe	at the	argue	replaced	part-too-short	Argue	replaced	false	true	true	60065	true
+en-missed-space-013	en	missed-space	ofconduct	of conduct	conduct	replaced	part-too-short	Conduct	replaced	false	true	true	0	true
+en-missed-space-014	en	missed-space	subjectedto	subjected to	subjected	replaced	part-too-short	Subjected	replaced	false	true	true	18360	true
+en-missed-space-015	en	missed-space	houseis	house is	houses	replaced	part-too-short	Houses	replaced	false	true	true	18618	true
+en-missed-space-016	en	missed-space	themyet	them yet	the yet	wrong-split	no-bigram:left-word-followers-full	The yet	wrong-split	false	true	true	0	true
+en-missed-space-017	en	missed-space	tostop	to stop	gossip	replaced	part-too-short	Gossip	replaced	false	true	true	0	true
+en-missed-space-018	en	missed-space	costof	cost of	costly	replaced	part-too-short	Costly	replaced	false	true	true	49688	true
+en-missed-space-019	en	missed-space	madlyin	madly in	marlin	replaced	part-too-short	Marlin	replaced	false	true	true	11787	false
+en-missed-space-020	en	missed-space	rightaway	right away	right away	split-correct		Right away	split-correct	false	true	true	29620	true
+en-missed-space-021	en	missed-space	makeothers	make others		nothing	no-bigram:left-word-followers-full		nothing	false	true	true	0	true
+en-missed-space-022	en	missed-space	yetto	yet to	retro	replaced	part-too-short	Retro	replaced	false	true	true	21242	true
+en-missed-space-023	en	missed-space	outto	out to	otto	replaced	part-too-short	Otto	replaced	false	true	true	51831	true
+en-missed-space-024	en	missed-space	ofbread	of bread	pthread	replaced	part-too-short	Pthread	replaced	false	true	true	0	true
+en-missed-space-025	en	missed-space	isin	is in	iain	replaced	part-too-short	Iain	replaced	false	true	true	52543	true
+en-missed-space-026	en	missed-space	thepolitician	the politician		nothing	no-bigram:left-word-followers-full		nothing	false	true	true	0	true
+en-missed-space-027	en	missed-space	fromkindergarten	from kindergarten	fro kindergarten	wrong-split	no-bigram:left-word-followers-full	Fro kindergarten	wrong-split	false	true	true	0	true
+en-missed-space-028	en	missed-space	sameperiod	same period		nothing	no-bigram:left-word-followers-full		nothing	false	true	true	0	true
+en-missed-space-029	en	missed-space	threechildren	three children		nothing	no-bigram:left-word-followers-full		nothing	false	true	true	0	true
+en-missed-space-030	en	missed-space	everhappening	ever happening		nothing	no-bigram:left-word-followers-full		nothing	false	true	true	0	true
+en-missed-space-031	en	missed-space	neededto	needed to	needed	replaced	part-too-short	Needed	replaced	false	true	true	51493	true
+en-missed-space-032	en	missed-space	touristseverywhere	tourists everywhere		nothing	no-bigram:left-word-followers-full		nothing	false	true	true	0	true
+en-missed-space-033	en	missed-space	youthink	you think	you think	split-correct		You think	split-correct	false	true	true	51639	true
+en-missed-space-034	en	missed-space	boyis	boy is	boys	replaced	part-too-short	Boys	replaced	false	true	true	16661	true
+en-missed-space-035	en	missed-space	yourmoney	your money	your obey	wrong-split	no-bigram:left-word-followers-full	Your obey	wrong-split	false	true	true	0	true
+en-missed-space-036	en	missed-space	inpain	in pain	unpaid	replaced	part-too-short	Unpaid	replaced	false	true	true	0	true
+en-missed-space-037	en	missed-space	cardtricks	card tricks		nothing	no-bigram:left-word-followers-full		nothing	false	true	true	0	true
+en-missed-space-038	en	missed-space	footdown	foot down	foot down	split-correct		Foot down	split-correct	false	true	true	10259	true
+en-missed-space-039	en	missed-space	myfriend	my friend	boyfriend	replaced	part-too-short	Boyfriend	replaced	false	true	true	46997	true
+en-missed-space-040	en	missed-space	tovisit	to visit	revisit	replaced	part-too-short	Revisit	replaced	false	true	true	0	true
+en-missed-space-041	en	missed-space	womenlove	women love		nothing	no-bigram:left-word-followers-full		nothing	false	true	true	0	true
+en-missed-space-042	en	missed-space	thatas	that as	thats	replaced	part-too-short	Thats	replaced	false	true	true	0	true
+en-missed-space-043	en	missed-space	darkchocolate	dark chocolate		nothing	no-bigram:left-word-followers-full		nothing	false	true	true	0	true
+en-missed-space-044	en	missed-space	knowsthat	knows that	knows that	split-correct		Knows that	split-correct	false	true	true	26212	true
+en-missed-space-045	en	missed-space	cleanthe	clean the	clean the	split-correct		Clean the	split-correct	false	true	true	13954	true
+en-missed-space-046	en	missed-space	doingthat	doing that	doi that	wrong-split	no-bigram:left-word-followers-full	Doi that	wrong-split	false	true	true	0	true
+en-missed-space-047	en	missed-space	boringpeople	boring people	boring people	split-correct		Boring people	split-correct	false	true	true	7896	true
+en-missed-space-048	en	missed-space	hadyour	had your	harbour	replaced	no-bigram:left-word-followers-full	Harbour	replaced	false	true	true	0	true
+en-missed-space-049	en	missed-space	wouldbe	would be	wouldnt	replaced	part-too-short	Wouldnt	replaced	false	true	true	56510	true
+en-missed-space-050	en	missed-space	tohold	to hold	tools	replaced	part-too-short	Tools	replaced	false	true	true	0	true
+en-neighbour-key-001	en	neighbour-key	tonwork	to work		nothing	part-too-short		nothing	false	true	true	0	true
+en-neighbour-key-002	en	neighbour-key	hostedbthe	hosted the	hosted the	split-correct		Hosted the	split-correct	false	true	true	13123	true
+en-neighbour-key-003	en	neighbour-key	nevermby	never by		nothing	part-too-short		nothing	false	true	true	0	true
+en-neighbour-key-004	en	neighbour-key	sonfluently	so fluently		nothing	part-too-short		nothing	false	true	false	0	true
+en-neighbour-key-005	en	neighbour-key	gainedbpower	gained power	gained power	split-correct		Gained power	split-correct	false	true	true	0	true
+en-neighbour-key-006	en	neighbour-key	atmall	at all	small	replaced	part-too-short	Small	replaced	false	true	true	52891	true
+en-neighbour-key-007	en	neighbour-key	thisnis	this is	thinks	replaced	part-too-short	Thinks	replaced	false	true	true	56657	true
+en-neighbour-key-008	en	neighbour-key	inbhis	in his	inches	replaced	part-too-short	Inches	replaced	false	true	true	56429	true
+en-neighbour-key-009	en	neighbour-key	seemthat	see that	see that	split-correct		See that	split-correct	false	true	true	49972	true
+en-neighbour-key-010	en	neighbour-key	wantednto	wanted to		nothing	part-too-short		nothing	false	true	true	53760	true
+en-neighbour-key-011	en	neighbour-key	atbthis	at this		nothing	part-too-short		nothing	false	true	true	51746	true
+en-neighbour-key-012	en	neighbour-key	relatedmto	related to		nothing	part-too-short		nothing	false	true	true	51876	true
+en-neighbour-key-013	en	neighbour-key	intonlast	into last	into last	split-correct		Into last	split-correct	false	true	true	0	true
+en-neighbour-key-014	en	neighbour-key	oftenbgo	often go		nothing	part-too-short		nothing	false	true	true	0	true
+en-neighbour-key-015	en	neighbour-key	youmshould	you should	you should	split-correct		You should	split-correct	false	true	true	14208	true
+en-neighbour-key-016	en	neighbour-key	worknin	work in	working	replaced	part-too-short	Working	replaced	false	true	true	49517	true
+en-neighbour-key-017	en	neighbour-key	bybnature	by nature		nothing	part-too-short		nothing	false	true	true	0	true
+en-neighbour-key-018	en	neighbour-key	andmdecadent	and decadent	and decadent	split-correct		And decadent	split-correct	false	true	true	0	true
+en-neighbour-key-019	en	neighbour-key	withnyou	with you	with you	split-correct		With you	split-correct	false	true	true	51099	true
+en-neighbour-key-020	en	neighbour-key	frozenbfor	frozen for	frozen for	split-correct		Frozen for	split-correct	false	true	true	7650	true
+en-neighbour-key-021	en	neighbour-key	ifmwe	if we	immer	replaced	part-too-short	Immer	replaced	false	true	true	52308	true
+en-neighbour-key-022	en	neighbour-key	thatncustomer	that customer	that customer	split-correct		That customer	split-correct	false	true	true	0	true
+en-neighbour-key-023	en	neighbour-key	isbdoing	is doing	labeling	replaced	part-too-short	Labeling	replaced	false	true	true	0	true
+en-neighbour-key-024	en	neighbour-key	evenmtry	even try	even try	split-correct		Even try	split-correct	false	true	true	0	true
+en-neighbour-key-025	en	neighbour-key	runnthe	run the	run the	split-correct		Run the	split-correct	false	true	true	19151	true
+en-legit-compound-001	en	legit-compound	louisville	louisville		kept			kept	true				
+en-legit-compound-002	en	legit-compound	chatroom	chatroom		kept			kept	true				
+en-legit-compound-003	en	legit-compound	emotional	emotional		kept			kept	true				
+en-legit-compound-004	en	legit-compound	magicyellow	magicyellow		kept			kept	true				
+en-legit-compound-005	en	legit-compound	johnson	johnson		kept			kept	true				
+en-legit-compound-006	en	legit-compound	passionate	passionate		kept			kept	true				
+en-legit-compound-007	en	legit-compound	toothpaste	toothpaste		kept			kept	true				
+en-legit-compound-008	en	legit-compound	fireworks	fireworks		kept			kept	true				
+en-legit-compound-009	en	legit-compound	jupiterweb	jupiterweb		kept			kept	true				
+en-legit-compound-010	en	legit-compound	lancome	lancome		kept			kept	true				
+en-legit-compound-011	en	legit-compound	philharmonic	philharmonic		kept			kept	true				
+en-legit-compound-012	en	legit-compound	snapping	snapping		kept			kept	true				
+en-legit-compound-013	en	legit-compound	bookshelves	bookshelves		kept			kept	true				
+en-legit-compound-014	en	legit-compound	handout	handout		kept			kept	true				
+en-legit-compound-015	en	legit-compound	candidate	candidate		kept			kept	true				
+en-legit-compound-016	en	legit-compound	massages	massages		kept			kept	true				
+en-legit-compound-017	en	legit-compound	peppers	peppers		kept			kept	true				
+en-legit-compound-018	en	legit-compound	seagate	seagate		kept			kept	true				
+en-legit-compound-019	en	legit-compound	numbering	numbering		kept			kept	true				
+en-legit-compound-020	en	legit-compound	quotation	quotation		kept			kept	true				
+en-legit-rare-001	en	legit-rare	scariest	scariest	scarlet	false-replacement	single-word-correction	Scarlet	false-replacement	false				
+en-legit-rare-002	en	legit-rare	consonants	consonants	consonant	false-replacement	single-word-correction	Consonant	false-replacement	false				
+en-legit-rare-003	en	legit-rare	artemisinin	artemisinin	arte simon	false-split	split-pass	Arte simon	false-split	false				
+en-legit-rare-004	en	legit-rare	coolness	coolness	cool ess	false-split	split-pass	Cool ess	false-split	false				
+en-legit-rare-005	en	legit-rare	sleeplessness	sleeplessness	sleepless ess	false-split	split-pass	Sleepless ess	false-split	false				
+en-legit-rare-006	en	legit-rare	uncovers	uncovers	uncover	false-replacement	single-word-correction	Uncover	false-replacement	false				
+en-legit-rare-007	en	legit-rare	exorcise	exorcise	exercise	false-replacement	single-word-correction	Exercise	false-replacement	false				
+en-legit-rare-008	en	legit-rare	squirmed	squirmed	squires	false-replacement	single-word-correction	Squires	false-replacement	false				
+en-legit-rare-009	en	legit-rare	predates	predates	prepares	false-replacement	single-word-correction	Prepares	false-replacement	false				
+en-legit-rare-010	en	legit-rare	consoled	consoled	consoles	false-replacement	single-word-correction	Consoles	false-replacement	false				
+en-legit-rare-011	en	legit-rare	masochist	masochist		kept			kept	false				
+en-legit-rare-012	en	legit-rare	dehumanize	dehumanize		kept			kept	false				
+en-legit-rare-013	en	legit-rare	worshippers	worshippers	worshipped	false-replacement	single-word-correction	Worshipped	false-replacement	false				
+en-legit-rare-014	en	legit-rare	apathetic	apathetic	pathetic	false-replacement	single-word-correction	Pathetic	false-replacement	false				
+en-legit-rare-015	en	legit-rare	digitize	digitize	digitized	false-replacement	single-word-correction	Digitized	false-replacement	false				
+en-legit-rare-016	en	legit-rare	shamelessly	shamelessly	shameless	false-replacement	single-word-correction	Shameless	false-replacement	false				
+en-legit-rare-017	en	legit-rare	parachutes	parachutes	parachute	false-replacement	single-word-correction	Parachute	false-replacement	false				
+en-legit-rare-018	en	legit-rare	baptised	baptised	baptized	false-replacement	single-word-correction	Baptized	false-replacement	false				
+en-legit-rare-019	en	legit-rare	seasickness	seasickness		kept			kept	false				
+en-legit-rare-020	en	legit-rare	disdainful	disdainful		kept			kept	false				
+de-missed-space-001	de	missed-space	alleinesein	alleine sein	alleinsein	replaced	no-bigram:left-word-followers-full	Alleinsein	replaced	false	true	true	0	true
+de-missed-space-002	de	missed-space	aufhörenzu	aufhören zu	aufhören	replaced	part-too-short	Aufhören	replaced	false	true	true	11548	true
+de-missed-space-003	de	missed-space	weißnicht	weiß nicht	weiß ich	wrong-split	other:another-split-won	Weiß ich	wrong-split	false	true	true	51884	true
+de-missed-space-004	de	missed-space	aufdie	auf die	auf die	split-correct		Auf die	split-correct	false	true	true	62277	true
+de-missed-space-005	de	missed-space	wenigerhäufig	weniger häufig		nothing	no-bigram:left-word-followers-full		nothing	false	true	true	0	true
+de-missed-space-006	de	missed-space	gingins	ging ins	higgins	replaced	no-bigram:left-word-followers-full	Higgins	replaced	false	true	true	0	true
+de-missed-space-007	de	missed-space	nichtden	nicht den	nichten	replaced	no-bigram:left-word-followers-full	Nichten	replaced	false	true	true	0	true
+de-missed-space-008	de	missed-space	kennenkeine	kennen keine	kenne keine	wrong-split	no-bigram:left-word-followers-full	Kenne keine	wrong-split	false	true	true	0	true
+de-missed-space-009	de	missed-space	nurein	nur ein	nur ein	split-correct		Nur ein	split-correct	false	true	true	54847	true
+de-missed-space-010	de	missed-space	dasaussah	das aussah		nothing	no-bigram:left-word-followers-full		nothing	false	true	true	0	true
+de-missed-space-011	de	missed-space	esjetzt	es jetzt	gehetzt	replaced	part-too-short	Gehetzt	replaced	false	true	true	0	true
+de-missed-space-012	de	missed-space	wennich	wenn ich	wen ich	wrong-split	other:another-split-won	Wen ich	wrong-split	false	true	true	56781	true
+de-missed-space-013	de	missed-space	inein	in ein	nein	replaced	part-too-short	Nein	replaced	false	true	true	0	true
+de-missed-space-014	de	missed-space	nützlicherals	nützlicher als	nützlicher als	split-correct		Nützlicher als	split-correct	false	true	true	9489	false
+de-missed-space-015	de	missed-space	mirgeraten	mir geraten		nothing	no-bigram:left-word-followers-full		nothing	false	true	true	0	true
+de-missed-space-016	de	missed-space	dereinzige	der einzige		nothing	no-bigram:left-word-followers-full		nothing	false	true	true	0	true
+de-missed-space-017	de	missed-space	michschon	mich schon	muchachos	replaced	no-bigram:left-word-followers-full	Muchachos	replaced	false	true	true	0	true
+de-missed-space-018	de	missed-space	vondeinen	von deinen		nothing	no-bigram:left-word-followers-full		nothing	false	true	true	0	true
+de-missed-space-019	de	missed-space	daßjemand	daß jemand		nothing	no-bigram:left-word-followers-full		nothing	false	true	true	0	true
+de-missed-space-020	de	missed-space	istzu	ist zu	istja	replaced	part-too-short	Istja	replaced	false	true	true	0	true
+de-missed-space-021	de	missed-space	tuetwas	tu etwas	tu etwas	split-correct		Tu etwas	split-correct	false	true	true	18273	true
+de-missed-space-022	de	missed-space	euchdas	euch das	euch das	split-correct		Euch das	split-correct	false	true	true	26607	true
+de-missed-space-023	de	missed-space	dasser	dass er	wasser	replaced	part-too-short	Wasser	replaced	false	true	true	58557	true
+de-missed-space-024	de	missed-space	einerjapanische	einer japanische		nothing	no-bigram:left-word-followers-full		nothing	false	true	true	0	true
+de-missed-space-025	de	missed-space	abersobald	aber sobald		nothing	no-bigram:left-word-followers-full		nothing	false	true	true	0	true
+de-missed-space-026	de	missed-space	vielefrischgebackene	viele frischgebackene		nothing	part-not-in-dictionary		nothing	false	true	false	0	true
+de-missed-space-027	de	missed-space	jagesagt	ja gesagt	zugesagt	replaced	part-too-short	Zugesagt	replaced	false	true	true	0	true
+de-missed-space-028	de	missed-space	ihrenrichtigen	ihren richtigen	ihre richtigen	wrong-split	no-bigram:left-word-followers-full	Ihre richtigen	wrong-split	false	true	true	0	true
+de-missed-space-029	de	missed-space	undder	und der	und der	split-correct		Und der	split-correct	false	true	true	60625	true
+de-missed-space-030	de	missed-space	indie	in die	indien	replaced	part-too-short	Indien	replaced	false	true	true	61862	true
+de-missed-space-031	de	missed-space	duso	du so	susi	replaced	part-too-short	Susi	replaced	false	true	true	0	true
+de-missed-space-032	de	missed-space	nichtgeweint	nicht geweint		nothing	no-bigram:left-word-followers-full		nothing	false	true	true	0	true
+de-missed-space-033	de	missed-space	zuarbeiten	zu arbeiten	bearbeiten	replaced	part-too-short	Bearbeiten	replaced	false	true	true	0	true
+de-missed-space-034	de	missed-space	istkein	ist kein	kathrin	replaced	no-bigram:left-word-followers-full	Kathrin	replaced	false	true	true	0	true
+de-missed-space-035	de	missed-space	undich	und ich	und ich	split-correct		Und ich	split-correct	false	true	true	58339	true
+de-missed-space-036	de	missed-space	wasdas	was das	was das	split-correct		Was das	split-correct	false	true	true	50054	true
+de-missed-space-037	de	missed-space	mitgehensollen	mitgehen sollen		nothing	no-bigram:left-word-has-room		nothing	false	true	true	0	false
+de-missed-space-038	de	missed-space	darüberreden	darüber reden	darüber reden	split-correct		Darüber reden	split-correct	false	true	true	24319	true
+de-missed-space-039	de	missed-space	denganzen	den ganzen	den ganzen	split-correct		Den ganzen	split-correct	false	true	true	51544	true
+de-missed-space-040	de	missed-space	mirso	mir so	wieso	replaced	part-too-short	Wieso	replaced	false	true	true	47953	true
+de-missed-space-041	de	missed-space	duschlägst	du schlägst	zuschlägt	replaced	no-bigram:left-word-followers-full	Zuschlägt	replaced	false	true	true	0	true
+de-missed-space-042	de	missed-space	bewohntdiesen	bewohnt diesen		nothing	no-bigram:left-word-has-room		nothing	false	true	true	0	false
+de-missed-space-043	de	missed-space	kamherunter	kam herunter		nothing	no-bigram:left-word-followers-full		nothing	false	true	true	0	true
+de-missed-space-044	de	missed-space	oderschlechte	oder schlechte		nothing	no-bigram:left-word-followers-full		nothing	false	true	true	0	true
+de-missed-space-045	de	missed-space	esfünf	es fünf	edmund	replaced	part-too-short	Edmund	replaced	false	true	true	0	true
+de-missed-space-046	de	missed-space	undes	und es	unser	replaced	part-too-short	Unser	replaced	false	true	true	56090	true
+de-missed-space-047	de	missed-space	sollenkünftig	sollen künftig	solle künftig	wrong-split	no-bigram:left-word-followers-full	Solle künftig	wrong-split	false	true	true	0	true
+de-missed-space-048	de	missed-space	folgtmir	folgt mir	folgt mir	split-correct		Folgt mir	split-correct	false	true	true	23684	true
+de-missed-space-049	de	missed-space	mehrausruhen	mehr ausruhen		nothing	no-bigram:left-word-followers-full		nothing	false	true	true	0	true
+de-missed-space-050	de	missed-space	nochein	noch ein	noch ein	split-correct		Noch ein	split-correct	false	true	true	54251	true
+de-neighbour-key-001	de	neighbour-key	erinnerenich	erinnere ich	erinnere ich	split-correct		Erinnere ich	split-correct	false	true	true	17933	false
+de-neighbour-key-002	de	neighbour-key	dasbgeschafft	das geschafft	das geschafft	split-correct		Das geschafft	split-correct	false	true	true	0	true
+de-neighbour-key-003	de	neighbour-key	dermperfekte	der perfekte	der perfekte	split-correct		Der perfekte	split-correct	false	true	true	0	true
+de-neighbour-key-004	de	neighbour-key	warnin	war in	warnen	replaced	part-too-short	Warnen	replaced	false	true	true	51929	true
+de-neighbour-key-005	de	neighbour-key	hierbarbeiten	hier arbeiten	hier arbeiten	split-correct		Hier arbeiten	split-correct	false	true	true	0	true
+de-neighbour-key-006	de	neighbour-key	sonnigmist	sonnig ist	sonnig ist	split-correct		Sonnig ist	split-correct	false	true	true	0	false
+de-neighbour-key-007	de	neighbour-key	hingegennzog	hingegen zog	hingegen zog	split-correct		Hingegen zog	split-correct	false	true	true	0	true
+de-neighbour-key-008	de	neighbour-key	sichbkeine	sich keine	sich keine	split-correct		Sich keine	split-correct	false	true	true	0	true
+de-neighbour-key-009	de	neighbour-key	kleinmgeschlagen	klein geschlagen	klein geschlagen	split-correct		Klein geschlagen	split-correct	false	true	true	0	true
+de-neighbour-key-010	de	neighbour-key	einennhier	einen hier	eine hier	wrong-split	other:another-split-won	Eine hier	wrong-split	false	true	true	0	true
+de-neighbour-key-011	de	neighbour-key	nichtbarbeitet	nicht arbeitet	nicht arbeitet	split-correct		Nicht arbeitet	split-correct	false	true	true	0	true
+de-neighbour-key-012	de	neighbour-key	dasmletzte	das letzte	das letzte	split-correct		Das letzte	split-correct	false	true	true	0	true
+de-neighbour-key-013	de	neighbour-key	istndie	ist die	ist die	split-correct		Ist die	split-correct	false	true	true	58682	true
+de-neighbour-key-014	de	neighbour-key	gehtbes	geht es	fettes	replaced	part-too-short	Fettes	replaced	false	true	true	53912	true
+de-neighbour-key-015	de	neighbour-key	allesmgesorgt	alles gesorgt	alles gesorgt	split-correct		Alles gesorgt	split-correct	false	true	true	0	true
+de-neighbour-key-016	de	neighbour-key	duftetnnämlich	duftet nämlich	duftet nämlich	split-correct		Duftet nämlich	split-correct	false	true	true	0	false
+de-neighbour-key-017	de	neighbour-key	machenbwürde	machen würde	machen würde	split-correct		Machen würde	split-correct	false	true	true	0	true
+de-neighbour-key-018	de	neighbour-key	istmauf	ist auf	ist auf	split-correct		Ist auf	split-correct	false	true	true	0	true
+de-neighbour-key-019	de	neighbour-key	allesngedeiht	alles gedeiht	alles gedeiht	split-correct		Alles gedeiht	split-correct	false	true	true	0	true
+de-neighbour-key-020	de	neighbour-key	einbwenig	ein wenig	ein wenig	split-correct		Ein wenig	split-correct	false	true	true	54951	true
+de-neighbour-key-021	de	neighbour-key	nichtman	nicht an	nichtmal	replaced	part-too-short	Nichtmal	replaced	false	true	true	52575	true
+de-neighbour-key-022	de	neighbour-key	führtenzu	führte zu	führten	replaced	part-too-short	Führten	replaced	false	true	true	18254	true
+de-neighbour-key-023	de	neighbour-key	wirdbdeutlich	wird deutlich	wird deutlich	split-correct		Wird deutlich	split-correct	false	true	true	0	true
+de-neighbour-key-024	de	neighbour-key	frommanxiety	from anxiety	from society	wrong-split	part-not-in-dictionary	From society	wrong-split	false	true	false	0	true
+de-neighbour-key-025	de	neighbour-key	ichnwerden	ich werden	ich werden	split-correct		Ich werden	split-correct	false	true	true	0	true
+de-legit-compound-001	de	legit-compound	rattengift	rattengift		kept			kept	true				
+de-legit-compound-002	de	legit-compound	freigenommen	freigenommen		kept			kept	true				
+de-legit-compound-003	de	legit-compound	zugreifen	zugreifen		kept			kept	true				
+de-legit-compound-004	de	legit-compound	ausgesetzt	ausgesetzt		kept			kept	true				
+de-legit-compound-005	de	legit-compound	tiefpunkt	tiefpunkt		kept			kept	true				
+de-legit-compound-006	de	legit-compound	ausgebucht	ausgebucht		kept			kept	true				
+de-legit-compound-007	de	legit-compound	schwachstelle	schwachstelle		kept			kept	true				
+de-legit-compound-008	de	legit-compound	lebenslange	lebenslange		kept			kept	true				
+de-legit-compound-009	de	legit-compound	möchtest	möchtest		kept			kept	true				
+de-legit-compound-010	de	legit-compound	beinarbeit	beinarbeit		kept			kept	true				
+de-legit-compound-011	de	legit-compound	bildeten	bildeten		kept			kept	true				
+de-legit-compound-012	de	legit-compound	heißhunger	heißhunger		kept			kept	true				
+de-legit-compound-013	de	legit-compound	ausgeteilt	ausgeteilt		kept			kept	true				
+de-legit-compound-014	de	legit-compound	netterweise	netterweise		kept			kept	true				
+de-legit-compound-015	de	legit-compound	weggetreten	weggetreten		kept			kept	true				
+de-legit-compound-016	de	legit-compound	gerichtsgebäude	gerichtsgebäude		kept			kept	true				
+de-legit-compound-017	de	legit-compound	wegfahren	wegfahren		kept			kept	true				
+de-legit-compound-018	de	legit-compound	meldest	meldest		kept			kept	true				
+de-legit-compound-019	de	legit-compound	einnehmen	einnehmen		kept			kept	true				
+de-legit-compound-020	de	legit-compound	frachtschiff	frachtschiff		kept			kept	true				
+de-legit-rare-001	de	legit-rare	zweiundzwanzigsten	zweiundzwanzigsten		kept			kept	false				
+de-legit-rare-002	de	legit-rare	umgerechnet	umgerechnet	abgerechnet	false-replacement	single-word-correction	Abgerechnet	false-replacement	false				
+de-legit-rare-003	de	legit-rare	ausdenkt	ausdenkt	auskennt	false-replacement	single-word-correction	Auskennt	false-replacement	false				
+de-legit-rare-004	de	legit-rare	informierter	informierter	informierte	false-replacement	single-word-correction	Informierte	false-replacement	false				
+de-legit-rare-005	de	legit-rare	kritisierte	kritisierte	kritisiert	false-replacement	single-word-correction	Kritisiert	false-replacement	false				
+de-legit-rare-006	de	legit-rare	entgegnen	entgegnen	entfernen	false-replacement	single-word-correction	Entfernen	false-replacement	false				
+de-legit-rare-007	de	legit-rare	etlichen	etlichen	etliche	false-replacement	single-word-correction	Etliche	false-replacement	false				
+de-legit-rare-008	de	legit-rare	merklich	merklich	herzlich	false-replacement	single-word-correction	Herzlich	false-replacement	false				
+de-legit-rare-009	de	legit-rare	literarischen	literarischen	literarische	false-replacement	single-word-correction	Literarische	false-replacement	false				
+de-legit-rare-010	de	legit-rare	erkämpft	erkämpft	gekämpft	false-replacement	single-word-correction	Gekämpft	false-replacement	false				
+de-legit-rare-011	de	legit-rare	dasjenige	dasjenige	diejenige	false-replacement	single-word-correction	Diejenige	false-replacement	false				
+de-legit-rare-012	de	legit-rare	aufbekommen	aufbekommen	aufgenommen	false-replacement	single-word-correction	Aufgenommen	false-replacement	false				
+de-legit-rare-013	de	legit-rare	hochgewachsenen	hochgewachsenen		kept			kept	false				
+de-legit-rare-014	de	legit-rare	schüchternes	schüchternes	schüchterne	false-replacement	single-word-correction	Schüchterne	false-replacement	false				
+de-legit-rare-015	de	legit-rare	russischsprachige	russischsprachige		kept			kept	false				
+de-legit-rare-016	de	legit-rare	verbessere	verbessere	ver bessere	false-split	split-pass	Ver bessere	false-split	false				
+de-legit-rare-017	de	legit-rare	edelsten	edelsten	edelstein	false-replacement	single-word-correction	Edelstein	false-replacement	false				
+de-legit-rare-018	de	legit-rare	zusammenhängenden	zusammenhängenden	zusammenhänge den	false-split	split-pass	Zusammenhänge den	false-split	false				
+de-legit-rare-019	de	legit-rare	europäisch	europäisch	europäische	false-replacement	single-word-correction	Europäische	false-replacement	false				
+de-legit-rare-020	de	legit-rare	auslöffeln	auslöffeln		kept			kept	false				
+es-missed-space-001	es	missed-space	yasentir	y asentir	asentir	replaced	part-too-short	Asentir	replaced	false	true	true	0	true
+es-missed-space-002	es	missed-space	recuperólas	recuperó las	recuperó las	split-correct		Recuperó las	split-correct	false	true	true	4875	false
+es-missed-space-003	es	missed-space	todoen	todo en	todo en	split-correct		Todo en	split-correct	false	true	true	47281	true
+es-missed-space-004	es	missed-space	simbolizanla	simbolizan la	simboliza la	wrong-split	part-not-in-dictionary	Simboliza la	wrong-split	false	false	true	7312	false
+es-missed-space-005	es	missed-space	miausencia	mi ausencia	ausencia	replaced	part-too-short	Ausencia	replaced	false	true	true	0	true
+es-missed-space-006	es	missed-space	penséisde	penséis de	penséis	replaced	part-too-short	Penséis	replaced	false	true	true	0	false
+es-missed-space-007	es	missed-space	altransporte	al transporte	transporte	replaced	part-too-short	Transporte	replaced	false	true	true	0	true
+es-missed-space-008	es	missed-space	dehaber	de haber	rehacer	replaced	part-too-short	Rehacer	replaced	false	true	true	0	true
+es-missed-space-009	es	missed-space	nobaja	no baja	navaja	replaced	part-too-short	Navaja	replaced	false	true	true	0	true
+es-missed-space-010	es	missed-space	altoque	alto que	alto que	split-correct		Alto que	split-correct	false	true	true	18579	true
+es-missed-space-011	es	missed-space	queno	que no	bueno	replaced	part-too-short	Bueno	replaced	false	true	true	59445	true
+es-missed-space-012	es	missed-space	fuerobado	fue robado		nothing	no-bigram:left-word-followers-full		nothing	false	true	true	0	true
+es-missed-space-013	es	missed-space	loque	lo que	toque	replaced	part-too-short	Toque	replaced	false	true	true	60804	true
+es-missed-space-014	es	missed-space	trazamosla	trazamos la	traza isla	wrong-split	part-not-in-dictionary	Traza isla	wrong-split	false	false	true	9020	false
+es-missed-space-015	es	missed-space	oídoque	oído que	oído que	split-correct		Oído que	split-correct	false	true	true	9963	true
+es-missed-space-016	es	missed-space	escepticismoes	escepticismo es	escepticismo	replaced	part-too-short	Escepticismo	replaced	false	true	true	9750	true
+es-missed-space-017	es	missed-space	quecasi	que casi	quedado	replaced	no-bigram:left-word-followers-full	Quedado	replaced	false	true	true	0	true
+es-missed-space-018	es	missed-space	novelase	novela se	novela se	split-correct		Novela se	split-correct	false	true	true	10164	true
+es-missed-space-019	es	missed-space	aoler	a oler	doler	replaced	part-too-short	Doler	replaced	false	true	true	0	true
+es-missed-space-020	es	missed-space	eseentonces	ese entonces		nothing	no-bigram:left-word-followers-full		nothing	false	true	true	0	true
+es-missed-space-021	es	missed-space	consejosabio	consejo sabio		nothing	no-bigram:left-word-followers-full		nothing	false	true	true	0	true
+es-missed-space-022	es	missed-space	todassean	todas sean		nothing	no-bigram:left-word-followers-full		nothing	false	true	true	0	true
+es-missed-space-023	es	missed-space	deinformación	de información	desinformación	replaced	part-too-short	Desinformación	replaced	false	true	true	0	true
+es-missed-space-024	es	missed-space	sabercuanto	saber cuanto		nothing	no-bigram:left-word-followers-full		nothing	false	true	true	0	true
+es-missed-space-025	es	missed-space	tienetreinta	tiene treinta	tie treinta	wrong-split	no-bigram:left-word-followers-full	Tie treinta	wrong-split	false	true	true	0	true
+es-missed-space-026	es	missed-space	componenel	componen el	componente	replaced	part-too-short	Componente	replaced	false	true	true	15581	true
+es-missed-space-027	es	missed-space	despuésde	después de	después	replaced	part-too-short	Después	replaced	false	true	true	55188	true
+es-missed-space-028	es	missed-space	lagustaba	la gustaba	gustaba	replaced	no-bigram:left-word-followers-full	Gustaba	replaced	false	true	true	0	true
+es-missed-space-029	es	missed-space	puedohacer	puedo hacer	puedo hacer	split-correct		Puedo hacer	split-correct	false	true	true	36259	true
+es-missed-space-030	es	missed-space	mejormanera	mejor manera	mejor manera	split-correct		Mejor manera	split-correct	false	true	true	21405	true
+es-missed-space-031	es	missed-space	puedecomer	puede comer		nothing	no-bigram:left-word-followers-full		nothing	false	true	true	0	true
+es-missed-space-032	es	missed-space	elperro	el perro	experto	replaced	part-too-short	Experto	replaced	false	true	true	0	true
+es-missed-space-033	es	missed-space	dealegría	de alegría	alegría	replaced	part-too-short	Alegría	replaced	false	true	true	0	true
+es-missed-space-034	es	missed-space	enla	en la	en la	split-correct		En la	split-correct	false	true	true	62685	true
+es-missed-space-035	es	missed-space	unsentido	un sentido	sinsentido	replaced	no-bigram:left-word-followers-full	Sinsentido	replaced	false	true	true	0	true
+es-missed-space-036	es	missed-space	perose	pero se	pero se	split-correct		Pero se	split-correct	false	true	true	48335	true
+es-missed-space-037	es	missed-space	unpaso	un paso	impuso	replaced	no-bigram:left-word-followers-full	Impuso	replaced	false	true	true	0	true
+es-missed-space-038	es	missed-space	hacerun	hacer un	hacer un	split-correct		Hacer un	split-correct	false	true	true	46343	true
+es-missed-space-039	es	missed-space	estánburlando	están burlando	está burlando	wrong-split	no-bigram:left-word-followers-full	Está burlando	wrong-split	false	true	true	0	true
+es-missed-space-040	es	missed-space	amablecon	amable con	ama leon	wrong-split	other:another-split-won	Ama leon	wrong-split	false	true	true	11026	true
+es-missed-space-041	es	missed-space	viel	vi el	fiel	replaced	part-too-short	Fiel	replaced	false	true	true	10354	true
+es-missed-space-042	es	missed-space	nosconocíamos	nos conocíamos		nothing	no-bigram:left-word-followers-full		nothing	false	true	true	0	true
+es-missed-space-043	es	missed-space	lamáscara	la máscara	la máscara	split-correct		La máscara	split-correct	false	true	true	0	true
+es-missed-space-044	es	missed-space	estadoallí	estado allí		nothing	no-bigram:left-word-followers-full		nothing	false	true	true	0	true
+es-missed-space-045	es	missed-space	gustael	gusta el	gustado	replaced	part-too-short	Gustado	replaced	false	true	true	16530	true
+es-missed-space-046	es	missed-space	laenergía	la energía	energía	replaced	no-bigram:left-word-followers-full	Energía	replaced	false	true	true	0	true
+es-missed-space-047	es	missed-space	pulserade	pulsera de	pulseras	replaced	part-too-short	Pulseras	replaced	false	true	true	6301	false
+es-missed-space-048	es	missed-space	deflauta	de flauta	declara	replaced	part-too-short	Declara	replaced	false	true	true	0	true
+es-missed-space-049	es	missed-space	leítres	leí tres	letras	replaced	no-bigram:left-word-has-room	Letras	replaced	false	true	true	0	false
+es-missed-space-050	es	missed-space	bastantebueno	bastante bueno	bastante bueno	split-correct		Bastante bueno	split-correct	false	true	true	14218	true
+es-neighbour-key-001	es	neighbour-key	denmí	de mí	denme	replaced	part-too-short	Denme	replaced	false	true	true	0	true
+es-neighbour-key-002	es	neighbour-key	parecesbotro	pareces otro	pareces otro	split-correct		Pareces otro	split-correct	false	true	true	0	false
+es-neighbour-key-003	es	neighbour-key	lesmgusta	les gusta	les gusta	split-correct		Les gusta	split-correct	false	true	true	24260	true
+es-neighbour-key-004	es	neighbour-key	másnrico	más rico	más rico	split-correct		Más rico	split-correct	false	true	true	0	true
+es-neighbour-key-005	es	neighbour-key	acabarbconmigo	acabar conmigo	acabar conmigo	split-correct		Acabar conmigo	split-correct	false	true	true	0	true
+es-neighbour-key-006	es	neighbour-key	hayammatado	haya matado	haya matado	split-correct		Haya matado	split-correct	false	true	true	0	true
+es-neighbour-key-007	es	neighbour-key	teníanla	tenía la	tenía la	split-correct		Tenía la	split-correct	false	true	true	47938	true
+es-neighbour-key-008	es	neighbour-key	pediríabque	pediría que	pediría que	split-correct		Pediría que	split-correct	false	true	true	0	false
+es-neighbour-key-009	es	neighbour-key	memfalla	me falla	me falla	split-correct		Me falla	split-correct	false	true	true	0	true
+es-neighbour-key-010	es	neighbour-key	reescribirnel	reescribir el		nothing	part-too-short		nothing	false	true	true	8432	false
+es-neighbour-key-011	es	neighbour-key	unbidioma	un idioma	un idioma	split-correct		Un idioma	split-correct	false	true	true	0	true
+es-neighbour-key-012	es	neighbour-key	gastómtodo	gastó todo	gastó todo	split-correct		Gastó todo	split-correct	false	true	true	0	false
+es-neighbour-key-013	es	neighbour-key	hermanonmayor	hermano mayor	hermano mayor	split-correct		Hermano mayor	split-correct	false	true	true	12076	true
+es-neighbour-key-014	es	neighbour-key	ybasí	y así	unas	replaced	part-too-short	Unas	replaced	false	true	true	0	true
+es-neighbour-key-015	es	neighbour-key	quemhay	que hay	que hay	split-correct		Que hay	split-correct	false	true	true	0	true
+es-neighbour-key-016	es	neighbour-key	quierensaber	quiere saber	quiere saber	split-correct		Quiere saber	split-correct	false	true	true	23902	true
+es-neighbour-key-017	es	neighbour-key	esbanaranjado	es anaranjado		nothing	part-too-short		nothing	false	true	true	0	true
+es-neighbour-key-018	es	neighbour-key	demtres	de tres	demores	replaced	part-too-short	Demores	replaced	false	true	true	0	true
+es-neighbour-key-019	es	neighbour-key	dencenar	de cenar	centenar	replaced	part-too-short	Centenar	replaced	false	true	true	0	true
+es-neighbour-key-020	es	neighbour-key	debidiotas	de idiotas		nothing	part-too-short		nothing	false	true	true	0	true
+es-neighbour-key-021	es	neighbour-key	formaranmpequeñas	formaran pequeñas		nothing	part-not-in-dictionary		nothing	false	false	true	0	false
+es-neighbour-key-022	es	neighbour-key	vasonde	vaso de	adonde	replaced	part-too-short	Adonde	replaced	false	true	true	43638	true
+es-neighbour-key-023	es	neighbour-key	muybcara	muy cara	muy cara	split-correct		Muy cara	split-correct	false	true	true	0	true
+es-neighbour-key-024	es	neighbour-key	mimparte	mi parte	comparte	replaced	part-too-short	Comparte	replaced	false	true	true	0	true
+es-neighbour-key-025	es	neighbour-key	producennmuchos	producen muchos	produce muchos	wrong-split	other:another-split-won	Produce muchos	wrong-split	false	true	true	0	true
+es-legit-compound-001	es	legit-compound	decidamos	decidamos		kept			kept	true				
+es-legit-compound-002	es	legit-compound	recuperaremos	recuperaremos		kept			kept	true				
+es-legit-compound-003	es	legit-compound	despidan	despidan		kept			kept	true				
+es-legit-compound-004	es	legit-compound	huyeron	huyeron		kept			kept	true				
+es-legit-compound-005	es	legit-compound	servida	servida		kept			kept	true				
+es-legit-compound-006	es	legit-compound	cuadradas	cuadradas		kept			kept	true				
+es-legit-compound-007	es	legit-compound	desapareces	desapareces		kept			kept	true				
+es-legit-compound-008	es	legit-compound	descubiertos	descubiertos		kept			kept	true				
+es-legit-compound-009	es	legit-compound	extrañaremos	extrañaremos		kept			kept	true				
+es-legit-compound-010	es	legit-compound	sobreviviera	sobreviviera		kept			kept	true				
+es-legit-compound-011	es	legit-compound	fielding	fielding		kept			kept	true				
+es-legit-compound-012	es	legit-compound	stanley	stanley		kept			kept	true				
+es-legit-compound-013	es	legit-compound	contestadora	contestadora		kept			kept	true				
+es-legit-compound-014	es	legit-compound	preparada	preparada		kept			kept	true				
+es-legit-compound-015	es	legit-compound	contratos	contratos		kept			kept	true				
+es-legit-compound-016	es	legit-compound	metales	metales		kept			kept	true				
+es-legit-compound-017	es	legit-compound	combate	combate		kept			kept	true				
+es-legit-compound-018	es	legit-compound	consiguiente	consiguiente		kept			kept	true				
+es-legit-compound-019	es	legit-compound	convendría	convendría		kept			kept	true				
+es-legit-compound-020	es	legit-compound	lanzallamas	lanzallamas		kept			kept	true				
+es-legit-rare-001	es	legit-rare	neonazis	neonazis	neo aziz	false-split	split-pass	Neo aziz	false-split	false				
+es-legit-rare-002	es	legit-rare	pronombres	pronombres	pro hombres	false-split	split-pass	Pro hombres	false-split	false				
+es-legit-rare-003	es	legit-rare	incentivar	incentivar	investigar	false-replacement	single-word-correction	Investigar	false-replacement	false				
+es-legit-rare-004	es	legit-rare	liberticidas	liberticidas		kept			kept	false				
+es-legit-rare-005	es	legit-rare	somnoliento	somnoliento		kept			kept	false				
+es-legit-rare-006	es	legit-rare	andantes	andantes	andante	false-replacement	single-word-correction	Andante	false-replacement	false				
+es-legit-rare-007	es	legit-rare	chubasquero	chubasquero	chu arquero	false-split	split-pass	Chu arquero	false-split	false				
+es-legit-rare-008	es	legit-rare	rehusaron	rehusaron	revisaron	false-replacement	single-word-correction	Revisaron	false-replacement	false				
+es-legit-rare-009	es	legit-rare	paludismo	paludismo		kept			kept	false				
+es-legit-rare-010	es	legit-rare	tronando	tronando	tomando	false-replacement	single-word-correction	Tomando	false-replacement	false				
+es-legit-rare-011	es	legit-rare	oculista	oculista	vocalista	false-replacement	single-word-correction	Vocalista	false-replacement	false				
+es-legit-rare-012	es	legit-rare	soleados	soleados	soldados	false-replacement	single-word-correction	Soldados	false-replacement	false				
+es-legit-rare-013	es	legit-rare	atosigada	atosigada	arraigada	false-replacement	single-word-correction	Arraigada	false-replacement	false				
+es-legit-rare-014	es	legit-rare	mensualmente	mensualmente	me usualmente	false-split	split-pass	Me usualmente	false-split	false				
+es-legit-rare-015	es	legit-rare	acusativo	acusativo	acuático	false-replacement	single-word-correction	Acuático	false-replacement	false				
+es-legit-rare-016	es	legit-rare	enseñáis	enseñáis	enseñas	false-replacement	single-word-correction	Enseñas	false-replacement	false				
+es-legit-rare-017	es	legit-rare	alborozados	alborozados	alborotador	false-replacement	single-word-correction	Alborotador	false-replacement	false				
+es-legit-rare-018	es	legit-rare	colibríes	colibríes	colibrí	false-replacement	single-word-correction	Colibrí	false-replacement	false				
+es-legit-rare-019	es	legit-rare	polleras	polleras	pollera	false-replacement	single-word-correction	Pollera	false-replacement	false				
+es-legit-rare-020	es	legit-rare	ambiguas	ambiguas	antiguas	false-replacement	single-word-correction	Antiguas	false-replacement	false				
