@@ -1,6 +1,7 @@
 // DictusApp/Views/PaywallPresentation.swift
 // One way to open the paywall, shared by every entry point.
 import SwiftUI
+import DictusCore
 
 extension View {
     /// Presents the paywall over the whole screen.
@@ -22,13 +23,12 @@ extension View {
     /// stack, so the paywall would otherwise have no navigation bar to hang its
     /// close button on.
     ///
-    /// `framing` is `.trialEnded` for the one presentation the app makes on its own,
-    /// at the end of the reverse trial (#593); every entry point the user taps keeps
-    /// the default.
-    func paywallCover(isPresented: Binding<Bool>, framing: PaywallFraming = .standard) -> some View {
+    /// `trialEnd` is set for the one presentation the app makes on its own, at the end
+    /// of the reverse trial (#593, #837); every entry point the user taps keeps nil.
+    func paywallCover(isPresented: Binding<Bool>, trialEnd: ProTrialEndPaywall? = nil) -> some View {
         fullScreenCover(isPresented: isPresented) {
             NavigationStack {
-                PaywallView(framing: framing)
+                PaywallView(trialEnd: trialEnd)
             }
         }
     }

@@ -1,34 +1,55 @@
 // DictusApp/Onboarding/GlobeKeyTutorialPage.swift
-// Onboarding step: the first dictation through the globe key, in three states (#678).
+// Onboarding step: the first dictation through the globe key (#678, #845).
 import SwiftUI
 import UIKit
 import DictusCore
 
-/// The first dictation: the user taps a real text field, switches to the Dictus keyboard
-/// with the globe long-press, and dictates. The text landing in the field ends the step.
+/// The first dictation: the page opens the keyboard on a real text field, the user switches
+/// to the Dictus keyboard with the globe long-press, and dictates. The text landing in the
+/// field ends the step.
 ///
-/// THE THREE STATES (#649 decision 1.8, #678), from `FirstDictationStage`:
-/// 1. Before the field is tapped: no keyboard. Under the field, a looping drawn card shows a
-///    finger long-pressing the globe, the keyboard menu opening and Dictus being chosen.
-/// 2. Apple's keyboard is up: a banner just above it, *Long-press the globe, then Dictus*.
-/// 3. Dictus's keyboard is up: the banner points at the blue mic.
+/// THE STATES (#649 decision 1.8, #678, #845), from `FirstDictationStage`:
+/// 1. Opening: the field takes focus by itself and the keyboard slides in. No hint, since
+///    there is no globe to press yet.
+/// 2. No keyboard (the focus did not come within a second, or the user closed the keyboard):
+///    the subtitle asks for a tap on the field. Still no animation.
+/// 3. Apple's keyboard is up: the drawn globe animation, between the field and the keyboard.
+/// 4. Dictus's keyboard is up: a banner points at the blue mic.
 ///
 /// WHY EVERY HINT SITS ABOVE THE KEYBOARD: the app cannot draw over a system keyboard. The
-/// banner is the last view of the page, and the page ends at the keyboard's top edge (the
+/// hint is the last view before Skip, and the page ends at the keyboard's top edge (the
 /// keyboard safe area), so it can only ever be above it. Nothing is overlaid.
 ///
-/// WHY THE FIELD IS NOT FOCUSED FOR THE USER ANY MORE: before #678 the page raised the
-/// keyboard on appear, which skipped what state 1 teaches. Tapping the field is now the
-/// first gesture of the lesson.
+/// WHY THE PAGE FOCUSES THE FIELD (#845, decided by Pierre on 2026-10-28): #678 made tapping
+/// the field the first gesture, and showed the globe animation before any keyboard was up.
+/// Users read it as "do this now", found no globe, and got stuck. The keyboard now opens on
+/// its own, as before #678, and the animation waits for it.
 struct GlobeKeyTutorialPage: View {
-    /// Called once the field holds a dictation (or, pre-A14, typed words). `OnboardingView`
-    /// resets the dictation coordinator and moves on to the completion step (#675); the
-    /// shell's Skip, at the bottom of the page, does the same without a dictation.
+    /// Called once the field holds a dictation (or typed words), or on "Continue".
+    /// `OnboardingView` resets the dictation coordinator and moves on to the completion step
+    /// (#675); the shell's Skip, at the bottom of the page, does the same without a dictation.
     let onComplete: () -> Void
 
     @State private var isFieldFocused = false
     @State private var isDictusKeyboard = false
     @State private var textFieldContent = ""
+
+    /// True from the page's appear until the field takes focus, the focus is given up on
+    /// (`FirstDictationStage.autoFocusHasFailed`), or the keyboard is closed.
+    @State private var isAwaitingAutoFocus = true
+
+    /// Bumped to ask the field for focus: once on appear, then on each return to the
+    /// foreground while the field has no keyboard and the user did not close it.
+    @State private var focusRequest = 1
+
+    /// Set when the user closes the keyboard on the page: from then on, only a tap on the
+    /// field opens it again (#845).
+    @State private var userClosedKeyboard = false
+
+    /// The first time another keyboard than Dictus came up, and the clock the "Continue"
+    /// fallback reads (`FirstDictationStage.showsContinue`).
+    @State private var otherKeyboardSince: Date?
+    @State private var now = Date()
 
     /// Latched the first time the Dictus keyboard is up: the completion rule counts text
     /// only from then on (`FirstDictationStage.completes`), as the page did before #678.
@@ -40,9 +61,11 @@ struct GlobeKeyTutorialPage: View {
     /// Set when enough text has landed: drives `successCue` until the page moves on.
     @State private var showSuccessCue = false
 
-    /// The stage shown once the text has landed, so the keyboard closing on the way out
-    /// does not bring back state 1's card for the last fraction of a second.
+    /// The stage shown once the page is leaving, so the keyboard closing on the way out
+    /// does not bring back the "tap the field" state for the last fraction of a second.
     @State private var frozenStage: FirstDictationStage?
+
+    @Environment(\.scenePhase) private var scenePhase
 
     /// Whether the keyboard can dictate on this device (#635). False on a pre-A14
     /// chip, where the Dictus keyboard draws its mic disabled everywhere, this page's
@@ -52,7 +75,18 @@ struct GlobeKeyTutorialPage: View {
     private let keyboardCanDictate = DeviceCapabilities.current().supportsKeyboardDictation
 
     private var stage: FirstDictationStage {
-        frozenStage ?? FirstDictationStage(isFieldFocused: isFieldFocused, isDictusKeyboard: isDictusKeyboard)
+        frozenStage ?? FirstDictationStage(
+            isFieldFocused: isFieldFocused,
+            isDictusKeyboard: isDictusKeyboard,
+            isAwaitingAutoFocus: isAwaitingAutoFocus
+        )
+    }
+
+    private var showsContinue: Bool {
+        frozenStage == nil && FirstDictationStage.showsContinue(
+            secondsSinceOtherKeyboard: otherKeyboardSince.map { now.timeIntervalSince($0) },
+            hasSeenDictusKeyboard: hasSeenDictusKeyboard
+        )
     }
 
     var body: some View {
@@ -64,39 +98,81 @@ struct GlobeKeyTutorialPage: View {
 
             field
                 .padding(.horizontal, OnboardingMetrics.horizontalPadding)
-                // Takes what the rest leaves (#700): the card is sized first, and only
+                // Takes what the rest leaves (#700): the animation is sized first, and only
                 // shrinks once the field is down to its minimum.
                 .layoutPriority(-1)
 
             switch stage {
-            case .beforeTap:
-                // State 1: no keyboard yet, the drawn loop fills the place it will take.
-                GlobeLongPressCard()
+            case .opening, .beforeTap:
+                EmptyView()
+            case .otherKeyboard:
+                // Apple's keyboard is up: the globe animation, right above it.
+                KeyboardSwitchAnimation()
                     .padding(.horizontal, OnboardingMetrics.horizontalPadding)
-                    .padding(.top, 16)
-                    // The gap the other steps keep between their button and the Skip row.
-                    .padding(.bottom, OnboardingMetrics.skipRowSpacing)
-                    .transition(.opacity.combined(with: .move(edge: .bottom)))
-            case .otherKeyboard, .dictusKeyboard:
-                // States 2 and 3: the banner, right above the keyboard.
+                    .padding(.top, 12)
+                    .transition(.opacity)
+            case .dictusKeyboard:
+                // Dictus is up: the banner, right above the keyboard.
                 FirstDictationBanner(content: bannerContent)
                     .frame(maxWidth: .infinity)
                     .padding(.horizontal, OnboardingMetrics.horizontalPadding)
-                    .padding(.vertical, 14)
+                    .padding(.top, 14)
                     .transition(.opacity.combined(with: .scale(scale: 0.95, anchor: .bottom)))
             }
 
             // Skip, the step's only way out without a dictation (#700). The page has no
             // button, so it sits alone in the row other steps keep under theirs, at the
             // same place. With a keyboard up it follows the page's bottom edge, between the
-            // banner and the keyboard: it never goes under the keyboard.
+            // hint and the keyboard: it never goes under the keyboard. "Continue" joins it
+            // when the Dictus keyboard is not detected (#845).
             OnboardingSkipRow()
+                .overlay(alignment: .trailing) {
+                    if showsContinue {
+                        continueButton
+                            .padding(.trailing, OnboardingMetrics.horizontalPadding)
+                            .transition(.opacity)
+                    }
+                }
                 .padding(.bottom, OnboardingMetrics.buttonBottomPadding)
         }
         .animation(.easeInOut(duration: 0.3), value: stage)
+        .animation(.easeInOut(duration: 0.3), value: showsContinue)
+        .task {
+            // The auto-focus fallback (#845): no focus a second after the request, ask for
+            // a tap.
+            let requestedAt = Date()
+            try? await Task.sleep(for: .seconds(FirstDictationStage.autoFocusTimeout))
+            if FirstDictationStage.autoFocusHasFailed(
+                secondsSinceRequest: Date().timeIntervalSince(requestedAt),
+                isFieldFocused: isFieldFocused
+            ) {
+                isAwaitingAutoFocus = false
+            }
+        }
+        .task(id: otherKeyboardSince) {
+            // The "Continue" fallback (#845): wake once the delay has run, and let the rule
+            // decide.
+            guard let since = otherKeyboardSince else { return }
+            let remaining = FirstDictationStage.continueDelay - Date().timeIntervalSince(since)
+            if remaining > 0 {
+                do { try await Task.sleep(for: .seconds(remaining)) } catch { return }
+            }
+            now = Date()
+        }
+        .onChange(of: stage) { _, newStage in
+            if newStage == .otherKeyboard && otherKeyboardSince == nil {
+                otherKeyboardSince = Date()
+            }
+        }
+        .onChange(of: scenePhase) { _, phase in
+            // Back from Settings or the app switcher with no keyboard: ask again, unless
+            // the user closed it here (#845).
+            guard phase == .active, !isFieldFocused, !userClosedKeyboard, frozenStage == nil else { return }
+            focusRequest += 1
+        }
         .onChange(of: textFieldContent) { newValue in
-            // Auto-advance when the user has dictated enough text (`FirstDictationStage`:
-            // 3 characters, once the Dictus keyboard has been up).
+            // Auto-advance when the user has dictated or typed enough text with Dictus
+            // (`FirstDictationStage`: 3 characters, once the Dictus keyboard has been up).
             guard !hasAutoAdvanced,
                   FirstDictationStage.completes(text: newValue, hasSeenDictusKeyboard: hasSeenDictusKeyboard)
             else { return }
@@ -124,18 +200,26 @@ struct GlobeKeyTutorialPage: View {
     /// leaves it, which is everything above the keyboard once one is up. The UITextView
     /// scrolls internally if the dictation is longer than that.
     ///
-    /// WHY 60 PT AT LEAST (#700): with the Skip row now at the bottom of the page, the
-    /// title, the field at its old 88 pt minimum and the drawn card overflowed a 667 pt
-    /// screen (iPhone SE) by about 26 pt, which pushed the progress bar under the status
-    /// bar and Skip off the screen. Before a keyboard is up the field only holds its
-    /// one-line placeholder, so it gives up the height rather than the drawing.
+    /// WHY 60 PT AT LEAST (#700), AND ONE LINE UNDER THE ANIMATION (#845): on a 667 pt
+    /// screen (iPhone SE) with the keyboard up, the room between the title and the keyboard
+    /// is about 200 pt. While the animation shows, the field holds no text yet, so it gives
+    /// up its height to it, down to one line.
     private var field: some View {
         KeyboardDetectingTextField(
             text: $textFieldContent,
             placeholder: placeholder,
+            focusRequest: focusRequest,
             onFocusChange: { focused in
                 guard frozenStage == nil else { return }
                 isFieldFocused = focused
+                if !focused {
+                    isAwaitingAutoFocus = false
+                    // A keyboard closed while the app is in the foreground is the user's
+                    // doing; one closed on the way to the background is not.
+                    if UIApplication.shared.applicationState == .active {
+                        userClosedKeyboard = true
+                    }
+                }
             },
             onKeyboardChange: { isDictus in
                 guard frozenStage == nil else { return }
@@ -147,7 +231,7 @@ struct GlobeKeyTutorialPage: View {
             }
         )
         .accessibilityIdentifier("onboarding.firstDictation.field")
-        .frame(minHeight: 60, maxHeight: .infinity)
+        .frame(minHeight: stage == .otherKeyboard ? 22 : 60, maxHeight: .infinity)
         .padding(16)
         .onboardingCard(cornerRadius: 20)
         .overlay {
@@ -180,16 +264,37 @@ struct GlobeKeyTutorialPage: View {
         .accessibilityHidden(true)
     }
 
+    /// "Continue", next to Skip after 15 s on another keyboard without Dictus detected
+    /// (#845). It ends the step like a dictation would, keyboard dismissal included.
+    private var continueButton: some View {
+        Button {
+            guard !hasAutoAdvanced else { return }
+            hasAutoAdvanced = true
+            frozenStage = stage
+            // Logged as the Skip it stands in for: no `onboardingDictusKeyboardActivated`
+            // line before it is what tells the two apart from a dictation.
+            PersistentLog.log(.onboardingGlobeTutorialSkipped)
+            advanceToSuccess()
+        } label: {
+            Text("Continue")
+                .font(.footnote.weight(.semibold))
+                .lineLimit(1)
+                .foregroundStyle(Color.dictusAccent)
+        }
+        .buttonStyle(.plain)
+        .accessibilityIdentifier("onboarding.firstDictation.continue")
+    }
+
     // MARK: - Copy
 
     /// What to do now, under the title. Changes with the stage and, on a pre-A14 chip, asks
     /// for typing instead of dictating (#635).
     private var instruction: Text {
         switch stage {
+        case .opening:
+            return Text("Your keyboard opens below.")
         case .beforeTap:
-            return keyboardCanDictate
-                ? Text("Tap the field, switch to the Dictus keyboard, then dictate whatever you like.")
-                : Text("Tap the field, switch to the Dictus keyboard, then type a few words.")
+            return Text("Tap the field to open your keyboard")
         case .otherKeyboard:
             return Text("Long-press the globe, then choose Dictus.")
         case .dictusKeyboard:
@@ -201,7 +306,7 @@ struct GlobeKeyTutorialPage: View {
 
     /// The field's placeholder: an invitation to tap it, then what to put in it.
     private var placeholder: String {
-        if stage == .beforeTap {
+        if stage == .opening || stage == .beforeTap {
             return String(localized: "Tap here to write")
         }
         return keyboardCanDictate
@@ -209,20 +314,11 @@ struct GlobeKeyTutorialPage: View {
             : String(localized: "Type something…")
     }
 
-    /// The banner for states 2 and 3.
+    /// The banner once Dictus is up.
     private var bannerContent: FirstDictationBanner.Content {
-        switch stage {
-        case .beforeTap, .otherKeyboard:
-            return .init(
-                leadingSymbol: "globe",
-                text: Text("Long-press the globe, then Dictus"),
-                trailingSymbol: "hand.tap"
-            )
-        case .dictusKeyboard:
-            return keyboardCanDictate
-                ? .init(leadingSymbol: "mic", text: Text("Tap the blue mic, then speak"), trailingSymbol: "arrow.down.right")
-                : .init(leadingSymbol: "keyboard", text: Text("Type a few words"), trailingSymbol: "arrow.down")
-        }
+        keyboardCanDictate
+            ? .init(leadingSymbol: "mic", text: Text("Tap the blue mic, then speak"), trailingSymbol: "arrow.down.right")
+            : .init(leadingSymbol: "keyboard", text: Text("Type a few words"), trailingSymbol: "arrow.down")
     }
 
     // MARK: - Navigation
@@ -239,7 +335,7 @@ struct GlobeKeyTutorialPage: View {
 
 // MARK: - Banner
 
-/// The coach banner above the keyboard (#678, mock-ups `10b` and `10c`): a capsule in the
+/// The coach banner above the Dictus keyboard (#678, mock-up `10c`): a capsule in the
 /// Dictus blue with white text and symbols, in light and dark alike (decided by Pierre on
 /// 2026-10-10 after testing on device: the first version, navy on light and white on dark,
 /// read as foreign to the app). Same pairing as the onboarding's primary button: the accent
@@ -280,122 +376,209 @@ private struct FirstDictationBanner: View {
     }
 }
 
-// MARK: - GlobeLongPressCard
+// MARK: - KeyboardSwitchAnimation
 
-/// State 1's looping drawn card (#678, mock-up `10a`): a finger long-presses the globe of a
-/// drawn iOS keyboard, the keyboard menu opens, the finger slides to Dictus and lets go.
+/// The globe long-press, drawn in four frames in the bottom of the onboarding's drawn
+/// iPhone (#845, the animation the page had before #678): Apple's keyboard, the finger
+/// holding the globe and the keyboard menu opening on the current keyboard, the finger
+/// sliding to Dictus, then the Dictus keyboard.
 ///
-/// WHY DRAWN AND WHY BLANK KEYS (#649 decisions 13 and 14): Apple's keyboard and its globe
-/// menu are iOS system UI, which the onboarding draws; the keys carry no letters because the
-/// globe is the one thing to look at. The card is a picture, so it is one element for
-/// VoiceOver, read as its caption.
+/// WHY THIS ONE (decided by Pierre on 2026-10-28): it presses the globe where it sits on a
+/// Face ID iPhone, under the keys, as Wispr Flow shows it.
+///
+/// WHY IN THE DRAWN IPHONE (Pierre, 2026-10-29, after testing #856 on device): every other
+/// animation of the onboarding plays in the same drawn phone (`OnboardingPhoneCard`, the
+/// Smart Modes scene among them), and this one, drawn on its own, looked foreign. It uses
+/// that card as the scenes do (`FeatureSceneCard`), with the scenes' system bar, finger
+/// and keyboard backdrop.
+///
+/// WHY SCALED, NOT CUT (#845): it sits between the field and the open keyboard, which on a
+/// 667 pt screen (iPhone SE) leaves far less than its drawn height. The card is laid out at
+/// one size and scaled down to the room the page gives it, so the whole of it, globe and
+/// menu included, stays visible.
 ///
 /// WHY A `.task` LOOP AND NOT A TIMER: the loop belongs to the view's lifetime. SwiftUI
-/// cancels the task when the card leaves (the field is tapped), so no timer is left firing
-/// into a view that is gone. With Reduce Motion on, the card holds the frame that says it
-/// all: the menu open, Dictus selected.
-private struct GlobeLongPressCard: View {
-    /// One moment of the loop, in order.
-    private enum Phase: CaseIterable {
-        /// The keyboard alone.
-        case rest
-        /// The finger comes down on the globe.
-        case approach
-        /// The finger holds the globe.
-        case press
-        /// The menu is open on the current keyboard.
-        case menuOpen
-        /// The finger has slid up to Dictus.
-        case dictusSelected
-        /// The finger has let go: Dictus is chosen, the menu closes.
-        case chosen
+/// cancels the task when the animation leaves (Dictus comes up), so no timer is left firing
+/// into a view that is gone. With Reduce Motion on, it holds the frame that says it all:
+/// the menu open, Dictus highlighted. The animation is a picture, so it is one element for
+/// VoiceOver, read as its caption.
+private struct KeyboardSwitchAnimation: View {
+    /// Where the finger is, if it is on screen.
+    private enum Finger {
+        case globe, dictus
+    }
 
-        var duration: Duration {
-            switch self {
-            case .rest: return .seconds(0.9)
-            case .approach: return .seconds(0.6)
-            case .press: return .seconds(0.8)
-            case .menuOpen: return .seconds(0.9)
-            case .dictusSelected: return .seconds(1.1)
-            case .chosen: return .seconds(1.0)
-            }
+    /// One moment of the loop, in order: the drawn frame, the finger, and for how long.
+    private struct Step {
+        let frame: Int
+        let finger: Finger?
+        let duration: Duration
+    }
+
+    private static let steps = [
+        Step(frame: 0, finger: nil, duration: .seconds(1.2)),
+        Step(frame: 0, finger: .globe, duration: .seconds(0.3)),
+        Step(frame: 1, finger: .globe, duration: .seconds(1.5)),
+        Step(frame: 2, finger: .dictus, duration: .seconds(1.5)),
+        Step(frame: 3, finger: nil, duration: .seconds(2.0))
+    ]
+
+    private typealias Phone = OnboardingPhoneMetrics
+
+    // The phone's screen, in points, at the width the scenes are drawn at (402 pt).
+    private static let screenWidth: CGFloat = 402
+    /// The host app's strip above the keyboard, where the menu has room to open.
+    private static let hostHeight: CGFloat = 24
+    /// iOS's suggestion bar, or the Dictus toolbar in its place.
+    private static let barHeight: CGFloat = 44
+    private static let keyHeight: CGFloat = 40
+    private static let rowSpacing: CGFloat = 9
+    /// iOS's bar under the keys on a Face ID iPhone (`SmartModesSceneMetrics`).
+    private static let systemBarHeight: CGFloat = 64
+    private static var keysHeight: CGFloat { keyHeight * 4 + rowSpacing * 3 + 8 }
+    private static var screenHeight: CGFloat { hostHeight + barHeight + keysHeight + systemBarHeight }
+    /// The card around the screen: the phone's outline and the card's inset on each side.
+    private static var cardSize: CGSize {
+        let side = Phone.phoneFrameWidth + Phone.phoneInset
+        return CGSize(width: screenWidth + side * 2, height: screenHeight + side)
+    }
+
+    // The menu, from the screen's bottom-left corner.
+    private static let menuLeading: CGFloat = 16
+    private static let menuBottom: CGFloat = 62
+    private static let menuWidth: CGFloat = 220
+    private static let menuRowHeight: CGFloat = 44
+    /// The globe's centre in `SceneSystemBar` (30 pt in, 8 pt down, a 24 pt symbol).
+    private static var globeCentre: CGPoint {
+        CGPoint(x: 43, y: screenHeight - systemBarHeight + 20)
+    }
+    /// The Dictus row's centre: the menu's last row.
+    private static var dictusCentre: CGPoint {
+        CGPoint(x: menuLeading + menuWidth * 0.6, y: screenHeight - menuBottom - 4 - menuRowHeight / 2)
+    }
+
+    @State private var animationFrame = 0
+    @State private var finger: Finger?
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    /// Whether the iOS system language is French (drives AZERTY vs QWERTY layout).
+    /// WHY read from Locale.preferredLanguages, NOT SharedKeys.language:
+    /// SharedKeys.language is the Dictus *transcription* preference — it's independent
+    /// from the iOS keyboard layout the user actually sees when they press the globe.
+    private let isFrench = (Locale.preferredLanguages.first ?? "en").hasPrefix("fr")
+
+    private var row0: [String] {
+        isFrench
+            ? ["A", "Z", "E", "R", "T", "Y", "U", "I", "O", "P"]
+            : ["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P"]
+    }
+    private var row1: [String] {
+        isFrench
+            ? ["Q", "S", "D", "F", "G", "H", "J", "K", "L", "M"]
+            : ["A", "S", "D", "F", "G", "H", "J", "K", "L"]
+    }
+    private var row2: [String] {
+        isFrench
+            ? ["W", "X", "C", "V", "B", "N", "'"]
+            : ["Z", "X", "C", "V", "B", "N", "M"]
+    }
+
+    /// The current keyboard's row in the menu. The real menu names each keyboard in its
+    /// own language, so the catalog spells both names the same in every locale.
+    private var systemKeyboardName: String {
+        isFrench
+            ? String(localized: "Français", comment: "Drawn globe menu row: the French keyboard, named in French (#678).")
+            : String(localized: "English", comment: "Drawn globe menu row: the English keyboard, named in English (#678).")
+    }
+
+    /// The space bar's label in the non-Dictus frames.
+    private var spaceLabel: String {
+        isFrench ? "espace" : "space"
+    }
+
+    var body: some View {
+        let size = Self.cardSize
+        GeometryReader { proxy in
+            let scale = min(1, proxy.size.width / size.width, proxy.size.height / size.height)
+            card
+                .frame(width: size.width, height: size.height)
+                .scaleEffect(scale)
+                .frame(width: proxy.size.width, height: proxy.size.height)
+        }
+        // Never taller than drawn; shorter when the page has less room (iPhone SE).
+        .frame(maxWidth: .infinity, maxHeight: size.height)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(Text("Long-press the globe, then Dictus"))
+        .accessibilityIdentifier("onboarding.firstDictation.animation")
+        .task(id: reduceMotion) { await run() }
+    }
+
+    /// The bottom of the drawn iPhone, as `FeatureSceneCard` draws it.
+    private var card: some View {
+        OnboardingPhoneCard(end: .bottom) {
+            screen
+                .clipShape(Phone.screenShape(end: .bottom))
+                .padding(.horizontal, Phone.phoneFrameWidth)
+                .padding(.bottom, Phone.phoneFrameWidth)
         }
     }
 
-    @State private var phase: Phase = .rest
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
-
-    /// The current keyboard's row in the menu, in the iPhone's language. The real menu
-    /// lists the enabled keyboards by their own names; the language follows the system,
-    /// like the keyboard the user will actually see (not `SharedKeys.language`, which is
-    /// the transcription language). Each name is a catalog entry, spelled the same in
-    /// both locales, like the real menu, which names a keyboard in its own language.
-    private let systemKeyboardName: String = {
-        let preferred = Locale.preferredLanguages.first ?? "en"
-        return preferred.hasPrefix("fr")
-            ? String(localized: "Français", comment: "Drawn globe menu row: the French keyboard, named in French (#678).")
-            : String(localized: "English", comment: "Drawn globe menu row: the English keyboard, named in English (#678).")
-    }()
-
-    // Geometry of the drawn keyboard, in points from its bottom-left corner.
-    private let keyHeight: CGFloat = 32
-    private let globeSize: CGFloat = 44
-    private let globeInset: CGFloat = 14
-    private let menuRowHeight: CGFloat = 40
-    private let menuWidth: CGFloat = 180
-    /// Bottom of the menu, above the globe.
-    private var menuBottom: CGFloat { globeInset + globeSize + 12 }
-
-    var body: some View {
+    private var screen: some View {
         VStack(spacing: 0) {
-            Text("Long-press the globe, then Dictus")
-                .font(.subheadline.weight(.semibold))
-                .foregroundStyle(.primary)
-                .multilineTextAlignment(.center)
-                .frame(maxWidth: .infinity)
-                .padding(.horizontal, 16)
-                .padding(.top, 20)
-                .padding(.bottom, 14)
-
-            ZStack(alignment: .bottomLeading) {
-                keyboard
-                globe
-                if showsMenu {
-                    menu
-                        .padding(.leading, globeInset)
-                        .padding(.bottom, menuBottom)
-                        .transition(.opacity.combined(with: .scale(scale: 0.9, anchor: .bottomLeading)))
+            Color.clear.frame(height: Self.hostHeight)
+            VStack(spacing: 0) {
+                Group {
+                    if animationFrame == 3 {
+                        dictusToolbar
+                    } else {
+                        Color.clear
+                    }
                 }
-                finger
+                .frame(height: Self.barHeight)
+                keys(isDictus: animationFrame == 3)
+                    .frame(height: Self.keysHeight, alignment: .top)
+                SceneSystemBar()
+                    .frame(height: Self.systemBarHeight)
             }
-            // `minHeight: 0` lets the drawing be cut at its top when the card shrinks.
-            .frame(maxWidth: .infinity, minHeight: 0, maxHeight: .infinity, alignment: .bottom)
+            .background(
+                UnevenRoundedRectangle(topLeadingRadius: 18, topTrailingRadius: 18, style: .continuous)
+                    .fill(SmartModesScene.backdrop)
+            )
         }
-        // Sized so the page fits a 667 pt screen (iPhone SE) with the title, the field and
-        // Skip. At a large text size the card gives up height instead (#700): the drawing is
-        // anchored at its bottom (the globe) and loses its top, but Skip, the step's only way
-        // out, stays on screen.
-        .frame(maxHeight: 284)
-        .onboardingCard()
-        .clipShape(RoundedRectangle(cornerRadius: OnboardingMetrics.cardCornerRadius, style: .continuous))
-        .animation(.easeInOut(duration: 0.3), value: phase)
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel(Text("Long-press the globe, then Dictus"))
-        .task(id: reduceMotion) { await run() }
+        .frame(width: Self.screenWidth, height: Self.screenHeight)
+        .overlay(alignment: .bottomLeading) {
+            // The menu, for frames 1 and 2, just above the globe.
+            if animationFrame == 1 || animationFrame == 2 {
+                menu(dictusHighlighted: animationFrame == 2)
+                    .padding(.leading, Self.menuLeading)
+                    .padding(.bottom, Self.menuBottom)
+                    .transition(.opacity.combined(with: .scale(scale: 0.9, anchor: .bottomLeading)))
+            }
+        }
+        .overlay(alignment: .topLeading) {
+            SceneFinger(isPressed: finger != nil)
+                .opacity(finger == nil ? 0 : 1)
+                .position(finger == .dictus ? Self.dictusCentre : Self.globeCentre)
+        }
+        .animation(.easeInOut(duration: 0.3), value: animationFrame)
+        .animation(.easeInOut(duration: 0.3), value: finger)
+        .allowsHitTesting(false)
     }
 
     // MARK: Loop
 
     private func run() async {
         if reduceMotion {
-            phase = .dictusSelected
+            animationFrame = 2
+            finger = .dictus
             return
         }
         while !Task.isCancelled {
-            for next in Phase.allCases {
-                phase = next
+            for step in Self.steps {
+                animationFrame = step.frame
+                finger = step.finger
                 do {
-                    try await Task.sleep(for: next.duration)
+                    try await Task.sleep(for: step.duration)
                 } catch {
                     return
                 }
@@ -403,162 +586,108 @@ private struct GlobeLongPressCard: View {
         }
     }
 
-    private var showsMenu: Bool {
-        phase == .menuOpen || phase == .dictusSelected
-    }
-
     // MARK: Drawn keyboard
 
-    /// Blank keys on the keyboard tray, which runs into the card's rounded bottom. The bottom row
-    /// leaves room for the globe, drawn on its own so it can light up.
-    private var keyboard: some View {
-        VStack(spacing: 8) {
-            keyRow(count: 10)
-            keyRow(count: 10)
+    /// The four rows of keys, with real labels: Apple's keyboard, or Dictus's, which draws
+    /// the same rows under its own toolbar.
+    private func keys(isDictus: Bool) -> some View {
+        VStack(spacing: Self.rowSpacing) {
             HStack(spacing: 6) {
-                functionKey.frame(width: 44)
-                keyRow(count: 7)
-                functionKey.frame(width: 44)
+                ForEach(row0, id: \.self) { keyCell(Text(verbatim: $0)) }
             }
             HStack(spacing: 6) {
-                functionKey.frame(width: 92)
-                letterKey
-                functionKey.frame(width: 92)
+                ForEach(row1, id: \.self) { keyCell(Text(verbatim: $0)) }
             }
-            Color.clear.frame(height: globeSize)
+            HStack(spacing: 6) {
+                keyCell(Image(systemName: "shift"), width: 48)
+                ForEach(row2, id: \.self) { keyCell(Text(verbatim: $0)) }
+                keyCell(Image(systemName: "delete.left"), width: 48)
+            }
+            HStack(spacing: 6) {
+                keyCell(Text(verbatim: "123").font(.system(size: 16)), width: 52)
+                keyCell(Image(systemName: "face.smiling"), width: 52)
+                keyCell(Text(verbatim: spaceLabel).font(.system(size: 16)))
+                keyCell(Image(systemName: "return"), width: 88)
+            }
         }
-        .padding(.horizontal, 8)
-        .padding(.top, 12)
-        .padding(.bottom, globeInset)
-        .frame(maxWidth: .infinity)
-        .background(
-            UnevenRoundedRectangle(
-                topLeadingRadius: OnboardingMetrics.cardCornerRadius,
-                topTrailingRadius: OnboardingMetrics.cardCornerRadius,
-                style: .continuous
-            )
-            .fill(Self.trayFill)
-        )
+        .padding(.horizontal, 4)
+        .padding(.top, 8)
     }
 
-    private func keyRow(count: Int) -> some View {
-        HStack(spacing: 6) {
-            ForEach(0..<count, id: \.self) { _ in letterKey }
+    /// The Dictus keyboard's toolbar: the ☰ capsule on the left, the blue mic pill on the
+    /// right.
+    private var dictusToolbar: some View {
+        HStack {
+            Image(systemName: "line.3.horizontal")
+                .font(.system(size: 16, weight: .medium))
+                .foregroundStyle(.secondary)
+                .frame(width: 56, height: 32)
+                .background(Capsule().fill(Self.keyFill))
+            Spacer()
+            Image(systemName: "mic.fill")
+                .font(.system(size: 16))
+                .foregroundStyle(.white)
+                .frame(width: 64, height: 32)
+                .background(Capsule().fill(Color.dictusAccent))
         }
+        .padding(.horizontal, 12)
+        .padding(.top, 6)
     }
 
-    private var letterKey: some View {
-        RoundedRectangle(cornerRadius: 7, style: .continuous)
-            .fill(Self.keyFill)
-            .frame(height: keyHeight)
-            .frame(maxWidth: .infinity)
-    }
-
-    private var functionKey: some View {
-        RoundedRectangle(cornerRadius: 7, style: .continuous)
-            .fill(Self.functionKeyFill)
-            .frame(height: keyHeight)
-    }
-
-    /// The globe key, ringed in blue while the finger holds it.
-    private var globe: some View {
-        let lit = phase == .press || showsMenu
-        return Image(systemName: "globe")
-            .font(.system(size: 22))
+    private func keyCell(_ label: some View, width: CGFloat? = nil) -> some View {
+        label
+            .font(.system(size: 20))
             .foregroundStyle(.primary)
-            .frame(width: globeSize, height: globeSize)
-            .background(Circle().fill(Color.dictusAccent.opacity(lit ? 0.22 : 0)))
-            .overlay(Circle().strokeBorder(Color.dictusAccent, lineWidth: 2.5).opacity(lit ? 1 : 0))
-            .padding(.leading, globeInset)
-            .padding(.bottom, globeInset)
+            .frame(maxWidth: width ?? .infinity)
+            .frame(width: width, height: Self.keyHeight)
+            .background(
+                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                    .fill(Self.keyFill)
+            )
     }
+
+    /// The keys on iOS 26, as the Smart Modes scene draws them: white on light, rgb(61, 61,
+    /// 61) on dark.
+    private static let keyFill = Color(light: .white, dark: Color(red: 61 / 255, green: 61 / 255, blue: 61 / 255))
 
     // MARK: Drawn menu
 
-    /// The globe's keyboard menu: the current keyboard, Dictus, Emoji.
-    private var menu: some View {
-        VStack(spacing: 0) {
-            menuRow(Text(verbatim: systemKeyboardName), selected: phase == .menuOpen)
-            menuRow(Text(verbatim: "Dictus"), selected: phase == .dictusSelected)
-            menuRow(Text("Emoji"), selected: false)
+    /// The globe's keyboard menu: the current keyboard, Emoji, Dictus.
+    private func menu(dictusHighlighted: Bool) -> some View {
+        VStack(alignment: .leading, spacing: 0) {
+            menuRow(systemKeyboardName, highlighted: !dictusHighlighted)
+            Divider().opacity(0.3)
+            menuRow(String(localized: "Emoji"))
+            Divider().opacity(0.3)
+            menuRow("Dictus", highlighted: dictusHighlighted, accent: dictusHighlighted)
         }
-        .frame(width: menuWidth)
+        .padding(.vertical, 4)
+        .frame(width: Self.menuWidth)
         .background(
             RoundedRectangle(cornerRadius: 14, style: .continuous)
                 .fill(Self.menuFill)
-                .shadow(color: .black.opacity(0.18), radius: 12, y: 4)
+                .shadow(color: .black.opacity(0.2), radius: 12, y: 3)
         )
-        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
     }
 
-    private func menuRow(_ label: Text, selected: Bool) -> some View {
-        label
-            .font(.body.weight(selected ? .semibold : .regular))
-            .foregroundStyle(selected ? Color.white : Color.primary)
+    /// Takes a `String`, so it is shown verbatim: callers localize with `String(localized:)`
+    /// (#661).
+    private func menuRow(_ text: String, highlighted: Bool = false, accent: Bool = false) -> some View {
+        Text(verbatim: text)
+            .font(.system(size: 17, weight: highlighted || accent ? .semibold : .regular))
+            .foregroundStyle(accent ? Color.dictusAccent : Color.primary)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.horizontal, 16)
-            .frame(height: menuRowHeight)
-            .background(selected ? Color.dictusAccent : Color.clear)
+            .padding(.horizontal, 14)
+            .frame(height: Self.menuRowHeight)
+            .background(
+                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                    .fill(highlighted ? (accent ? Color.dictusAccent.opacity(0.14) : Color.primary.opacity(0.08)) : Color.clear)
+                    .padding(.horizontal, 4)
+            )
     }
 
-    // MARK: Finger
-
-    /// The fingertip: a translucent disc with a white rim, the way iOS shows touches in
-    /// screen recordings. It comes down on the globe, then slides up to the Dictus row.
-    private var finger: some View {
-        let size: CGFloat = 36
-        // Centre of the globe, and of the Dictus row (the menu's middle row), from the
-        // keyboard's bottom-left corner.
-        let globeCentre = CGPoint(x: globeInset + globeSize / 2, y: globeInset + globeSize / 2)
-        let dictusCentre = CGPoint(x: globeInset + menuWidth * 0.75, y: menuBottom + menuRowHeight * 1.5)
-        let target: CGPoint
-        let visible: Bool
-        let pressed: Bool
-        switch phase {
-        case .rest:
-            target = CGPoint(x: globeCentre.x + 50, y: globeCentre.y + 40)
-            visible = false
-            pressed = false
-        case .approach:
-            target = globeCentre
-            visible = true
-            pressed = false
-        case .press, .menuOpen:
-            target = globeCentre
-            visible = true
-            pressed = true
-        case .dictusSelected:
-            target = dictusCentre
-            visible = true
-            pressed = true
-        case .chosen:
-            target = dictusCentre
-            visible = false
-            pressed = false
-        }
-        return Circle()
-            .fill(Color.gray.opacity(0.35))
-            .overlay(Circle().strokeBorder(.white, lineWidth: 2.5))
-            .shadow(color: .black.opacity(0.2), radius: 3, y: 1)
-            .frame(width: size, height: size)
-            .scaleEffect(pressed ? 0.85 : 1)
-            .opacity(visible ? 1 : 0)
-            // The ZStack aligns the disc's bottom-left on the keyboard's; move its centre
-            // onto the target.
-            .offset(x: target.x - size / 2, y: -(target.y - size / 2))
-            .allowsHitTesting(false)
-    }
-
-    // MARK: Colours
-
-    /// The keyboard tray: iOS's light keyboard grey on light, a lifted navy on dark.
-    private static let trayFill = Color(light: Color(hex: 0xD1D4DB), dark: Color(hex: 0x1E2535))
-    /// The letter keys: white on light, slate on dark.
-    private static let keyFill = Color(light: .white, dark: Color(hex: 0x3A4256))
-    /// Shift, delete, 123, return: a step darker than the letters.
-    private static let functionKeyFill = Color(light: Color(hex: 0xABB0BA), dark: Color(hex: 0x2A3244))
     /// The menu: a white card on light, the app's surface on dark.
-    private static let menuFill = Color(light: .white, dark: Color(hex: 0x161C2C))
+    private static let menuFill = Color(light: .white, dark: Color(hex: 0x2A3244))
 }
 
 // MARK: - KeyboardDetectingTextField
@@ -575,13 +704,15 @@ private struct GlobeLongPressCard: View {
 /// the user switches to the Dictus keyboard (via long-press globe). SwiftUI's
 /// TextEditor doesn't expose this. This wrapper:
 /// 1. Reports focus from `textViewDidBeginEditing` / `textViewDidEndEditing`: a focused
-///    field is a keyboard on screen (#678 state 1 versus states 2 and 3)
+///    field is a keyboard on screen (#678, #845)
 /// 2. Observes UITextInputMode.currentInputModeDidChangeNotification
 /// 3. Reads the UITextView's textInputMode.identifier
 /// 4. Calls onKeyboardChange(isDictus:) when the active keyboard changes
+/// 5. Takes focus each time `focusRequest` changes (#845)
 private struct KeyboardDetectingTextField: UIViewRepresentable {
     @Binding var text: String
     let placeholder: String
+    let focusRequest: Int
     let onFocusChange: (Bool) -> Void
     let onKeyboardChange: (Bool) -> Void
 
@@ -621,6 +752,10 @@ private struct KeyboardDetectingTextField: UIViewRepresentable {
         if textView.placeholder != placeholder {
             textView.placeholder = placeholder
         }
+        if context.coordinator.handledFocusRequest != focusRequest {
+            context.coordinator.handledFocusRequest = focusRequest
+            textView.requestFocus()
+        }
     }
 
     static func dismantleUIView(_ textView: PlaceholderTextView, coordinator: Coordinator) {
@@ -634,6 +769,8 @@ private struct KeyboardDetectingTextField: UIViewRepresentable {
     class Coordinator: NSObject, UITextViewDelegate {
         var parent: KeyboardDetectingTextField
         weak var textView: PlaceholderTextView?
+        /// The last `focusRequest` acted on: 0, so the first one (1) focuses on appear.
+        var handledFocusRequest = 0
 
         init(_ parent: KeyboardDetectingTextField) {
             self.parent = parent
@@ -718,5 +855,33 @@ private class PlaceholderTextView: UITextView {
 
     func refreshPlaceholder() {
         placeholderLabel.isHidden = !text.isEmpty
+    }
+
+    /// Set while a focus request waits for the view to be in a window.
+    private var wantsFocus = false
+
+    /// Opens the keyboard on this view, now if it is in a window, or as soon as it is.
+    ///
+    /// WHY WAIT FOR THE WINDOW (#845): `becomeFirstResponder()` returns false on a view
+    /// outside a window. Before #678 the page called it from `makeUIView`, one run-loop tick
+    /// after creating the view, with no guarantee the view was in a window yet and no
+    /// retry. `didMoveToWindow` is the moment it is.
+    func requestFocus() {
+        guard window != nil else {
+            wantsFocus = true
+            return
+        }
+        wantsFocus = false
+        // Next run-loop tick: SwiftUI calls this from `updateUIView`, mid-update.
+        DispatchQueue.main.async { [weak self] in
+            _ = self?.becomeFirstResponder()
+        }
+    }
+
+    override func didMoveToWindow() {
+        super.didMoveToWindow()
+        if wantsFocus && window != nil {
+            requestFocus()
+        }
     }
 }

@@ -152,10 +152,14 @@ public enum PolishGuardrail {
     /// The intended failure to catch is the Apple FM chat-reply pattern: target=fr
     /// but the engine emitted English. The char-ratio guardrail misses this when
     /// the chat reply happens to be similar length to the raw input.
+    ///
+    /// `raw`, when given, is the transcript the output was polished from: a segment
+    /// found in it word for word passes the per-segment pass (#861).
     public static func detectedLanguageMatches(polished: String,
                                                target: SupportedLanguage,
+                                               raw: String? = nil,
                                                thresholds: PolishLanguageSegmentThresholds = .default) -> Bool {
-        matches(polished: polished, expectedCode: target.rawValue, thresholds: thresholds)
+        matches(polished: polished, expectedCode: target.rawValue, raw: raw, thresholds: thresholds)
     }
 
     /// Auto-mode variant (#239): there is no target language, but the INPUT's
@@ -169,8 +173,9 @@ public enum PolishGuardrail {
     /// sides share one namespace.
     public static func detectedLanguageMatches(polished: String,
                                                inputLanguageCode: String,
+                                               raw: String? = nil,
                                                thresholds: PolishLanguageSegmentThresholds = .default) -> Bool {
-        matches(polished: polished, expectedCode: inputLanguageCode, thresholds: thresholds)
+        matches(polished: polished, expectedCode: inputLanguageCode, raw: raw, thresholds: thresholds)
     }
 
     /// Shared core: `true` when the output reads as `expectedCode` **as a whole and
@@ -205,15 +210,27 @@ public enum PolishGuardrail {
     /// Apple FM chat reply this guardrail was written for — which has no segment
     /// structure to inspect. The per-segment pass only ever adds rejections; free
     /// polish, which returns one continuous passage, sees no change.
+    ///
+    /// ### A segment the speaker said is never refused (#861)
+    ///
+    /// The per-segment pass refused `It's a folie.` on a French `smart.message`
+    /// dictation (device, 2026-10-29) although the transcript holds it word for word.
+    /// The check exists to catch the model writing in another language; a segment
+    /// copied from the transcript is the speaker's own code-switch, not the model's.
+    /// So a segment found verbatim in `raw` passes before it is read. A segment that
+    /// is not in `raw` is read exactly as before.
     private static func matches(polished: String,
                                 expectedCode: String,
+                                raw: String?,
                                 thresholds: PolishLanguageSegmentThresholds) -> Bool {
         let trimmed = polished.trimmingCharacters(in: .whitespacesAndNewlines)
         guard trimmed.count >= 12 else { return true }
         guard reads(trimmed, as: expectedCode, confidenceFloor: 0.5) else { return false }
         let segments = PolishSegmentation.segments(of: trimmed)
         guard segments.count > 1 else { return true }
+        let spoken = raw.map(verbatimKey)
         return segments.allSatisfy { segment in
+            if let spoken, spoken.contains(verbatimKey(segment)) { return true }
             // A segment too short for the recogniser is not evidence of anything, so
             // it passes untested rather than being guessed at. Every uncertainty in
             // this check resolves toward accepting: a wrong rejection costs a Smart
@@ -221,6 +238,17 @@ public enum PolishGuardrail {
             guard segment.count >= thresholds.minimumSegmentCharacters else { return true }
             return reads(segment, as: expectedCode, confidenceFloor: thresholds.confidenceFloor)
         }
+    }
+
+    /// `text` lower-cased, its whitespace runs collapsed to one space and its typographic
+    /// apostrophe folded, so a segment matches the transcript it was copied from through
+    /// the casing, the French no-break spaces and the `’` the post-pass and the model add.
+    static func verbatimKey(_ text: String) -> String {
+        text.lowercased()
+            .replacingOccurrences(of: "\u{2019}", with: "'")
+            .components(separatedBy: .whitespacesAndNewlines)
+            .filter { !$0.isEmpty }
+            .joined(separator: " ")
     }
 
     /// `true` when `text` reads as `expectedCode`, or when the reading is too weak

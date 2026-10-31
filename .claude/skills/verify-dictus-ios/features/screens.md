@@ -17,7 +17,7 @@ Captures are in [`docs/agents/screens/`](../../../../docs/agents/screens/), one 
 | `app.onboarding.history-scene` | Onboarding scene: « Tout se retrouve » | … -string historyScene | onboarding, history | [oui](../../../../docs/agents/screens/app.onboarding.history-scene.png) |
 | `app.onboarding.model-preparation` | Onboarding: model download and preparation | … -string modelPreparation (starts a download) | onboarding, models.transcription | non |
 | `app.onboarding.microphone` | Onboarding: « Dictus a besoin du micro » | … -string microphonePrompt | onboarding | [oui](../../../../docs/agents/screens/app.onboarding.microphone.png) |
-| `app.onboarding.first-dictation` | Onboarding: « Essayez maintenant » practice field | … -string firstDictation | onboarding, dictation.keyboard | [oui](../../../../docs/agents/screens/app.onboarding.first-dictation.png) |
+| `app.onboarding.first-dictation` | Onboarding: « Essayez maintenant » practice field, keyboard open, globe animation in the drawn iPhone above Apple's keyboard (#845) | … -string firstDictation | onboarding, dictation.keyboard | [oui](../../../../docs/agents/screens/app.onboarding.first-dictation.png) |
 | `app.onboarding.stop-standby` | Onboarding: « Pour arrêter Dictus » | … -string stopStandby | onboarding, live-activity | [oui](../../../../docs/agents/screens/app.onboarding.stop-standby.png) |
 | `app.onboarding.completion` | Onboarding: « C'est prêt » | … -string completion | onboarding | [oui](../../../../docs/agents/screens/app.onboarding.completion.png) |
 | `app.whats-new` | What's new (existing user behind 2.0.0) | set-default dictus.hasCompletedOnboarding -bool YES, then dictus.lastVersionSeen -string 1.8.0 | onboarding | [oui](../../../../docs/agents/screens/app.whats-new.png) |
@@ -26,7 +26,7 @@ Captures are in [`docs/agents/screens/`](../../../../docs/agents/screens/), one 
 | `app.history` | History sheet (empty state) | Pro on, Accueil → tap-label Historique | history | [oui](../../../../docs/agents/screens/app.history.png) |
 | `app.history.detail` | Transcription detail | History → a row (needs a transcription) | history, vocabulary | non |
 | `app.models` | Tab Modèles | tab Modèles | models.transcription | [oui](../../../../docs/agents/screens/app.models.png) |
-| `app.models.languages` | Supported languages sheet | Modèles → tap-label « Langues prises en charge » | models.transcription | [oui](../../../../docs/agents/screens/app.models.languages.png) |
+| `app.models.languages` | Supported languages sheet | Modèles → the Small (quantifié) card's ⓘ (see models.transcription) | models.transcription | [oui](../../../../docs/agents/screens/app.models.languages.png) |
 | `app.models.loading` | Full-screen model preparation: « On prépare votre modèle », download then « Optimisation pour cet iPhone » | Modèles → tap-label « Small (quantifié) » (a real download, see models.transcription) | models.transcription | [oui](../../../../docs/agents/screens/app.models.loading.png) |
 | `app.settings` | Tab Réglages | tab Réglages | keyboard.languages, polish, typing.*, live-activity, diagnostics.logs | [oui](../../../../docs/agents/screens/app.settings.png) |
 | `app.settings.sounds` | Réglages → Sons | Réglages, scroll, tap-label Sons | feedback.sounds-haptics | [oui](../../../../docs/agents/screens/app.settings.sounds.png) |
@@ -36,9 +36,11 @@ Captures are in [`docs/agents/screens/`](../../../../docs/agents/screens/), one 
 | `app.settings.polish-debug` | Polish debug screen | Réglages → tap « Version » five times | polish | non |
 | `app.pro.hub` | Dictus Pro hub | Pro on, Réglages → tap-label « Dictus Pro, Pro actif » | pro.subscription | [oui](../../../../docs/agents/screens/app.pro.hub.png) |
 | `app.pro.smart-modes` | Pro → Mode intelligent (pinned modes) | hub → « Mode intelligent, … » | smart-modes | [oui](../../../../docs/agents/screens/app.pro.smart-modes.png) |
-| `app.pro.history` | Pro → Historique (switch, demo) | hub → « Historique, … » | history | [oui](../../../../docs/agents/screens/app.pro.history.png) |
-| `app.pro.vocabulary` | Pro → Vocabulaire (terms, suggestions) | hub → « Vocabulaire, … » | vocabulary | [oui](../../../../docs/agents/screens/app.pro.vocabulary.png) |
+| `app.pro.history` | Pro → Historique (switch, demo) | hub → « Recherche dans l’historique, … » | history | [oui](../../../../docs/agents/screens/app.pro.history.png) |
+| `app.pro.vocabulary` | Pro → Vocabulaire (switch, « Comment ça marche » card that names « Analyser mes transcriptions », terms with « Remplace : … » or « En attente d’erreurs à corriger », « Ajouter un terme », « Analyser mes transcriptions ») | hub → « Vocabulaire, … » | vocabulary | [oui](../../../../docs/agents/screens/app.pro.vocabulary.png) |
 | `app.pro.vocabulary.term-editor` | « Nouveau terme » sheet | Vocabulaire → « Ajouter un terme » | vocabulary | non |
+| `app.pro.vocabulary.suggestions` | « Suggestions depuis l’historique » sheet, « Vos orthographes, écrites autrement » first (Accepter / Ignorer, ids `vocabulary.pair.<rank>.accept` / `.ignore`) | Vocabulaire → « Analyser mes transcriptions » (seeded History, see vocabulary) | vocabulary | [oui](../../../../docs/agents/screens/app.pro.vocabulary.suggestions.png) |
+| `app.pro.vocabulary.pair-review` | « Avant l’ajout » sheet: the change in one sentence, the term and the new variant as editable fields, the term's variants, Annuler / Ajouter | suggestions → tap-id vocabulary.pair.1.accept | vocabulary | [oui](../../../../docs/agents/screens/app.pro.vocabulary.pair-review.png) |
 | `app.pro.voice-notes` | Pro → Messages vocaux (language, after transcription) | hub → « Messages vocaux, … » | voice-notes | [oui](../../../../docs/agents/screens/app.pro.voice-notes.png) |
 | `app.paywall` | Paywall (plans and prices) | Accueil → « Débloquez Dictus Pro, … » (no trial running); prices need simslim's `store` category, see pro.subscription Gotchas | pro.subscription | [oui](../../../../docs/agents/screens/app.paywall.png) |
 | `app.pro.trial-announcement` | Reverse-trial announcement sheet | « C'est prêt » → « Commencer » on a fresh install (`kind=newUser`); or Réglages → Developer → « Forget the trial » + « Forget What's new », relaunch, end of What's new (`kind=existingUser`) | pro.subscription | [oui](../../../../docs/agents/screens/app.pro.trial-announcement.png) |
@@ -46,6 +48,7 @@ Captures are in [`docs/agents/screens/`](../../../../docs/agents/screens/), one 
 | `kbd.keys` | Dictus keyboard, letters (AZERTY), toolbar with ☰ and mic | full-access, select-keyboard | dictation.keyboard, typing.autocorrect | [oui](../../../../docs/agents/screens/kbd.keys.png) |
 | `kbd.no-full-access` | Keyboard bar « Accès complet requis », mic greyed | select-keyboard before full-access | dictation.keyboard | [oui](../../../../docs/agents/screens/kbd.no-full-access.png) |
 | `kbd.dictation-error` | Keyboard after a mic tap with no model (failure message) | kbd mic with no model installed (proof run) | dictation.keyboard | [oui](../../../../docs/agents/screens/kbd.dictation-error.png) |
+| `kbd.recovered-transcription` | Keyboard bar « Dictée interrompue. Votre texte est dans l'app Dictus. » in accent blue, mic right, no ☰ | set-default dictus.recoveredTranscription -string "…", then show the keyboard (#860) | dictation.keyboard | [oui](../../../../docs/agents/screens/kbd.recovered-transcription.png) |
 | `kbd.recording` | Keyboard recording overlay: ✕ / ✓, waveform, timer, « En écoute... » | kbd mic with a model (records the Mac's mic, see dictation.keyboard) | dictation.keyboard | [oui](../../../../docs/agents/screens/kbd.recording.png) |
 | `kbd.transcribing` | Keyboard overlay after ✓: no buttons, waveform, « Transcription... » | ✓ on `kbd.recording`, screenshot within the transcription (~10 s on this Mac) | dictation.keyboard | [oui](../../../../docs/agents/screens/kbd.transcribing.png) |
 | `kbd.dictation-undo` | Keys back, inserted text in the field, « ↶ Annuler » in the bar's left slot | right after a dictation is inserted (8 s window) | dictation.keyboard | [oui](../../../../docs/agents/screens/kbd.dictation-undo.png) |
@@ -66,7 +69,7 @@ Captures are in [`docs/agents/screens/`](../../../../docs/agents/screens/), one 
 
 The strip above the keys is the keyboard's one control surface: suggestions, the mic, the menu, dictation feedback and dictation undo all take turns in the same 52 pt band, which never changes height. This section describes what the user sees in it and what moves it from one state to the next, so another platform can build the same bar ([dictus-android#139](https://github.com/getdictus/dictus-android/issues/139)). It describes behaviour, not implementation.
 
-Layout of the bar when nothing is happening: menu ☰ on the left, a centre slot, the blue mic pill on the right. The centre slot holds one thing at a time; when several apply, the higher one in this order wins: error, dictation undo, suggestions, then quiet hints (the armed Smart Mode's name, a "long press" tip). Error, dictation undo and suggestions need the width, so they also take the ☰'s place. During a dictation the bar and the keys give way to one overlay that fills the whole keyboard.
+Layout of the bar when nothing is happening: menu ☰ on the left, a centre slot, the blue mic pill on the right. The centre slot holds one thing at a time; when several apply, the higher one in this order wins: error, recovered text, dictation undo, suggestions, then quiet hints (the armed Smart Mode's name, a "long press" tip). Error, recovered text, dictation undo and suggestions need the width, so they also take the ☰'s place. During a dictation the bar and the keys give way to one overlay that fills the whole keyboard.
 
 | State | What the user sees | Entered by | Left by | Capture |
 | --- | --- | --- | --- | --- |
@@ -74,11 +77,12 @@ Layout of the bar when nothing is happening: menu ☰ on the left, a centre slot
 | **Idle** (menu + mic) | ☰ left, empty centre (or a quiet hint), blue mic pill right. | Showing the keyboard with Full Access; or the end of any state below. | Typing → **Suggestions**. Tap mic → **Starting**. Tap ☰ → voice note reader (Pro). Hold ☰ → **Menu open**. Hold mic → Smart Mode fan (Pro). | `kbd.keys` |
 | **Suggestions** | Up to three slots in place of ☰ and centre: completions or corrections while typing, next-word predictions after a space, a ↶ chip with the original word after an autocorrection (`typing.undo-correction`, not the dictation undo). Mic still on the right. | Typing. | Nothing left to suggest (e.g. the field emptied) → **Idle**. Tap mic → **Starting**. | `kbd.suggestions` |
 | **Menu open** | ✕ left, Dictus Pro entry (non-subscribers) and ⚙ right, no mic; languages and layouts fill the key area. | Holding ☰. | ✕ → **Idle**. ⚙ opens the app. | `kbd.panel` |
-| **Starting** | Overlay over the whole keyboard: ✕ only, « Démarrage... ». On a cold start the app comes forward on « Dictée en cours » and the user swipes back to the host app. | Tap mic in **Idle** or **Suggestions** (or in **Error**). | The app starts recording → **Recording**. ✕ → **Idle**. A failure → **Error**. | none (lasts about a second warm) |
+| **Starting** | Overlay over the whole keyboard: ✕ only, « Démarrage... ». On a cold start the app comes forward on « Dictée en cours » (« Préparation du micro… » while its audio session recovers, #853) and the user swipes back to the host app. | Tap mic in **Idle** or **Suggestions** (or in **Error**). | The app starts recording → **Recording**. ✕ → **Idle**. A failure → **Error**. | none (lasts about a second warm) |
 | **Recording** | Overlay: ✕ left, green ✓ right, live waveform, timer, « En écoute... ». | Recording has started. | ✓ → **Transcribing**. ✕ → **Idle**, nothing inserted. | `kbd.recording` |
 | **Transcribing** | Overlay: no buttons, waveform breathing, « Transcription... » (« Traitement... » while a Smart Mode or polish runs). Cannot be cancelled. | ✓ on **Recording**. | Text inserted at the cursor → **Dictation undo**. A failure (no words, no model…) → **Error**. | `kbd.transcribing` |
 | **Dictation undo** | Keys back, the dictated text in the field, « ↶ Annuler » in place of ☰ (left), mic right. | A dictation was just inserted. | Tap « Annuler » → the inserted text is removed → **Idle**. Eight seconds pass, or the user types or moves the cursor → **Idle** (or **Suggestions**). | `kbd.dictation-undo` |
 | **Error** | A grey, two-line explanation centred (never red), mic right, no ☰. | A dictation failed. | About three seconds → **Idle**. Tap mic → **Starting**. | `kbd.dictation-error` |
+| **Recovered text** | A blue, two-line banner « Dictée interrompue. Votre texte est dans l'app Dictus. » with an open-app arrow, in place of ☰ and centre; mic right. No timer: it comes back each time the keyboard is shown, in any app. | A dictation's text was produced but not inserted (the user had left the field, typically during a call) (#860). | Tap the banner → DictusApp opens on Accueil, the text in « Dernière transcription » → **Idle**. Tap mic → **Starting** (the banner is dropped). | `kbd.recovered-transcription` |
 
 ```mermaid
 stateDiagram-v2
@@ -104,6 +108,9 @@ stateDiagram-v2
     DictationUndo --> Idle: tap Annuler (text removed), 8 s, a caret move, or a keystroke with nothing to suggest
     DictationUndo --> Suggestions: a keystroke, when there is something to suggest
     Error --> Idle: about 3 s
+    Transcribing --> RecoveredText: text produced, not inserted
+    RecoveredText --> Idle: tap the banner (opens Dictus)
+    RecoveredText --> Starting: tap mic
 ```
 
 Not in the diagram, because they leave the bar rather than change it: a tap on ☰ opens the voice note reader over the whole keyboard (`kbd.voice-note-reader`), and a hold on the mic opens the Smart Mode fan (`kbd.smart-mode-fan`), whose release either starts a dictation (**Starting**) or aborts back to **Idle**. The 123 and `#+=` pages (`kbd.numbers`, `kbd.symbols`) change the keys only; the bar above them behaves exactly as on the letters page.

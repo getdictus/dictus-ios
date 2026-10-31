@@ -83,14 +83,16 @@ argent run screenshot --udid <udid> --scale 1 --out ~/dev/dictus-evidence/verify
 | `home.newDictation` | The round mic on Home that starts a dictation (label « Nouvelle dictée »; only with a model) |
 | `voiceNoteReaderClose`, `voiceNoteReaderDelete`, `voiceNoteReaderEmpty`, `voiceNoteReaderOpen`, `voiceNoteReaderInsert` | Keyboard voice-note reader (inside the keyboard, so not in the host's tree) |
 
-Labels that are stable and unique (French device): tabs `Accueil` / `Modèles` / `Réglages` (RadioButtons, no identifier); `Dictus Pro, Pro actif`; the Pro hub rows `Mode intelligent, …`, `Historique, …`, `Vocabulaire, …`, `Messages vocaux, …`; `Langues prises en charge`; `Sons`, `Diagnostic`, `Debug Logs`, `Licences`, `Exporter les logs`; navigation back is the identifier `BackButton`, a modal close `xmark` or the label `Fermer`.
+Labels that are stable and unique (French device): tabs `Accueil` / `Modèles` / `Réglages` (RadioButtons; reach them with `drive.sh tab`, since the Models screen also has a « Modèles » heading); `Dictus Pro, Pro actif`; the Pro hub rows `Mode intelligent, …`, `Historique, …`, `Vocabulaire, …`, `Messages vocaux, …`; `Langues prises en charge`; `Sons`, `Diagnostic`, `Debug Logs`, `Licences`, `Exporter les logs`; navigation back is the identifier `BackButton`, a modal close `xmark` or the label `Fermer`.
 
 **The Dictus keyboard is one opaque element**, `inputView`, in the host app's tree: none of its keys or buttons is listed. `drive.sh kbd <control>` presses them at measured offsets from that frame, and the App Group log is what proves the press landed.
+
+`tap-id` and `tap-label` tap only a unique match. When several elements on screen share the label (or the identifier), they refuse with exit 1 and list every candidate, so the run never taps the wrong one silently: pick the one you mean with `tap-id`. A match nested inside another (a row and its title, a tab and its icon) counts once, and the inner one is tapped. They also refuse an element whose centre is off screen (a list lays out rows below the fold, and `axe` would tap whatever sits at the edge, a Subscribe button included): scroll it into view first. The recipes (`full-access`, `select-keyboard`) keep tapping the first match, because Settings repeats its row identifiers on nested elements. A tap on a toggle row's title does not flip a SwiftUI switch: use `axe tap --label <label> --element-type CheckBox`, which touches the switch.
 
 ```bash
 D=.claude/skills/verify-dictus-ios/scripts/drive.sh
 $D tap-id onboarding.primary          # by identifier
-$D tap-label "Modèles"                # by label (tabs: $D tab Modèles)
+$D tap-label "Diagnostic"             # by label (tabs: $D tab Modèles)
 $D wait-id onboarding.back 10         # wait, fail after 10 s
 $D set-default dictus.debugProEntitlementForced -bool YES   # Pro on (Debug build), relaunch
 $D full-access                        # Réglages → Général → Clavier → Claviers → Dictus → Accès complet
@@ -171,11 +173,12 @@ Two lists. The first is what an agent proves alone with this skill; the second i
 | Onboarding | Every step displays, back/skip/next, What's new; not the download, mic prompt or practice dictation | `onboarding.*` except `onboarding.model-download`, `onboarding.microphone`, `onboarding.first-dictation` |
 | Keyboard setup | The keyboard registers, is enabled, takes Full Access, is selected from the globe menu | `dictation.requires-full-access`, `sys.settings.full-access`, `kbd.keys`, `kbd.no-full-access` |
 | Hand-off, cold path | Mic tap → DictusApp cold start → `No model downloaded` → keyboard shows the failure | `dictation.handoff` (cold only), `kbd.dictation-error` |
+| Recovered-text banner | Seeded through the App Group: the banner in any app, its tap opening Dictus on the text (cold launch included), a mic tap dropping it | `dictation.recovered-banner`, `kbd.recovered-transcription` |
 | Dictation chain, with a model | Only when the task asks for a recording: a `say` clip played through the Mac's speakers is recorded, transcribed and inserted; the top-bar states are captured (`features/dictation.keyboard.md`, With a model). Proves the chain runs, not the voice, the quality or the timings | `dictation.start`, `dictation.stop`, `dictation.cancel`, `kbd.recording`, `kbd.transcribing`, `kbd.dictation-undo`, `dictation.undo-insert` (drivable by tapping « Annuler » within 8 s; the recipe does not) |
 | Typing | Suggestions, autocorrect on space, undo, accents, dead keys, learned words, reset | `typing.*`, `learned-words.*`, `kbd.suggestions` |
 | Keyboard surfaces | Languages panel, layouts, number row, 123 and `#+=` pages, emoji picker, recents, search | `keyboard.*`, `emoji.*`, `kbd.panel`, `kbd.numbers`, `kbd.symbols`, `kbd.emoji` |
 | Settings and switches | Every preference changes and persists through the App Group (sounds, haptics, polish, Live Activity, history, vocabulary, voice notes) | `sounds.toggle`, `sounds.volume`, `sounds.per-event`, `haptics.toggle`, `polish.toggle`, `live-activity.toggle`, `smart-modes.toggle`, `history.toggle`, `vocabulary.toggle`, `voice-notes.toggle` |
-| Pro, Debug-forced | Hub, Smart Mode pins, fan opening (greyed), vocabulary add/edit/delete, history and voice-note reader empty states | `pro.hub`, `smart-modes.fan`, `smart-modes.pin`, `vocabulary.add`/`edit`/`delete`/`reset`, `history.list` (empty), `voice-notes.reader` (empty) |
+| Pro, Debug-forced | Hub, Smart Mode pins, fan opening (greyed), vocabulary add/edit/delete, variants of your terms on a seeded History (accept with an editable review, empty variant refused, ignore, cap at 10, a term without a variant leaving « En attente d’erreurs à corriger »), history and voice-note reader empty states | `pro.hub`, `smart-modes.fan`, `smart-modes.pin`, `vocabulary.add`/`edit`/`delete`/`reset`, `vocabulary.term-variants`, `history.list` (empty), `voice-notes.reader` (empty) |
 | Models | Catalogue, download (real traffic), preparation screen, select, delete, retry, languages sheet; A12/A13 refusal on a device created as `iPhone-11` | `models.*` except the RAM halves of `models.device-gating` and `models.recommended`; `app.models.loading` (screen, not timing) |
 | Diagnostics | Log view, export sheet opens, App Group check (signed build) | `diagnostics.*` |
 
@@ -183,8 +186,8 @@ Two lists. The first is what an agent proves alone with this skill; the second i
 
 | Area | Why the simulator cannot prove it | IDs |
 | --- | --- | --- |
-| Real voice and microphone | A simulator records the Mac's input device: the room, or a synthesized `say` clip. A real voice, its accent and the text quality, and what depends on them (a filled history, the vocabulary effect, voice-note transcription) | `dictation.in-app`, `app.recording`, `history.detail`, `vocabulary.apply`, `voice-notes.transcribe` |
-| Audio routing | AirPods, Bluetooth headsets, wired input, route changes and interruptions mid-recording: the simulator has only the Mac's devices | `dictation.start`, `dictation.in-app`, `voice-notes.transcribe` |
+| Real voice and microphone | A simulator records the Mac's input device: the room, or a synthesized `say` clip. A real voice, its accent and the text quality, and what depends on them (a filled history, the vocabulary effect, voice-note transcription) | `dictation.in-app`, `app.recording`, `history.detail`, `vocabulary.apply`, `vocabulary.term-variants` (rows from a real History), `voice-notes.transcribe` |
+| Audio routing | AirPods, Bluetooth headsets, wired input, route changes and interruptions mid-recording: the simulator has only the Mac's devices | `dictation.start`, `dictation.in-app`, `voice-notes.transcribe`, `dictation.recovered-banner` (a call ending in the banner) |
 | Keyboard memory and jetsam | The extension's ~50 MB ceiling and its kills are device figures; simulator `memMB` carries no verdict | `dictation.keyboard`, `kbd.*` (memory only) |
 | Keyboard height and dead zones | The declared height constraint (#166) and touch dead zones | `kbd.keys` |
 | Warm hand-off and return | The warm path depends on iOS keeping the app alive; auto-return and the Spotlight/arbiter cases (#23) behave differently on device | `dictation.handoff` (warm), `return.auto-return`, `return.swipe-back` |
@@ -195,6 +198,7 @@ Two lists. The first is what an agent proves alone with this skill; the second i
 | Live Activity and Dynamic Island | Not reproduced by this skill; states, stop from the island, Focus dropping alerts, dev installs killing activities | `live-activity.*`, `voice-notes.progress-activity`, `widget.live-activity`, `onboarding.stop-standby` |
 | Haptics and sounds | No haptic engine and no audible check; only the preference is provable | `haptics.toggle` (effect), `sounds.*` (effect) |
 | Voice notes from a messaging app | No messaging app in the simulator to share from | `voice-notes.share-in`, `share.voice-note`, `app.voice-note.result` |
+| Contacts and text replacements | The simulator proves the rules on a contact and a replacement made by hand. The lexicon iOS hands a third-party keyboard on a real phone (a full contact book, replacements synced from iCloud) is device-only | `typing.contacts-and-replacements` |
 | Host spell-check | Host underlines are not a usable probe in the simulator (`docs/agents/simulator.md` §8) | `typing.autocorrect` |
 
 **Rule.** A PR that changes a behavior or a screen in the iPhone list (its code, not only this table) carries the `needs-physical-test` label and goes through the `batch-device-test` skill (proposed in Pivii/skills#20, not merged yet): one local branch merges every PR waiting for a device test, without pushing; one build goes on the iPhone; Pierre fills one checklist, `#<num> OK` / `#<num> KO`; then each PR that passed is merged on its own, PR by PR. Until that skill exists, run the same steps by hand; the iPhone verdict goes on the PR's manual test list either way. The simulator run of this skill still happens first, for the first list. A green simulator run never stands in for a line of the second.
@@ -217,9 +221,9 @@ All executable, all run from the repository root, all read the run from the argu
 | --- | --- | --- |
 | `scripts/launch.sh` | `launch.sh [--skip-onboarding] [--lang fr\|en]` | `READY udid=… run=… pid=… screen=…` |
 | `scripts/doctor.sh` | `doctor.sh [run-dir]` | `DOCTOR OK` / `DOCTOR FAIL <n>` |
-| `scripts/drive.sh` | `drive.sh <tap-id\|tap-label\|wait-id\|wait-label\|gone-id\|tab\|tree\|log-mark\|wait-log\|relaunch\|set-default\|full-access\|select-keyboard\|kbd\|type\|space> [args]` | one line per action; exit 1 with `error:` when an element never appears |
+| `scripts/drive.sh` | `drive.sh <tap-id\|tap-label\|wait-id\|wait-label\|gone-id\|tab\|tree\|log-mark\|wait-log\|relaunch\|set-default\|full-access\|select-keyboard\|kbd\|type\|space> [args]` | one line per action; exit 1 with `error:` when an element never appears, and when `tap-id` or `tap-label` matches several elements (the candidates are listed: type, label, identifier, frame) or one that is off screen |
 | `scripts/evidence.sh` | `evidence.sh <name> [run-dir]` | `evidence <name>: <path>.png` |
 | `scripts/cleanup.sh` | `cleanup.sh [run-dir]` | `CLEANUP OK udid=… deleted=yes` |
-| `scripts/lib.sh` | sourced, not run | `find_frame`, `wait_for`, `stable_frame`, `tap`, `tap_until`, `wait_log` |
+| `scripts/lib.sh` | sourced, not run | `find_frame`, `find_matches`, `wait_for`, `stable_frame`, `tap`, `tap_unique`, `tap_until`, `wait_log` |
 
 Overrides: `DICTUS_VERIFY_RUN` (run directory), `DICTUS_VERIFY_SESSION` (session name), `DICTUS_VERIFY_EVIDENCE` (evidence root), `DICTUS_VERIFY_DEVICE_TYPE`, `DICTUS_VERIFY_RUNTIME`.

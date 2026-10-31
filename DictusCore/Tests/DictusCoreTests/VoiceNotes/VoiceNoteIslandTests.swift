@@ -128,7 +128,9 @@ final class VoiceNoteIslandTests: XCTestCase {
         XCTAssertTrue(VoiceNoteActivityContent(segments: [.ready, .failed]).allFinished)
     }
 
-    func testTheEngineTimeoutHasOneHome() {
-        XCTAssertEqual(WarmEngineTimeout.interval, 600)
+    func testTheEngineTimeoutDefaultIsIndependentOfTheReadyLifetime() {
+        // #620 decision 4: the two windows must never depend on each other.
+        XCTAssertEqual(WarmEngineTimeoutOption.defaultOption.interval, 600)
+        XCTAssertEqual(VoiceNoteIsland.readyLifetime, 300)
     }
 }

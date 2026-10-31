@@ -31,7 +31,7 @@ Out of the map on purpose: the "Developer" section of Réglages (Debug builds on
 
 ## All IDs
 
-Every ID in this map, in one table: the 18 features first, then their 110 sub-features (in the order of the feature files), then the 53 screens of [screens.md](screens.md) — 181 IDs in all. **Gratuit/Pro** is the tier of the feature the ID belongs to. **Spécifique iOS** is « oui » when the ID has no Android equivalent to compare against: the keyboard-to-app hand-off and Full Access (an iOS keyboard extension cannot record and must ask for Full Access), return to the host app, Apple Intelligence (polish), the Dynamic Island (Live Activity, stopping standby), and the App Group check.
+Every ID in this map, in one table: the 18 features first, then their 116 sub-features (in the order of the feature files), then the 56 screens of [screens.md](screens.md) — 190 IDs in all. **Gratuit/Pro** is the tier of the feature the ID belongs to. **Spécifique iOS** is « oui » when the ID has no Android equivalent to compare against: the keyboard-to-app hand-off and Full Access (an iOS keyboard extension cannot record and must ask for Full Access), return to the host app, Apple Intelligence (polish), the Dynamic Island (Live Activity, stopping standby), and the App Group check.
 
 | ID | Gratuit/Pro | Spécifique iOS |
 | --- | --- | --- |
@@ -61,6 +61,8 @@ Every ID in this map, in one table: the 18 features first, then their 110 sub-fe
 | `dictation.handoff` | Gratuit | oui |
 | `dictation.requires-full-access` | Gratuit | oui |
 | `dictation.device-gating` | Gratuit | non |
+| `dictation.onboarding-gate` | Gratuit | oui |
+| `dictation.recovered-banner` | Gratuit | non |
 | `dictation.start-in-app` | Gratuit | non |
 | `dictation.copy-last` | Gratuit | non |
 | `dictation.download-prompt` | Gratuit | non |
@@ -100,6 +102,7 @@ Every ID in this map, in one table: the 18 features first, then their 110 sub-fe
 | `vocabulary.delete` | Pro | non |
 | `vocabulary.reset` | Pro | non |
 | `vocabulary.suggestions` | Pro | non |
+| `vocabulary.term-variants` | Pro | non |
 | `vocabulary.apply` | Pro | non |
 | `vocabulary.toggle` | Pro | non |
 | `voice-notes.share-in` | Pro | non |
@@ -113,11 +116,14 @@ Every ID in this map, in one table: the 18 features first, then their 110 sub-fe
 | `voice-notes.progress-activity` | Pro | oui |
 | `typing.suggestions` | Gratuit | non |
 | `typing.autocorrect-on-space` | Gratuit | non |
+| `typing.autocorrect-on-punctuation` | Gratuit | non |
 | `typing.undo-correction` | Gratuit | non |
+| `typing.refused-correction` | Gratuit | non |
 | `typing.auto-full-stop` | Gratuit | non |
 | `typing.accents` | Gratuit | non |
 | `typing.dead-keys` | Gratuit | non |
 | `typing.autocorrect-toggle` | Gratuit | non |
+| `typing.contacts-and-replacements` | Gratuit | non |
 | `learned-words.learn` | Gratuit | non |
 | `learned-words.reset` | Gratuit | non |
 | `keyboard.language-switch` | Gratuit | non |
@@ -196,6 +202,8 @@ Every ID in this map, in one table: the 18 features first, then their 110 sub-fe
 | `app.pro.history` | Pro | non |
 | `app.pro.vocabulary` | Pro | non |
 | `app.pro.vocabulary.term-editor` | Pro | non |
+| `app.pro.vocabulary.suggestions` | Pro | non |
+| `app.pro.vocabulary.pair-review` | Pro | non |
 | `app.pro.voice-notes` | Pro | non |
 | `app.paywall` | Pro | non |
 | `app.pro.trial-announcement` | Pro | non |
@@ -203,6 +211,7 @@ Every ID in this map, in one table: the 18 features first, then their 110 sub-fe
 | `kbd.keys` | Gratuit | non |
 | `kbd.no-full-access` | Gratuit | oui |
 | `kbd.dictation-error` | Gratuit | non |
+| `kbd.recovered-transcription` | Gratuit | non |
 | `kbd.recording` | Gratuit | non |
 | `kbd.transcribing` | Gratuit | non |
 | `kbd.dictation-undo` | Gratuit | non |

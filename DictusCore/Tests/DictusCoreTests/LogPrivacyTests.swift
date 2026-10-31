@@ -23,6 +23,13 @@ final class LogPrivacyTests: XCTestCase {
             .transcriptionCompleted(durationMs: 2500, wordCount: 42, confidence: 0.916),
             .transcriptionCompleted(durationMs: 3400, wordCount: 214, confidence: 0.916,
                                     retry: DriftRetryStats(spans: 3, wins: 2, durationMs: 2210)),
+            // The one deliberate exception (#861): the text of a span the drift retry
+            // replaced, and nothing of the dictation around it, in a test build only. The
+            // App Store line carries the two lengths; `testTheAppStoreDriftRetryLineCarriesNoText`.
+            .driftRetrySpanReplaced(startMs: 11_520, endMs: 18_960, before: "english9 english10",
+                                    after: "français français", channel: .testBuild),
+            .driftRetrySpanReplaced(startMs: 11_520, endMs: 18_960, before: "english9 english10",
+                                    after: "français français", channel: .appStore),
             .transcriptionFailed(error: "modelNotLoaded"),
             // #80's pass reports counters only. A term the user typed is their own
             // vocabulary, and a character count of the transcript is not the transcript.
@@ -150,6 +157,22 @@ final class LogPrivacyTests: XCTestCase {
                     "Event \(formatted) contains sensitive pattern '\(pattern)'"
                 )
             }
+        }
+    }
+
+    /// #861: the App Store build logs where the replaced span sits and how long it was on
+    /// each side, never its words. So does an event built without a channel.
+    func testTheAppStoreDriftRetryLineCarriesNoText() {
+        for event in [
+            LogEvent.driftRetrySpanReplaced(startMs: 11_520, endMs: 18_960, before: "english9 english10",
+                                            after: "français français", channel: .appStore),
+            LogEvent.driftRetrySpanReplaced(startMs: 11_520, endMs: 18_960, before: "english9 english10",
+                                            after: "français français")
+        ] {
+            let formatted = event.formatted()
+            XCTAssertFalse(formatted.contains("english"), formatted)
+            XCTAssertFalse(formatted.contains("français"), formatted)
+            XCTAssertTrue(formatted.hasSuffix("startMs=11520 endMs=18960 beforeLen=18 afterLen=17"), formatted)
         }
     }
 

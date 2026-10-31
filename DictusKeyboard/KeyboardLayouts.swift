@@ -350,15 +350,19 @@ enum KeyboardLayouts {
     /// user toggles 123/ABC (Apple parity). The `.symbols` key auto-labels "123" on letter
     /// pages and "ABC" on symbol pages, and the emoji key stays present on every page.
     ///
-    /// [(🌐 1.0w) 123/ABC 1.5w] [emoji 1.5w] [space 5.0w/4.0w] [return 2.0w] = 10 units.
-    /// 123/ABC and emoji share the same small width; only the space bar changes width, shrinking
-    /// by 1.0 when the globe is prepended (needsInputModeSwitchKey, App Store 4.4.1).
+    /// [123/ABC 1.25w] [emoji 1.25w] [space 5.5w] [return 2.0w] = 10 units.
+    /// [🌐 1.0w] [123/ABC 1.5w] [emoji 1.5w] [space 4.0w] [return 2.0w] = 10 units.
+    /// 123/ABC and emoji share the same small width. Without the globe they are 1.25 so the
+    /// space bar starts where Apple's does (#877): at 1.5 a tap on the left end of Apple's space
+    /// bar opened the emoji picker. The globe row (needsInputModeSwitchKey, App Store 4.4.1)
+    /// keeps its 1.5 split: it was not measured against Apple's.
     private static func bottomRow(lang: SupportedLanguage, needsGlobe: Bool) -> [KeyDefinition] {
         var row: [KeyDefinition] = needsGlobe ? [globeKey()] : []
+        let sideKeyWidth: CGFloat = needsGlobe ? 1.5 : 1.25
         row.append(contentsOf: [
-            KeyDefinition(type: .symbols, size: CGSize(width: 1.5, height: 1)),
-            KeyDefinition(type: .input(key: emojiKeyGlyph, alternate: nil), size: CGSize(width: 1.5, height: 1)),
-            KeyDefinition(type: .spacebar(name: lang.spaceName), size: CGSize(width: needsGlobe ? 4.0 : 5.0, height: 1)),
+            KeyDefinition(type: .symbols, size: CGSize(width: sideKeyWidth, height: 1)),
+            KeyDefinition(type: .input(key: emojiKeyGlyph, alternate: nil), size: CGSize(width: sideKeyWidth, height: 1)),
+            KeyDefinition(type: .spacebar(name: lang.spaceName), size: CGSize(width: needsGlobe ? 4.0 : 5.5, height: 1)),
             KeyDefinition(type: .returnkey(name: lang.returnName), size: CGSize(width: 2.0, height: 1))
         ])
         return row

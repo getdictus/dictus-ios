@@ -27,8 +27,19 @@
 ```bash
 .claude/skills/verify-dictus-ios/scripts/launch.sh --skip-onboarding
 .claude/skills/verify-dictus-ios/scripts/drive.sh tab Modèles
-.claude/skills/verify-dictus-ios/scripts/drive.sh tap-label "Langues prises en charge"     # first ⓘ on screen: Small
-.claude/skills/verify-dictus-ios/scripts/evidence.sh models-languages
+# Every card's ⓘ carries the label « Langues prises en charge » and the SF Symbol name
+# `info.circle` as identifier, so neither tap-label nor tap-id can pick one. Tap the ⓘ that
+# shares its top edge with the Small (quantifié) card (it is not the first ⓘ on screen):
+xy=$(.claude/skills/verify-dictus-ios/scripts/drive.sh tree | python3 -c '
+import json, sys
+nodes = []
+def walk(n): nodes.append(n); [walk(c) for c in n.get("children") or []]
+for r in json.load(sys.stdin): walk(r)
+card = next(n["frame"] for n in nodes if (n.get("AXLabel") or "").startswith("Small (quantifié),"))
+f = next(n["frame"] for n in nodes if n.get("AXUniqueId") == "info.circle" and abs(n["frame"]["y"] - card["y"]) < 1)
+print(round(f["x"] + f["width"] / 2), round(f["y"] + f["height"] / 2))')
+axe tap -x "${xy% *}" -y "${xy#* }" --udid <udid>
+.claude/skills/verify-dictus-ios/scripts/evidence.sh models-languages             # sheet titled « Small (quantifié) »
 .claude/skills/verify-dictus-ios/scripts/drive.sh tap-label OK
 ```
 

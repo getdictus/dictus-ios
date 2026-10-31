@@ -10,7 +10,7 @@ Where we are going, and which issue to work on next. Nothing else.
 - Whole file under 60 lines. If an edit pushes it past that, something belongs on an issue instead.
 - The [Project board](https://github.com/orgs/getdictus/projects/2) moves by itself on a branch push, a PR and a merge. Two moves are by hand: an issue added to **Now** is added to the board in the same edit (`gh project item-add 2 --owner getdictus --url <issue-url>`), and work with no branch (a grilling, a measurement) is set to In progress when it starts.
 
-Last reviewed: 2026-10-22.
+Last reviewed: 2026-10-28.
 
 ## Now — 2.0.0, the Pro launch
 
@@ -22,7 +22,7 @@ Take the first line that is not struck through. Status (who is on what): [Projec
 4. ~~#573 — rebuild `Liste` as a summary in bullets~~ — merged in PR #629; closed 2026-10-10, real-use verdict left to user feedback
 5. ~~#593 — reverse trial: Pro free for a fixed period, then the paywall~~ — merged in PR #595; its two device checks (iPad, EN strings) moved to #279 step 6
 6. ~~#690 — model download freezes after iOS kills Dictus on the Full Access change~~ — merged in PR #694; follow-up #701 (stale-task cancel fails the run) merged in PR #702; residual #707
-7. #649 — onboarding rebuild: PR A merged in PR #654 (#653 in PR #655); mock-ups done 2026-10-07; split into sub-issues #675-#686 (#675 merged in PR #688; next #676-#678, #682, #683 in parallel); intro videos #667 merged in PR #670 (2026-10-09); #676 merged in PR #697 (2026-10-10); #677 merged in PR #695 (2026-10-10); #678 merged in PR #696 (2026-10-10); #682 merged in PR #698 (2026-10-11), follow-ups #704 (explain Full Access, merged in PR #721 2026-10-13 as a sheet from the keyboard step) and #709 (Settings link when keyboard already detected, merged in PR #710 2026-10-12; follow-ups #713 merged in PR #719 2026-10-14, #715 merged in PR #717 2026-10-12); #683 merged in PR #699 (2026-10-11), follow-up #706 (PiP guide, merged in PR #731 2026-10-16); #679 merged in PR #705 (2026-10-12); #680 merged in PR #722 (2026-10-13), follow-up #725 (back between scenes, merged in PR #740 2026-10-20); #681 merged in PR #720 (2026-10-13, step skipped on iPad); #700 merged in PR #718 (2026-10-13, Skip moved under the primary button on every step); #685 merged in PR #741 (2026-10-17, What's new for existing users); #686 merged in PR #743 (2026-10-18, "See the demo" link in a "How it works" card on each Pro feature screen, opens the onboarding scene in a sheet)
+7. ~~#649 — onboarding rebuild~~ — PR A merged in PR #654 (#653 in PR #655); mock-ups done 2026-10-07; split into sub-issues #675-#686 (#675 merged in PR #688; next #676-#678, #682, #683 in parallel); intro videos #667 merged in PR #670 (2026-10-09); #676 merged in PR #697 (2026-10-10); #677 merged in PR #695 (2026-10-10); #678 merged in PR #696 (2026-10-10); #682 merged in PR #698 (2026-10-11), follow-ups #704 (explain Full Access, merged in PR #721 2026-10-13 as a sheet from the keyboard step) and #709 (Settings link when keyboard already detected, merged in PR #710 2026-10-12; follow-ups #713 merged in PR #719 2026-10-14, #715 merged in PR #717 2026-10-12); #683 merged in PR #699 (2026-10-11), follow-up #706 (PiP guide, merged in PR #731 2026-10-16); #679 merged in PR #705 (2026-10-12); #680 merged in PR #722 (2026-10-13), follow-up #725 (back between scenes, merged in PR #740 2026-10-20); #681 merged in PR #720 (2026-10-13, step skipped on iPad); #700 merged in PR #718 (2026-10-13, Skip moved under the primary button on every step); #685 merged in PR #741 (2026-10-17, What's new for existing users); #686 merged in PR #743 (2026-10-18, "See the demo" link in a "How it works" card on each Pro feature screen, opens the onboarding scene in a sheet)
 8. ~~#707 — model download: #690's watchdog replacement stalls on the same background session~~ — merged in PR #714 (2026-10-12), closed: mechanism proven on simulator, real stall not reproduced (0/23); reopen if a log shows `Silent` without `fg` bytes
 9. ~~#216 — the Pro hub, one screen for free / trial / paid users~~ — closed 2026-10-06
 10. ~~#621 — search the history: the paywall already sells it~~ — merged in PR #652
@@ -31,14 +31,17 @@ Take the first line that is not struck through. Status (who is on what): [Projec
 13. ~~#533 — countdown under the model preparation (compile / load), not a second bar~~ — merged in PR #687
 14. ~~#708 — rebuild the model preparation screen (ring with logo, two-step card, no layout jumps)~~ — merged in PR #716 (2026-10-12)
 15. ~~#723 — add a word to Personal Vocabulary from a history entry~~ — merged in PR #730 (2026-10-13); discoverability tip #738 parked in 2.1, depends on #512
-16. #512 — suggest vocabulary from history: step 1 GO, merged in PR #742 (2026-10-18); step 2 spike = PR #751 (open, generator + `vocabpairs`/`vocabjudge` harness); waiting on ~5 days of real dictations (journal keeps 7), then export the journal JSON and run both commands with `~/Documents/512/terms.txt`
-17. ~~#724 — paywall: yearly + lifetime visible, monthly behind a link and in the end-of-trial dismiss sheet, no-commitment line~~ — merged in PR #739 (2026-10-20); the dismiss offer only follows a user who saw the plans, not the recap
-18. ~~#726 — end-of-trial recap: words dictated + time saved, dictation counter for every user~~ — merged in PR #753 (2026-10-21)
-19. ~~#727 — README: free dictation + optional Pro, no free-forever promise~~ — merged in PR #729 (2026-10-13), ahead of #279: promote to main only with #279
-20. ~~#758 — App Store slide 1: redraw the hero woman to match the onboarding intro's character (bob, hands, phone held out, trousers)~~ — merged in PR #759 (2026-10-22)
-21. #380 — User-configurable audio session inactivity timeout (Immediately / 1 / 5 / 10 default / 30 min / 1 h / Unlimited), also governs prewarm
-22. #279 — flip `PremiumFlags.paywallVisible` and walk all four entry points, plus #593's iPad and EN checks
-23. #769 — cut chore: remove the bundled `JointDecisionv3.mlmodelc` from DictusApp
+16. #853 — first dictation after an audio server reset fails: the reset wait outlasts the foreground (urgent, needs device)
+17. #512 — suggest vocabulary from history: step 1 GO, merged in PR #742 (2026-10-18); step 2 spike = PR #751 (open, generator + `vocabpairs`/`vocabjudge` harness); waiting on ~5 days of real dictations (journal keeps 7), then export the journal JSON and run both commands with `~/Documents/512/terms.txt`; step 2 UI (suggestions from #751's `VocabularyPairGenerator`) enters 2.0.0
+18. ~~#724 — paywall: yearly + lifetime visible, monthly behind a link and in the end-of-trial dismiss sheet, no-commitment line~~ — merged in PR #739 (2026-10-20); the dismiss offer only follows a user who saw the plans, not the recap
+19. ~~#726 — end-of-trial recap: words dictated + time saved, dictation counter for every user~~ — merged in PR #753 (2026-10-21)
+20. ~~#727 — README: free dictation + optional Pro, no free-forever promise~~ — merged in PR #729 (2026-10-13), ahead of #279: promote to main only with #279
+21. ~~#758 — App Store slide 1: redraw the hero woman to match the onboarding intro's character (bob, hands, phone held out, trousers)~~ — merged in PR #759 (2026-10-22)
+22. ~~#380 — User-configurable audio session inactivity timeout (Immediately / 1 / 5 / 10 default / 30 min / 1 h / Unlimited), also governs prewarm~~ — merged in PR #807 (2026-10-25)
+23. #279 — flip `PremiumFlags.paywallVisible` and walk all four entry points, plus #593's iPad and EN checks — merged in PR #776 and PR #791, device test pending
+24. ~~#769 — cut chore: remove the bundled `JointDecisionv3.mlmodelc` from DictusApp~~
+25. ~~#489 — Smart Modes can only be armed from the keyboard, and the app gives no sign which one is running~~ — merged in PR #795 (2026-10-25)
+26. ~~#793 — End-of-trial paywall: "Continue for free" opened Safari once~~ — merged in PR #812 (2026-10-25)
 
 Done in this lane: #530, #414, #490, #518, #80, #536, #523 `Structuré`, #572 `Message`, #571 `Résumé`, #575, #215, #620 voice notes. Closed 2026-10-10 as done or superseded: #79, #439.
 

@@ -82,9 +82,12 @@ DICTUS PRO
 
 Pro ajoute les modes intelligents, les messages vocaux dans le clavier, l’historique de vos dictées et votre propre vocabulaire pour les noms et les termes techniques.
 
-Essayez Pro gratuitement pendant 14 jours. Il n’y a rien à souscrire et rien ne se renouvelle : à la fin des 14 jours, Dictus repasse en version gratuite et vous demande si vous voulez garder Pro. Votre historique et votre vocabulaire sont conservés. L’essai est proposé sur les iPhone capables de faire tourner les modes intelligents. La dictée et le clavier restent gratuits.
+Essayez Pro gratuitement pendant 14 jours. L’essai ne demande aucun paiement et ne se renouvelle pas : à la fin des 14 jours, Dictus repasse en version gratuite et vous propose de garder Pro, en abonnement mensuel ou annuel, ou en achat à vie. Votre historique et votre vocabulaire sont conservés. L’essai est proposé sur les iPhone capables de faire tourner les modes intelligents. La dictée et le clavier restent gratuits.
 
-Dictus ne collecte aucune donnée. Politique de confidentialité : getdictus.com/privacy
+Pour garder Pro, choisissez un abonnement mensuel ou annuel à renouvellement automatique, ou l’achat à vie, qui n’est pas un abonnement. Le prix et la période de chaque formule sont affichés dans l’app et sur l’App Store pour votre pays. Le paiement est prélevé sur votre compte Apple à la confirmation de l’achat. L’abonnement se renouvelle automatiquement pour la même période, sauf si le renouvellement automatique est désactivé au moins 24 heures avant la fin de la période en cours ; le renouvellement est prélevé dans les 24 heures qui précèdent cette fin. Gérez ou résiliez votre abonnement dans les réglages de votre compte Apple.
+
+Conditions d’utilisation : https://getdictus.com/fr/terms
+Dictus ne collecte aucune donnée. Politique de confidentialité : https://getdictus.com/fr/privacy
 ```
 
 ### Facts behind the copy
@@ -97,7 +100,7 @@ The same claims as `listing/en-GB.md`, with the same sources; re-check them at t
 | Translate targets: French, English, German, Spanish | `SupportedLanguage.allCases` |
 | Apple Intelligence: iPhone 15 Pro or later, iOS 26 or later | the app's own string `Requires Apple Intelligence (iPhone 15 Pro or later, iOS 26)`; **to confirm against Apple's current device list** |
 | Pro = modes intelligents, messages vocaux, historique, vocabulaire | `ProFeature` |
-| 14-day reverse trial, nothing to subscribe to, nothing renews, back to free at the end with an offer to keep Pro, data kept, no trial where Smart Modes can never run | `ProTrial.durationDays = 14`, `ProTrialPolicy` (definitive reasons), #593 decisions 1 and 2 |
+| 14-day reverse trial, the trial needs no payment and does not renew, back to free at the end with an offer to keep Pro, data kept, no trial where Smart Modes can never run | `ProTrial.durationDays = 14`, `ProTrialPolicy` (definitive reasons), #593 decisions 1 and 2 |
 | 40+ languages at good or fair quality, Parakeet 25 European, Whisper close to 100 | `ModelLanguageSupport.swift`, #488; slide 7 |
 | Keyboard: 4 languages, 3 layouts | `SupportedLanguage.swift`, `KeyboardLayouts.swift` |
 | No account, no tracking, no analytics, no data collected | App Privacy "Data Not Collected" |
@@ -112,4 +115,4 @@ Measured with `python3` on this file's fenced and quoted texts (`len()` for char
 | Subtitle | 30 | 30 |
 | Promotional text | 170 | 170 |
 | Keywords (bytes) | 100 | 100 |
-| Description | 4000 | 3162 |
+| Description | 4000 | 3918 |

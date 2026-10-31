@@ -46,12 +46,15 @@ public enum IdleReleasePolicy {
     /// nothing was ever armed, or a recording is in progress — so nothing is due.
     /// A clock that moved backwards yields a negative elapsed time and is treated
     /// as "not due", which keeps the engine warm rather than killing it early.
+    ///
+    /// A nil `interval` is the Unlimited timeout (#380 decision 3): there is no
+    /// window to elapse, so nothing is ever due, however long the engine idled.
     public static func isIdleWindowElapsed(
         idleSince: Date?,
         now: Date,
-        interval: TimeInterval
+        interval: TimeInterval?
     ) -> Bool {
-        guard let idleSince else { return false }
+        guard let idleSince, let interval else { return false }
         return now.timeIntervalSince(idleSince) >= interval
     }
 
@@ -61,7 +64,7 @@ public enum IdleReleasePolicy {
         isRecording: Bool,
         idleSince: Date?,
         now: Date,
-        interval: TimeInterval
+        interval: TimeInterval?
     ) -> Bool {
         canRelease(isWarm: isWarm, isRecording: isRecording)
             && isIdleWindowElapsed(idleSince: idleSince, now: now, interval: interval)

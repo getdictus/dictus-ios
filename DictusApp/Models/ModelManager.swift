@@ -601,8 +601,13 @@ class ModelManager: ObservableObject {
         // recorded about this model's warmth is no longer a claim it can back (#542). Cleared
         // at the START of the transfer, not at the end: the moment the files begin to change,
         // the old compiled artefacts stop describing what is on disk, and an interrupted
-        // download must not leave a warmth record standing over a half-written model.
-        ModelWarmth.clear(identifier, defaults: defaults)
+        // download must not leave a warmth record standing over a half-written model. Not
+        // when every file is already there (#868): nothing will change on disk.
+        ModelWarmth.clearBeforeDownload(
+            identifier,
+            filesCompleteOnDisk: Self.hasCompleteFilesOnDisk(identifier),
+            defaults: defaults
+        )
 
         // Route by engine. Parakeet and Nemotron share the FluidAudio path (#558); every
         // engine is named, so a new one cannot fall into WhisperKit's by accident.

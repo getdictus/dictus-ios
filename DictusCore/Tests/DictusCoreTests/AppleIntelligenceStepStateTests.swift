@@ -25,6 +25,37 @@ final class AppleIntelligenceStepStateTests: XCTestCase {
         XCTAssertFalse(AppleIntelligenceStepState(isAvailable: false).rechecksQuietly)
     }
 
+    // MARK: - Opening state by reason (#846)
+
+    /// Decision of 2026-10-28: `modelNotReady` opens on the setting-up screen, which
+    /// keeps the Siri hint, and re-reads quietly from the start.
+    func testModelNotReadyOpensOnSettingUp() {
+        let state = AppleIntelligenceStepState(engineState: .modelNotReady)
+        XCTAssertEqual(state.phase, .settingUp)
+        XCTAssertTrue(state.rechecksQuietly)
+    }
+
+    func testModelNotReadyCanStillShowTheSteps() {
+        var state = AppleIntelligenceStepState(engineState: .modelNotReady)
+        state.showInstructionsAgain()
+        XCTAssertEqual(state.phase, .instructions)
+    }
+
+    func testModelNotReadyTurnsReadyOnAQuietReRead() {
+        var state = AppleIntelligenceStepState(engineState: .modelNotReady)
+        XCTAssertEqual(state.availabilityRead(isAvailable: true, at: at(3)), .becameAvailable(afterSeconds: nil))
+        XCTAssertEqual(state.phase, .ready)
+    }
+
+    func testOtherNotReadyReasonsOpenOnTheInstructions() {
+        XCTAssertEqual(AppleIntelligenceStepState(engineState: .appleIntelligenceNotEnabled).phase, .instructions)
+        XCTAssertEqual(AppleIntelligenceStepState(engineState: .other("x")).phase, .instructions)
+    }
+
+    func testAvailableEngineOpensReady() {
+        XCTAssertEqual(AppleIntelligenceStepState(engineState: .available).phase, .ready)
+    }
+
     // MARK: - Return
 
     /// Device test of 2026-10-10: Apple's model in place, the first read on return is

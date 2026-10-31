@@ -175,6 +175,8 @@ extension DictationCoordinator {
         DarwinNotificationCenter.post(DarwinNotificationName.statusChanged)
         DarwinNotificationCenter.post(DarwinNotificationName.transcriptionReady)
         LiveActivityManager.shared.endWithResult(preview: finalText)
+        // An in-app dictation is over once its text is written (#380).
+        releaseWarmStateIfImmediate(after: "inAppResult")
 
         if #available(iOS 14.0, *) {
             DictusLogger.app.info("Transcription complete: \(finalText, privacy: .private)")
@@ -345,6 +347,9 @@ extension DictationCoordinator {
         if let reason {
             PersistentLog.log(.polishHandoff(step: "abandoned", outcome: reason, chars: 0))
         }
+        // The last piece of a keyboard dictation: the keyboard no longer needs this
+        // process alive to answer it (#380).
+        releaseWarmStateIfImmediate(after: "handoff")
     }
 
     /// The keyboard says the dictation is over — polished or not, typed or refused.

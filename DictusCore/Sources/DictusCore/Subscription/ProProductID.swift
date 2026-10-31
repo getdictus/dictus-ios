@@ -16,7 +16,8 @@ public enum ProProductID {
     /// Auto-renewable subscription, 1 month, no introductory offer.
     public static let monthly = "solutions.pivi.dictus.pro.monthly"
 
-    /// Auto-renewable subscription, 1 year, 7-day free trial.
+    /// Auto-renewable subscription, 1 year, no introductory offer. The free trial is
+    /// the app's own 14-day reverse trial (`ProTrial.durationDays`), not a StoreKit offer.
     public static let yearly = "solutions.pivi.dictus.pro.yearly"
 
     /// Non-consumable one-off purchase (#54, #350).

@@ -4,6 +4,7 @@
 // transcribe(audioArray:) which accepts any [Float] 16kHz mono array.
 import Foundation
 @preconcurrency import AVFoundation
+import UIKit
 import DictusCore
 
 extension Notification.Name {
@@ -137,6 +138,10 @@ enum AudioEngineError: Error, DiagnosableError {
 // same rationale calls the highest-risk change available. Scoped here, and only here.
 // swiftlint:disable:next type_body_length
 class UnifiedAudioEngine: ObservableObject {
+    /// `userInfo` key of `dictusAudioSessionInterrupted`: a `DictationInterruptionCause`
+    /// raw value, so the dictation can tell a call from a media services reset (#851).
+    nonisolated static let interruptionCauseKey = "cause"
+
     // MARK: - Published State
 
     /// Whether the user is actively recording (samples being accumulated).
@@ -273,6 +278,12 @@ class UnifiedAudioEngine: ObservableObject {
     /// event (Siri → ringing call back-to-back), which would leave a dangling tap.
     private var isHandlingInterruption = false
 
+    /// Carries the standby an interruption found from `.began` to `.ended`, and decides
+    /// whether `.shouldResume` brings it back (#353). The rules are in DictusCore.
+    private let interruptionRecovery = AudioInterruptionRecovery(
+        describe: { DictationFailureMessage.diagnostic(for: $0) }
+    )
+
     /// Generation counter for the underlying AVAudioEngine instance. Bumped on
     /// `handleMediaServicesReset` when we replace the engine. The audio tap closure
     /// captures the generation it was installed under — if a buffer arrives after
@@ -290,41 +301,23 @@ class UnifiedAudioEngine: ObservableObject {
     /// or a successful `warmUp()` — and cancelled at the start of any new
     /// recording. If it ever fires, `releaseWarmState()` tears down the engine +
     /// session so the device stops paying for `UIBackgroundModes:audio`.
-    private var idleReleaseWorkItem: DispatchWorkItem?
+    ///
+    /// This and the two properties below are internal, not private, because the code
+    /// that arms them lives in `UnifiedAudioEngine+IdleRelease.swift`.
+    var idleReleaseWorkItem: DispatchWorkItem?
 
     /// Time at which the engine entered the warm-idle state: a recording ended
     /// (`collectSamples` / `cancelDictation`) or a warm-up completed with nobody
     /// recording. Used to compute how long the engine sat idle before being
-    /// released — emitted in the `warmStateReleased(idleSeconds:)` log event for
+    /// released — emitted in the `warmStateReleased(idleSeconds:reason:)` log event for
     /// tuning the timeout — and as the anchor for the wall-clock backstop.
     /// Nil means "not warm-idle": either never armed, or a recording is running.
-    private var lastIdleStartTime: Date?
+    var lastIdleStartTime: Date?
 
     /// The interval the currently-armed release was scheduled with. Kept so the
-    /// wall-clock backstop measures against the same window the timer used,
-    /// rather than assuming the post-dictation one.
-    private var armedIdleReleaseInterval: TimeInterval = UnifiedAudioEngine.idleReleaseInterval
-
-    /// Idle window after which the warm engine + session are released, when the
-    /// warm state followed a real dictation. Hardcoded for this iteration; a
-    /// user-facing setting will land as a follow-up (issue #106 out-of-scope).
-    /// 10 minutes balances UX (warm starts feel instant within a normal
-    /// "back-and-forth dictation session") against battery drain (3.3%/h
-    /// baseline drops to ~0%/h after release).
-    ///
-    /// Read from `WarmEngineTimeout` since #620, the one place #380's user setting
-    /// will plug into.
-    private static var idleReleaseInterval: TimeInterval { WarmEngineTimeout.interval }
-
-    /// Idle window applied when the engine was warmed WITHOUT a preceding
-    /// dictation: launch pre-load, `didBecomeActive` re-warm, explicit `warmUp()`.
-    ///
-    /// WHY a separate constant that currently holds the same value: #256 leaves
-    /// open whether a user who merely opened the app deserves a shorter window
-    /// than one who just dictated. That is a product call, not an implementation
-    /// one, so this ships with the conservative answer (identical windows) and a
-    /// single line to change if the maintainer decides otherwise.
-    private static var warmUpIdleReleaseInterval: TimeInterval { idleReleaseInterval }
+    /// wall-clock backstop measures against the same window the timer used, even
+    /// after the user changed the setting. Nil is Unlimited: nothing is ever due.
+    var armedIdleReleaseInterval: TimeInterval?
 
     /// Sample gating flag read from the audio thread.
     /// WHY nonisolated(unsafe): Read from audio callback thread (single reader pattern).
@@ -432,9 +425,11 @@ class UnifiedAudioEngine: ObservableObject {
     /// Activity must dismiss because a dead session means the next dictation will
     /// be a cold start, not a warm start (issue #106).
     ///
-    /// On `.ended` with `.shouldResume`: try to reactivate and re-warm. If recovery
-    /// fails (rare — usually means the OS still holds the audio resource), we leave
-    /// the engine cold and accept that the next dictation pays the cold-start cost.
+    /// On `.ended` with `.shouldResume`: if the engine was in standby when the
+    /// interruption began and its idle window has not run out, reactivate, restart it
+    /// muted and bring the standby Live Activity back (#353). If the restart fails
+    /// (from the background iOS may still refuse the input, `kAUStartIO`), the engine
+    /// stays cold and the next dictation pays the cold-start cost, as before.
     private func handleInterruption(_ note: Notification) {
         // Re-entry guard: a second interruption arriving before we finish handling
         // the previous one (Siri → ringing call back-to-back) would leave a dangling
@@ -466,45 +461,26 @@ class UnifiedAudioEngine: ObservableObject {
                 return "\(value)"
             } ?? "unknown"
 
-            isInterrupted = true
-            isRecording = false
-            isRecordingFlag = false
-            cancelIdleRelease()
-
-            // Stop the engine so the next start() reinstalls the tap with a fresh
-            // hardware format. Don't deactivate the session — iOS will do that for us
-            // and re-asks ownership when the interruption ends.
-            engine.inputNode.removeTap(onBus: 0)
-            engine.stop()
-
-            PersistentLog.log(.audioInterruptionBegan(reason: reason))
-            logHapticsAllowance(context: "interruptionBegan")
-
-            // Notify in-process listeners (LiveActivityManager, DictationCoordinator)
-            // immediately. Darwin notification mirrors for cross-process consumers
-            // (keyboard ext) so they can stop trusting the warm-state contract.
-            NotificationCenter.default.post(name: .dictusAudioSessionInterrupted, object: nil)
-            DarwinNotificationCenter.post(DarwinNotificationName.audioSessionInterrupted)
+            // `engineRunning` is what iOS left of the I/O by the time this runs, which is not
+            // what decides a resume (see `engineStateForInterruption`, #353).
+            PersistentLog.log(.audioInterruptionBegan(reason: "\(reason) engineRunning=\(engine.isRunning)"))
+            // Reads whether the engine was in standby, then runs `tearDownForInterruption()`.
+            interruptionRecovery.began(target: self)
 
         case .ended:
             let optionsRaw = userInfo[AVAudioSessionInterruptionOptionKey] as? UInt ?? 0
             let options = AVAudioSession.InterruptionOptions(rawValue: optionsRaw)
             let shouldResume = options.contains(.shouldResume)
 
-            // We deliberately do NOT auto-resume here even when shouldResume is true.
+            // Before #353 this branch never resumed, and logged a literal `restored: false`.
+            // The reason was the orange indicator: re-warming re-opened the input, iOS showed
+            // the microphone in use with no Dictus pill to explain it. #430 removed that
+            // reason: a warm engine now runs with its input muted and shows no indicator. So
+            // a standby that `.shouldResume` interrupts comes back, muted, with its pill and
+            // the rest of its idle window. A recording, a cold engine, an expired window, or
+            // an `.ended` without `.shouldResume` still leave the engine cold, and the
+            // natural re-warm paths (didBecomeActive, the cold-start dictation) take over.
             //
-            // WHY: the user just finished a phone call (or whatever interruption);
-            // they have not asked to dictate. Eagerly re-warming the engine
-            // re-activates AVAudioSession, which iOS surfaces as the orange mic
-            // indicator in its Dynamic Island — but our Live Activity is already
-            // dismissed (Phase A correctly tears it down on .began). The combination
-            // is the worst of both: audio resources held + no Dictus UX visible.
-            //
-            // Instead, leave the engine cold and rely on the natural re-warm paths:
-            //  - if user reopens the app, DictationCoordinator's didBecomeActive
-            //    observer calls warmUp.
-            //  - if user taps the keyboard mic, the cold-start dictation path
-            //    starts the engine fresh.
             // The interruption is over, so the flag that says one is in flight must say
             // so — that is its documented meaning, and until #459 nothing here cleared
             // it. The only clear was at the end of a successful `startEngine`, which was
@@ -518,16 +494,21 @@ class UnifiedAudioEngine: ObservableObject {
             // when the call ends, so the other half of the guard's conjunction falls and
             // the latch never closes — but that is iOS saving us, not us being correct.
             //
-            // Clearing here does NOT resume anything: the engine stays cold on purpose,
-            // for the reason above. It says the audio layer is no longer degraded, which
-            // is true, and lets the next mic tap try. The clear in `startEngine` stays —
-            // it answers a different question (this start succeeded, so we are healthy)
-            // and covers the interruptions that never deliver an `.ended` at all.
+            // Clearing here does not resume anything by itself: it says the audio layer is
+            // no longer degraded, which is true, and lets the next mic tap try. The clear in
+            // `startEngine` stays — it answers a different question (this start succeeded,
+            // so we are healthy) and covers the interruptions that never deliver an `.ended`.
             isInterrupted = false
 
-            // Either way, the warm-state contract matches reality and the orange
-            // mic only appears when the user actually wants to record (issue #106).
-            PersistentLog.log(.audioInterruptionEnded(shouldResume: shouldResume, restored: false))
+            // Logs the outcome and `audioInterruptionEnded`, whose `restored` is now measured.
+            let appState = UIApplication.shared.applicationState
+            interruptionRecovery.ended(
+                shouldResume: shouldResume,
+                appIsActive: appState == .active,
+                appState: "\(appState.rawValue)",
+                target: self
+            )
+            LiveActivityManager.shared.settleAfterInterruption(engineWarm: engine.isRunning)  // #353
 
         @unknown default:
             return
@@ -622,8 +603,13 @@ class UnifiedAudioEngine: ObservableObject {
         isInterrupted = true
         isRecording = false
         isRecordingFlag = false
+        // The rebuilt stack has nothing warm in it; an `.ended` after this resumes nothing.
+        interruptionRecovery.forget()
 
-        NotificationCenter.default.post(name: .dictusAudioSessionInterrupted, object: nil)
+        NotificationCenter.default.post(
+            name: .dictusAudioSessionInterrupted, object: nil,
+            userInfo: [Self.interruptionCauseKey: DictationInterruptionCause.mediaServicesReset.rawValue]
+        )
         DarwinNotificationCenter.post(DarwinNotificationName.audioSessionInterrupted)
     }
 
@@ -722,7 +708,12 @@ class UnifiedAudioEngine: ObservableObject {
             try AudioSessionActivationPolicy.perform(
                 step,
                 context: { "mediaServicesLost=\(mediaServicesLost) \(routeStateDescription())" },
-                call
+                {
+                    #if DEBUG
+                    try SimulatedAudioServerReset.throwWhileActive()
+                    #endif
+                    try call()
+                }
             )
         } catch let failure as AudioSessionActivationFailure {
             throw AudioEngineError.sessionActivationFailed(step: failure.step, status: failure.status)
@@ -876,7 +867,19 @@ class UnifiedAudioEngine: ObservableObject {
             // Re-arm before returning. `cancelIdleRelease()` above dropped
             // whatever was pending, and leaving without re-arming is how the
             // engine used to end up warm forever.
-            scheduleIdleRelease(after: Self.warmUpIdleReleaseInterval)
+            scheduleIdleRelease(context: "warmUp-alreadyRunning")
+            return
+        }
+
+        // Immediately keeps no standby (#380 decision 2), so a warm-up that is not a
+        // dictation has nothing to warm: starting the engine here would only open the
+        // session for the release to close it again. The next dictation starts the
+        // engine itself, as it does after any release.
+        //
+        // Returning rather than throwing, for the reason the permission gate below
+        // gives: the model load around this call is fine, and must publish `.ready`.
+        if WarmEngineTimeout.option() == .immediately {
+            PersistentLog.log(.engineWarmUpSkipped(context: "unifiedEngine-warmUp", reason: "timeout=immediately"))
             return
         }
 
@@ -903,7 +906,7 @@ class UnifiedAudioEngine: ObservableObject {
         // NOT in a `defer`: on a `startEngine()` throw we are not warm, and
         // arming a release for an engine that never started would only produce a
         // misleading `warmStateReleased` ten minutes later.
-        scheduleIdleRelease(after: Self.warmUpIdleReleaseInterval)
+        scheduleIdleRelease(context: "warmUp")
     }
 
     /// Begin recording: purge idle audio and start accumulating samples.
@@ -983,7 +986,7 @@ class UnifiedAudioEngine: ObservableObject {
 
         // Arm the idle-release timer (issue #106 Phase B). If the user starts a
         // new recording or warms up before the timer fires, it gets cancelled.
-        scheduleIdleRelease(after: Self.idleReleaseInterval)
+        scheduleIdleRelease(context: "collectSamples")
 
         return samples
     }
@@ -1017,6 +1020,8 @@ class UnifiedAudioEngine: ObservableObject {
     /// Call when user explicitly stops all audio (e.g., Power button in Dynamic Island).
     func deactivateSession() {
         cancelIdleRelease()
+        // The user stopped standby: an interruption ending later must not restart it (#353).
+        interruptionRecovery.forget()
         isRecording = false
         isRecordingFlag = false
         engine.inputNode.removeTap(onBus: 0)
@@ -1071,58 +1076,6 @@ class UnifiedAudioEngine: ObservableObject {
 
     // MARK: - Idle Release (issue #106 Phase B)
 
-    /// Arm the idle-release work item. Idempotent by construction: it cancels any
-    /// prior timer first, so the extra call sites added for #256 can never stack
-    /// timers — the last caller to arm always owns the only pending work item.
-    /// The work runs on the main queue after `interval` elapses with no recording
-    /// activity. Must be called from MainActor context.
-    ///
-    /// - Parameter interval: how long the engine may sit warm and idle. Callers
-    ///   pass `idleReleaseInterval` after a dictation and
-    ///   `warmUpIdleReleaseInterval` when the warm state was entered without one.
-    private func scheduleIdleRelease(after interval: TimeInterval) {
-        cancelIdleRelease()
-        lastIdleStartTime = Date()
-        armedIdleReleaseInterval = interval
-
-        let work = DispatchWorkItem { [weak self] in
-            MainActor.assumeIsolated {
-                self?.releaseWarmState(reason: "idleTimeout")
-            }
-        }
-        idleReleaseWorkItem = work
-        DispatchQueue.main.asyncAfter(deadline: .now() + interval, execute: work)
-    }
-
-    /// Re-arm the idle release from now, if one is armed (#620).
-    ///
-    /// A shared voice note transcribed in the background runs in this process only
-    /// because the warm engine keeps it alive (`UIBackgroundModes: audio`). Releasing
-    /// the engine mid-note would let iOS suspend the app with the note half done. A
-    /// voice note is the user using Dictus, so it earns the same window a dictation
-    /// does: the release is pushed back by one full idle interval, never pulled
-    /// forward, and nothing happens when the engine is not warm-idle — there is no
-    /// warm state to extend, and starting one from the background is what iOS forbids.
-    func extendWarmWindow() {
-        guard idleReleaseWorkItem != nil else { return }
-        scheduleIdleRelease(after: Self.idleReleaseInterval)
-    }
-
-    /// Cancel a pending idle release. Safe to call when none is armed.
-    ///
-    /// WHY it also clears `lastIdleStartTime`: the anchor is only meaningful while
-    /// a release is armed. Every caller here (`startRecording`, `stopEngine`,
-    /// `deactivateSession`, `forceRestart`, interruption and media-services-reset
-    /// handling) is leaving the warm-idle state, so keeping the old timestamp let
-    /// the wall-clock backstop measure an idle age that had already ended — most
-    /// dangerously during an active recording, where the next `didBecomeActive`
-    /// could have released the engine mid-sentence (issue #256).
-    private func cancelIdleRelease() {
-        idleReleaseWorkItem?.cancel()
-        idleReleaseWorkItem = nil
-        lastIdleStartTime = nil
-    }
-
     /// Wall-clock backstop for the asyncAfter timer. If iOS suspended the main
     /// queue while we were backgrounded, `scheduleIdleRelease`'s `asyncAfter`
     /// can fire late or get coalesced. The DictationCoordinator's
@@ -1169,6 +1122,9 @@ class UnifiedAudioEngine: ObservableObject {
             isRecording: isRecording
         ) else { return }
 
+        // Released on purpose: an interruption ending later must not bring it back (#353).
+        interruptionRecovery.forget()
+
         let idleSeconds: Int = {
             guard let started = lastIdleStartTime else { return 0 }
             return Int(Date().timeIntervalSince(started))
@@ -1193,9 +1149,13 @@ class UnifiedAudioEngine: ObservableObject {
         converter = nil
         lastUnconvertibleInputFormat = nil
         lastIdleStartTime = nil
+        // Cancelled, not just dropped (#380): Immediately releases from outside the
+        // timer, and a backstop left scheduled would fire into whatever warm state
+        // the next dictation builds, after `startRecording` could no longer reach it.
+        idleReleaseWorkItem?.cancel()
         idleReleaseWorkItem = nil
 
-        PersistentLog.log(.warmStateReleased(idleSeconds: idleSeconds))
+        PersistentLog.log(.warmStateReleased(idleSeconds: idleSeconds, reason: reason))
 
         // The user-visible claim of #293 is "haptics came back on their own about
         // ten minutes later". This line is what dates the other end of that
@@ -1335,15 +1295,23 @@ class UnifiedAudioEngine: ObservableObject {
         } catch {
             inputNode.removeTap(onBus: 0)
             let reason = (error as NSError).localizedDescription
-            PersistentLog.log(.dictationFailed(error: "engine.start NSException: \(reason)"))
+            // `appState=` for the reason given on the throw below (#853).
+            let appState = UIApplication.shared.applicationState.sceneMarker.rawValue
+            PersistentLog.log(.dictationFailed(error: "engine.start NSException: \(reason) appState=\(appState)"))
             throw AudioEngineError.installTapFailed(call: .engineStart, reason: reason)
         }
         if let swiftStartError {
             inputNode.removeTap(onBus: 0)
             // The last silent throw in this function before #123. AUIOClient_StartIO
             // failures land here and left nothing in the log to date them by.
+            //
+            // `appState=` because iOS refuses this start from outside the foreground with
+            // the same `2003329396` it gives for a session that is not up (#853): without
+            // it, telling the two apart meant rebuilding the app's lifecycle from the lines
+            // around it.
+            let appState = UIApplication.shared.applicationState.sceneMarker.rawValue
             PersistentLog.log(.dictationFailed(
-                error: "engine.start failed: \((swiftStartError as NSError).localizedDescription)"
+                error: "engine.start failed: \((swiftStartError as NSError).localizedDescription) appState=\(appState)"
             ))
             throw swiftStartError
         }
@@ -1932,5 +1900,102 @@ extension UnifiedAudioEngine {
         case .pendingCall:
             return "CallKit reports a call that is ringing or connecting"
         }
+    }
+}
+
+// MARK: - Interruption Resume (issue #353)
+
+/// The engine half of `AudioInterruptionRecovery`: the decision and its order are in
+/// DictusCore and tested there, these are the calls they make.
+extension UnifiedAudioEngine: InterruptionResumeTarget {
+
+    /// Read from our own flags, never from `engine.isRunning`.
+    ///
+    /// WHY (#353, device 2026-10-25): the first version started with
+    /// `guard engine.isRunning else { return .cold }`, and on Pierre's iPhone every call
+    /// ended in `engineWarmUpSkipped reason=wasCold` straight after a dictation had left the
+    /// engine in standby. A call takes the I/O hardware and changes its format, and the
+    /// engine stops itself when its I/O does (`AVAudioEngine.h`, configuration change):
+    /// by the time `.began` reaches the main queue, `isRunning` can already be false. It
+    /// describes what iOS did, not the state the interruption found.
+    ///
+    /// The armed idle release is the state we own: it is armed only on entering warm-idle
+    /// (`warmUp`, `collectSamples`), and every path of ours that stops the engine cancels
+    /// it first (`stopEngine`, `deactivateSession`, `forceRestart`, `releaseWarmState`,
+    /// the interruption and media-services teardowns). Armed means we left the engine
+    /// running muted, whatever iOS has done to its I/O since; not armed means cold.
+    var engineStateForInterruption: InterruptedEngineState {
+        if isRecording { return .recording }
+        // Batch resolution #803 × #807: the warm-idle marker is the idle anchor, which
+        // #380's Unlimited sets without arming a timer, and which every stopping path
+        // clears (`cancelIdleRelease`). Unlimited has no deadline: a finite horizon far
+        // beyond any interruption stands for it, since the resume logs its remaining
+        // seconds as an `Int`.
+        guard let idleSince = lastIdleStartTime else { return .cold }
+        return .standby(idleSince: idleSince, interval: armedIdleReleaseInterval ?? Self.unlimitedResumeHorizon)
+    }
+
+    /// The `.began` teardown, unchanged by #353.
+    func tearDownForInterruption() {
+        isInterrupted = true
+        isRecording = false
+        isRecordingFlag = false
+        cancelIdleRelease()
+
+        // Stop the engine so the next start() reinstalls the tap with a fresh
+        // hardware format. Don't deactivate the session — iOS will do that for us
+        // and re-asks ownership when the interruption ends.
+        engine.inputNode.removeTap(onBus: 0)
+        engine.stop()
+
+        logHapticsAllowance(context: "interruptionBegan")
+        LiveActivityManager.shared.handleInterruptionBegan()  // #353: pause, before the post below
+
+        // Notify in-process listeners (LiveActivityManager, DictationCoordinator)
+        // immediately. Darwin notification mirrors for cross-process consumers
+        // (keyboard ext) so they can stop trusting the warm-state contract.
+        NotificationCenter.default.post(
+            name: .dictusAudioSessionInterrupted, object: nil,
+            userInfo: [Self.interruptionCauseKey: DictationInterruptionCause.interruption.rawValue]
+        )
+        DarwinNotificationCenter.post(DarwinNotificationName.audioSessionInterrupted)
+    }
+
+    func reactivateSession() throws {
+        try configureAudioSession()
+    }
+
+    /// The same start-then-mute order as `warmUp()`, the one #430 measured on device.
+    func startEngineAtRest() throws -> Bool {
+        try startEngine(context: "interruptionResume")
+        muteInputIfIdle(context: "interruptionResume")
+        return AVAudioApplication.shared.isInputMuted
+    }
+
+    /// Back to what a failed resume found: engine stopped, input unmuted (the two full
+    /// teardowns unmute too, #430), session released. `sessionConfigured` goes false so
+    /// the next start activates again, as it does after the idle release.
+    func abandonResume() {
+        engine.inputNode.removeTap(onBus: 0)
+        engine.stop()
+        try? setInputMuted(false, context: "interruptionResume-abandon")
+        try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
+        sessionConfigured = false
+    }
+
+    /// Re-arms from the window's original start; the window itself is the inactivity
+    /// setting (#380), the same one `engineStateForInterruption` reported.
+    func armIdleRelease(idleSince: Date, interval: TimeInterval) {
+        scheduleIdleRelease(context: "interruptionResume", idleSince: idleSince)
+    }
+
+    /// Stands for Unlimited's missing deadline in an interruption's standby window.
+    private static let unlimitedResumeHorizon = TimeInterval(Int32.max)
+
+    /// Called directly rather than through a notification, as the `.began` teardown is:
+    /// the outcome goes into the resume's log line, and `startStandbyActivity()` must run
+    /// synchronously, while iOS still lets this process request an activity.
+    func restartStandbyLiveActivity() -> String {
+        LiveActivityManager.shared.startStandbyActivity().reason
     }
 }

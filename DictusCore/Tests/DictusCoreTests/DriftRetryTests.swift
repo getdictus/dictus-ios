@@ -75,6 +75,34 @@ final class DriftRetryTests: XCTestCase {
         XCTAssertTrue(decoder.clipLengths.allSatisfy { $0 <= 240_000 })
     }
 
+    /// The replaced span is reported for the log (#861): its audio window and its text on
+    /// both sides, nothing of the dictation outside it.
+    func testAReplacedSpanIsReportedWithItsPositionAndBothTexts() async throws {
+        let timings = firstPass { self.drifted.contains($0) ? self.driftConfidence : 0.99 }
+        let outcome = try await DriftRetry.run(samples: samples, firstPassText: SyntheticTokens.text(of: timings),
+                                               firstPassTimings: timings) { self.confidentFrench($0) }
+        XCTAssertEqual(outcome.replacements.count, 1)
+        let replaced = try XCTUnwrap(outcome.replacements.first)
+        // The window holds the first frame of word 9 (11.76 s) and of word 14 (18.24 s).
+        XCTAssertLessThan(replaced.startMs, 11_840)
+        XCTAssertGreaterThanOrEqual(replaced.endMs, 18_240)
+        XCTAssertTrue(replaced.before.contains("english9"), replaced.before)
+        XCTAssertTrue(replaced.before.contains("english14"), replaced.before)
+        XCTAssertFalse(replaced.after.contains("english"), replaced.after)
+        XCTAssertTrue(replaced.after.contains("français"), replaced.after)
+
+        let line = LogEvent.driftRetrySpanReplaced(startMs: replaced.startMs, endMs: replaced.endMs,
+                                                   before: replaced.before, after: replaced.after,
+                                                   channel: .testBuild).payload()
+        XCTAssertTrue(line.hasPrefix("INFO    [transcription] <"), line)
+        XCTAssertTrue(line.contains(
+            "driftRetrySpanReplaced startMs=\(replaced.startMs) endMs=\(replaced.endMs) "
+                + "before=\"\(replaced.before)\" after=\"\(replaced.after)\""
+        ), line)
+        XCTAssertFalse(line.contains("mot0"), "the log carries the span, never the dictation around it")
+        print("[#861 log sample] \(line)")
+    }
+
     /// When no re-decode beats the first pass, the dictation comes back exactly as it was,
     /// spacing included: the retry spent time and changed nothing.
     func testWhenTheFirstPassWinsTheTextIsUntouched() async throws {

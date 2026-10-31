@@ -145,4 +145,24 @@ final class IdleReleasePolicyTests: XCTestCase {
             interval: tenMinutes
         ))
     }
+
+    // MARK: - Unlimited (#380): no window, never due
+
+    func testUnlimitedIsNeverElapsedHoweverLongTheIdle() {
+        XCTAssertFalse(IdleReleasePolicy.isIdleWindowElapsed(
+            idleSince: now.addingTimeInterval(-7 * 24 * 3600),
+            now: now,
+            interval: WarmEngineTimeoutOption.unlimited.interval
+        ))
+    }
+
+    func testUnlimitedNeverReleasesFromTheBackstop() {
+        XCTAssertFalse(IdleReleasePolicy.shouldRelease(
+            isWarm: true,
+            isRecording: false,
+            idleSince: now.addingTimeInterval(-7 * 24 * 3600),
+            now: now,
+            interval: nil
+        ))
+    }
 }
