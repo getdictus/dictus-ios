@@ -489,16 +489,17 @@ class KeyboardViewController: UIInputViewController {
         // During cold start, applyAreaMode was skipped (hasAppeared was false).
         // Now that activeControllerID matches, KeyboardRootView.presentedMode agrees
         // with us, so the constraint and SwiftUI content change together — no
-        // displaced toolbar. This also restores a picker the user left open when
-        // iOS hands the keyboard to a fresh controller.
+        // displaced toolbar. The pickers are closed first (below): an appearance
+        // starts on the keys (#241, #505).
         let statusBeforeHandle = KeyboardState.shared.dictationStatus.rawValue
 
         // The hamburger panel does not survive leaving the keyboard (#241 device
         // feedback). Switching away with the globe and coming back put the user
         // straight back into the menu instead of the keys, which is not what
-        // returning to a keyboard should mean. The emoji picker deliberately keeps
-        // the old restore behaviour: browsing emoji is a task worth resuming,
-        // choosing a language is not.
+        // returning to a keyboard should mean. The emoji picker follows the same rule
+        // since #505: Apple's keyboard always comes back on the letters, and a user
+        // asking for a keyboard in a new field is asking for a keyboard. Inside one
+        // activation nothing changes — the picker stays until ABC or a dictation.
         // The Smart Mode fan does not survive either, and for a stronger reason than
         // the panel's (#79): it is the visible half of a gesture, and the finger that
         // opened it is long gone by the time a fresh controller mounts. Restoring it
@@ -509,7 +510,7 @@ class KeyboardViewController: UIInputViewController {
             KeyboardSmartModeState.shared.close()
         }
 
-        if KeyboardState.shared.areaMode == .panel {
+        if KeyboardState.shared.areaMode == .panel || KeyboardState.shared.areaMode == .emoji {
             KeyboardState.shared.presentAreaMode(.keys)
         }
 

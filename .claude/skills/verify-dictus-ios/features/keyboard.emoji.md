@@ -11,6 +11,7 @@
 - `emoji.recents`: Recently used emoji.
 - `emoji.search`: « Rechercher des Emoji », with French keywords.
 - `emoji.back-to-letters`: ABC returns to the letters.
+- `emoji.closed-on-reappearance` (#505): the picker does not survive the keyboard going away. Left open, then the keyboard dismissed (same app) or another app's field focused, the keyboard comes back on the letters, like Apple's. Check: open the picker, dismiss the keyboard, focus the field again → letters; the App Group log's `viewWillAppear_afterHandle` line reads `mode=keys`.
 
 ## How to get to it (user POV)
 
