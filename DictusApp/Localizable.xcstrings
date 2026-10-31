@@ -1186,6 +1186,35 @@
         }
       }
     },
+    "Cancel download" : {
+      "comment" : "Button on the model preparation screen and the model card that stops a model download and deletes what it fetched (issue #493).",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Download abbrechen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancel download"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancelar descarga"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Annuler le téléchargement"
+          }
+        }
+      }
+    },
     "Change" : {
       "comment" : "Onboarding language screen: opens the menu of languages (#675).",
       "localizations" : {
