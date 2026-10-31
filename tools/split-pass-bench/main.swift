@@ -95,7 +95,11 @@ func outcome(_ c: Case, _ result: String?) -> String {
 let shortSplitAllowlist: Set<String> = [
     "je", "tu", "il", "on", "me", "te", "se", "ne",
     "le", "la", "un", "du", "au", "en",
-    "et", "ou", "ni", "si", "ça", "où", "ce"
+    "et", "ou", "ni", "si", "ça", "où", "ce",
+    "pu", "vu",
+    "to", "is", "in", "at", "by", "be", "go", "my",
+    "es", "mi", "lo",
+    "an", "er"
 ]
 func isValidSplitPart(_ part: String) -> Bool {
     part.count >= 3 || (part.count == 2 && shortSplitAllowlist.contains(part))

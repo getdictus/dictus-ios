@@ -695,16 +695,25 @@ class TextPredictionEngine {
     private static let azertySpacebarNeighbors: Set<Character> = ["n", "b", ","]
     private static let qwertySpacebarNeighbors: Set<Character> = ["n", "b", "m"]
 
-    /// Short French words (2 chars) that are allowed to appear as split parts.
+    /// Short words (2 chars) that are allowed to appear as split parts.
     /// Standard split requires ≥3 chars per part to avoid noise like "ho ne",
     /// but French has many 2-char pronouns/articles/connectives that commonly
     /// start missed-space compounds (e.g., "tuboeux" should split as "tu peux",
     /// "jepense" as "je pense"). This allowlist restricts the 2-char relaxation
     /// to words that are structurally plausible as a left/right split half.
+    /// The set is shared by every language. Each word past the French ones was
+    /// admitted only after the split-pass bench (tools/split-pass-bench, #499) showed
+    /// it recovers glues and adds no false or wrong split in any language. "de",
+    /// "of", "el", "zu", "so" and "sa" were measured and left out for adding one, and
+    /// "no" for trapping on "queno" (#499).
     private static let shortSplitAllowlist: Set<String> = [
         "je", "tu", "il", "on", "me", "te", "se", "ne",
         "le", "la", "un", "du", "au", "en",
-        "et", "ou", "ni", "si", "ça", "où", "ce"
+        "et", "ou", "ni", "si", "ça", "où", "ce",
+        "pu", "vu",
+        "to", "is", "in", "at", "by", "be", "go", "my",
+        "es", "mi", "lo",
+        "an", "er"
     ]
 
     /// Whether a split part is long enough or belongs to the short-word allowlist.
