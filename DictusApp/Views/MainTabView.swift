@@ -215,7 +215,7 @@ struct MainTabView: View {
                 // WHY SwipeBackOverlayView instead of inline code:
                 // The overlay has its own animation state and bilingual logic -- keeping it
                 // in a separate file follows "one file = one responsibility".
-                SwipeBackOverlayView()
+                SwipeBackOverlayView(isPreparingMicrophone: coordinator.isRecoveringAudioSession)
             } else if let whatsNewSteps {
                 // What's new for existing users (#685), in place of the tabs. Below the
                 // two branches above: a dictation from the keyboard still takes the screen.
@@ -357,6 +357,20 @@ struct MainTabView: View {
                     details: "source=keyboard"
                 ))
                 showsPaywall = true
+                return
+            }
+
+            // The keyboard's "Dictation interrupted" banner (#860). The text comes from the
+            // App Group, not from `lastResult`: that one lives in memory, and an app
+            // relaunched since the dictation would land on an empty home screen.
+            if KeyboardOpenURL.intent(from: url) == .transcription {
+                let recovered = RecoveredTranscriptionChannel.take()
+                if let recovered { coordinator.lastResult = recovered }
+                PersistentLog.log(.diagnosticProbe(
+                    component: "recoveredTranscription", instanceID: "0", action: "opened",
+                    details: "source=keyboard chars=\(recovered?.count ?? 0)"
+                ))
+                selectedTab = 0
                 return
             }
 

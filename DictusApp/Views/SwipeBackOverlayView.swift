@@ -10,10 +10,15 @@ import DictusCore
 /// TEACH the gesture visually with an iPhone mockup, animated waveform, and a hand
 /// showing the swipe direction — not just mention it in words.
 ///
-/// WHY no parameters:
-/// MainTabView calls `SwipeBackOverlayView()` with no arguments. Recording happens in
-/// DictationCoordinator — this view is purely visual.
+/// WHY a single parameter: recording happens in DictationCoordinator, and this view is
+/// purely visual. The one thing it reads is whether the audio session is still being
+/// recovered (#853), passed in by MainTabView.
 struct SwipeBackOverlayView: View {
+    /// The cold start's audio session is recovering from an audio server reset, and the
+    /// return to the host app is held for it (#853). That can take about three seconds, so
+    /// the title says the microphone is being prepared rather than that dictation runs.
+    var isPreparingMicrophone = false
+
     @State private var isWaveformAnimating = false
     @State private var swipeProgress: CGFloat = 0
 
@@ -27,7 +32,7 @@ struct SwipeBackOverlayView: View {
             .ignoresSafeArea()
 
             VStack(spacing: 0) {
-                Text("Dictation in progress")
+                Text(isPreparingMicrophone ? preparingMicrophoneTitle : dictationInProgressTitle)
                     .font(.title2.weight(.semibold))
                     .foregroundColor(.white)
                     .padding(.top, 60)
@@ -99,6 +104,15 @@ struct SwipeBackOverlayView: View {
             }
             startSwipeLoop()
         }
+    }
+
+    private var dictationInProgressTitle: String {
+        String(localized: "Dictation in progress")
+    }
+
+    private var preparingMicrophoneTitle: String {
+        String(localized: "Preparing the microphone…",
+               comment: "Swipe-back overlay title while a cold start waits for iOS to bring the audio system back, which can take about three seconds; replaces 'Dictation in progress' until recording starts (issue #853).")
     }
 
     /// Repeating hand swipe animation with pause between cycles.

@@ -614,6 +614,9 @@ class DictationCoordinator: ObservableObject {
         // that makes it so. Clearing here — rather than when a surface reads it — is
         // what lets both the keyboard and the app read it, in either order.
         DictationErrorChannel.clear()
+        // And the previous dictation's "text is in the Dictus app" banner (#860): a new
+        // dictation is the user moving on. The keyboard clears it at its own mic tap too.
+        RecoveredTranscriptionChannel.clear()
         bufferEnergy = []
         bufferSeconds = 0
         // Cancel any polish still running from the previous dictation (#141).
@@ -702,7 +705,12 @@ class DictationCoordinator: ObservableObject {
         // engine for nothing, then said the microphone was missing. The cold start below
         // hands it to `activateSessionForColdStart`, which retries or fails with "tap again".
         // The warm path needs no retry: its running engine means the session is up.
-        let firstActivation = Result { try audioEngine.configureAudioSession() }
+        //
+        // The helper also raises `isRecoveringAudioSession` for a cold start whose activation
+        // was refused (#853). It has to be here, before the cold start's defer below: the
+        // host return reads it at its 250 ms ceiling, which in the capture lands before
+        // `didBecomeActive` retries, so this call's own `'msrv'` is the only signal by then.
+        let firstActivation = activateSessionAtStart(engine: audioEngine)
 
         // The session these start paths belong to. `ensureMicrophonePermission` is
         // an await even when permission is already granted, so a cancel queued on

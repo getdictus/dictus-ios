@@ -9,6 +9,7 @@
 
 - `return.swipe-back`: After a cold start from the keyboard, an overlay tells the user to swipe back to the app they were typing in.
 - `return.auto-return`: Where the host app is recognised, Dictus returns to it by itself after the dictation.
+  On an ordinary cold start it opens the host app once recording has started, or at 250 ms at the latest. When the cold start's audio session is recovering (first activation refused, typically `'msrv'` after an audio server reset, #853), it holds the foreground instead (`hostReturn … holding reason=audioSessionRecovering`) and opens on recording (`via=recording`), on a failure (`via=failed`) or at 5 s (`via=holdCeiling`). Meanwhile the overlay title reads « Préparation du micro… » instead of « Dictée en cours ».
 
 ## How to get to it (user POV)
 
@@ -27,3 +28,5 @@ The cold start is reachable: run the `dictation.keyboard` recipe and capture the
 
 - **Not drivable in the simulator:** whether the return lands in the right host app, and the Spotlight/arbiter cases (#23). Device only; the simulator's host detection is not the phone's.
 - The overlay needs a successful dictation start, i.e. a model.
+- **#853 in the simulator, title only:** a Debug build refuses every activation with `'msrv'` for a window after the first one when `debugSimulateAudioServerResetMs` is set in the app's own defaults (`xcrun simctl spawn <udid> defaults write <app data container>/Library/Preferences/com.pivi.dictus.plist debugSimulateAudioServerResetMs -int 2500`, after `dictus.modelReady` and `dictus.hasCompletedOnboarding` via `drive.sh set-default`). The overlay then reads « Préparation du micro… » (captured 2026-10-28, under the microphone permission prompt, which was refused so nothing recorded). Safari has no return scheme, so the held return itself (`holding reason=audioSessionRecovering`) is not reached there.
+- **Device only (#853):** the held return and a real audio server reset during a cold start, which nobody can trigger on demand. A reset that lands after DictusApp has left the foreground must end in « La dictée n’a pas pu démarrer. Touchez à nouveau le micro. » with `engineStartSkipped appState=background` in the log, never a `dictationFailed error=engine.start failed`.
