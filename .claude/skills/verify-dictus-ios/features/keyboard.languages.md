@@ -30,6 +30,8 @@
 
 The 123 and `#+=` pages: `drive.sh kbd abc` on the letters page presses the bottom-left key, which reads 123 there (`kbd.numbers`); `#+=` is the first key of the third row, at (+30, +187) pt from `inputView`'s origin (`kbd.symbols`); `kbd abc` goes back to the letters.
 
+A space typed on either page after a digit or symbol also goes back to the letters, as Apple's keyboard does (#504). A space typed before any character stays on the page, and so does Return. To check it: `kbd abc`, tap `2` (second key of the first row), tap the space bar, and expect the letters page, its bottom-left key reading 123 again.
+
 App side: `.claude/skills/verify-dictus-ios/scripts/drive.sh tab Réglages`, `axe swipe --start-x 201 --start-y 600 --end-x 201 --end-y 350 --duration 0.4 --udid <udid>` (at rest the row sits under the floating tab bar, and a tap there switches to Modèles), then `.claude/skills/verify-dictus-ios/scripts/drive.sh tap-label "Disposition, AZERTY"`.
 
 ## Gotchas
