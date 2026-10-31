@@ -173,6 +173,7 @@ Two lists. The first is what an agent proves alone with this skill; the second i
 | Onboarding | Every step displays, back/skip/next, What's new; not the download, mic prompt or practice dictation | `onboarding.*` except `onboarding.model-download`, `onboarding.microphone`, `onboarding.first-dictation` |
 | Keyboard setup | The keyboard registers, is enabled, takes Full Access, is selected from the globe menu | `dictation.requires-full-access`, `sys.settings.full-access`, `kbd.keys`, `kbd.no-full-access` |
 | Hand-off, cold path | Mic tap → DictusApp cold start → `No model downloaded` → keyboard shows the failure | `dictation.handoff` (cold only), `kbd.dictation-error` |
+| Recovered-text banner | Seeded through the App Group: the banner in any app, its tap opening Dictus on the text (cold launch included), a mic tap dropping it | `dictation.recovered-banner`, `kbd.recovered-transcription` |
 | Dictation chain, with a model | Only when the task asks for a recording: a `say` clip played through the Mac's speakers is recorded, transcribed and inserted; the top-bar states are captured (`features/dictation.keyboard.md`, With a model). Proves the chain runs, not the voice, the quality or the timings | `dictation.start`, `dictation.stop`, `dictation.cancel`, `kbd.recording`, `kbd.transcribing`, `kbd.dictation-undo`, `dictation.undo-insert` (drivable by tapping « Annuler » within 8 s; the recipe does not) |
 | Typing | Suggestions, autocorrect on space, undo, accents, dead keys, learned words, reset | `typing.*`, `learned-words.*`, `kbd.suggestions` |
 | Keyboard surfaces | Languages panel, layouts, number row, 123 and `#+=` pages, emoji picker, recents, search | `keyboard.*`, `emoji.*`, `kbd.panel`, `kbd.numbers`, `kbd.symbols`, `kbd.emoji` |
@@ -186,7 +187,7 @@ Two lists. The first is what an agent proves alone with this skill; the second i
 | Area | Why the simulator cannot prove it | IDs |
 | --- | --- | --- |
 | Real voice and microphone | A simulator records the Mac's input device: the room, or a synthesized `say` clip. A real voice, its accent and the text quality, and what depends on them (a filled history, the vocabulary effect, voice-note transcription) | `dictation.in-app`, `app.recording`, `history.detail`, `vocabulary.apply`, `vocabulary.term-variants` (rows from a real History), `voice-notes.transcribe` |
-| Audio routing | AirPods, Bluetooth headsets, wired input, route changes and interruptions mid-recording: the simulator has only the Mac's devices | `dictation.start`, `dictation.in-app`, `voice-notes.transcribe` |
+| Audio routing | AirPods, Bluetooth headsets, wired input, route changes and interruptions mid-recording: the simulator has only the Mac's devices | `dictation.start`, `dictation.in-app`, `voice-notes.transcribe`, `dictation.recovered-banner` (a call ending in the banner) |
 | Keyboard memory and jetsam | The extension's ~50 MB ceiling and its kills are device figures; simulator `memMB` carries no verdict | `dictation.keyboard`, `kbd.*` (memory only) |
 | Keyboard height and dead zones | The declared height constraint (#166) and touch dead zones | `kbd.keys` |
 | Warm hand-off and return | The warm path depends on iOS keeping the app alive; auto-return and the Spotlight/arbiter cases (#23) behave differently on device | `dictation.handoff` (warm), `return.auto-return`, `return.swipe-back` |

@@ -130,6 +130,16 @@ public enum LogEvent: Sendable {
     /// other engines, which prints no field. `confidence` stays the FIRST pass's score, so it
     /// remains comparable with every line logged since #554.
     case transcriptionCompleted(durationMs: Int, wordCount: Int, confidence: Float?, language: String? = nil, promptId: Int? = nil, detectedLanguage: String? = nil, retry: DriftRetryStats? = nil)
+    /// One span the drift retry replaced (#861): where it sits in the audio, in ms from the
+    /// start of the engine call, and its text before and after. **The one transcription
+    /// line that carries transcript text**, and only the replaced span's, and only in a
+    /// test build (`channel` `.testBuild`: Debug, TestFlight): without it a log says a
+    /// retry won but not what it wrote, so a guardrail refusal downstream cannot be traced
+    /// back to it. The App Store build writes the two lengths in characters instead.
+    /// `channel` defaults to `.appStore`, the side that writes no text. Spans the first
+    /// pass kept log nothing.
+    case driftRetrySpanReplaced(startMs: Int, endMs: Int, before: String, after: String,
+                                channel: BuildChannel = .appStore)
     case transcriptionFailed(error: String)
     case recordingTooShort(durationMs: Int)
     case transcriptionPerformance(modelName: String, audioDurationMs: Int, transcriptionDurationMs: Int, peakMemoryMB: Int)
@@ -761,7 +771,7 @@ public enum LogEvent: Sendable {
              // Info, not debug like its siblings: it is the one line that says why the
              // engine is cold, and a reader of the log has to find it (#715).
              .engineWarmUpSkipped,
-             .transcriptionStarted, .transcriptionCompleted,
+             .transcriptionStarted, .transcriptionCompleted, .driftRetrySpanReplaced,
              .modelDownloadStarted, .modelDownloadCompleted, .modelDownloadProgress,
              .modelSelected, .modelCompilationStarted, .modelCompilationCompleted,
              .modelDeleted, .modelPrewarmStarted, .modelCleanupPerformed,
@@ -909,6 +919,13 @@ public enum LogEvent: Sendable {
             let languageFields = [language.map { "language=\($0)" }, promptId.map { "promptId=\($0)" }, detected.map { "detected=\($0)" }]
                 .compactMap { $0 }.map { " \($0)" }.joined()
             return "duration=\(durationMs)ms words=\(wordCount)\(confidenceField)\(languageFields)\(retry.map { " \($0.logFields)" } ?? "")"
+        case .driftRetrySpanReplaced(let startMs, let endMs, let before, let after, let channel):
+            switch channel {
+            case .testBuild:
+                return "startMs=\(startMs) endMs=\(endMs) before=\"\(before)\" after=\"\(after)\""
+            case .appStore:
+                return "startMs=\(startMs) endMs=\(endMs) beforeLen=\(before.count) afterLen=\(after.count)"
+            }
         case .transcriptionFailed(let error):
             return "error=\(error)"
         case .recordingTooShort(let durationMs):
@@ -1249,8 +1266,8 @@ extension LogEvent {
              .idleReleaseArmed, .audioHapticsAllowance, .audioHapticsAllowanceFailed,
              .audioInputMuted, .audioInputMuteFailed:
             return .audio
-        case .transcriptionStarted, .transcriptionCompleted, .transcriptionFailed, .recordingTooShort,
-             .transcriptionPerformance:
+        case .transcriptionStarted, .transcriptionCompleted, .driftRetrySpanReplaced, .transcriptionFailed,
+             .recordingTooShort, .transcriptionPerformance:
             return .transcription
         case .modelDownloadStarted, .modelDownloadCompleted, .modelDownloadFailed,
              .modelSelected, .modelCompilationStarted, .modelCompilationCompleted,
@@ -1346,6 +1363,7 @@ extension LogEvent {
         case .audioInputMuteFailed: return "audioInputMuteFailed"
         case .transcriptionStarted: return "transcriptionStarted"
         case .transcriptionCompleted: return "transcriptionCompleted"
+        case .driftRetrySpanReplaced: return "driftRetrySpanReplaced"
         case .transcriptionFailed: return "transcriptionFailed"
         case .recordingTooShort: return "recordingTooShort"
         case .modelDownloadStarted: return "modelDownloadStarted"

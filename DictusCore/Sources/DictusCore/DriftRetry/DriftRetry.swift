@@ -28,6 +28,26 @@ public struct DriftRetryOutcome: Equatable, Sendable {
 
     /// Spans where a re-decode replaced the first pass.
     public let wins: Int
+
+    /// What each winning re-decode replaced, in span order, for the debug log (#861).
+    public let replacements: [DriftRetryReplacement]
+
+    init(text: String, spans: Int, wins: Int, replacements: [DriftRetryReplacement] = []) {
+        self.text = text
+        self.spans = spans
+        self.wins = wins
+        self.replacements = replacements
+    }
+}
+
+/// One span a re-decode replaced (#861): the audio window the retry worked on and the
+/// span's text on both sides. "After" is the winning re-decode as read, before the splice
+/// drops words it repeats at a seam.
+public struct DriftRetryReplacement: Equatable, Sendable {
+    public let startMs: Int
+    public let endMs: Int
+    public let before: String
+    public let after: String
 }
 
 public enum DriftRetryError: Error, Equatable {
@@ -68,6 +88,7 @@ public enum DriftRetry {
         guard !spans.isEmpty else { return DriftRetryOutcome(text: firstPassText, spans: 0, wins: 0) }
 
         var choices: [DriftRetryChoice] = []
+        var replacements: [DriftRetryReplacement] = []
         for span in spans {
             try Task.checkCancellation()
             let range = DriftRetrySplice.firstPassRange(of: span, in: firstPass)
@@ -81,6 +102,11 @@ public enum DriftRetry {
             }
             if let winner = DriftRetrySelection.winner(candidates: candidates, firstPass: original, endTrimmed: endTrimmed) {
                 choices.append(DriftRetryChoice(range: range, pieces: candidates[winner], keepsFirstPass: false))
+                let samplesPerMs = DriftRetryParameters.sampleRate / 1_000
+                replacements.append(DriftRetryReplacement(
+                    startMs: span.start / samplesPerMs, endMs: span.end / samplesPerMs,
+                    before: DriftRetryText.text(of: original), after: DriftRetryText.text(of: candidates[winner])
+                ))
             } else {
                 choices.append(DriftRetryChoice(range: range, pieces: original, keepsFirstPass: true))
             }
@@ -89,6 +115,7 @@ public enum DriftRetry {
         let wins = choices.filter { !$0.keepsFirstPass }.count
         guard wins > 0 else { return DriftRetryOutcome(text: firstPassText, spans: spans.count, wins: 0) }
         let spliced = DriftRetrySplice.splice(firstPass: firstPass, choices: choices)
-        return DriftRetryOutcome(text: DriftRetryText.text(of: spliced), spans: spans.count, wins: wins)
+        return DriftRetryOutcome(text: DriftRetryText.text(of: spliced), spans: spans.count, wins: wins,
+                                 replacements: replacements)
     }
 }

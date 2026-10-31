@@ -187,6 +187,8 @@ struct KeyboardRootView: View {
             messageProbeRootViewID: instanceID,
             messageProbeControllerID: controllerID,
             showsPolishUnavailable: state.polishUnavailable,
+            showsRecoveredTranscription: state.recoveredTranscriptionPending,
+            onRecoveredTranscriptionTap: { state.openRecoveredTranscription() },
             suggestions: presentedMode == .keys ? suggestionState.suggestions : [],
             suggestionMode: presentedMode == .keys ? suggestionState.mode : .idle,
             onSuggestionTap: { index in handleSuggestionTap(index: index) },
