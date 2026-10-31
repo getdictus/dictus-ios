@@ -3,7 +3,7 @@
 - **ID:** `dictation.keyboard`
 - **Tier:** Gratuit (Free)
 - **Targets:** DictusKeyboard + DictusApp + DictusCore
-- **Screens:** `kbd.keys`, `kbd.no-full-access`, `kbd.recording`, `kbd.transcribing`, `kbd.dictation-undo`, `kbd.dictation-error` — see [screens.md](screens.md), which also maps the top bar's states
+- **Screens:** `kbd.keys`, `kbd.no-full-access`, `kbd.recording`, `kbd.transcribing`, `kbd.dictation-undo`, `kbd.dictation-error`, `kbd.recovered-transcription` — see [screens.md](screens.md), which also maps the top bar's states
 
 ## Sub-features
 
@@ -15,6 +15,7 @@
 - `dictation.handoff`: The keyboard hands the recording to the app (warm through a notification, cold through the `dictus://dictate` URL after 500 ms), because the extension's memory limit keeps audio out of it.
 - `dictation.requires-full-access`: Without Full Access the mic is disabled and the bar reads « Accès complet requis ».
 - `dictation.device-gating`: Refused on devices too old to transcribe (A12/A13 iPhones: « Dictation unavailable on this device »).
+- `dictation.recovered-banner`: When a dictation's text was produced but not inserted (the user left the field, typically during a call, `polishInsertionRefused`), the bar shows « Dictée interrompue. Votre texte est dans l'app Dictus. » until it is tapped or the next dictation starts, in any app (#860). The tap opens Dictus on Accueil with the text in « Dernière transcription », even after a relaunch: the text waits in the App Group key `dictus.recoveredTranscription`. Log: `<KBD> … openDictusApp details=intent=transcription`, `<APP> … component=recoveredTranscription … action=opened … chars=N`, `<KBD> … recoveredTranscriptionCleared details=reason=new-dictation`.
 - `dictation.onboarding-gate`: Before onboarding is finished (#827), the mic (and the long-press mode rows) in another app only opens Dictus on onboarding: no recording, no error, no return to the host. Long-press → Dictus Pro opens onboarding, not the paywall. Inside Dictus (the onboarding practice field) dictation is allowed. Log: `<KBD> … micTapOpensOnboarding` / `micTapAllowedBeforeOnboarding reason=…`.
 
 ## How to get to it (user POV)
@@ -58,7 +59,20 @@ The proof is the sequence `<KBD> statusChanged … to=recording`, `<APP> transcr
 
 This recipe proves the insertion and captures the undo **state** only: it does not tap « Annuler », so `dictation.undo-insert` itself (the inserted text removed) is not verified by it. « Annuler » sits in the bar's left slot, where ☰ is (`kbd menu` taps that spot); a run that wants the proof taps it within the 8 s and checks the field is back to what it held before the dictation.
 
+**Recovered-text banner** (`dictation.recovered-banner`, run on 2026-10-29). The interruption itself needs a call, so the state is seeded the way the keyboard leaves it, with onboarding finished and DictusApp terminated (which makes the tap a cold launch, the relaunch case):
+
+```bash
+.claude/skills/verify-dictus-ios/scripts/drive.sh set-default dictus.recoveredTranscription -string "Rappelle-moi d'appeler Camille demain matin."
+.claude/skills/verify-dictus-ios/scripts/drive.sh select-keyboard     # the bar shows the banner
+axe tap -x 164 -y 559 --udid <udid>                                  # the banner, centre-left of the bar
+.claude/skills/verify-dictus-ios/scripts/drive.sh wait-log 'component=recoveredTranscription .*action=opened' 15
+```
+
+Accueil then shows the text in « Dernière transcription » (on a fresh install the trial announcement sheet covers it first; swipe it down) and the key is gone from the App Group plist. Seed again and `kbd mic` instead to see the banner dropped by a new dictation.
+
 ## Gotchas
+
+- **The banner's real trigger is device-only.** The seeded key proves the banner, the tap and the card; that a call during a dictation actually ends in `polishInsertionRefused` and the banner is a physical iPhone check (#860's acceptance).
 
 - **A recording is the room.** A simulator records the Mac's microphone: what `say` plays through the speakers, and whatever else is said nearby, which ends up in the transcript. Do not start one unless the task asks, keep takes short, and never publish a transcript without reading it. Transcript quality is not a measurement: through speakers and a built-in mic, Small (quantifié) heard « Bonjour, si c'est un test de tes aiselles, c'est mieux le teur. » for the sentence above, after a sentence picked up from the room, and « *MUSIQUE*. » at the Mac's default input volume (34). Transcription timing is Mac silicon (~10 s for 9 s of audio here).
 - **Not drivable:** the warm hand-off as a deterministic test (it depends on iOS keeping the app alive), auto-return to the host app, the keyboard's memory ceiling and the declared-height constraint (#166). Physical iPhone only.

@@ -249,6 +249,11 @@ public enum SharedKeys {
     public static let handoffToken = "dictus.handoffToken"
     /// String: the token the keyboard echoes beside `lastPolishedTranscription`.
     public static let lastPolishedHandoffToken = "dictus.lastPolishedHandoffToken"
+    /// String: the text of the last keyboard dictation the document refused, until the
+    /// user opens it in DictusApp or starts another dictation (#860). Read and written
+    /// only through `RecoveredTranscriptionChannel`; the keyboard's banner is drawn
+    /// from it.
+    public static let recoveredTranscription = "dictus.recoveredTranscription"
 
     // MARK: - Smart Modes (issue #79)
     /// String: identifier of the armed Smart Mode, or absent for Normal. Sticky —

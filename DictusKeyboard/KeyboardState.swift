@@ -252,6 +252,12 @@ class KeyboardState: ObservableObject {
     /// that dictation posts, and again whenever a controller appears.
     @Published private(set) var polishUnavailable = false
 
+    /// Whether a dictation the document refused has its text waiting in DictusApp
+    /// (#860). A state like `polishUnavailable`, not a `statusMessage`: it has no timer
+    /// and stays until tapped or until the next dictation starts. See the extension at
+    /// the bottom of this file.
+    @Published private(set) var recoveredTranscriptionPending = false
+
     /// Whether this process is holding `.processing` on its own authority (#361).
     ///
     /// Polish runs here now, so the stage is set locally with no round trip through
@@ -681,6 +687,8 @@ class KeyboardState: ObservableObject {
         // whether this one was abandoned. A state that can last the whole process
         // must not be skipped by an unrelated exit.
         refreshPolishAvailability()
+        // Same placement argument (#860): the banner describes a dictation that is over.
+        refreshRecoveredTranscription()
 
         // Same placement argument as the line above (#79): the armed mode is a sticky
         // setting the app can change — block C's mode list unpins and repins — and it
@@ -1421,6 +1429,8 @@ class KeyboardState: ObservableObject {
 
         // A new dictation ends the previous one's undo offer, whatever comes of it.
         invalidateDictationUndo(reason: "new-dictation")
+        // And the previous one's "text is in the Dictus app" banner (#860).
+        clearRecoveredTranscriptionForNewDictation()
 
         // And gives up on a polish still running for the previous one (#361
         // decision 15): N+1 cancels N and takes its place.
@@ -2061,5 +2071,40 @@ extension KeyboardState {
         } else if let openURL {
             openURL(url)
         }
+    }
+}
+
+// MARK: - Recovered transcription (#860)
+
+/// The banner that says a dictation's text is waiting in DictusApp.
+///
+/// In an extension for the reason the readiness one above gives: the class body sits at
+/// the `type_body_length` budget. Same file, so it can still write the `private(set)`
+/// flag.
+extension KeyboardState {
+
+    /// Re-read the pending state from the App Group. Called on every refresh, which runs
+    /// whenever a controller appears, so the banner is back in any app the user types in.
+    func refreshRecoveredTranscription() {
+        recoveredTranscriptionPending = RecoveredTranscriptionChannel.current() != nil
+    }
+
+    /// A new dictation is the user moving on: the banner describes the previous one.
+    /// DictusApp clears it too, in `startDictation`, for dictations started in the app.
+    func clearRecoveredTranscriptionForNewDictation() {
+        guard recoveredTranscriptionPending || RecoveredTranscriptionChannel.current() != nil else { return }
+        RecoveredTranscriptionChannel.clear()
+        recoveredTranscriptionPending = false
+        logProbe("recoveredTranscriptionCleared", details: "reason=new-dictation")
+    }
+
+    /// The banner was tapped: open DictusApp on the text.
+    ///
+    /// The App Group key is left for the app to take, never cleared here: if the open
+    /// failed, the next appearance draws the banner again rather than losing the only
+    /// pointer to the text. Hidden locally so the tap reads as answered.
+    func openRecoveredTranscription() {
+        recoveredTranscriptionPending = false
+        openDictusApp(intent: .transcription)
     }
 }

@@ -360,6 +360,20 @@ struct MainTabView: View {
                 return
             }
 
+            // The keyboard's "Dictation interrupted" banner (#860). The text comes from the
+            // App Group, not from `lastResult`: that one lives in memory, and an app
+            // relaunched since the dictation would land on an empty home screen.
+            if KeyboardOpenURL.intent(from: url) == .transcription {
+                let recovered = RecoveredTranscriptionChannel.take()
+                if let recovered { coordinator.lastResult = recovered }
+                PersistentLog.log(.diagnosticProbe(
+                    component: "recoveredTranscription", instanceID: "0", action: "opened",
+                    details: "source=keyboard chars=\(recovered?.count ?? 0)"
+                ))
+                selectedTab = 0
+                return
+            }
+
             guard let intent = KeyboardDictationURL.intent(from: url) else { return }
 
             // #827: before onboarding is done a dictation URL raises nothing here — no
