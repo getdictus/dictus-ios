@@ -48,6 +48,7 @@ Captures are in [`docs/agents/screens/`](../../../../docs/agents/screens/), one 
 | `kbd.keys` | Dictus keyboard, letters (AZERTY), toolbar with ☰ and mic | full-access, select-keyboard | dictation.keyboard, typing.autocorrect | [oui](../../../../docs/agents/screens/kbd.keys.png) |
 | `kbd.no-full-access` | Keyboard bar « Accès complet requis », mic greyed | select-keyboard before full-access | dictation.keyboard | [oui](../../../../docs/agents/screens/kbd.no-full-access.png) |
 | `kbd.dictation-error` | Keyboard after a mic tap with no model (failure message) | kbd mic with no model installed (proof run) | dictation.keyboard | [oui](../../../../docs/agents/screens/kbd.dictation-error.png) |
+| `kbd.recovered-transcription` | Keyboard bar « Dictée interrompue. Votre texte est dans l'app Dictus. » in accent blue, mic right, no ☰ | set-default dictus.recoveredTranscription -string "…", then show the keyboard (#860) | dictation.keyboard | [oui](../../../../docs/agents/screens/kbd.recovered-transcription.png) |
 | `kbd.recording` | Keyboard recording overlay: ✕ / ✓, waveform, timer, « En écoute... » | kbd mic with a model (records the Mac's mic, see dictation.keyboard) | dictation.keyboard | [oui](../../../../docs/agents/screens/kbd.recording.png) |
 | `kbd.transcribing` | Keyboard overlay after ✓: no buttons, waveform, « Transcription... » | ✓ on `kbd.recording`, screenshot within the transcription (~10 s on this Mac) | dictation.keyboard | [oui](../../../../docs/agents/screens/kbd.transcribing.png) |
 | `kbd.dictation-undo` | Keys back, inserted text in the field, « ↶ Annuler » in the bar's left slot | right after a dictation is inserted (8 s window) | dictation.keyboard | [oui](../../../../docs/agents/screens/kbd.dictation-undo.png) |
@@ -68,7 +69,7 @@ Captures are in [`docs/agents/screens/`](../../../../docs/agents/screens/), one 
 
 The strip above the keys is the keyboard's one control surface: suggestions, the mic, the menu, dictation feedback and dictation undo all take turns in the same 52 pt band, which never changes height. This section describes what the user sees in it and what moves it from one state to the next, so another platform can build the same bar ([dictus-android#139](https://github.com/getdictus/dictus-android/issues/139)). It describes behaviour, not implementation.
 
-Layout of the bar when nothing is happening: menu ☰ on the left, a centre slot, the blue mic pill on the right. The centre slot holds one thing at a time; when several apply, the higher one in this order wins: error, dictation undo, suggestions, then quiet hints (the armed Smart Mode's name, a "long press" tip). Error, dictation undo and suggestions need the width, so they also take the ☰'s place. During a dictation the bar and the keys give way to one overlay that fills the whole keyboard.
+Layout of the bar when nothing is happening: menu ☰ on the left, a centre slot, the blue mic pill on the right. The centre slot holds one thing at a time; when several apply, the higher one in this order wins: error, recovered text, dictation undo, suggestions, then quiet hints (the armed Smart Mode's name, a "long press" tip). Error, recovered text, dictation undo and suggestions need the width, so they also take the ☰'s place. During a dictation the bar and the keys give way to one overlay that fills the whole keyboard.
 
 | State | What the user sees | Entered by | Left by | Capture |
 | --- | --- | --- | --- | --- |
@@ -81,6 +82,7 @@ Layout of the bar when nothing is happening: menu ☰ on the left, a centre slot
 | **Transcribing** | Overlay: no buttons, waveform breathing, « Transcription... » (« Traitement... » while a Smart Mode or polish runs). Cannot be cancelled. | ✓ on **Recording**. | Text inserted at the cursor → **Dictation undo**. A failure (no words, no model…) → **Error**. | `kbd.transcribing` |
 | **Dictation undo** | Keys back, the dictated text in the field, « ↶ Annuler » in place of ☰ (left), mic right. | A dictation was just inserted. | Tap « Annuler » → the inserted text is removed → **Idle**. Eight seconds pass, or the user types or moves the cursor → **Idle** (or **Suggestions**). | `kbd.dictation-undo` |
 | **Error** | A grey, two-line explanation centred (never red), mic right, no ☰. | A dictation failed. | About three seconds → **Idle**. Tap mic → **Starting**. | `kbd.dictation-error` |
+| **Recovered text** | A blue, two-line banner « Dictée interrompue. Votre texte est dans l'app Dictus. » with an open-app arrow, in place of ☰ and centre; mic right. No timer: it comes back each time the keyboard is shown, in any app. | A dictation's text was produced but not inserted (the user had left the field, typically during a call) (#860). | Tap the banner → DictusApp opens on Accueil, the text in « Dernière transcription » → **Idle**. Tap mic → **Starting** (the banner is dropped). | `kbd.recovered-transcription` |
 
 ```mermaid
 stateDiagram-v2
@@ -106,6 +108,9 @@ stateDiagram-v2
     DictationUndo --> Idle: tap Annuler (text removed), 8 s, a caret move, or a keystroke with nothing to suggest
     DictationUndo --> Suggestions: a keystroke, when there is something to suggest
     Error --> Idle: about 3 s
+    Transcribing --> RecoveredText: text produced, not inserted
+    RecoveredText --> Idle: tap the banner (opens Dictus)
+    RecoveredText --> Starting: tap mic
 ```
 
 Not in the diagram, because they leave the bar rather than change it: a tap on ☰ opens the voice note reader over the whole keyboard (`kbd.voice-note-reader`), and a hold on the mic opens the Smart Mode fan (`kbd.smart-mode-fan`), whose release either starts a dictation (**Starting**) or aborts back to **Idle**. The 123 and `#+=` pages (`kbd.numbers`, `kbd.symbols`) change the keys only; the bar above them behaves exactly as on the letters page.

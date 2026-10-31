@@ -562,6 +562,10 @@ class KeyboardViewController: UIInputViewController {
         // stale copy or learned words keep bypassing autocorrect.
         UserDictionary.shared.reload()
 
+        // Contact names and text replacements (#873), re-read on every appearance
+        // so a contact or replacement added meanwhile is picked up.
+        suggestionState.refreshSupplementaryLexicon(from: self)
+
         // Set default opening layer from user preference.
         // WHY here not viewDidLoad: viewWillAppear fires each time the keyboard appears,
         // allowing the user to change settings in the app and see the effect immediately.
@@ -1256,6 +1260,8 @@ class KeyboardViewController: UIInputViewController {
         KeyboardState.shared.revalidateDictationUndo()
         // Invalidate autocorrect undo on external text changes (paste, cursor tap, host autocorrect).
         bridge?.suggestionState?.pendingUndo = nil
+        // A sent message empties the field under the same documentIdentifier (#872).
+        bridge?.hostTextChanged()
         // When text changes externally (paste, cursor move, autocorrect by host app),
         // recheck autocapitalization. This ensures shift state stays correct even when
         // the user moves the cursor to a different position in the text.

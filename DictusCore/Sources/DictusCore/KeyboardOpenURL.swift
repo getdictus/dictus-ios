@@ -19,6 +19,12 @@ public enum KeyboardOpenIntent: String, Sendable, Equatable, CaseIterable {
     /// closed rather than open to typos.
     case settings
 
+    /// The home screen's "Last transcription" card, holding a dictation the document
+    /// refused (#860). Sent by the keyboard's recovered-transcription banner; the app
+    /// takes the text from `RecoveredTranscriptionChannel`, so it is there even after a
+    /// relaunch emptied the in-memory card.
+    case transcription
+
     /// A shared voice note's result screen, from the keyboard's voice note reader
     /// (#637). Unlike the two above it does not travel on `dictus://open`: it targets
     /// the voice note link the Live Activity and the share extension already use,
@@ -64,7 +70,7 @@ public enum KeyboardOpenURL {
                   var components = URLComponents(url: link, resolvingAgainstBaseURL: false) else { return nil }
             components.queryItems = (components.queryItems ?? []) + [URLQueryItem(name: "source", value: "keyboard")]
             return components.url
-        case .pro, .settings:
+        case .pro, .settings, .transcription:
             return URL(string: "\(scheme)://\(host)?source=keyboard&intent=\(intent.rawValue)")
         }
     }
