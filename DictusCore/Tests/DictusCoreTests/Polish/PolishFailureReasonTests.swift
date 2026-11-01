@@ -21,7 +21,7 @@ final class PolishFailureReasonTests: XCTestCase {
     func testSlugsAreStableStrings() {
         XCTAssertEqual(PolishFailureReason.exceededContextWindowSize.slug, "exceededContextWindowSize")
         XCTAssertEqual(PolishFailureReason.assetsUnavailable.slug, "assetsUnavailable")
-        XCTAssertEqual(PolishFailureReason.guardrailViolation.slug, "guardrailViolation")
+        XCTAssertEqual(PolishFailureReason.safetyRefusal.slug, "safetyRefusal")
         XCTAssertEqual(PolishFailureReason.unsupportedGuide.slug, "unsupportedGuide")
         XCTAssertEqual(PolishFailureReason.unsupportedLanguageOrLocale.slug, "unsupportedLanguageOrLocale")
         XCTAssertEqual(PolishFailureReason.decodingFailure.slug, "decodingFailure")
@@ -58,7 +58,7 @@ final class PolishFailureReasonTests: XCTestCase {
         let expected: [(LanguageModelSession.GenerationError, PolishFailureReason)] = [
             (.exceededContextWindowSize(context), .exceededContextWindowSize),
             (.assetsUnavailable(context), .assetsUnavailable),
-            (.guardrailViolation(context), .guardrailViolation),
+            (.guardrailViolation(context), .safetyRefusal),
             (.unsupportedGuide(context), .unsupportedGuide),
             (.unsupportedLanguageOrLocale(context), .unsupportedLanguageOrLocale),
             (.decodingFailure(context), .decodingFailure),

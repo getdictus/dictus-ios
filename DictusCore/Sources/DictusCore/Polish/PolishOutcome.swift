@@ -62,6 +62,15 @@ public struct SmartModeFailure: Equatable, Sendable {
         self.detectedLanguage = detectedLanguage
         self.guardrailCheck = guardrailCheck
     }
+
+    /// Whether Apple Foundation Models declined the text (#455), which is neither a
+    /// fault nor our own guardrail rejecting an output: the engine threw one of the
+    /// two refusals `PolishFailureReason.isModelRefusal` names. What a surface keys
+    /// on to word it as the model declining rather than as a failure.
+    public var isModelRefusal: Bool {
+        outcome == PolishMetrics.Outcome.engineFailed.rawValue
+            && PolishFailureReason(slug: reason).isModelRefusal
+    }
 }
 
 /// The result of one polish call.

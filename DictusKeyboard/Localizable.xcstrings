@@ -34,6 +34,35 @@
         }
       }
     },
+    "%@: Apple Intelligence declined to process this text, inserted as dictated." : {
+      "comment" : "Shown when Apple Intelligence refused to process the dictated text for an armed Smart Mode, so the untransformed text was inserted instead. The placeholder is the mode's name.",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@: Apple Intelligence hat die Verarbeitung dieses Textes abgelehnt, wie diktiert eingefügt."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@: Apple Intelligence declined to process this text, inserted as dictated."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@: Apple Intelligence se negó a procesar este texto, insertado tal como se dictó."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ : Apple Intelligence a refusé de traiter ce texte, inséré tel quel."
+          }
+        }
+      }
+    },
     "%@: Apple Intelligence does not support the dictated language (%@)." : {
       "comment" : "Shown when an armed Smart Mode could not run because the language the user dictated is outside the set Apple Intelligence reads. First placeholder is the mode's name, second is the dictated language.",
       "localizations" : {
