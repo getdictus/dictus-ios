@@ -181,6 +181,12 @@ final class BackgroundModelDownloadService: NSObject, @unchecked Sendable {
     /// what makes reopening onboarding unable to start a second copy (criterion 6).
     private var runs: [String: DownloadRun] = [:]
 
+    /// Models the user cancelled while no run existed yet (issue #493): the attempt was
+    /// still listing the repository, and its `run` call is on its way. That call is refused
+    /// once, so a listing that outlives the cancel cannot start the transfer the user
+    /// stopped. Cleared by `allowRuns(for:)`, which every new attempt calls first.
+    private var refusedRuns: Set<String> = []
+
     /// How each live task ended, keyed by session and `taskIdentifier` — an identifier is
     /// only unique within one session, and two sessions can hand out the same number.
     private var outcomes: [DownloadTaskKey: ChunkOutcome] = [:]
@@ -267,6 +273,10 @@ final class BackgroundModelDownloadService: NSObject, @unchecked Sendable {
     ) async throws {
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
             queue.addOperation { [self] in
+                if refusedRuns.remove(manifest.modelIdentifier) != nil {
+                    continuation.resume(throwing: CancellationError())
+                    return
+                }
                 let run = adopt(manifest: manifest, destination: destination)
                 run.observers.append(onProgress)
                 run.continuations.append(continuation)
@@ -447,35 +457,6 @@ final class BackgroundModelDownloadService: NSObject, @unchecked Sendable {
         }
     }
 
-    /// Identifiers with a manifest on disk that has not finished transferring.
-    /// Read straight from the file system so a fresh process can answer it.
-    static func interruptedModelIdentifiers() -> [String] {
-        ManifestStore.loadAll()
-            .filter { !$0.value.isTransferComplete }
-            .keys
-            .sorted()
-    }
-
-    /// Whether a transfer for this model is already under way — a manifest on disk that
-    /// has not finished. Read straight from the file system, so it answers in a process
-    /// that has done nothing yet.
-    static func hasUnfinishedTransfer(for identifier: String) -> Bool {
-        guard let manifest = ManifestStore.load(identifier) else { return false }
-        return !manifest.isTransferComplete
-    }
-
-    /// Durable progress of an interrupted download, for a screen that has to show
-    /// something before the first delegate callback of this process arrives.
-    static func persistedProgress(for identifier: String) -> ModelRepoDownloader.Progress? {
-        guard let manifest = ManifestStore.load(identifier) else { return nil }
-        return ModelRepoDownloader.Progress(
-            bytesDownloaded: manifest.receivedBytes,
-            totalBytes: manifest.totalBytes,
-            completedFiles: manifest.completedFileCount,
-            totalFiles: manifest.files.count
-        )
-    }
-
     /// Throws away everything a model's interrupted download is holding: the manifest,
     /// the partials, the chunks. Called by the "Delete partial download" path and by
     /// model deletion, both of which mean the user wants the disk space back.
@@ -486,6 +467,42 @@ final class BackgroundModelDownloadService: NSObject, @unchecked Sendable {
                 finish(run, error: CancellationError())
             }
             ManifestStore.discard(identifier)
+        }
+    }
+
+    /// Stops a model's transfer because the user cancelled it, and forgets it for good
+    /// (issue #493): the tasks are cancelled, everyone waiting on the run is handed a
+    /// `CancellationError`, and the manifest, partials and chunks are deleted, so the next
+    /// launch has nothing to adopt.
+    ///
+    /// Returns once all of that is done, on the delegate queue. That is what makes it safe
+    /// for the caller to delete the model's published files next: no chunk of this run
+    /// can be published after this returns, because publishing happens on the same queue
+    /// and the run is gone from it.
+    ///
+    /// With no run yet, the attempt is still listing the repository: its `run` call is
+    /// refused once instead (`refusedRuns`).
+    func cancelTransfer(for identifier: String) async {
+        await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
+            queue.addOperation { [self] in
+                if let run = runs[identifier] {
+                    run.cancelAllTasks(caller: .userCancelled)
+                    finish(run, error: CancellationError())
+                } else {
+                    refusedRuns.insert(identifier)
+                }
+                ManifestStore.discard(identifier)
+                continuation.resume()
+            }
+        }
+    }
+
+    /// Lifts a refusal `cancelTransfer` left for this model. Called at the start of every
+    /// new attempt, which is enqueued before that attempt's own `run`, so the refusal only
+    /// ever catches a listing that started before the cancel.
+    func allowRuns(for identifier: String) {
+        queue.addOperation { [self] in
+            refusedRuns.remove(identifier)
         }
     }
 
@@ -1310,6 +1327,8 @@ private enum TaskCancelCaller: String {
     case restoreStaleFile
     /// `discardStaging`: the user deleted the partial download or the model.
     case discardStaging
+    /// `cancelTransfer`: the user cancelled the download from its card (#493).
+    case userCancelled
     /// `adopt`: a fresh listing describes a different download, which replaces the run.
     case listingReplaced
     /// `reportOfflineStalls`: no network path while the user watched (#492).
