@@ -27,7 +27,7 @@ public enum ProProductID {
     /// meaningless for a purchase that never renews. Being outside the group
     /// also means it can carry no introductory offer — free trials are a
     /// subscription feature.
-    public static let lifetime = "solutions.pivi.dictus.pro.lifetime"
+    public static let lifetime = "solutions.pivi.dictus.pro.lifetime2"
 
     /// Every identifier `SubscriptionManager` asks StoreKit for.
     ///
