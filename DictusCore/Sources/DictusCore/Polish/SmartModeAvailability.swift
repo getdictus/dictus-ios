@@ -237,6 +237,19 @@ public enum SmartModeAvailability {
         }
     }
 
+    /// The Apple Foundation Models state every armability below is read from.
+    ///
+    /// `PolishAvailability.state`, except in a Debug build whose App Group sets
+    /// `SharedKeys.debugAppleIntelligenceForced`: a simulator has no Apple Intelligence,
+    /// so without it no screen that draws an armable mode can be captured there (#489).
+    /// Compiled out of Release with the key, like `PremiumFlags.debugProEntitlementForced`.
+    static var engineState: PolishAvailabilityState {
+        #if DEBUG
+        if AppGroup.defaults.bool(forKey: SharedKeys.debugAppleIntelligenceForced) { return .available }
+        #endif
+        return PolishAvailability.state
+    }
+
     /// Armability as it stands in *this* process.
     ///
     /// The #315 half is per-process by nature: the flag is written and cleared by
@@ -250,7 +263,7 @@ public enum SmartModeAvailability {
     /// and the app share.
     public static var current: SmartModeArmability {
         armability(
-            engineState: PolishAvailability.state,
+            engineState: engineState,
             engineIsRefusing: PolishAvailabilityChannel.isUnavailable,
             entitlement: SmartModeEntitlement.current
         )
@@ -270,7 +283,7 @@ public enum SmartModeAvailability {
     /// rung of the centre slot's table (`ToolbarCentreSlot.polishUnavailable`).
     public static var forDictation: SmartModeArmability {
         armability(
-            engineState: PolishAvailability.state,
+            engineState: engineState,
             engineIsRefusing: false,
             entitlement: SmartModeEntitlement.current
         )
@@ -298,7 +311,7 @@ public enum SmartModeAvailability {
     /// the user had armed.
     public static var deviceCanRunModes: Bool {
         armability(
-            engineState: PolishAvailability.state, engineIsRefusing: false, entitlement: .entitled
+            engineState: engineState, engineIsRefusing: false, entitlement: .entitled
         ).isArmable
     }
 
@@ -313,7 +326,7 @@ public enum SmartModeAvailability {
     /// `isRecoverable` read as a capability question rather than a second table that
     /// could drift from the first.
     public static var deviceIsCapable: Bool {
-        isCapable(engineState: PolishAvailability.state)
+        isCapable(engineState: engineState)
     }
 
     /// `deviceIsCapable` for a given engine state, so a rule built on it can be tested

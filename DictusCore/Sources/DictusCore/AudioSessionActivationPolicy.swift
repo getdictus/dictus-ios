@@ -17,9 +17,9 @@ public enum AudioSessionActivationDecision: Equatable, Sendable {
     /// Activate again after `afterMilliseconds`.
     case retryActivation(afterMilliseconds: Int)
 
-    /// The audio server is down (`mediaServicesWereLost`). Nothing can activate until it
-    /// comes back, so wait for `mediaServicesWereReset` — at most `timeoutMilliseconds` —
-    /// then activate once more.
+    /// The audio server is down, or may be. Nothing can activate until it comes back, so
+    /// wait for `mediaServicesWereReset` — at most `timeoutMilliseconds` — then activate
+    /// once more.
     case waitForMediaServicesReset(timeoutMilliseconds: Int)
 
     /// Give up and tell the user to tap again. The hardware is not missing, so the
@@ -46,9 +46,16 @@ public enum AudioSessionActivationDecision: Equatable, Sendable {
 /// - The audio server is known to be down: wait for its reset, once, then activate again —
 ///   even when the last activation succeeded, since it may predate the loss.
 /// - Activated: start — including after that wait, whether or not the reset came.
-/// - Otherwise one more activation after a short pause, then fail with "tap again".
+/// - Otherwise one more activation after a short pause.
+/// - That one failed too: wait for a reset, once, as if the server were known to be down.
+///   The capture has no loss line (nothing observed it then) and its reset came one second
+///   after the failure, so a server going down is not always announced before activation
+///   fails on it. A failure that is not the server costs the wait, then "tap again".
+///   The error code does not pick those apart: `'!int'` (`cannotInterruptOthers`) refused
+///   the activation right after an interruption in #515's capture and the next attempt
+///   worked, so it is not proof that another app keeps the session.
 ///
-/// The retry after the reset is the one retry that start gets: a reset that arrives and
+/// The activation after the wait is the last one that start gets: a reset that arrives and
 /// still leaves the session unable to activate is not something a second wait can fix.
 public enum AudioSessionActivationPolicy {
 
@@ -97,7 +104,7 @@ public enum AudioSessionActivationPolicy {
 
         return failedAttempts < maxActivationAttempts
             ? .retryActivation(afterMilliseconds: retryDelayMilliseconds)
-            : .fail
+            : .waitForMediaServicesReset(timeoutMilliseconds: mediaServicesResetTimeoutMilliseconds)
     }
 
     /// An error code as the log should show it: the number, plus its four-character code

@@ -23,6 +23,12 @@ import Foundation
 ///    down, and the row positions are the arithmetic the release depends on.
 /// 1. **Error** — the dictation failed. Nothing below it is worth saying, and undo
 ///    in particular is meaningless because nothing was inserted.
+/// 1b. **Recovered transcription** (#860) — a dictation the document refused, whose
+///    text is waiting in DictusApp. It stays until the user taps it or starts another
+///    dictation, so it sits above the suggestions: below them it would vanish at the
+///    first letter typed, and the user would never learn the text exists. It costs the
+///    suggestions for that long, and that is the price of a dictation not being lost
+///    in silence. Below the error, which is the newer and more urgent fact.
 /// 2. **Undo** (#266) — expires in seconds and on the first keystroke, and it is the
 ///    only alternative to holding backspace on a two-minute dictation.
 /// 3. **Suggestions** — the keyboard's core job, and the reason the left slot yields
@@ -67,6 +73,10 @@ public enum ToolbarCentreSlot: Equatable, Sendable {
     /// A dictation or Smart Mode failure, in red.
     case error(String)
 
+    /// "Dictation interrupted. Your text is in the Dictus app." (#860), a tappable
+    /// banner that opens the app on that text.
+    case recoveredTranscription
+
     /// The undo-insertion control (#266).
     case dictationUndo
 
@@ -108,7 +118,7 @@ public enum ToolbarCentreSlot: Equatable, Sendable {
     case empty
 
     // swiftlint:disable function_parameter_count
-    // Ten parameters because there are nine competitors and one of them needs a
+    // Eleven parameters because there are ten competitors and one of them needs a
     // second fact to pick between its two shapes (#423). A table with nine rows
     // needs nine inputs. Wrapping them in a struct would move the seven names
     // one line up and add a type whose only job is to be unpacked here; the
@@ -119,6 +129,8 @@ public enum ToolbarCentreSlot: Equatable, Sendable {
     /// What the slot resolves to.
     ///
     /// - Parameter isChoosingMode: whether the long-press fan is on screen.
+    /// - Parameter recoveredTranscriptionPending: whether a refused dictation's text is
+    ///   waiting in DictusApp — `RecoveredTranscriptionChannel.current` (#860).
     /// - Parameter armedModeName: the armed mode's display name, or nil for Normal.
     /// - Parameter armedModeIsEffective: whether a dictation starting now would
     ///   actually run that mode — `SmartModeAvailability.forDictation` (#423). No
@@ -133,6 +145,7 @@ public enum ToolbarCentreSlot: Equatable, Sendable {
     ///   teaching (#639) — the caller owns that policy, see `MenuPanelDiscovery`.
     public static func resolve(isChoosingMode: Bool,
                                errorMessage: String?,
+                               recoveredTranscriptionPending: Bool,
                                offersDictationUndo: Bool,
                                hasSuggestions: Bool,
                                dictationUnavailable: Bool,
@@ -143,6 +156,7 @@ public enum ToolbarCentreSlot: Equatable, Sendable {
                                offersDiscoveryHint: Bool) -> ToolbarCentreSlot {
         if isChoosingMode { return .choosingMode }
         if let errorMessage { return .error(errorMessage) }
+        if recoveredTranscriptionPending { return .recoveredTranscription }
         if offersDictationUndo { return .dictationUndo }
         if hasSuggestions { return .suggestions }
         if dictationUnavailable { return offersPanelHint ? .panelHint : .dictationUnavailable }
@@ -166,7 +180,7 @@ public enum ToolbarCentreSlot: Equatable, Sendable {
     /// teaches is on the ☰.
     public var evictsHamburger: Bool {
         switch self {
-        case .error, .dictationUndo, .suggestions: return true
+        case .error, .recoveredTranscription, .dictationUndo, .suggestions: return true
         case .choosingMode, .dictationUnavailable, .polishUnavailable, .armedMode, .armedModeInactive,
              .panelHint, .discoveryHint, .empty:
             return false

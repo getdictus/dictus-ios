@@ -263,6 +263,11 @@ extension ParakeetEngine {
                 return Self.driftRetryTimings(try await asrManager.transcribe(clip, decoderState: &clipState))
             }
             let durationMs = Int(Date().timeIntervalSince(start) * 1000)
+            for replaced in outcome.replacements {
+                PersistentLog.log(.driftRetrySpanReplaced(startMs: replaced.startMs, endMs: replaced.endMs,
+                                                          before: replaced.before, after: replaced.after,
+                                                          channel: .current))
+            }
             return (outcome.text, DriftRetryStats(spans: outcome.spans, wins: outcome.wins, durationMs: durationMs))
         } catch {
             // Counters and the error only: the log never carries transcript text.

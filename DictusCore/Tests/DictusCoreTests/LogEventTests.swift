@@ -231,6 +231,29 @@ final class LogEventTests: XCTestCase {
         XCTAssertEqual(event.message, "context=startEngine-warmUp error=boom")
     }
 
+    // MARK: - Inactivity timeout (issue #380)
+
+    func testWarmStateReleasedNamesItsReason() {
+        let event = LogEvent.warmStateReleased(idleSeconds: 61, reason: "idleTimeout")
+        XCTAssertEqual(event.level, .info)
+        XCTAssertEqual(event.subsystem, .audio)
+        XCTAssertEqual(event.name, "warmStateReleased")
+        XCTAssertEqual(event.message, "idleSeconds=61 reason=idleTimeout")
+    }
+
+    func testIdleReleaseArmedCarriesTheOptionAndTheTimer() {
+        let event = LogEvent.idleReleaseArmed(option: "oneMinute", timerSeconds: 60, context: "collectSamples")
+        XCTAssertEqual(event.level, .info)
+        XCTAssertEqual(event.subsystem, .audio)
+        XCTAssertEqual(event.name, "idleReleaseArmed")
+        XCTAssertEqual(event.message, "option=oneMinute timerSeconds=60 context=collectSamples")
+    }
+
+    func testIdleReleaseArmedSaysNoneForUnlimited() {
+        let event = LogEvent.idleReleaseArmed(option: "unlimited", timerSeconds: nil, context: "warmUp")
+        XCTAssertEqual(event.message, "option=unlimited timerSeconds=none context=warmUp")
+    }
+
     // MARK: - Idle input mute (issue #430)
 
     func testInputMutedIsInfoAudioAndCarriesTheValue() {

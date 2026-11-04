@@ -267,7 +267,8 @@ public enum PersistentLog {
             deviceModel: deviceModel,
             activeModel: activeModel,
             codeRevision: codeRevision,
-            retainedWindow: retainedWindow(of: content)
+            retainedWindow: retainedWindow(of: content),
+            launch: launchSummary.value
         )
         return header + content
     }
@@ -281,12 +282,31 @@ public enum PersistentLog {
         deviceModel: String,
         activeModel: String,
         codeRevision: String = PersistentLog.codeRevision,
-        retainedWindow: String = "unknown"
+        retainedWindow: String = "unknown",
+        launch: String? = nil
     ) -> String {
         "Dictus Debug Log\n"
             + "iOS \(iosVersion) | App \(appVersion) (\(buildNumber)) | rev \(codeRevision) | \(deviceModel) | Model: \(activeModel)\n"
             + "Window: \(retainedWindow)\n"
+            + (launch.map { "Launch: \($0)\n" } ?? "")
             + "---\n"
+    }
+
+    /// How the exporting process was launched, for the export header (#868): the
+    /// `appLaunched` fields that say whether it started before first unlock. Set by
+    /// DictusApp at launch; empty in the keyboard, which exports nothing.
+    public static let launchSummary = LaunchSummary()
+
+    /// A `String?` behind a lock, so the launch summary is a `let` and safe to reach from
+    /// any thread under Swift 6. `@unchecked` because the lock is what makes it `Sendable`.
+    public final class LaunchSummary: @unchecked Sendable {
+        private let lock = NSLock()
+        private var stored: String?
+
+        public var value: String? {
+            get { lock.withLock { stored } }
+            set { lock.withLock { stored = newValue } }
+        }
     }
 
     /// First timestamp, last timestamp, line count and byte size of the retained
@@ -408,9 +428,29 @@ public enum PersistentLog {
 
     // MARK: - NSFileCoordinator Helpers
 
+    /// Text the file refused, written ahead of the next append that succeeds (#868).
+    /// Read and written on `writeQueue` only, like the collapse state above.
+    private static var pendingLines = PendingLogLines()
+
+    /// Append `text`, after any text held from earlier refused appends.
+    ///
+    /// When the file cannot be opened (the App Group before the first unlock after a
+    /// boot), the text is held in `pendingLines` instead of being lost. Must be called on
+    /// `writeQueue`.
     private static func coordinatedAppend(_ text: String, to url: URL) {
+        let held = pendingLines.isEmpty ? "" : pendingLines.text(timestamp: LogEvent.timestamp())
+        if appendToFile(held + text, at: url) {
+            pendingLines.removeAll()
+        } else {
+            pendingLines.hold(text)
+        }
+    }
+
+    /// - Returns: whether the text reached the file.
+    private static func appendToFile(_ text: String, at url: URL) -> Bool {
         let coordinator = NSFileCoordinator()
         var error: NSError?
+        var wrote = false
 
         coordinator.coordinate(writingItemAt: url, options: .forMerging, error: &error) { coordURL in
             if !FileManager.default.fileExists(atPath: coordURL.path) {
@@ -422,7 +462,9 @@ public enum PersistentLog {
                 handle.write(data)
             }
             handle.closeFile()
+            wrote = true
         }
+        return wrote
     }
 
     private static func coordinatedRead(from url: URL) -> String {
@@ -566,9 +608,19 @@ public enum PersistentLog {
         }
     }
 
-    /// Forget the current collapsed run (for unit tests, which share process state).
+    /// Forget the current collapsed run and any held text (for unit tests, which share
+    /// process state).
     static func resetCollapseStateForTesting() {
-        writeQueue.sync { resetCollapseState() }
+        writeQueue.sync {
+            resetCollapseState()
+            pendingLines.removeAll()
+        }
+    }
+
+    /// How many refused appends are held, and how many were counted past the buffer
+    /// (for unit tests).
+    static var pendingLinesForTesting: (held: Int, dropped: Int) {
+        writeQueue.sync { (pendingLines.chunks.count, pendingLines.droppedCount) }
     }
 
     /// Expose trimTargetSize for test assertions.

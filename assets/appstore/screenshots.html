@@ -858,8 +858,9 @@ window.CUT_TRIPLE = LAYOUT === "v14-B" || LAYOUT === "v15-B" ? { slides: [0, 1, 
    Slides 3 to 7 are V6's exported files. */
 window.EXPORT_SLIDES = [0, 1];
 window.REUSE_FROM = "v6";
-/* fr-FR (and any later locale) has no earlier iteration to reuse: every slide is rendered. */
-if (LOCALE !== "en-GB") window.EXPORT_SLIDES = null;
+/* fr-FR (and any later locale) has no earlier iteration to reuse: every slide is rendered.
+   V16-B is the shipped set, so en-GB renders every slide too instead of reusing V6's 3 to 7. */
+if (LOCALE !== "en-GB" || ART === "v16-B") window.EXPORT_SLIDES = null;
 window.PAIR = { slides: [0, 1], width: 1400, file: "slides-1-2.jpg" };
 /* V10-B: each slide alone at search-result size, a gap between them, as the store shows them. */
 /* V13-B: one waveform made of apps. It rises out of slide 1's bottom edge, crosses the cut with

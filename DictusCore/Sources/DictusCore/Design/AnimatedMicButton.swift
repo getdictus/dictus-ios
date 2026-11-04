@@ -62,19 +62,54 @@ public struct AnimatedMicButton: View {
     /// dictation, where the motion carries state the user needs.
     public let animatesIdleGlow: Bool
 
+    /// What the resting button shows instead of the plain mic, or nil for the mic.
+    ///
+    /// The app's Home mic only (#489): there the button is 72 pt across and the mode
+    /// dial sits around it, so it can carry the mode's own glyph and the brand's deep
+    /// blue. The keyboard pill never passes one — its 36 pt and the rule #79 set for
+    /// it (a badge, never a second colour) stand. Ignored outside the resting states:
+    /// recording and transcribing keep their own fills.
+    public let face: MicFace?
+
+    /// Whether the button shrinks and fades under the finger. True everywhere but on the
+    /// Home mic while its Smart Mode dial is open (#489): the finger is still down, so the
+    /// press would keep the mic shrunk while the dial grows it.
+    public let showsPressFeedback: Bool
+
     public let onTap: () -> Void
 
     public init(status: DictationStatus,
                 isPill: Bool = false,
                 badge: SmartModeBadge? = nil,
                 animatesIdleGlow: Bool = true,
+                face: MicFace? = nil,
+                showsPressFeedback: Bool = true,
                 onTap: @escaping () -> Void) {
         self.status = status
         self.isPill = isPill
         self.badge = badge
         self.animatesIdleGlow = animatesIdleGlow
+        self.face = face
+        self.showsPressFeedback = showsPressFeedback
         self.onTap = onTap
     }
+
+    /// A resting face for the round mic: a glyph, an optional caption under it (a
+    /// translation's target code), and the fill.
+    public struct MicFace: Equatable {
+        public let symbol: String
+        public let caption: String?
+        public let fill: Color
+
+        public init(symbol: String, caption: String? = nil, fill: Color) {
+            self.symbol = symbol
+            self.caption = caption
+            self.fill = fill
+        }
+    }
+
+    /// The face in force: only at rest, where `isTappable` is true.
+    private var restingFace: MicFace? { isTappable ? face : nil }
 
     // MARK: - Animation State
 
@@ -83,6 +118,9 @@ public struct AnimatedMicButton: View {
     @State private var shimmerOffset: CGFloat = -1.0
     @State private var showSuccessFlash: Bool = false
     @State private var previousStatus: DictationStatus = .idle
+
+    /// Reduce Motion stills the idle glow, as `animatesIdleGlow == false` does (#489).
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     /// Circle mode: 72pt diameter. Pill mode: 56x36 capsule for keyboard toolbar.
     private var buttonWidth: CGFloat { isPill ? 56 : 72 }
@@ -137,21 +175,39 @@ public struct AnimatedMicButton: View {
                         .frame(width: buttonWidth, height: buttonHeight)
                 }
 
-                // Mic icon
-                Image(systemName: "mic.fill")
-                    .font(.system(size: isPill ? 14 : 16, weight: .medium))
+                // Mic icon, or the armed mode's face on the Home mic
+                if let restingFace {
+                    VStack(spacing: 1) {
+                        Image(systemName: restingFace.symbol)
+                            .font(.system(size: 22, weight: .medium))
+                        if let caption = restingFace.caption {
+                            Text(verbatim: caption)
+                                .font(.system(size: 10, weight: .bold, design: .rounded))
+                                .lineLimit(1)
+                        }
+                    }
                     .foregroundColor(.white)
-                    .scaleEffect(status == .recording ? pulseScale * 0.9 + 0.1 : 1.0)
+                } else {
+                    Image(systemName: "mic.fill")
+                        .font(.system(size: isPill ? 14 : 16, weight: .medium))
+                        .foregroundColor(.white)
+                        .scaleEffect(status == .recording ? pulseScale * 0.9 + 0.1 : 1.0)
+                }
 
                 // Armed Smart Mode, last so nothing draws over it
                 armedBadge
             }
         }
-        .buttonStyle(GlassPressStyle(pressedScale: 0.88))
+        .buttonStyle(GlassPressStyle(pressedScale: showsPressFeedback ? 0.88 : 1,
+                                     pressedOpacity: showsPressFeedback ? 0.85 : 1))
         .disabled(!isTappable)
         .onChange(of: status) { newStatus in
             handleStatusChange(from: previousStatus, to: newStatus)
             previousStatus = newStatus
+        }
+        .onChange(of: reduceMotion) { _ in
+            guard isTappable else { return }
+            startIdleAnimation()
         }
         .onAppear {
             startIdleAnimation()
@@ -262,7 +318,7 @@ public struct AnimatedMicButton: View {
         case .transcribing, .processing:
             return .dictusAccentHighlight.opacity(0.5)
         default:
-            return .dictusAccent
+            return restingFace?.fill ?? .dictusAccent
         }
     }
 
@@ -313,13 +369,16 @@ public struct AnimatedMicButton: View {
     private func startIdleAnimation() {
         pulseScale = 1.0
 
-        guard animatesIdleGlow else {
+        guard animatesIdleGlow, !reduceMotion else {
             // 0.45 is the midpoint of the 0.3-0.6 range the animation sweeps, so the
             // static ring reads as the average of what was breathing there rather than
             // as either extreme -- neither a glow that looks extinguished nor one stuck
             // at its peak. Assigned outside `withAnimation` on purpose: the whole point
-            // is that Core Animation is left with nothing live to composite (#510).
-            glowOpacity = 0.45
+            // is that Core Animation is left with nothing live to composite (#510). The
+            // transaction also stops a glow already breathing when Reduce Motion turns on.
+            var still = Transaction()
+            still.disablesAnimations = true
+            withTransaction(still) { glowOpacity = 0.45 }
             return
         }
 

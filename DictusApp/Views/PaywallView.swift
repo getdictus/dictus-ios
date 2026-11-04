@@ -24,9 +24,15 @@ struct PaywallView: View {
     @EnvironmentObject var proStatus: ProStatusManager
     @Environment(\.dismiss) private var dismiss
 
-    /// Why this paywall is up (#593). `.standard` for every entry point the user
-    /// chose; `.trialEnded` for the one the app opens once when the trial is over.
-    var framing: PaywallFraming = .standard
+    /// Set when the app opened this paywall because the trial is over (#593), with
+    /// how it is framed (#837); nil for every entry point the user chose.
+    var trialEnd: ProTrialEndPaywall?
+
+    /// Why this paywall is up. `.trialEnded` only for the end-of-trial framing; a
+    /// reinstall over an ended trial gets the ordinary one (#837).
+    private var framing: PaywallFraming {
+        trialEnd == .trialEnded ? .trialEnded : .standard
+    }
 
     /// Selected plan, tracked by product ID (never by array index: StoreKit's
     /// product order is unspecified). Yearly is preselected per the pricing
@@ -471,11 +477,16 @@ struct PaywallView: View {
         .padding(.top, 2)
     }
 
+    /// Each part goes through the catalog first (#279): `ProFeature`'s strings are
+    /// English keys, and `accessibilityLabel(_:)` reads a `String` verbatim, so the
+    /// combined label was the one English line on a French paywall.
     private func accessibilityLabel(for feature: ProFeature) -> String {
+        let name = String(localized: String.LocalizationValue(feature.displayName))
+        let description = String(localized: String.LocalizationValue(feature.paywallDescription))
         guard let notice = feature.unsupportedNotice else {
-            return "\(feature.displayName): \(feature.paywallDescription)"
+            return "\(name): \(description)"
         }
-        return "\(feature.displayName): \(feature.paywallDescription). \(notice)"
+        return "\(name): \(description). \(String(localized: String.LocalizationValue(notice)))"
     }
 
     /// Icon color per feature (Smart Mode = accent, others = accent highlight; #789).
@@ -862,13 +873,13 @@ struct PaywallView: View {
     // MARK: - Monthly offer on close (#724)
 
     /// Every way out of the paywall the user can take: the cross and "Continue for
-    /// free". On the end-of-trial paywall, once the user has seen the plans, the first
-    /// one shows the monthly offer instead of closing
+    /// free". On the paywall the app opened at the trial's end, once the user has seen
+    /// the plans, the first one shows the monthly offer instead of closing
     /// (`ProPaywallPlans.offersMonthlyOnClose`); from the recap, everywhere else, and
     /// the second time, it closes.
     private func close() {
         guard ProPaywallPlans.offersMonthlyOnClose(
-            isEndOfTrialPaywall: framing == .trialEnded,
+            trialEndPaywall: trialEnd,
             sawPlans: showsOffers,
             isPaid: proStatus.isPaid,
             monthlyLoaded: subscriptionManager.monthlyProduct != nil,
@@ -923,6 +934,9 @@ struct PaywallView: View {
                 .dictusGlass()
         }
         .buttonStyle(GlassPressStyle())
+        // Distinct from the monthly offer's own "Continue for free" (#793): with the
+        // offer up, both share a label, and a tap by label can land on this one.
+        .accessibilityIdentifier("paywall.continueForFree")
     }
 
     // MARK: - Bottom Links
@@ -957,6 +971,9 @@ struct PaywallView: View {
             }
             .font(.dictusCaption)
             .foregroundColor(.secondary)
+            // A gap between the way out above and the links (#793), so a tap just
+            // under "Continue for free" cannot open Safari.
+            .padding(.top, 8)
         }
     }
 

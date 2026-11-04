@@ -88,9 +88,12 @@ struct MainTabView: View {
     /// intent nil and lands on the tab navigation with nothing added to the path.
     init() {
         let launchIntent = ColdStartLaunch.intent
-        _isColdStartMode = State(initialValue: launchIntent == .record)
+        // #827: a launch from the keyboard before onboarding is done raises neither
+        // screen; onboarding is what the user must see.
+        let onboarded = KeyboardOnboardingGate.isOnboardingCompleted()
+        _isColdStartMode = State(initialValue: onboarded && launchIntent == .record)
         _preparation = State(
-            initialValue: launchIntent == .prepare
+            initialValue: onboarded && launchIntent == .prepare
                 ? PreparationPresentation(
                     modelIdentifier: Self.persistedActiveModelIdentifier,
                     context: .keyboardColdStart
@@ -212,7 +215,7 @@ struct MainTabView: View {
                 // WHY SwipeBackOverlayView instead of inline code:
                 // The overlay has its own animation state and bilingual logic -- keeping it
                 // in a separate file follows "one file = one responsibility".
-                SwipeBackOverlayView()
+                SwipeBackOverlayView(isPreparingMicrophone: coordinator.isRecoveringAudioSession)
             } else if let whatsNewSteps {
                 // What's new for existing users (#685), in place of the tabs. Below the
                 // two branches above: a dictation from the keyboard still takes the screen.
@@ -284,7 +287,10 @@ struct MainTabView: View {
                     onDismiss: { trialCoordinator.announcementDismissed() },
                     content: { announcement in ProTrialAnnouncementView(announcement: announcement) }
                 )
-                .paywallCover(isPresented: $trialCoordinator.showsEndOfTrialPaywall, framing: .trialEnded)
+                .paywallCover(
+                    isPresented: $trialCoordinator.showsEndOfTrialPaywall,
+                    trialEnd: trialCoordinator.endOfTrialPaywall
+                )
                 .onAppear {
                     trialCoordinator.evaluate(canPresent: mayRaiseTrialScreens)
                 }
@@ -341,6 +347,8 @@ struct MainTabView: View {
             // public and the app must not be the half of the pair that trusts it.
             if KeyboardOpenURL.intent(from: url) == .pro {
                 guard PremiumFlags.paywallVisible else { return }
+                // #827: never a paywall over onboarding, whatever keyboard sent this.
+                guard KeyboardOnboardingGate.isOnboardingCompleted() else { return }
                 // Logged because the two halves of this live in different processes:
                 // the keyboard records that it opened the URL, and this is the line
                 // that says the app received it and answered.
@@ -352,7 +360,28 @@ struct MainTabView: View {
                 return
             }
 
+            // The keyboard's "Dictation interrupted" banner (#860). The text comes from the
+            // App Group, not from `lastResult`: that one lives in memory, and an app
+            // relaunched since the dictation would land on an empty home screen.
+            if KeyboardOpenURL.intent(from: url) == .transcription {
+                let recovered = RecoveredTranscriptionChannel.take()
+                if let recovered { coordinator.lastResult = recovered }
+                PersistentLog.log(.diagnosticProbe(
+                    component: "recoveredTranscription", instanceID: "0", action: "opened",
+                    details: "source=keyboard chars=\(recovered?.count ?? 0)"
+                ))
+                selectedTab = 0
+                return
+            }
+
             guard let intent = KeyboardDictationURL.intent(from: url) else { return }
+
+            // #827: before onboarding is done a dictation URL raises nothing here — no
+            // cold-start overlay, no preparation screen. Onboarding stays on screen.
+            guard KeyboardOnboardingGate.isOnboardingCompleted() else {
+                Self.hasHandledURL = true
+                return
+            }
 
             if intent == .prepare {
                 // #458's rule applies here too. This overlay sits BELOW `RecordingView`

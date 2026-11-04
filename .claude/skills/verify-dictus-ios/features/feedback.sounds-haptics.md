@@ -24,8 +24,10 @@
 .claude/skills/verify-dictus-ios/scripts/drive.sh tab Réglages
 axe swipe --start-x 201 --start-y 700 --end-x 201 --end-y 350 --duration 0.4 --udid <udid>
 .claude/skills/verify-dictus-ios/scripts/drive.sh tap-label Sons
-.claude/skills/verify-dictus-ios/scripts/drive.sh tap-label "Activer les sons"
+axe tap --label "Activer les sons" --element-type CheckBox --wait-timeout 5 --udid <udid>
 ```
+
+The toggle flips only when its switch is touched. `drive.sh tap-label` taps the row's title, which does nothing on a SwiftUI toggle row; `axe tap --label … --element-type CheckBox` taps the switch (its activation point) with a physical touch, and `--wait-timeout` lets the Sons screen finish pushing first.
 
 ## Gotchas
 

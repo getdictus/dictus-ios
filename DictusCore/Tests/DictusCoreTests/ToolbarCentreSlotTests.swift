@@ -10,6 +10,7 @@ final class ToolbarCentreSlotTests: XCTestCase {
     /// case in isolation would pass against any order at all.
     private func resolve(isChoosingMode: Bool = false,
                          errorMessage: String? = nil,
+                         recoveredTranscriptionPending: Bool = false,
                          offersDictationUndo: Bool = false,
                          hasSuggestions: Bool = false,
                          dictationUnavailable: Bool = false,
@@ -21,6 +22,7 @@ final class ToolbarCentreSlotTests: XCTestCase {
         ToolbarCentreSlot.resolve(
             isChoosingMode: isChoosingMode,
             errorMessage: errorMessage,
+            recoveredTranscriptionPending: recoveredTranscriptionPending,
             offersDictationUndo: offersDictationUndo,
             hasSuggestions: hasSuggestions,
             dictationUnavailable: dictationUnavailable,
@@ -55,6 +57,24 @@ final class ToolbarCentreSlotTests: XCTestCase {
             ),
             .error("boom")
         )
+    }
+
+    /// The banner for a refused dictation (#860) persists until tapped, so it must beat
+    /// the suggestions — below them it would vanish at the first letter typed.
+    func testRecoveredTranscriptionOutranksUndoAndSuggestions() {
+        XCTAssertEqual(
+            resolve(
+                recoveredTranscriptionPending: true, offersDictationUndo: true,
+                hasSuggestions: true, polishUnavailable: true, armedModeName: "List",
+                offersDiscoveryHint: true
+            ),
+            .recoveredTranscription
+        )
+        XCTAssertEqual(
+            resolve(errorMessage: "boom", recoveredTranscriptionPending: true),
+            .error("boom")
+        )
+        XCTAssertTrue(ToolbarCentreSlot.recoveredTranscription.evictsHamburger)
     }
 
     func testUndoOutranksSuggestions() {

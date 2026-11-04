@@ -66,18 +66,28 @@ public struct DictusLiveActivityAttributes: ActivityAttributes {
         /// `VoiceNoteActivityContent` for why this is content and not a phase.
         public var voiceNote: VoiceNoteActivityContent?
 
+        /// The standby pill is paused by an audio interruption, a phone call (#353):
+        /// the engine is stopped until the interruption ends. Read only in `.standby`.
+        /// Optional for the same reason as `voiceNote`; nil reads as not paused.
+        public var paused: Bool?
+
+        /// Whether to draw the paused standby.
+        public var isPaused: Bool { phase == .standby && paused == true }
+
         public init(
             phase: Phase,
             recordingStartDate: Date? = nil,
             waveformLevels: [Float] = [],
             transcriptionPreview: String? = nil,
-            voiceNote: VoiceNoteActivityContent? = nil
+            voiceNote: VoiceNoteActivityContent? = nil,
+            paused: Bool? = nil
         ) {
             self.phase = phase
             self.recordingStartDate = recordingStartDate
             self.waveformLevels = waveformLevels
             self.transcriptionPreview = transcriptionPreview
             self.voiceNote = voiceNote
+            self.paused = paused
         }
     }
 

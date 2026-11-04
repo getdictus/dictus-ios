@@ -266,6 +266,8 @@ struct MonthlyPlanOfferSheet: View {
             }
             .buttonStyle(GlassPressStyle())
             .disabled(isPurchasing)
+            // Distinct from the paywall's own button under this sheet (#793).
+            .accessibilityIdentifier("monthlyOffer.continueForFree")
 
             // Guideline 3.1.2: the terms travel with every screen that sells a
             // subscription, and this one sells it on its own.
@@ -275,6 +277,9 @@ struct MonthlyPlanOfferSheet: View {
             }
             .font(.dictusCaption)
             .foregroundColor(.secondary)
+            // Same gap as the paywall's links (#793): a tap just under the way out
+            // must not open Safari.
+            .padding(.top, 8)
         }
         .padding(.horizontal, 16)
         .padding(.top, 28)

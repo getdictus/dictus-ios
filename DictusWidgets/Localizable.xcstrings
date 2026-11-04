@@ -34,6 +34,17 @@
         }
       }
     },
+    "Paused" : {
+      "comment" : "Live Activity, expanded Dynamic Island and Lock Screen: Dictus standby is paused by a phone call or another app taking the audio, and comes back when it ends (#353). Keep it short.",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En pause"
+          }
+        }
+      }
+    },
     "Processing..." : {
       "comment" : "Live Activity, expanded Dynamic Island and Lock Screen: the Smart mode runs on the transcript (#267, #664). Translations end on the single ellipsis character (…), which never splits across two lines.",
       "localizations" : {
