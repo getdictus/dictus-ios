@@ -15,7 +15,8 @@ import DictusCore
 /// and Apple reports that as `modelNotReady`. On iOS 27 there is no Apple Intelligence
 /// switch at all: matching the languages is what turns it on. The first version of this
 /// page sent the user looking for a switch that was already on, and kept the language as
-/// a side warning.
+/// a side warning. Since 2026-10-28 (#846) `modelNotReady` opens on the setting-up screen
+/// first, which still names the Siri language; the instructions are one tap away.
 ///
 /// WHY A DRAWN SETTINGS PAGE: there is no public deep link to Siri's settings, and private
 /// `App-Prefs:` URLs get apps rejected. The only link an app may open is its own settings
@@ -23,10 +24,13 @@ import DictusCore
 /// keyboard step's style: numbered rows, lit in turn on a loop. The root row is the one
 /// the running iOS shows (`AppleIntelligenceOnboarding.settingsRoute`).
 ///
-/// WHY ONE PAGE FOR EVERY "NOT READY" REASON: the reason cannot be trusted to pick the
-/// copy (a language mismatch and a switched-off Apple Intelligence both read as
-/// `modelNotReady`), so the text covers the language, the switch where iOS 26 has one,
-/// and that Apple then downloads its model.
+/// WHY THE REASON PICKS ONLY THE OPENING SCREEN (Pierre's decision of 2026-10-28, #846):
+/// the reason cannot be trusted to pick the copy (a language mismatch and a switched-off
+/// Apple Intelligence both read as `modelNotReady`, as does Apple downloading its model).
+/// `modelNotReady` opens on the setting-up screen, which says Apple is getting ready and
+/// keeps the Siri language hint and "See the steps again"; every other reason opens on
+/// the instructions, whose text covers the language, the switch where iOS 26 has one, and
+/// that Apple then downloads its model.
 ///
 /// WHY NO DURATION: Apple's model is up to several GB and takes from minutes to hours.
 /// Any number would be wrong for someone, so the page says "sometimes a long time" and
@@ -104,13 +108,19 @@ struct AppleIntelligencePage: View {
         .onAppear {
             let engineState = PolishAvailability.state
             logCheck(trigger: "appear", engineState: engineState)
-            state = AppleIntelligenceStepState(isAvailable: engineState == .available)
+            state = AppleIntelligenceStepState(engineState: engineState)
             // Appearing while the app is not yet active is a launch onto this step, after
             // iOS ended the app: its first `.active` is a return. Arriving from the
             // keyboard step happens with the app active, and is not.
             returnPending = UIApplication.shared.applicationState != .active
             startAnimation()
             checklist.start()
+            // Opened on the setting-up screen (`modelNotReady`): it re-reads quietly from
+            // the start, as it does after a return.
+            if state.rechecksQuietly {
+                log(.settingUpShown, engineState: engineState)
+                runRechecks()
+            }
         }
         .onDisappear {
             checklist.stop()
@@ -187,10 +197,10 @@ struct AppleIntelligencePage: View {
 
     // MARK: - Setting up
 
-    /// Back in the app and Apple Intelligence not available. Calm on purpose: nothing
-    /// failed that the user can see, Apple finishes in the background, and the onboarding
-    /// goes on. No duration is promised. It turns ready on its own if a quiet re-read finds
-    /// Apple Intelligence available.
+    /// Back in the app and Apple Intelligence not available, or `modelNotReady` from the
+    /// first read (#846). Calm on purpose: nothing failed that the user can see, Apple
+    /// finishes in the background, and the onboarding goes on. No duration is promised.
+    /// It turns ready on its own if a quiet re-read finds Apple Intelligence available.
     ///
     /// WHY THE LANGUAGE HINT STAYS: the copy cannot depend on the reason, and a language
     /// that still does not match is one of the reasons. It is the one thing to check if

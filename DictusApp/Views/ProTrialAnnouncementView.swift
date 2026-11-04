@@ -120,11 +120,8 @@ struct ProTrialAnnouncementView: View {
                 // too (decision 2), and the clock runs anyway. Saying so here is the
                 // difference between two weeks of Smart Modes and two weeks of a
                 // feature that silently did nothing.
-                if feature == .smartMode && PolishAvailability.state == .appleIntelligenceNotEnabled {
-                    Text("Turn on Apple Intelligence in iOS Settings to use Smart Modes.")
-                        .font(.dictusCaption)
-                        .foregroundColor(.dictusAccentHighlight)
-                        .fixedSize(horizontal: false, vertical: true)
+                if feature == .smartMode {
+                    smartModeNote
                 }
             }
 
@@ -133,6 +130,33 @@ struct ProTrialAnnouncementView: View {
         .padding(12)
         .dictusGlass()
         .accessibilityElement(children: .combine)
+    }
+
+    /// The line under the Smart Mode row when Apple Intelligence is not ready yet.
+    ///
+    /// `modelNotReady` (#846): Apple is most often downloading its model, but a Siri
+    /// language mismatch reads the same, so the Siri hint follows. Both sentences are the
+    /// ones the keyboard fan and the onboarding already say.
+    @ViewBuilder
+    private var smartModeNote: some View {
+        switch PolishAvailability.state {
+        case .appleIntelligenceNotEnabled:
+            Text("Turn on Apple Intelligence in iOS Settings to use Smart Modes.")
+                .font(.dictusCaption)
+                .foregroundColor(.dictusAccentHighlight)
+                .fixedSize(horizontal: false, vertical: true)
+        case .modelNotReady:
+            Text("Apple Intelligence is still downloading. Smart Modes will work once it finishes.")
+                .font(.dictusCaption)
+                .foregroundColor(.dictusAccentHighlight)
+                .fixedSize(horizontal: false, vertical: true)
+            Text("If Smart Modes stay unavailable, check that Siri speaks your iPhone's language.")
+                .font(.dictusCaption)
+                .foregroundColor(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+        default:
+            EmptyView()
+        }
     }
 
     // MARK: - Disclosure

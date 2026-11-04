@@ -138,6 +138,10 @@ enum AudioEngineError: Error, DiagnosableError {
 // same rationale calls the highest-risk change available. Scoped here, and only here.
 // swiftlint:disable:next type_body_length
 class UnifiedAudioEngine: ObservableObject {
+    /// `userInfo` key of `dictusAudioSessionInterrupted`: a `DictationInterruptionCause`
+    /// raw value, so the dictation can tell a call from a media services reset (#851).
+    nonisolated static let interruptionCauseKey = "cause"
+
     // MARK: - Published State
 
     /// Whether the user is actively recording (samples being accumulated).
@@ -602,7 +606,10 @@ class UnifiedAudioEngine: ObservableObject {
         // The rebuilt stack has nothing warm in it; an `.ended` after this resumes nothing.
         interruptionRecovery.forget()
 
-        NotificationCenter.default.post(name: .dictusAudioSessionInterrupted, object: nil)
+        NotificationCenter.default.post(
+            name: .dictusAudioSessionInterrupted, object: nil,
+            userInfo: [Self.interruptionCauseKey: DictationInterruptionCause.mediaServicesReset.rawValue]
+        )
         DarwinNotificationCenter.post(DarwinNotificationName.audioSessionInterrupted)
     }
 
@@ -701,7 +708,12 @@ class UnifiedAudioEngine: ObservableObject {
             try AudioSessionActivationPolicy.perform(
                 step,
                 context: { "mediaServicesLost=\(mediaServicesLost) \(routeStateDescription())" },
-                call
+                {
+                    #if DEBUG
+                    try SimulatedAudioServerReset.throwWhileActive()
+                    #endif
+                    try call()
+                }
             )
         } catch let failure as AudioSessionActivationFailure {
             throw AudioEngineError.sessionActivationFailed(step: failure.step, status: failure.status)
@@ -1283,15 +1295,23 @@ class UnifiedAudioEngine: ObservableObject {
         } catch {
             inputNode.removeTap(onBus: 0)
             let reason = (error as NSError).localizedDescription
-            PersistentLog.log(.dictationFailed(error: "engine.start NSException: \(reason)"))
+            // `appState=` for the reason given on the throw below (#853).
+            let appState = UIApplication.shared.applicationState.sceneMarker.rawValue
+            PersistentLog.log(.dictationFailed(error: "engine.start NSException: \(reason) appState=\(appState)"))
             throw AudioEngineError.installTapFailed(call: .engineStart, reason: reason)
         }
         if let swiftStartError {
             inputNode.removeTap(onBus: 0)
             // The last silent throw in this function before #123. AUIOClient_StartIO
             // failures land here and left nothing in the log to date them by.
+            //
+            // `appState=` because iOS refuses this start from outside the foreground with
+            // the same `2003329396` it gives for a session that is not up (#853): without
+            // it, telling the two apart meant rebuilding the app's lifecycle from the lines
+            // around it.
+            let appState = UIApplication.shared.applicationState.sceneMarker.rawValue
             PersistentLog.log(.dictationFailed(
-                error: "engine.start failed: \((swiftStartError as NSError).localizedDescription)"
+                error: "engine.start failed: \((swiftStartError as NSError).localizedDescription) appState=\(appState)"
             ))
             throw swiftStartError
         }
@@ -1934,7 +1954,10 @@ extension UnifiedAudioEngine: InterruptionResumeTarget {
         // Notify in-process listeners (LiveActivityManager, DictationCoordinator)
         // immediately. Darwin notification mirrors for cross-process consumers
         // (keyboard ext) so they can stop trusting the warm-state contract.
-        NotificationCenter.default.post(name: .dictusAudioSessionInterrupted, object: nil)
+        NotificationCenter.default.post(
+            name: .dictusAudioSessionInterrupted, object: nil,
+            userInfo: [Self.interruptionCauseKey: DictationInterruptionCause.interruption.rawValue]
+        )
         DarwinNotificationCenter.post(DarwinNotificationName.audioSessionInterrupted)
     }
 

@@ -36,9 +36,9 @@ public enum ProTrialPolicy {
     ///   which is `SmartModeUnavailableReason.isRecoverable` read as a capability
     ///   question: `deviceNotEligible` and `osTooOld` (and `sdkMissing`) are the
     ///   definitive reasons, and a device in one of them never gets a trial, new user
-    ///   or existing. On such a device Pro is History and Vocabulary only, and Pierre
-    ///   does not want to push a subscription that light. A capable iPhone with Apple
-    ///   Intelligence switched off **is** capable and gets the trial.
+    ///   or existing. On such a device Pro is History, Vocabulary and voice notes only,
+    ///   and Pierre does not want to push a subscription that light. A capable iPhone
+    ///   with Apple Intelligence switched off **is** capable and gets the trial.
     /// - **No second trial.** Anything but `.neverStarted` refuses, whatever the rest
     ///   says. The Keychain behind `ProTrialStore` is what makes `.neverStarted` true
     ///   only once per device.
@@ -80,6 +80,29 @@ public enum ProTrialPolicy {
         paywallVisible && !isPaid && trial.isExpired && !alreadyShown
     }
 
+    /// Whether the launch reconcile just handed an install a trial that had already
+    /// ended before it (#837).
+    ///
+    /// True only when the App Group had no record, the Keychain had one, and that one
+    /// is over: a reinstall, since the Keychain item survives the app and the App Group
+    /// does not. `restored` is what `ProTrialStore.reconcile()` returned; with an empty
+    /// mirror, a non-nil record can only have come from the Keychain.
+    public static func endedBeforeThisInstall(appGroupWasEmpty: Bool,
+                                              restored: ProTrialRecord?,
+                                              now: Date) -> Bool {
+        appGroupWasEmpty && ProTrialState(record: restored, now: now).isExpired
+    }
+
+    /// Which paywall the end of the trial opens (#837).
+    ///
+    /// The end-of-trial framing and its recap are about a trial this install lived
+    /// through. A trial that ended before a reinstall left nothing here to recap, and
+    /// "your trial has ended" would greet someone who has only just set the app up,
+    /// so that install gets the ordinary paywall. The trial stays consumed either way.
+    public static func endOfTrialPaywall(endedBeforeThisInstall: Bool) -> ProTrialEndPaywall {
+        endedBeforeThisInstall ? .standard : .trialEnded
+    }
+
     /// The number the discreet `Pro · N days left` badge shows, or nil for no badge.
     ///
     /// Nil for a subscriber: the badge tells a user what they have and for how long,
@@ -91,6 +114,16 @@ public enum ProTrialPolicy {
         guard paywallVisible, !isPaid else { return nil }
         return trial.daysLeft(now: now)
     }
+}
+
+/// How the paywall the app opens once the trial is over is framed (#837).
+public enum ProTrialEndPaywall: Equatable, Sendable {
+
+    /// The end-of-trial framing: what ended, and the recap of what the user did with it.
+    case trialEnded
+
+    /// The ordinary paywall, with no word about a trial.
+    case standard
 }
 
 /// What a promotional Pro entry point shows: the home banner and the keyboard

@@ -7,12 +7,12 @@
 
 ## Sub-features
 
-- `learned-words.learn`: A rejected correction or a word typed repeatedly is learned and no longer corrected.
+- `learned-words.learn`: A word kept where the user refused a correction (one refusal is enough, #872), or an unknown word typed twice, is learned and no longer corrected.
 - `learned-words.reset`: « Reset learned words » in Réglages → Clavier.
 
 ## How to get to it (user POV)
 
-1. Undo an autocorrection twice on the same word: Dictus stops correcting it.
+1. Refuse an autocorrection once (erase it and retype, Undo then move on, or tap the quoted typed word): the word you commit at that place is learned. After Undo, the word learned is the one you finally commit there, not the restored typo.
 2. To start over: Dictus → Réglages → « Reset learned words ».
 
 ## Driving it with axe + Argent

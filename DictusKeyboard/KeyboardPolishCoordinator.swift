@@ -715,11 +715,18 @@ final class KeyboardPolishCoordinator {
         // Before `postDidFinish`, never after, for the reason `postDidFinish` gives
         // about the token: a bare Darwin notification says only "some polish finished",
         // and the app decides on what it reads next.
+        let ending: PolishedTextChannel.Ending
         if let reported {
-            PolishedTextChannel.record(inserted == nil ? .refused(reported) : .inserted(reported))
+            ending = inserted == nil ? .refused(reported) : .inserted(reported)
         } else {
-            PolishedTextChannel.record(.nothing)
+            ending = .nothing
         }
+        PolishedTextChannel.record(ending)
+        // A refusal leaves the text waiting in DictusApp, and the banner says so (#860):
+        // the user is usually still in the app they were typing in, and nothing else
+        // tells them where the dictation went.
+        RecoveredTranscriptionChannel.note(ending)
+        KeyboardState.shared.refreshRecoveredTranscription()
         postDidFinish()
 
         guard let inserted else {

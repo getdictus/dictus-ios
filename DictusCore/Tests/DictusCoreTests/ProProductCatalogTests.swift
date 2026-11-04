@@ -18,7 +18,7 @@ final class ProProductCatalogTests: XCTestCase {
         // Values from the product table in #215.
         XCTAssertEqual(ProProductID.monthly, "solutions.pivi.dictus.pro.monthly")
         XCTAssertEqual(ProProductID.yearly, "solutions.pivi.dictus.pro.yearly")
-        XCTAssertEqual(ProProductID.lifetime, "solutions.pivi.dictus.pro.lifetime")
+        XCTAssertEqual(ProProductID.lifetime, "solutions.pivi.dictus.pro.lifetime2")
     }
 
     func testEveryIdentifierIsRequestedFromStoreKit() {
@@ -78,13 +78,13 @@ final class ProProductCatalogTests: XCTestCase {
     }
 
     func testPricesMatchThePricingDecision() throws {
-        // #54 revised 2026-08-14: 4,99 € monthly, 39,99 € yearly, 79,99 € lifetime
-        // during the founder window. The lifetime goes to 149,99 € afterwards,
-        // which is an App Store Connect change and never a change to this file.
+        // #54 revised 2026-08-14: 4,99 € monthly, 39,99 € yearly. The lifetime
+        // is 149,99 € on its replacement product `lifetime2` (#892); a later
+        // price move is an App Store Connect change, never a change to this file.
         let config = try storeKitConfiguration()
         XCTAssertEqual(config.subscriptions[ProProductID.monthly]?["displayPrice"] as? String, "4.99")
         XCTAssertEqual(config.subscriptions[ProProductID.yearly]?["displayPrice"] as? String, "39.99")
-        XCTAssertEqual(config.nonConsumables[ProProductID.lifetime]?["displayPrice"] as? String, "79.99")
+        XCTAssertEqual(config.nonConsumables[ProProductID.lifetime]?["displayPrice"] as? String, "149.99")
     }
 
     // MARK: - Founder window

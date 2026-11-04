@@ -11,8 +11,15 @@ final class LiveActivityInterruptionPolicyTests: XCTestCase {
         XCTAssertEqual(LiveActivityInterruptionPolicy.atBegan(hasActivity: true, phase: .standby), .pause)
     }
 
-    func testDictationActivityEndsWithTheDictation() {
-        for phase: LiveActivityStateMachine.Phase in [.recording, .transcribing, .processing, .ready, .failed] {
+    func testDictationActivityIsLeftToTheDictation() {
+        // #851: the coordinator transcribes what was captured, or fails and ends the pill.
+        for phase: LiveActivityStateMachine.Phase in [.recording, .transcribing, .processing] {
+            XCTAssertEqual(LiveActivityInterruptionPolicy.atBegan(hasActivity: true, phase: phase), .none, "\(phase)")
+        }
+    }
+
+    func testFinishedDictationActivityEnds() {
+        for phase: LiveActivityStateMachine.Phase in [.ready, .failed] {
             XCTAssertEqual(LiveActivityInterruptionPolicy.atBegan(hasActivity: true, phase: phase), .end, "\(phase)")
         }
     }

@@ -19,7 +19,8 @@
 #   4. Check the launched pid is still alive after the UI settles.
 #   5. Navigate onboarding: Get started -> language step -> Back -> intro.
 #   6. Grant Full Access in Settings.
-#   7. Focus Safari's address field, long-press the globe, choose Dictus.
+#   7. Mark onboarding finished, focus Safari's address field, long-press the globe,
+#      choose Dictus.
 #   8. Tap the Dictus mic, with no model installed.
 #   9. Assert the keyboard -> app -> keyboard chain in the App Group log.
 #  10. Save screenshots, the filtered log and a report outside the repository.
@@ -533,6 +534,16 @@ while :; do
   waited=$((waited + 1))
 done
 say "DictusApp terminated: the mic tap will cold-start it"
+
+# Onboarding is marked finished before the tap (#827). Before it is, the keyboard only
+# opens Dictus on onboarding and asks for no dictation, so the chain below would never
+# start. Steps 4-5 have already checked the onboarding screens; what follows is the
+# hand-off an onboarded user gets. Written while the app is not running, into the App
+# Group plist from inside the device, as `verify-dictus-ios`'s `launch.sh
+# --skip-onboarding` does.
+xcrun simctl spawn "$UDID" defaults write \
+  "$GROUP_DIR/Library/Preferences/$APP_GROUP.plist" dictus.hasCompletedOnboarding -bool YES \
+  || fail "could not mark onboarding as finished"
 
 xcrun simctl launch "$UDID" com.apple.mobilesafari >/dev/null || fail "could not open Safari"
 tap id TabBarItemTitle

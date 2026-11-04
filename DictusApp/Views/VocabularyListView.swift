@@ -11,17 +11,14 @@ import DictusCore
 /// replacements" would ask the user to hold a distinction the data does not make.
 /// The list edits both; the add sheet asks two questions.
 ///
-/// ### Why the second field is required (#536, amending #80 decision 6)
+/// ### Why the second field is optional, and says so (#819, after #536)
 ///
-/// It used to be optional, because a term alone still joined the polish prompt. #536
-/// measured that on device and the prompt was ignored, so a term alone now changes
-/// nothing at all — and the paywall sentence, "Teach Dictus your technical terms",
-/// rests entirely on the replacement pass. The sheet therefore refuses to save an
-/// entry with no variant, which is the one state that would make the sentence false.
-///
-/// **Entries stored before that are kept.** Nothing migrates, nothing is deleted, and
-/// no edit is forced at load: a variant-less entry loads, lists, and says on its own
-/// row what it needs (`VocabularyEntry.hasEffect`).
+/// #536 measured that a term alone changes nothing: the polish prompt ignored it, and
+/// the replacement pass only acts on variants. It made the field required. #819 made it
+/// optional again, because a user often does not know yet how Dictus will misspell a
+/// word and had no way to save it at all. What stays from #536 is the honesty: the
+/// sheet says a term alone changes nothing yet, and the row says the term is waiting
+/// for a misspelling (`VocabularyEntry.hasEffect`) instead of claiming to replace one.
 struct VocabularyListView: View {
 
     @StateObject private var store = VocabularyStore.shared
@@ -65,7 +62,14 @@ struct VocabularyListView: View {
             ProFeatureSwitchSection(feature: .vocabulary)
 
             // What the feature does, and its demo (#686).
-            ProFeatureHowItWorksSection(feature: .vocabulary, isAvailable: isAvailable)
+            // Its own paragraph, like Voice notes: this screen is where the suggestions
+            // live, so it names the button that finds them (#829).
+            ProFeatureHowItWorksSection(
+                feature: .vocabulary,
+                explanation: Text("Correct your words in the Dictus keyboard: it learns them. Tap Analyze my transcriptions: Dictus compares them with your dictations and suggests terms to accept, edit or ignore. Nothing is added without you, and everything stays on your iPhone. Your terms then correct your dictations automatically.",
+                                  comment: "Vocabulary screen: the paragraph of the \"How it works\" card. 'Analyze my transcriptions' is the button further down the same screen (#829)."),
+                isAvailable: isAvailable
+            )
 
             Section {
                 if store.isEmpty {
@@ -118,7 +122,7 @@ struct VocabularyListView: View {
                 Button {
                     showSuggestions = true
                 } label: {
-                    Label("Suggestions from History", systemImage: "text.magnifyingglass")
+                    Label("Analyze my transcriptions", systemImage: "text.magnifyingglass")
                 }
             } footer: {
                 Text("Words from your History that Dictus may be getting wrong.")
@@ -182,20 +186,17 @@ struct VocabularyListView: View {
                     // front of it twice. One word carries the direction, and the
                     // second line was already there so the row does not grow.
                     //
-                    // The other branch is #536's: an entry saved before the second
-                    // field became required does nothing, and the row is where that
-                    // is visible. Orange, the app's warning tint, and never red —
-                    // nothing is broken and no data is at risk, there is one thing
-                    // left to type. The sentence names it rather than saying "no
-                    // variants", which describes the field and not the fix.
+                    // The other branch is a term saved on its own, to watch (#819).
+                    // It replaces nothing, and the row says so without a warning
+                    // tint: nothing is wrong, the misspelling is simply not known yet.
                     if entry.hasEffect {
                         Text("Replaces: \(entry.variantsLine)")
                             .font(.dictusCaption)
                             .foregroundColor(.secondary)
                     } else {
-                        Text("Does nothing yet. Add what Dictus writes instead.")
+                        Text("Waiting for misspellings")
                             .font(.dictusCaption)
-                            .foregroundColor(.orange)
+                            .foregroundColor(.secondary)
                     }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -328,22 +329,18 @@ struct VocabularyEditorView: View {
 
     /// Whether the second field is still empty, on a sheet the user has started
     /// filling. It drives the explanation under that field, so it stays false on an
-    /// untouched new-term sheet: telling someone what is missing before they have
-    /// typed anything is scolding, not helping.
+    /// untouched new-term sheet, where the general explanation reads better.
     private var variantsMissing: Bool {
         candidate?.hasEffect == false
     }
 
     private var canSave: Bool {
         guard let candidate, !exceedsLimit else { return false }
-        // `hasEffect` and not `variants.isEmpty` (#536): the rule is "this entry
-        // would change a transcript", the model owns it, and a unit test can reach
-        // it. A line of nothing but commas is refused here for the same reason —
-        // `VocabularyEntry` cleans it away to no variants at all.
-        // A merge needs a variant too: without one Save would store nothing and
-        // close as if it had.
+        // A term on its own is saved, to watch (#819). A merge still needs a
+        // variant: it adds to a stored term, and without one Save would store
+        // nothing and close as if it had.
         if mergeTarget != nil { return candidate.hasEffect }
-        return candidate.hasEffect && !duplicatesAnotherTerm
+        return !duplicatesAnotherTerm
     }
 
     var body: some View {
@@ -389,16 +386,15 @@ struct VocabularyEditorView: View {
             } header: {
                 Text("What Dictus writes instead")
             } footer: {
-                // Three states, in the order they can occur. The middle one is #536's
-                // and it is why Save is greyed out: without it the button refuses
-                // with no reason on screen, which is the failure this feature's own
-                // device test already produced once.
+                // Three states, in the order they can occur. The middle one does not
+                // block Save (#819): it says, without a warning tint, that a term
+                // saved on its own changes nothing yet (#536).
                 if saveFailed {
                     Text("Could not save. Your device may be out of storage.")
                         .foregroundColor(.red)
                 } else if variantsMissing {
-                    Text("Add at least one. A term on its own changes nothing Dictus writes.")
-                        .foregroundColor(.orange)
+                    Text("Optional. Without a misspelling, this term changes nothing yet. Add one when you spot it.")
+                        .foregroundColor(.secondary)
                 } else {
                     Text("Separated by commas. Dictus replaces each of them with your spelling.")
                 }

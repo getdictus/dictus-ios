@@ -40,6 +40,12 @@ class TextPredictionEngine {
     /// earlier session. See `reportPruneAlreadyDone()`.
     private var hasReportedPruneAlreadyDone = false
 
+    /// Contact names and text replacements (#873). Written on the main thread
+    /// when the keyboard appears, read by `spellCheck` on the main thread (space)
+    /// and on the suggestion queue (bar), hence the lock.
+    private var supplementaryLexicon = SupplementaryLexicon.empty
+    private let lexiconLock = NSLock()
+
     private init() {
         loadDictionaries(for: language)
     }
@@ -53,6 +59,42 @@ class TextPredictionEngine {
     func setLanguage(_ lang: String) {
         language = lang
         loadDictionaries(for: lang)
+    }
+
+    /// Replaces the contacts + text replacements lexicon (#873).
+    func setSupplementaryLexicon(_ lexicon: SupplementaryLexicon) {
+        lexiconLock.lock()
+        supplementaryLexicon = lexicon
+        lexiconLock.unlock()
+    }
+
+    /// The lexicon's verdict on `word`, or nil when the lexicon does not know it.
+    func lexiconDecision(for word: String) -> SupplementaryLexicon.Decision? {
+        lexiconLock.lock()
+        let lexicon = supplementaryLexicon
+        lexiconLock.unlock()
+        return lexicon.decision(for: word, isDictionaryWord: aospTrieEngine.wordExists(word.lowercased()))
+    }
+
+    /// Turns a lexicon verdict into a `spellCheck` result: nil keeps the word.
+    private func lexiconResult(
+        _ decision: SupplementaryLexicon.Decision,
+        for word: String
+    ) -> (correction: String, alternatives: [String])? {
+        switch decision {
+        case .keep:
+            #if DEBUG
+            AutocorrectDebugLog.autocorrectSkipped(word: word, reason: "lexicon")
+            #endif
+            return nil
+        case .replace(let text):
+            #if DEBUG
+            AutocorrectDebugLog.autocorrectDecision(
+                original: word, corrected: text, branch: "lexicon", prevWord: nil
+            )
+            #endif
+            return (text, [])
+        }
     }
 
     /// Loads both dictionaries for `lang` and runs the work that can only happen
@@ -219,6 +261,12 @@ class TextPredictionEngine {
         isAtSentenceStart: Bool = true
     ) -> (correction: String, alternatives: [String])? {
         guard !word.isEmpty else { return nil }
+
+        // The user's own contacts and text replacements (#873) outrank every
+        // dictionary rule below, the language overrides included.
+        if let decision = lexiconDecision(for: word) {
+            return lexiconResult(decision, for: word)
+        }
 
         // Language-specific overrides bypass everything — e.g., "ca" is never valid French.
         // Must check before UserDictionary, otherwise typing "ca" twice
@@ -449,6 +497,12 @@ class TextPredictionEngine {
         previousWord: String?,
         isAtSentenceStart: Bool = true
     ) -> (correction: String, alternatives: [String])? {
+        // Lexicon verdicts (#873) return before the bigram rerank, which could
+        // otherwise swap a replacement phrase or a kept name for a neighbour.
+        if let decision = lexiconDecision(for: word) {
+            return lexiconResult(decision, for: word)
+        }
+
         // Language overrides are authoritative — return before the bigram
         // rerank can replace them. Concrete failure this prevents (#222):
         // "je lai" → override "l'ai", but the corpus tokenizes "j'ai" as ONE
@@ -641,16 +695,25 @@ class TextPredictionEngine {
     private static let azertySpacebarNeighbors: Set<Character> = ["n", "b", ","]
     private static let qwertySpacebarNeighbors: Set<Character> = ["n", "b", "m"]
 
-    /// Short French words (2 chars) that are allowed to appear as split parts.
+    /// Short words (2 chars) that are allowed to appear as split parts.
     /// Standard split requires ≥3 chars per part to avoid noise like "ho ne",
     /// but French has many 2-char pronouns/articles/connectives that commonly
     /// start missed-space compounds (e.g., "tuboeux" should split as "tu peux",
     /// "jepense" as "je pense"). This allowlist restricts the 2-char relaxation
     /// to words that are structurally plausible as a left/right split half.
+    /// The set is shared by every language. Each word past the French ones was
+    /// admitted only after the split-pass bench (tools/split-pass-bench, #499) showed
+    /// it recovers glues and adds no false or wrong split in any language. "de",
+    /// "of", "el", "zu", "so" and "sa" were measured and left out for adding one, and
+    /// "no" for trapping on "queno" (#499).
     private static let shortSplitAllowlist: Set<String> = [
         "je", "tu", "il", "on", "me", "te", "se", "ne",
         "le", "la", "un", "du", "au", "en",
-        "et", "ou", "ni", "si", "ça", "où", "ce"
+        "et", "ou", "ni", "si", "ça", "où", "ce",
+        "pu", "vu",
+        "to", "is", "in", "at", "by", "be", "go", "my",
+        "es", "mi", "lo",
+        "an", "er"
     ]
 
     /// Whether a split part is long enough or belongs to the short-word allowlist.

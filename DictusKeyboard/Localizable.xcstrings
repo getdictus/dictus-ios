@@ -191,6 +191,23 @@
         }
       }
     },
+    "Dictation interrupted. Your text is in the Dictus app." : {
+      "comment" : "Persistent keyboard toolbar banner after a dictation whose text could not be inserted (for example after a call). Tapping it opens Dictus on that text (#860).",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dictation interrupted. Your text is in the Dictus app."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dictée interrompue. Votre texte est dans l'app Dictus."
+          }
+        }
+      }
+    },
     "Dictation unavailable on this device" : {
       "comment" : "Keyboard toolbar note beside the disabled mic on a device whose chip is too old to dictate from the keyboard (#635).",
       "localizations" : {

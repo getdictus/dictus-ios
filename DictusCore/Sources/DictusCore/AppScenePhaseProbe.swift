@@ -33,7 +33,8 @@ public enum AppScenePhaseMarker: String {
 /// No new IPC path: this is the App Group's shared `UserDefaults`, the same channel
 /// every other cross-process value in this app travels on.
 ///
-/// Observation only. Nothing reads these keys to make a decision.
+/// Observation only, with one exception: `currentPhase(from:)` feeds
+/// `KeyboardOnboardingGate` (#827), which only reads it while onboarding is not done.
 public enum AppScenePhaseProbe {
 
     /// Publishes `marker` as DictusApp's current phase. Called from the app only.
@@ -58,6 +59,18 @@ public enum AppScenePhaseProbe {
         defaults.set(marker.rawValue, forKey: SharedKeys.appScenePhase)
         defaults.set(date.timeIntervalSince1970, forKey: SharedKeys.appScenePhaseTimestamp)
         defaults.synchronize()
+    }
+
+    /// DictusApp's last published phase, typed. Called from the keyboard only.
+    ///
+    /// `.unknown` when nothing is stored or the stored value is not a phase this build
+    /// can name. The age is deliberately not consulted: the one decision that reads this
+    /// (`KeyboardOnboardingGate`) asks only "is the app in the foreground", and DictusApp
+    /// publishes `background` every time it leaves the foreground, so a stale `active`
+    /// takes a crash while active. That case lets the keyboard hand the tap to the app,
+    /// whose own check (`appMayStartKeyboardDictation`) still refuses it.
+    public static func currentPhase(from defaults: UserDefaults = AppGroup.defaults) -> AppScenePhaseMarker {
+        defaults.string(forKey: SharedKeys.appScenePhase).flatMap(AppScenePhaseMarker.init(rawValue:)) ?? .unknown
     }
 
     /// The app's phase, its age in milliseconds, and the cold-start flag, in the
