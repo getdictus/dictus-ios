@@ -12,6 +12,7 @@
 - `live-activity.stop-standby`: Stop Dictus between dictations from the island.
 - `live-activity.controls`: Dictate and stop buttons in the expanded island.
 - `live-activity.toggle`: « Live Activity » switch in Réglages → Clavier.
+- `live-activity.inactivity-timeout`: « Délai d’inactivité » picker in Réglages → Clavier (Immédiatement / 1 min / 5 min / 10 min default / 30 min / 1 h / Illimité): how long the engine and the standby pill stay after a dictation (#380).
 
 ## How to get to it (user POV)
 

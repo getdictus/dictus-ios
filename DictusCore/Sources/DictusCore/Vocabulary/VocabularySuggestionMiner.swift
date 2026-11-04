@@ -215,32 +215,62 @@ public struct VocabularySuggestionMiner {
     /// is put in composed form first, so a decomposed `é` from a paste or another
     /// engine counts as the same word.
     static func tokens(in text: String) -> [Token] {
-        let clean = removingLinks(from: text.precomposedStringWithCanonicalMapping)
-        var tokens: [Token] = []
+        rangedTokens(inClean: cleaned(text)).map(\.token)
+    }
+
+    /// The text the tokenizer reads: composed, links and e-mail addresses removed.
+    /// Exposed so a caller that needs the tokens' ranges (`rangedTokens`) cuts its
+    /// excerpts from the same string the ranges point into.
+    static func cleaned(_ text: String) -> String {
+        removingLinks(from: text.precomposedStringWithCanonicalMapping)
+    }
+
+    /// The tokens of an already `cleaned` text, each with where it stands in it.
+    ///
+    /// The one tokenizer; `tokens(in:)` drops the ranges. The ranges exist for the
+    /// step 2 pair generator (#512), which has to show the sentence a span was found
+    /// in, and a second tokenizer that agreed with this one "nearly" would make a
+    /// pair's excerpt and its tokens disagree.
+    static func rangedTokens(inClean clean: String) -> [(token: Token, range: Range<String.Index>)] {
+        var tokens: [(token: Token, range: Range<String.Index>)] = []
         var current = ""
+        var start = clean.startIndex
+        var end = clean.startIndex
         var sentenceInitial = true
         var nextIsSentenceInitial = true
         let joiners: Set<Character> = ["'", "\u{2019}", "-"]
 
         func flush() {
-            while let last = current.last, joiners.contains(last) { current.removeLast() }
+            while let last = current.last, joiners.contains(last) {
+                current.removeLast()
+                end = clean.index(before: end)
+            }
             if !current.isEmpty {
-                tokens.append(Token(text: current, isSentenceInitial: sentenceInitial))
+                tokens.append((Token(text: current, isSentenceInitial: sentenceInitial), start..<end))
                 nextIsSentenceInitial = false
             }
             current = ""
         }
 
-        for character in clean {
+        var index = clean.startIndex
+        while index < clean.endIndex {
+            let character = clean[index]
+            let next = clean.index(after: index)
             if character.isLetter || character.isNumber || character.unicodeScalars.allSatisfy({ $0.properties.isGraphemeExtend }) {
-                if current.isEmpty { sentenceInitial = nextIsSentenceInitial }
+                if current.isEmpty {
+                    sentenceInitial = nextIsSentenceInitial
+                    start = index
+                }
                 current.append(character)
+                end = next
             } else if joiners.contains(character), !current.isEmpty {
                 current.append(character)
+                end = next
             } else {
                 flush()
                 if character.isNewline || ".!?…".contains(character) { nextIsSentenceInitial = true }
             }
+            index = next
         }
         flush()
         return tokens

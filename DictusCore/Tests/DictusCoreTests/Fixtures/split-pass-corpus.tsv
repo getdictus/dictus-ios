@@ -1,0 +1,686 @@
+# Glued-word corpus for the split-pass bench (#499). Built by tools/split-pass-bench/make_corpus.py.
+# Tatoeba sentences (https://tatoeba.org), CC BY 2.0 FR. Exports downloaded 2026-10-31, sha256:
+#   fra_sentences.tsv.bz2 b21f8b30656062056b66dd1ce2d1c85510d7f52627b9dc292bc12f8c46868937
+#   eng_sentences.tsv.bz2 07f33d399f0a55b917202abbd901f23c39c54a6dd562252985ce8c7e168db6ef
+#   deu_sentences.tsv.bz2 3338f9fc53f53af3c532a999aae50402d8e506af46c055c14342cffb76c08eec
+#   spa_sentences.tsv.bz2 bc7e22e31dec6557dd5cf5ce3547f1f2519a62c76a0699c9a5a5c84a83bae71c
+# Columns: id, lang, category, typed (what reached the space bar), expected, source.
+id	lang	category	typed	expected	source
+fr-observed-001	fr	observed	pasmal	pas mal	research:spacebar-2026-10-31
+fr-observed-002	fr	observed	jesuis	je suis	research:spacebar-2026-10-31
+fr-observed-003	fr	observed	bonjourmonsieur	bonjour monsieur	research:spacebar-2026-10-31
+fr-observed-004	fr	observed	cavient	ça vient	research:spacebar-2026-10-31
+fr-observed-005	fr	observed	motsuivant	mot suivant	research:spacebar-2026-10-31
+fr-observed-006	fr	observed	jepense	je pense	research:spacebar-2026-10-31
+fr-observed-007	fr	observed	pasnmal	pas mal	research:spacebar-2026-10-31
+fr-observed-008	fr	observed	surtoutdune	surtout d'une	research:spacebar-2026-10-31
+fr-missed-space-001	fr	missed-space	decette	de cette	tatoeba:1968566
+fr-missed-space-002	fr	missed-space	unebalayeuse	une balayeuse	tatoeba:9697967
+fr-missed-space-003	fr	missed-space	sensvraiment	sens vraiment	tatoeba:13006599
+fr-missed-space-004	fr	missed-space	lapiscine	la piscine	tatoeba:9227955
+fr-missed-space-005	fr	missed-space	pasrater	pas rater	tatoeba:4083309
+fr-missed-space-006	fr	missed-space	lemonde	le monde	tatoeba:12308297
+fr-missed-space-007	fr	missed-space	lesrecherches	les recherches	tatoeba:13406111
+fr-missed-space-008	fr	missed-space	enmeilleure	en meilleure	tatoeba:5492030
+fr-missed-space-009	fr	missed-space	ellevous	elle vous	tatoeba:909097
+fr-missed-space-010	fr	missed-space	lasemaine	la semaine	tatoeba:9813774
+fr-missed-space-011	fr	missed-space	celate	cela te	tatoeba:12898762
+fr-missed-space-012	fr	missed-space	pascru	pas cru	tatoeba:3586627
+fr-missed-space-013	fr	missed-space	mêmede	même de	tatoeba:2940801
+fr-missed-space-014	fr	missed-space	payerpour	payer pour	tatoeba:10298004
+fr-missed-space-015	fr	missed-space	réussirdans	réussir dans	tatoeba:132394
+fr-missed-space-016	fr	missed-space	prendscomme	prends comme	tatoeba:12622715
+fr-missed-space-017	fr	missed-space	setrouve	se trouve	tatoeba:13480925
+fr-missed-space-018	fr	missed-space	ditmon	dit mon	tatoeba:10222777
+fr-missed-space-019	fr	missed-space	appeléleur	appelé leur	tatoeba:8961728
+fr-missed-space-020	fr	missed-space	corpssain	corps sain	tatoeba:11531879
+fr-missed-space-021	fr	missed-space	dufrançais	du français	tatoeba:13241
+fr-missed-space-022	fr	missed-space	despluies	des pluies	tatoeba:461227
+fr-missed-space-023	fr	missed-space	mauvaisgarçon	mauvais garçon	tatoeba:10998863
+fr-missed-space-024	fr	missed-space	ilpense	il pense	tatoeba:10684816
+fr-missed-space-025	fr	missed-space	avendu	a vendu	tatoeba:4102624
+fr-missed-space-026	fr	missed-space	surune	sur une	tatoeba:10638182
+fr-missed-space-027	fr	missed-space	construitune	construit une	tatoeba:350208
+fr-missed-space-028	fr	missed-space	lacompassion	la compassion	tatoeba:5289383
+fr-missed-space-029	fr	missed-space	unbain	un bain	tatoeba:13205548
+fr-missed-space-030	fr	missed-space	frissonnaà	frissonna à	tatoeba:8313
+fr-missed-space-031	fr	missed-space	leraconter	le raconter	tatoeba:2097308
+fr-missed-space-032	fr	missed-space	àcette	à cette	tatoeba:12038890
+fr-missed-space-033	fr	missed-space	malheureusementpas	malheureusement pas	tatoeba:3255679
+fr-missed-space-034	fr	missed-space	suisallé	suis allé	tatoeba:331063
+fr-missed-space-035	fr	missed-space	résoudrece	résoudre ce	tatoeba:12161324
+fr-missed-space-036	fr	missed-space	nesuis	ne suis	tatoeba:12217292
+fr-missed-space-037	fr	missed-space	vitela	vite la	tatoeba:907132
+fr-missed-space-038	fr	missed-space	oùtu	où tu	tatoeba:5803793
+fr-missed-space-039	fr	missed-space	autennis	au tennis	tatoeba:133384
+fr-missed-space-040	fr	missed-space	toujoursun	toujours un	tatoeba:9028056
+fr-missed-space-041	fr	missed-space	conseillede	conseille de	tatoeba:4602214
+fr-missed-space-042	fr	missed-space	étédifficile	été difficile	tatoeba:7357802
+fr-missed-space-043	fr	missed-space	plutoute	plu toute	tatoeba:3089285
+fr-missed-space-044	fr	missed-space	esten	est en	tatoeba:129760
+fr-missed-space-045	fr	missed-space	grêlonsont	grêlons ont	tatoeba:8696027
+fr-missed-space-046	fr	missed-space	mehâte	me hâte	tatoeba:8951393
+fr-missed-space-047	fr	missed-space	doitregretter	doit regretter	tatoeba:8662938
+fr-missed-space-048	fr	missed-space	àtout	à tout	tatoeba:5411262
+fr-missed-space-049	fr	missed-space	nepeut	ne peut	tatoeba:1988138
+fr-missed-space-050	fr	missed-space	ungénocide	un génocide	tatoeba:8126462
+fr-missed-space-051	fr	missed-space	necompte	ne compte	tatoeba:12662110
+fr-missed-space-052	fr	missed-space	allergiqueaux	allergique aux	tatoeba:7264611
+fr-missed-space-053	fr	missed-space	montexte	mon texte	tatoeba:13546136
+fr-missed-space-054	fr	missed-space	unmessage	un message	tatoeba:11812294
+fr-missed-space-055	fr	missed-space	unjour	un jour	tatoeba:1524447
+fr-missed-space-056	fr	missed-space	ditespeut	dites peut	tatoeba:1519927
+fr-missed-space-057	fr	missed-space	personnesâgées	personnes âgées	tatoeba:13727928
+fr-missed-space-058	fr	missed-space	estplus	est plus	tatoeba:5105466
+fr-missed-space-059	fr	missed-space	peutle	peut le	tatoeba:3626364
+fr-missed-space-060	fr	missed-space	unrhume	un rhume	tatoeba:12545588
+fr-missed-space-061	fr	missed-space	revenude	revenu de	tatoeba:11918993
+fr-missed-space-062	fr	missed-space	quandmême	quand même	tatoeba:12428671
+fr-missed-space-063	fr	missed-space	arendu	a rendu	tatoeba:12448259
+fr-missed-space-064	fr	missed-space	vousprêter	vous prêter	tatoeba:13442387
+fr-missed-space-065	fr	missed-space	ditça	dit ça	tatoeba:9079829
+fr-missed-space-066	fr	missed-space	pluridisciplinaireset	pluridisciplinaires et	tatoeba:13211501
+fr-missed-space-067	fr	missed-space	vosfaiblesses	vos faiblesses	tatoeba:11005657
+fr-missed-space-068	fr	missed-space	refouléset	refoulés et	tatoeba:12736544
+fr-missed-space-069	fr	missed-space	dubruit	du bruit	tatoeba:8538072
+fr-missed-space-070	fr	missed-space	aucrayon	au crayon	tatoeba:11153873
+fr-missed-space-071	fr	missed-space	vagabondantpar	vagabondant par	tatoeba:2940787
+fr-missed-space-072	fr	missed-space	autrechose	autre chose	tatoeba:10664771
+fr-missed-space-073	fr	missed-space	queje	que je	tatoeba:11929706
+fr-missed-space-074	fr	missed-space	tousles	tous les	tatoeba:1410448
+fr-missed-space-075	fr	missed-space	estégalement	est également	tatoeba:8786044
+fr-missed-space-076	fr	missed-space	àprendre	à prendre	tatoeba:6386171
+fr-missed-space-077	fr	missed-space	vaislui	vais lui	tatoeba:12626568
+fr-missed-space-078	fr	missed-space	sije	si je	tatoeba:12128295
+fr-missed-space-079	fr	missed-space	voixsuave	voix suave	tatoeba:12482210
+fr-missed-space-080	fr	missed-space	danston	dans ton	tatoeba:10810340
+fr-missed-space-081	fr	missed-space	sureux	sur eux	tatoeba:13273720
+fr-missed-space-082	fr	missed-space	plusde	plus de	tatoeba:12604998
+fr-missed-space-083	fr	missed-space	estde	est de	tatoeba:2444163
+fr-missed-space-084	fr	missed-space	mâchédes	mâché des	tatoeba:12599418
+fr-missed-space-085	fr	missed-space	proprefils	propre fils	tatoeba:12142018
+fr-missed-space-086	fr	missed-space	avonsde	avons de	tatoeba:10056833
+fr-missed-space-087	fr	missed-space	véritablemotif	véritable motif	tatoeba:3211881
+fr-missed-space-088	fr	missed-space	mepermets	me permets	tatoeba:457830
+fr-missed-space-089	fr	missed-space	ditque	dit que	tatoeba:11953594
+fr-missed-space-090	fr	missed-space	ducorps	du corps	tatoeba:1635834
+fr-missed-space-091	fr	missed-space	nepeux	ne peux	tatoeba:6473149
+fr-missed-space-092	fr	missed-space	deharicots	de haricots	tatoeba:6624262
+fr-missed-space-093	fr	missed-space	detéléphone	de téléphone	tatoeba:8349589
+fr-missed-space-094	fr	missed-space	repérerla	repérer la	tatoeba:2508378
+fr-missed-space-095	fr	missed-space	rique	ri que	tatoeba:2384886
+fr-missed-space-096	fr	missed-space	soyezpas	soyez pas	tatoeba:14079775
+fr-missed-space-097	fr	missed-space	accourenttous	accourent tous	tatoeba:7726191
+fr-missed-space-098	fr	missed-space	retourneraià	retournerai à	tatoeba:13727142
+fr-missed-space-099	fr	missed-space	detemps	de temps	tatoeba:952715
+fr-missed-space-100	fr	missed-space	retientéveillé	retient éveillé	tatoeba:3289
+fr-missed-space-101	fr	missed-space	chosesous	chose sous	tatoeba:1445210
+fr-missed-space-102	fr	missed-space	nesommes	ne sommes	tatoeba:11081359
+fr-missed-space-103	fr	missed-space	monentendement	mon entendement	tatoeba:139080
+fr-missed-space-104	fr	missed-space	lebardot	le bardot	tatoeba:9677793
+fr-missed-space-105	fr	missed-space	prêtsà	prêts à	tatoeba:808074
+fr-missed-space-106	fr	missed-space	samémoire	sa mémoire	tatoeba:10712853
+fr-missed-space-107	fr	missed-space	etle	et le	tatoeba:12690636
+fr-missed-space-108	fr	missed-space	tempsde	temps de	tatoeba:9547114
+fr-missed-space-109	fr	missed-space	estdans	est dans	tatoeba:5822365
+fr-missed-space-110	fr	missed-space	jeparle	je parle	tatoeba:8281334
+fr-missed-space-111	fr	missed-space	peuxpas	peux pas	tatoeba:8237597
+fr-missed-space-112	fr	missed-space	cachéça	caché ça	tatoeba:12527685
+fr-missed-space-113	fr	missed-space	hurlenttoujours	hurlent toujours	tatoeba:2312821
+fr-missed-space-114	fr	missed-space	soufflaitdans	soufflait dans	tatoeba:13182156
+fr-missed-space-115	fr	missed-space	doissortir	dois sortir	tatoeba:6711
+fr-missed-space-116	fr	missed-space	crapaudset	crapauds et	tatoeba:9035443
+fr-missed-space-117	fr	missed-space	plantéla	planté la	tatoeba:13612189
+fr-missed-space-118	fr	missed-space	unecertaine	une certaine	tatoeba:1414540
+fr-missed-space-119	fr	missed-space	dutravail	du travail	tatoeba:6555288
+fr-missed-space-120	fr	missed-space	quetu	que tu	tatoeba:7099213
+fr-missed-space-121	fr	missed-space	enterminale	en terminale	tatoeba:1549952
+fr-missed-space-122	fr	missed-space	planeest	plane est	tatoeba:2804648
+fr-missed-space-123	fr	missed-space	demal	de mal	tatoeba:1590073
+fr-missed-space-124	fr	missed-space	besoinde	besoin de	tatoeba:12477067
+fr-missed-space-125	fr	missed-space	lamanière	la manière	tatoeba:13387495
+fr-missed-space-126	fr	missed-space	copiesde	copies de	tatoeba:967728
+fr-missed-space-127	fr	missed-space	rarementà	rarement à	tatoeba:11179172
+fr-missed-space-128	fr	missed-space	villefurent	ville furent	tatoeba:746474
+fr-missed-space-129	fr	missed-space	résoudrele	résoudre le	tatoeba:433913
+fr-missed-space-130	fr	missed-space	jamaisvu	jamais vu	tatoeba:12953802
+fr-missed-space-131	fr	missed-space	contentde	content de	tatoeba:5380454
+fr-missed-space-132	fr	missed-space	partirde	partir de	tatoeba:1733167
+fr-missed-space-133	fr	missed-space	toutà	tout à	tatoeba:10682525
+fr-missed-space-134	fr	missed-space	poupéeà	poupée à	tatoeba:12835348
+fr-missed-space-135	fr	missed-space	moinsde	moins de	tatoeba:2799673
+fr-missed-space-136	fr	missed-space	douleurlorsque	douleur lorsque	tatoeba:1012901
+fr-missed-space-137	fr	missed-space	agirà	agir à	tatoeba:6821522
+fr-missed-space-138	fr	missed-space	cetélève	cet élève	tatoeba:440740
+fr-missed-space-139	fr	missed-space	toujoursfatigué	toujours fatigué	tatoeba:942041
+fr-missed-space-140	fr	missed-space	sonoisiveté	son oisiveté	tatoeba:452934
+fr-missed-space-141	fr	missed-space	adolescentsi	adolescent si	tatoeba:331307
+fr-missed-space-142	fr	missed-space	sonbateau	son bateau	tatoeba:10897915
+fr-missed-space-143	fr	missed-space	icipour	ici pour	tatoeba:4519469
+fr-missed-space-144	fr	missed-space	sonparapluie	son parapluie	tatoeba:4775387
+fr-missed-space-145	fr	missed-space	pourraitorganiser	pourrait organiser	tatoeba:12701617
+fr-missed-space-146	fr	missed-space	leursparapluies	leurs parapluies	tatoeba:2918968
+fr-missed-space-147	fr	missed-space	hontequand	honte quand	tatoeba:13268499
+fr-missed-space-148	fr	missed-space	unehistoire	une histoire	tatoeba:14035626
+fr-missed-space-149	fr	missed-space	pasdire	pas dire	tatoeba:7843521
+fr-missed-space-150	fr	missed-space	étaitinterdit	était interdit	tatoeba:13592598
+fr-neighbour-key-001	fr	neighbour-key	unnde	un de	tatoeba:1748955
+fr-neighbour-key-002	fr	neighbour-key	nousbavons	nous avons	tatoeba:6865442
+fr-neighbour-key-003	fr	neighbour-key	toujoursnprendre	toujours prendre	tatoeba:12136429
+fr-neighbour-key-004	fr	neighbour-key	debvotre	de votre	tatoeba:8856919
+fr-neighbour-key-005	fr	neighbour-key	demandenà	demande à	tatoeba:12461532
+fr-neighbour-key-006	fr	neighbour-key	payerben	payer en	tatoeba:13183810
+fr-neighbour-key-007	fr	neighbour-key	lesnfenêtres	les fenêtres	tatoeba:12081034
+fr-neighbour-key-008	fr	neighbour-key	saventbbien	savent bien	tatoeba:11930641
+fr-neighbour-key-009	fr	neighbour-key	anfélicité	a félicité	tatoeba:11941800
+fr-neighbour-key-010	fr	neighbour-key	pourbla	pour la	tatoeba:2127757
+fr-neighbour-key-011	fr	neighbour-key	étaitntrop	était trop	tatoeba:546454
+fr-neighbour-key-012	fr	neighbour-key	vousbsuggère	vous suggère	tatoeba:13122271
+fr-neighbour-key-013	fr	neighbour-key	quenvous	que vous	tatoeba:2584886
+fr-neighbour-key-014	fr	neighbour-key	estbune	est une	tatoeba:13445952
+fr-neighbour-key-015	fr	neighbour-key	celanavec	cela avec	tatoeba:6695
+fr-neighbour-key-016	fr	neighbour-key	debchose	de chose	tatoeba:1406769
+fr-neighbour-key-017	fr	neighbour-key	égalementnremarqué	également remarqué	tatoeba:1845845
+fr-neighbour-key-018	fr	neighbour-key	faitbtout	fait tout	tatoeba:4232443
+fr-neighbour-key-019	fr	neighbour-key	ancouvert	a couvert	tatoeba:7319116
+fr-neighbour-key-020	fr	neighbour-key	évitezbles	évitez les	tatoeba:8617724
+fr-neighbour-key-021	fr	neighbour-key	lanrue	la rue	tatoeba:7371941
+fr-neighbour-key-022	fr	neighbour-key	êtrebpréservés	être préservés	tatoeba:10153991
+fr-neighbour-key-023	fr	neighbour-key	sendoit	se doit	tatoeba:838396
+fr-neighbour-key-024	fr	neighbour-key	contrariezbpas	contrariez pas	tatoeba:2024668
+fr-neighbour-key-025	fr	neighbour-key	monnami	mon ami	tatoeba:12581225
+fr-neighbour-key-026	fr	neighbour-key	bonbnombre	bon nombre	tatoeba:1706751
+fr-neighbour-key-027	fr	neighbour-key	formesnles	formes les	tatoeba:3019321
+fr-neighbour-key-028	fr	neighbour-key	remplacerbavantageusement	remplacer avantageusement	tatoeba:4941006
+fr-neighbour-key-029	fr	neighbour-key	fairenun	faire un	tatoeba:13080652
+fr-neighbour-key-030	fr	neighbour-key	réglerbcet	régler cet	tatoeba:13423090
+fr-neighbour-key-031	fr	neighbour-key	voyagenen	voyage en	tatoeba:8628452
+fr-neighbour-key-032	fr	neighbour-key	avoirbun	avoir un	tatoeba:12708552
+fr-neighbour-key-033	fr	neighbour-key	conditionsnmétéorologiques	conditions météorologiques	tatoeba:9096007
+fr-neighbour-key-034	fr	neighbour-key	coûterabbeaucoup	coûtera beaucoup	tatoeba:3696908
+fr-neighbour-key-035	fr	neighbour-key	suisnun	suis un	tatoeba:9742065
+fr-neighbour-key-036	fr	neighbour-key	debserre	de serre	tatoeba:12741633
+fr-neighbour-key-037	fr	neighbour-key	pournune	pour une	tatoeba:12756772
+fr-neighbour-key-038	fr	neighbour-key	absentbà	absent à	tatoeba:5317154
+fr-neighbour-key-039	fr	neighbour-key	quenje	que je	tatoeba:13202274
+fr-neighbour-key-040	fr	neighbour-key	unebchance	une chance	tatoeba:4213773
+fr-neighbour-key-041	fr	neighbour-key	parlernà	parler à	tatoeba:5844523
+fr-neighbour-key-042	fr	neighbour-key	lablettre	la lettre	tatoeba:12388915
+fr-neighbour-key-043	fr	neighbour-key	soiréenpour	soirée pour	tatoeba:12740385
+fr-neighbour-key-044	fr	neighbour-key	damebblanche	dame blanche	tatoeba:10346726
+fr-neighbour-key-045	fr	neighbour-key	pasnbesoin	pas besoin	tatoeba:14016317
+fr-neighbour-key-046	fr	neighbour-key	estbrefusée	est refusée	tatoeba:6473195
+fr-neighbour-key-047	fr	neighbour-key	parncomprendre	par comprendre	tatoeba:6858151
+fr-neighbour-key-048	fr	neighbour-key	deuxbobjets	deux objets	tatoeba:10566723
+fr-neighbour-key-049	fr	neighbour-key	unenautre	une autre	tatoeba:2594117
+fr-neighbour-key-050	fr	neighbour-key	sebrévélera	se révélera	tatoeba:13371329
+fr-neighbour-key-051	fr	neighbour-key	révèlenla	révèle la	tatoeba:12741700
+fr-neighbour-key-052	fr	neighbour-key	mebsuis	me suis	tatoeba:8292
+fr-neighbour-key-053	fr	neighbour-key	jamaisnà	jamais à	tatoeba:1076236
+fr-neighbour-key-054	fr	neighbour-key	probablementbpas	probablement pas	tatoeba:2285566
+fr-neighbour-key-055	fr	neighbour-key	faitntard	fait tard	tatoeba:12141892
+fr-neighbour-key-056	fr	neighbour-key	desbbiscuits	des biscuits	tatoeba:9497623
+fr-neighbour-key-057	fr	neighbour-key	phrasesnen	phrases en	tatoeba:12651155
+fr-neighbour-key-058	fr	neighbour-key	pasbà	pas à	tatoeba:1951138
+fr-neighbour-key-059	fr	neighbour-key	denla	de la	tatoeba:1580854
+fr-neighbour-key-060	fr	neighbour-key	chezbeux	chez eux	tatoeba:1913177
+fr-neighbour-key-061	fr	neighbour-key	denmerveilleux	de merveilleux	tatoeba:6556235
+fr-neighbour-key-062	fr	neighbour-key	donnébde	donné de	tatoeba:13844751
+fr-neighbour-key-063	fr	neighbour-key	lantélévision	la télévision	tatoeba:482126
+fr-neighbour-key-064	fr	neighbour-key	sontbhabitées	sont habitées	tatoeba:12743194
+fr-neighbour-key-065	fr	neighbour-key	pournêtre	pour être	tatoeba:5279493
+fr-neighbour-key-066	fr	neighbour-key	comprendrebune	comprendre une	tatoeba:9416
+fr-neighbour-key-067	fr	neighbour-key	punrien	pu rien	tatoeba:413424
+fr-neighbour-key-068	fr	neighbour-key	abquelques	a quelques	tatoeba:1832577
+fr-neighbour-key-069	fr	neighbour-key	pasnde	pas de	tatoeba:3380495
+fr-neighbour-key-070	fr	neighbour-key	toutbet	tout et	tatoeba:3135272
+fr-neighbour-key-071	fr	neighbour-key	cettenodeur	cette odeur	tatoeba:8693518
+fr-neighbour-key-072	fr	neighbour-key	difficilebest	difficile est	tatoeba:10560511
+fr-neighbour-key-073	fr	neighbour-key	venuesnassister	venues assister	tatoeba:12931970
+fr-neighbour-key-074	fr	neighbour-key	lesblégumes	les légumes	tatoeba:12911591
+fr-neighbour-key-075	fr	neighbour-key	lanvoiler	la voiler	tatoeba:946329
+fr-legit-compound-001	fr	legit-compound	financièrement	financièrement	frequency
+fr-legit-compound-002	fr	legit-compound	apporteras	apporteras	frequency
+fr-legit-compound-003	fr	legit-compound	prévenons	prévenons	frequency
+fr-legit-compound-004	fr	legit-compound	serviras	serviras	frequency
+fr-legit-compound-005	fr	legit-compound	bienfait	bienfait	frequency
+fr-legit-compound-006	fr	legit-compound	parfait	parfait	frequency
+fr-legit-compound-007	fr	legit-compound	soutenue	soutenue	frequency
+fr-legit-compound-008	fr	legit-compound	paiement	paiement	frequency
+fr-legit-compound-009	fr	legit-compound	sortirais	sortirais	frequency
+fr-legit-compound-010	fr	legit-compound	guetter	guetter	frequency
+fr-legit-compound-011	fr	legit-compound	formelles	formelles	frequency
+fr-legit-compound-012	fr	legit-compound	combien	combien	frequency
+fr-legit-compound-013	fr	legit-compound	charnues	charnues	frequency
+fr-legit-compound-014	fr	legit-compound	bavardaient	bavardaient	frequency
+fr-legit-compound-015	fr	legit-compound	penseraient	penseraient	frequency
+fr-legit-compound-016	fr	legit-compound	passionnée	passionnée	frequency
+fr-legit-compound-017	fr	legit-compound	starter	starter	frequency
+fr-legit-compound-018	fr	legit-compound	montreras	montreras	frequency
+fr-legit-compound-019	fr	legit-compound	désordonné	désordonné	frequency
+fr-legit-compound-020	fr	legit-compound	prévoit	prévoit	frequency
+fr-legit-compound-021	fr	legit-compound	cornemuse	cornemuse	frequency
+fr-legit-compound-022	fr	legit-compound	congelé	congelé	frequency
+fr-legit-compound-023	fr	legit-compound	prévisible	prévisible	frequency
+fr-legit-compound-024	fr	legit-compound	bouleverse	bouleverse	frequency
+fr-legit-compound-025	fr	legit-compound	présentes	présentes	frequency
+fr-legit-compound-026	fr	legit-compound	préoccupez	préoccupez	frequency
+fr-legit-compound-027	fr	legit-compound	prêterais	prêterais	frequency
+fr-legit-compound-028	fr	legit-compound	disposées	disposées	frequency
+fr-legit-compound-029	fr	legit-compound	violait	violait	frequency
+fr-legit-compound-030	fr	legit-compound	disparu	disparu	frequency
+fr-legit-compound-031	fr	legit-compound	cassais	cassais	frequency
+fr-legit-compound-032	fr	legit-compound	maintiens	maintiens	frequency
+fr-legit-compound-033	fr	legit-compound	guinées	guinées	frequency
+fr-legit-compound-034	fr	legit-compound	vantant	vantant	frequency
+fr-legit-compound-035	fr	legit-compound	irrésistiblement	irrésistiblement	frequency
+fr-legit-compound-036	fr	legit-compound	baiserais	baiserais	frequency
+fr-legit-compound-037	fr	legit-compound	pressentais	pressentais	frequency
+fr-legit-compound-038	fr	legit-compound	échangeâmes	échangeâmes	frequency
+fr-legit-compound-039	fr	legit-compound	soulevait	soulevait	frequency
+fr-legit-compound-040	fr	legit-compound	comporté	comporté	frequency
+fr-legit-compound-041	fr	legit-compound	gagnerais	gagnerais	frequency
+fr-legit-compound-042	fr	legit-compound	trahisons	trahisons	frequency
+fr-legit-compound-043	fr	legit-compound	monocorde	monocorde	frequency
+fr-legit-compound-044	fr	legit-compound	fougère	fougère	frequency
+fr-legit-compound-045	fr	legit-compound	préoccupés	préoccupés	frequency
+fr-legit-compound-046	fr	legit-compound	cachetons	cachetons	frequency
+fr-legit-compound-047	fr	legit-compound	bienséance	bienséance	frequency
+fr-legit-compound-048	fr	legit-compound	stockage	stockage	frequency
+fr-legit-compound-049	fr	legit-compound	emporterait	emporterait	frequency
+fr-legit-compound-050	fr	legit-compound	chérissait	chérissait	frequency
+fr-legit-rare-001	fr	legit-rare	agenouillés	agenouillés	tatoeba:392492
+fr-legit-rare-002	fr	legit-rare	sainfoin	sainfoin	tatoeba:12586367
+fr-legit-rare-003	fr	legit-rare	structurelle	structurelle	tatoeba:977298
+fr-legit-rare-004	fr	legit-rare	débrouillées	débrouillées	tatoeba:1510632
+fr-legit-rare-005	fr	legit-rare	plateformes	plateformes	tatoeba:9576330
+fr-legit-rare-006	fr	legit-rare	vectoriels	vectoriels	tatoeba:613772
+fr-legit-rare-007	fr	legit-rare	effrontément	effrontément	tatoeba:1062917
+fr-legit-rare-008	fr	legit-rare	souverainistes	souverainistes	tatoeba:9734300
+fr-legit-rare-009	fr	legit-rare	segments	segments	tatoeba:987057
+fr-legit-rare-010	fr	legit-rare	appauvrit	appauvrit	tatoeba:2848718
+fr-legit-rare-011	fr	legit-rare	courriel	courriel	tatoeba:390561
+fr-legit-rare-012	fr	legit-rare	corrigée	corrigée	tatoeba:824032
+fr-legit-rare-013	fr	legit-rare	mendiait	mendiait	tatoeba:2433789
+fr-legit-rare-014	fr	legit-rare	protégeront	protégeront	tatoeba:624515
+fr-legit-rare-015	fr	legit-rare	basketball	basketball	tatoeba:7614
+fr-legit-rare-016	fr	legit-rare	copierez	copierez	tatoeba:5287062
+fr-legit-rare-017	fr	legit-rare	attrapées	attrapées	tatoeba:1664309
+fr-legit-rare-018	fr	legit-rare	optiques	optiques	tatoeba:10727504
+fr-legit-rare-019	fr	legit-rare	psychanalystes	psychanalystes	tatoeba:1055762
+fr-legit-rare-020	fr	legit-rare	précipitez	précipitez	tatoeba:5494662
+fr-legit-rare-021	fr	legit-rare	renommés	renommés	tatoeba:1036442
+fr-legit-rare-022	fr	legit-rare	contextes	contextes	tatoeba:918924
+fr-legit-rare-023	fr	legit-rare	blanquette	blanquette	tatoeba:883829
+fr-legit-rare-024	fr	legit-rare	permuter	permuter	tatoeba:12433743
+fr-legit-rare-025	fr	legit-rare	décapités	décapités	tatoeba:2059425
+fr-legit-rare-026	fr	legit-rare	sérendipité	sérendipité	tatoeba:11316566
+fr-legit-rare-027	fr	legit-rare	fureteur	fureteur	tatoeba:1336389
+fr-legit-rare-028	fr	legit-rare	exportateur	exportateur	tatoeba:1463226
+fr-legit-rare-029	fr	legit-rare	dégourdi	dégourdi	tatoeba:1462299
+fr-legit-rare-030	fr	legit-rare	ripaille	ripaille	tatoeba:12928199
+fr-legit-rare-031	fr	legit-rare	impatientes	impatientes	tatoeba:566885
+fr-legit-rare-032	fr	legit-rare	logogrammes	logogrammes	tatoeba:2056466
+fr-legit-rare-033	fr	legit-rare	dévastatrices	dévastatrices	tatoeba:1722475
+fr-legit-rare-034	fr	legit-rare	entendeur	entendeur	tatoeba:1549383
+fr-legit-rare-035	fr	legit-rare	moquèrent	moquèrent	tatoeba:817101
+fr-legit-rare-036	fr	legit-rare	introvertie	introvertie	tatoeba:5060204
+fr-legit-rare-037	fr	legit-rare	suspectée	suspectée	tatoeba:971301
+fr-legit-rare-038	fr	legit-rare	interviewé	interviewé	tatoeba:1078239
+fr-legit-rare-039	fr	legit-rare	sioniste	sioniste	tatoeba:3389270
+fr-legit-rare-040	fr	legit-rare	falsification	falsification	tatoeba:865771
+fr-legit-rare-041	fr	legit-rare	hurluberlu	hurluberlu	tatoeba:2335003
+fr-legit-rare-042	fr	legit-rare	herbivores	herbivores	tatoeba:8564813
+fr-legit-rare-043	fr	legit-rare	draconiennes	draconiennes	tatoeba:1479851
+fr-legit-rare-044	fr	legit-rare	réutilisation	réutilisation	tatoeba:450924
+fr-legit-rare-045	fr	legit-rare	diététicienne	diététicienne	tatoeba:8771739
+fr-legit-rare-046	fr	legit-rare	dévoilés	dévoilés	tatoeba:1404895
+fr-legit-rare-047	fr	legit-rare	intoxications	intoxications	tatoeba:1696528
+fr-legit-rare-048	fr	legit-rare	découragés	découragés	tatoeba:562640
+fr-legit-rare-049	fr	legit-rare	achetèrent	achetèrent	tatoeba:1549724
+fr-legit-rare-050	fr	legit-rare	attirants	attirants	tatoeba:390739
+en-missed-space-001	en	missed-space	aproblem	a problem	tatoeba:2663401
+en-missed-space-002	en	missed-space	dancingwith	dancing with	tatoeba:7342582
+en-missed-space-003	en	missed-space	isgoing	is going	tatoeba:7374998
+en-missed-space-004	en	missed-space	hasabsolutely	has absolutely	tatoeba:4564126
+en-missed-space-005	en	missed-space	wantto	want to	tatoeba:2591951
+en-missed-space-006	en	missed-space	itnow	it now	tatoeba:10131927
+en-missed-space-007	en	missed-space	iscold	is cold	tatoeba:10739362
+en-missed-space-008	en	missed-space	ofstuff	of stuff	tatoeba:6495742
+en-missed-space-009	en	missed-space	goingto	going to	tatoeba:7002449
+en-missed-space-010	en	missed-space	bearsin	bears in	tatoeba:7841311
+en-missed-space-011	en	missed-space	adozen	a dozen	tatoeba:6508914
+en-missed-space-012	en	missed-space	atthe	at the	tatoeba:7259274
+en-missed-space-013	en	missed-space	ofconduct	of conduct	tatoeba:12374831
+en-missed-space-014	en	missed-space	subjectedto	subjected to	tatoeba:3716684
+en-missed-space-015	en	missed-space	houseis	house is	tatoeba:3728073
+en-missed-space-016	en	missed-space	themyet	them yet	tatoeba:3906737
+en-missed-space-017	en	missed-space	tostop	to stop	tatoeba:8363865
+en-missed-space-018	en	missed-space	costof	cost of	tatoeba:6657479
+en-missed-space-019	en	missed-space	madlyin	madly in	tatoeba:5857204
+en-missed-space-020	en	missed-space	rightaway	right away	tatoeba:4878969
+en-missed-space-021	en	missed-space	makeothers	make others	tatoeba:8678318
+en-missed-space-022	en	missed-space	yetto	yet to	tatoeba:5739210
+en-missed-space-023	en	missed-space	outto	out to	tatoeba:12677119
+en-missed-space-024	en	missed-space	ofbread	of bread	tatoeba:249092
+en-missed-space-025	en	missed-space	isin	is in	tatoeba:11173819
+en-missed-space-026	en	missed-space	thepolitician	the politician	tatoeba:9141785
+en-missed-space-027	en	missed-space	fromkindergarten	from kindergarten	tatoeba:2178322
+en-missed-space-028	en	missed-space	sameperiod	same period	tatoeba:7043648
+en-missed-space-029	en	missed-space	threechildren	three children	tatoeba:8338219
+en-missed-space-030	en	missed-space	everhappening	ever happening	tatoeba:8860308
+en-missed-space-031	en	missed-space	neededto	needed to	tatoeba:6716338
+en-missed-space-032	en	missed-space	touristseverywhere	tourists everywhere	tatoeba:1445689
+en-missed-space-033	en	missed-space	youthink	you think	tatoeba:12537710
+en-missed-space-034	en	missed-space	boyis	boy is	tatoeba:10461525
+en-missed-space-035	en	missed-space	yourmoney	your money	tatoeba:2276151
+en-missed-space-036	en	missed-space	inpain	in pain	tatoeba:8378327
+en-missed-space-037	en	missed-space	cardtricks	card tricks	tatoeba:7191777
+en-missed-space-038	en	missed-space	footdown	foot down	tatoeba:10923501
+en-missed-space-039	en	missed-space	myfriend	my friend	tatoeba:2549441
+en-missed-space-040	en	missed-space	tovisit	to visit	tatoeba:7897811
+en-missed-space-041	en	missed-space	womenlove	women love	tatoeba:10681309
+en-missed-space-042	en	missed-space	thatas	that as	tatoeba:4874255
+en-missed-space-043	en	missed-space	darkchocolate	dark chocolate	tatoeba:11145341
+en-missed-space-044	en	missed-space	knowsthat	knows that	tatoeba:7500996
+en-missed-space-045	en	missed-space	cleanthe	clean the	tatoeba:12778693
+en-missed-space-046	en	missed-space	doingthat	doing that	tatoeba:7517291
+en-missed-space-047	en	missed-space	boringpeople	boring people	tatoeba:12999281
+en-missed-space-048	en	missed-space	hadyour	had your	tatoeba:9307118
+en-missed-space-049	en	missed-space	wouldbe	would be	tatoeba:6650063
+en-missed-space-050	en	missed-space	tohold	to hold	tatoeba:3259309
+en-neighbour-key-001	en	neighbour-key	tonwork	to work	tatoeba:6828061
+en-neighbour-key-002	en	neighbour-key	hostedbthe	hosted the	tatoeba:281228
+en-neighbour-key-003	en	neighbour-key	nevermby	never by	tatoeba:4256546
+en-neighbour-key-004	en	neighbour-key	sonfluently	so fluently	tatoeba:10657290
+en-neighbour-key-005	en	neighbour-key	gainedbpower	gained power	tatoeba:11430044
+en-neighbour-key-006	en	neighbour-key	atmall	at all	tatoeba:5136934
+en-neighbour-key-007	en	neighbour-key	thisnis	this is	tatoeba:435651
+en-neighbour-key-008	en	neighbour-key	inbhis	in his	tatoeba:7391187
+en-neighbour-key-009	en	neighbour-key	seemthat	see that	tatoeba:7493906
+en-neighbour-key-010	en	neighbour-key	wantednto	wanted to	tatoeba:7320991
+en-neighbour-key-011	en	neighbour-key	atbthis	at this	tatoeba:8474922
+en-neighbour-key-012	en	neighbour-key	relatedmto	related to	tatoeba:12271596
+en-neighbour-key-013	en	neighbour-key	intonlast	into last	tatoeba:6434805
+en-neighbour-key-014	en	neighbour-key	oftenbgo	often go	tatoeba:6910106
+en-neighbour-key-015	en	neighbour-key	youmshould	you should	tatoeba:6970604
+en-neighbour-key-016	en	neighbour-key	worknin	work in	tatoeba:11790705
+en-neighbour-key-017	en	neighbour-key	bybnature	by nature	tatoeba:9955333
+en-neighbour-key-018	en	neighbour-key	andmdecadent	and decadent	tatoeba:5792390
+en-neighbour-key-019	en	neighbour-key	withnyou	with you	tatoeba:8868756
+en-neighbour-key-020	en	neighbour-key	frozenbfor	frozen for	tatoeba:11195903
+en-neighbour-key-021	en	neighbour-key	ifmwe	if we	tatoeba:3819602
+en-neighbour-key-022	en	neighbour-key	thatncustomer	that customer	tatoeba:12755033
+en-neighbour-key-023	en	neighbour-key	isbdoing	is doing	tatoeba:7518304
+en-neighbour-key-024	en	neighbour-key	evenmtry	even try	tatoeba:887072
+en-neighbour-key-025	en	neighbour-key	runnthe	run the	tatoeba:6927549
+en-legit-compound-001	en	legit-compound	louisville	louisville	frequency
+en-legit-compound-002	en	legit-compound	chatroom	chatroom	frequency
+en-legit-compound-003	en	legit-compound	emotional	emotional	frequency
+en-legit-compound-004	en	legit-compound	magicyellow	magicyellow	frequency
+en-legit-compound-005	en	legit-compound	johnson	johnson	frequency
+en-legit-compound-006	en	legit-compound	passionate	passionate	frequency
+en-legit-compound-007	en	legit-compound	toothpaste	toothpaste	frequency
+en-legit-compound-008	en	legit-compound	fireworks	fireworks	frequency
+en-legit-compound-009	en	legit-compound	jupiterweb	jupiterweb	frequency
+en-legit-compound-010	en	legit-compound	lancome	lancome	frequency
+en-legit-compound-011	en	legit-compound	philharmonic	philharmonic	frequency
+en-legit-compound-012	en	legit-compound	snapping	snapping	frequency
+en-legit-compound-013	en	legit-compound	bookshelves	bookshelves	frequency
+en-legit-compound-014	en	legit-compound	handout	handout	frequency
+en-legit-compound-015	en	legit-compound	candidate	candidate	frequency
+en-legit-compound-016	en	legit-compound	massages	massages	frequency
+en-legit-compound-017	en	legit-compound	peppers	peppers	frequency
+en-legit-compound-018	en	legit-compound	seagate	seagate	frequency
+en-legit-compound-019	en	legit-compound	numbering	numbering	frequency
+en-legit-compound-020	en	legit-compound	quotation	quotation	frequency
+en-legit-rare-001	en	legit-rare	scariest	scariest	tatoeba:567950
+en-legit-rare-002	en	legit-rare	consonants	consonants	tatoeba:61404
+en-legit-rare-003	en	legit-rare	artemisinin	artemisinin	tatoeba:9014780
+en-legit-rare-004	en	legit-rare	coolness	coolness	tatoeba:287813
+en-legit-rare-005	en	legit-rare	sleeplessness	sleeplessness	tatoeba:20213
+en-legit-rare-006	en	legit-rare	uncovers	uncovers	tatoeba:841332
+en-legit-rare-007	en	legit-rare	exorcise	exorcise	tatoeba:1444724
+en-legit-rare-008	en	legit-rare	squirmed	squirmed	tatoeba:3068915
+en-legit-rare-009	en	legit-rare	predates	predates	tatoeba:8752313
+en-legit-rare-010	en	legit-rare	consoled	consoled	tatoeba:39295
+en-legit-rare-011	en	legit-rare	masochist	masochist	tatoeba:709444
+en-legit-rare-012	en	legit-rare	dehumanize	dehumanize	tatoeba:5774045
+en-legit-rare-013	en	legit-rare	worshippers	worshippers	tatoeba:1539947
+en-legit-rare-014	en	legit-rare	apathetic	apathetic	tatoeba:23558
+en-legit-rare-015	en	legit-rare	digitize	digitize	tatoeba:5276659
+en-legit-rare-016	en	legit-rare	shamelessly	shamelessly	tatoeba:5370365
+en-legit-rare-017	en	legit-rare	parachutes	parachutes	tatoeba:2473189
+en-legit-rare-018	en	legit-rare	baptised	baptised	tatoeba:7258306
+en-legit-rare-019	en	legit-rare	seasickness	seasickness	tatoeba:6604276
+en-legit-rare-020	en	legit-rare	disdainful	disdainful	tatoeba:713027
+de-missed-space-001	de	missed-space	alleinesein	alleine sein	tatoeba:13767352
+de-missed-space-002	de	missed-space	aufhörenzu	aufhören zu	tatoeba:1985853
+de-missed-space-003	de	missed-space	weißnicht	weiß nicht	tatoeba:7726994
+de-missed-space-004	de	missed-space	aufdie	auf die	tatoeba:3982765
+de-missed-space-005	de	missed-space	wenigerhäufig	weniger häufig	tatoeba:2101848
+de-missed-space-006	de	missed-space	gingins	ging ins	tatoeba:7592581
+de-missed-space-007	de	missed-space	nichtden	nicht den	tatoeba:1283728
+de-missed-space-008	de	missed-space	kennenkeine	kennen keine	tatoeba:13673784
+de-missed-space-009	de	missed-space	nurein	nur ein	tatoeba:2916101
+de-missed-space-010	de	missed-space	dasaussah	das aussah	tatoeba:741277
+de-missed-space-011	de	missed-space	esjetzt	es jetzt	tatoeba:12602085
+de-missed-space-012	de	missed-space	wennich	wenn ich	tatoeba:1480799
+de-missed-space-013	de	missed-space	inein	in ein	tatoeba:3992192
+de-missed-space-014	de	missed-space	nützlicherals	nützlicher als	tatoeba:735986
+de-missed-space-015	de	missed-space	mirgeraten	mir geraten	tatoeba:13986712
+de-missed-space-016	de	missed-space	dereinzige	der einzige	tatoeba:12448637
+de-missed-space-017	de	missed-space	michschon	mich schon	tatoeba:3171678
+de-missed-space-018	de	missed-space	vondeinen	von deinen	tatoeba:607470
+de-missed-space-019	de	missed-space	daßjemand	daß jemand	tatoeba:13708339
+de-missed-space-020	de	missed-space	istzu	ist zu	tatoeba:6845102
+de-missed-space-021	de	missed-space	tuetwas	tu etwas	tatoeba:5574084
+de-missed-space-022	de	missed-space	euchdas	euch das	tatoeba:12449278
+de-missed-space-023	de	missed-space	dasser	dass er	tatoeba:3487418
+de-missed-space-024	de	missed-space	einerjapanische	einer japanische	tatoeba:1437889
+de-missed-space-025	de	missed-space	abersobald	aber sobald	tatoeba:12093187
+de-missed-space-026	de	missed-space	vielefrischgebackene	viele frischgebackene	tatoeba:2184833
+de-missed-space-027	de	missed-space	jagesagt	ja gesagt	tatoeba:11108220
+de-missed-space-028	de	missed-space	ihrenrichtigen	ihren richtigen	tatoeba:6150600
+de-missed-space-029	de	missed-space	undder	und der	tatoeba:928742
+de-missed-space-030	de	missed-space	indie	in die	tatoeba:4774237
+de-missed-space-031	de	missed-space	duso	du so	tatoeba:12800964
+de-missed-space-032	de	missed-space	nichtgeweint	nicht geweint	tatoeba:6921197
+de-missed-space-033	de	missed-space	zuarbeiten	zu arbeiten	tatoeba:12981392
+de-missed-space-034	de	missed-space	istkein	ist kein	tatoeba:9996432
+de-missed-space-035	de	missed-space	undich	und ich	tatoeba:8903889
+de-missed-space-036	de	missed-space	wasdas	was das	tatoeba:4054999
+de-missed-space-037	de	missed-space	mitgehensollen	mitgehen sollen	tatoeba:2185593
+de-missed-space-038	de	missed-space	darüberreden	darüber reden	tatoeba:12005347
+de-missed-space-039	de	missed-space	denganzen	den ganzen	tatoeba:2300293
+de-missed-space-040	de	missed-space	mirso	mir so	tatoeba:754868
+de-missed-space-041	de	missed-space	duschlägst	du schlägst	tatoeba:8864361
+de-missed-space-042	de	missed-space	bewohntdiesen	bewohnt diesen	tatoeba:2381424
+de-missed-space-043	de	missed-space	kamherunter	kam herunter	tatoeba:942042
+de-missed-space-044	de	missed-space	oderschlechte	oder schlechte	tatoeba:1257952
+de-missed-space-045	de	missed-space	esfünf	es fünf	tatoeba:11389718
+de-missed-space-046	de	missed-space	undes	und es	tatoeba:2844574
+de-missed-space-047	de	missed-space	sollenkünftig	sollen künftig	tatoeba:1030230
+de-missed-space-048	de	missed-space	folgtmir	folgt mir	tatoeba:1918720
+de-missed-space-049	de	missed-space	mehrausruhen	mehr ausruhen	tatoeba:6990760
+de-missed-space-050	de	missed-space	nochein	noch ein	tatoeba:12923456
+de-neighbour-key-001	de	neighbour-key	erinnerenich	erinnere ich	tatoeba:11299733
+de-neighbour-key-002	de	neighbour-key	dasbgeschafft	das geschafft	tatoeba:9829691
+de-neighbour-key-003	de	neighbour-key	dermperfekte	der perfekte	tatoeba:6535033
+de-neighbour-key-004	de	neighbour-key	warnin	war in	tatoeba:4926402
+de-neighbour-key-005	de	neighbour-key	hierbarbeiten	hier arbeiten	tatoeba:6011734
+de-neighbour-key-006	de	neighbour-key	sonnigmist	sonnig ist	tatoeba:6634831
+de-neighbour-key-007	de	neighbour-key	hingegennzog	hingegen zog	tatoeba:4606903
+de-neighbour-key-008	de	neighbour-key	sichbkeine	sich keine	tatoeba:8668012
+de-neighbour-key-009	de	neighbour-key	kleinmgeschlagen	klein geschlagen	tatoeba:2997614
+de-neighbour-key-010	de	neighbour-key	einennhier	einen hier	tatoeba:784195
+de-neighbour-key-011	de	neighbour-key	nichtbarbeitet	nicht arbeitet	tatoeba:12576873
+de-neighbour-key-012	de	neighbour-key	dasmletzte	das letzte	tatoeba:3401346
+de-neighbour-key-013	de	neighbour-key	istndie	ist die	tatoeba:1729807
+de-neighbour-key-014	de	neighbour-key	gehtbes	geht es	tatoeba:10726417
+de-neighbour-key-015	de	neighbour-key	allesmgesorgt	alles gesorgt	tatoeba:4294158
+de-neighbour-key-016	de	neighbour-key	duftetnnämlich	duftet nämlich	tatoeba:10541765
+de-neighbour-key-017	de	neighbour-key	machenbwürde	machen würde	tatoeba:608512
+de-neighbour-key-018	de	neighbour-key	istmauf	ist auf	tatoeba:3779204
+de-neighbour-key-019	de	neighbour-key	allesngedeiht	alles gedeiht	tatoeba:1899190
+de-neighbour-key-020	de	neighbour-key	einbwenig	ein wenig	tatoeba:12378378
+de-neighbour-key-021	de	neighbour-key	nichtman	nicht an	tatoeba:2936662
+de-neighbour-key-022	de	neighbour-key	führtenzu	führte zu	tatoeba:12584116
+de-neighbour-key-023	de	neighbour-key	wirdbdeutlich	wird deutlich	tatoeba:5600057
+de-neighbour-key-024	de	neighbour-key	frommanxiety	from anxiety	tatoeba:13685059
+de-neighbour-key-025	de	neighbour-key	ichnwerden	ich werden	tatoeba:406958
+de-legit-compound-001	de	legit-compound	rattengift	rattengift	frequency
+de-legit-compound-002	de	legit-compound	freigenommen	freigenommen	frequency
+de-legit-compound-003	de	legit-compound	zugreifen	zugreifen	frequency
+de-legit-compound-004	de	legit-compound	ausgesetzt	ausgesetzt	frequency
+de-legit-compound-005	de	legit-compound	tiefpunkt	tiefpunkt	frequency
+de-legit-compound-006	de	legit-compound	ausgebucht	ausgebucht	frequency
+de-legit-compound-007	de	legit-compound	schwachstelle	schwachstelle	frequency
+de-legit-compound-008	de	legit-compound	lebenslange	lebenslange	frequency
+de-legit-compound-009	de	legit-compound	möchtest	möchtest	frequency
+de-legit-compound-010	de	legit-compound	beinarbeit	beinarbeit	frequency
+de-legit-compound-011	de	legit-compound	bildeten	bildeten	frequency
+de-legit-compound-012	de	legit-compound	heißhunger	heißhunger	frequency
+de-legit-compound-013	de	legit-compound	ausgeteilt	ausgeteilt	frequency
+de-legit-compound-014	de	legit-compound	netterweise	netterweise	frequency
+de-legit-compound-015	de	legit-compound	weggetreten	weggetreten	frequency
+de-legit-compound-016	de	legit-compound	gerichtsgebäude	gerichtsgebäude	frequency
+de-legit-compound-017	de	legit-compound	wegfahren	wegfahren	frequency
+de-legit-compound-018	de	legit-compound	meldest	meldest	frequency
+de-legit-compound-019	de	legit-compound	einnehmen	einnehmen	frequency
+de-legit-compound-020	de	legit-compound	frachtschiff	frachtschiff	frequency
+de-legit-rare-001	de	legit-rare	zweiundzwanzigsten	zweiundzwanzigsten	tatoeba:688317
+de-legit-rare-002	de	legit-rare	umgerechnet	umgerechnet	tatoeba:912460
+de-legit-rare-003	de	legit-rare	ausdenkt	ausdenkt	tatoeba:645109
+de-legit-rare-004	de	legit-rare	informierter	informierter	tatoeba:2812154
+de-legit-rare-005	de	legit-rare	kritisierte	kritisierte	tatoeba:481464
+de-legit-rare-006	de	legit-rare	entgegnen	entgegnen	tatoeba:2068418
+de-legit-rare-007	de	legit-rare	etlichen	etlichen	tatoeba:1328564
+de-legit-rare-008	de	legit-rare	merklich	merklich	tatoeba:1454968
+de-legit-rare-009	de	legit-rare	literarischen	literarischen	tatoeba:1264862
+de-legit-rare-010	de	legit-rare	erkämpft	erkämpft	tatoeba:1308398
+de-legit-rare-011	de	legit-rare	dasjenige	dasjenige	tatoeba:2173225
+de-legit-rare-012	de	legit-rare	aufbekommen	aufbekommen	tatoeba:3238547
+de-legit-rare-013	de	legit-rare	hochgewachsenen	hochgewachsenen	tatoeba:1109893
+de-legit-rare-014	de	legit-rare	schüchternes	schüchternes	tatoeba:645865
+de-legit-rare-015	de	legit-rare	russischsprachige	russischsprachige	tatoeba:3073490
+de-legit-rare-016	de	legit-rare	verbessere	verbessere	tatoeba:809282
+de-legit-rare-017	de	legit-rare	edelsten	edelsten	tatoeba:3041753
+de-legit-rare-018	de	legit-rare	zusammenhängenden	zusammenhängenden	tatoeba:1420470
+de-legit-rare-019	de	legit-rare	europäisch	europäisch	tatoeba:1247797
+de-legit-rare-020	de	legit-rare	auslöffeln	auslöffeln	tatoeba:1206501
+es-missed-space-001	es	missed-space	yasentir	y asentir	tatoeba:5767362
+es-missed-space-002	es	missed-space	recuperólas	recuperó las	tatoeba:6823813
+es-missed-space-003	es	missed-space	todoen	todo en	tatoeba:5040661
+es-missed-space-004	es	missed-space	simbolizanla	simbolizan la	tatoeba:4933520
+es-missed-space-005	es	missed-space	miausencia	mi ausencia	tatoeba:1388987
+es-missed-space-006	es	missed-space	penséisde	penséis de	tatoeba:8530077
+es-missed-space-007	es	missed-space	altransporte	al transporte	tatoeba:1593507
+es-missed-space-008	es	missed-space	dehaber	de haber	tatoeba:11682083
+es-missed-space-009	es	missed-space	nobaja	no baja	tatoeba:11890462
+es-missed-space-010	es	missed-space	altoque	alto que	tatoeba:744676
+es-missed-space-011	es	missed-space	queno	que no	tatoeba:14098329
+es-missed-space-012	es	missed-space	fuerobado	fue robado	tatoeba:1689449
+es-missed-space-013	es	missed-space	loque	lo que	tatoeba:1262482
+es-missed-space-014	es	missed-space	trazamosla	trazamos la	tatoeba:10302070
+es-missed-space-015	es	missed-space	oídoque	oído que	tatoeba:13920555
+es-missed-space-016	es	missed-space	escepticismoes	escepticismo es	tatoeba:1693578
+es-missed-space-017	es	missed-space	quecasi	que casi	tatoeba:1236805
+es-missed-space-018	es	missed-space	novelase	novela se	tatoeba:1245282
+es-missed-space-019	es	missed-space	aoler	a oler	tatoeba:12046889
+es-missed-space-020	es	missed-space	eseentonces	ese entonces	tatoeba:3018332
+es-missed-space-021	es	missed-space	consejosabio	consejo sabio	tatoeba:1359820
+es-missed-space-022	es	missed-space	todassean	todas sean	tatoeba:5183490
+es-missed-space-023	es	missed-space	deinformación	de información	tatoeba:5567270
+es-missed-space-024	es	missed-space	sabercuanto	saber cuanto	tatoeba:5994065
+es-missed-space-025	es	missed-space	tienetreinta	tiene treinta	tatoeba:1184019
+es-missed-space-026	es	missed-space	componenel	componen el	tatoeba:1218373
+es-missed-space-027	es	missed-space	despuésde	después de	tatoeba:538643
+es-missed-space-028	es	missed-space	lagustaba	la gustaba	tatoeba:8281759
+es-missed-space-029	es	missed-space	puedohacer	puedo hacer	tatoeba:2351524
+es-missed-space-030	es	missed-space	mejormanera	mejor manera	tatoeba:808534
+es-missed-space-031	es	missed-space	puedecomer	puede comer	tatoeba:13076474
+es-missed-space-032	es	missed-space	elperro	el perro	tatoeba:2268105
+es-missed-space-033	es	missed-space	dealegría	de alegría	tatoeba:2311793
+es-missed-space-034	es	missed-space	enla	en la	tatoeba:1526407
+es-missed-space-035	es	missed-space	unsentido	un sentido	tatoeba:1683261
+es-missed-space-036	es	missed-space	perose	pero se	tatoeba:1602673
+es-missed-space-037	es	missed-space	unpaso	un paso	tatoeba:8735478
+es-missed-space-038	es	missed-space	hacerun	hacer un	tatoeba:1996095
+es-missed-space-039	es	missed-space	estánburlando	están burlando	tatoeba:2092282
+es-missed-space-040	es	missed-space	amablecon	amable con	tatoeba:11076554
+es-missed-space-041	es	missed-space	viel	vi el	tatoeba:8802048
+es-missed-space-042	es	missed-space	nosconocíamos	nos conocíamos	tatoeba:5249749
+es-missed-space-043	es	missed-space	lamáscara	la máscara	tatoeba:11684688
+es-missed-space-044	es	missed-space	estadoallí	estado allí	tatoeba:919370
+es-missed-space-045	es	missed-space	gustael	gusta el	tatoeba:5990955
+es-missed-space-046	es	missed-space	laenergía	la energía	tatoeba:13849608
+es-missed-space-047	es	missed-space	pulserade	pulsera de	tatoeba:985778
+es-missed-space-048	es	missed-space	deflauta	de flauta	tatoeba:814554
+es-missed-space-049	es	missed-space	leítres	leí tres	tatoeba:919378
+es-missed-space-050	es	missed-space	bastantebueno	bastante bueno	tatoeba:5854907
+es-neighbour-key-001	es	neighbour-key	denmí	de mí	tatoeba:330662
+es-neighbour-key-002	es	neighbour-key	parecesbotro	pareces otro	tatoeba:2189517
+es-neighbour-key-003	es	neighbour-key	lesmgusta	les gusta	tatoeba:520732
+es-neighbour-key-004	es	neighbour-key	másnrico	más rico	tatoeba:5098896
+es-neighbour-key-005	es	neighbour-key	acabarbconmigo	acabar conmigo	tatoeba:12779445
+es-neighbour-key-006	es	neighbour-key	hayammatado	haya matado	tatoeba:863235
+es-neighbour-key-007	es	neighbour-key	teníanla	tenía la	tatoeba:10349058
+es-neighbour-key-008	es	neighbour-key	pediríabque	pediría que	tatoeba:1892910
+es-neighbour-key-009	es	neighbour-key	memfalla	me falla	tatoeba:7947906
+es-neighbour-key-010	es	neighbour-key	reescribirnel	reescribir el	tatoeba:10195250
+es-neighbour-key-011	es	neighbour-key	unbidioma	un idioma	tatoeba:2409104
+es-neighbour-key-012	es	neighbour-key	gastómtodo	gastó todo	tatoeba:2106352
+es-neighbour-key-013	es	neighbour-key	hermanonmayor	hermano mayor	tatoeba:853352
+es-neighbour-key-014	es	neighbour-key	ybasí	y así	tatoeba:358475
+es-neighbour-key-015	es	neighbour-key	quemhay	que hay	tatoeba:7239489
+es-neighbour-key-016	es	neighbour-key	quierensaber	quiere saber	tatoeba:4593284
+es-neighbour-key-017	es	neighbour-key	esbanaranjado	es anaranjado	tatoeba:5257411
+es-neighbour-key-018	es	neighbour-key	demtres	de tres	tatoeba:2949557
+es-neighbour-key-019	es	neighbour-key	dencenar	de cenar	tatoeba:1389943
+es-neighbour-key-020	es	neighbour-key	debidiotas	de idiotas	tatoeba:503643
+es-neighbour-key-021	es	neighbour-key	formaranmpequeñas	formaran pequeñas	tatoeba:10179448
+es-neighbour-key-022	es	neighbour-key	vasonde	vaso de	tatoeba:11861241
+es-neighbour-key-023	es	neighbour-key	muybcara	muy cara	tatoeba:2278450
+es-neighbour-key-024	es	neighbour-key	mimparte	mi parte	tatoeba:5058521
+es-neighbour-key-025	es	neighbour-key	producennmuchos	producen muchos	tatoeba:8769935
+es-legit-compound-001	es	legit-compound	decidamos	decidamos	frequency
+es-legit-compound-002	es	legit-compound	recuperaremos	recuperaremos	frequency
+es-legit-compound-003	es	legit-compound	despidan	despidan	frequency
+es-legit-compound-004	es	legit-compound	huyeron	huyeron	frequency
+es-legit-compound-005	es	legit-compound	servida	servida	frequency
+es-legit-compound-006	es	legit-compound	cuadradas	cuadradas	frequency
+es-legit-compound-007	es	legit-compound	desapareces	desapareces	frequency
+es-legit-compound-008	es	legit-compound	descubiertos	descubiertos	frequency
+es-legit-compound-009	es	legit-compound	extrañaremos	extrañaremos	frequency
+es-legit-compound-010	es	legit-compound	sobreviviera	sobreviviera	frequency
+es-legit-compound-011	es	legit-compound	fielding	fielding	frequency
+es-legit-compound-012	es	legit-compound	stanley	stanley	frequency
+es-legit-compound-013	es	legit-compound	contestadora	contestadora	frequency
+es-legit-compound-014	es	legit-compound	preparada	preparada	frequency
+es-legit-compound-015	es	legit-compound	contratos	contratos	frequency
+es-legit-compound-016	es	legit-compound	metales	metales	frequency
+es-legit-compound-017	es	legit-compound	combate	combate	frequency
+es-legit-compound-018	es	legit-compound	consiguiente	consiguiente	frequency
+es-legit-compound-019	es	legit-compound	convendría	convendría	frequency
+es-legit-compound-020	es	legit-compound	lanzallamas	lanzallamas	frequency
+es-legit-rare-001	es	legit-rare	neonazis	neonazis	tatoeba:10711879
+es-legit-rare-002	es	legit-rare	pronombres	pronombres	tatoeba:900161
+es-legit-rare-003	es	legit-rare	incentivar	incentivar	tatoeba:1571186
+es-legit-rare-004	es	legit-rare	liberticidas	liberticidas	tatoeba:10143943
+es-legit-rare-005	es	legit-rare	somnoliento	somnoliento	tatoeba:1331225
+es-legit-rare-006	es	legit-rare	andantes	andantes	tatoeba:5920178
+es-legit-rare-007	es	legit-rare	chubasquero	chubasquero	tatoeba:7220198
+es-legit-rare-008	es	legit-rare	rehusaron	rehusaron	tatoeba:1279220
+es-legit-rare-009	es	legit-rare	paludismo	paludismo	tatoeba:7915327
+es-legit-rare-010	es	legit-rare	tronando	tronando	tatoeba:1619933
+es-legit-rare-011	es	legit-rare	oculista	oculista	tatoeba:998340
+es-legit-rare-012	es	legit-rare	soleados	soleados	tatoeba:940066
+es-legit-rare-013	es	legit-rare	atosigada	atosigada	tatoeba:7949640
+es-legit-rare-014	es	legit-rare	mensualmente	mensualmente	tatoeba:1347503
+es-legit-rare-015	es	legit-rare	acusativo	acusativo	tatoeba:1097123
+es-legit-rare-016	es	legit-rare	enseñáis	enseñáis	tatoeba:10024670
+es-legit-rare-017	es	legit-rare	alborozados	alborozados	tatoeba:8115037
+es-legit-rare-018	es	legit-rare	colibríes	colibríes	tatoeba:1259794
+es-legit-rare-019	es	legit-rare	polleras	polleras	tatoeba:1054616
+es-legit-rare-020	es	legit-rare	ambiguas	ambiguas	tatoeba:1134366

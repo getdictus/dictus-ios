@@ -20,8 +20,11 @@ import Foundation
 /// WHY IN DICTUSCORE: the transitions are rules, the app target has no test bundle, and
 /// the dates are passed in so a test can measure the time since the return.
 ///
-/// The copy behind every phase is independent of the not-ready reason: Apple reports a
-/// Siri language mismatch as `modelNotReady`, so the reason cannot pick a sentence.
+/// The reason picks only where the page opens, never a sentence: Apple reports a Siri
+/// language mismatch as `modelNotReady` too, so `modelNotReady` opens on the setting-up
+/// screen, whose copy says Apple is getting ready AND keeps the Siri language hint, with
+/// "See the steps again" back to the instructions (Pierre's decision of 2026-10-28, #846).
+/// Every other not-ready reason opens on the instructions.
 public struct AppleIntelligenceStepState: Equatable, Sendable {
 
     /// What the page shows.
@@ -30,8 +33,9 @@ public struct AppleIntelligenceStepState: Equatable, Sendable {
         case instructions
         /// Apple Intelligence is available: the green line and Continue.
         case ready
-        /// Back in the app and not available: Apple Intelligence finishes in the
-        /// background, Continue, and a way back to the instructions.
+        /// Back in the app and not available, or `modelNotReady` from the first read:
+        /// Apple Intelligence finishes in the background, Continue, and a way back to the
+        /// instructions.
         case settingUp
     }
 
@@ -59,6 +63,21 @@ public struct AppleIntelligenceStepState: Equatable, Sendable {
     /// The state when the page appears, from the first availability read.
     public init(isAvailable: Bool) {
         phase = isAvailable ? .ready : .instructions
+    }
+
+    /// The state when the page appears, from the first read of the engine state.
+    ///
+    /// `modelNotReady` opens on the setting-up screen rather than the instructions
+    /// (decision of 2026-10-28, #846): Apple is most often downloading its model, and
+    /// telling that user to change Siri's language was wrong. The setting-up screen still
+    /// names the Siri language as the thing to check, which covers the mismatch Apple
+    /// also reports as `modelNotReady`.
+    public init(engineState: PolishAvailabilityState) {
+        switch engineState {
+        case .available: phase = .ready
+        case .modelNotReady: phase = .settingUp
+        default: phase = .instructions
+        }
     }
 
     /// The app came back to the foreground while the step is on screen: back from

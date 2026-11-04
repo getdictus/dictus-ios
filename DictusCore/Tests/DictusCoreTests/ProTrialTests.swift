@@ -419,6 +419,114 @@ final class ProTrialTests: XCTestCase {
         XCTAssertTrue(reinstalled.trialState.isRunning)
         XCTAssertEqual(reinstalled.trialBadgeDaysLeft, 11)
         XCTAssertFalse(reinstalled.mayStartTrial)
+        XCTAssertEqual(reinstalled.endOfTrialPaywall, .trialEnded,
+                       "a trial still running at the reinstall ends here, with its recap")
+    }
+
+    // MARK: - A trial that ended before a reinstall (#837)
+
+    func testOnlyAnExpiredTrialRestoredIntoAnEmptyAppGroupEndedBeforeThisInstall() {
+        let record = ProTrialRecord.starting(at: t0)
+        let afterEnd = record.endsAt
+        XCTAssertTrue(ProTrialPolicy.endedBeforeThisInstall(appGroupWasEmpty: true, restored: record, now: afterEnd))
+        XCTAssertFalse(ProTrialPolicy.endedBeforeThisInstall(appGroupWasEmpty: false, restored: record, now: afterEnd),
+                       "the App Group lived through the trial")
+        XCTAssertFalse(ProTrialPolicy.endedBeforeThisInstall(appGroupWasEmpty: true, restored: record, now: t0),
+                       "a running trial resumes")
+        XCTAssertFalse(ProTrialPolicy.endedBeforeThisInstall(appGroupWasEmpty: true, restored: nil, now: afterEnd),
+                       "nothing in the Keychain")
+    }
+
+    func testATrialThatEndedBeforeThisInstallOpensTheOrdinaryPaywall() {
+        XCTAssertEqual(ProTrialPolicy.endOfTrialPaywall(endedBeforeThisInstall: true), .standard)
+        XCTAssertEqual(ProTrialPolicy.endOfTrialPaywall(endedBeforeThisInstall: false), .trialEnded)
+    }
+
+    /// Acceptance: empty App Group + expired trial in the Keychain → the ordinary paywall,
+    /// no end-of-trial framing or recap, and no new trial.
+    @MainActor
+    func testAReinstallAfterTheTrialEndedGetsTheOrdinaryPaywallAndNoNewTrial() {
+        let clock = TestClock(t0)
+        let keychain = InMemoryKeychain()
+        let (first, _) = makeManager(clock: clock, keychain: keychain)
+        first.startTrialIfEligible()
+        let original = keychain.record
+
+        clock.advance(days: 30)
+        let (reinstalled, _) = makeManager(clock: clock, keychain: keychain)
+        reinstalled.reconcileTrial()
+        XCTAssertTrue(reinstalled.trialState.isExpired)
+        XCTAssertTrue(reinstalled.endOfTrialPaywallDue, "the paywall still opens after onboarding")
+        XCTAssertEqual(reinstalled.endOfTrialPaywall, .standard)
+        XCTAssertTrue(ProPaywallPlans.offersMonthlyOnClose(
+            trialEndPaywall: reinstalled.endOfTrialPaywall, sawPlans: false, isPaid: reinstalled.isPaid,
+            monthlyLoaded: true, alreadyOffered: false), "closing it offers the monthly plan")
+
+        XCTAssertFalse(reinstalled.mayStartTrial)
+        XCTAssertFalse(reinstalled.startTrialIfEligible(), "no second trial")
+        XCTAssertEqual(keychain.record, original, "the trial stays consumed")
+        XCTAssertFalse(reinstalled.isProActive)
+    }
+
+    /// Onboarding can span launches: from the second one the mirror is no longer empty,
+    /// and the reinstall must still be told apart.
+    @MainActor
+    func testTheOrdinaryPaywallSurvivesALaterLaunchOfTheSameInstall() {
+        let clock = TestClock(t0)
+        let keychain = InMemoryKeychain()
+        keychain.record = .starting(at: t0)
+        clock.advance(days: 30)
+        let defaults = makeDefaults()
+        let (firstLaunch, _) = makeManager(clock: clock, keychain: keychain, defaults: defaults)
+        firstLaunch.reconcileTrial()
+
+        let (secondLaunch, _) = makeManager(clock: clock, keychain: keychain, defaults: defaults)
+        secondLaunch.reconcileTrial()
+        XCTAssertTrue(secondLaunch.endOfTrialPaywallDue)
+        XCTAssertEqual(secondLaunch.endOfTrialPaywall, .standard)
+    }
+
+    /// Acceptance: a trial that ends on an install that lived through it is unchanged.
+    @MainActor
+    func testATrialEndingWithTheAppGroupPresentKeepsTheEndOfTrialPaywall() {
+        let clock = TestClock(t0)
+        let keychain = InMemoryKeychain()
+        let defaults = makeDefaults()
+        let (first, _) = makeManager(clock: clock, keychain: keychain, defaults: defaults)
+        first.reconcileTrial()
+        first.startTrialIfEligible()
+
+        clock.advance(days: 30)
+        let (nextLaunch, _) = makeManager(clock: clock, keychain: keychain, defaults: defaults)
+        nextLaunch.reconcileTrial()
+        XCTAssertTrue(nextLaunch.endOfTrialPaywallDue)
+        XCTAssertEqual(nextLaunch.endOfTrialPaywall, .trialEnded)
+        XCTAssertFalse(ProPaywallPlans.offersMonthlyOnClose(
+            trialEndPaywall: nextLaunch.endOfTrialPaywall, sawPlans: false, isPaid: false,
+            monthlyLoaded: true, alreadyOffered: false), "unchanged: not from the recap")
+        XCTAssertTrue(ProPaywallPlans.offersMonthlyOnClose(
+            trialEndPaywall: nextLaunch.endOfTrialPaywall, sawPlans: true, isPaid: false,
+            monthlyLoaded: true, alreadyOffered: false), "unchanged: once the plans were seen")
+    }
+
+    /// An empty App Group with nothing in the Keychain is a first install: one trial, once.
+    @MainActor
+    func testAnEmptyAppGroupNeverStartsASecondTrial() {
+        let clock = TestClock(t0)
+        let keychain = InMemoryKeychain()
+        let (fresh, _) = makeManager(clock: clock, keychain: keychain)
+        fresh.reconcileTrial()
+        XCTAssertEqual(fresh.trialState, .neverStarted)
+        XCTAssertTrue(fresh.startTrialIfEligible())
+        let granted = keychain.record
+
+        for days in [3.0, 30.0] {
+            clock.advance(days: days)
+            let (reinstalled, _) = makeManager(clock: clock, keychain: keychain)
+            reinstalled.reconcileTrial()
+            XCTAssertFalse(reinstalled.startTrialIfEligible(), "no second trial \(days) days later")
+            XCTAssertEqual(keychain.record, granted)
+        }
     }
 
     // MARK: - Recap counters (decision 5)

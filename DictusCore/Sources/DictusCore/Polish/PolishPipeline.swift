@@ -244,14 +244,16 @@ public enum PolishPipeline {
         switch job.task.contract.outputLanguage {
         case .polishTarget:
             return PolishGuardrail.detectedLanguageMatches(
-                polished: polished, target: job.promptLanguage
+                polished: polished, target: job.promptLanguage, raw: preprocessed
             )
         case .fixed(let language):
+            // No `raw` (#861): in a translation a segment copied from the transcript is
+            // the untranslated text this check exists to catch.
             return PolishGuardrail.detectedLanguageMatches(polished: polished, target: language)
         case .sameAsInput:
             guard let inputCode = detectLanguageCode(in: preprocessed) else { return true }
             return PolishGuardrail.detectedLanguageMatches(
-                polished: polished, inputLanguageCode: inputCode
+                polished: polished, inputLanguageCode: inputCode, raw: preprocessed
             )
         }
     }

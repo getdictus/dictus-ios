@@ -44,6 +44,7 @@ Thumbs.db
 # IDE
 .idea/
 .vscode/
+.claude/settings.local.json
 
 # Archives
 *.ipa

@@ -130,6 +130,13 @@ public enum AutocorrectDebugLog {
         write("UNDO orig=\"\(original)\" rejected=\"\(rejected)\"")
     }
 
+    /// The user refused an autocorrection at its position (#872): `by` is
+    /// "backspace", "undo" or "typed-word". The next word committed there is kept.
+    public static func autocorrectRefused(corrected: String, by: String) {
+        guard enabled else { return }
+        write("REFUSED corrected=\"\(corrected)\" by=\(by)")
+    }
+
     /// A word replacement was aborted because the live context failed the
     /// boundary-safety check (#191). This is the proxy-desync signature:
     /// the pipeline decided on a correction but the document no longer ends

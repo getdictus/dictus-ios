@@ -101,6 +101,15 @@ final class DictusKeyboardBridge: NSObject,
     ///   may re-apply shift if conditions still hold (e.g., still at start of sentence)
     private var isManualShift = false
 
+    /// Whether a character was typed since the symbols pages opened (#504). The space
+    /// bar returns to letters only after one, as Apple's keyboard does: `123` then
+    /// space stays on the page.
+    private var typedOnSymbols = false
+
+    /// Whether caps lock was on when the symbols pages opened, so that the space bar's
+    /// return to letters gives it back (#504).
+    private var capsLockBeforeSymbols = false
+
     /// Last character inserted by the keyboard, tracked locally to avoid IPC latency.
     /// Used by adaptive accent key (Phase 19 Plan 03) and as supplement to proxy reads.
     private(set) var lastInsertedCharacter: String?
@@ -177,6 +186,7 @@ final class DictusKeyboardBridge: NSObject,
             handleBackspace()
 
         case .spacebar:
+            returnToLettersAfterSymbols()
             handleSpace()
 
         case .returnkey:
@@ -383,9 +393,12 @@ final class DictusKeyboardBridge: NSObject,
     /// NOTE: Haptic and click fire in GiellaKeyboardView.touchesBegan() for ALL keys
     /// on touchDown, so neither is emitted here.
     private func handleInputKey(_ character: String) {
-        // Clear rejected words when starting a new word
-        if suggestionState?.currentWord.isEmpty == true {
-            suggestionState?.rejectedWords.removeAll()
+        learnWordMovedPast()
+
+        // A comma, a full stop and the like end the word before them (#872): it is
+        // corrected there, without a space, and the mark is inserted below.
+        if AutocorrectTrigger.commitsWord(character) {
+            autocorrectBeforeCursor(trailing: "")
         }
 
         // Insert the character. When on shifted/capslock page, the key definition
@@ -412,6 +425,9 @@ final class DictusKeyboardBridge: NSObject,
             keyboardView?.page = .normal
             isManualShift = false
         }
+        if let page = keyboardView?.page, page == .symbols1 || page == .symbols2 {
+            typedOnSymbols = true
+        }
 
         // Recheck autocapitalization after the character was inserted.
         // Example: typing "." won't trigger autocap yet (need space after),
@@ -431,6 +447,7 @@ final class DictusKeyboardBridge: NSObject,
         // never reached the mirror — the keyboard's prediction went 54 to 53 while the
         // mirror stayed at 49 — and every character count taken off the mirror after
         // that over-counted. Bracketing the call is what catches it.
+        let contextBefore = controller?.textDocumentProxy.documentContextBeforeInput
         let mirrorBefore = mirrorLength()
         controller?.textDocumentProxy.deleteBackward()
         observeMirror(before: mirrorBefore, deleted: 1)
@@ -462,6 +479,7 @@ final class DictusKeyboardBridge: NSObject,
         updateCapitalization()
         updateAccentKeyDisplay()
         let context = controller?.textDocumentProxy.documentContextBeforeInput
+        noteDeletion(before: contextBefore, after: context)
         suggestionState?.updateAsync(context: context)
     }
 
@@ -533,6 +551,7 @@ final class DictusKeyboardBridge: NSObject,
         lastInsertedCharacter = nil
         updateCapitalization()
         let context = controller?.textDocumentProxy.documentContextBeforeInput
+        noteDeletion(before: before, after: context)
         suggestionState?.updateAsync(context: context)
     }
 
@@ -547,26 +566,19 @@ final class DictusKeyboardBridge: NSObject,
     /// Correcting mid-word would be disorienting as the text changes while typing.
     private func handleSpace() {
         secondToLastInsertedCharacter = lastInsertedCharacter
-
-        // Next space after autocorrect = undo window closes
-        suggestionState?.pendingUndo = nil
+        learnWordMovedPast()
+        closeUndoWindowAtSpace()
 
         // Read the current word directly from the text field (synchronous, main thread).
         // WHY not use state.currentWord: it's updated by an async background queue.
         // If the user types fast and hits space before the async update completes,
         // state.currentWord can be stale (missing last characters). Using the stale
         // count for deleteBackward would leave orphan characters (first-letter duplication).
-        let freshWord: String = {
-            guard let context = controller?.textDocumentProxy.documentContextBeforeInput,
-                  !context.isEmpty,
-                  let lastChar = context.last,
-                  !lastChar.isWhitespace, !lastChar.isNewline else { return "" }
-            var word = ""
-            context.enumerateSubstrings(in: context.startIndex..., options: .byWords) { sub, _, _, _ in
-                if let s = sub { word = s }
-            }
-            return word
-        }()
+        // Empty when the context does not end with the word: after `cuisine,` the
+        // comma already committed it (#872).
+        let freshWord = AutocorrectRejectionMemory.wordAtCursor(
+            context: controller?.textDocumentProxy.documentContextBeforeInput
+        )?.word ?? ""
 
         // Guard: never autocorrect tokens containing digits (#74).
         // WHY CharacterSet.decimalDigits: covers all Unicode digits (0-9 plus other scripts).
@@ -589,7 +601,6 @@ final class DictusKeyboardBridge: NSObject,
             )
             #endif
             suggestionState?.clear()
-            suggestionState?.rejectedWords.removeAll()
             let ctx = controller?.textDocumentProxy.documentContextBeforeInput
             suggestionState?.updatePredictions(context: ctx)
             updateCapitalization()
@@ -597,131 +608,13 @@ final class DictusKeyboardBridge: NSObject,
             return
         }
 
-        // Autocorrect check before space insertion.
-        // Only trigger if autocorrect is enabled, there's a current word, the word
-        // was not previously rejected by the user, and the spell checker offers a
-        // different correction.
-        // Extract previous word for n-gram context boost
-        let previousWord: String? = {
-            guard let ctx = controller?.textDocumentProxy.documentContextBeforeInput else { return nil }
-            var words: [String] = []
-            ctx.enumerateSubstrings(in: ctx.startIndex..., options: .byWords) { sub, _, _, _ in
-                if let s = sub { words.append(s) }
-            }
-            // Last word in context is freshWord; the one before is previousWord
-            guard words.count >= 2 else { return nil }
-            return words[words.count - 2]
-        }()
-
-        // Refresh the host-traits policy right before the apply decision (#200):
-        // the proxy read is cheap and this is the freshest possible signal.
-        refreshHostPolicy()
-
-        // Sentence position for the proper-noun guard (#199): an unknown
-        // capitalized word mid-sentence is preserved; at sentence start the
-        // capitalization is just autocap, so corrections stay enabled there.
-        let atSentenceStart: Bool = {
-            guard let ctx = controller?.textDocumentProxy.documentContextBeforeInput else { return true }
-            return ProperNounGuard.isAtSentenceStart(context: ctx, word: freshWord)
-        }()
-
-        // Whether the learning path below may record this word. Learning means
-        // "the pipeline evaluated the word and chose not to correct it" — NOT
-        // "the word reached the space key". Words typed where autocorrect never
-        // ran (search/URL fields, #200) or whose replacement was aborted by the
-        // boundary check (possibly phantom words, #191) must not be learned:
-        // a learned word bypasses autocorrect everywhere afterwards, which is
-        // how test typing in Safari's search bar broke "lai"/"Cest" in Messages.
-        //
-        // The user's own autocorrect switch counts as such a case (#287 decision 8).
-        // With autocorrect off `spellCheck` never runs, so nothing vets the word:
-        // "bonjuor" typed twice would clear the trie filter below and become
-        // permanently immune. Reading only the host policy here — as this line did
-        // until #287 — made the comment above untrue in exactly that configuration.
-        var wordWasEvaluated: Bool = {
-            guard let state = suggestionState else { return false }
-            return state.autocorrectEnabled && state.hostPolicy.autocorrectAllowed
-        }()
-
-        // #530: the mirror has been caught holding characters this keyboard's own
-        // edits do not account for, so nothing may count characters off it until the
-        // keyboard gets a fresh input context.
-        //
-        // Learning is blocked here rather than only in the `.failed` branch below: a
-        // word the pipeline finds nothing wrong with never reaches that branch, and
-        // it would be learned off a document we cannot read correctly. A learned word
-        // bypasses autocorrect everywhere afterwards, which is far more expensive to
-        // undo than a skipped correction.
-        let mirrorSuspect = mirrorSync.isSuspect
-        if mirrorSuspect {
-            wordWasEvaluated = false
+        // #530: counted per press, whatever the word. See `autocorrectBeforeCursor`.
+        if mirrorSync.isSuspect {
             mirrorSync.noteSpaceWhileSuspect()
         }
 
-        if let state = suggestionState, state.autocorrectEnabled,
-           state.hostPolicy.autocorrectAllowed,
-           !freshWord.isEmpty,
-           !state.rejectedWords.contains(freshWord.lowercased()),
-           let result = state.performSpellCheck(
-               freshWord,
-               previousWord: previousWord,
-               isAtSentenceStart: atSentenceStart
-           ),
-           result.correction.lowercased() != freshWord.lowercased() {
-            // Boundary-safe replacement (#191): re-read the LIVE context and
-            // verify it still ends with the word we plan to replace, with a
-            // proper boundary before it. Under proxy desync (rapid delete/retype
-            // producing phantom words like "quee"), the captured freshWord can
-            // disagree with the document — a blind count-based delete would eat
-            // the preceding space ("pense quee" -> "penseque"). On failure we
-            // skip the correction and fall through to a normal space.
-            // The gate and the delete both live in AutocorrectCountingSite now
-            // (#530), so the code that can destroy the user's text is reachable from
-            // `swift test`. It corrects the delete count for whatever the mirror is
-            // known to be over-reporting, and refuses only when it cannot.
-            switch applyAutocorrect(
-                state: state,
-                freshWord: freshWord,
-                correction: result.correction,
-                previousWord: previousWord
-            ) {
-            case .applied:
-                return
-
-            case .refused(let reason):
-                // Do NOT correct, do NOT delete. Fall through to the normal space
-                // path below so the user keeps their typed word and still gets a
-                // space. The word may be a phantom ("quee") — don't learn it either.
-                wordWasEvaluated = false
-                #if DEBUG
-                AutocorrectDebugLog.replacementAborted(
-                    word: freshWord,
-                    reason: reason,
-                    contextTail: Self.contextTail(
-                        controller?.textDocumentProxy.documentContextBeforeInput
-                    )
-                )
-                #endif
-            }
-        }
-
-        // Repetition learning: the pipeline evaluated the word and did NOT
-        // correct it (user typed it as-is). Track usage — at the repetition
-        // threshold, learn it. Skipped when autocorrect never ran (see
-        // wordWasEvaluated above): those words were not vetted by the pipeline.
-        //
-        // The dictionary check is the gate this site was missing (#287 decision 2).
-        // Passive typing states nothing about intent, so the only word worth
-        // recording here is one the base dictionary does not have: a word it does
-        // have is never autocorrected anyway, so an entry for it protects nothing
-        // while #288 would go on to feed it into speech recognition. Six ordinary
-        // French phrases used to leave 22 entries behind, 20 of them trie words.
-        //
-        // The check belongs here rather than inside UserDictionary because the undo
-        // site must NOT be subject to it — see `UserDictionary.recordUsage`.
-        if let state = suggestionState, !freshWord.isEmpty, wordWasEvaluated,
-           state.isUnknownToDictionary(freshWord) {
-            UserDictionary.shared.recordUsage(freshWord)
+        if autocorrectBeforeCursor(trailing: " ") {
+            return
         }
 
         // Normal space handling with double-space period detection
@@ -755,9 +648,7 @@ final class DictusKeyboardBridge: NSObject,
         // WHY updatePredictions instead of updateAsync: After finishing a word,
         // the user wants to see predicted next words (n-gram), not completions
         // for a partial word (which doesn't exist yet after a space).
-        // Also clear rejected words -- the user has moved on to a new word.
         suggestionState?.clear()
-        suggestionState?.rejectedWords.removeAll()
         let context = controller?.textDocumentProxy.documentContextBeforeInput
         suggestionState?.updatePredictions(context: context)
 
@@ -770,7 +661,10 @@ final class DictusKeyboardBridge: NSObject,
     /// After inserting newline, recheck autocapitalization -- many apps use
     /// .sentences autocap which should capitalize after a newline.
     private func handleReturn() {
+        learnWordMovedPast()
         suggestionState?.pendingUndo = nil
+        // Return ends the word before it, like a punctuation mark (#872).
+        autocorrectBeforeCursor(trailing: "")
         let mirrorBefore = mirrorLength()
         controller?.textDocumentProxy.insertText("\n")
         observeMirror(before: mirrorBefore, inserted: 1)
@@ -785,6 +679,12 @@ final class DictusKeyboardBridge: NSObject,
         secondToLastInsertedCharacter = lastInsertedCharacter
         lastInsertedCharacter = "\n"
         suggestionState?.clear()
+        if suggestionState?.pendingUndo != nil {
+            // A correction was just made: the bar shows its undo chip.
+            suggestionState?.updatePredictions(
+                context: controller?.textDocumentProxy.documentContextBeforeInput
+            )
+        }
         updateCapitalization()
         updateAccentKeyDisplay()
     }
@@ -797,6 +697,7 @@ final class DictusKeyboardBridge: NSObject,
     /// Going through handleSpace() would trigger autocorrect which might
     /// "correct" a perfectly valid prediction.
     func handlePredictionTap(word: String) {
+        learnWordMovedPast()
         let proxy = controller?.textDocumentProxy
         // #548: the edit is reported before the trailing space settles the suspicion.
         // Order matters — settling first would discard whatever this insert revealed.
@@ -938,10 +839,23 @@ final class DictusKeyboardBridge: NSObject,
 
         switch kbView.page {
         case .normal, .shifted, .capslock:
+            capsLockBeforeSymbols = kbView.page == .capslock
+            typedOnSymbols = false
             kbView.page = .symbols1
         case .symbols1, .symbols2:
             kbView.page = .normal
         }
+    }
+
+    /// A space that ends a run of symbols returns to letters, as on Apple's keyboard
+    /// (#504). Called before the space is inserted, so that `handleSpace`'s
+    /// autocapitalization check already sees the letters page and shifts it after ". ".
+    private func returnToLettersAfterSymbols() {
+        guard let kbView = keyboardView, typedOnSymbols,
+              kbView.page == .symbols1 || kbView.page == .symbols2 else { return }
+        typedOnSymbols = false
+        kbView.page = capsLockBeforeSymbols ? .capslock : .normal
+        isManualShift = false
     }
 
     /// Handle #+=/123 toggle on symbols pages.
@@ -959,8 +873,162 @@ final class DictusKeyboardBridge: NSObject,
         }
     }
 
+    /// Commits the word in front of the cursor: corrects it, keeps it where the user
+    /// refused a correction, or counts it toward learning. Returns true when the
+    /// correction was written, followed by `trailing`.
+    ///
+    /// `trailing` is " " for the space bar. It is empty for a punctuation mark or a
+    /// return (#872), whose caller inserts its own character afterwards.
+    @discardableResult
+    private func autocorrectBeforeCursor(trailing: String) -> Bool {
+        guard let state = suggestionState, let memory = rejectionMemory,
+              let context = controller?.textDocumentProxy.documentContextBeforeInput,
+              let (prefix, freshWord) = AutocorrectRejectionMemory.wordAtCursor(context: context)
+        else { return false }
+
+        // Guard: never autocorrect tokens containing digits (#74). The space bar
+        // has its own branch for them; a punctuation mark just inserts itself.
+        guard !freshWord.unicodeScalars.contains(where: { CharacterSet.decimalDigits.contains($0) })
+        else { return false }
+
+        // Extract previous word for n-gram context boost
+        let previousWord: String? = {
+            var words: [String] = []
+            context.enumerateSubstrings(in: context.startIndex..., options: .byWords) { sub, _, _, _ in
+                if let s = sub { words.append(s) }
+            }
+            // Last word in context is freshWord; the one before is previousWord
+            guard words.count >= 2 else { return nil }
+            return words[words.count - 2]
+        }()
+
+        // Refresh the host-traits policy right before the apply decision (#200):
+        // the proxy read is cheap and this is the freshest possible signal.
+        refreshHostPolicy()
+
+        // Sentence position for the proper-noun guard (#199): an unknown
+        // capitalized word mid-sentence is preserved; at sentence start the
+        // capitalization is just autocap, so corrections stay enabled there.
+        let atSentenceStart = ProperNounGuard.isAtSentenceStart(context: context, word: freshWord)
+
+        // Whether the learning paths below may record this word. Learning means
+        // "the pipeline evaluated the word and chose not to correct it" — NOT
+        // "the word reached the space key". Words typed where autocorrect never
+        // ran (search/URL fields, #200) or whose replacement was aborted by the
+        // boundary check (possibly phantom words, #191) must not be learned:
+        // a learned word bypasses autocorrect everywhere afterwards, which is
+        // how test typing in Safari's search bar broke "lai"/"Cest" in Messages.
+        //
+        // The user's own autocorrect switch counts as such a case (#287 decision 8).
+        // With autocorrect off `spellCheck` never runs, so nothing vets the word:
+        // "bonjuor" typed twice would clear the trie filter below and become
+        // permanently immune. Reading only the host policy here — as this line did
+        // until #287 — made the comment above untrue in exactly that configuration.
+        let autocorrectRuns = state.autocorrectEnabled && state.hostPolicy.autocorrectAllowed
+        var wordWasEvaluated = autocorrectRuns
+
+        // #530: the mirror has been caught holding characters this keyboard's own
+        // edits do not account for, so nothing may count characters off it until the
+        // keyboard gets a fresh input context.
+        //
+        // Learning is blocked here rather than only in the `.refused` branch below: a
+        // word the pipeline finds nothing wrong with never reaches that branch, and
+        // it would be learned off a document we cannot read correctly. A learned word
+        // bypasses autocorrect everywhere afterwards, which is far more expensive to
+        // undo than a skipped correction.
+        if mirrorSync.isSuspect {
+            wordWasEvaluated = false
+        }
+
+        let proposal = autocorrectRuns
+            ? state.performSpellCheck(
+                freshWord, previousWord: previousWord, isAtSentenceStart: atSentenceStart
+            )?.correction
+            : nil
+
+        switch memory.commit(
+            prefix: prefix, word: freshWord, proposedCorrection: proposal,
+            countable: wordWasEvaluated,
+            allowsCasingChange: proposal != nil && state.isInSupplementaryLexicon(freshWord)
+        ) {
+        case .correct:
+            guard let correction = proposal else { return false }
+            // Boundary-safe replacement (#191): re-read the LIVE context and
+            // verify it still ends with the word we plan to replace, with a
+            // proper boundary before it. Under proxy desync (rapid delete/retype
+            // producing phantom words like "quee"), the captured freshWord can
+            // disagree with the document — a blind count-based delete would eat
+            // the preceding space ("pense quee" -> "penseque"). On failure we
+            // skip the correction and fall through to a normal space.
+            // The gate and the delete both live in AutocorrectCountingSite now
+            // (#530), so the code that can destroy the user's text is reachable from
+            // `swift test`. It corrects the delete count for whatever the mirror is
+            // known to be over-reporting, and refuses only when it cannot.
+            switch applyAutocorrect(
+                state: state,
+                freshWord: freshWord,
+                correction: correction,
+                trailing: trailing,
+                previousWord: previousWord
+            ) {
+            case .applied:
+                memory.correctionApplied(prefix: prefix, corrected: correction)
+                return true
+
+            case .refused(let reason):
+                // Do NOT correct, do NOT delete. Fall through to the caller's own
+                // insert so the user keeps their typed word. The word may be a
+                // phantom ("quee") — don't learn it either.
+                #if DEBUG
+                AutocorrectDebugLog.replacementAborted(
+                    word: freshWord,
+                    reason: reason,
+                    contextTail: Self.contextTail(
+                        controller?.textDocumentProxy.documentContextBeforeInput
+                    )
+                )
+                #endif
+                return false
+            }
+
+        case .keepAndLearn:
+            // The user refused a correction at this very place (#872): keep what
+            // they typed, and one refusal is enough to learn it, as on Apple's
+            // keyboard. `learn` and not `recordUsage` — see `UserDictionary.learn`.
+            #if DEBUG
+            AutocorrectDebugLog.autocorrectSkipped(word: freshWord, reason: "refused-here")
+            #endif
+            if wordWasEvaluated {
+                UserDictionary.shared.learn(freshWord)
+            }
+            return false
+
+        case .keep(let countUsage):
+            // Repetition learning: the pipeline evaluated the word and did NOT
+            // correct it (user typed it as-is). Track usage — at the repetition
+            // threshold, learn it. Skipped when autocorrect never ran (see
+            // wordWasEvaluated above): those words were not vetted by the pipeline,
+            // and when this word was already counted at this place (#872).
+            //
+            // The dictionary check is the gate this site was missing (#287 decision 2).
+            // Passive typing states nothing about intent, so the only word worth
+            // recording here is one the base dictionary does not have: a word it does
+            // have is never autocorrected anyway, so an entry for it protects nothing
+            // while #288 would go on to feed it into speech recognition. Six ordinary
+            // French phrases used to leave 22 entries behind, 20 of them trie words.
+            //
+            // The check belongs here rather than inside UserDictionary because the undo
+            // site must NOT be subject to it — see `UserDictionary.recordUsage`.
+            if countUsage, wordWasEvaluated, state.isUnknownToDictionary(freshWord) {
+                UserDictionary.shared.recordUsage(freshWord)
+            }
+            return false
+        }
+    }
+
     /// Applies a validated autocorrection: deletes the typed word, inserts the
-    /// correction + trailing space, stores undo state and refreshes predictions.
+    /// correction + `trailing`, stores undo state and, after a space, refreshes
+    /// predictions. Without a trailing space the caller's insert does that.
     /// Only called after AutocorrectReplacement.check confirmed the live context
     /// ends with `freshWord` (#191) — `deleteCount` comes from that check.
     ///
@@ -973,6 +1041,7 @@ final class DictusKeyboardBridge: NSObject,
         state: SuggestionState,
         freshWord: String,
         correction: String,
+        trailing: String,
         previousWord: String?
     ) -> AutocorrectCountingSite.Outcome {
         // Decision and execution both live in DictusCore now (#530), so the code
@@ -983,18 +1052,20 @@ final class DictusKeyboardBridge: NSObject,
             editor: documentEditor,
             word: freshWord,
             correction: correction,
+            trailing: trailing,
             previousWord: previousWord,
             mirror: mirrorSync
         )
         guard case .applied = outcome else { return outcome }
-        lastInsertedCharacter = " "
 
         // Store undo state — user can tap suggestion bar to revert
         state.pendingUndo = AutocorrectState(
             originalWord: freshWord,
             correctedWord: correction,
-            insertedSpace: true
+            insertedSpace: !trailing.isEmpty
         )
+        guard !trailing.isEmpty else { return outcome }
+        lastInsertedCharacter = " "
         // No haptic on autocorrect (#224): the spacebar touchDown tick already fired
         // ~100ms earlier, and stacking a second haptic reads as a keyboard glitch.
         // Feedback is visual instead — the suggestion bar pulses its undo chip
@@ -1004,7 +1075,6 @@ final class DictusKeyboardBridge: NSObject,
         // Trigger n-gram predictions after autocorrection too.
         // The corrected word + space is now in the proxy — predict what comes next.
         state.clear()
-        state.rejectedWords.removeAll()
         let correctedContext = controller?.textDocumentProxy.documentContextBeforeInput
         state.updatePredictions(context: correctedContext)
         updateCapitalization()
@@ -1017,6 +1087,62 @@ final class DictusKeyboardBridge: NSObject,
     static func contextTail(_ context: String?) -> String {
         guard let context = context else { return "<nil>" }
         return String(context.suffix(30))
+    }
+
+    // MARK: - Refused corrections (#872)
+
+    /// The refusal memory, pointed at the document being edited.
+    var rejectionMemory: AutocorrectRejectionMemory? {
+        guard let memory = suggestionState?.rejectionMemory else { return nil }
+        let document = controller.flatMap {
+            DictusTextProxyIdentity.documentIdentifier(of: $0.textDocumentProxy)?.uuidString
+        }
+        memory.enter(document: document)
+        return memory
+    }
+
+    /// The host changed the text. When it left the document empty, as Messages does
+    /// on sending without changing the documentIdentifier, nothing remembered is at
+    /// any position any more. `hasText` answers for the whole document, so a caret
+    /// at the start of a non-empty field does not count.
+    func hostTextChanged() {
+        guard let proxy = controller?.textDocumentProxy, !proxy.hasText else { return }
+        rejectionMemory?.documentEmptied()
+    }
+
+    /// Learns a word restored by Undo once the user moves on past it unchanged.
+    /// Called before anything is inserted after a word boundary.
+    private func learnWordMovedPast() {
+        guard let state = suggestionState, let memory = rejectionMemory,
+              let word = memory.movingOn(context: controller?.textDocumentProxy.documentContextBeforeInput)
+        else { return }
+        // Same gate as every other learning site: autocorrect ran, and the mirror
+        // can be trusted (#287 decision 8, #530).
+        guard state.autocorrectEnabled, state.hostPolicy.autocorrectAllowed, !mirrorSync.isSuspect
+        else { return }
+        UserDictionary.shared.learn(word)
+    }
+
+    /// Takes a backspace into a correction Dictus made as the user refusing it.
+    private func noteDeletion(before: String?, after: String?) {
+        guard let corrected = rejectionMemory?.textDeleted(before: before, after: after) else { return }
+        #if DEBUG
+        AutocorrectDebugLog.autocorrectRefused(corrected: corrected, by: "backspace")
+        #endif
+    }
+
+    /// The space closes the undo window of the correction before it, except the
+    /// space typed right after the punctuation mark that made a correction (#872):
+    /// `cuisinr,` + space keeps `cuisine`'s undo chip until the next space.
+    private func closeUndoWindowAtSpace() {
+        guard let undo = suggestionState?.pendingUndo else { return }
+        if !undo.insertedSpace,
+           let context = controller?.textDocumentProxy.documentContextBeforeInput,
+           let mark = context.last, AutocorrectTrigger.commitsWord(String(mark)),
+           context.dropLast().hasSuffix(undo.correctedWord) {
+            return
+        }
+        suggestionState?.pendingUndo = nil
     }
 
     // MARK: - Auto-full-stop

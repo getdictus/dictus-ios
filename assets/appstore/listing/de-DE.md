@@ -83,9 +83,12 @@ DICTUS PRO
 
 Pro bringt die Smart Modes, Sprachnachrichten in der Tastatur, einen Verlauf deiner Diktate und dein eigenes Vokabular für Namen und Fachbegriffe.
 
-Teste Pro 14 Tage lang kostenlos. Du schließt nichts ab, und nichts verlängert sich: Nach 14 Tagen wechselt Dictus zurück zur kostenlosen Version und fragt dich, ob du Pro behalten möchtest. Dein Verlauf und dein Vokabular bleiben erhalten. Der Test wird auf iPhones angeboten, auf denen Smart Modes laufen können. Diktieren und Tastatur bleiben kostenlos.
+Teste Pro 14 Tage lang kostenlos. Der Test erfordert keine Zahlung und verlängert sich nicht: Nach 14 Tagen wechselt Dictus zurück zur kostenlosen Version und bietet dir an, Pro zu behalten, im Monats- oder Jahresabo oder als einmaligen Kauf auf Lebenszeit. Dein Verlauf und dein Vokabular bleiben erhalten. Der Test wird auf iPhones angeboten, auf denen Smart Modes laufen können. Diktieren und Tastatur bleiben kostenlos.
 
-Dictus erhebt keine Daten. Datenschutzerklärung: getdictus.com/privacy
+Um Pro zu behalten, wähle ein sich automatisch verlängerndes Monats- oder Jahresabo oder den einmaligen Kauf auf Lebenszeit, der kein Abo ist. Preis und Laufzeit jedes Angebots werden in der App und im App Store für dein Land angezeigt. Die Zahlung wird bei Bestätigung des Kaufs über deinen Apple Account abgerechnet. Das Abo verlängert sich automatisch um denselben Zeitraum, wenn die automatische Verlängerung nicht mindestens 24 Stunden vor Ende des laufenden Zeitraums deaktiviert wird; die Verlängerung wird innerhalb der 24 Stunden vor diesem Ende abgerechnet. Verwalte oder kündige dein Abo in den Einstellungen deines Apple Accounts.
+
+Nutzungsbedingungen: https://getdictus.com/en/terms
+Dictus erhebt keine Daten. Datenschutzerklärung: https://getdictus.com/en/privacy
 ```
 
 ## Length check
@@ -98,4 +101,4 @@ Measured with `python3` (`len()` for characters, UTF-8 bytes for the keywords, w
 | Subtitle | 30 | 26 |
 | Promotional text | 170 | 166 |
 | Keywords (bytes) | 100 | 96 |
-| Description | 4000 | 3166 |
+| Description | 4000 | 3940 |

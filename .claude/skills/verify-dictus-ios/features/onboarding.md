@@ -15,7 +15,7 @@
 - `onboarding.smart-mode-pick`: Pick three Smart Modes.
 - `onboarding.model-download`: Download and prepare the recommended model.
 - `onboarding.microphone`: Microphone permission.
-- `onboarding.first-dictation`: A first dictation in a practice field.
+- `onboarding.first-dictation`: A first dictation in a practice field. The field focuses itself and the keyboard opens with no tap; the globe animation, in the bottom of the onboarding's drawn iPhone (`onboarding.firstDictation.animation`), shows only once Apple's keyboard is up, between the field and the keyboard; Dictus's keyboard shows the mic banner (`onboarding.firstDictation.banner`). No focus within 1 s: « Touchez le champ pour ouvrir votre clavier », no animation. After 15 s on another keyboard without Dictus: « Continuer » (`onboarding.firstDictation.continue`) next to Skip. Three characters typed or dictated once Dictus has been up complete the step (#845).
 - `onboarding.stop-standby`: How to stop Dictus from the Dynamic Island.
 - `onboarding.completion`: « C'est prêt ».
 - `onboarding.resume`: An interrupted onboarding resumes at the same step.
@@ -44,4 +44,7 @@
 
 - **Never tap `onboarding.primary` on the language step** unless a download is wanted: it starts the model download. Jump past it with `set-default dictus.onboardingStep`.
 - `modelPreparation` downloads; `microphonePrompt` raises the system mic prompt; `firstDictation` records. Show them, do not complete them.
+- `firstDictation` reopens on the keyboard the device used last. To see the animation, long-press the globe (`Clavier suivant`) and pick an Apple keyboard; to see the banner, pick `Dictus, multilingue`. Typing three letters with the Dictus keyboard completes the step without a recording (Dictus keys are not in the accessibility tree: tap by coordinate).
+- On a fresh simulator, iOS's own keyboard tips (« Type français et anglais », swipe typing) cover the keyboard the first time it opens. Their `Continue` buttons come in pairs, so tap them by coordinate.
+- The 1 s fallback (« Touchez le champ… ») only shows when the focus fails, which a normal simulator run does not produce: neither Apple's nor Dictus's iPhone keyboard has a key that closes it.
 - The step is resumed only while `dictus.hasCompletedOnboarding` is false.

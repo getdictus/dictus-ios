@@ -53,6 +53,11 @@ public enum SharedKeys {
     public static let waveformEnergy = "dictus.waveformEnergy"
     /// Bool flag set by keyboard to request recording stop
     public static let stopRequested = "dictus.stopRequested"
+    /// Double: wall-clock time of the keyboard's stop tap, seconds since 1970 (#862).
+    /// Read and written only through `StopTimingTrace`.
+    public static let stopTapEpoch = "dictus.stopTapEpoch"
+    /// String: the keyboard session id the stop tap above belongs to (#862).
+    public static let stopTapSessionID = "dictus.stopTapSessionID"
     /// Bool flag set by keyboard to request recording cancellation
     public static let cancelRequested = "dictus.cancelRequested"
     /// Double: elapsed recording seconds, updated at ~5Hz during recording
@@ -251,6 +256,11 @@ public enum SharedKeys {
     public static let handoffToken = "dictus.handoffToken"
     /// String: the token the keyboard echoes beside `lastPolishedTranscription`.
     public static let lastPolishedHandoffToken = "dictus.lastPolishedHandoffToken"
+    /// String: the text of the last keyboard dictation the document refused, until the
+    /// user opens it in DictusApp or starts another dictation (#860). Read and written
+    /// only through `RecoveredTranscriptionChannel`; the keyboard's banner is drawn
+    /// from it.
+    public static let recoveredTranscription = "dictus.recoveredTranscription"
 
     // MARK: - Smart Modes (issue #79)
     /// String: identifier of the armed Smart Mode, or absent for Normal. Sticky —
@@ -396,6 +406,9 @@ public enum SharedKeys {
     public static let proTrialEndsAt = "dictus.proTrialEndsAt"
     /// Bool: the end-of-trial paywall has been shown. It is shown once (#593).
     public static let proTrialEndPaywallShown = "dictus.proTrialEndPaywallShown"
+    /// Bool: the launch reconcile restored, into an empty App Group, a trial that had
+    /// already ended (a reinstall). Its end-of-trial paywall is the ordinary one (#837).
+    public static let proTrialEndedBeforeInstall = "dictus.proTrialEndedBeforeInstall"
     /// Int: Smart Mode dictations that succeeded while the trial ran. Written by
     /// whichever process ran the mode, read by the end-of-trial recap.
     public static let proTrialSmartModeUses = "dictus.proTrialSmartModeUses"

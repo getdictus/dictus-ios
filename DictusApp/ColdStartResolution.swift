@@ -85,6 +85,9 @@ extension DictationCoordinator {
         // parked request, and leaving the flag set would let a later `didBecomeActive`
         // start a second dictation for a request already resolved.
         pendingColdStartDictation = false
+        // The parked start's activation may have raised it (#853). Nothing will recover a
+        // start that is reported or dropped here, and a retry re-reads it in `startDictation`.
+        isRecoveringAudioSession = false
         PersistentLog.log(.coldStartStranded(
             keyboardStatus: storedRaw ?? "nil",
             action: resolution.rawValue

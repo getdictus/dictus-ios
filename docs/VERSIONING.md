@@ -130,7 +130,14 @@ No tag to remember, `cut-testflight.sh` made `build/N`. Xcode → Product ▸ Ar
 
 **It authenticates with the App Store Connect API key, not the Xcode account, and that is deliberate.** Xcode 26 keeps its signed-in Apple Account somewhere `xcodebuild` does not read: the CLI resolves the legacy `IDEProvisioningTeams` preference instead, finds a stale free-Personal-Team entry with no keychain token, and dies with `exportArchive No Accounts` / `No signing certificate "iOS Distribution" found` — while Xcode's own Settings ▸ Apple Accounts shows the right account, healthy. Nothing is broken and re-adding the account does not help, because the CLI never looks there. The API key bypasses the account system entirely. Measured 2026-09-07 while cutting 1.8.2 (30).
 
-The key must be readable at `~/.asc/keys/AuthKey_<KEYID>.p8`. **Not** in `~/Downloads`, `~/Desktop` or `~/Documents`: macOS TCC blocks a terminal from reading those, and the symptom is `Operation not permitted` on a file `ls` displays perfectly. Move it with Finder, which is not subject to that restriction.
+The key is named by two environment variables, which the script refuses to start without. Both are in App Store Connect > Users and Access > Integrations > App Store Connect API, and they are the names `asc` itself reads:
+
+```sh
+export ASC_KEY_ID=<your-key-id>          # the key's Key ID
+export ASC_ISSUER_ID=<your-issuer-id>    # the Issuer ID above the keys table
+```
+
+The key must be readable at `~/.asc/keys/AuthKey_<ASC_KEY_ID>.p8`. **Not** in `~/Downloads`, `~/Desktop` or `~/Documents`: macOS TCC blocks a terminal from reading those, and the symptom is `Operation not permitted` on a file `ls` displays perfectly. Move it with Finder, which is not subject to that restriction.
 
 ### Promote a TestFlight build to the App Store
 

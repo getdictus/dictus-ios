@@ -24,11 +24,17 @@ public enum LiveActivityInterruptionAction: String, Equatable, Sendable {
 /// the activity that exists is kept and its content changes instead.
 public enum LiveActivityInterruptionPolicy {
 
-    /// At `.began`. Only the standby pill is paused: a dictation the call cuts off fails
-    /// as before, and its activity ends with it.
+    /// At `.began`. The standby pill is paused. A dictation's activity is left to the
+    /// dictation (#851): it decides at the same instant whether the captured audio is
+    /// transcribed (the pill goes on to transcribing, then ready) or the dictation
+    /// fails (`DictationCoordinator` ends the pill itself). Anything else ends.
     public static func atBegan(hasActivity: Bool, phase: LiveActivityStateMachine.Phase) -> LiveActivityInterruptionAction {
         guard hasActivity else { return .none }
-        return phase == .standby ? .pause : .end
+        switch phase {
+        case .standby: return .pause
+        case .recording, .transcribing, .processing: return .none
+        case .idle, .ready, .failed: return .end
+        }
     }
 
     /// At `.ended`, once the engine's resume has been tried.

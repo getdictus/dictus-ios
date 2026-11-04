@@ -150,7 +150,14 @@ final class SubscriptionManager: ObservableObject {
             }
         } catch {
             purchaseState = .failed(error.localizedDescription)
-            PersistentLog.log(.subscriptionError(action: "purchase", error: error.localizedDescription))
+            let nsError = error as NSError
+            PersistentLog.log(.subscriptionError(
+                action: "purchase",
+                error: error.localizedDescription,
+                product: product.id,
+                domain: nsError.domain,
+                code: nsError.code
+            ))
         }
     }
 
