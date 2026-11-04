@@ -229,24 +229,41 @@ jobs:
             -project Dictus.xcodeproj \
             -scheme DictusApp
 
-      # An iPhone whose runtime matches the selected Xcode's simulator SDK. Measured
-      # locally: on a runtime older than the Xcode (iOS 26.5 under Xcode 27.2) every
-      # SKTestSession call fails with SKInternalErrorDomain 3, so "any iPhone" is not
-      # enough. Fails here, by name, when the image has no matching runtime.
-      - name: Pick a simulator matching the SDK
+      # What the image offers, so the log shows why the next step chose what it chose.
+      - name: Show installed Xcodes and iOS runtimes
         run: |
-          SDK=$(xcrun --sdk iphonesimulator --show-sdk-version)
-          echo "iphonesimulator SDK: $SDK"
+          ls -d /Applications/Xcode*.app
+          xcrun simctl list runtimes
+
+      # SKTestSession is broken on the iOS 26.3 to 26.5 simulator runtimes: every call
+      # fails with SKInternalErrorDomain 3 and `buyProduct` throws `notEntitled`
+      # (FB22237318 and public reports; measured here on 26.4.1 in CI and on 26.5
+      # locally, while 27.2 passes locally). So:
+      # - B: an Xcode 27 with an iOS 27 runtime on the image, used for this job only;
+      # - A, otherwise: Xcode 26.4.1 kept, an iPhone on the iOS 26.2 runtime the image
+      #   ships. Nothing is installed; no such iPhone fails here, by name.
+      - name: Pick Xcode and simulator for SKTestSession
+        run: |
+          XCODE27=$(ls -d /Applications/Xcode_27*.app 2>/dev/null | tail -1 || true)
+          if [ -n "$XCODE27" ] && xcrun simctl list runtimes available | grep -q "^iOS 27\."; then
+            echo "Option B: $XCODE27 with an iOS 27 runtime"
+            sudo xcode-select -s "$XCODE27"
+            xcodebuild -version
+            WANT=27
+          else
+            echo "Option A: no Xcode 27 with an iOS 27 runtime; Xcode 26.4.1 and iOS 26.2"
+            WANT=26.2
+          fi
           xcrun simctl list -j runtimes available > "$RUNNER_TEMP/runtimes.json"
           xcrun simctl list -j devices available > "$RUNNER_TEMP/devices.json"
-          PICK=$(python3 - "$SDK" "$RUNNER_TEMP/runtimes.json" "$RUNNER_TEMP/devices.json" <<'PY'
+          PICK=$(python3 - "$WANT" "$RUNNER_TEMP/runtimes.json" "$RUNNER_TEMP/devices.json" <<'PY'
           import json, sys
-          sdk, runtimes_path, devices_path = sys.argv[1:4]
-          want = sdk.split(".")[:2]
+          want, runtimes_path, devices_path = sys.argv[1:4]
+          prefix = want.split(".")
           runtimes = [r for r in json.load(open(runtimes_path))["runtimes"]
-                      if r.get("platform") == "iOS" and r["version"].split(".")[:2] == want]
+                      if r.get("platform") == "iOS" and r["version"].split(".")[:len(prefix)] == prefix]
           devices = json.load(open(devices_path))["devices"]
-          for runtime in sorted(runtimes, key=lambda r: r["version"], reverse=True):
+          for runtime in sorted(runtimes, key=lambda r: [int(x) for x in r["version"].split(".")], reverse=True):
               phones = [d for d in devices.get(runtime["identifier"], [])
                         if d["name"].startswith("iPhone") and d.get("isAvailable", True)]
               if phones:
@@ -256,8 +273,7 @@ jobs:
           PY
           )
           if [ -z "$PICK" ]; then
-            echo "::error::No available iPhone simulator on an iOS $SDK runtime. SKTestSession needs the runtime to match the SDK."
-            xcrun simctl list runtimes
+            echo "::error::No available iPhone simulator on an iOS $WANT runtime. SKTestSession fails on iOS 26.3 to 26.5 (SKInternalErrorDomain 3), so no other runtime is taken."
             exit 1
           fi
           IFS='|' read -r UDID RUNTIME NAME <<<"$PICK"
