@@ -209,6 +209,17 @@ final class SubscriptionManager: ObservableObject {
         }
     }
 
+    /// Re-reads the entitlements, called when the app comes back to the foreground (#900).
+    ///
+    /// WHY on top of `Transaction.updates` and the launch scan: a purchase made outside
+    /// the app (an offer code redeemed through a link or the App Store) while the app
+    /// sat in the background was only picked up by the next launch or the next event.
+    /// Same scan as everywhere else, so there stays one place that decides `isPaid`; an
+    /// overlap with the launch scan is resolved by `ProScanGeneration`.
+    func refreshEntitlements() async {
+        await updateProStatus()
+    }
+
     /// Reset purchaseState to idle — called by PaywallView after dismissing error alerts.
     func resetState() {
         purchaseState = .idle
