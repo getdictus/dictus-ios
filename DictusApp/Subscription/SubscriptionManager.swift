@@ -59,20 +59,29 @@ final class SubscriptionManager: ObservableObject {
     /// Numbers overlapping entitlement scans so only the latest publishes (#216).
     private var scanGenerations = ProScanGeneration()
 
-    init(proStatus: ProStatusManager) {
+    /// The launch's product fetch and entitlement scan. Kept so a test can wait for it
+    /// to finish before buying, and know any later change came from another scan.
+    private(set) var launchScan: Task<Void, Never>?
+
+    /// - Parameter listensForUpdates: `false` only in tests (#900), so that the
+    ///   `Transaction.updates` and subscription status listeners cannot unlock Pro and
+    ///   only an explicit scan can. The app always uses the default.
+    init(proStatus: ProStatusManager, listensForUpdates: Bool = true) {
         self.proStatus = proStatus
         // Start listening IMMEDIATELY at init — before any view renders.
         // WHY: If user purchased on another device or subscription renewed
         // while the app was killed, Transaction.updates delivers those
         // transactions on next launch. Missing them = stale Pro status.
-        transactionListener = listenForTransactions()
-        statusListener = listenForStatusUpdates()
+        if listensForUpdates {
+            transactionListener = listenForTransactions()
+            statusListener = listenForStatusUpdates()
+        }
         // Products first, then the entitlement scan (passive, no sign-in prompt).
         // WHY in that order: the scan's grace-period check reads the subscription
         // status through a loaded product, and run in parallel it could find none
         // and leave a subscriber in grace period unpaid until the next event.
         // `loadProducts()` never throws, so the scan runs even when the fetch fails.
-        Task {
+        launchScan = Task {
             await loadProducts()
             await updateProStatus()
         }
