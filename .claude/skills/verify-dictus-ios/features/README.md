@@ -163,6 +163,7 @@ Every ID in this map, in one table: the 18 features first, then their 117 sub-fe
 | `pro.hub` | Pro | non |
 | `pro.paywall` | Pro | non |
 | `pro.restore` | Pro | non |
+| `pro.redeem-code` | Pro | non |
 | `pro.trial` | Pro | non |
 | `pro.trial-end` | Pro | non |
 | `pro.demo` | Pro | non |
