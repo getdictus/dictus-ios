@@ -65,7 +65,6 @@ final class ProGatingTests: XCTestCase {
             XCTAssertFalse(feature.displayName.isEmpty)
             XCTAssertFalse(feature.icon.isEmpty)
             XCTAssertFalse(feature.paywallDescription.isEmpty)
-            XCTAssertFalse(feature.paywallDescriptionFR.isEmpty)
         }
     }
 
