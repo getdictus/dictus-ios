@@ -548,6 +548,10 @@ class KeyboardViewController: UIInputViewController {
             keyboard.updateTheme(theme: Theme.current(for: traitCollection))
         }
 
+        // Back to the letters if the keyboard was hidden on 123 or #+= (#889), before
+        // the shift state below is computed for the letters page.
+        bridge?.showLettersOnAppearance()
+
         // Set initial shift state based on the text field's autocapitalization setting.
         // WHY here and not viewDidLoad: The textDocumentProxy is not fully connected
         // until the view is about to appear. Calling in viewDidLoad would read stale data.

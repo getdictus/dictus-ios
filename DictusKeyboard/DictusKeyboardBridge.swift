@@ -858,6 +858,23 @@ final class DictusKeyboardBridge: NSObject,
         isManualShift = false
     }
 
+    /// The keyboard always opens on the letters (#889). Called on every appearance,
+    /// before `updateCapitalization`, so a field that wants a capital still gets one.
+    ///
+    /// WHY on every appearance: the page lives in the key grid view, which iOS keeps
+    /// or recreates as it pleases, so without this a keyboard hidden on 123 or #+=
+    /// came back there only some of the time. The #504 state goes with the page: a
+    /// space must not count characters typed on symbols before the keyboard was
+    /// hidden, and caps lock is not given back, as on Android (#291).
+    func showLettersOnAppearance() {
+        typedOnSymbols = false
+        capsLockBeforeSymbols = false
+        guard let kbView = keyboardView,
+              kbView.page == .symbols1 || kbView.page == .symbols2 else { return }
+        kbView.page = .normal
+        isManualShift = false
+    }
+
     /// Handle #+=/123 toggle on symbols pages.
     /// Toggles between symbols1 and symbols2.
     private func handleShiftSymbolsToggle() {
