@@ -498,6 +498,10 @@ public enum LogEvent: Sendable {
     /// self-diagnosing: before it, a stranded dictation left no trace at all
     /// beyond a `dictationDeferred` followed by silence.
     case coldStartStranded(keyboardStatus: String, action: String)
+    /// A keyboard cold start whose reset wait ran out kept waiting while the keyboard did,
+    /// and the reset landed after `waitedMs` (#899). The activation that follows is the start's
+    /// single retry; `failedAttempts` is how many activations had been refused before it.
+    case coldStartRetryAfterMediaServicesReset(waitedMs: Int, failedAttempts: Int)
 
     // MARK: Subscription
     /// `product`, `domain` and `code` are only set by a failed purchase (#842): the
@@ -751,7 +755,8 @@ public enum LogEvent: Sendable {
         case .dictationDeferred, .dictationStateReconciled, .recordingInterrupted,
              .watchdogReset, .stageWatchdogRearmed, .engineWarmUpFailed, .recordingTooShort,
              .waveformStall, .waveformTimelineNotFiring,
-             .coldStartDarwinFallback, .coldStartStranded, .modelPrewarmTimeout,
+             .coldStartDarwinFallback, .coldStartStranded, .coldStartRetryAfterMediaServicesReset,
+             .modelPrewarmTimeout,
              .audioInterruptionBegan, .audioMediaServicesLost, .audioMediaServicesReset,
              .modelDownloadStalled, .audioHapticsAllowanceFailed, .audioInputMuteFailed,
              .modelDownloadSizeMismatch, .modelDownloadRangeRejected,
@@ -1143,6 +1148,8 @@ public enum LogEvent: Sendable {
             return "keyboardStatus=\(keyboardStatus)"
         case .coldStartDarwinFallback(let elapsedMs, let status):
             return "elapsedMs=\(elapsedMs) status=\(status)"
+        case .coldStartRetryAfterMediaServicesReset(let waitedMs, let failedAttempts):
+            return "waitedMs=\(waitedMs) failedAttempts=\(failedAttempts)"
         case .coldStartStranded(let keyboardStatus, let action):
             return "keyboardStatus=\(keyboardStatus) action=\(action)"
 
@@ -1310,7 +1317,7 @@ extension LogEvent {
              .onboardingSceneSequenceSkipped, .onboardingWentBack, .onboardingStopStandbyShown:
             return .lifecycle
         case .coldStartURLReceived, .coldStartFlagSet, .coldStartRetry, .coldStartDarwinFallback,
-             .coldStartStranded:
+             .coldStartStranded, .coldStartRetryAfterMediaServicesReset:
             return .lifecycle
         case .logExportCompleted:
             return .lifecycle
@@ -1451,6 +1458,7 @@ extension LogEvent {
         case .coldStartRetry: return "coldStartRetry"
         case .coldStartDarwinFallback: return "coldStartDarwinFallback"
         case .coldStartStranded: return "coldStartStranded"
+        case .coldStartRetryAfterMediaServicesReset: return "coldStartRetryAfterMediaServicesReset"
         case .subscriptionError: return "subscriptionError"
         case .logExportCompleted: return "logExportCompleted"
         case .transcriptionPerformance: return "transcriptionPerformance"
