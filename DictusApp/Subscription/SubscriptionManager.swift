@@ -196,12 +196,26 @@ final class SubscriptionManager: ObservableObject {
     /// cleanly, not whether a code was redeemed. A redeemed code produces a
     /// transaction, which StoreKit delivers through `Transaction.updates`, so
     /// `listenForTransactions()` refreshes the entitlement as it does for a renewal.
+    ///
+    /// WHY a cancellation is not an error: closing the sheet with its cross comes back
+    /// as `StoreKitError.userCancelled`, and was logged as `subscriptionError` (device
+    /// log, 2026-11-05). `OfferCodeSheetOutcome` tells a close from a real failure.
     func offerCodeSheetClosed(_ result: Result<Void, Error>) {
+        let failure: NSError?
         switch result {
-        case .success:
-            Self.logStoreKit(action: "offerCodeSheetClosed", details: "result=success")
-        case .failure(let error):
-            PersistentLog.log(.subscriptionError(action: "offerCodeRedemption", error: error.localizedDescription))
+        case .success: failure = nil
+        case .failure(let error): failure = error as NSError
+        }
+        let outcome = OfferCodeSheetOutcome.classify(errorDomain: failure?.domain, code: failure?.code ?? 0)
+        if let logResult = outcome.logResult {
+            Self.logStoreKit(action: "offerCodeSheetClosed", details: "result=\(logResult)")
+        } else if let failure {
+            PersistentLog.log(.subscriptionError(
+                action: "offerCodeRedemption",
+                error: failure.localizedDescription,
+                domain: failure.domain,
+                code: failure.code
+            ))
         }
     }
 
