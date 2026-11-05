@@ -348,8 +348,6 @@ struct SettingsView: View {
                     }
                 }
 
-                DefaultLayerPicker()
-
                 Picker("Layout", selection: layoutSelection) {
                     // Iterate over LayoutType so adding a layout (QWERTZ in #151,
                     // any future one) only requires the enum case — the entries used

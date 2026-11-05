@@ -19,7 +19,7 @@ import Foundation
 ///
 /// Lives in DictusCore rather than DictusKeyboard so the transition rule below is
 /// unit-testable — the keyboard extension target has no test bundle. Same
-/// reasoning as `DefaultKeyboardLayer` and `LayoutType`.
+/// reasoning as `LayoutType`.
 public enum KeyboardAreaMode: String, Equatable, CaseIterable, Sendable {
     /// The UIKit key grid. Toolbar sits above it at 52 pt.
     case keys
