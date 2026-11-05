@@ -193,3 +193,122 @@ jobs:
       - name: Run DictusCore tests (swift test)
         working-directory: DictusCore
         run: swift test
+
+  # The DictusApp unit tests (#900), today the SKTestSession test of a lifetime bought
+  # outside the app. Its own job, like `test`, so a red test reads as a test failure.
+  # It cannot live in `test`: under `swift test` on macOS SKTestSession refuses the
+  # purchase with `notEntitled`, so it needs an app host on a simulator.
+  app-tests:
+    name: App Tests (iOS Simulator)
+    runs-on: macos-26
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      # Same toolchain as the build job, for the same reasons (see its comment).
+      - name: Select Xcode 26.4.1
+        run: sudo xcode-select -s /Applications/Xcode_26.4.1.app
+
+      - name: Show Xcode version
+        run: xcodebuild -version
+
+      - name: Cache SwiftPM
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/Library/Developer/Xcode/DerivedData/**/SourcePackages
+            ~/Library/Caches/org.swift.swiftpm
+          # Same keys as the build job (see its comment on `fa015`).
+          key: spm-fa015-${{ runner.os }}-${{ hashFiles('Dictus.xcodeproj/project.pbxproj', 'DictusCore/Package.swift') }}
+          restore-keys: |
+            spm-fa015-${{ runner.os }}-
+
+      - name: Resolve SwiftPM dependencies
+        run: |
+          xcodebuild -resolvePackageDependencies \
+            -project Dictus.xcodeproj \
+            -scheme DictusApp
+
+      # What the image offers, so the log shows why the next step chose what it chose.
+      - name: Show installed Xcodes and iOS runtimes
+        run: |
+          ls -d /Applications/Xcode*.app
+          xcrun simctl list runtimes
+
+      # SKTestSession is broken on the iOS 26.3 to 26.5 simulator runtimes: every call
+      # fails with SKInternalErrorDomain 3 and `buyProduct` throws `notEntitled`
+      # (FB22237318 and public reports; measured here on 26.4.1 in CI and on 26.5
+      # locally, while 27.2 passes locally). So:
+      # - B: an Xcode 27 with an iOS 27 runtime on the image, used for this job only;
+      # - A, otherwise: Xcode 26.4.1 kept, an iPhone on the iOS 26.2 runtime the image
+      #   ships. Nothing is installed; no such iPhone fails here, by name.
+      - name: Pick Xcode and simulator for SKTestSession
+        run: |
+          XCODE27=$(ls -d /Applications/Xcode_27*.app 2>/dev/null | tail -1 || true)
+          if [ -n "$XCODE27" ] && xcrun simctl list runtimes available | grep -q "^iOS 27\."; then
+            echo "Option B: $XCODE27 with an iOS 27 runtime"
+            sudo xcode-select -s "$XCODE27"
+            xcodebuild -version
+            WANT=27
+          else
+            echo "Option A: no Xcode 27 with an iOS 27 runtime; Xcode 26.4.1 and iOS 26.2"
+            WANT=26.2
+          fi
+          xcrun simctl list -j runtimes available > "$RUNNER_TEMP/runtimes.json"
+          xcrun simctl list -j devices available > "$RUNNER_TEMP/devices.json"
+          PICK=$(python3 - "$WANT" "$RUNNER_TEMP/runtimes.json" "$RUNNER_TEMP/devices.json" <<'PY'
+          import json, sys
+          want, runtimes_path, devices_path = sys.argv[1:4]
+          prefix = want.split(".")
+          runtimes = [r for r in json.load(open(runtimes_path))["runtimes"]
+                      if r.get("platform") == "iOS" and r["version"].split(".")[:len(prefix)] == prefix]
+          devices = json.load(open(devices_path))["devices"]
+          for runtime in sorted(runtimes, key=lambda r: [int(x) for x in r["version"].split(".")], reverse=True):
+              phones = [d for d in devices.get(runtime["identifier"], [])
+                        if d["name"].startswith("iPhone") and d.get("isAvailable", True)]
+              if phones:
+                  phone = sorted(phones, key=lambda d: d["name"])[-1]
+                  print(phone["udid"], runtime["version"], phone["name"], sep="|")
+                  break
+          PY
+          )
+          if [ -z "$PICK" ]; then
+            echo "::error::No available iPhone simulator on an iOS $WANT runtime. SKTestSession fails on iOS 26.3 to 26.5 (SKInternalErrorDomain 3), so no other runtime is taken."
+            exit 1
+          fi
+          IFS='|' read -r UDID RUNTIME NAME <<<"$PICK"
+          echo "Simulator: $NAME, iOS $RUNTIME, $UDID"
+          echo "SIM_UDID=$UDID" >> "$GITHUB_ENV"
+
+      # Raw xcodebuild output in a file, filtered on screen: xcbeautify would rewrite
+      # the "Test Case ... passed" lines the next step looks for.
+      - name: Run DictusAppTests (xcodebuild test)
+        run: |
+          set -o pipefail
+          xcodebuild test \
+            -project Dictus.xcodeproj \
+            -scheme DictusApp \
+            -configuration Debug \
+            -destination "platform=iOS Simulator,id=$SIM_UDID" \
+            -derivedDataPath build/DerivedData \
+            -only-testing:DictusAppTests \
+            -test-timeouts-enabled YES \
+            -default-test-execution-time-allowance 120 \
+            -maximum-test-execution-time-allowance 180 \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_IDENTITY="" \
+            2>&1 | tee "$RUNNER_TEMP/app-tests.log" \
+            | grep -E --line-buffered "error:|Test Case|Executed|\*\* |Testing failed|hung"
+
+      - name: Show the SubscriptionForegroundRefreshTests result
+        run: grep -E "Test Case .*SubscriptionForegroundRefreshTests.* passed" "$RUNNER_TEMP/app-tests.log"
+
+      - name: Upload test log on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-tests-log
+          path: ${{ runner.temp }}/app-tests.log
+          retention-days: 7
+          if-no-files-found: ignore

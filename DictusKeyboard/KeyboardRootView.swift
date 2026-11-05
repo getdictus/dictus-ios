@@ -3,16 +3,6 @@ import SwiftUI
 import Combine
 import DictusCore
 
-/// Bridge between DictusCore's DefaultKeyboardLayer and DictusKeyboard's KeyboardLayerType.
-extension DefaultKeyboardLayer {
-    var asLayerType: KeyboardLayerType {
-        switch self {
-        case .letters: return .letters
-        case .numbers: return .numbers
-        }
-    }
-}
-
 /// Root SwiftUI view for the keyboard extension chrome (toolbar + full-area
 /// presentations).
 ///

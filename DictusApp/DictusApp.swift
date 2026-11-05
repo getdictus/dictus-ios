@@ -331,9 +331,9 @@ struct DictusApp: App {
         WhatsNew.recordLaunch(deviceCanRunSmartModes: SmartModeAvailability.deviceIsCapable)
 
         // Retire App Group keys nothing reads any more (#361 removed the #357 probe's
-        // arming flag). A device where the debug toggle was left on carries a `true`
-        // for a key that no longer exists in code, and this is the only process that
-        // owns hygiene over shared state.
+        // arming flag, #888 the « open on 123 » setting). A device where one was set
+        // carries a value for a key that no longer exists in code, and this is the
+        // only process that owns hygiene over shared state.
         SharedKeys.clearRetiredKeys()
 
         // Read n-gram diagnostic written by keyboard extension
@@ -438,6 +438,9 @@ struct DictusApp: App {
                     case .active:
                         PersistentLog.log(.appDidBecomeActive)
                         catchUpOnProtectedData(trigger: "didBecomeActive")
+                        // A purchase made outside the app while it was in the
+                        // background unlocks Pro on return (#900).
+                        Task { await subscriptionManager.refreshEntitlements() }
                         // #620's cold path: a voice note shared while the app was not
                         // running starts now, with the list on screen.
                         VoiceNoteProcessor.shared.appBecameActive()

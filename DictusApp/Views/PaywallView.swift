@@ -65,6 +65,9 @@ struct PaywallView: View {
     /// Drives the staged entrance animation of the thank-you screen elements.
     @State private var successEntrance = false
 
+    /// Presents Apple's offer code sheet (#787).
+    @State private var showsOfferCodeRedemption = false
+
     /// The feature whose screen is pushed onto the hub's stack (#216 decision 4).
     @State private var openedFeature: ProFeature?
 
@@ -235,6 +238,11 @@ struct PaywallView: View {
             Button("OK") { subscriptionManager.resetState() }
         } message: {
             Text(errorMessage)
+        }
+        // On the screen and not on its button: redeeming can flip `sellsPlans` and
+        // remove the button while the sheet is still closing.
+        .offerCodeRedemption(isPresented: $showsOfferCodeRedemption) { result in
+            subscriptionManager.offerCodeSheetClosed(result)
         }
         // Closing it any way but a purchase closes the paywall too (#724): the user
         // has now declined twice, and a third screen would be the nag the decision
@@ -963,6 +971,16 @@ struct PaywallView: View {
                 }
                 .font(.dictusCaption)
                 .accessibilityLabel("Restore previous purchases")
+
+                // Apple's own offer code sheet (#787): the codes are made in App Store
+                // Connect, so a gifted code grants the same Pro product the plans above
+                // sell. Same neutral wording rule as the issue: the label says what
+                // the button does, never where a code comes from.
+                Button("Redeem a code") {
+                    showsOfferCodeRedemption = true
+                }
+                .font(.dictusCaption)
+                .accessibilityIdentifier("paywall.redeemCode")
             }
 
             HStack(spacing: 16) {
