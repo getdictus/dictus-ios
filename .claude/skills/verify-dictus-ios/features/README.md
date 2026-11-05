@@ -13,7 +13,7 @@ Each file has the same four sections: **Sub-features** (each with its own stable
 | [`dictation.return-to-app`](dictation.return-to-app.md) | Return to the app you were typing in | Gratuit | Cold start only; return = device |
 | [`models.transcription`](models.transcription.md) | Transcription models | Gratuit | Yes (download is real traffic); RAM gates no |
 | [`polish`](polish.md) | Polish | Gratuit, needs Apple Intelligence | Toggle only |
-| [`smart-modes`](smart-modes.md) | Smart Modes | Pro | Fan and settings; no rewrite (no Apple Intelligence); the refusal message with Debug keys (#455) |
+| [`smart-modes`](smart-modes.md) | Smart Modes | Pro | Fan, Home ring and settings; no rewrite (no Apple Intelligence); the refusal message with Debug keys (#455) |
 | [`history`](history.md) | History of transcriptions | Pro | Empty state and settings |
 | [`vocabulary`](vocabulary.md) | Custom vocabulary | Pro | Yes, except its effect on a transcript |
 | [`voice-notes`](voice-notes.md) | Voice notes transcription | Pro | Keyboard reader and settings; no share sheet |
@@ -31,7 +31,7 @@ Out of the map on purpose: the "Developer" section of Réglages (Debug builds on
 
 ## All IDs
 
-Every ID in this map, in one table: the 18 features first, then their 116 sub-features (in the order of the feature files), then the 56 screens of [screens.md](screens.md) — 190 IDs in all. **Gratuit/Pro** is the tier of the feature the ID belongs to. **Spécifique iOS** is « oui » when the ID has no Android equivalent to compare against: the keyboard-to-app hand-off and Full Access (an iOS keyboard extension cannot record and must ask for Full Access), return to the host app, Apple Intelligence (polish), the Dynamic Island (Live Activity, stopping standby), and the App Group check.
+Every ID in this map, in one table: the 18 features first, then their 117 sub-features (in the order of the feature files), then the 57 screens of [screens.md](screens.md) — 192 IDs in all. **Gratuit/Pro** is the tier of the feature the ID belongs to. **Spécifique iOS** is « oui » when the ID has no Android equivalent to compare against: the keyboard-to-app hand-off and Full Access (an iOS keyboard extension cannot record and must ask for Full Access), return to the host app, Apple Intelligence (polish), the Dynamic Island (Live Activity, stopping standby), and the App Group check.
 
 | ID | Gratuit/Pro | Spécifique iOS |
 | --- | --- | --- |
@@ -90,6 +90,7 @@ Every ID in this map, in one table: the 18 features first, then their 116 sub-fe
 | `smart-modes.translate` | Pro | non |
 | `smart-modes.pin` | Pro | non |
 | `smart-modes.toggle` | Pro | non |
+| `smart-modes.home-ring` | Pro | non |
 | `history.list` | Pro | non |
 | `history.search` | Pro | non |
 | `history.delete` | Pro | non |
@@ -185,6 +186,7 @@ Every ID in this map, in one table: the 18 features first, then their 116 sub-fe
 | `app.onboarding.completion` | Gratuit | non |
 | `app.whats-new` | Gratuit | non |
 | `app.home` | Gratuit | non |
+| `app.home.smart-mode-ring` | Pro | non |
 | `app.recording` | Gratuit | non |
 | `app.history` | Pro | non |
 | `app.history.detail` | Pro | non |
