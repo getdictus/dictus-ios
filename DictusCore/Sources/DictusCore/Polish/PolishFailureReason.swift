@@ -39,6 +39,9 @@ public struct PolishFailureReason: Sendable, Hashable, Codable, CustomStringConv
     // The nine `LanguageModelSession.GenerationError` cases, one slug each. The
     // names match Apple's case names deliberately: the reason in an export can
     // be searched straight against Apple's documentation. One exception, below.
+    // iOS 27's `LanguageModelError` reuses these where it only renamed a case
+    // (`contextSizeExceeded`, `unsupportedGenerationGuide`), so one failure keeps
+    // one slug across the two OS versions.
 
     public static let exceededContextWindowSize = PolishFailureReason(slug: "exceededContextWindowSize")
     public static let assetsUnavailable = PolishFailureReason(slug: "assetsUnavailable")
@@ -55,6 +58,14 @@ public struct PolishFailureReason: Sendable, Hashable, Codable, CustomStringConv
     public static let rateLimited = PolishFailureReason(slug: "rateLimited")
     public static let concurrentRequests = PolishFailureReason(slug: "concurrentRequests")
     public static let refusal = PolishFailureReason(slug: "refusal")
+
+    // The three iOS 27 `LanguageModelError` cases with no `GenerationError`
+    // counterpart (#826), under Apple's names for the same reason as above. None
+    // is a refusal: each is about the call, not about the words.
+
+    public static let unsupportedCapability = PolishFailureReason(slug: "unsupportedCapability")
+    public static let unsupportedTranscriptContent = PolishFailureReason(slug: "unsupportedTranscriptContent")
+    public static let timeout = PolishFailureReason(slug: "timeout")
 
     /// Whether the model declined this text, as opposed to failing to run (#455).
     ///

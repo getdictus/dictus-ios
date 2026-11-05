@@ -95,22 +95,10 @@ struct FramedAppleFMPolishEngine: PolishEngineProtocol {
         AppleFoundationModelsPolishEngine.inputLanguageSupport(countedCodes: countedCodes)
     }
 
+    /// Delegated to the shipping engine for the same reason: one throw, one slug,
+    /// whichever of `GenerationError` and iOS 27's `LanguageModelError` it is (#826).
     func failureReason(for error: Error) -> PolishFailureReason {
-        guard let generationError = error as? LanguageModelSession.GenerationError else {
-            return .other(error)
-        }
-        switch generationError {
-        case .exceededContextWindowSize: return .exceededContextWindowSize
-        case .assetsUnavailable: return .assetsUnavailable
-        case .guardrailViolation: return .safetyRefusal
-        case .unsupportedGuide: return .unsupportedGuide
-        case .unsupportedLanguageOrLocale: return .unsupportedLanguageOrLocale
-        case .decodingFailure: return .decodingFailure
-        case .rateLimited: return .rateLimited
-        case .concurrentRequests: return .concurrentRequests
-        case .refusal: return .refusal
-        @unknown default: return .other(error)
-        }
+        AppleFoundationModelsPolishEngine.failureReason(for: error)
     }
 }
 #endif

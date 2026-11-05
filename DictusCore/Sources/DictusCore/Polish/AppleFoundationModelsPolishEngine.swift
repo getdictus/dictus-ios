@@ -161,7 +161,7 @@ public final class AppleFoundationModelsPolishEngine: PolishEngineProtocol, Send
     /// Map what `session.respond(...)` threw onto a stable slug.
     ///
     /// This is the whole point of #315: a failure that arrives in 4 ms while
-    /// availability reads `available` has to say which of Apple's nine
+    /// availability reads `available` has to say which of Apple's
     /// `GenerationError` cases it was. Two of them can plausibly throw that
     /// fast without the model running — `rateLimited` and `concurrentRequests` —
     /// and they point at opposite culprits: a quota Apple applies to us, or two
@@ -172,6 +172,26 @@ public final class AppleFoundationModelsPolishEngine: PolishEngineProtocol, Send
     /// `Context.debugDescription` can quote the prompt, i.e. the user's
     /// dictation, and this value travels into a shared export.
     public func failureReason(for error: Error) -> PolishFailureReason {
+        Self.failureReason(for: error)
+    }
+
+    /// The mapping itself, shared with the eval harness and the Debug refusal
+    /// engine so the three never classify the same throw differently.
+    public static func failureReason(for error: Error) -> PolishFailureReason {
+        // iOS 27 throws `LanguageModelError` and deprecates `GenerationError` (#826).
+        // Unread, a refusal arriving as the new type would land in
+        // `other:LanguageModelError`, and the user would get the generic failure
+        // instead of their text and the refusal message (#455).
+        //
+        // WHY `#if compiler(>=6.4)`: the type exists only in the iOS 27 SDK, and CI
+        // still builds with Xcode 26.4.1 (Swift 6.3), where naming it fails to
+        // compile. Swift 6.4 ships with that SDK and no earlier one. `#available`
+        // then keeps an iOS 26 device, which cannot throw it, off the branch.
+        #if compiler(>=6.4)
+        if #available(iOS 27.0, macOS 27.0, *), let languageModelError = error as? LanguageModelError {
+            return failureReason(for: languageModelError)
+        }
+        #endif
         guard let generationError = error as? LanguageModelSession.GenerationError else {
             return .other(error)
         }
@@ -191,6 +211,30 @@ public final class AppleFoundationModelsPolishEngine: PolishEngineProtocol, Send
         @unknown default: return .other(error)
         }
     }
+
+    #if compiler(>=6.4)
+    /// The iOS 27 cases (#826), onto the slugs `GenerationError` already used
+    /// wherever Apple only renamed the case, so an export from iOS 26 and one from
+    /// iOS 27 count the same failure under the same word. Apple's two refusals stay
+    /// `safetyRefusal` and `refusal`, which is what keeps #455's behaviour.
+    @available(iOS 27.0, macOS 27.0, *)
+    static func failureReason(for error: LanguageModelError) -> PolishFailureReason {
+        switch error {
+        case .contextSizeExceeded: return .exceededContextWindowSize
+        case .rateLimited: return .rateLimited
+        case .guardrailViolation: return .safetyRefusal
+        case .refusal: return .refusal
+        case .unsupportedGenerationGuide: return .unsupportedGuide
+        case .unsupportedLanguageOrLocale: return .unsupportedLanguageOrLocale
+        case .unsupportedCapability: return .unsupportedCapability
+        case .unsupportedTranscriptContent: return .unsupportedTranscriptContent
+        case .timeout: return .timeout
+        // `@nonexhaustive`: a later OS can add a case. The catch-all keeps its
+        // type name, so it is still visible in an export.
+        @unknown default: return .other(error)
+        }
+    }
+    #endif
 
     // MARK: - Input-language pre-flight (#490)
 
