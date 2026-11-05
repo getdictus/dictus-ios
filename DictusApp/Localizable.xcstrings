@@ -9051,6 +9051,28 @@
         }
       }
     },
+    "Redeem a code" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Code einlösen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Canjear un código"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saisir un code"
+          }
+        }
+      }
+    },
     "Reformulate your text with on-device AI" : {
       "extractionState" : "stale",
       "localizations" : {

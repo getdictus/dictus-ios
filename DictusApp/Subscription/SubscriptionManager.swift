@@ -181,6 +181,21 @@ final class SubscriptionManager: ObservableObject {
         }
     }
 
+    /// Logs how Apple's offer code sheet closed (#787).
+    ///
+    /// WHY no status refresh here: the sheet's result only says whether it closed
+    /// cleanly, not whether a code was redeemed. A redeemed code produces a
+    /// transaction, which StoreKit delivers through `Transaction.updates`, so
+    /// `listenForTransactions()` refreshes the entitlement as it does for a renewal.
+    func offerCodeSheetClosed(_ result: Result<Void, Error>) {
+        switch result {
+        case .success:
+            Self.logStoreKit(action: "offerCodeSheetClosed", details: "result=success")
+        case .failure(let error):
+            PersistentLog.log(.subscriptionError(action: "offerCodeRedemption", error: error.localizedDescription))
+        }
+    }
+
     /// Re-reads ownership after Apple's Manage subscription sheet closed (#216).
     ///
     /// WHY more than one read: switching auto-renew off in the sheet produces no
