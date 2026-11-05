@@ -10,7 +10,7 @@
 - `keyboard.language-switch`: Français, English, Español, Deutsch, switched from the keyboard panel (☰ held).
 - `keyboard.layout`: AZERTY / QWERTY / QWERTZ per language.
 - `keyboard.number-row`: « Rangée de chiffres » above the letters.
-- `keyboard.default-page`: Default page ABC or 123.
+- `keyboard.default-page`: **retired (#888).** Was the « Page par défaut » ABC / 123 choice in Réglages; the setting is gone and the keyboard always opens on the letters. The ID stays retired, never reused.
 - `keyboard.transcription-language`: Transcription language: « Suivre la langue du clavier » or fixed.
 - `keyboard.open-app`: The panel's gear opens Dictus.
 

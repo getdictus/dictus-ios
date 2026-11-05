@@ -1,0 +1,10 @@
+simulator F5600A6B (iPhone 17, iOS 26.5), build eefd0934
+DictusApp terminated, App Group plist written:
+  defaults write group.solutions.pivi.dictus.plist dictus.defaultKeyboardLayer -string numbers
+  defaults write group.solutions.pivi.dictus.plist dictus.keyboardMode -string micro
+before launch:
+    "dictus.defaultKeyboardLayer" = numbers;
+    "dictus.keyboardMode" = micro;
+xcrun simctl launch -> com.pivi.dictus: 1005, wait 5 s
+after launch (defaults read | grep -E "defaultKeyboardLayer|keyboardMode"):
+    (neither key present)

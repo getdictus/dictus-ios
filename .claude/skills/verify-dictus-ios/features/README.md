@@ -130,7 +130,7 @@ Every ID in this map, in one table: the 18 features first, then their 117 sub-fe
 | `keyboard.language-switch` | Gratuit | non |
 | `keyboard.layout` | Gratuit | non |
 | `keyboard.number-row` | Gratuit | non |
-| `keyboard.default-page` | Gratuit | non |
+| `keyboard.default-page` (retired, #888) | Gratuit | non |
 | `keyboard.transcription-language` | Gratuit | non |
 | `keyboard.open-app` | Gratuit | non |
 | `emoji.picker` | Gratuit | non |
