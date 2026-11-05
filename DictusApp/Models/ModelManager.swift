@@ -114,6 +114,12 @@ class ModelManager: ObservableObject {
     /// above: two instances completing the same model would run two compiles.
     private static var hasRepairedIncompleteModelsThisProcess = false
 
+    /// The downloads the user cancelled (issue #493), so an attempt already under way can
+    /// tell, when it next looks, that it must not go on. Static for the reason the flags
+    /// above give: the attempt a cancel has to stop may belong to the other instance — a
+    /// transfer resumed by onboarding's manager and cancelled from the Models screen.
+    private static var cancellations = ModelDownloadCancellations()
+
     /// The serial prewarm lock used to live here, as `isPrewarming`. It now lives on
     /// `DictationCoordinator` (issue #428, second review): the Neural Engine cannot
     /// compile two models at once, and a lock owned by this class covered neither
@@ -520,6 +526,12 @@ class ModelManager: ObservableObject {
               let rawState = info["state"] as? String else { return }
 
         switch rawState {
+        case "notDownloaded":
+            // A cancelled download (issue #493) or a deleted model. Without this case the
+            // other instance kept drawing a bar for a transfer that no longer exists.
+            modelStates[identifier] = .notDownloaded
+            downloadProgress.removeValue(forKey: identifier)
+            downloadByteInfo.removeValue(forKey: identifier)
         case "downloading":
             modelStates[identifier] = .downloading
         case "prewarming":
@@ -609,15 +621,22 @@ class ModelManager: ObservableObject {
             defaults: defaults
         )
 
+        // What this attempt checks against to learn the user cancelled it (issue #493), and
+        // the lifting of a refusal an earlier cancel left in the service. The refusal is
+        // for an attempt that was still listing when it was cancelled, never for this one,
+        // which the user (or a launch adoption of a transfer nobody cancelled) just asked for.
+        let cancellationToken = Self.cancellations.token(for: identifier)
+        BackgroundModelDownloadService.shared.allowRuns(for: identifier)
+
         // Route by engine. Parakeet and Nemotron share the FluidAudio path (#558); every
         // engine is named, so a new one cannot fall into WhisperKit's by accident.
         switch ModelInfo.forIdentifier(identifier)?.engine {
         case .parakeet:
-            try await downloadFluidAudioModel(identifier, engine: .parakeet)
+            try await downloadFluidAudioModel(identifier, engine: .parakeet, cancellationToken: cancellationToken)
         case .nemotron:
-            try await downloadFluidAudioModel(identifier, engine: .nemotron)
+            try await downloadFluidAudioModel(identifier, engine: .nemotron, cancellationToken: cancellationToken)
         case .whisperKit, nil:
-            try await downloadWhisperKitModel(identifier)
+            try await downloadWhisperKitModel(identifier, cancellationToken: cancellationToken)
         }
     }
 
@@ -670,7 +689,7 @@ class ModelManager: ObservableObject {
     /// WhisperKit models need Core ML compilation on first use. Prewarming does this
     /// compilation immediately after download, so the first transcription is fast.
     /// Without prewarming, the first transcription would have a ~10-30s delay.
-    private func downloadWhisperKitModel(_ identifier: String) async throws {
+    private func downloadWhisperKitModel(_ identifier: String, cancellationToken: Int) async throws {
         guard let modelsDir = modelsDirectory else {
             throw ModelManagerError.noContainer
         }
@@ -708,6 +727,8 @@ class ModelManager: ObservableObject {
                     self?.updateDownloadProgress(progress, identifier: identifier)
                 }
             }
+            // A transfer that finished in the instant before the user cancelled it (#493).
+            try throwIfCancelled(identifier, since: cancellationToken)
             let modelFolder = repoDir.appendingPathComponent(identifier, isDirectory: true)
 
             PersistentLog.log(.modelDownloadCompleted(name: identifier))
@@ -963,6 +984,10 @@ class ModelManager: ObservableObject {
             // it (issue #449).
             throw CancellationError()
         } catch {
+            // A failure of an attempt the user cancelled — the downloader's tripwire
+            // finding the files the cancel just deleted, say — is not a failure to show:
+            // the cancel owns the card and has already reset it (issue #493).
+            try throwIfCancelled(identifier, since: cancellationToken)
             setState(.error(error.localizedDescription), for: identifier)
             downloadProgress.removeValue(forKey: identifier)
             downloadByteInfo.removeValue(forKey: identifier)
@@ -1011,7 +1036,11 @@ class ModelManager: ObservableObject {
     ///
     /// Since Dictus now targets iOS 17, no availability guard is needed.
     /// FluidAudio is always available.
-    private func downloadFluidAudioModel(_ identifier: String, engine: SpeechEngine) async throws {
+    private func downloadFluidAudioModel(
+        _ identifier: String,
+        engine: SpeechEngine,
+        cancellationToken: Int
+    ) async throws {
         let route = FluidAudioDownloadRoute(engine: engine)
         // A model already listed as downloaded is being COMPLETED, not downloaded (#558):
         // the launch repair and the card's "Retry" on an incomplete model both come through
@@ -1047,6 +1076,8 @@ class ModelManager: ObservableObject {
                     self?.updateDownloadProgress(progress, identifier: identifier)
                 }
             }
+            // A transfer that finished in the instant before the user cancelled it (#493).
+            try throwIfCancelled(identifier, since: cancellationToken)
 
             // The transfer is over and every file is published: that, and only that, is
             // what `modelDownloadCompleted` means, for every engine (#693). It used to be
@@ -1205,6 +1236,10 @@ class ModelManager: ObservableObject {
             // it (issue #449).
             throw CancellationError()
         } catch {
+            // A failure of an attempt the user cancelled — the downloader's tripwire
+            // finding the files the cancel just deleted, say — is not a failure to show:
+            // the cancel owns the card and has already reset it (issue #493).
+            try throwIfCancelled(identifier, since: cancellationToken)
             setState(.error(error.localizedDescription), for: identifier)
             downloadProgress.removeValue(forKey: identifier)
             downloadByteInfo.removeValue(forKey: identifier)
@@ -1376,7 +1411,7 @@ class ModelManager: ObservableObject {
 
     /// Removes partially downloaded or corrupted model files from disk.
     /// Called after download/prewarm failure so a retry starts clean.
-    private func cleanupModelFiles(_ identifier: String) {
+    private func cleanupModelFiles(_ identifier: String, reason: String = "download-or-prewarm-failure") {
         // Clean from App Group container
         if let modelsDir = modelsDirectory {
             let modelPath = modelsDir.appendingPathComponent(identifier)
@@ -1405,7 +1440,7 @@ class ModelManager: ObservableObject {
         // believed they had deleted.
         BackgroundModelDownloadService.shared.discardStaging(for: identifier)
 
-        PersistentLog.log(.modelCleanupPerformed(name: identifier, reason: "download-or-prewarm-failure"))
+        PersistentLog.log(.modelCleanupPerformed(name: identifier, reason: reason))
 
         // Remove from downloaded list if it was added prematurely
         downloadedModels.removeAll { $0 == identifier }
@@ -1454,6 +1489,64 @@ class ModelManager: ObservableObject {
         // chooses it. The stricter definition is the one the flag has always claimed.
         defaults.set(isModelReady, forKey: SharedKeys.modelReady)
         defaults.synchronize()
+    }
+}
+
+// MARK: - Cancelling a download (#493)
+
+// An extension for the same `type_body_length` reason as the one below.
+extension ModelManager {
+
+    /// Whether the user can cancel this model's download right now: it is transferring,
+    /// and it is not an installed model whose missing files are being completed (#558).
+    ///
+    /// WHY NOT A MODEL BEING COMPLETED: the cancel deletes the model's files, and those of
+    /// an installed model are the user's working model. The completion is also not the
+    /// trap #493 is about — it is relaunched by every launch by design, so a cancel would
+    /// not even stick.
+    func canCancelDownload(_ identifier: String) -> Bool {
+        modelStates[identifier] == .downloading && !downloadedModels.contains(identifier)
+    }
+
+    /// Cancels a model's download for good (issue #493): the transfer stops, nothing is
+    /// left for the next launch to adopt, the model's partial and published files are
+    /// deleted, and the card goes back to "not downloaded". The only way forward is the
+    /// user tapping Download again, which starts from zero.
+    ///
+    /// WHY THE PARTIAL BYTES ARE DISCARDED and not kept for a faster restart: the user just
+    /// said no to this model, often because it was the wrong one, and a kept partial is
+    /// hundreds of megabytes they cannot see on a card that says "not downloaded".
+    ///
+    /// THE ORDER IS THE POINT. The attempt in flight is marked cancelled first, so whatever
+    /// it reaches next — its transfer returning, a failure — ends in `CancellationError`
+    /// and writes nothing. The service then stops the transfer and deletes the staging
+    /// area, and returns only once no chunk of it can still be published. Only then are
+    /// the published files deleted, and only then does the card change: until that moment
+    /// it stays disabled, so a second Download cannot start under the deletion.
+    func cancelDownload(_ identifier: String) async {
+        guard canCancelDownload(identifier) else { return }
+        Self.cancellations.cancel(identifier)
+        PersistentLog.log(.diagnosticProbe(
+            component: "ModelDownload",
+            instanceID: identifier,
+            action: "cancelledByUser",
+            details: "percent=\(Int((downloadProgress[identifier] ?? 0) * 100))"
+        ))
+
+        await BackgroundModelDownloadService.shared.cancelTransfer(for: identifier)
+        cleanupModelFiles(identifier, reason: "user-cancelled")
+
+        setState(.notDownloaded, for: identifier)
+        downloadProgress.removeValue(forKey: identifier)
+        downloadByteInfo.removeValue(forKey: identifier)
+        lastLoggedDeciles.removeValue(forKey: identifier)
+    }
+
+    /// Ends an attempt the user cancelled since it started (issue #493).
+    private func throwIfCancelled(_ identifier: String, since token: Int) throws {
+        if Self.cancellations.isCancelled(identifier, since: token) {
+            throw CancellationError()
+        }
     }
 }
 
