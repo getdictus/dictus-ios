@@ -10045,6 +10045,35 @@
         }
       }
     },
+    "space" : {
+      "comment" : "Space bar label in the miniature keyboard preview of Settings > Default page (#798). Same word as the real keyboard's space bar.",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Leertaste"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "space"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "espacio"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "espace"
+          }
+        }
+      }
+    },
     "Speak. Dictus writes." : {
       "comment" : "Onboarding intro carousel, headline of the first page, under the scene of a woman dictating while walking (#676).",
       "localizations" : {

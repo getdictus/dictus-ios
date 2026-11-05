@@ -91,6 +91,12 @@ struct DefaultLayerPicker: View {
         .frame(height: 22)
     }
 
+    /// Space bar label, from the catalog so it follows the app language (#798).
+    /// The real keyboard writes the same word per language (`SupportedLanguage.spaceName`).
+    private var spaceLabel: String {
+        String(localized: "space", comment: "Space bar label in the miniature keyboard preview of Settings > Default page (#798). Same word as the real keyboard's space bar.")
+    }
+
     // MARK: - Letters Preview (AZERTY)
 
     /// Four rows with actual AZERTY letters to be immediately recognizable.
@@ -103,7 +109,7 @@ struct DefaultLayerPicker: View {
                 ["A", "Z", "E", "R", "T", "Y", "U", "I", "O", "P"],
                 ["Q", "S", "D", "F", "G", "H", "J", "K", "L", "M"],
                 ["W", "X", "C", "V", "B", "N"],
-                ["123", "espace"]
+                ["123", spaceLabel]
             ]
 
             ForEach(0..<rows.count, id: \.self) { rowIndex in
@@ -111,7 +117,7 @@ struct DefaultLayerPicker: View {
                     if rowIndex == 3 {
                         // Bottom row: 123 key + space bar
                         miniKey("123", width: 32, isSpecial: true)
-                        miniKey("espace", isSpace: true)
+                        miniKey(spaceLabel, isSpace: true)
                     } else {
                         ForEach(rows[rowIndex], id: \.self) { letter in
                             miniKey(letter)
@@ -154,7 +160,7 @@ struct DefaultLayerPicker: View {
             // Bottom row: ABC key + space bar
             HStack(spacing: 2) {
                 miniKey("ABC", width: 32, isSpecial: true)
-                miniKey("espace", isSpace: true)
+                miniKey(spaceLabel, isSpace: true)
             }
         }
         .padding(10)
