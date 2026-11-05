@@ -56,9 +56,10 @@ public enum ForegroundAudioRecoveryPolicy {
     /// How long the return is held, from the hand-off, while the session recovers.
     ///
     /// The sum of every budget a recovering start can spend before `.recording`: the single
-    /// activation retry, the full media-services reset wait, the route wait #515's start makes
-    /// after an empty route, and the engine start. 5000 ms today, well inside the keyboard's
-    /// 15 s cold-start grace.
+    /// activation retry, the full media-services reset wait, the late-reset wait a keyboard
+    /// start adds when that one runs out (#899), the route wait #515's start makes after an
+    /// empty route, and the engine start. 10 000 ms today, inside the keyboard's 15 s
+    /// cold-start grace.
     ///
     /// WHY holding past the ~300 ms `open()` window is still a gain if that window is real:
     /// the alternative is the capture's outcome, a dictation lost for certain. Held, the user
@@ -69,6 +70,7 @@ public enum ForegroundAudioRecoveryPolicy {
     public static let recoveryHoldCeilingMilliseconds =
         AudioSessionActivationPolicy.retryDelayMilliseconds
         + AudioSessionActivationPolicy.mediaServicesResetTimeoutMilliseconds
+        + AudioSessionActivationPolicy.lateMediaServicesResetTimeoutMilliseconds
         + AudioStartReadinessPolicy.inputRouteWaitMilliseconds
         + engineStartMarginMilliseconds
 

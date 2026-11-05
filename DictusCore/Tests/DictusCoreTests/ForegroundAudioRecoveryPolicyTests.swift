@@ -71,6 +71,7 @@ final class ForegroundAudioRecoveryPolicyTests: XCTestCase {
     func testTheHoldCoversTheWholeRecoveryBudget() {
         let budget = AudioSessionActivationPolicy.retryDelayMilliseconds
             + AudioSessionActivationPolicy.mediaServicesResetTimeoutMilliseconds
+            + AudioSessionActivationPolicy.lateMediaServicesResetTimeoutMilliseconds
             + AudioStartReadinessPolicy.inputRouteWaitMilliseconds
         XCTAssertGreaterThan(ForegroundAudioRecoveryPolicy.recoveryHoldCeilingMilliseconds, budget)
         // The capture's reset came after 2727 ms and 2788 ms.

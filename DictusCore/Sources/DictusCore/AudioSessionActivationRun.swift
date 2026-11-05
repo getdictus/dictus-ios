@@ -75,8 +75,13 @@ public struct AudioSessionActivationRun {
     /// After a wait, whether anyone is still waiting for this start (the keyboard may have
     /// given up). `nil` to go on; otherwise the reason to drop it, for the log.
     let reasonToDropAfterWait: () -> String?
+    /// Whether the keyboard still shows this start as `requested`, with DictusApp in front
+    /// (#899). Read before and during the late-reset wait; `false` for any other start.
+    let keyboardStillWaiting: () -> Bool
     /// One diagnostic line: an action and its details.
     let log: (_ action: String, _ details: String) -> Void
+    /// A `LogEvent` of its own: the late-reset retry (#899).
+    let logEvent: (LogEvent) -> Void
     /// The clock the reset wait is timed on. A test moves it with its own `sleep`.
     let now: () -> Date
 
@@ -87,7 +92,9 @@ public struct AudioSessionActivationRun {
         sleep: @escaping (_ milliseconds: Int) async -> Bool,
         isStillWanted: @escaping (_ label: String) -> Bool,
         reasonToDropAfterWait: @escaping () -> String?,
+        keyboardStillWaiting: @escaping () -> Bool = { false },
         log: @escaping (_ action: String, _ details: String) -> Void,
+        logEvent: @escaping (LogEvent) -> Void = { PersistentLog.log($0) },
         now: @escaping () -> Date = Date.init
     ) {
         self.activate = activate
@@ -96,7 +103,9 @@ public struct AudioSessionActivationRun {
         self.sleep = sleep
         self.isStillWanted = isStillWanted
         self.reasonToDropAfterWait = reasonToDropAfterWait
+        self.keyboardStillWaiting = keyboardStillWaiting
         self.log = log
+        self.logEvent = logEvent
         self.now = now
     }
 
@@ -104,6 +113,21 @@ public struct AudioSessionActivationRun {
     /// reads 3000, not 2999.
     private func milliseconds(since start: Date) -> Int {
         Int((now().timeIntervalSince(start) * 1000).rounded())
+    }
+
+    /// Pause until a reset lands after `resetCountAtStart`, `keepWaiting` turns false, or
+    /// `timeoutMs` has passed. Each pause is capped at what is left, so the wait never asks for
+    /// more than `timeoutMs` in total: a full 50 ms poll after 2990 ms used to overrun it.
+    /// - Returns: the milliseconds waited, or `nil` when the task was cancelled.
+    private func waitForReset(after resetCountAtStart: Int, timeoutMs: Int,
+                              while keepWaiting: () -> Bool = { true }) async -> Int? {
+        let started = now()
+        while mediaServicesResetCount() == resetCountAtStart && keepWaiting() {
+            let remainingMs = timeoutMs - milliseconds(since: started)
+            guard remainingMs > 0 else { break }
+            guard await sleep(min(50, remainingMs)) else { return nil }
+        }
+        return milliseconds(since: started)
     }
 
     /// - Parameter firstActivation: how the start's own activation went.
@@ -116,13 +140,17 @@ public struct AudioSessionActivationRun {
         if case .failure(let error) = firstActivation { lastError = error }
         var failedAttempts = lastError == nil ? 0 : 1
         var hasWaitedForReset = false
+        var hasAwaitedLateReset = false
 
         while true {
             let decision = AudioSessionActivationPolicy.decide(
                 activated: lastError == nil,
                 failedAttempts: failedAttempts,
                 mediaServicesLost: mediaServicesLost(),
-                hasWaitedForReset: hasWaitedForReset
+                hasWaitedForReset: hasWaitedForReset,
+                resetSeen: mediaServicesResetCount() != resetCountAtStart,
+                keyboardStillWaiting: keyboardStillWaiting(),
+                hasAwaitedLateReset: hasAwaitedLateReset
             )
 
             switch decision {
@@ -145,16 +173,10 @@ public struct AudioSessionActivationRun {
             case .waitForMediaServicesReset(let timeoutMs):
                 // Ends on a reset during this start. A loss flag still raised after one is
                 // a loss that reset cleared and a later one raised: the timeout bounds it.
-                // Each pause is capped at what is left, so the wait never asks for more than
-                // `timeoutMs` in total: a full 50 ms poll after 2990 ms used to overrun it.
-                let started = now()
-                while mediaServicesResetCount() == resetCountAtStart {
-                    let remainingMs = timeoutMs - milliseconds(since: started)
-                    guard remainingMs > 0 else { break }
-                    guard await sleep(min(50, remainingMs)) else { return false }
+                guard let waitedMs = await waitForReset(after: resetCountAtStart, timeoutMs: timeoutMs) else {
+                    return false
                 }
                 hasWaitedForReset = true
-                let waitedMs = milliseconds(since: started)
                 log("sessionActivationWaitedForReset",
                     "waitedMs=\(waitedMs) timeoutMs=\(timeoutMs) "
                         + "reset=\(mediaServicesResetCount() != resetCountAtStart) lost=\(mediaServicesLost())")
@@ -164,6 +186,27 @@ public struct AudioSessionActivationRun {
                     log("sessionActivationDropped", reason)
                     return false
                 }
+            case .awaitLateMediaServicesReset(let timeoutMs):
+                // #899: stops as soon as the keyboard gives up or DictusApp leaves the
+                // foreground, where the engine could not start anyway (#853).
+                hasAwaitedLateReset = true
+                guard let waitedMs = await waitForReset(
+                    after: resetCountAtStart, timeoutMs: timeoutMs, while: keyboardStillWaiting) else {
+                    return false
+                }
+                let reset = mediaServicesResetCount() != resetCountAtStart
+                log("sessionActivationAwaitedLateReset",
+                    "waitedMs=\(waitedMs) timeoutMs=\(timeoutMs) reset=\(reset) keyboardWaiting=\(keyboardStillWaiting())")
+                guard reset else {
+                    if let reason = reasonToDropAfterWait() {
+                        log("sessionActivationDropped", reason)
+                        return false
+                    }
+                    // No reset: the refusal that sent the start here is the one to report.
+                    throw lastError ?? AudioSessionActivationFailure(
+                        step: .setActive, error: NSError(domain: "DictusAudioSession", code: 0))
+                }
+                logEvent(.coldStartRetryAfterMediaServicesReset(waitedMs: waitedMs, failedAttempts: failedAttempts))
             }
 
             guard isStillWanted("session activation retry") else { return false }
