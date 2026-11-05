@@ -56,7 +56,6 @@
 		AA000030 /* InputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100030 /* InputView.swift */; };
 		AA000035 /* FullAccessBanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100035 /* FullAccessBanner.swift */; };
 		AA000036 /* KeyDefinition.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100036 /* KeyDefinition.swift */; };
-		AA000037 /* KeyboardLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100037 /* KeyboardLayer.swift */; };
 		AA000038 /* KeyboardLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100038 /* KeyboardLayout.swift */; };
 		AA000041 /* TranscriptionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100041 /* TranscriptionService.swift */; };
 		AA0003A1 /* WhisperComputeOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1003A1 /* WhisperComputeOptions.swift */; };
@@ -147,7 +146,6 @@
 		AA0000D5 /* es_frequency.json in Resources */ = {isa = PBXBuildFile; fileRef = AA1000D5 /* es_frequency.json */; };
 		AA0000D6 /* de_frequency.json in Resources */ = {isa = PBXBuildFile; fileRef = AA1000D6 /* de_frequency.json */; };
 		AA0000D4 /* SuggestionBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000D4 /* SuggestionBarView.swift */; };
-		AA0000E0 /* KeyboardModePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000E0 /* KeyboardModePicker.swift */; };
 		AA0000EA /* LanguageSetupPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000EA /* LanguageSetupPage.swift */; };
 		AA0000E2 /* GaugeBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000E2 /* GaugeBarView.swift */; };
 		AA0000E3 /* ModelCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000E3 /* ModelCardView.swift */; };
@@ -295,7 +293,6 @@
 		AA100030 /* InputView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputView.swift; sourceTree = "<group>"; };
 		AA100035 /* FullAccessBanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FullAccessBanner.swift; sourceTree = "<group>"; };
 		AA100036 /* KeyDefinition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyDefinition.swift; sourceTree = "<group>"; };
-		AA100037 /* KeyboardLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardLayer.swift; sourceTree = "<group>"; };
 		AA100038 /* KeyboardLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardLayout.swift; sourceTree = "<group>"; };
 		AA100041 /* TranscriptionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranscriptionService.swift; sourceTree = "<group>"; };
 		AA1003A1 /* WhisperComputeOptions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhisperComputeOptions.swift; sourceTree = "<group>"; };
@@ -395,7 +392,6 @@
 		AA1000D5 /* es_frequency.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = es_frequency.json; sourceTree = "<group>"; };
 		AA1000D6 /* de_frequency.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = de_frequency.json; sourceTree = "<group>"; };
 		AA1000D4 /* SuggestionBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SuggestionBarView.swift; sourceTree = "<group>"; };
-		AA1000E0 /* KeyboardModePicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardModePicker.swift; sourceTree = "<group>"; };
 		AA1000EA /* LanguageSetupPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LanguageSetupPage.swift; sourceTree = "<group>"; };
 		AA1000E2 /* GaugeBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GaugeBarView.swift; sourceTree = "<group>"; };
 		AA1000E3 /* ModelCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelCardView.swift; sourceTree = "<group>"; };
@@ -673,7 +669,6 @@
 			isa = PBXGroup;
 			children = (
 				AA100036 /* KeyDefinition.swift */,
-				AA100037 /* KeyboardLayer.swift */,
 				AA100038 /* KeyboardLayout.swift */,
 				AA1000B0 /* EmojiData.swift */,
 				AA1000B1 /* RecentEmojis.swift */,
@@ -731,7 +726,6 @@
 				AA1000A6 /* SettingsView.swift */,
 				AA1000A7 /* LicensesView.swift */,
 				AA1000A8 /* DebugLogView.swift */,
-				AA1000E0 /* KeyboardModePicker.swift */,
 				AA1000E2 /* GaugeBarView.swift */,
 				AA1000E3 /* ModelCardView.swift */,
 				AA100302 /* ModelLanguageDetailView.swift */,
@@ -1384,7 +1378,6 @@
 				AA0000A6 /* SettingsView.swift in Sources */,
 				AA0000A7 /* LicensesView.swift in Sources */,
 				AA0000A8 /* DebugLogView.swift in Sources */,
-				AA0000E0 /* KeyboardModePicker.swift in Sources */,
 				AA0000EA /* LanguageSetupPage.swift in Sources */,
 				AA0000F0 /* SpeechModelProtocol.swift in Sources */,
 				AA0000F1 /* ParakeetEngine.swift in Sources */,
@@ -1449,7 +1442,6 @@
 				AA000008 /* MicButtonDisabled.swift in Sources */,
 				AA000030 /* InputView.swift in Sources */,
 				AA000035 /* FullAccessBanner.swift in Sources */,
-				AA000037 /* KeyboardLayer.swift in Sources */,
 				AA000060 /* ToolbarView.swift in Sources */,
 				AA00006L /* KeyboardPanelView.swift in Sources */,
 				AA000061 /* RecordingOverlay.swift in Sources */,

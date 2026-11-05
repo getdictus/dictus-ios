@@ -567,14 +567,6 @@ class KeyboardViewController: UIInputViewController {
         // so a contact or replacement added meanwhile is picked up.
         suggestionState.refreshSupplementaryLexicon(from: self)
 
-        // Set default opening layer from user preference.
-        // WHY here not viewDidLoad: viewWillAppear fires each time the keyboard appears,
-        // allowing the user to change settings in the app and see the effect immediately.
-        let defaultLayer = DefaultKeyboardLayer.active
-        if defaultLayer == .numbers {
-            giellaKeyboard?.page = .symbols1
-        }
-
         // The user dictionary's one-shot prune (#287), attempted BEFORE the load
         // below and not after it. The engine is process-wide, so at this instant
         // the previous appearance's dictionary is still mmap'd, we are on the main
