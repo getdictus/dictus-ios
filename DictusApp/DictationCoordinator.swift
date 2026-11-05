@@ -480,8 +480,14 @@ class DictationCoordinator: ObservableObject {
         ) { [weak self] notification in
             let rawCause = notification.userInfo?[UnifiedAudioEngine.interruptionCauseKey] as? String
             let cause = rawCause.flatMap(DictationInterruptionCause.init(rawValue:)) ?? .interruption
+            // Sampled at the post, not when the Task runs (#899): a cold start waiting for this
+            // reset starts its engine on it, and the Task can run after that start and fail
+            // the recording it never interrupted (seen in the simulator, `samples=0`).
+            let wasActiveAtPost = MainActor.assumeIsolated {
+                self.map { DictationSessionLivenessPolicy.isActive($0.status) } ?? false
+            }
             Task { @MainActor in
-                self?.handleAudioInterruptionDuringDictation(cause: cause)
+                self?.handleAudioInterruptionDuringDictation(cause: cause, wasActiveAtPost: wasActiveAtPost)
             }
         }
 
@@ -1981,9 +1987,10 @@ extension DictationCoordinator {
     /// with nothing to keep fails: cancel the in-flight task, write a "failed"
     /// status to App Group so the keyboard's overlay closes, and end the Live
     /// Activity. Issue #106.
-    private func handleAudioInterruptionDuringDictation(cause: DictationInterruptionCause) {
-        // Same predicate as `resetStatus` and for the same reason (#267).
-        let wasActive = DictationSessionLivenessPolicy.isActive(status)
+    private func handleAudioInterruptionDuringDictation(cause: DictationInterruptionCause, wasActiveAtPost: Bool) {
+        // Same predicate as `resetStatus` and for the same reason (#267). A dictation that
+        // became active after the post started on the rebuilt stack: not interrupted (#899).
+        let wasActive = wasActiveAtPost && DictationSessionLivenessPolicy.isActive(status)
         guard wasActive else {
             // Engine died while idle — nothing to roll back. The standby DI is
             // LiveActivityManager's; only a dictation pill with no dictation left
