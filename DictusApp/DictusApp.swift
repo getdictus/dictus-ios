@@ -438,6 +438,9 @@ struct DictusApp: App {
                     case .active:
                         PersistentLog.log(.appDidBecomeActive)
                         catchUpOnProtectedData(trigger: "didBecomeActive")
+                        // A purchase made outside the app while it was in the
+                        // background unlocks Pro on return (#900).
+                        Task { await subscriptionManager.refreshEntitlements() }
                         // #620's cold path: a voice note shared while the app was not
                         // running starts now, with the list on screen.
                         VoiceNoteProcessor.shared.appBecameActive()
