@@ -40,3 +40,4 @@ App side: `.claude/skills/verify-dictus-ios/scripts/drive.sh tab Réglages`, `ax
 
 - Panel rows are inside the keyboard: tap them by coordinate from the screenshot (`kbd.panel`), then check the log (`presentAreaMode`).
 - The gear's `intent=settings` URL has no route in the app: it only brings Dictus forward, and raises the openurl confirmation in the simulator.
+- `keyboard.default-page` also lives in Réglages → Clavier, as a segmented ABC / 123 picker over a miniature keyboard. That preview's space bar reads the catalog's `space` key, so it follows the **app** language, while the real space bar follows the **keyboard** language (`SupportedLanguage.spaceName`). Both carry the same four words (#798; captures in `docs/agents/evidence/792/`). Its letter rows stay AZERTY in every language.
