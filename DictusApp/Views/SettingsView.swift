@@ -85,6 +85,12 @@ struct SettingsView: View {
     /// the default "auto-open". Read by the keyboard at each appearance.
     @AppStorage(SharedKeys.debugVoiceNoteAutoOpenDisabled, store: UserDefaults(suiteName: AppGroup.identifier))
     private var voiceNoteAutoOpenDisabled = false
+
+    /// Debug-only: every polish call throws Apple's safety refusal, so the #455 sentence
+    /// can be seen without a phrase Apple refuses. Read by `PolishService` in the
+    /// keyboard and the app; off writes false, which is the same as the key's absence.
+    @AppStorage(SharedKeys.debugPolishRefusalForced, store: UserDefaults(suiteName: AppGroup.identifier))
+    private var polishRefusalForced = false
     #endif
 
     /// The keyboard language the pickers below operate on.
@@ -481,6 +487,16 @@ struct SettingsView: View {
                 } else {
                     Text("The keyboard opens a new voice note transcript the first time it appears. A tap on the menu button works either way.")
                 }
+            }
+
+            // #455: a refusal cannot be produced on demand. Verbatim strings, so the
+            // build extracts nothing from this section into the catalog.
+            Section {
+                Toggle(isOn: $polishRefusalForced) {
+                    Text(verbatim: "Force Apple Intelligence refusal")
+                }
+            } footer: {
+                Text(verbatim: "The keyboard treats every Smart Mode and polish call as refused by Apple Intelligence. Debug builds only.")
             }
             #endif
 

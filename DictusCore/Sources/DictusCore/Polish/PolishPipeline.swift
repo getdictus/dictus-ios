@@ -410,7 +410,8 @@ public enum PolishPipeline {
         if result.outcome == .success, let output = result.engineOutput {
             return output
         }
-        if let mode = job.task.smartMode, !degradesToFloor(mode, outcome: result.outcome) {
+        if let mode = job.task.smartMode,
+           !degradesToFloor(mode, outcome: result.outcome, failureReason: result.failureReason) {
             return nil
         }
         return deterministicFloor(preprocessed: preprocessed, job: job)
@@ -472,8 +473,17 @@ public enum PolishPipeline {
     /// The mode's own answer is still the gate, and it is the whole reason
     /// `Translate → X` inserts nothing on a refused translation: its floor is the
     /// input language, the one thing the mode exists to change.
+    ///
+    /// **Except when the model declined the text** (#455): an engine throw whose
+    /// reason `isModelRefusal`. That refusal is about these words, so dictating them
+    /// again is refused again, and inserting nothing leaves the user with no text and
+    /// nothing to do about it. Every mode then inserts the floor, Translate included,
+    /// and the surface says the model declined. Any other throw keeps the mode's own
+    /// answer.
     public static func degradesToFloor(_ mode: SmartMode,
-                                       outcome: PolishMetrics.Outcome) -> Bool {
+                                       outcome: PolishMetrics.Outcome,
+                                       failureReason: PolishFailureReason? = nil) -> Bool {
+        if outcome == .engineFailed, failureReason?.isModelRefusal == true { return true }
         guard mode.floorBehaviour == .insertRawText else { return false }
         return outcome == .exceededContextBudget
             || outcome == .rejectedGuardrail

@@ -13,7 +13,7 @@ Each file has the same four sections: **Sub-features** (each with its own stable
 | [`dictation.return-to-app`](dictation.return-to-app.md) | Return to the app you were typing in | Gratuit | Cold start only; return = device |
 | [`models.transcription`](models.transcription.md) | Transcription models | Gratuit | Yes (download is real traffic); RAM gates no |
 | [`polish`](polish.md) | Polish | Gratuit, needs Apple Intelligence | Toggle only |
-| [`smart-modes`](smart-modes.md) | Smart Modes | Pro | Fan and settings; no rewrite (no Apple Intelligence) |
+| [`smart-modes`](smart-modes.md) | Smart Modes | Pro | Fan and settings; no rewrite (no Apple Intelligence); the refusal message with Debug keys (#455) |
 | [`history`](history.md) | History of transcriptions | Pro | Empty state and settings |
 | [`vocabulary`](vocabulary.md) | Custom vocabulary | Pro | Yes, except its effect on a transcript |
 | [`voice-notes`](voice-notes.md) | Voice notes transcription | Pro | Keyboard reader and settings; no share sheet |

@@ -102,7 +102,7 @@ struct FramedAppleFMPolishEngine: PolishEngineProtocol {
         switch generationError {
         case .exceededContextWindowSize: return .exceededContextWindowSize
         case .assetsUnavailable: return .assetsUnavailable
-        case .guardrailViolation: return .guardrailViolation
+        case .guardrailViolation: return .safetyRefusal
         case .unsupportedGuide: return .unsupportedGuide
         case .unsupportedLanguageOrLocale: return .unsupportedLanguageOrLocale
         case .decodingFailure: return .decodingFailure
