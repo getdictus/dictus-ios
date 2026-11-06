@@ -77,7 +77,7 @@ public enum OnboardingStep: String, CaseIterable, Sendable {
     /// one (`DeviceCapabilities.hasDynamicIsland`), on the Lock Screen.
     ///
     /// WHY RIGHT AFTER THE FIRST DICTATION: that dictation is what puts the standby island
-    /// up for real, so it is the moment the orange dot the user will ask about appears.
+    /// up for real, so it is the moment the standby the user will ask about appears.
     /// Shown on every iPhone: every iPhone gets the standby, the Lock Screen view at least.
     /// Passed over on an iPad (`passedOver(on:)`), where iPadOS shows no Live Activity.
     case stopStandby
@@ -118,9 +118,10 @@ public enum OnboardingStep: String, CaseIterable, Sendable {
     /// Whether this step sells or sets up a Pro feature (#649).
     ///
     /// Pro steps are hidden on a device that can never run Smart Modes, for the reason the
-    /// reverse trial is withheld there (#593 decision 2): on such an iPhone Pro is History
-    /// and Vocabulary only, and a step about Smart Modes would describe a feature the user
-    /// cannot have. A capable iPhone with Apple Intelligence switched off still sees them.
+    /// reverse trial is withheld there (#593 decision 2): on such an iPhone Pro is History,
+    /// Vocabulary and voice notes only, and a step about Smart Modes would describe a
+    /// feature the user cannot have. A capable iPhone with Apple Intelligence switched off
+    /// still sees them.
     ///
     /// WHY THE VOICE NOTES, VOCABULARY AND HISTORY SCENES TOO (#680): those features run on
     /// every iPhone, but they are Pro, and decision 2 also says no Pro promotion where no

@@ -1,0 +1,28 @@
+simulator AD9AE469 (iPhone 17, iOS 26.5, French device), Debug build of 430e17c5, host: Safari address bar
+FR: kbd abc (123 page) -> Safari Fermer (keyboard hidden, no inputView) -> tap address bar -> letters
+EN: dictus.language=en, kbd abc then #+= -> Fermer -> tap address bar -> letters
+
+controller lifecycle, whole run (instanceID action):
+2026-11-05T15:16:01Z 1A42FAB4 viewDidLoad
+2026-11-05T15:16:02Z 1A42FAB4 registeredAppearance
+2026-11-05T15:16:43Z 1A42FAB4 deinit
+2026-11-05T15:16:49Z 98C973AD viewDidLoad
+2026-11-05T15:16:49Z 98C973AD registeredAppearance
+2026-11-05T15:17:16Z 98C973AD deinit
+2026-11-05T15:17:20Z D8141BED viewDidLoad
+2026-11-05T15:17:20Z D8141BED registeredAppearance
+2026-11-05T15:17:34Z D8141BED deinit
+2026-11-05T15:17:43Z C1241B5B viewDidLoad
+2026-11-05T15:17:43Z C1241B5B registeredAppearance
+2026-11-05T15:18:09Z C1241B5B deinit
+2026-11-05T15:18:15Z 5FAD731A viewDidLoad
+2026-11-05T15:18:15Z 5FAD731A registeredAppearance
+2026-11-05T15:18:41Z 1B19017A viewDidLoad
+2026-11-05T15:18:42Z 1B19017A registeredAppearance
+2026-11-05T15:18:42Z 5FAD731A deinit
+2026-11-05T15:19:26Z D1610E79 viewDidLoad
+2026-11-05T15:19:27Z D1610E79 registeredAppearance
+2026-11-05T15:19:27Z 1B19017A deinit
+2026-11-05T15:19:48Z D1610E79 deinit
+2026-11-05T15:19:53Z 838DBF10 viewDidLoad
+2026-11-05T15:19:53Z 838DBF10 registeredAppearance

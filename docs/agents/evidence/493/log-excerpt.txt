@@ -1,0 +1,11 @@
+[2026-11-04T09:47:14Z] INFO    [model] <APP> modelDownloadStarted name=parakeet-tdt-0.6b-v3 size=483MB
+[2026-11-04T09:47:16Z] INFO    [model] <APP> modelDownloadProgress name=parakeet-tdt-0.6b-v3 percent=0 downloaded=0MB total=483MB
+[2026-11-04T09:47:30Z] INFO    [model] <APP> modelDownloadProgress name=parakeet-tdt-0.6b-v3 percent=10 downloaded=49MB total=483MB
+[2026-11-04T09:47:38Z] DEBUG   [keyboard] <APP> diagnosticProbe component=ModelDownload instanceID=parakeet-tdt-0.6b-v3 action=cancelledByUser details=percent=19
+[2026-11-04T09:47:38Z] INFO    [model] <APP> modelDownloadTaskCancelled name=parakeet-tdt-0.6b-v3 path=Encoder.mlmodelc/weights/weight.bin chunk=2 caller=userCancelled
+[2026-11-04T09:47:38Z] INFO    [model] <APP> modelDownloadTaskCancelled name=parakeet-tdt-0.6b-v3 path=Encoder.mlmodelc/weights/weight.bin chunk=3 caller=userCancelled
+[2026-11-04T09:47:38Z] INFO    [model] <APP> modelCleanupPerformed name=parakeet-tdt-0.6b-v3 reason=user-cancelled
+[2026-11-04T09:47:49Z] INFO    [model] <APP> modelDownloadTaskState name=parakeet-tdt-0.6b-v3 path=? chunk=3 phase=start+10s origin=new session=bg state=completed received=0B error=NSURLErrorDomain/-999
+[2026-11-04T09:47:49Z] INFO    [model] <APP> modelDownloadTaskState name=parakeet-tdt-0.6b-v3 path=? chunk=2 phase=start+10s origin=new session=bg state=completed received=0B error=NSURLErrorDomain/-999
+[2026-11-04T09:47:55Z] INFO    [lifecycle] <APP> appLaunched version=2.0.0 protectedData=true activePrewarm=false appGroup=healthy
+[2026-11-04T09:47:55Z] INFO    [model] <APP> modelDownloadSessionRestored tasks=0 models=0

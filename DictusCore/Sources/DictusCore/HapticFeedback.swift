@@ -208,6 +208,17 @@ public enum HapticFeedback {
         #endif
     }
 
+    /// Medium impact when a long press is recognised and opens something under the
+    /// finger: the Home mic's Smart Mode dial (#489). Heavier than the selection tick that
+    /// follows on each mode change, so the hand feels "it opened" and then "it moved".
+    public static func longPressRecognized() {
+        #if canImport(UIKit) && !os(macOS)
+        guard isEnabled() else { return }
+        mediumGenerator.impactOccurred()
+        mediumGenerator.prepare()
+        #endif
+    }
+
     /// Selection tick feedback for each character of cursor movement during trackpad drag.
     /// Uses UISelectionFeedbackGenerator — the same subtle "tick" Apple uses for pickers
     /// and the native cursor. This is the #1 factor for perceived trackpad fluidity.

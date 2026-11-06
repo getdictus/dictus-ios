@@ -19,8 +19,10 @@ public enum AppleIntelligenceOnboarding {
     ///   the user could do about it.
     ///
     /// WHY THE REASON IS NOT SPLIT FURTHER: Apple reportedly reports Apple Intelligence
-    /// switched off as `modelNotReady` too, so the two cannot be told apart reliably. The
-    /// step shows one page for both, whose copy does not depend on the reason.
+    /// switched off, and a Siri language mismatch, as `modelNotReady` too, so they cannot
+    /// be told apart reliably. The step is shown for all of them. The reason only picks
+    /// where the step opens: `modelNotReady` on the setting-up screen, which keeps the
+    /// Siri language hint (decision of 2026-10-28, #846, `AppleIntelligenceStepState`).
     ///
     /// "Capable" is `SmartModeAvailability.isCapable(engineState:)`, the same table the
     /// trial and the paywall read, so the onboarding cannot disagree with them about

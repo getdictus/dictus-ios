@@ -89,7 +89,7 @@ Existing free tools do raw transcription only. There is no open-source app that 
 
 ### 3.1 Vision
 
-Let any iOS user — French or English speaking — dictate text into any app, correct it instantly without switching keyboards, and optionally reformat it with AI, all without a subscription.
+Let any iOS user, French or English speaking, dictate text into any app and correct it instantly without switching keyboards, for free. Dictus Pro optionally adds AI reformatting.
 
 ### 3.2 V1 Success metrics
 

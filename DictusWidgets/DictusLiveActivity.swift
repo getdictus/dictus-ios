@@ -111,9 +111,17 @@ struct DictusLiveActivity: Widget {
         } else {
         switch context.state.phase {
         case .standby:
-            Text("On")
-                .font(.system(size: 14, weight: .semibold))
-                .foregroundColor(.white)
+            if context.state.isPaused {
+                // A call paused standby (#353). A glyph, not the word: the pill grows
+                // with its text, and « En pause » would double its width.
+                Image(systemName: "pause.fill")
+                    .foregroundColor(.white.opacity(0.7))
+                    .font(.system(size: 14))
+            } else {
+                Text("On")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundColor(.white)
+            }
         case .recording:
             Text("Rec")
                 .font(.system(size: 14, weight: .semibold))
@@ -152,6 +160,10 @@ struct DictusLiveActivity: Widget {
             VoiceNoteRing(note: note, diameter: 14, lineWidth: 2, countSize: 7)
         } else {
         switch context.state.phase {
+        case .standby where context.state.isPaused:
+            Image(systemName: "pause.fill")
+                .foregroundColor(.white.opacity(0.7))
+                .font(.system(size: 12))
         case .standby:
             // Full 3-bar logo even in minimal — single bar was invisible
             MiniLogoBars(levels: [0.43, 1.0, 0.64], animated: false)
@@ -211,7 +223,7 @@ struct DictusLiveActivity: Widget {
                 Group {
                 switch context.state.phase {
                 case .standby:
-                    Text("On")
+                    (context.state.isPaused ? Text("Paused") : Text("On"))
                         .font(.system(size: 12))
                         .foregroundColor(.white.opacity(0.6))
                 case .recording:
@@ -362,7 +374,7 @@ struct DictusLiveActivity: Widget {
 
                 switch context.state.phase {
                 case .standby:
-                    Text("On")
+                    (context.state.isPaused ? Text("Paused") : Text("On"))
                         .font(.system(size: 13))
                         .foregroundColor(.white.opacity(0.6))
                 case .recording:

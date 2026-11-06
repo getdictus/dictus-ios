@@ -59,20 +59,29 @@ final class SubscriptionManager: ObservableObject {
     /// Numbers overlapping entitlement scans so only the latest publishes (#216).
     private var scanGenerations = ProScanGeneration()
 
-    init(proStatus: ProStatusManager) {
+    /// The launch's product fetch and entitlement scan. Kept so a test can wait for it
+    /// to finish before buying, and know any later change came from another scan.
+    private(set) var launchScan: Task<Void, Never>?
+
+    /// - Parameter listensForUpdates: `false` only in tests (#900), so that the
+    ///   `Transaction.updates` and subscription status listeners cannot unlock Pro and
+    ///   only an explicit scan can. The app always uses the default.
+    init(proStatus: ProStatusManager, listensForUpdates: Bool = true) {
         self.proStatus = proStatus
         // Start listening IMMEDIATELY at init — before any view renders.
         // WHY: If user purchased on another device or subscription renewed
         // while the app was killed, Transaction.updates delivers those
         // transactions on next launch. Missing them = stale Pro status.
-        transactionListener = listenForTransactions()
-        statusListener = listenForStatusUpdates()
+        if listensForUpdates {
+            transactionListener = listenForTransactions()
+            statusListener = listenForStatusUpdates()
+        }
         // Products first, then the entitlement scan (passive, no sign-in prompt).
         // WHY in that order: the scan's grace-period check reads the subscription
         // status through a loaded product, and run in parallel it could find none
         // and leave a subscriber in grace period unpaid until the next event.
         // `loadProducts()` never throws, so the scan runs even when the fetch fails.
-        Task {
+        launchScan = Task {
             await loadProducts()
             await updateProStatus()
         }
@@ -150,7 +159,14 @@ final class SubscriptionManager: ObservableObject {
             }
         } catch {
             purchaseState = .failed(error.localizedDescription)
-            PersistentLog.log(.subscriptionError(action: "purchase", error: error.localizedDescription))
+            let nsError = error as NSError
+            PersistentLog.log(.subscriptionError(
+                action: "purchase",
+                error: error.localizedDescription,
+                product: product.id,
+                domain: nsError.domain,
+                code: nsError.code
+            ))
         }
     }
 
@@ -171,6 +187,35 @@ final class SubscriptionManager: ObservableObject {
         } catch {
             purchaseState = .failed(error.localizedDescription)
             PersistentLog.log(.subscriptionError(action: "restore", error: error.localizedDescription))
+        }
+    }
+
+    /// Logs how Apple's offer code sheet closed (#787).
+    ///
+    /// WHY no status refresh here: the sheet's result only says whether it closed
+    /// cleanly, not whether a code was redeemed. A redeemed code produces a
+    /// transaction, which StoreKit delivers through `Transaction.updates`, so
+    /// `listenForTransactions()` refreshes the entitlement as it does for a renewal.
+    ///
+    /// WHY a cancellation is not an error: closing the sheet with its cross comes back
+    /// as `StoreKitError.userCancelled`, and was logged as `subscriptionError` (device
+    /// log, 2026-11-05). `OfferCodeSheetOutcome` tells a close from a real failure.
+    func offerCodeSheetClosed(_ result: Result<Void, Error>) {
+        let failure: NSError?
+        switch result {
+        case .success: failure = nil
+        case .failure(let error): failure = error as NSError
+        }
+        let outcome = OfferCodeSheetOutcome.classify(errorDomain: failure?.domain, code: failure?.code ?? 0)
+        if let logResult = outcome.logResult {
+            Self.logStoreKit(action: "offerCodeSheetClosed", details: "result=\(logResult)")
+        } else if let failure {
+            PersistentLog.log(.subscriptionError(
+                action: "offerCodeRedemption",
+                error: failure.localizedDescription,
+                domain: failure.domain,
+                code: failure.code
+            ))
         }
     }
 
@@ -200,6 +245,17 @@ final class SubscriptionManager: ObservableObject {
                 if settled { return }
             }
         }
+    }
+
+    /// Re-reads the entitlements, called when the app comes back to the foreground (#900).
+    ///
+    /// WHY on top of `Transaction.updates` and the launch scan: a purchase made outside
+    /// the app (an offer code redeemed through a link or the App Store) while the app
+    /// sat in the background was only picked up by the next launch or the next event.
+    /// Same scan as everywhere else, so there stays one place that decides `isPaid`; an
+    /// overlap with the launch scan is resolved by `ProScanGeneration`.
+    func refreshEntitlements() async {
+        await updateProStatus()
     }
 
     /// Reset purchaseState to idle — called by PaywallView after dismissing error alerts.

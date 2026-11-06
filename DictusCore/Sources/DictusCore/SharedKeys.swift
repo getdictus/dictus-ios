@@ -53,18 +53,15 @@ public enum SharedKeys {
     public static let waveformEnergy = "dictus.waveformEnergy"
     /// Bool flag set by keyboard to request recording stop
     public static let stopRequested = "dictus.stopRequested"
+    /// Double: wall-clock time of the keyboard's stop tap, seconds since 1970 (#862).
+    /// Read and written only through `StopTimingTrace`.
+    public static let stopTapEpoch = "dictus.stopTapEpoch"
+    /// String: the keyboard session id the stop tap above belongs to (#862).
+    public static let stopTapSessionID = "dictus.stopTapSessionID"
     /// Bool flag set by keyboard to request recording cancellation
     public static let cancelRequested = "dictus.cancelRequested"
     /// Double: elapsed recording seconds, updated at ~5Hz during recording
     public static let recordingElapsedSeconds = "dictus.recordingElapsedSeconds"
-
-    // Keyboard mode preference (added for Phase 09 keyboard modes)
-    /// Current keyboard mode stored as String ("micro", "emojiMicro", "full")
-    @available(*, deprecated, message: "Use defaultKeyboardLayer instead. Kept for migration only.")
-    public static let keyboardMode = "dictus.keyboardMode"
-
-    /// Default keyboard layer: "letters" or "numbers". Replaces keyboardMode.
-    public static let defaultKeyboardLayer = "dictus.defaultKeyboardLayer"
 
     // User preferences (added for Plan 4.1 onboarding + settings)
     /// Keyboard language code ("fr"/"en"/"es"/"de"), default "fr".
@@ -145,17 +142,36 @@ public enum SharedKeys {
     /// lose.
     public static let debugProEntitlementForced = "dictus.debugProEntitlementForced"
 
+    // Forced Apple Intelligence (DEBUG builds only - see SmartModeAvailability.engineState).
+    /// Bool: when true, the Smart Mode surfaces read Apple Foundation Models as available,
+    /// so a simulator without Apple Intelligence can draw an armable mode (#489's dial
+    /// captures). It forces what the surfaces *show*: a generation still asks the real
+    /// model and fails where it is missing. Inside the conditional for the reason above.
+    public static let debugAppleIntelligenceForced = "dictus.debugAppleIntelligenceForced"
+
     /// Bool: when true, the keyboard never opens the voice note reader on its own; it
     /// opens from a tap on ☰ only (#637 decision 3, #639). Absent reads false,
     /// the default "auto-open". Exists for one device comparison between the two
     /// behaviours; the losing branch and this key are deleted in a follow-up. Inside
     /// the conditional for `debugProEntitlementForced`'s reason.
     public static let debugVoiceNoteAutoOpenDisabled = "dictus.debugVoiceNoteAutoOpenDisabled"
+
+    // Forced model refusal (DEBUG builds only - see PolishService.activeEngine).
+    /// Bool: when true, every polish call throws Apple's safety refusal, so the #455
+    /// copy and the text it keeps can be seen in a simulator, where Apple Intelligence
+    /// does not run, or on a device without a phrase Apple refuses. Inside the
+    /// conditional for `debugProEntitlementForced`'s reason.
+    public static let debugPolishRefusalForced = "dictus.debugPolishRefusalForced"
     #endif
 
     // Live Activity preference
     /// Whether Live Activity (Dynamic Island + Lock Screen) is enabled, default true
     public static let liveActivityEnabled = "dictus.liveActivityEnabled"
+
+    // Inactivity timeout (issue #380)
+    /// Raw value of `WarmEngineTimeoutOption`: how long the warm audio engine waits after
+    /// a dictation before releasing. Missing means the 10-minute default.
+    public static let warmEngineTimeout = "dictus.warmEngineTimeout"
 
     // Post-STT polish (issue #141)
     /// Whether the polish layer runs between STT final output and App Group write, default false.
@@ -232,6 +248,11 @@ public enum SharedKeys {
     public static let handoffToken = "dictus.handoffToken"
     /// String: the token the keyboard echoes beside `lastPolishedTranscription`.
     public static let lastPolishedHandoffToken = "dictus.lastPolishedHandoffToken"
+    /// String: the text of the last keyboard dictation the document refused, until the
+    /// user opens it in DictusApp or starts another dictation (#860). Read and written
+    /// only through `RecoveredTranscriptionChannel`; the keyboard's banner is drawn
+    /// from it.
+    public static let recoveredTranscription = "dictus.recoveredTranscription"
 
     // MARK: - Smart Modes (issue #79)
     /// String: identifier of the armed Smart Mode, or absent for Normal. Sticky —
@@ -377,6 +398,9 @@ public enum SharedKeys {
     public static let proTrialEndsAt = "dictus.proTrialEndsAt"
     /// Bool: the end-of-trial paywall has been shown. It is shown once (#593).
     public static let proTrialEndPaywallShown = "dictus.proTrialEndPaywallShown"
+    /// Bool: the launch reconcile restored, into an empty App Group, a trial that had
+    /// already ended (a reinstall). Its end-of-trial paywall is the ordinary one (#837).
+    public static let proTrialEndedBeforeInstall = "dictus.proTrialEndedBeforeInstall"
     /// Int: Smart Mode dictations that succeeded while the trial ran. Written by
     /// whichever process ran the mode, read by the end-of-trial recap.
     public static let proTrialSmartModeUses = "dictus.proTrialSmartModeUses"
@@ -399,8 +423,23 @@ public enum SharedKeys {
     /// Drop this and its one caller once a release has shipped with the cleanup.
     static let retiredAppleFMExtensionProbeArmed = "dictus.debug.appleFMExtensionProbeArmed"
 
+    /// The « open on 123 » setting (`"letters"` / `"numbers"`), removed in #888: the
+    /// keyboard now always opens on the letters. Nothing reads it, so a device that
+    /// had chosen 123 is already back on the letters; clearing it only leaves no
+    /// stale `"numbers"` behind.
+    static let retiredDefaultKeyboardLayer = "dictus.defaultKeyboardLayer"
+
+    /// The three-mode setting the key above replaced in v1.3 (`"micro"`, `"full"`,
+    /// `"emojiMicro"`). Its migration is gone with #888; a device that never ran it
+    /// can still carry the value.
+    static let retiredKeyboardMode = "dictus.keyboardMode"
+
     /// Every key no live code reads, cleared once per app launch.
-    static let retiredKeys = [retiredAppleFMExtensionProbeArmed]
+    static let retiredKeys = [
+        retiredAppleFMExtensionProbeArmed,
+        retiredDefaultKeyboardLayer,
+        retiredKeyboardMode
+    ]
 
     /// Remove the retired keys above. Called from DictusApp's launch, which is the
     /// only process that owns hygiene over shared state.

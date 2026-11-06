@@ -106,6 +106,64 @@ public enum SpellingSimilarity {
         return lhs == rhs || phoneticKey(span) == phoneticKey(learned)
     }
 
+    /// How close a span of one to three words is to a canonical spelling of any
+    /// length, for the step 2 pair generator (#512). Lower is closer; nil when the two
+    /// are not a candidate pair.
+    ///
+    /// ### Why this is looser than `spanMatches`, on purpose
+    ///
+    /// `spanMatches` refuses an edit distance because every word of a span may be an
+    /// ordinary word, and step 1 has no second opinion: what it pairs, it suggests.
+    /// Step 2 exists for exactly the case that rule cannot reach: `cloud code` for
+    /// `Claude Code` is two real words, two edits from the term, and neither equal
+    /// skeletons nor equal phonetic keys. Its second opinion is the user: the app
+    /// offers only the closest pairs seen more than once
+    /// (`VocabularyPairGenerator.suggestions`), and stores one only on **Accept**.
+    ///
+    /// - 0: equal skeletons (`whisper kit` for `WhisperKit`, `stephane` for `Stéphane`).
+    /// - 1: equal phonetic keys (`her mes` for `Hermes`).
+    /// - 1 + d: `d` edits between the skeletons or between the phonetic keys,
+    ///   whichever is smaller, within `allowedEdits`.
+    ///
+    /// Five letters at least on each side when the span has more than one word, as for
+    /// `spanMatches`: two short words joined (`de la`) spell too many things.
+    public static func spanScore(_ span: String, canonical: String, wordCount: Int) -> Int? {
+        spanScore(Keys(span), canonical: Keys(canonical), wordCount: wordCount)
+    }
+
+    /// A spelling's skeleton and phonetic key, computed once. The pair generator
+    /// compares every span with every canonical; computing both keys per comparison
+    /// was most of an analysis's time (16 s for 80 dictations on the simulator).
+    /// Held as Unicode scalar values: `String.count` walks the string, `Character`
+    /// comparison is grapheme-aware, and this is compared about a million times per
+    /// analysis. Both keys are already folded, so scalars compare what they mean.
+    public struct Keys {
+        public let skeleton: [UInt32]
+        public let phoneticKey: [UInt32]
+
+        public init(_ text: String) {
+            skeleton = SpellingSimilarity.skeleton(text).unicodeScalars.map(\.value)
+            phoneticKey = SpellingSimilarity.phoneticKey(text).unicodeScalars.map(\.value)
+        }
+    }
+
+    /// `spanScore(_:canonical:wordCount:)` on keys already computed.
+    public static func spanScore(_ span: Keys, canonical: Keys, wordCount: Int) -> Int? {
+        let lhs = span.skeleton, rhs = canonical.skeleton
+        let floor = wordCount > 1 ? 5 : 3
+        guard lhs.count >= floor, rhs.count >= 3 else { return nil }
+        if lhs == rhs { return 0 }
+        let lhsKey = span.phoneticKey, rhsKey = canonical.phoneticKey
+        if lhsKey == rhsKey, lhsKey.count >= 3 { return 1 }
+        let allowed = max(1, min(lhs.count, rhs.count) / 4)
+        guard abs(lhs.count - rhs.count) <= allowed || abs(lhsKey.count - rhsKey.count) <= allowed else { return nil }
+        let distance = min(
+            editDistance(lhs, rhs, atMost: allowed),
+            editDistance(lhsKey, rhsKey, atMost: allowed)
+        )
+        return distance <= allowed ? 1 + distance : nil
+    }
+
     /// Whether two folded spellings are close enough to be one unknown word misheard
     /// twice. The grouping of the history-only suggestions, which have no learned
     /// word to anchor them; kept as tight as before (one edit up to six characters).
@@ -118,7 +176,32 @@ public enum SpellingSimilarity {
 
     /// Levenshtein distance, giving up past `atMost` (the answer is then `atMost + 1`).
     static func editDistance(_ lhs: String, _ rhs: String, atMost limit: Int) -> Int {
-        let left = Array(lhs), right = Array(rhs)
+        editDistance(Array(lhs), Array(rhs), atMost: limit)
+    }
+
+    /// `editDistance` on scalar values, with two rows reused instead of one array
+    /// allocated per row: the pair generator's inner loop.
+    static func editDistance(_ left: [UInt32], _ right: [UInt32], atMost limit: Int) -> Int {
+        if left.isEmpty { return right.count }
+        if right.isEmpty { return left.count }
+        var previous = Array(0...right.count)
+        var current = previous
+        for i in 0..<left.count {
+            current[0] = i + 1
+            var rowMinimum = current[0]
+            let leftValue = left[i]
+            for j in 0..<right.count {
+                let substitution = previous[j] + (leftValue == right[j] ? 0 : 1)
+                current[j + 1] = min(previous[j + 1] + 1, current[j] + 1, substitution)
+                rowMinimum = min(rowMinimum, current[j + 1])
+            }
+            if rowMinimum > limit { return limit + 1 }
+            swap(&previous, &current)
+        }
+        return previous[right.count]
+    }
+
+    static func editDistance(_ left: [Character], _ right: [Character], atMost limit: Int) -> Int {
         if left.isEmpty { return right.count }
         if right.isEmpty { return left.count }
         var previous = Array(0...right.count)

@@ -49,10 +49,13 @@ struct ProHubFeatureCard: View {
                         HStack(spacing: 4) {
                             Image(systemName: "exclamationmark.triangle.fill")
                                 .font(.system(size: 10))
+                            // No line limit and a vertical fixed size (#846): beside the
+                            // state value the line has little width, and the French takes
+                            // three lines there. Any limit truncated it.
                             Text("Requires Apple Intelligence (iPhone 15 Pro or later, iOS 26)")
                                 .font(.dictusCaption)
-                                .lineLimit(2)
                                 .multilineTextAlignment(.leading)
+                                .fixedSize(horizontal: false, vertical: true)
                         }
                         .foregroundColor(.secondary)
                         .padding(.top, 2)

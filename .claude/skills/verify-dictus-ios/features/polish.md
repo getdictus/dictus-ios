@@ -23,7 +23,7 @@
 ```bash
 .claude/skills/verify-dictus-ios/scripts/launch.sh --skip-onboarding
 .claude/skills/verify-dictus-ios/scripts/drive.sh tab Réglages
-.claude/skills/verify-dictus-ios/scripts/drive.sh tap-label "Polir la transcription"
+axe tap --label "Polir la transcription" --element-type CheckBox --wait-timeout 5 --udid <udid>   # the switch; a tap on the row's title does not flip it
 .claude/skills/verify-dictus-ios/scripts/drive.sh tree | grep -A3 '"Polir la transcription"'   # AXValue flips
 ```
 
@@ -32,4 +32,4 @@ Debug builds show the toggle even without Apple Intelligence (`DICTUS_POLISH_DEB
 ## Gotchas
 
 - **Not drivable in the simulator:** the polish itself. Apple Intelligence is unavailable there (the keyboard's Smart Mode fan reads « Les modes exigent Apple Intelligence »), so toggling it changes a preference and nothing else.
-- The explanatory text under the toggle and « Open iPhone Settings » are English on a French device (missing translations).
+- The text under the toggle and « Open iPhone Settings » follow the app language (#792; FR, EN, DE, ES captures in `docs/agents/evidence/792/`). The simulator reaches only the « Apple Intelligence not enabled » state; the other footer sentences are pinned in the catalog by `SettingsFrenchCopyTests`.

@@ -43,25 +43,49 @@ final class ProPaywallPlansTests: XCTestCase {
 
     func testClosingTheEndOfTrialPaywallOffersMonthlyOnce() {
         XCTAssertTrue(ProPaywallPlans.offersMonthlyOnClose(
-            isEndOfTrialPaywall: true, sawPlans: true, isPaid: false, monthlyLoaded: true, alreadyOffered: false))
+            trialEndPaywall: .trialEnded, sawPlans: true, isPaid: false, monthlyLoaded: true, alreadyOffered: false))
         XCTAssertFalse(ProPaywallPlans.offersMonthlyOnClose(
-            isEndOfTrialPaywall: true, sawPlans: true, isPaid: false, monthlyLoaded: true, alreadyOffered: true), "once")
+            trialEndPaywall: .trialEnded, sawPlans: true, isPaid: false, monthlyLoaded: true, alreadyOffered: true), "once")
     }
 
     func testNoOfferWhenLeavingFromTheRecap() {
         XCTAssertFalse(ProPaywallPlans.offersMonthlyOnClose(
-            isEndOfTrialPaywall: true, sawPlans: false, isPaid: false, monthlyLoaded: true, alreadyOffered: false))
+            trialEndPaywall: .trialEnded, sawPlans: false, isPaid: false, monthlyLoaded: true, alreadyOffered: false))
     }
 
     func testNoOfferFromAnyOtherEntryPoint() {
         XCTAssertFalse(ProPaywallPlans.offersMonthlyOnClose(
-            isEndOfTrialPaywall: false, sawPlans: true, isPaid: false, monthlyLoaded: true, alreadyOffered: false))
+            trialEndPaywall: nil, sawPlans: true, isPaid: false, monthlyLoaded: true, alreadyOffered: false))
+    }
+
+    /// #837: after a reinstall over an ended trial, the app opens the ordinary paywall
+    /// instead of the end-of-trial one, and closing it still offers the monthly plan.
+    /// It has no recap, so its plans were on screen from the start.
+    func testClosingTheReinstallPaywallOffersMonthlyOnce() {
+        XCTAssertTrue(ProPaywallPlans.offersMonthlyOnClose(
+            trialEndPaywall: .standard, sawPlans: false, isPaid: false, monthlyLoaded: true, alreadyOffered: false))
+        XCTAssertFalse(ProPaywallPlans.offersMonthlyOnClose(
+            trialEndPaywall: .standard, sawPlans: false, isPaid: false, monthlyLoaded: true, alreadyOffered: true), "once")
+        XCTAssertFalse(ProPaywallPlans.offersMonthlyOnClose(
+            trialEndPaywall: .standard, sawPlans: false, isPaid: true, monthlyLoaded: true, alreadyOffered: false), "bought")
+        XCTAssertFalse(ProPaywallPlans.offersMonthlyOnClose(
+            trialEndPaywall: .standard, sawPlans: false, isPaid: false, monthlyLoaded: false, alreadyOffered: false),
+                       "no price")
+    }
+
+    /// The same ordinary paywall opened by the user, from Settings, Home or a locked
+    /// feature, never offers on close: only the app's own trial-end presentation does.
+    func testNoOfferFromTheOrdinaryPaywallTheUserOpened() {
+        for sawPlans in [false, true] {
+            XCTAssertFalse(ProPaywallPlans.offersMonthlyOnClose(
+                trialEndPaywall: nil, sawPlans: sawPlans, isPaid: false, monthlyLoaded: true, alreadyOffered: false))
+        }
     }
 
     func testNoOfferToABuyerOrWithoutAMonthlyPrice() {
         XCTAssertFalse(ProPaywallPlans.offersMonthlyOnClose(
-            isEndOfTrialPaywall: true, sawPlans: true, isPaid: true, monthlyLoaded: true, alreadyOffered: false), "bought")
+            trialEndPaywall: .trialEnded, sawPlans: true, isPaid: true, monthlyLoaded: true, alreadyOffered: false), "bought")
         XCTAssertFalse(ProPaywallPlans.offersMonthlyOnClose(
-            isEndOfTrialPaywall: true, sawPlans: true, isPaid: false, monthlyLoaded: false, alreadyOffered: false), "no price")
+            trialEndPaywall: .trialEnded, sawPlans: true, isPaid: false, monthlyLoaded: false, alreadyOffered: false), "no price")
     }
 }
