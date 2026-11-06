@@ -31,7 +31,7 @@ Out of the map on purpose: the "Developer" section of Réglages (Debug builds on
 
 ## All IDs
 
-Every ID in this map, in one table: the 18 features first, then their 118 sub-features (in the order of the feature files), then the 58 screens of [screens.md](screens.md) — 194 IDs in all. **Gratuit/Pro** is the tier of the feature the ID belongs to. **Spécifique iOS** is « oui » when the ID has no Android equivalent to compare against: the keyboard-to-app hand-off and Full Access (an iOS keyboard extension cannot record and must ask for Full Access), return to the host app, Apple Intelligence (polish), the Dynamic Island (Live Activity, stopping standby), and the App Group check.
+Every ID in this map, in one table: the 18 features first, then their 118 sub-features (in the order of the feature files), then the 57 screens of [screens.md](screens.md) — 193 IDs in all. **Gratuit/Pro** is the tier of the feature the ID belongs to. **Spécifique iOS** is « oui » when the ID has no Android equivalent to compare against: the keyboard-to-app hand-off and Full Access (an iOS keyboard extension cannot record and must ask for Full Access), return to the host app, Apple Intelligence (polish), the Dynamic Island (Live Activity, stopping standby), and the App Group check.
 
 | ID | Gratuit/Pro | Spécifique iOS |
 | --- | --- | --- |
@@ -210,7 +210,6 @@ Every ID in this map, in one table: the 18 features first, then their 118 sub-fe
 | `app.pro.vocabulary.pair-review` | Pro | non |
 | `app.pro.voice-notes` | Pro | non |
 | `app.paywall` | Pro | non |
-| `app.paywall.trial-ended` | Pro | non |
 | `app.pro.trial-announcement` | Pro | non |
 | `app.voice-note.result` | Pro | non |
 | `kbd.keys` | Gratuit | non |
