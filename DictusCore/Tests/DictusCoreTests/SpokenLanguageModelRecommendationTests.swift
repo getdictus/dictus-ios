@@ -142,4 +142,34 @@ final class SpokenLanguageModelRecommendationTests: XCTestCase {
         XCTAssertFalse(device("iPhone12,1", ramGB: 4).isA15OrLater)
         XCTAssertFalse(device("arm64", ramGB: 8).isA15OrLater)
     }
+
+    /// #660: the Settings gate and the recommendation read one line. On every iPhone and
+    /// iPad, Turbo is selectable exactly where a non-Parakeet speaker is recommended it.
+    func testTurboGateAndRecommendationAgree() {
+        guard let turboModel = ModelInfo.forIdentifier(turbo) else {
+            return XCTFail("\(turbo) is not in the catalogue")
+        }
+        let devices = [iPhone15ProMax, iPhone13Pro, iPhone13, iPhone12Pro, iPhone12, iPhone11,
+                       iPadProA12Z, iPadProM1, iPadProM2,
+                       device("iPhone14,6", ramGB: 4), device("iPhone17,1", ramGB: 8)]
+        for capabilities in devices {
+            let recommendsTurbo = ModelInfo.recommendedIdentifier(forSpokenLanguage: "zh", on: capabilities) == turbo
+            XCTAssertEqual(turboModel.isSupported(on: capabilities), recommendsTurbo,
+                           capabilities.deviceModelIdentifier)
+        }
+    }
+
+    func testIsPreA15IsTheComplementOnIPhonesAndIPads() {
+        for model in ["iPhone11,8", "iPhone12,1", "iPhone13,2", "iPhone13,4", "iPad13,2", "iPad13,8"] {
+            XCTAssertTrue(device(model, ramGB: 6).isPreA15, model)
+        }
+        for model in ["iPhone14,2", "iPhone14,5", "iPhone14,6", "iPhone15,2", "iPhone16,2",
+                      "iPhone17,1", "iPhone19,1", "iPad14,1"] {
+            XCTAssertFalse(device(model, ramGB: 6).isPreA15, model)
+            XCTAssertTrue(device(model, ramGB: 6).isA15OrLater, model)
+        }
+        for model in ["arm64", "Mac15,3", "iPhoneTest,1"] {
+            XCTAssertFalse(device(model, ramGB: 8).isPreA15, model)
+        }
+    }
 }
