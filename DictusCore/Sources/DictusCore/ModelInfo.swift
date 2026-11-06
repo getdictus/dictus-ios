@@ -813,7 +813,8 @@ public struct ModelInfo: Identifiable {
         // generation. This is the same line `recommendedIdentifier(forSpokenLanguage:on:)`
         // reads through `isA15OrLater`, so the picker and the recommendation agree. It
         // only greys the Available row: an A14 user who installed Turbo under an earlier
-        // build is moved off it by `TurboMigration`.
+        // build keeps it, usable and selectable from the ungated Downloaded section, until
+        // they change model themselves. Nothing moves them off it (Pierre, 2026-11-06).
         guard Self.turboIdentifiers.contains(identifier) else { return nil }
         if capabilities.isPreA15 { return .hardwareGeneration }
         return capabilities.physicalMemoryGB >= 6 ? nil : .insufficientMemory(requiredGB: 6)

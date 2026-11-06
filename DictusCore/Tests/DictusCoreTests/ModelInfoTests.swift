@@ -643,10 +643,10 @@ final class ModelInfoTests: XCTestCase {
         }
     }
 
-    /// An A14 user who installed Turbo under an earlier build keeps dictating with it until
-    /// `TurboMigration` has their target ready. Meanwhile the identifier still resolves, so
-    /// the launch preload keeps Turbo's 300 s budget, and the target is never Turbo.
-    func testA14TurboStaysResolvableUntilMigrated() {
+    /// An A14 user who installed Turbo under an earlier build keeps dictating with it: the
+    /// gate only blocks new downloads (#660, no migration). The identifier still resolves,
+    /// so the launch preload keeps Turbo's 300 s budget, and the recommendation is never Turbo.
+    func testA14TurboStaysResolvableForUsersWhoHoldIt() {
         let iphone12Pro = makeCapabilities(ramGB: 6, model: "iPhone13,3")
         for identifier in turboVariants {
             XCTAssertNotNil(ModelInfo.forIdentifier(identifier), identifier)
@@ -654,6 +654,30 @@ final class ModelInfoTests: XCTestCase {
         }
         XCTAssertNotEqual(ModelInfo.recommendedIdentifier(for: iphone12Pro), turbo632)
         XCTAssertNotEqual(ModelInfo.recommendedIdentifier(forSpokenLanguage: "zh", on: iphone12Pro), turbo632)
+    }
+
+    /// Whatever the language, a device below the A15 is recommended a model it can run,
+    /// and never Turbo (#660).
+    func testTheRecommendationOnAPreA15DeviceIsNeverTurboAndAlwaysRunnable() {
+        let devices = [("iPhone13,3", 6), ("iPhone13,2", 4), ("iPhone12,1", 4), ("iPad13,4", 8)]
+        for (identifier, ram) in devices {
+            let capabilities = makeCapabilities(ramGB: ram, model: identifier)
+            XCTAssertTrue(capabilities.isPreA15, identifier)
+            for language in ["fr", "en", "zh", "ja"] {
+                let target = ModelInfo.recommendedIdentifier(forSpokenLanguage: language, on: capabilities)
+                XCTAssertFalse(ModelInfo.turboIdentifiers.contains(target), "\(identifier) \(language)")
+                XCTAssertEqual(ModelInfo.forIdentifier(target)?.isSupported(on: capabilities), true,
+                               "\(identifier) \(language) → \(target)")
+            }
+        }
+    }
+
+    /// The gate's set is exactly the two catalogue variants, both still resolvable (#660).
+    func testTurboIdentifiersAreBothCatalogueVariants() {
+        XCTAssertEqual(ModelInfo.turboIdentifiers, Set(turboVariants))
+        for identifier in ModelInfo.turboIdentifiers {
+            XCTAssertNotNil(ModelInfo.forIdentifier(identifier), identifier)
+        }
     }
 
     // MARK: - Issue #408: the Turbo swap and the users left on the old variant

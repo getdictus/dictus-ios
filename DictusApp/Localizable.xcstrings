@@ -3480,35 +3480,6 @@
         }
       }
     },
-    "Dictus switched you to %@." : {
-      "comment" : "One-time message after Whisper Turbo was replaced on a device below the A15 (#660). Argument: the model now in use (Parakeet v3).",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dictus hat dich auf %@ umgestellt."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dictus switched you to %@."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dictus te ha cambiado a %@."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dictus est passé à %@."
-          }
-        }
-      }
-    },
     "Dictus uses it to reach the Dictus app." : {
       "comment" : "Full Access explainer sheet, first point, bold lead (#704).",
       "localizations" : {
@@ -3528,35 +3499,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Dictus s’en sert pour joindre l’app Dictus."
-          }
-        }
-      }
-    },
-    "Dictus will switch you to %@ once it has downloaded over Wi-Fi. Until then, Turbo keeps working." : {
-      "comment" : "One-time message on a device below the A15 whose replacement for Whisper Turbo still has to download (#660). Argument: the model it will switch to (Parakeet v3).",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dictus stellt dich auf %@ um, sobald das Modell über WLAN geladen ist. Bis dahin funktioniert Turbo weiter."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dictus will switch you to %@ once it has downloaded over Wi-Fi. Until then, Turbo keeps working."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dictus te cambiará a %@ en cuanto se descargue por Wi-Fi. Hasta entonces, Turbo sigue funcionando."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dictus passera à %@ dès que le modèle sera téléchargé en Wi-Fi. D’ici là, Turbo continue de fonctionner."
           }
         }
       }
@@ -5128,64 +5070,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Variante « %1$@ » ajoutée à « %2$@ »."
-          }
-        }
-      }
-    },
-    "Whisper Turbo isn't supported on this iPad" : {
-      "comment" : "Title of the one-time message moving an iPad below the M2 off Whisper Turbo (#660).",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Whisper Turbo wird auf diesem iPad nicht unterstützt"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Whisper Turbo isn't supported on this iPad"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Whisper Turbo no es compatible con este iPad"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Whisper Turbo n’est pas pris en charge sur cet iPad"
-          }
-        }
-      }
-    },
-    "Whisper Turbo isn't supported on this iPhone" : {
-      "comment" : "Title of the one-time message moving an iPhone below the A15 off Whisper Turbo (#660).",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Whisper Turbo wird auf diesem iPhone nicht unterstützt"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Whisper Turbo isn't supported on this iPhone"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Whisper Turbo no es compatible con este iPhone"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Whisper Turbo n’est pas pris en charge sur cet iPhone"
           }
         }
       }
