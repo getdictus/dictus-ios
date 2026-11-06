@@ -212,8 +212,13 @@ final class VoiceNoteProcessor: ObservableObject {
         runTask = Task { [weak self] in
             await self?.runLoop()
             self?.runTask = nil
+            // The queue was what still needed the engine (#380).
+            DictationCoordinator.shared.releaseWarmStateIfImmediate(after: "voiceNotes")
         }
     }
+
+    /// Whether the queue is transcribing, so an Immediately release waits for it (#380).
+    var isRunning: Bool { runTask != nil }
 
     private func runLoop() async {
         beginBackgroundTask()

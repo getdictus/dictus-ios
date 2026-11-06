@@ -1,0 +1,10 @@
+Test Case '-[DictusCoreTests.SystemKeyboardLanguageTests testEachSupportedDeviceLanguageDrawsItsOwnLabels]' passed (0.000 seconds).
+Test Case '-[DictusCoreTests.SystemKeyboardLanguageTests testOnlyTheFirstPreferredLanguageCounts]' passed (0.000 seconds).
+Test Case '-[DictusCoreTests.SystemKeyboardLanguageTests testRegionAndScriptDoNotChangeTheLanguage]' passed (0.000 seconds).
+Test Case '-[DictusCoreTests.SystemKeyboardLanguageTests testUnsupportedDeviceLanguageFallsBackToEnglish]' passed (0.000 seconds).
+Test Suite 'SystemKeyboardLanguageTests' passed at 2026-11-06 09:50:30.891.
+	 Executed 4 tests, with 0 failures (0 unexpected) in 0.001 (0.001) seconds
+Test Suite 'DictusCoreTests.xctest' passed at 2026-11-06 09:50:30.891.
+	 Executed 4 tests, with 0 failures (0 unexpected) in 0.001 (0.001) seconds
+Test Suite 'Selected tests' passed at 2026-11-06 09:50:30.891.
+	 Executed 4 tests, with 0 failures (0 unexpected) in 0.001 (0.002) seconds

@@ -392,6 +392,7 @@ private struct SceneToolbar: View {
         let slot = ToolbarCentreSlot.resolve(
             isChoosingMode: isFanOpen,
             errorMessage: nil,
+            recoveredTranscriptionPending: false,
             offersDictationUndo: offersUndo,
             hasSuggestions: false,
             dictationUnavailable: false,

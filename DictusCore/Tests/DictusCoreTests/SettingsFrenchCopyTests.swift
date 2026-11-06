@@ -34,28 +34,36 @@ final class SettingsFrenchCopyTests: XCTestCase {
         "Dynamic Island and Lock Screen notification are disabled."
     ]
 
-    func testEverySettingsKeyHasAFrenchValue() throws {
+    /// The languages Dictus ships besides the English source. #792 was reported on
+    /// French; German and Spanish carry the same keys and are pinned with it.
+    private static let languages = ["fr", "de", "es"]
+
+    func testEverySettingsKeyIsTranslatedInEveryShippedLanguage() throws {
         let strings = try catalogueStrings()
         for key in Self.keys {
             let entry = try XCTUnwrap(strings[key], "the catalogue has no entry for \(key)")
-            let values = frenchValues(of: entry)
-            XCTAssertFalse(values.isEmpty, "no French value for \(key)")
-            for value in values {
-                XCTAssertNotEqual(value, key, "the French value is the English source: \(key)")
-                XCTAssertFalse(value.contains("—"), "no em dashes in user-facing copy: \(value)")
+            for language in Self.languages {
+                let values = self.values(of: entry, in: language)
+                XCTAssertFalse(values.isEmpty, "no \(language) value for \(key)")
+                for value in values {
+                    XCTAssertNotEqual(value, key, "the \(language) value is the English source: \(key)")
+                    XCTAssertFalse(value.contains("—"), "no em dashes in user-facing copy: \(value)")
+                }
             }
         }
     }
 
-    /// The format arguments survive translation, so the French sentence still shows
-    /// Apple's reason and the word count.
-    func testFrenchValuesKeepTheirPlaceholders() throws {
+    /// The format arguments survive translation, so the translated sentence still
+    /// shows Apple's reason and the word count.
+    func testTranslatedValuesKeepTheirPlaceholders() throws {
         let strings = try catalogueStrings()
         for key in Self.keys {
             let entry = try XCTUnwrap(strings[key])
             for placeholder in ["%@", "%lld"] where key.contains(placeholder) {
-                for value in frenchValues(of: entry) {
-                    XCTAssertTrue(value.contains(placeholder), "\(value) drops \(placeholder)")
+                for language in Self.languages {
+                    for value in values(of: entry, in: language) {
+                        XCTAssertTrue(value.contains(placeholder), "\(value) drops \(placeholder)")
+                    }
                 }
             }
         }
@@ -76,15 +84,15 @@ final class SettingsFrenchCopyTests: XCTestCase {
 
     // MARK: - Reading the repo
 
-    /// The French `stringUnit` values of an entry, or every plural form's when the
-    /// entry varies by count.
-    private func frenchValues(of entry: [String: Any]) -> [String] {
+    /// The `stringUnit` values of an entry in one language, or every plural form's
+    /// when the entry varies by count.
+    private func values(of entry: [String: Any], in language: String) -> [String] {
         guard let localizations = entry["localizations"] as? [String: Any],
-              let french = localizations["fr"] as? [String: Any] else { return [] }
-        if let unit = french["stringUnit"] as? [String: Any], let value = unit["value"] as? String {
+              let localization = localizations[language] as? [String: Any] else { return [] }
+        if let unit = localization["stringUnit"] as? [String: Any], let value = unit["value"] as? String {
             return [value]
         }
-        let plural = (french["variations"] as? [String: Any])?["plural"] as? [String: Any] ?? [:]
+        let plural = (localization["variations"] as? [String: Any])?["plural"] as? [String: Any] ?? [:]
         return plural.values.compactMap {
             (($0 as? [String: Any])?["stringUnit"] as? [String: Any])?["value"] as? String
         }

@@ -106,8 +106,18 @@ class KeyboardState: ObservableObject {
             if dictationStatus != .processing {
                 holdsLocalProcessingStage = false
             }
+            // Sixth (#862): the keyboard's last step of the stop timing trace, the
+            // moment it sees the app's `.transcribing`. Any other status ends the trace,
+            // so a stop the app never acted on cannot time a later dictation.
+            if let trace = pendingStopTrace, oldValue != dictationStatus, dictationStatus != .recording {
+                if dictationStatus == .transcribing { trace.log("keyboardTranscribing") }
+                pendingStopTrace = nil
+            }
         }
     }
+
+    /// The stop tap this process is timing, until the app's `.transcribing` reaches it (#862).
+    private var pendingStopTrace: StopTimingTrace?
 
     /// The app error this keyboard has already put on its toolbar.
     ///
@@ -241,6 +251,12 @@ class KeyboardState: ObservableObject {
     /// during a dictation, and `refreshFromDefaults()` runs on the `statusChanged`
     /// that dictation posts, and again whenever a controller appears.
     @Published private(set) var polishUnavailable = false
+
+    /// Whether a dictation the document refused has its text waiting in DictusApp
+    /// (#860). A state like `polishUnavailable`, not a `statusMessage`: it has no timer
+    /// and stays until tapped or until the next dictation starts. See the extension at
+    /// the bottom of this file.
+    @Published private(set) var recoveredTranscriptionPending = false
 
     /// Whether this process is holding `.processing` on its own authority (#361).
     ///
@@ -601,34 +617,13 @@ class KeyboardState: ObservableObject {
         presentAreaMode(areaMode == .panel ? .keys : .panel)
     }
 
-    // MARK: - Opening DictusApp from the panel
-
-    /// Open DictusApp on a particular screen (#241, #404).
-    ///
-    /// `intent` travels in the URL, and since #404 the app actually routes on it:
-    /// `.pro` lands on the paywall. It used to be a free-form `String` and the app had
-    /// no `open` route at all, so the Pro entries opened the app on whatever screen
-    /// happened to be showing and the user had to find the paywall themselves. The
-    /// vocabulary is `KeyboardOpenIntent` and the URL is built by `KeyboardOpenURL`,
-    /// which the app parses with the same type — this target has no test bundle, and a
-    /// string interpolated here against a string matched over there is exactly the
-    /// cross-process contract that drifted.
-    ///
-    /// Goes through `openDictusURL`, i.e. `extensionContext` first: that is the
-    /// documented path for an app extension, and SwiftUI's `openURL` has no
-    /// success result and can fail silently in a keyboard extension.
-    func openDictusApp(intent: KeyboardOpenIntent, voiceNoteID: UUID? = nil) {
-        guard let url = KeyboardOpenURL.url(intent: intent, voiceNoteID: voiceNoteID) else { return }
-        logProbe("openDictusApp", details: "intent=\(intent.rawValue)")
-        openDictusURL(url)
-    }
-
     // MARK: - Recording commands (keyboard -> app)
 
     /// Request DictusApp to stop recording and begin transcription.
     /// Uses the Darwin notification + Bool flag pattern: write the flag first,
     /// then post the notification so the app reads the flag when it handles the notification.
     func requestStop() {
+        let tapTime = Date()
         logProbe("requestStop", details: sessionDetails())
 
         // A stop tapped by a keyboard that never started this dictation (#261). The
@@ -648,9 +643,18 @@ class KeyboardState: ObservableObject {
             if reconcileIfOrphaned(source: "keyboard-stop") { return }
         }
 
+        // The tap travels with the flag, written first so the app that reads the flag
+        // finds it (#862). The trace is the keyboard's session id and the tap's wall-clock
+        // time, never anything the user said.
+        let trace = StopTimingTrace.tapped(sessionID: activeSessionID ?? "none", at: tapTime)
+        PersistentLog.log(trace.event("tap", at: tapTime))
+        trace.write(to: defaults)
+        pendingStopTrace = trace
+
         defaults.set(true, forKey: SharedKeys.stopRequested)
         defaults.synchronize()
         DarwinNotificationCenter.post(DarwinNotificationName.stopRecording)
+        trace.log("stopPosted")
         HapticFeedback.recordingStopped()
     }
 
@@ -683,6 +687,8 @@ class KeyboardState: ObservableObject {
         // whether this one was abandoned. A state that can last the whole process
         // must not be skipped by an unrelated exit.
         refreshPolishAvailability()
+        // Same placement argument (#860): the banner describes a dictation that is over.
+        refreshRecoveredTranscription()
 
         // Same placement argument as the line above (#79): the armed mode is a sticky
         // setting the app can change — block C's mode list unpins and repins — and it
@@ -1416,8 +1422,15 @@ class KeyboardState: ObservableObject {
             outcome: "tap-\(resolution?.reason ?? "no-controller")"
         ))
 
+        // #827: before onboarding is done, a tap from another app only opens Dictus.
+        // Here, after the host is known and before anything is requested of the app:
+        // nothing to undo, no Darwin post, no URL that asks for a dictation or a return.
+        guard !refuseMicTapBeforeOnboarding(hostId: pendingHostId) else { return }
+
         // A new dictation ends the previous one's undo offer, whatever comes of it.
         invalidateDictationUndo(reason: "new-dictation")
+        // And the previous one's "text is in the Dictus app" banner (#860).
+        clearRecoveredTranscriptionForNewDictation()
 
         // And gives up on a polish still running for the previous one (#361
         // decision 15): N+1 cancels N and takes its place.
@@ -1520,27 +1533,6 @@ class KeyboardState: ObservableObject {
     private func deferRecordingForModelPreparation(reason: String) {
         PersistentLog.log(.dictationDeferred(reason: reason))
         openModelPreparation()
-    }
-
-    /// Prefer the extension context because the SwiftUI openURL callback has no
-    /// success result and can fail silently in a keyboard extension.
-    private func openDictusURL(_ url: URL) {
-        if controller?.extensionContext != nil {
-            openURLFromExtension(url) { [weak self] succeeded in
-                guard !succeeded else { return }
-                PersistentLog.log(.diagnosticProbe(
-                    component: "KeyboardState",
-                    instanceID: self?.instanceID ?? "unknown",
-                    action: "extensionURLFallback",
-                    details: "extensionContext.open returned false"
-                ))
-                DispatchQueue.main.async { [weak self] in
-                    self?.openURL?(url)
-                }
-            }
-        } else if let openURL {
-            openURL(url)
-        }
     }
 
     /// Write "requested" status to App Group before triggering URL.
@@ -1996,5 +1988,123 @@ extension KeyboardState {
         logProbe("micTapRejectedUnsupportedDevice", details: sessionDetails())
         HapticFeedback.actionRefused()
         return true
+    }
+}
+
+// MARK: - Onboarding gate (#827)
+
+extension KeyboardState {
+
+    /// Decline a dictation while onboarding is not done, and open Dictus instead.
+    ///
+    /// The decision is `KeyboardOnboardingGate`'s, where every combination is tested.
+    /// When it refuses, Dictus opens with `intent=settings`: no route, no `hostId`, so the
+    /// app comes forward on onboarding and sends nobody back. The mic tap and the Smart
+    /// Mode fan's mode rows both reach here through `startRecording`.
+    ///
+    /// - Returns: `true` when the tap was refused and the caller must stop.
+    func refuseMicTapBeforeOnboarding(hostId: String?) -> Bool {
+        let decision = KeyboardOnboardingGate.decide(
+            onboardingCompleted: KeyboardOnboardingGate.isOnboardingCompleted(in: defaults),
+            hostId: hostId,
+            appPhase: AppScenePhaseProbe.currentPhase(from: defaults)
+        )
+        guard !decision.allowsAction else {
+            if decision != .onboardingComplete {
+                logProbe("micTapAllowedBeforeOnboarding", details: "reason=\(decision.rawValue)")
+            }
+            return false
+        }
+        logProbe("micTapOpensOnboarding", details: "host=\(hostId ?? "unknown") \(AppScenePhaseProbe.describe())")
+        pendingHostId = nil
+        openDictusApp(intent: .settings)
+        return true
+    }
+}
+
+// MARK: - Opening DictusApp from the panel
+
+extension KeyboardState {
+
+    /// Open DictusApp on a particular screen (#241, #404).
+    ///
+    /// `intent` travels in the URL, and since #404 the app actually routes on it:
+    /// `.pro` lands on the paywall. It used to be a free-form `String` and the app had
+    /// no `open` route at all, so the Pro entries opened the app on whatever screen
+    /// happened to be showing and the user had to find the paywall themselves. The
+    /// vocabulary is `KeyboardOpenIntent` and the URL is built by `KeyboardOpenURL`,
+    /// which the app parses with the same type — this target has no test bundle, and a
+    /// string interpolated here against a string matched over there is exactly the
+    /// cross-process contract that drifted.
+    ///
+    /// Goes through `openDictusURL`, i.e. `extensionContext` first: that is the
+    /// documented path for an app extension, and SwiftUI's `openURL` has no
+    /// success result and can fail silently in a keyboard extension.
+    func openDictusApp(intent: KeyboardOpenIntent, voiceNoteID: UUID? = nil) {
+        // #827: no paywall over onboarding. `.settings` has no route, so the app comes
+        // forward and onboarding stays on screen.
+        let intent = KeyboardOnboardingGate.openIntent(
+            intent,
+            onboardingCompleted: KeyboardOnboardingGate.isOnboardingCompleted(in: defaults)
+        )
+        guard let url = KeyboardOpenURL.url(intent: intent, voiceNoteID: voiceNoteID) else { return }
+        logProbe("openDictusApp", details: "intent=\(intent.rawValue)")
+        openDictusURL(url)
+    }
+
+    /// Prefer the extension context because the SwiftUI openURL callback has no
+    /// success result and can fail silently in a keyboard extension.
+    private func openDictusURL(_ url: URL) {
+        if controller?.extensionContext != nil {
+            openURLFromExtension(url) { [weak self] succeeded in
+                guard !succeeded else { return }
+                PersistentLog.log(.diagnosticProbe(
+                    component: "KeyboardState",
+                    instanceID: self?.instanceID ?? "unknown",
+                    action: "extensionURLFallback",
+                    details: "extensionContext.open returned false"
+                ))
+                DispatchQueue.main.async { [weak self] in
+                    self?.openURL?(url)
+                }
+            }
+        } else if let openURL {
+            openURL(url)
+        }
+    }
+}
+
+// MARK: - Recovered transcription (#860)
+
+/// The banner that says a dictation's text is waiting in DictusApp.
+///
+/// In an extension for the reason the readiness one above gives: the class body sits at
+/// the `type_body_length` budget. Same file, so it can still write the `private(set)`
+/// flag.
+extension KeyboardState {
+
+    /// Re-read the pending state from the App Group. Called on every refresh, which runs
+    /// whenever a controller appears, so the banner is back in any app the user types in.
+    func refreshRecoveredTranscription() {
+        recoveredTranscriptionPending = RecoveredTranscriptionChannel.current() != nil
+    }
+
+    /// A new dictation is the user moving on: the banner describes the previous one.
+    /// DictusApp clears it too, in `startDictation`, for dictations started in the app.
+    func clearRecoveredTranscriptionForNewDictation() {
+        guard recoveredTranscriptionPending || RecoveredTranscriptionChannel.current() != nil else { return }
+        RecoveredTranscriptionChannel.clear()
+        recoveredTranscriptionPending = false
+        logProbe("recoveredTranscriptionCleared", details: "reason=new-dictation")
+    }
+
+    /// The banner was tapped: open DictusApp on the text.
+    ///
+    /// The App Group key is left for the app to take, never cleared here: if the open
+    /// failed, the next appearance draws the banner again rather than losing the only
+    /// pointer to the text. Hidden locally so the tap reads as answered.
+    func openRecoveredTranscription() {
+        recoveredTranscriptionPending = false
+        openDictusApp(intent: .transcription)
     }
 }

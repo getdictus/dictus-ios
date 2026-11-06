@@ -134,15 +134,3 @@ public enum LiveActivityRenderOwner: Equatable, Sendable {
         }
     }
 }
-
-/// The warm engine's idle window, from one place (#620 decision 4).
-///
-/// The engine releases itself after this long without a dictation, which ends the
-/// standby pill. Read here, and only here, so #380 — a user setting for this timeout
-/// (immediately, 1 to 5 minutes, 1 to 2 hours, indefinitely) — plugs in without
-/// touching the voice note island, whose ready state has its own 5-minute lifetime
-/// (`VoiceNoteIsland.readyLifetime`) precisely so the two never depend on each other.
-public enum WarmEngineTimeout {
-    /// 10 minutes, the value #106 Phase B shipped.
-    public static var interval: TimeInterval { 10 * 60 }
-}

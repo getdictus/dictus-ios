@@ -489,16 +489,17 @@ class KeyboardViewController: UIInputViewController {
         // During cold start, applyAreaMode was skipped (hasAppeared was false).
         // Now that activeControllerID matches, KeyboardRootView.presentedMode agrees
         // with us, so the constraint and SwiftUI content change together — no
-        // displaced toolbar. This also restores a picker the user left open when
-        // iOS hands the keyboard to a fresh controller.
+        // displaced toolbar. The pickers are closed first (below): an appearance
+        // starts on the keys (#241, #505).
         let statusBeforeHandle = KeyboardState.shared.dictationStatus.rawValue
 
         // The hamburger panel does not survive leaving the keyboard (#241 device
         // feedback). Switching away with the globe and coming back put the user
         // straight back into the menu instead of the keys, which is not what
-        // returning to a keyboard should mean. The emoji picker deliberately keeps
-        // the old restore behaviour: browsing emoji is a task worth resuming,
-        // choosing a language is not.
+        // returning to a keyboard should mean. The emoji picker follows the same rule
+        // since #505: Apple's keyboard always comes back on the letters, and a user
+        // asking for a keyboard in a new field is asking for a keyboard. Inside one
+        // activation nothing changes — the picker stays until ABC or a dictation.
         // The Smart Mode fan does not survive either, and for a stronger reason than
         // the panel's (#79): it is the visible half of a gesture, and the finger that
         // opened it is long gone by the time a fresh controller mounts. Restoring it
@@ -509,7 +510,7 @@ class KeyboardViewController: UIInputViewController {
             KeyboardSmartModeState.shared.close()
         }
 
-        if KeyboardState.shared.areaMode == .panel {
+        if KeyboardState.shared.areaMode == .panel || KeyboardState.shared.areaMode == .emoji {
             KeyboardState.shared.presentAreaMode(.keys)
         }
 
@@ -547,6 +548,10 @@ class KeyboardViewController: UIInputViewController {
             keyboard.updateTheme(theme: Theme.current(for: traitCollection))
         }
 
+        // Back to the letters if the keyboard was hidden on 123 or #+= (#889), before
+        // the shift state below is computed for the letters page.
+        bridge?.showLettersOnAppearance()
+
         // Set initial shift state based on the text field's autocapitalization setting.
         // WHY here and not viewDidLoad: The textDocumentProxy is not fully connected
         // until the view is about to appear. Calling in viewDidLoad would read stale data.
@@ -562,13 +567,9 @@ class KeyboardViewController: UIInputViewController {
         // stale copy or learned words keep bypassing autocorrect.
         UserDictionary.shared.reload()
 
-        // Set default opening layer from user preference.
-        // WHY here not viewDidLoad: viewWillAppear fires each time the keyboard appears,
-        // allowing the user to change settings in the app and see the effect immediately.
-        let defaultLayer = DefaultKeyboardLayer.active
-        if defaultLayer == .numbers {
-            giellaKeyboard?.page = .symbols1
-        }
+        // Contact names and text replacements (#873), re-read on every appearance
+        // so a contact or replacement added meanwhile is picked up.
+        suggestionState.refreshSupplementaryLexicon(from: self)
 
         // The user dictionary's one-shot prune (#287), attempted BEFORE the load
         // below and not after it. The engine is process-wide, so at this instant
@@ -1256,6 +1257,8 @@ class KeyboardViewController: UIInputViewController {
         KeyboardState.shared.revalidateDictationUndo()
         // Invalidate autocorrect undo on external text changes (paste, cursor tap, host autocorrect).
         bridge?.suggestionState?.pendingUndo = nil
+        // A sent message empties the field under the same documentIdentifier (#872).
+        bridge?.hostTextChanged()
         // When text changes externally (paste, cursor move, autocorrect by host app),
         // recheck autocapitalization. This ensures shift state stays correct even when
         // the user moves the cursor to a different position in the text.

@@ -17,10 +17,14 @@ public enum AudioSessionActivationDecision: Equatable, Sendable {
     /// Activate again after `afterMilliseconds`.
     case retryActivation(afterMilliseconds: Int)
 
-    /// The audio server is down (`mediaServicesWereLost`). Nothing can activate until it
-    /// comes back, so wait for `mediaServicesWereReset` — at most `timeoutMilliseconds` —
-    /// then activate once more.
+    /// The audio server is down, or may be. Nothing can activate until it comes back, so
+    /// wait for `mediaServicesWereReset` — at most `timeoutMilliseconds` — then activate
+    /// once more.
     case waitForMediaServicesReset(timeoutMilliseconds: Int)
+    /// The reset wait ran out with no reset, the activation after it was refused, and the
+    /// keyboard is still waiting with DictusApp in front (#899). Keep waiting for the reset,
+    /// at most `timeoutMilliseconds`, then activate one last time.
+    case awaitLateMediaServicesReset(timeoutMilliseconds: Int)
 
     /// Give up and tell the user to tap again. The hardware is not missing, so the
     /// "microphone is not available" sentence would be wrong.
@@ -46,9 +50,16 @@ public enum AudioSessionActivationDecision: Equatable, Sendable {
 /// - The audio server is known to be down: wait for its reset, once, then activate again —
 ///   even when the last activation succeeded, since it may predate the loss.
 /// - Activated: start — including after that wait, whether or not the reset came.
-/// - Otherwise one more activation after a short pause, then fail with "tap again".
+/// - Otherwise one more activation after a short pause.
+/// - That one failed too: wait for a reset, once, as if the server were known to be down.
+///   The capture has no loss line (nothing observed it then) and its reset came one second
+///   after the failure, so a server going down is not always announced before activation
+///   fails on it. A failure that is not the server costs the wait, then "tap again".
+///   The error code does not pick those apart: `'!int'` (`cannotInterruptOthers`) refused
+///   the activation right after an interruption in #515's capture and the next attempt
+///   worked, so it is not proof that another app keeps the session.
 ///
-/// The retry after the reset is the one retry that start gets: a reset that arrives and
+/// The activation after the wait is the last one that start gets: a reset that arrives and
 /// still leaves the session unable to activate is not something a second wait can fix.
 public enum AudioSessionActivationPolicy {
 
@@ -63,6 +74,14 @@ public enum AudioSessionActivationPolicy {
     /// stays well inside the keyboard's 15 s cold-start grace.
     public static let mediaServicesResetTimeoutMilliseconds = 3000
 
+    /// How long a keyboard start keeps waiting for a reset that has not come by the end of
+    /// `mediaServicesResetTimeoutMilliseconds` (#899). Not measured: the 2026-11-04 capture
+    /// shows the reset landing after that wait, but DictusApp was suspended in between, so the
+    /// real delay is unknown. Five seconds keeps the whole recovery (see
+    /// `ForegroundAudioRecoveryPolicy.recoveryHoldCeilingMilliseconds`) inside the keyboard's
+    /// 15 s cold-start grace.
+    public static let lateMediaServicesResetTimeoutMilliseconds = 5000
+
     /// How many activations a start makes before giving up, outside a media-services loss.
     public static let maxActivationAttempts = 2
 
@@ -72,11 +91,19 @@ public enum AudioSessionActivationPolicy {
     ///   - mediaServicesLost: whether `mediaServicesWereLost` has been observed with no
     ///     `mediaServicesWereReset` after it.
     ///   - hasWaitedForReset: whether this start has already waited for a reset.
+    ///   - resetSeen: whether a reset has landed since this start began.
+    ///   - keyboardStillWaiting: whether this is a keyboard start the keyboard still shows as
+    ///     `requested`, with DictusApp in the foreground. The defaults keep every other start
+    ///     on the #775 rule.
+    ///   - hasAwaitedLateReset: whether this start has already spent its late-reset wait.
     public static func decide(
         activated: Bool,
         failedAttempts: Int,
         mediaServicesLost: Bool,
-        hasWaitedForReset: Bool
+        hasWaitedForReset: Bool,
+        resetSeen: Bool = false,
+        keyboardStillWaiting: Bool = false,
+        hasAwaitedLateReset: Bool = false
     ) -> AudioSessionActivationDecision {
         // Retrying against a dead audio server burns the retry for nothing: wait for it.
         // Checked before `activated` (CodeRabbit on PR #777): the first activation runs
@@ -92,12 +119,22 @@ public enum AudioSessionActivationPolicy {
 
         if activated { return .startRecording }
 
-        // The reset came and the activation after it still failed. That was the retry.
-        if hasWaitedForReset { return .fail }
+        if hasWaitedForReset {
+            // The wait ran out before the reset (#899): the 2026-11-04 capture shows it landing
+            // later, with nothing left to retry the dictation the keyboard was still waiting
+            // for. One more bounded wait, then one activation, never a second: a reset that
+            // came and still left the session refusing is not something more waiting fixes.
+            if !resetSeen && keyboardStillWaiting && !hasAwaitedLateReset {
+                return .awaitLateMediaServicesReset(
+                    timeoutMilliseconds: lateMediaServicesResetTimeoutMilliseconds)
+            }
+            // The reset came and the activation after it still failed. That was the retry.
+            return .fail
+        }
 
         return failedAttempts < maxActivationAttempts
             ? .retryActivation(afterMilliseconds: retryDelayMilliseconds)
-            : .fail
+            : .waitForMediaServicesReset(timeoutMilliseconds: mediaServicesResetTimeoutMilliseconds)
     }
 
     /// An error code as the log should show it: the number, plus its four-character code

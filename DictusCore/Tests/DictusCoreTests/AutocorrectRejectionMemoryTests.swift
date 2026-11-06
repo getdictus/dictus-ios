@@ -1,0 +1,402 @@
+// DictusCore/Tests/DictusCoreTests/AutocorrectRejectionMemoryTests.swift
+// A refused autocorrection is not made again at the same place (#872).
+//
+// Each test feeds the memory the contexts the keyboard bridge passes it, in the
+// order a user produces them. The scenario numbers are the ones of the Apple vs
+// Dictus comparison on the iOS 27 simulator, recorded on the issue.
+
+import XCTest
+@testable import DictusCore
+
+final class AutocorrectRejectionMemoryTests: XCTestCase {
+
+    private var memory: AutocorrectRejectionMemory!
+
+    override func setUp() {
+        super.setUp()
+        memory = AutocorrectRejectionMemory()
+        memory.enter(document: "doc-A")
+    }
+
+    /// The keyboard commits `word` at the end of `context` and the corrector
+    /// proposes `correction`.
+    private func commit(
+        _ context: String, proposing correction: String?, allowsCasingChange: Bool = false
+    ) -> AutocorrectRejectionMemory.Decision {
+        guard let (prefix, word) = AutocorrectRejectionMemory.wordAtCursor(context: context) else {
+            XCTFail("no word at the end of \"\(context)\"")
+            return .keep(countUsage: false)
+        }
+        return memory.commit(
+            prefix: prefix, word: word, proposedCorrection: correction,
+            allowsCasingChange: allowsCasingChange
+        )
+    }
+
+    /// Dictus applies `typed` → `corrected` at the end of `context`, which ends with `typed`.
+    private func applyCorrection(_ context: String, to corrected: String) {
+        guard let (prefix, _) = AutocorrectRejectionMemory.wordAtCursor(context: context) else {
+            return XCTFail("no word at the end of \"\(context)\"")
+        }
+        XCTAssertEqual(memory.commit(prefix: prefix, word: String(context[prefix.endIndex...]),
+                                     proposedCorrection: corrected), .correct)
+        memory.correctionApplied(prefix: prefix, corrected: corrected)
+    }
+
+    /// Backspaces from `start` down to `end`, one character at a time, as the bridge
+    /// reports them.
+    private func erase(from start: String, to end: String) {
+        var text = start
+        while text.count > end.count {
+            let before = text
+            text.removeLast()
+            memory.textDeleted(before: before, after: text)
+        }
+        XCTAssertEqual(text, end)
+    }
+
+    // MARK: - Erasing a correction and typing again at the same place
+
+    func testRetypingTheSameWordAfterErasingTheCorrectionKeepsAndLearnsIt() {
+        // Scenario 3: `la montagnr` → montagne, word erased, `montagnr` typed again.
+        applyCorrection("la montagnr", to: "montagne")
+        erase(from: "la montagne ", to: "la ")
+
+        XCTAssertEqual(commit("la montagnr", proposing: "montagne"), .keepAndLearn)
+    }
+
+    func testRetypingANearbyWordAfterErasingTheCorrectionKeepsAndLearnsIt() {
+        // Scenario 4: `le soleik` → soleil, word erased, `soleiq` typed instead.
+        applyCorrection("le soleik", to: "soleil")
+        erase(from: "le soleil ", to: "le ")
+
+        XCTAssertEqual(commit("le soleiq", proposing: "soleil"), .keepAndLearn)
+    }
+
+    func testErasingOneLetterOfTheCorrectionIsARefusal() {
+        applyCorrection("la montagnr", to: "montagne")
+        erase(from: "la montagne ", to: "la montagn")
+
+        XCTAssertEqual(commit("la montagnr", proposing: "montagne"), .keepAndLearn)
+    }
+
+    func testErasingOnlyTheSpaceAfterTheCorrectionIsNotARefusal() {
+        applyCorrection("la montagnr", to: "montagne")
+        erase(from: "la montagne ", to: "la montagne")
+
+        XCTAssertNil(memory.textDeleted(before: "la montagne ", after: "la montagne"))
+        XCTAssertFalse(memory.isRejected(prefix: "la "))
+    }
+
+    func testErasingOnlyTheSpaceBeforeTheCorrectionIsNotARefusal() {
+        // Review of #874: the caret is moved back to just after `la `, in front of
+        // the corrected word, and the space is erased. No letter of `montagne` went,
+        // so nothing was refused, and a typo typed at that place later is corrected.
+        applyCorrection("la montagnr", to: "montagne")
+
+        XCTAssertNil(memory.textDeleted(before: "la ", after: "la"))
+        XCTAssertFalse(memory.isRejected(prefix: "la "))
+        XCTAssertEqual(commit("la montagnr", proposing: "montagne"), .correct)
+    }
+
+    func testErasingTheWholeCorrectionAtOnceIsARefusal() {
+        // A held backspace deletes `montagne ` in one step: letters went.
+        applyCorrection("la montagnr", to: "montagne")
+
+        XCTAssertEqual(memory.textDeleted(before: "la montagne ", after: "la "), "montagne")
+        XCTAssertEqual(commit("la montagnr", proposing: "montagne"), .keepAndLearn)
+    }
+
+    func testTheMemorySurvivesErasingTheSpaceBeforeTheWord() {
+        // Scenario 21: `la plagr` → plage, word AND preceding space erased, ` plagr` typed.
+        applyCorrection("la plagr", to: "plage")
+        erase(from: "la plage ", to: "la")
+
+        XCTAssertEqual(commit("la plagr", proposing: "plage"), .keepAndLearn)
+    }
+
+    func testTheMemorySurvivesTheNextWords() {
+        // `rejectedWords` was emptied at the start of the next word; this is not.
+        applyCorrection("la montagnr", to: "montagne")
+        erase(from: "la montagne ", to: "la ")
+        XCTAssertEqual(commit("la montagnr", proposing: "montagne"), .keepAndLearn)
+        XCTAssertEqual(commit("la montagnr est", proposing: nil), .keep(countUsage: true))
+        XCTAssertEqual(commit("la montagnr est haute", proposing: nil), .keep(countUsage: true))
+
+        XCTAssertTrue(memory.isRejected(prefix: "la "))
+    }
+
+    func testAnotherPositionIsStillCorrected() {
+        // The refusal is a place, not a word: elsewhere the learned word protects it,
+        // and an unrelated typo there is still corrected.
+        applyCorrection("la montagnr", to: "montagne")
+        erase(from: "la montagne ", to: "la ")
+
+        XCTAssertEqual(commit("la montagnr. Une montagnr", proposing: "montagne"), .correct)
+    }
+
+    func testTheMemoryIsLimitedToTheDocument() {
+        applyCorrection("la montagnr", to: "montagne")
+        erase(from: "la montagne ", to: "la ")
+
+        memory.enter(document: "doc-B")
+        XCTAssertEqual(commit("la montagnr", proposing: "montagne"), .correct)
+
+        memory.enter(document: "doc-A")
+        XCTAssertEqual(commit("la montagnr", proposing: "montagne"), .correct,
+                       "coming back to a document does not bring its refusals back")
+    }
+
+    func testErasingPastThePositionForgetsIt() {
+        // Measured on the simulator: `Le batrau` refused by Undo, the field erased,
+        // then a new message starting `Le soleik` was kept and `soleik` learned,
+        // because the new word sat after the same `Le`. Once the text before a
+        // refused word is erased, that position no longer exists.
+        applyCorrection("Le batrau", to: "bateau")
+        memory.correctionUndone(prefix: "Le ", original: "batrau")
+        erase(from: "Le batrau ", to: "")
+
+        XCTAssertEqual(commit("Le soleik", proposing: "soleil"), .correct)
+        XCTAssertNil(memory.movingOn(context: "Le batrau "), "the restored word is gone too")
+    }
+
+    func testErasingPastAnAppliedCorrectionStopsWatchingIt() {
+        applyCorrection("Le batrau", to: "bateau")
+        erase(from: "Le bateau ", to: "")
+
+        // A new `Le` followed by a backspace into a word is not a refusal of `bateau`.
+        XCTAssertNil(memory.textDeleted(before: "Le bate", after: "Le bat"))
+        XCTAssertEqual(commit("Le batrau", proposing: "bateau"), .correct)
+    }
+
+    func testAMessageSentByTheHostForgetsItsRefusals() {
+        // Measured on the simulator (risk 3 of #874): `la voitude` refused, the
+        // message sent, then `la maisob` in the next message was kept and learned.
+        // Messages empties the field itself and keeps the same documentIdentifier,
+        // so no backspace and no new document told the memory the text was gone.
+        applyCorrection("la voitude", to: "voiture")
+        erase(from: "la voiture ", to: "la ")
+        XCTAssertEqual(commit("la voitude", proposing: "voiture"), .keepAndLearn)
+
+        memory.documentEmptied()
+        XCTAssertEqual(commit("la maisob", proposing: "maison"), .correct)
+    }
+
+    func testWithoutADocumentIdentifierTwoFieldsDoNotShareRefusals() {
+        // Review of #874: a host may give no `documentIdentifier`. Two such fields
+        // looked like one document, so a refusal in the first one kept, and
+        // learned, a typo typed after the same text in the second.
+        memory.enter(document: nil)
+        applyCorrection("la montagnr", to: "montagne")
+        erase(from: "la montagne ", to: "la ")
+
+        memory.enter(document: nil)  // the next event, maybe in another field
+        XCTAssertEqual(commit("la montagnr", proposing: "montagne"), .correct)
+        XCTAssertFalse(memory.remembersRefusals)
+        memory.enter(document: "doc-B")
+        XCTAssertTrue(memory.remembersRefusals)
+    }
+
+    func testTheSameDocumentKeepsItsMemory() {
+        applyCorrection("la montagnr", to: "montagne")
+        erase(from: "la montagne ", to: "la ")
+
+        memory.enter(document: "doc-A")
+        XCTAssertEqual(commit("la montagnr", proposing: "montagne"), .keepAndLearn)
+    }
+
+    func testAKeyIsTheEndOfTheTextBeforeTheWord() {
+        // A host may give a window that ends at the cursor: the key only reads its end.
+        let long = String(repeating: "x", count: 100) + " le "
+        XCTAssertEqual(AutocorrectRejectionMemory.positionKey(prefix: Substring(long)),
+                       String(long.dropLast().suffix(AutocorrectRejectionMemory.keyLength)))
+        XCTAssertEqual(AutocorrectRejectionMemory.positionKey(prefix: "la  \n"), "la")
+    }
+
+    // MARK: - The suggestion bar
+
+    func testTheBarHidesTheCorrectionOnlyAtTheRefusedPosition() {
+        // Review of #874: the bar kept refused spellings in one global set, so the
+        // same typo typed elsewhere showed no correction, while space still made it.
+        applyCorrection("la montagnr", to: "montagne")
+        erase(from: "la montagne ", to: "la ")
+
+        XCTAssertFalse(memory.previewsCorrection(context: "la montagnr"))
+        XCTAssertTrue(memory.previewsCorrection(context: "la montagnr. Une montagnr"))
+        XCTAssertEqual(commit("la montagnr. Une montagnr", proposing: "montagne"), .correct,
+                       "the bar previews what space does")
+    }
+
+    // MARK: - Undo
+
+    func testUndoThenMovingOnLearnsTheRestoredWord() {
+        // Scenario 2: `le batrau` → bateau, Undo restores `batrau ` with its space,
+        // the user types the next word.
+        applyCorrection("le batrau", to: "bateau")
+        memory.correctionUndone(prefix: "le ", original: "batrau")
+
+        XCTAssertEqual(memory.movingOn(context: "le batrau "), "batrau")
+        XCTAssertNil(memory.movingOn(context: "le batrau "), "learned once")
+    }
+
+    func testUndoThenAPredictionTapStillLearnsTheRestoredWord() {
+        // Review of #874: after Undo, tapping a prediction inserts `est ` in one go.
+        // The next keystroke then sees `est` at the caret, not `batrau`, and the
+        // restored word was never learned.
+        applyCorrection("le batrau", to: "bateau")
+        memory.correctionUndone(prefix: "le ", original: "batrau")
+
+        XCTAssertEqual(memory.movingOn(context: "le batrau est "), "batrau")
+    }
+
+    func testUndoBeforeAPunctuationMarkThenMovingOnLearnsTheRestoredWord() {
+        // Review of #874: Undo of `cuisinr,` → `cuisine,` restores `cuisinr,`, and
+        // `cuisinr, ` does not end with the restored word.
+        applyCorrection("la cuisinr", to: "cuisine")
+        memory.correctionUndone(prefix: "la ", original: "cuisinr")
+
+        XCTAssertEqual(memory.movingOn(context: "la cuisinr, "), "cuisinr")
+    }
+
+    func testUndoAloneLearnsNothing() {
+        applyCorrection("le batrau", to: "bateau")
+        memory.correctionUndone(prefix: "le ", original: "batrau")
+
+        // Still on the word: nothing has been validated yet.
+        XCTAssertNil(memory.movingOn(context: "le batrau"))
+    }
+
+    func testUndoThenEditingLearnsTheEditNotTheTypo() {
+        // Scenario 5: `crayin` → crayon, Undo, erase the space and `n`, type `m`.
+        applyCorrection("un crayin", to: "crayon")
+        memory.correctionUndone(prefix: "un ", original: "crayin")
+
+        XCTAssertEqual(commit("un crayim", proposing: "crayon"), .keepAndLearn)
+        // `crayin` is never handed back to be learned: moving on past `crayim` is
+        // not moving on past the restored word.
+        XCTAssertNil(memory.movingOn(context: "un crayim "))
+        // Further on, the typo is corrected again.
+        XCTAssertEqual(commit("un crayim et un crayin", proposing: "crayon"), .correct)
+    }
+
+    func testUndoThenCommittingTheRestoredWordLearnsIt() {
+        // Erase the restored space and press space again: the same word, validated.
+        applyCorrection("le batrau", to: "bateau")
+        memory.correctionUndone(prefix: "le ", original: "batrau")
+
+        XCTAssertEqual(commit("le batrau", proposing: "bateau"), .keepAndLearn)
+        XCTAssertNil(memory.movingOn(context: "le batrau "), "already learned at the commit")
+    }
+
+    func testUndoThenEditingIntoAValidWordLearnsNothing() {
+        applyCorrection("un crayin", to: "crayon")
+        memory.correctionUndone(prefix: "un ", original: "crayin")
+
+        XCTAssertEqual(commit("un crayon", proposing: nil), .keep(countUsage: true))
+        XCTAssertNil(memory.movingOn(context: "un crayon "))
+    }
+
+    // MARK: - The typed word, quoted in slot 0
+
+    func testTappingTheTypedWordRefusesThePosition() {
+        // Scenario 8: `La musiqur`, tap «musiqur». The bridge learns it on the tap;
+        // the position is remembered as refused too.
+        XCTAssertTrue(memory.typedWordKept(prefix: "La ", word: "musiqur", rowWord: "musiqur"))
+        XCTAssertTrue(memory.isRejected(prefix: "La "))
+        XCTAssertEqual(commit("La musiqur", proposing: "musique"), .keepAndLearn)
+    }
+
+    func testAStaleCorrectionsRowRefusesNothing() {
+        // Review of #874: the row was built for `musiqur`, then the caret moved to
+        // the end of `bonjour` without the row refreshing. Tapping slot 0 must not
+        // learn `bonjour` nor refuse its position.
+        XCTAssertFalse(memory.typedWordKept(prefix: "Il dit ", word: "bonjour", rowWord: "musiqur"))
+        XCTAssertFalse(memory.isRejected(prefix: "Il dit "))
+        XCTAssertTrue(memory.typedWordKept(prefix: "La ", word: "Musiqur", rowWord: "musiqur"),
+                      "case does not make a row stale")
+    }
+
+    // MARK: - #287: no learning without a refused correction
+
+    func testAWordNeverCorrectedIsNeverLearnedHere() {
+        XCTAssertEqual(commit("le blorpa", proposing: nil), .keep(countUsage: true))
+        XCTAssertEqual(commit("le blorpa et", proposing: "est"), .correct)
+        XCTAssertNil(memory.movingOn(context: "le blorpa "))
+    }
+
+    func testACorrectionTheUserKeepsLearnsNothing() {
+        applyCorrection("le batrau", to: "bateau")
+        XCTAssertNil(memory.movingOn(context: "le bateau "))
+        XCTAssertEqual(commit("le bateau", proposing: nil), .keep(countUsage: true))
+    }
+
+    func testTheSameWordCommittedTwiceAtTheSamePlaceIsCountedOnce() {
+        // Scenario 13: `ECOLR ` then backspace over the space and `.` committed the
+        // same word again, and `recordUsage` reached its threshold of 2 on one word.
+        XCTAssertEqual(commit("une ECOLR", proposing: nil), .keep(countUsage: true))
+        XCTAssertEqual(commit("une ECOLR", proposing: nil), .keep(countUsage: false))
+        XCTAssertEqual(commit("une ECOLR. Une ECOLR", proposing: nil), .keep(countUsage: true))
+    }
+
+    func testAWordNotCountedIsNotMarkedAsCounted() {
+        // Review of #874: with autocorrect off or the mirror suspect the bridge does
+        // not count the word, so the next eligible commit there must still count.
+        XCTAssertEqual(memory.commit(prefix: "une ", word: "ECOLR", proposedCorrection: nil, countable: false),
+                       .keep(countUsage: true))
+        XCTAssertEqual(commit("une ECOLR", proposing: nil), .keep(countUsage: true))
+    }
+
+    func testRestoredWordsAreBoundedWithTheRefusals() {
+        // Review of #874: Undo at more positions than `capacity`, never moving on.
+        for index in 0...AutocorrectRejectionMemory.capacity {
+            memory.correctionUndone(prefix: Substring("mot\(index) "), original: "batrau")
+        }
+        XCTAssertNil(memory.movingOn(context: "mot0 batrau "), "the oldest restore went with its refusal")
+        let last = AutocorrectRejectionMemory.capacity
+        XCTAssertEqual(memory.movingOn(context: "mot\(last) batrau "), "batrau")
+    }
+
+    // MARK: - Word at cursor
+
+    func testWordAtCursorNeedsTheContextToEndWithTheWord() {
+        XCTAssertEqual(AutocorrectRejectionMemory.wordAtCursor(context: "la cuisinr")?.word, "cuisinr")
+        XCTAssertEqual(AutocorrectRejectionMemory.wordAtCursor(context: "la cuisinr")?.prefix, "la ")
+        XCTAssertNil(AutocorrectRejectionMemory.wordAtCursor(context: "la cuisine,"))
+        XCTAssertNil(AutocorrectRejectionMemory.wordAtCursor(context: "la cuisine "))
+        XCTAssertNil(AutocorrectRejectionMemory.wordAtCursor(context: ""))
+        XCTAssertNil(AutocorrectRejectionMemory.wordAtCursor(context: nil))
+    }
+
+    // MARK: - Casing from the contacts lexicon (#873)
+
+    /// #873 scenario 14: `le zofiak` + space gives `le Zofiak` for a contact.
+    func testALexiconCasingIsACorrection() {
+        XCTAssertEqual(commit("le zofiak", proposing: "Zofiak", allowsCasingChange: true), .correct)
+    }
+
+    /// Outside the lexicon a casing-only proposal stays no proposal, as in #872.
+    func testACasingOnlyProposalIsNoCorrectionOutsideTheLexicon() {
+        XCTAssertEqual(commit("le zofiak", proposing: "Zofiak"), .keep(countUsage: true))
+    }
+
+    /// `Bonjour. Zofiak`: the word already has the lexicon casing.
+    func testAWordAlreadyInTheLexiconCasingIsKept() {
+        XCTAssertEqual(
+            commit("Bonjour. Zofiak", proposing: "Zofiak", allowsCasingChange: true),
+            .keep(countUsage: true)
+        )
+    }
+
+    /// Erasing into `Zofiak` refuses it, like any correction: `zofiak` typed
+    /// again at that place is kept and learned.
+    func testARefusedLexiconCasingStaysRefused() {
+        XCTAssertEqual(commit("le zofiak", proposing: "Zofiak", allowsCasingChange: true), .correct)
+        memory.correctionApplied(prefix: "le ", corrected: "Zofiak")
+        erase(from: "le Zofiak ", to: "le Zofia")
+        erase(from: "le Zofia", to: "le ")
+        XCTAssertEqual(
+            commit("le zofiak", proposing: "Zofiak", allowsCasingChange: true),
+            .keepAndLearn
+        )
+    }
+}

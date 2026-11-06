@@ -36,10 +36,12 @@ The script bumps all three plists together, commits, tags `build/N` and pushes. 
 ## 2. Upload
 
 ```sh
+export ASC_KEY_ID=<your-key-id>          # once per shell, or in ~/.zshrc
+export ASC_ISSUER_ID=<your-issuer-id>
 scripts/upload-testflight.sh
 ```
 
-Archive, sign for the store, upload, wait for processing. Headless, so no window steals Pierre's screen. The script's header explains why it authenticates with the App Store Connect API key rather than the Xcode account; read it before you debug a signing failure, because the obvious diagnosis is wrong.
+Archive, sign for the store, upload, wait for processing. Headless, so no window steals Pierre's screen. It stops before archiving if either variable is missing; both come from App Store Connect > Users and Access > Integrations > App Store Connect API, and the `.p8` must sit at `~/.asc/keys/AuthKey_<ASC_KEY_ID>.p8`. The script's header explains why it authenticates with the App Store Connect API key rather than the Xcode account; read it before you debug a signing failure, because the obvious diagnosis is wrong.
 
 ## 3. Write the What to Test
 

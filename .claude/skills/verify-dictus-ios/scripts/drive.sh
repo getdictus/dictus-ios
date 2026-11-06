@@ -6,12 +6,16 @@
 #   DICTUS_VERIFY_RUN=<run-dir> drive.sh <command> [args]                (a given run)
 #
 # Primitives (exit non-zero when the element never appears):
-#   tap-id <identifier>            tap the first element whose AXUniqueId matches
-#   tap-label <label>              tap the first element whose AXLabel matches
+#   tap-id <identifier>            tap the element whose AXUniqueId matches
+#   tap-label <label>              tap the element whose AXLabel matches
+#                                  both refuse (exit 1, candidates listed) when several
+#                                  elements match; a label clash is resolved with tap-id.
+#                                  They also refuse an element off screen: scroll first
 #   wait-id <identifier> [secs]    wait until it is on screen (default 15 s)
 #   wait-label <label> [secs]
 #   gone-id <identifier> [secs]    wait until it has left the screen
 #   tab <Accueil|Modèles|Réglages> tap a tab bar item (Home|Models|Settings on an English device)
+#                                  (its RadioButton: a screen can repeat the name as a heading)
 #   tree                           print the accessibility tree (axe, points)
 #   log-mark                       print the App Group log's next line number
 #   wait-log <regex> [secs] [from] wait for a log line at or after `from`
@@ -36,8 +40,8 @@ cmd=${1:?usage: drive.sh <command> [args]}
 shift
 
 case "$cmd" in
-  tap-id) tap id "$1"; echo "tapped id $1" ;;
-  tap-label) tap label "$1"; echo "tapped label $1" ;;
+  tap-id) tap_unique id "${1:?identifier}"; echo "tapped id $1" ;;
+  tap-label) tap_unique label "${1:?label}"; echo "tapped label $1" ;;
   wait-id) wait_for id "$1" "${2:-15}" >/dev/null || die "id '$1' never appeared"; echo "present id $1" ;;
   wait-label) wait_for label "$1" "${2:-15}" >/dev/null || die "label '$1' never appeared"; echo "present label $1" ;;
   gone-id)
@@ -48,8 +52,9 @@ case "$cmd" in
     done
     echo "gone id $1" ;;
   tab)
-    # Tab bar items are RadioButtons labelled with the tab name; they carry no identifier.
-    tap label "${1:?tab name}"; echo "tapped tab $1" ;;
+    # Tab bar items are RadioButtons labelled with the tab name. Their identifiers are SF
+    # Symbol names, not ours, and the Models screen also has a « Modèles » heading.
+    tap_unique label "${1:?tab name}" RadioButton; echo "tapped tab $1" ;;
   tree) axe describe-ui --udid "$UDID" ;;
   log-mark) echo $(($( [ -f "$LOG_FILE" ] && wc -l <"$LOG_FILE" || echo 0) + 1)) ;;
   wait-log)

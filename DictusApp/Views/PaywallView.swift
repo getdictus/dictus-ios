@@ -24,9 +24,15 @@ struct PaywallView: View {
     @EnvironmentObject var proStatus: ProStatusManager
     @Environment(\.dismiss) private var dismiss
 
-    /// Why this paywall is up (#593). `.standard` for every entry point the user
-    /// chose; `.trialEnded` for the one the app opens once when the trial is over.
-    var framing: PaywallFraming = .standard
+    /// Set when the app opened this paywall because the trial is over (#593), with
+    /// how it is framed (#837); nil for every entry point the user chose.
+    var trialEnd: ProTrialEndPaywall?
+
+    /// Why this paywall is up. `.trialEnded` only for the end-of-trial framing; a
+    /// reinstall over an ended trial gets the ordinary one (#837).
+    private var framing: PaywallFraming {
+        trialEnd == .trialEnded ? .trialEnded : .standard
+    }
 
     /// Selected plan, tracked by product ID (never by array index: StoreKit's
     /// product order is unspecified). Yearly is preselected per the pricing
@@ -58,6 +64,9 @@ struct PaywallView: View {
 
     /// Drives the staged entrance animation of the thank-you screen elements.
     @State private var successEntrance = false
+
+    /// Presents Apple's offer code sheet (#787).
+    @State private var showsOfferCodeRedemption = false
 
     /// The feature whose screen is pushed onto the hub's stack (#216 decision 4).
     @State private var openedFeature: ProFeature?
@@ -229,6 +238,11 @@ struct PaywallView: View {
             Button("OK") { subscriptionManager.resetState() }
         } message: {
             Text(errorMessage)
+        }
+        // On the screen and not on its button: redeeming can flip `sellsPlans` and
+        // remove the button while the sheet is still closing.
+        .offerCodeRedemption(isPresented: $showsOfferCodeRedemption) { result in
+            subscriptionManager.offerCodeSheetClosed(result)
         }
         // Closing it any way but a purchase closes the paywall too (#724): the user
         // has now declined twice, and a third screen would be the nag the decision
@@ -471,11 +485,16 @@ struct PaywallView: View {
         .padding(.top, 2)
     }
 
+    /// Each part goes through the catalog first (#279): `ProFeature`'s strings are
+    /// English keys, and `accessibilityLabel(_:)` reads a `String` verbatim, so the
+    /// combined label was the one English line on a French paywall.
     private func accessibilityLabel(for feature: ProFeature) -> String {
+        let name = String(localized: String.LocalizationValue(feature.displayName))
+        let description = String(localized: String.LocalizationValue(feature.paywallDescription))
         guard let notice = feature.unsupportedNotice else {
-            return "\(feature.displayName): \(feature.paywallDescription)"
+            return "\(name): \(description)"
         }
-        return "\(feature.displayName): \(feature.paywallDescription). \(notice)"
+        return "\(name): \(description). \(String(localized: String.LocalizationValue(notice)))"
     }
 
     /// Icon color per feature (Smart Mode = accent, others = accent highlight; #789).
@@ -862,13 +881,13 @@ struct PaywallView: View {
     // MARK: - Monthly offer on close (#724)
 
     /// Every way out of the paywall the user can take: the cross and "Continue for
-    /// free". On the end-of-trial paywall, once the user has seen the plans, the first
-    /// one shows the monthly offer instead of closing
+    /// free". On the paywall the app opened at the trial's end, once the user has seen
+    /// the plans, the first one shows the monthly offer instead of closing
     /// (`ProPaywallPlans.offersMonthlyOnClose`); from the recap, everywhere else, and
     /// the second time, it closes.
     private func close() {
         guard ProPaywallPlans.offersMonthlyOnClose(
-            isEndOfTrialPaywall: framing == .trialEnded,
+            trialEndPaywall: trialEnd,
             sawPlans: showsOffers,
             isPaid: proStatus.isPaid,
             monthlyLoaded: subscriptionManager.monthlyProduct != nil,
@@ -923,6 +942,9 @@ struct PaywallView: View {
                 .dictusGlass()
         }
         .buttonStyle(GlassPressStyle())
+        // Distinct from the monthly offer's own "Continue for free" (#793): with the
+        // offer up, both share a label, and a tap by label can land on this one.
+        .accessibilityIdentifier("paywall.continueForFree")
     }
 
     // MARK: - Bottom Links
@@ -949,6 +971,16 @@ struct PaywallView: View {
                 }
                 .font(.dictusCaption)
                 .accessibilityLabel("Restore previous purchases")
+
+                // Apple's own offer code sheet (#787): the codes are made in App Store
+                // Connect, so a gifted code grants the same Pro product the plans above
+                // sell. Same neutral wording rule as the issue: the label says what
+                // the button does, never where a code comes from.
+                Button("Redeem a code") {
+                    showsOfferCodeRedemption = true
+                }
+                .font(.dictusCaption)
+                .accessibilityIdentifier("paywall.redeemCode")
             }
 
             HStack(spacing: 16) {
@@ -957,6 +989,9 @@ struct PaywallView: View {
             }
             .font(.dictusCaption)
             .foregroundColor(.secondary)
+            // A gap between the way out above and the links (#793), so a tap just
+            // under "Continue for free" cannot open Safari.
+            .padding(.top, 8)
         }
     }
 

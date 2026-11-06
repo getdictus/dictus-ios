@@ -1,5 +1,5 @@
 // DictusCore/Tests/DictusCoreTests/StopStandbySceneScriptTests.swift
-// The onboarding's "how to stop Dictus" scene: the order of its gesture and its loop (#681).
+// The onboarding's "how to stop Dictus" scene: the order of its gesture and its loop (#681, #858).
 import XCTest
 @testable import DictusCore
 
@@ -30,24 +30,38 @@ final class StopStandbySceneScriptTests: XCTestCase {
 
     // MARK: - Loop
 
-    func testTheLoopIsWithinDecision14() {
-        XCTAssertGreaterThanOrEqual(Script.loopSeconds, 10)
-        XCTAssertLessThanOrEqual(Script.loopSeconds, 20)
+    /// A 3 s pass (#858): the gesture, then a second of empty island, nothing more.
+    func testTheLoopLastsThreeSeconds() {
+        XCTAssertEqual(Script.loopSeconds, 3)
     }
 
-    /// The loop restarts on the picture it ended on: no jump at the seam.
-    func testTheLoopClosesOnItself() {
-        for variant in [Script.Variant.island, .lockScreen] {
+    /// The seam is the standby coming back, as after the next dictation: the pass ends on
+    /// the activity gone and starts on it up, with no finger on either side.
+    func testTheSeamBringsTheStandbyBack() {
+        let expectations: [(Script.Variant, Script.Activity)] = [(.island, .compact), (.lockScreen, .expanded)]
+        for (variant, start) in expectations {
             let first = Script.frame(at: 0, variant: variant)
             let last = Script.frame(at: Script.loopSeconds - 0.001, variant: variant)
-            XCTAssertEqual(first, last, "\(variant)")
+            XCTAssertEqual(first.activity, start, "\(variant)")
+            XCTAssertEqual(last.activity, .none, "\(variant)")
             XCTAssertNil(first.finger, "\(variant): no finger at the seam")
+            XCTAssertNil(last.finger, "\(variant): no finger at the seam")
+        }
+    }
+
+    /// The last second of either pass shows the activity gone (#858: 2.0 to 3.0 s).
+    func testTheLastSecondShowsTheActivityGone() {
+        for variant in [Script.Variant.island, .lockScreen] {
+            for (time, frame) in everyFrame(variant) where time >= 2.0 {
+                XCTAssertEqual(frame.activity, .none, "\(variant), t=\(time)")
+            }
+            XCTAssertNotEqual(Script.frame(at: 1.99, variant: variant).activity, .none, "\(variant)")
         }
     }
 
     func testTimesOutsideTheLoopWrap() {
         for variant in [Script.Variant.island, .lockScreen] {
-            for time in [0.5, 2.2, 3.7, 6.0] {
+            for time in [0.5, 0.9, 1.7, 2.5] {
                 XCTAssertEqual(
                     Script.frame(at: time + Script.loopSeconds * 3, variant: variant),
                     Script.frame(at: time, variant: variant)
@@ -62,9 +76,24 @@ final class StopStandbySceneScriptTests: XCTestCase {
 
     // MARK: - Island
 
-    /// compact → long press → expanded → tap → gone → back: the story of decision 19.
-    func testTheIslandGoesCompactExpandedGoneAndBack() {
-        XCTAssertEqual(activitySequence(.island), [.compact, .expanded, .none, .compact])
+    /// compact → long press → expanded → tap → gone: the story of decision 19, the return
+    /// being the next pass.
+    func testTheIslandGoesCompactExpandedGone() {
+        XCTAssertEqual(activitySequence(.island), [.compact, .expanded, .none])
+    }
+
+    /// #858's beats: press at 0.3 s, expanded at 0.8 s, slide 1.1 to 1.6 s, tap 1.8 to 2.0 s.
+    func testTheIslandBeatsFitTheShortLoop() {
+        let frames = everyFrame(.island)
+        func firstTime(_ condition: (Script.Frame) -> Bool) -> Double? {
+            frames.first { condition($0.frame) }?.time
+        }
+        XCTAssertEqual(firstTime { $0.finger?.isPressed == true } ?? -1, 0.3, accuracy: 0.011)
+        XCTAssertEqual(firstTime { $0.activity == .expanded } ?? -1, 0.8, accuracy: 0.011)
+        XCTAssertEqual(firstTime { ($0.finger?.travel ?? 0) > 0 } ?? -1, 1.1, accuracy: 0.011)
+        XCTAssertEqual(firstTime { $0.finger?.travel == 1 } ?? -1, 1.6, accuracy: 0.011)
+        XCTAssertEqual(firstTime { $0.finger?.isPressed == true && $0.finger?.travel == 1 } ?? -1, 1.8, accuracy: 0.011)
+        XCTAssertEqual(firstTime { $0.activity == .none } ?? -1, 2.0, accuracy: 0.011)
     }
 
     /// The island expands only once the finger has held it for the long press.
@@ -120,12 +149,12 @@ final class StopStandbySceneScriptTests: XCTestCase {
         }
     }
 
-    /// The chips light 1, 2, 3 in order, then 1 again when the island comes back.
+    /// The chips light 1, 2, 3 in order; 1 again is the next pass.
     func testTheChipsFollowTheGesture() {
         let sequence = everyFrame(.island).compactMap(\.frame.chip).reduce(into: [Script.Chip]()) { result, chip in
             if result.last != chip { result.append(chip) }
         }
-        XCTAssertEqual(sequence, [.island, .longPress, .stop, .island])
+        XCTAssertEqual(sequence, [.island, .longPress, .stop])
         XCTAssertEqual(Script.frame(at: IslandBeat.expands, variant: .island).chip, .longPress)
         XCTAssertEqual(Script.frame(at: IslandBeat.tapPress, variant: .island).chip, .stop)
     }
@@ -138,9 +167,12 @@ final class StopStandbySceneScriptTests: XCTestCase {
     }
 
     /// Reduce Motion: the one picture that says it all, the finger on the lit power button
-    /// of the expanded island.
+    /// of the expanded island, between the slide and the tap.
     func testTheIslandStillFrameShowsThePowerButton() {
-        let still = Script.frame(at: Script.stillSeconds(.island), variant: .island)
+        let stillSeconds = Script.stillSeconds(.island)
+        XCTAssertGreaterThan(stillSeconds, 1.6)
+        XCTAssertLessThan(stillSeconds, 1.8)
+        let still = Script.frame(at: stillSeconds, variant: .island)
         XCTAssertEqual(still.activity, .expanded)
         XCTAssertTrue(still.isPowerLit)
         XCTAssertEqual(still.finger?.travel, 1)
@@ -152,8 +184,8 @@ final class StopStandbySceneScriptTests: XCTestCase {
     // MARK: - Lock Screen
 
     /// The banner shows its buttons as it is: never compact, and no chips.
-    func testTheLockScreenBannerGoesAndComesBack() {
-        XCTAssertEqual(activitySequence(.lockScreen), [.expanded, .none, .expanded])
+    func testTheLockScreenBannerGoes() {
+        XCTAssertEqual(activitySequence(.lockScreen), [.expanded, .none])
         for (_, frame) in everyFrame(.lockScreen) {
             XCTAssertNil(frame.chip)
             XCTAssertNotEqual(frame.activity, .compact)
@@ -163,7 +195,10 @@ final class StopStandbySceneScriptTests: XCTestCase {
         }
     }
 
+    /// The same tap as the island's, 1.8 to 2.0 s, after the finger has rested on the button.
     func testTheLockScreenTapEndsTheBanner() {
+        let firstPress = everyFrame(.lockScreen).first { $0.frame.finger?.isPressed == true }?.time ?? -1
+        XCTAssertEqual(firstPress, 1.8, accuracy: 0.011)
         XCTAssertEqual(Script.frame(at: LockBeat.tapRelease - 0.01, variant: .lockScreen).finger?.isPressed, true)
         XCTAssertEqual(Script.frame(at: LockBeat.tapRelease - 0.01, variant: .lockScreen).activity, .expanded)
         XCTAssertEqual(Script.frame(at: LockBeat.tapRelease, variant: .lockScreen).activity, .none)

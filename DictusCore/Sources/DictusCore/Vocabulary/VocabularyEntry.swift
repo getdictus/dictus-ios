@@ -15,13 +15,14 @@ import Foundation
 /// what let an entry with no variants claim to protect a spelling; #536 measured that
 /// claim false on device and withdrew the decision. The prompt no longer carries a
 /// term list at all, so **an entry with no variants changes nothing** — see
-/// `hasEffect`, which the add sheet uses to refuse one.
+/// `hasEffect`, which the list uses to say so on the row.
 ///
-/// ### Why `variants` can still be empty
+/// ### Why `variants` can be empty
 ///
-/// Entries stored before #536 have none, and the file is the user's data. `init?` and
-/// `isValid` deliberately keep accepting them, so nothing already on disk is dropped
-/// at load; the requirement lives at the point of entry instead.
+/// A user often does not know yet how Dictus will misspell a word, so the add sheet
+/// saves a term on its own, to watch (#819); entries stored before #536 have none
+/// either. `init?` and `isValid` accept them, and the list shows them as waiting for
+/// a misspelling rather than claiming an effect they do not have.
 ///
 /// ### Why there is no language tag (#80 decision 9)
 ///
@@ -123,10 +124,10 @@ public struct VocabularyEntry: Codable, Identifiable, Equatable, Sendable {
     ///
     /// Separate from `isValid` on purpose, and the separation is the whole design:
     /// `isValid` decides what may be **stored**, and the store filters on it at load,
-    /// so folding this rule into it would silently delete every variant-less entry
-    /// written before #536. This decides what is **worth storing**, and only the add
-    /// sheet asks — a stored entry that answers `false` is kept, listed, and flagged
-    /// on screen with the one action that fixes it.
+    /// so folding this rule into it would silently delete every variant-less entry.
+    /// This decides what the entry **does**: the replacer emits nothing for an entry
+    /// that answers `false`, and the list says so — the entry is kept, listed, and flagged
+    /// on screen as waiting for a misspelling (#819).
     public var hasEffect: Bool {
         !variants.isEmpty
     }
