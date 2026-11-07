@@ -47,6 +47,13 @@ struct LicensesView: View {
                 )
 
                 licenseBlock(
+                    name: "DM Sans",
+                    author: "The DM Sans Project Authors",
+                    url: "https://github.com/googlefonts/dm-fonts",
+                    license: dmSansLicense
+                )
+
+                licenseBlock(
                     name: "FluidAudio",
                     author: "NVIDIA Corporation",
                     url: "https://github.com/FluidInference/FluidAudio",
@@ -93,6 +100,17 @@ struct LicensesView: View {
     }
 
     // MARK: - Private
+
+    /// The SIL Open Font License shipped with the DM Sans files (#913), read from the
+    /// bundle so the text shown is the one distributed. OFL 1.1 asks for the license
+    /// to accompany the font.
+    private var dmSansLicense: String {
+        guard let url = Bundle.main.url(forResource: "OFL", withExtension: "txt"),
+              let text = try? String(contentsOf: url, encoding: .utf8) else {
+            return "Copyright 2014 The DM Sans Project Authors. SIL Open Font License, Version 1.1."
+        }
+        return text
+    }
 
     private func licenseBlock(name: String, author: String, url: String, license: String) -> some View {
         VStack(alignment: .leading, spacing: 8) {
