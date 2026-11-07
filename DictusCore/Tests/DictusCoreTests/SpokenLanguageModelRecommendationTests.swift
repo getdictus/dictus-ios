@@ -54,8 +54,9 @@ final class SpokenLanguageModelRecommendationTests: XCTestCase {
         }
     }
 
-    func testParakeetLanguageBelowSixGigabytesGetsSmall() {
-        XCTAssertEqual(ModelInfo.recommendedIdentifier(forSpokenLanguage: "it", on: iPhone13), small)
+    /// #921: below 6 GB, the A15 gets Parakeet and the A14 keeps Small.
+    func testParakeetLanguageBelowSixGigabytesGetsParakeetOnA15AndSmallOnA14() {
+        XCTAssertEqual(ModelInfo.recommendedIdentifier(forSpokenLanguage: "it", on: iPhone13), parakeet)
         XCTAssertEqual(ModelInfo.recommendedIdentifier(forSpokenLanguage: "fr", on: iPhone12), small)
     }
 
