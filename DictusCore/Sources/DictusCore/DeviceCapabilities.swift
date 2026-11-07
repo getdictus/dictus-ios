@@ -100,10 +100,9 @@ public struct DeviceCapabilities: Sendable, Equatable {
     /// M1 entry omits it). So "family >= 14" on both product lines is the matrix, not an
     /// approximation of it.
     ///
-    /// WHY it is not folded into `ModelInfo.incompatibilityReason`: that gate decides what
-    /// Settings lets a user PICK, and it predates this reading (it gates Turbo on RAM only,
-    /// which leaves a 6 GB A14 iPhone 12 Pro able to select it). Tightening what a user may
-    /// choose is a separate decision; this only keeps the RECOMMENDATION inside the matrix.
+    /// The Settings gate reads the same line through `isPreA15` (#660), so the picker and
+    /// the recommendation agree on every iPhone and iPad. On any other identifier both
+    /// answer false; `isPreA15` says why the gate must not read that as "unsupported".
     ///
     /// Identifiers that are neither iPhone nor iPad (a Mac, a placeholder) answer false:
     /// with no matrix entry to read, the recommendation stays on the conservative side.
@@ -114,6 +113,27 @@ public struct DeviceCapabilities: Sendable, Equatable {
             return false
         }
         return family >= 14
+    }
+
+    /// Whether this device's chip predates the A15: an iPhone or iPad whose hardware family
+    /// number is below 14 (the A14 iPhone 12 family `iPhone13,*`, the A14 and M1 iPads in
+    /// `iPad13,*`, and everything older). The complement of `isA15OrLater` on iPhone and
+    /// iPad identifiers, read from the same Argmax listing, see there.
+    ///
+    /// WHY a second predicate and not `!isA15OrLater` (#660): this one GATES what Settings
+    /// lets a user download, where `isA15OrLater` only steers a recommendation. On an
+    /// identifier that is neither iPhone nor iPad (a Mac, "arm64", a test placeholder) the
+    /// recommendation may stay conservative, but refusing a download there would take Turbo
+    /// away from hardware nobody has shown to be unsupported. So both answer false on it,
+    /// and an unknown device keeps the RAM rule alone, as before #660. A future iPhone
+    /// family (19 and up) is above the floor and keeps Turbo.
+    ///
+    /// Source of truth: https://huggingface.co/argmaxinc/whisperkit-coreml/raw/main/config.json
+    public var isPreA15: Bool {
+        guard let family = hardwareFamily(after: "iPhone") ?? hardwareFamily(after: "iPad") else {
+            return false
+        }
+        return family < 14
     }
 
     /// The family number of an identifier such as "iPad8,1" (→ 8), or nil when the
