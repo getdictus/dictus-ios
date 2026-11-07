@@ -283,10 +283,13 @@ struct PaywallView: View {
                 .accessibilityLabel("Close")
             }
         }
-        // The wordmark sits in the bar, level with the cross (#913): on an iPhone SE
-        // a row of its own under the bar cost the plans their room.
+        // On the sales states the wordmark sits in the bar, level with the cross
+        // (#913): on an iPhone SE a row of its own under the bar cost the plans their
+        // room. The hub keeps its large hero instead (`hubContent`).
         ToolbarItem(placement: .principal) {
-            PaywallWordmark()
+            if hubBlock.sellsPlans {
+                PaywallWordmark()
+            }
         }
     }
 
@@ -383,9 +386,12 @@ struct PaywallView: View {
     }
 
     /// Subscriber, Lifetime and the in-between states: no sales block, the hub as
-    /// before (#216) under the same wordmark.
+    /// before (#216), under its large hero. Kept after #913 on Pierre's device
+    /// verdict: the small bar wordmark left the hub unbalanced.
     private var hubContent: some View {
         VStack(spacing: 14) {
+            ProHubHero()
+
             VStack(spacing: 10) {
                 ForEach(ProFeature.allCases, id: \.self) { feature in
                     if cardsAreActive {
