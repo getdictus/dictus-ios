@@ -639,7 +639,7 @@ public struct ModelInfo: Identifiable {
     /// test for iPhones and iPads alike; `isSupported(on:)` reads the same predicate.
     /// The exception comes before the RAM rule, so a 6 GB A12X/A12Z iPad Pro gets
     /// Base and never Parakeet (issue #612). After it, Parakeet v3 (~800 MB) remains
-    /// the pick for >= 6 GB.
+    /// the pick for >= 6 GB, and for 4 GB on an A15 or later (#921).
     ///
     /// WHY in ModelInfo (not ModelManager):
     /// This is catalog-level logic — which model fits this device. It doesn't
@@ -662,9 +662,12 @@ public struct ModelInfo: Identifiable {
             // tier, and `preA14SupportedIdentifiers` keeps the two consistent.
             return "openai_whisper-base"
         }
-        return capabilities.physicalMemoryGB >= 6
-            ? "parakeet-tdt-0.6b-v3"
-            : "openai_whisper-small"
+        // #921: Parakeet also runs well on a 4 GB A15. Measured on an iPhone 13
+        // (iPhone14,5), TestFlight 39.804: 126 s of audio transcribed in 14.5 s, no
+        // failure. No 4 GB A14 was measured, so the iPhone 12 family keeps Small.
+        let parakeetFits = capabilities.physicalMemoryGB >= 6
+            || (capabilities.isA15OrLater && capabilities.physicalMemoryGB >= 4)
+        return parakeetFits ? "parakeet-tdt-0.6b-v3" : "openai_whisper-small"
     }
 
     /// The Turbo variant the catalogue offers (issue #408).
@@ -687,8 +690,8 @@ public struct ModelInfo: Identifiable {
     /// The rule, in order:
     /// 1. A pre-A14 device gets today's answer, Base, whatever the language: the Argmax
     ///    matrix allows nothing else there, and Base is multilingual.
-    /// 2. A language Parakeet speaks gets today's answer too: Parakeet on 6 GB or more,
-    ///    Small below. All four Dictus keyboard languages land here, so nobody who
+    /// 2. A language Parakeet speaks gets today's answer too: Parakeet on 6 GB or more
+    ///    and on a 4 GB A15 or later (#921), Small below. All four Dictus keyboard languages land here, so nobody who
     ///    onboarded before #649 sees their recommendation move.
     /// 3. Any other language gets the best Whisper the device runs reliably: Turbo where
     ///    Argmax lists it AND the catalogue's own Turbo gate (6 GB) lets it run, Small
@@ -847,7 +850,7 @@ public struct ModelInfo: Identifiable {
     /// WHY the exception is guarded on `.deprecated` rather than matching the
     /// identifier alone: `all` also drops Parakeet on iOS 16 through a runtime OS
     /// check, while `recommendedIdentifier(for:)` returns Parakeet on any >= 6 GB
-    /// device regardless of OS. A bare identifier match would smuggle Parakeet back
+    /// device (and any 4 GB A15) regardless of OS. A bare identifier match would smuggle Parakeet back
     /// onto iOS 16. This exception must undo deprecation and nothing else.
     ///
     /// Filters `allIncludingDeprecated` rather than `all` so the rendered order stays
