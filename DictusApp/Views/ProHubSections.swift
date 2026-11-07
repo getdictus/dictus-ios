@@ -1,7 +1,43 @@
 // DictusApp/Views/ProHubSections.swift
-// The Dictus Pro hub's pieces for users who have Pro: active feature cards, and the membership block (#216).
+// The Dictus Pro hub's pieces for users who have Pro: hero, active feature cards, and the membership block (#216).
 import SwiftUI
 import DictusCore
+
+/// The hub's brand hero (Subscriber, Lifetime and the in-between states): app-icon
+/// style tile (fixed dark gradient from the brand kit) with a blue glow, the gradient
+/// title and the tagline.
+///
+/// WHY the hub keeps it after #913: the sales states moved to a small wordmark in the
+/// bar to fit one screen, and on the hub the same small logo left the screen
+/// unbalanced (Pierre, on device). The hub has the room, so it keeps its hero.
+/// Glow uses the double-shadow pattern (tight + wide) from SwipeBackOverlayView.
+struct ProHubHero: View {
+    var body: some View {
+        VStack(spacing: 12) {
+            // The tile is the app icon itself (square, continuous corners, same
+            // ratios); only the glow below belongs to this screen.
+            DictusIconTile(logoHeight: 48)
+                .shadow(color: Color.dictusAccent.opacity(0.7), radius: 10)
+                .shadow(color: Color.dictusAccent.opacity(0.4), radius: 20)
+
+            Text("Dictus Pro")
+                .font(.system(.largeTitle, design: .rounded, weight: .bold))
+                .foregroundStyle(
+                    LinearGradient(
+                        colors: [.dictusGradientStart, .dictusGradientEnd],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+
+            Text("Your voice, unlimited")
+                .font(.dictusBody)
+                .foregroundColor(.secondary)
+        }
+        .padding(.top, 8)
+        .accessibilityElement(children: .combine)
+    }
+}
 
 /// A feature card for someone who has the feature: trial, subscriber, or the DEBUG
 /// forced entitlement (#216 decisions 4 and 5, amended after the first device test).

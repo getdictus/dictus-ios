@@ -7,6 +7,14 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		AA913B01 /* DMSans-ExtraLight.ttf in Resources */ = {isa = PBXBuildFile; fileRef = AA913F01 /* DMSans-ExtraLight.ttf */; };
+		AA913B02 /* DMSans-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = AA913F02 /* DMSans-Regular.ttf */; };
+		AA913B03 /* DMSans-Medium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = AA913F03 /* DMSans-Medium.ttf */; };
+		AA913B04 /* DMSans-SemiBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = AA913F04 /* DMSans-SemiBold.ttf */; };
+		AA913B05 /* DMSans-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = AA913F05 /* DMSans-Bold.ttf */; };
+		AA913B06 /* OFL.txt in Resources */ = {isa = PBXBuildFile; fileRef = AA913F06 /* OFL.txt */; };
+		AA913B11 /* Font+DMSans.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA913F11 /* Font+DMSans.swift */; };
+		AA913B12 /* PaywallSalesSections.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA913F12 /* PaywallSalesSections.swift */; };
 		AA0000L0 /* ModelInfo+Localized.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000L0 /* ModelInfo+Localized.swift */; };
 		SS000001 /* SubscriptionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = SS100001 /* SubscriptionManager.swift */; };
 		RT5930000004 /* ProTrialDebugSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = RT5930100004 /* ProTrialDebugSection.swift */; };
@@ -274,6 +282,14 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		AA913F01 /* DMSans-ExtraLight.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = DMSans-ExtraLight.ttf; sourceTree = "<group>"; };
+		AA913F02 /* DMSans-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = DMSans-Regular.ttf; sourceTree = "<group>"; };
+		AA913F03 /* DMSans-Medium.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = DMSans-Medium.ttf; sourceTree = "<group>"; };
+		AA913F04 /* DMSans-SemiBold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = DMSans-SemiBold.ttf; sourceTree = "<group>"; };
+		AA913F05 /* DMSans-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = DMSans-Bold.ttf; sourceTree = "<group>"; };
+		AA913F06 /* OFL.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = OFL.txt; sourceTree = "<group>"; };
+		AA913F11 /* Font+DMSans.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Font+DMSans.swift"; sourceTree = "<group>"; };
+		AA913F12 /* PaywallSalesSections.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaywallSalesSections.swift; sourceTree = "<group>"; };
 		AA1000L0 /* ModelInfo+Localized.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ModelInfo+Localized.swift"; sourceTree = "<group>"; };
 		AA1000L1 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		AA1000L2 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
@@ -559,6 +575,19 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		AA913G01 /* Fonts */ = {
+			isa = PBXGroup;
+			children = (
+				AA913F01 /* DMSans-ExtraLight.ttf */,
+				AA913F02 /* DMSans-Regular.ttf */,
+				AA913F03 /* DMSans-Medium.ttf */,
+				AA913F04 /* DMSans-SemiBold.ttf */,
+				AA913F05 /* DMSans-Bold.ttf */,
+				AA913F06 /* OFL.txt */,
+			);
+			path = Fonts;
+			sourceTree = "<group>";
+		};
 		AA400000 = {
 			isa = PBXGroup;
 			children = (
@@ -596,6 +625,7 @@
 				AA400009 /* Models */,
 				AA40000F /* Services */,
 				AA40000L /* Extensions */,
+				AA913G01 /* Fonts */,
 				AA1000L1 /* Localizable.xcstrings */,
 				AA1000L3 /* InfoPlist.xcstrings */,
 				AA1000C0 /* Assets.xcassets */,
@@ -755,6 +785,7 @@
 				AA100301 /* ModelLoadingOverlay.swift */,
 				AA100484 /* ModelPreparationPresentation.swift */,
 				SS100002 /* PaywallView.swift */,
+				AA913F12 /* PaywallSalesSections.swift */,
 				AA361013 /* SmartModeListView.swift */,
 				AA489001 /* HomeSmartModeRing.swift */,
 				AA800181 /* VocabularyListView.swift */,
@@ -1004,6 +1035,7 @@
 			isa = PBXGroup;
 			children = (
 				AA1000L0 /* ModelInfo+Localized.swift */,
+				AA913F11 /* Font+DMSans.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -1230,6 +1262,12 @@
 				AA0676A6 /* intro-c-dark.mp4 in Resources */,
 				AA000P10 /* PrivacyInfo.xcprivacy in Resources */,
 				AA0000L1 /* Localizable.xcstrings in Resources */,
+				AA913B01 /* DMSans-ExtraLight.ttf in Resources */,
+				AA913B02 /* DMSans-Regular.ttf in Resources */,
+				AA913B03 /* DMSans-Medium.ttf in Resources */,
+				AA913B04 /* DMSans-SemiBold.ttf in Resources */,
+				AA913B05 /* DMSans-Bold.ttf in Resources */,
+				AA913B06 /* OFL.txt in Resources */,
 				AA0000L3 /* InfoPlist.xcstrings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1459,6 +1497,8 @@
 				RT5930000002 /* ProTrialAnnouncementView.swift in Sources */,
 				RT5930000001 /* ProTrialCoordinator.swift in Sources */,
 				SS000002 /* PaywallView.swift in Sources */,
+				AA913B12 /* PaywallSalesSections.swift in Sources */,
+				AA913B11 /* Font+DMSans.swift in Sources */,
 				AA361014 /* SmartModeListView.swift in Sources */,
 				AA489002 /* HomeSmartModeRing.swift in Sources */,
 				AA800081 /* VocabularyListView.swift in Sources */,
