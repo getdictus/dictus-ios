@@ -101,6 +101,32 @@ public enum AudioStartReadinessPolicy {
     /// keying this on the route rather than on the interruption, made by the device.
     public static let inputRouteWaitMilliseconds = 1000
 
+    /// Whether a route change shows that the input route went empty, which is what raises
+    /// `routeWentEmptySinceLastStart`.
+    ///
+    /// The previous route counts as well as the current one (#925). A route that empties
+    /// while DictusApp is suspended, AirPods leaving for instance, produces no notification
+    /// the app can see while it is empty. The first one it gets is the activation bringing
+    /// the route back, `previous=none route=MicrophoneBuiltIn`, the line every zero-sample
+    /// attempt of #515 logged, and by then the current route is no longer empty.
+    ///
+    /// A category change is left out of that second reading: going to `.playAndRecord` from
+    /// a category with no input also reports `previous=none`, with no route lost.
+    ///
+    /// - Parameters:
+    ///   - currentInputPortCount: the input ports of the session's route when the
+    ///     notification is handled.
+    ///   - previousInputPortCount: the input ports of the route the notification says was
+    ///     replaced, `nil` when it carries none.
+    ///   - isCategoryChange: the notification's reason is `categoryChange`.
+    public static func routeChangeShowsEmptyInput(
+        currentInputPortCount: Int,
+        previousInputPortCount: Int?,
+        isCategoryChange: Bool
+    ) -> Bool {
+        currentInputPortCount == 0 || (previousInputPortCount == 0 && !isCategoryChange)
+    }
+
     /// - Parameters:
     ///   - inputPortCount: how many ports `AVAudioSession.currentRoute.inputs` holds right
     ///     now. Zero is the state an interruption leaves behind.

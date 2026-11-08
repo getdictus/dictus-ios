@@ -540,8 +540,8 @@ class UnifiedAudioEngine: ObservableObject {
         // AVAudioSession hands it to us in the notification and it is the only place
         // it exists. Tracking it ourselves would mean holding a copy that is wrong for
         // every route change that happens while the app is suspended.
-        let previous = (userInfo[AVAudioSessionRouteChangePreviousRouteKey] as? AVAudioSessionRouteDescription)
-            .map { portList($0.inputs) } ?? "unknown"
+        let previousRoute = userInfo[AVAudioSessionRouteChangePreviousRouteKey] as? AVAudioSessionRouteDescription
+        let previous = previousRoute.map { portList($0.inputs) } ?? "unknown"
 
         // The fact #515 turns on. An interruption ending leaves the route empty and
         // leaves it there; the next start is the one that pays for bringing it back, and
@@ -550,7 +550,11 @@ class UnifiedAudioEngine: ObservableObject {
         // interruption: a `.began` with no empty route behind it costs the next start
         // nothing, and an empty route with no `.ended` (media services, a cable pulled)
         // costs it just as much.
-        if AVAudioSession.sharedInstance().currentRoute.inputs.isEmpty {
+        if AudioStartReadinessPolicy.routeChangeShowsEmptyInput(
+            currentInputPortCount: AVAudioSession.sharedInstance().currentRoute.inputs.count,
+            previousInputPortCount: previousRoute?.inputs.count,
+            isCategoryChange: raw == AVAudioSession.RouteChangeReason.categoryChange.rawValue
+        ) {
             inputRouteWentEmptySinceLastStart = true
         }
 
