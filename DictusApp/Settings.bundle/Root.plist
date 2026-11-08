@@ -11,13 +11,13 @@
 			<key>Type</key>
 			<string>PSGroupSpecifier</string>
 			<key>Title</key>
-			<string>Activer Dictus</string>
+			<string>Enable Dictus</string>
 		</dict>
 		<dict>
 			<key>Type</key>
 			<string>PSTitleValueSpecifier</string>
 			<key>Title</key>
-			<string>1. Touchez Claviers</string>
+			<string>1. Tap Keyboards</string>
 			<key>Key</key>
 			<string>step1</string>
 			<key>DefaultValue</key>
@@ -27,7 +27,7 @@
 			<key>Type</key>
 			<string>PSTitleValueSpecifier</string>
 			<key>Title</key>
-			<string>2. Activez Dictus</string>
+			<string>2. Enable Dictus</string>
 			<key>Key</key>
 			<string>step2</string>
 			<key>DefaultValue</key>
@@ -37,7 +37,7 @@
 			<key>Type</key>
 			<string>PSTitleValueSpecifier</string>
 			<key>Title</key>
-			<string>3. Activez Autoriser l'acces complet</string>
+			<string>3. Turn on Allow Full Access</string>
 			<key>Key</key>
 			<string>step3</string>
 			<key>DefaultValue</key>
@@ -48,25 +48,25 @@
 			<key>Type</key>
 			<string>PSGroupSpecifier</string>
 			<key>Title</key>
-			<string>Vie privee</string>
+			<string>Privacy</string>
 			<key>FooterText</key>
-			<string>Dictus ne stocke ni ne transmet vos donnees vocales. L'acces complet permet uniquement au clavier de communiquer avec l'app pour la transcription.</string>
+			<string>Dictus transcribes on your device. Full Access lets the keyboard exchange dictation requests and results with the app.</string>
 		</dict>
 		<!-- Troubleshooting -->
 		<dict>
 			<key>Type</key>
 			<string>PSGroupSpecifier</string>
 			<key>Title</key>
-			<string>Claviers introuvable ?</string>
+			<string>Can't find Keyboards?</string>
 			<key>FooterText</key>
-			<string>Fermez les Reglages puis reessayez. Ou ouvrez Dictus et touchez Activer dans les Reglages.</string>
+			<string>Close Settings, then reopen the app settings for Dictus.</string>
 		</dict>
 		<!-- Version -->
 		<dict>
 			<key>Type</key>
 			<string>PSGroupSpecifier</string>
 			<key>Title</key>
-			<string>Informations</string>
+			<string>Information</string>
 		</dict>
 		<dict>
 			<key>Type</key>

@@ -29,7 +29,7 @@ struct StopStandbyIntent: LiveActivityIntent {
             )
         }
 
-        // Notify the app process to stop the audio engine (kills the orange mic indicator).
+        // Notify the app process to stop the audio engine (ends the warm standby).
         // WHY NotificationCenter (not calling DictationCoordinator directly):
         // This file is compiled into both DictusApp and DictusWidgets targets.
         // DictationCoordinator only exists in DictusApp — referencing it here

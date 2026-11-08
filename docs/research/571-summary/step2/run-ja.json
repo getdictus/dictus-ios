@@ -1,0 +1,586 @@
+[
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "ja-free-form",
+    "hasEngineOutput" : true,
+    "lang" : "ja",
+    "languageMatches" : false,
+    "listLines" : 0,
+    "ms" : 4057,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "rejectedGuardrail",
+    "output" : "Starting a product alone is hardest not writing code but deciding what not to do because new ideas always seem better than what you’re working on and six months later you have 15 started and nothing finished.",
+    "outputChars" : 208,
+    "outputLanguage" : "en",
+    "preamble" : false,
+    "ratio" : 1.2023121387283238,
+    "rawChars" : 173,
+    "rejectedCheck" : "length",
+    "reportFraming" : [
+
+    ],
+    "run" : 1
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "ja-free-form",
+    "hasEngineOutput" : true,
+    "lang" : "ja",
+    "languageMatches" : false,
+    "listLines" : 0,
+    "ms" : 2370,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "rejectedGuardrail",
+    "output" : "Starting a product alone is hardest not writing code but deciding what to avoid because new ideas always seem better than what you're doing now, leading to 15 started projects and nothing finished after 6 months.",
+    "outputChars" : 212,
+    "outputLanguage" : "en",
+    "preamble" : false,
+    "ratio" : 1.2254335260115607,
+    "rawChars" : 173,
+    "rejectedCheck" : "length",
+    "reportFraming" : [
+
+    ],
+    "run" : 2
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "ja-free-form",
+    "hasEngineOutput" : true,
+    "lang" : "ja",
+    "languageMatches" : false,
+    "listLines" : 0,
+    "ms" : 2876,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "rejectedGuardrail",
+    "output" : "Starting a product alone is hardest not writing code but deciding what not to do because new ideas always seem better than what you’re working on, leading to 15 started projects and none finished after 6 months.",
+    "outputChars" : 211,
+    "outputLanguage" : "en",
+    "preamble" : false,
+    "ratio" : 1.2196531791907514,
+    "rawChars" : 173,
+    "rejectedCheck" : "length",
+    "reportFraming" : [
+
+    ],
+    "run" : 3
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "ja-free-form",
+    "hasEngineOutput" : true,
+    "lang" : "ja",
+    "languageMatches" : false,
+    "listLines" : 0,
+    "ms" : 2745,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "rejectedGuardrail",
+    "output" : "Starting a product alone is hardest not writing code but deciding what not to do because new ideas always seem better than what you're working on, leading to 15 started projects and nothing finished after 6 months.",
+    "outputChars" : 214,
+    "outputLanguage" : "en",
+    "preamble" : false,
+    "ratio" : 1.2369942196531791,
+    "rawChars" : 173,
+    "rejectedCheck" : "length",
+    "reportFraming" : [
+
+    ],
+    "run" : 4
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "ja-free-form",
+    "hasEngineOutput" : true,
+    "lang" : "ja",
+    "languageMatches" : false,
+    "listLines" : 0,
+    "ms" : 4139,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "rejectedGuardrail",
+    "output" : "Starting a product alone is hardest not coding but deciding what not to do because new ideas always seem better than what you're working on, leading to 15 started projects and nothing finished after 6 months.",
+    "outputChars" : 208,
+    "outputLanguage" : "en",
+    "preamble" : false,
+    "ratio" : 1.2023121387283238,
+    "rawChars" : 173,
+    "rejectedCheck" : "length",
+    "reportFraming" : [
+
+    ],
+    "run" : 5
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "ja-todo-enumeration",
+    "hasEngineOutput" : true,
+    "lang" : "ja",
+    "languageMatches" : false,
+    "listLines" : 0,
+    "ms" : 4480,
+    "novelFigures" : [
+      "12",
+      "000",
+      "15",
+      "000"
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "rejectedGuardrail",
+    "output" : "I need the January numbers from Marion, which are on Wednesday, I must make a comparison table with last year’s data, I have to call the vendor because the estimate rose from 12,000 to 15,000 euros and no one approved it, and I must book the second-floor meeting room because the other one is full for a week.",
+    "outputChars" : 309,
+    "outputLanguage" : "en",
+    "preamble" : false,
+    "ratio" : 1.4855769230769231,
+    "rawChars" : 208,
+    "rejectedCheck" : "length",
+    "reportFraming" : [
+
+    ],
+    "run" : 1
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "ja-todo-enumeration",
+    "hasEngineOutput" : true,
+    "lang" : "ja",
+    "languageMatches" : false,
+    "listLines" : 0,
+    "ms" : 4248,
+    "novelFigures" : [
+      "12",
+      "000",
+      "15",
+      "000"
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "rejectedGuardrail",
+    "output" : "I need Marion to give me the numbers for January, which are on Wednesday, and I must make a comparison table with last year’s figures. I have to call the contractor because the estimate rose from 12,000 euros to 15,000 euros and no one approves it. I must also book the second-floor meeting room, which is already full for a week.",
+    "outputChars" : 330,
+    "outputLanguage" : "en",
+    "preamble" : false,
+    "ratio" : 1.5865384615384615,
+    "rawChars" : 208,
+    "rejectedCheck" : "length",
+    "reportFraming" : [
+
+    ],
+    "run" : 2
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "ja-todo-enumeration",
+    "hasEngineOutput" : true,
+    "lang" : "ja",
+    "languageMatches" : false,
+    "listLines" : 0,
+    "ms" : 4406,
+    "novelFigures" : [
+      "12",
+      "000",
+      "15",
+      "000"
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "rejectedGuardrail",
+    "output" : "I must get the numbers from Marion on Wednesday, make a comparison table with last year’s data, call the contractor because the estimate rose from 12,000 to 15,000 euros and no one approves, and book the second-floor meeting room since the other one is full for a week.",
+    "outputChars" : 269,
+    "outputLanguage" : "en",
+    "preamble" : false,
+    "ratio" : 1.2932692307692308,
+    "rawChars" : 208,
+    "rejectedCheck" : "length",
+    "reportFraming" : [
+
+    ],
+    "run" : 3
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "ja-todo-enumeration",
+    "hasEngineOutput" : true,
+    "lang" : "ja",
+    "languageMatches" : false,
+    "listLines" : 0,
+    "ms" : 3047,
+    "novelFigures" : [
+      "1500"
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "rejectedGuardrail",
+    "output" : "I must get the January numbers from Marion on Wednesday, make a comparison table with last year's figures, call the contractor because the estimate rose from 12000 euros to 1500 euros with no approval, and book the second-floor meeting room since the other one is always full.",
+    "outputChars" : 276,
+    "outputLanguage" : "en",
+    "preamble" : false,
+    "ratio" : 1.3269230769230769,
+    "rawChars" : 208,
+    "rejectedCheck" : "length",
+    "reportFraming" : [
+
+    ],
+    "run" : 4
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "ja-todo-enumeration",
+    "hasEngineOutput" : true,
+    "lang" : "ja",
+    "languageMatches" : false,
+    "listLines" : 0,
+    "ms" : 2329,
+    "novelFigures" : [
+      "12",
+      "000",
+      "15",
+      "000"
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "rejectedGuardrail",
+    "output" : "I must get the numbers from Marion by Wednesday, make a comparison table with last year’s figures, call the contractor because the estimate rose from 12,000 to 15,000 euros and no one approves, and book the second-floor meeting room since the other one is full for a week.",
+    "outputChars" : 272,
+    "outputLanguage" : "en",
+    "preamble" : false,
+    "ratio" : 1.3076923076923077,
+    "rawChars" : 208,
+    "rejectedCheck" : "length",
+    "reportFraming" : [
+
+    ],
+    "run" : 5
+  },
+  {
+    "arm" : "arm-ja-examples",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "ja-free-form",
+    "hasEngineOutput" : true,
+    "lang" : "ja",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 1542,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "一人でプロダクトを立ち上げる一番難しいのは何をやらないかを決めることだ。いつも今取り組んでるより良さそうに見えるアイデアに飛びついて、6か月後に15個始めて終わったのはゼロだ。",
+    "outputChars" : 88,
+    "outputLanguage" : "ja",
+    "preamble" : false,
+    "ratio" : 0.5086705202312138,
+    "rawChars" : 173,
+    "reportFraming" : [
+
+    ],
+    "run" : 1
+  },
+  {
+    "arm" : "arm-ja-examples",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "ja-free-form",
+    "hasEngineOutput" : true,
+    "lang" : "ja",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 1433,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "一人でプロダクトを立ち上げる一番難しいのは何をやらないかを決めることだ。今取り組んでるより良さそうに見えるアイデアに飛びついて、6か月後に15個始めて終わったものはゼロだ。",
+    "outputChars" : 86,
+    "outputLanguage" : "ja",
+    "preamble" : false,
+    "ratio" : 0.49710982658959535,
+    "rawChars" : 173,
+    "reportFraming" : [
+
+    ],
+    "run" : 2
+  },
+  {
+    "arm" : "arm-ja-examples",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "ja-free-form",
+    "hasEngineOutput" : true,
+    "lang" : "ja",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 1470,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "一人でプロダクトを立ち上げる一番難しいのは何をやらないかを決めることだ。今取り組んでいるものより良さそうに見えるアイデアに飛びついて、6か月後に15個始めて終わったものはゼロだ。",
+    "outputChars" : 89,
+    "outputLanguage" : "ja",
+    "preamble" : false,
+    "ratio" : 0.5144508670520231,
+    "rawChars" : 173,
+    "reportFraming" : [
+
+    ],
+    "run" : 3
+  },
+  {
+    "arm" : "arm-ja-examples",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "ja-free-form",
+    "hasEngineOutput" : true,
+    "lang" : "ja",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 1494,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "一人でプロダクトを立ち上げる一番難しいのは何をやらないかを決めることだ。いつも今取り組んでるより良さそうに見えるアイデアに飛びついて、6か月後に15個始めて終わったものはゼロだ。",
+    "outputChars" : 89,
+    "outputLanguage" : "ja",
+    "preamble" : false,
+    "ratio" : 0.5144508670520231,
+    "rawChars" : 173,
+    "reportFraming" : [
+
+    ],
+    "run" : 4
+  },
+  {
+    "arm" : "arm-ja-examples",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "ja-free-form",
+    "hasEngineOutput" : true,
+    "lang" : "ja",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 1471,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "一人でプロダクトを立ち上げる一番難しいのは何をやらないかを決めることだ。今取り組んでるより良さそうに見えるアイデアに飛びついて、6か月後に15個始めて終わったのはゼロだ。",
+    "outputChars" : 85,
+    "outputLanguage" : "ja",
+    "preamble" : false,
+    "ratio" : 0.4913294797687861,
+    "rawChars" : 173,
+    "reportFraming" : [
+
+    ],
+    "run" : 5
+  },
+  {
+    "arm" : "arm-ja-examples",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "ja-todo-enumeration",
+    "hasEngineOutput" : true,
+    "lang" : "ja",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 2132,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "rejectedGuardrail",
+    "output" : "マリオンから1月の数字を水曜日に得ないといけない。去年の数字との比較表を作らないといけない。業者に電話して見積もりが12000ユーロから15000ユーロに上がったことを確認しないといけない。2階の会議室を予約しないといけない。もう一つの方は一週間ずっと埋まっている。",
+    "outputChars" : 133,
+    "outputLanguage" : "ja",
+    "preamble" : false,
+    "ratio" : 0.6394230769230769,
+    "rawChars" : 208,
+    "rejectedCheck" : "length",
+    "reportFraming" : [
+
+    ],
+    "run" : 1
+  },
+  {
+    "arm" : "arm-ja-examples",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "ja-todo-enumeration",
+    "hasEngineOutput" : true,
+    "lang" : "ja",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 2077,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "マリオンから1月の数字が水曜日に届く。去年の数字との比較表を作る。業者に電話して見積りが12000ユーロから15000ユーロに上がったことを確認する。2階の会議室を予約する。もう一つの部屋は一週間中埋まっている。",
+    "outputChars" : 106,
+    "outputLanguage" : "ja",
+    "preamble" : false,
+    "ratio" : 0.5096153846153846,
+    "rawChars" : 208,
+    "reportFraming" : [
+
+    ],
+    "run" : 2
+  },
+  {
+    "arm" : "arm-ja-examples",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "ja-todo-enumeration",
+    "hasEngineOutput" : true,
+    "lang" : "ja",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 2042,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "マリオンから1月の数字が水曜日に届く。去年の数字との比較表を作る。業者の電話をして見積もりが12000ユーロから15000ユーロに上がったことを確認する。2階の会議室を予約する。もう一つの場所は一週間中埋まっている。",
+    "outputChars" : 108,
+    "outputLanguage" : "ja",
+    "preamble" : false,
+    "ratio" : 0.5192307692307693,
+    "rawChars" : 208,
+    "reportFraming" : [
+
+    ],
+    "run" : 3
+  },
+  {
+    "arm" : "arm-ja-examples",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "ja-todo-enumeration",
+    "hasEngineOutput" : true,
+    "lang" : "ja",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 1941,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "マリオンから1月の数字が水曜日に届く。去年の数字との比較表を作る。業者の電話で見積もりが12000ユーロから15000ユーロに上がったが誰も承認していない。2階の会議室を予約する。もう一つの方は一週間ずっと埋まっている。",
+    "outputChars" : 110,
+    "outputLanguage" : "ja",
+    "preamble" : false,
+    "ratio" : 0.5288461538461539,
+    "rawChars" : 208,
+    "reportFraming" : [
+
+    ],
+    "run" : 4
+  },
+  {
+    "arm" : "arm-ja-examples",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "ja-todo-enumeration",
+    "hasEngineOutput" : true,
+    "lang" : "ja",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 2108,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "rejectedGuardrail",
+    "output" : "マリオンから1月の数字を受け取らないといけない。水曜日に、去年の数字との比較表を作らないといけない。業者に電話して見積もりが12000ユーロから15000ユーロに上がったことを確認しないといけない。2階の会議室も予約しないといけない。もう一つの方は一週間ずっと埋まっている。",
+    "outputChars" : 137,
+    "outputLanguage" : "ja",
+    "preamble" : false,
+    "ratio" : 0.6586538461538461,
+    "rawChars" : 208,
+    "rejectedCheck" : "length",
+    "reportFraming" : [
+
+    ],
+    "run" : 5
+  }
+]

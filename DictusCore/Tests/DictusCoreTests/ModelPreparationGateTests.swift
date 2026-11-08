@@ -171,4 +171,45 @@ final class ModelPreparationGateTests: XCTestCase {
             )
         }
     }
+
+    // MARK: - Onboarding (#760)
+
+    /// The device case: a keyboard dictation from another app failed with no model and
+    /// left `.failed` behind; the onboarding covers the dictation screen, so the
+    /// preparation is presented. `.ready` is the same leftover from a dictation that worked.
+    func testOnboardingPresentsOverALeftoverFailedOrReadyStatus() {
+        for status in [DictationStatus.failed, .ready] {
+            var gate = ModelPreparationGate(surface: .onboarding)
+            XCTAssertEqual(
+                gate.modelToPresent(liveModel: model, dictationStatus: status, isPresenting: false),
+                model,
+                "\(status.rawValue) must not hold the onboarding's preparation screen off"
+            )
+        }
+    }
+
+    /// A dictation still in flight holds it off in onboarding too, latch included.
+    func testOnboardingStillRefusesWhileADictationIsInFlight() {
+        for status in DictationStatus.allCases where DictationSessionLivenessPolicy.isActive(status) {
+            var gate = ModelPreparationGate(surface: .onboarding)
+            XCTAssertNil(
+                gate.modelToPresent(liveModel: model, dictationStatus: status, isPresenting: false),
+                "\(status.rawValue) must hold the onboarding's preparation screen off"
+            )
+            XCTAssertNil(
+                gate.modelToPresent(liveModel: model, dictationStatus: .idle, isPresenting: false)
+            )
+        }
+    }
+
+    /// The main tabs keep #458's rule: a leftover `.failed` still refuses there, since
+    /// `MainTabView` mounts `RecordingView` for it.
+    func testMainTabsStillRefuseALeftoverFailedStatus() {
+        var gate = ModelPreparationGate()
+        XCTAssertNil(
+            gate.modelToPresent(liveModel: model, dictationStatus: .failed, isPresenting: false)
+        )
+        XCTAssertTrue(ModelPreparationGate.dictationOwnsTheDisplay(.failed))
+        XCTAssertFalse(ModelPreparationGate.dictationOwnsTheDisplay(.failed, on: .onboarding))
+    }
 }

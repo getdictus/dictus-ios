@@ -141,6 +141,22 @@ public enum ParakeetModelRepository {
         return missingBundles + missingVocabulary
     }
 
+    /// Splits the missing entries between the ones the app bundle carries and the ones only
+    /// the network can supply, in `missing`'s order.
+    ///
+    /// The repair's routing rule (#558): an entry the bundle carries is copied from it before
+    /// any load, everything else goes to the download repair (`ModelManager`, layer 1). Since
+    /// 2.0.0 (#769) the app bundle carries nothing, so every missing entry goes to the network.
+    public static func repairSources(
+        missing: [String],
+        bundledModelBundles: Set<String>
+    ) -> (fromBundle: [String], fromNetwork: [String]) {
+        (
+            fromBundle: missing.filter { bundledModelBundles.contains($0) },
+            fromNetwork: missing.filter { !bundledModelBundles.contains($0) }
+        )
+    }
+
     /// Whether every required bundle is a compiled Core ML directory and the vocabulary
     /// file is present, so the model set can be loaded without touching the network.
     public static func isCacheComplete(

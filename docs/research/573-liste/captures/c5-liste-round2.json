@@ -1,0 +1,1142 @@
+[
+  {
+    "alignedPairs" : 3,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 3,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "R1-fr-annonce-recap-matin",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 3,
+    "labels" : [
+
+    ],
+    "listLines" : 3,
+    "ms" : 2438,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Récapitulatif de ce qu'on a fait ce matin :\n- On a fini la maquette de la page d'accueil\n- On a corrigé le bug de connexion\n- On a envoyé le devis au client",
+    "outputChars" : 156,
+    "outputLanguage" : "fr",
+    "personLost" : 1,
+    "rawChars" : 166,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 3,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 3,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "R1-fr-annonce-recap-matin",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 3,
+    "labels" : [
+
+    ],
+    "listLines" : 3,
+    "ms" : 1805,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Récapitulatif de ce qu'on a fait ce matin :\n- On a fini la maquette de la page d'accueil\n- On a corrigé le bug de connexion\n- On a envoyé le devis au client",
+    "outputChars" : 156,
+    "outputLanguage" : "fr",
+    "personLost" : 1,
+    "rawChars" : 166,
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 3,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 3,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "R1-fr-annonce-recap-matin",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 3,
+    "labels" : [
+
+    ],
+    "listLines" : 3,
+    "ms" : 1851,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Récapitulatif de ce qu'on a fait ce matin :\n- On a fini la maquette de la page d'accueil\n- On a corrigé le bug de connexion\n- On a envoyé le devis au client",
+    "outputChars" : 156,
+    "outputLanguage" : "fr",
+    "personLost" : 1,
+    "rawChars" : 166,
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 3,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 3,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "R2-fr-annonce-liste-journee",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 3,
+    "labels" : [
+
+    ],
+    "listLines" : 3,
+    "ms" : 1779,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Liste de ce qu'on a fait aujourd'hui :\n- J'ai réglé au moins trois ou quatre tickets sur le site\n- J'ai relu le contrat du fournisseur\n- J'ai rangé le garage",
+    "outputChars" : 157,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 167,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 3,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 3,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "R2-fr-annonce-liste-journee",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 3,
+    "labels" : [
+
+    ],
+    "listLines" : 3,
+    "ms" : 1784,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Liste de ce qu'on a fait aujourd'hui :\n- J'ai réglé au moins trois ou quatre tickets sur le site\n- J'ai relu le contrat du fournisseur\n- J'ai rangé le garage",
+    "outputChars" : 157,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 167,
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 3,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 3,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "R2-fr-annonce-liste-journee",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 3,
+    "labels" : [
+
+    ],
+    "listLines" : 3,
+    "ms" : 1708,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Ce qu'on a fait aujourd'hui :\n- J'ai réglé au moins trois ou quatre tickets sur le site\n- J'ai relu le contrat du fournisseur\n- J'ai rangé le garage",
+    "outputChars" : 148,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 167,
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 2,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 1,
+    "dispersed" : 0,
+    "expectedLanguage" : "en",
+    "fixture" : "R3-en-announcement-uh",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 3,
+    "labels" : [
+
+    ],
+    "listLines" : 3,
+    "ms" : 1398,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "What we did this morning:\n- Fixed the login bug\n- Updated the docs\n- Tested the new build on two phones",
+    "outputChars" : 103,
+    "outputLanguage" : "en",
+    "personLost" : 2,
+    "rawChars" : 154,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "Okay so uh now we are going through what we did this morning."
+    ],
+    "unrecalledWholeRecall" : [
+      0.16666666666666666
+    ]
+  },
+  {
+    "alignedPairs" : 2,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 1,
+    "dispersed" : 0,
+    "expectedLanguage" : "en",
+    "fixture" : "R3-en-announcement-uh",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 3,
+    "labels" : [
+
+    ],
+    "listLines" : 3,
+    "ms" : 1362,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "What we did this morning:\n- Fixed the login bug\n- Updated the docs\n- Tested the new build on two phones",
+    "outputChars" : 103,
+    "outputLanguage" : "en",
+    "personLost" : 2,
+    "rawChars" : 154,
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "Okay so uh now we are going through what we did this morning."
+    ],
+    "unrecalledWholeRecall" : [
+      0.16666666666666666
+    ]
+  },
+  {
+    "alignedPairs" : 2,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 1,
+    "dispersed" : 0,
+    "expectedLanguage" : "en",
+    "fixture" : "R3-en-announcement-uh",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 3,
+    "labels" : [
+
+    ],
+    "listLines" : 3,
+    "ms" : 1461,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "What we did this morning:\n- Fixed the login bug\n- Updated the docs\n- Tested the new build on two phones",
+    "outputChars" : 103,
+    "outputLanguage" : "en",
+    "personLost" : 2,
+    "rawChars" : 154,
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "Okay so uh now we are going through what we did this morning."
+    ],
+    "unrecalledWholeRecall" : [
+      0.16666666666666666
+    ]
+  },
+  {
+    "alignedPairs" : 4,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 6,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "R4-fr-point-journee-passe",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 4,
+    "labels" : [
+
+    ],
+    "listLines" : 3,
+    "ms" : 1629,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Point de la journée :\n- On a promené le chien le matin\n- On a emmené la voiture au contrôle technique\n- On a fait les comptes du mois",
+    "outputChars" : 133,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 145,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 4,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 6,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "R4-fr-point-journee-passe",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 4,
+    "labels" : [
+
+    ],
+    "listLines" : 3,
+    "ms" : 1597,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Point de la journée :\n- On a promené le chien le matin\n- On a emmené la voiture au contrôle technique\n- On a fait les comptes du mois",
+    "outputChars" : 133,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 145,
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 4,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 6,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "R4-fr-point-journee-passe",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 4,
+    "labels" : [
+
+    ],
+    "listLines" : 3,
+    "ms" : 1612,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Point de la journée :\n- On a promené le chien le matin\n- On a emmené la voiture au contrôle technique\n- On a fait les comptes du mois",
+    "outputChars" : 133,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 145,
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 3,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 3,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "R5-fr-annonce-recap-soir",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 3,
+    "labels" : [
+
+    ],
+    "listLines" : 3,
+    "ms" : 1646,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Récap de ce qu'on a fait ce soir :\n- On a regardé le match\n- On a fini les restes\n- On a réparé la lampe du salon",
+    "outputChars" : 113,
+    "outputLanguage" : "fr",
+    "personLost" : 1,
+    "rawChars" : 131,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 3,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 3,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "R5-fr-annonce-recap-soir",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 3,
+    "labels" : [
+
+    ],
+    "listLines" : 3,
+    "ms" : 1800,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Récapitulatif de ce qu'on a fait ce soir :\n- On a regardé le match\n- On a fini les restes\n- On a réparé la lampe du salon",
+    "outputChars" : 121,
+    "outputLanguage" : "fr",
+    "personLost" : 1,
+    "rawChars" : 131,
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 3,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 3,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "R5-fr-annonce-recap-soir",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 3,
+    "labels" : [
+
+    ],
+    "listLines" : 3,
+    "ms" : 1622,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Récap de ce qu'on a fait ce soir :\n- On a regardé le match\n- On a fini les restes\n- On a réparé la lampe du salon",
+    "outputChars" : 113,
+    "outputLanguage" : "fr",
+    "personLost" : 1,
+    "rawChars" : 131,
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 1,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 1,
+    "expectedLanguage" : "fr",
+    "fixture" : "R6-fr-courses-court",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 2,
+    "labels" : [
+
+    ],
+    "listLines" : 4,
+    "ms" : 1636,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Liste de courses pour ce soir :\n- Acheter les tomates\n- Acheter le riz\n- Acheter les oignons\n- Acheter les yaourts",
+    "outputChars" : 114,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 63,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 1,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 1,
+    "expectedLanguage" : "fr",
+    "fixture" : "R6-fr-courses-court",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 2,
+    "labels" : [
+
+    ],
+    "listLines" : 4,
+    "ms" : 1424,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Liste de courses pour ce soir :\n- Acheter tomates\n- Acheter riz\n- Acheter oignons\n- Acheter yaourts",
+    "outputChars" : 99,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 63,
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 1,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 1,
+    "expectedLanguage" : "fr",
+    "fixture" : "R6-fr-courses-court",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 2,
+    "labels" : [
+
+    ],
+    "listLines" : 4,
+    "ms" : 1585,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Liste de courses pour ce soir :\n- Acheter les tomates\n- Acheter le riz\n- Acheter les oignons\n- Acheter les yaourts",
+    "outputChars" : 114,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 63,
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 1,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 1,
+    "expectedLanguage" : "en",
+    "fixture" : "R7-en-short-list",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 2,
+    "labels" : [
+
+    ],
+    "listLines" : 4,
+    "ms" : 1362,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Tonight's shopping:\n- Buy eggs\n- Buy bread\n- Buy apples\n- Buy milk",
+    "outputChars" : 66,
+    "outputLanguage" : "en",
+    "personLost" : 0,
+    "rawChars" : 50,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 1,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 1,
+    "expectedLanguage" : "en",
+    "fixture" : "R7-en-short-list",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 2,
+    "labels" : [
+
+    ],
+    "listLines" : 4,
+    "ms" : 1205,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Shopping for tonight:\n- Buy eggs\n- Buy bread\n- Buy apples\n- Buy milk",
+    "outputChars" : 68,
+    "outputLanguage" : "en",
+    "personLost" : 0,
+    "rawChars" : 50,
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 1,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 1,
+    "expectedLanguage" : "en",
+    "fixture" : "R7-en-short-list",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 2,
+    "labels" : [
+
+    ],
+    "listLines" : 4,
+    "ms" : 1357,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Tonight's shopping:\n- Buy eggs\n- Buy bread\n- Buy apples\n- Buy milk",
+    "outputChars" : 66,
+    "outputLanguage" : "en",
+    "personLost" : 0,
+    "rawChars" : 50,
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 0,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 1,
+    "expectedLanguage" : "fr",
+    "fixture" : "R8-fr-sans-annonce",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 2,
+    "labels" : [
+
+    ],
+    "listLines" : 3,
+    "ms" : 1546,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Actions nécessaires :\n- Rappeler le garage\n- Payer la facture d'électricité\n- Réserver le train pour lundi",
+    "outputChars" : 106,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 110,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "Il faut que je rappelle le garage,"
+    ],
+    "unrecalledWholeRecall" : [
+      0.3333333333333333
+    ]
+  },
+  {
+    "alignedPairs" : 0,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 1,
+    "expectedLanguage" : "fr",
+    "fixture" : "R8-fr-sans-annonce",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 2,
+    "labels" : [
+
+    ],
+    "listLines" : 3,
+    "ms" : 1529,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "À faire :\n- Rappeler le garage\n- Payer la facture d'électricité\n- Réserver le train pour lundi",
+    "outputChars" : 94,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 110,
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "Il faut que je rappelle le garage,"
+    ],
+    "unrecalledWholeRecall" : [
+      0.3333333333333333
+    ]
+  },
+  {
+    "alignedPairs" : 0,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 1,
+    "expectedLanguage" : "fr",
+    "fixture" : "R8-fr-sans-annonce",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 2,
+    "labels" : [
+
+    ],
+    "listLines" : 3,
+    "ms" : 1530,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "À faire :\n- Rappeler le garage\n- Payer la facture d'électricité\n- Réserver le train pour lundi",
+    "outputChars" : 94,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 110,
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "Il faut que je rappelle le garage,"
+    ],
+    "unrecalledWholeRecall" : [
+      0.3333333333333333
+    ]
+  },
+  {
+    "alignedPairs" : 3,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 3,
+    "dispersed" : 0,
+    "expectedLanguage" : "en",
+    "fixture" : "R9-en-duplicate",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 3,
+    "labels" : [
+
+    ],
+    "listLines" : 3,
+    "ms" : 1419,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Actions needed:\n- Call the bank about the card\n- Email the landlord\n- Book the dentist for next week",
+    "outputChars" : 100,
+    "outputLanguage" : "en",
+    "personLost" : 1,
+    "rawChars" : 127,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 3,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 3,
+    "dispersed" : 0,
+    "expectedLanguage" : "en",
+    "fixture" : "R9-en-duplicate",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 3,
+    "labels" : [
+
+    ],
+    "listLines" : 3,
+    "ms" : 1422,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Actions needed:\n- Call the bank about the card\n- Email the landlord\n- Book the dentist for next week",
+    "outputChars" : 100,
+    "outputLanguage" : "en",
+    "personLost" : 1,
+    "rawChars" : 127,
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 3,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 3,
+    "dispersed" : 0,
+    "expectedLanguage" : "en",
+    "fixture" : "R9-en-duplicate",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 3,
+    "labels" : [
+
+    ],
+    "listLines" : 3,
+    "ms" : 1420,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Actions required:\n- Call the bank about the card\n- Email the landlord\n- Book the dentist for next week",
+    "outputChars" : 102,
+    "outputLanguage" : "en",
+    "personLost" : 1,
+    "rawChars" : 127,
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 1,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "R10-fr-une-idee",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "listLines" : 1,
+    "ms" : 1166,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Racheter du café demain matin :\n- Racheter du café demain matin",
+    "outputChars" : 63,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 38,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 1,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "R10-fr-une-idee",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "listLines" : 1,
+    "ms" : 1204,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Café :\n- Racheter du café demain matin",
+    "outputChars" : 38,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 38,
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 1,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "R10-fr-une-idee",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "listLines" : 1,
+    "ms" : 1179,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Racheter du café demain matin :\n- Racheter du café demain matin",
+    "outputChars" : 63,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 38,
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  }
+]

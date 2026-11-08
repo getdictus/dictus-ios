@@ -38,6 +38,9 @@ struct KeyboardRootView: View {
     /// fan while the mic is held. A second observed object beside `KeyboardState`,
     /// exactly as the waveform driver above is — see `KeyboardSmartModeState`.
     @ObservedObject private var smartModes = KeyboardSmartModeState.shared
+    /// Shared voice note transcripts waiting for this keyboard: the ☰ ring, the hint
+    /// and the reader (#637, #639). A third observed object, for `smartModes`' reason.
+    @ObservedObject private var voiceNotes = KeyboardVoiceNoteState.shared
     @State private var instanceID = String(UUID().uuidString.prefix(8))
     /// Observable state for the suggestion bar, owned by KeyboardViewController.
     /// WHY @ObservedObject (not @StateObject): The controller creates and owns SuggestionState,
@@ -60,14 +63,26 @@ struct KeyboardRootView: View {
     /// layout is on screen.
     var onLayoutChanged: ((LayoutType, SupportedLanguage) -> Void)?
 
-    /// Whether the Pro entry is hidden from the panel bar.
+    /// What the panel bar's Pro entry shows (#593): nothing, the brand pill, or the
+    /// trial's two-day reminder.
     ///
     /// WHY @State refreshed on open rather than an observed ProStatusManager:
     /// the extension reads Pro status from the App Group, and a subscription
     /// cannot be bought while the keyboard is the frontmost surface — so a read
     /// each time the panel opens is both sufficient and cheaper than keeping an
     /// ObservableObject alive in a 50 MB process.
-    @State private var isProActive = false
+    @State private var proPromotion: ProPromotionEntry = .hidden
+
+    /// The panel's Pro entry as the App Group says it is now.
+    ///
+    /// The flag is checked first so a build with the paywall hidden never asks
+    /// `SystemLanguageModel` for a capability it would not use.
+    private static func readProPromotion() -> ProPromotionEntry {
+        guard PremiumFlags.paywallVisible else { return .hidden }
+        return ProStatusManager.promotionEntryStatic(
+            now: Date(), deviceIsCapable: SmartModeAvailability.deviceIsCapable
+        )
+    }
 
     /// WHY @Environment here: openURL is the SwiftUI way to open URLs.
     /// Keyboard extensions cannot access UIApplication.shared, but SwiftUI's
@@ -81,7 +96,8 @@ struct KeyboardRootView: View {
     /// What this view presents.
     ///
     /// The mode is owned by KeyboardState; what this adds is the presenter check
-    /// on `.recording` only. iOS caches UIInputViewController instances and their
+    /// on the two full-surface modes, `.recording` and `.voiceNoteResult`
+    /// (`KeyboardAreaMode.requiresVisibleOwner`). iOS caches UIInputViewController instances and their
     /// KeyboardRootViews keep receiving updates long after they leave the window
     /// (#128 / #134) — a stale view that rendered the overlay produced the
     /// duplicate grey panel in #116.
@@ -102,12 +118,19 @@ struct KeyboardRootView: View {
     ///
     /// The legacy `activeControllerID == nil` fallback that used to mask #128 is
     /// deliberately not reinstated: with #128 fixed, stale controllers are dormant.
+    ///
+    /// The voice note reader (#637) takes the same gate for a different reason: it
+    /// can open from a keyboard appearance, while cached controllers are alive, and
+    /// it carries an `Insert` that writes into a text field. Only the controller the
+    /// user is looking at may draw that; a stale instance falls back to `.keys`.
     private var presentedMode: KeyboardAreaMode {
         let mode = state.areaMode
-        guard mode == .recording else { return mode }
+        guard mode.requiresVisibleOwner else { return mode }
         guard state.activeControllerID == controllerID, state.isKeyboardVisible else {
             return .keys
         }
+        // The stage check below is about the dictation's own overlay only.
+        guard mode == .recording else { return mode }
         // Owning the area is not the same as having checked what to draw (#361). A
         // stage this process set on its own authority outlives the controller that
         // justified it, and a freshly mounted one would otherwise render it before
@@ -146,7 +169,7 @@ struct KeyboardRootView: View {
     /// anchor move synchronously in UIKit, in the same turn as the mode change,
     /// deliberately (#99, #142).
     private func togglePanel() {
-        isProActive = ProStatusManager.isProActiveStatic
+        proPromotion = Self.readProPromotion()
         state.togglePanelPresentation()
     }
 
@@ -158,11 +181,14 @@ struct KeyboardRootView: View {
         ToolbarView(
             hasFullAccess: state.controller?.hasFullAccess ?? false,
             dictationStatus: state.dictationStatus,
+            supportsDictation: KeyboardState.deviceSupportsDictation,
             onMicTap: { state.startRecording() },
             statusMessage: state.statusMessage,
             messageProbeRootViewID: instanceID,
             messageProbeControllerID: controllerID,
             showsPolishUnavailable: state.polishUnavailable,
+            showsRecoveredTranscription: state.recoveredTranscriptionPending,
+            onRecoveredTranscriptionTap: { state.openRecoveredTranscription() },
             suggestions: presentedMode == .keys ? suggestionState.suggestions : [],
             suggestionMode: presentedMode == .keys ? suggestionState.mode : .idle,
             onSuggestionTap: { index in handleSuggestionTap(index: index) },
@@ -174,7 +200,7 @@ struct KeyboardRootView: View {
             isPanelOpen: presentedMode == .panel,
             onPanelToggle: { togglePanel() },
             onSettingsTap: { leavePanel { state.openDictusApp(intent: .settings) } },
-            isProActive: isProActive,
+            proPromotion: proPromotion,
             onProTap: { leavePanel { state.openDictusApp(intent: .pro) } },
             armedSmartMode: smartModes.armedMode,
             effectiveSmartMode: smartModes.effectiveMode,
@@ -182,7 +208,13 @@ struct KeyboardRootView: View {
             onSmartModeFanOpen: { smartModes.open() },
             onSmartModeFanDrag: { y in smartModes.track(y: y) },
             onSmartModeFanRelease: { smartModes.commit() },
-            isSmartModeFanOpen: smartModes.fan != nil
+            isSmartModeFanOpen: smartModes.fan != nil,
+            ringsMenuForVoiceNotes: voiceNotes.showsMenuHalo,
+            offersPanelHint: voiceNotes.offersPanelHint,
+            // #639: the ☰'s tap is the voice note reader; its long press opens the
+            // panel through `onPanelToggle` above and retires the panel hint here.
+            onMenuTap: { voiceNotes.openFromTap() },
+            onMenuLongPress: { voiceNotes.menuLongPressRecognised() }
         )
         .frame(height: toolbarHeight)
     }
@@ -254,7 +286,7 @@ struct KeyboardRootView: View {
                 SmartModeFanView(state: fan, availableHeight: smartModes.areaHeight)
             }
 
-        case .keys, .recording:
+        case .keys, .recording, .voiceNoteResult:
             EmptyView()
         }
     }
@@ -277,6 +309,24 @@ struct KeyboardRootView: View {
                     // run is the one thing it must never do. It already draws
                     // nothing for Normal, and a mode that will not run *is* Normal.
                     armedSmartMode: smartModes.effectiveMode
+                )
+            } else if presentedMode == .voiceNoteResult, let reader = voiceNotes.reader {
+                // The voice note reader (#637): the whole surface, toolbar band
+                // included, exactly like the recording overlay above — which is why it
+                // is a branch here and not a case of `areaBelowToolbar`. The layout
+                // behind it is `.recording`'s, set by `KeyboardViewController`.
+                //
+                // It opens from a tap on the ☰ (#639), and this branch destroys the
+                // toolbar that carried it — the trap described below. The ☰'s long
+                // press, which opens the panel instead, is why the tap is latched in
+                // `ToolbarView.menuLongPressDidFire`.
+                VoiceNoteReaderView(
+                    pages: reader.pages,
+                    onClose: { voiceNotes.close(reason: "close") },
+                    onInsert: { id in insertVoiceNote(id) },
+                    onOpenInDictus: { id in voiceNotes.openInDictus(id) },
+                    onDelete: { id in voiceNotes.deleteFromKeyboard(id) },
+                    onPageShown: { id in voiceNotes.pageShown(id) }
                 )
             } else {
                 // ONE toolbar, outside the switch, for every non-recording mode.
@@ -388,7 +438,7 @@ struct KeyboardRootView: View {
             // Also read here, not only in togglePanel(): iOS can hand the keyboard
             // to a fresh controller while the panel is open, and viewWillAppear
             // restores `.panel` — that path never goes through the toggle.
-            isProActive = ProStatusManager.isProActiveStatic
+            proPromotion = Self.readProPromotion()
 
             // Language is set in KeyboardViewController.viewWillAppear, which fires
             // on every keyboard appearance and picks up any App Group preference changes.
@@ -434,6 +484,38 @@ struct KeyboardRootView: View {
         )
     }
 
+    // MARK: - Voice note insertion (#637)
+
+    /// `Insert` in the voice note reader: the visible page's transcript into the field
+    /// this keyboard is attached to, once per opening of the reader (#639: the note
+    /// stays, and a later opening may insert it again).
+    ///
+    /// Only from the controller the user is looking at — the same gate that let the
+    /// reader be drawn, re-checked at the tap because ownership can move between the
+    /// two. Mirrors the emoji insert above, #548's arming included: the bridge has to
+    /// hear about every edit the keyboard makes, or its mirror drifts.
+    private func insertVoiceNote(_ id: UUID) {
+        guard state.activeControllerID == controllerID, state.isKeyboardVisible,
+              let proxy = state.controller?.textDocumentProxy else {
+            PersistentLog.log(.diagnosticProbe(
+                component: "KeyboardRootView",
+                instanceID: instanceID,
+                action: "voiceNoteInsertRefused",
+                details: "id=\(id.uuidString.prefix(8)) owner=\(state.activeControllerID ?? "none") controllerID=\(controllerID) visible=\(state.isKeyboardVisible)"
+            ))
+            return
+        }
+        voiceNotes.insert(id) { transcript in
+            let mirrorBefore = bridge?.mirrorLength() ?? 0
+            proxy.insertText(transcript)
+            bridge?.observeMirror(before: mirrorBefore, inserted: transcript.count)
+            #if DEBUG
+            MirrorProbe.shared.record(.insert(transcript))
+            #endif
+            return true
+        }
+    }
+
     // MARK: - Suggestion Handling
 
     /// Handles a tap on one of the suggestion bar slots.
@@ -476,7 +558,7 @@ struct KeyboardRootView: View {
 
         if suggestionState.mode == .corrections {
             if index == 0 {
-                suggestionState.rejectedWords.insert(suggestion.lowercased())
+                keepTypedWord(proxy: proxy, rowWord: suggestion)
                 // #548: reported, but deliberately NOT treated as a settling boundary.
                 // Adding `noteBoundaryInserted` here would change when suspicion
                 // clears, which is behaviour, and #548 is only about what the detector
@@ -600,18 +682,39 @@ struct KeyboardRootView: View {
         AutocorrectDebugLog.autocorrectUndone(
             original: undo.originalWord, rejected: undo.correctedWord
         )
+        AutocorrectDebugLog.autocorrectRefused(corrected: undo.correctedWord, by: "undo")
         #endif
 
-        suggestionState.rejectedWords.insert(undo.originalWord.lowercased())
+        // A refusal, but nothing is learned on the tap (#872). The restored word is
+        // often itself a typo the user fixes next (`crayin` → `crayim`), and learning
+        // it here made the typo permanent. The memory learns the word the user ends
+        // up committing at this place: the restored one if they move on past it,
+        // their edit otherwise. Still one refusal, not two (#287 decision 4).
+        guard let memory = bridge?.rejectionMemory else { return }
+        memory.correctionUndone(prefix: context[..<range.lowerBound], original: undo.originalWord)
+        // A host without a document identifier keeps no memory, so nothing could be
+        // learned later: learn on the tap there, as before #872.
+        if !memory.remembersRefusals {
+            UserDictionary.shared.learn(undo.originalWord)
+        }
+    }
 
-        // Learn on this single occurrence (#287 decision 4). `learn` and not
-        // `recordUsage`: rejecting a correction is the user saying "no, I meant
-        // this word", which is the strongest signal the keyboard ever gets, and
-        // it is the trigger Apple documents for its own keyboard dictionary. The
-        // repetition counter guards the word-boundary site, where the user has
-        // said nothing at all; applying it here would mean rejecting the same
-        // correction twice before the keyboard stopped making it.
-        UserDictionary.shared.learn(undo.originalWord)
+    /// The user tapped the word they typed, quoted in slot 0 of the corrections row:
+    /// the correction is refused before it is made, and the word is learned at once,
+    /// as on Apple's keyboard (#872). Unlike Undo there is no restored typo to fix
+    /// afterwards, since the word is exactly what the user typed and chose.
+    private func keepTypedWord(proxy: UITextDocumentProxy, rowWord: String) {
+        guard let (prefix, word) = AutocorrectRejectionMemory.wordAtCursor(
+            context: proxy.documentContextBeforeInput
+        ) else { return }
+        guard bridge?.rejectionMemory?.typedWordKept(prefix: prefix, word: word, rowWord: rowWord) == true
+        else { return }
+        #if DEBUG
+        // Slot 1 of the corrections row is the correction the space would have made.
+        let refused = suggestionState.suggestions.count > 1 ? suggestionState.suggestions[1] : ""
+        AutocorrectDebugLog.autocorrectRefused(corrected: refused, by: "typed-word")
+        #endif
+        UserDictionary.shared.learn(word)
     }
 
     /// Replaces the word currently being typed with a replacement string.

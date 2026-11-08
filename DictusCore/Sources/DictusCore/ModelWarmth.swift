@@ -140,6 +140,27 @@ public enum ModelWarmth {
         write(current, to: defaults)
     }
 
+    /// Forget that `model` is warm when a download is about to change its files.
+    ///
+    /// WHY NOT WHEN THEY ARE ALREADY COMPLETE (#868): `ModelManager.downloadModel` is also
+    /// re-entered for a model whose files are all on disk (onboarding run again, a retry,
+    /// the launch repair), and then no byte changes and the compiled cache still describes
+    /// them. Clearing anyway left the record gone while the loaded engine, already warm,
+    /// had no reason to run a warm inference and write it back: every keyboard tap then
+    /// read a cold model and opened Dictus with `intent=prepare`.
+    ///
+    /// - Returns: whether the record was cleared.
+    @discardableResult
+    public static func clearBeforeDownload(
+        _ model: String,
+        filesCompleteOnDisk: Bool,
+        defaults: UserDefaults = AppGroup.defaults
+    ) -> Bool {
+        guard !filesCompleteOnDisk else { return false }
+        clear(model, defaults: defaults)
+        return true
+    }
+
     // MARK: - Storage
 
     /// `[modelIdentifier: installIdentity]`.

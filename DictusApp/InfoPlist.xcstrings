@@ -1,0 +1,24 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "NSMicrophoneUsageDescription" : {
+      "comment" : "Explanation shown in iOS's microphone permission alert (#736).",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dictus needs microphone access to transcribe your voice."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dictus a besoin du micro pour transcrire votre voix."
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.1"
+}

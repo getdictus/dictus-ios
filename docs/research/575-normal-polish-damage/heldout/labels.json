@@ -1,0 +1,142 @@
+{
+ "heldout/auto/device-structured-0918-fr/F6-structured-since#1": {
+  "label": "refuse",
+  "reason": "`un petit peu plus longs` → `un peu plus longs`: a qualifier deleted, labelled damage exactly as findings.md labelled `3-long`"
+ },
+ "heldout/auto/device-structured-0918-fr/F6-structured-since#3": {
+  "label": "refuse",
+  "reason": "`un petit peu plus longs` → `un peu plus longs`: a qualifier deleted, labelled damage exactly as findings.md labelled `3-long`"
+ },
+ "heldout/auto/device-structured-fr/D6-issues-check#1": {
+  "label": "refuse",
+  "reason": "the product name `dictus` became `dictées`: a different word, the meaning changes"
+ },
+ "heldout/auto/device-structured-fr/D6-issues-check#2": {
+  "label": "refuse",
+  "reason": "the product name `dictus` became `dictées`: a different word, the meaning changes"
+ },
+ "heldout/auto/device-structured-fr/D6-issues-check#3": {
+  "label": "refuse",
+  "reason": "the product name `dictus` became `dictées`: a different word, the meaning changes"
+ },
+ "heldout/auto/device-structured-fr/D7-mod-rejects#1": {
+  "label": "faithful",
+  "reason": "`log` → `logue`: the anglicism verb spelled the French way; same word. Missed by the abbreviation licence, which needs 4 letters"
+ },
+ "heldout/auto/device-structured-fr/D7-mod-rejects#2": {
+  "label": "faithful",
+  "reason": "`log` → `logue`: the anglicism verb spelled the French way; same word. Missed by the abbreviation licence, which needs 4 letters"
+ },
+ "heldout/auto/device-structured-fr/D7-mod-rejects#3": {
+  "label": "faithful",
+  "reason": "`log` → `logue`: the anglicism verb spelled the French way; same word. Missed by the abbreviation licence, which needs 4 letters"
+ },
+ "heldout/auto/email-fr/E6-demande-fichier#2": {
+  "label": "refuse",
+  "reason": "`pourrais` → `peux`: a different word, the brief refuses it (same shape as P2 on the round)"
+ },
+ "heldout/auto/email-fr/E6-demande-fichier#3": {
+  "label": "refuse",
+  "reason": "`pourrais` → `peux`: a different word, the brief refuses it (same shape as P2 on the round)"
+ },
+ "heldout/auto/point-fr/N2-point-de-vue#1": {
+  "label": "faithful",
+  "reason": "`aperçoive` → `aperçoit`: subjunctive into indicative, a grammar change; the meaning is intact"
+ },
+ "heldout/auto/point-fr/N2-point-de-vue#2": {
+  "label": "faithful",
+  "reason": "`aperçoive` → `aperçoit`: subjunctive into indicative, a grammar change; the meaning is intact"
+ },
+ "heldout/auto/point-fr/N2-point-de-vue#3": {
+  "label": "faithful",
+  "reason": "`aperçoive` → `aperçoit`: subjunctive into indicative, a grammar change; the meaning is intact"
+ },
+ "heldout/auto/seed/11-verbal-newlines#2": {
+  "label": "refuse",
+  "reason": "`Line 1.`: the dictation is gone, translated; refused upstream by the length check"
+ },
+ "heldout/auto/seed/5-erreur-parakeet#1": {
+  "label": "faithful",
+  "reason": "rule-8 and grammar repairs of a code-switched dictation (`traduise` → `traduit`, `error` → `erreur`, `it arrive` → `it happens`); nothing the speaker meant is lost"
+ },
+ "heldout/auto/seed/5-erreur-parakeet#2": {
+  "label": "faithful",
+  "reason": "rule-8 and grammar repairs of a code-switched dictation (`traduise` → `traduit`, `error` → `erreur`, `it arrive` → `it happens`); nothing the speaker meant is lost"
+ },
+ "heldout/auto/seed/5-erreur-parakeet#3": {
+  "label": "faithful",
+  "reason": "rule-8 and grammar repairs of a code-switched dictation (`traduise` → `traduit`, `error` → `erreur`, `it arrive` → `it happens`); nothing the speaker meant is lost"
+ },
+ "heldout/auto/summary-device-r1/R2-misrendered-product#1": {
+  "label": "refuse",
+  "reason": "`hue dictus` (ASR for `issues Dictus`) became `instructions dictées` / `mises à jour`: the product name is lost"
+ },
+ "heldout/auto/summary-device-r1/R2-misrendered-product#2": {
+  "label": "refuse",
+  "reason": "`hue dictus` (ASR for `issues Dictus`) became `instructions dictées` / `mises à jour`: the product name is lost"
+ },
+ "heldout/natural/device-structured-0918-fr/F6-structured-since#2": {
+  "label": "refuse",
+  "reason": "`un petit peu plus longs` → `un peu plus longs`: a qualifier deleted, labelled damage exactly as findings.md labelled `3-long`"
+ },
+ "heldout/natural/device-structured-0918-fr/F6-structured-since#3": {
+  "label": "refuse",
+  "reason": "`un petit peu plus longs` → `un peu plus longs`: a qualifier deleted, labelled damage exactly as findings.md labelled `3-long`"
+ },
+ "heldout/natural/device-structured-fr/D6-issues-check#3": {
+  "label": "refuse",
+  "reason": "the product name `dictus` became `dictées`: a different word, the meaning changes"
+ },
+ "heldout/natural/device-structured-fr/D7-mod-rejects#1": {
+  "label": "faithful",
+  "reason": "`log` → `logue`: the anglicism verb spelled the French way; same word. Missed by the abbreviation licence, which needs 4 letters"
+ },
+ "heldout/natural/device-structured-fr/D7-mod-rejects#2": {
+  "label": "faithful",
+  "reason": "`log` → `logue`: the anglicism verb spelled the French way; same word. Missed by the abbreviation licence, which needs 4 letters"
+ },
+ "heldout/natural/device-structured-fr/D7-mod-rejects#3": {
+  "label": "faithful",
+  "reason": "`log` → `logue`: the anglicism verb spelled the French way; same word. Missed by the abbreviation licence, which needs 4 letters"
+ },
+ "heldout/natural/email-fr/E2-dispo#1": {
+  "label": "refuse",
+  "reason": "`ouais` → `Où est-ce`: a word replaced by an invented phrase"
+ },
+ "heldout/natural/email-fr/E2-dispo#3": {
+  "label": "refuse",
+  "reason": "`ouais` → `Où est-ce`: a word replaced by an invented phrase"
+ },
+ "heldout/natural/email-fr/E5-long-projet#1": {
+  "label": "faithful",
+  "reason": "`par contre` → `mais`: a connective swapped for its synonym; meaning intact"
+ },
+ "heldout/natural/nl-markers-fr/nl-1-liste-courses#1": {
+  "label": "faithful",
+  "reason": "`de points` is ASR for `deux points`, and the model wrote `:` - rule 4/8 doing its job"
+ },
+ "heldout/natural/nl-markers-fr/nl-1-liste-courses#3": {
+  "label": "faithful",
+  "reason": "`de points` is ASR for `deux points`, and the model wrote `:` - rule 4/8 doing its job"
+ },
+ "heldout/natural/nl-markers-fr/nl-4-identifiants#1": {
+  "label": "faithful",
+  "reason": "`de points` is ASR for `deux points`, dropped by the model as noise - a repair"
+ },
+ "heldout/natural/nl-markers-fr/nl-4-identifiants#2": {
+  "label": "faithful",
+  "reason": "`de points` is ASR for `deux points`, dropped by the model as noise - a repair"
+ },
+ "heldout/natural/nl-markers-fr/nl-4-identifiants#3": {
+  "label": "faithful",
+  "reason": "`de points` is ASR for `deux points`, dropped by the model as noise - a repair"
+ },
+ "heldout/natural/point-fr/N1-point-final#2": {
+  "label": "refuse",
+  "reason": "`un point final` → `une fin`: a different word, the brief refuses it"
+ },
+ "heldout/natural/summary-device-r1/R2-misrendered-product#3": {
+  "label": "refuse",
+  "reason": "`hue dictus` (ASR for `issues Dictus`) became `instructions dictées` / `mises à jour`: the product name is lost"
+ }
+}

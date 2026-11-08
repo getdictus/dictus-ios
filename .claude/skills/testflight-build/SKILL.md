@@ -31,15 +31,17 @@ The bare form is the default and is right almost always. Pass a version only whe
 
 The script bumps all three plists together, commits, tags `build/N` and pushes. It refuses a dirty tree, a branch other than `develop`, and a duplicate `build/N`.
 
-**Before cutting, the lane must be empty.** [`docs/ROADMAP.md`](../../../docs/ROADMAP.md) holds the ordered queue and says what a cycle contains. Check the milestone has no open issues, run `cd DictusCore && swift test`, and run `swiftlint lint --strict --no-cache`. CI does not run the tests, so nobody else will.
+**Before cutting, the lane must be empty.** [`docs/ROADMAP.md`](../../../docs/ROADMAP.md) holds the ordered queue and says what a cycle contains. Check the milestone has no open issues, run `cd DictusCore && swift test`, and run `swiftlint lint --strict --no-cache`. CI runs the same suite on every pull request and every push to `develop` (#534); the local run checks the exact commit you are about to cut, before a build number is spent on it.
 
 ## 2. Upload
 
 ```sh
+export ASC_KEY_ID=<your-key-id>          # once per shell, or in ~/.zshrc
+export ASC_ISSUER_ID=<your-issuer-id>
 scripts/upload-testflight.sh
 ```
 
-Archive, sign for the store, upload, wait for processing. Headless, so no window steals Pierre's screen. The script's header explains why it authenticates with the App Store Connect API key rather than the Xcode account; read it before you debug a signing failure, because the obvious diagnosis is wrong.
+Archive, sign for the store, upload, wait for processing. Headless, so no window steals Pierre's screen. It stops before archiving if either variable is missing; both come from App Store Connect > Users and Access > Integrations > App Store Connect API, and the `.p8` must sit at `~/.asc/keys/AuthKey_<ASC_KEY_ID>.p8`. The script's header explains why it authenticates with the App Store Connect API key rather than the Xcode account; read it before you debug a signing failure, because the obvious diagnosis is wrong.
 
 ## 3. Write the What to Test
 

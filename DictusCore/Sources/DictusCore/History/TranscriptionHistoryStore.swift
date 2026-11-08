@@ -81,6 +81,16 @@ public final class TranscriptionHistoryStore: ObservableObject {
     /// no UI in this issue that would explain it.
     public static let maxRecords = 200
 
+    /// Told the ids the cap just pushed out, after the file is written (#639).
+    ///
+    /// DictusApp sets it to withdraw a shared voice note's keyboard delivery when its
+    /// record falls off the end: the keyboard keeps a note while it is being used,
+    /// and a note History no longer holds must not live on there — that is private
+    /// text with no owner left. A hook rather than a call into the delivery store from
+    /// here: dictations append too, from code that knows nothing about voice notes,
+    /// and this is the one place every eviction passes through.
+    public var onEvicted: (([UUID]) -> Void)?
+
     static let fileName = "transcription_history.json"
 
     /// Where the records live, or nil when the App Group container is unreachable —
@@ -136,10 +146,13 @@ public final class TranscriptionHistoryStore: ObservableObject {
             return nil
         }
         records.insert(record, at: 0)
+        var evicted: [UUID] = []
         if records.count > Self.maxRecords {
+            evicted = records.suffix(records.count - Self.maxRecords).map(\.id)
             records.removeLast(records.count - Self.maxRecords)
         }
         persist()
+        if !evicted.isEmpty { onEvicted?(evicted) }
         return record
     }
 
@@ -162,6 +175,42 @@ public final class TranscriptionHistoryStore: ObservableObject {
         guard records[index].text != newText else { return }
         records[index] = records[index].withText(newText)
         persist()
+    }
+
+    /// Store the summary of a shared voice note (#620), computed when its result was
+    /// first opened. Ungated for `updateText`'s reason: it only ever touches a record
+    /// already on disk. A record that has gone in between is left alone.
+    public func updateSummary(id: UUID, to summary: String, modeIdentifier: String) {
+        guard !summary.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
+        guard let index = records.firstIndex(where: { $0.id == id }) else { return }
+        records[index] = records[index].withSummary(summary, modeIdentifier: modeIdentifier)
+        persist()
+    }
+
+    /// Mark a voice note's result as opened (#620). Ungated for `updateText`'s reason.
+    /// Only the first opening is recorded.
+    public func markOpened(id: UUID, at date: Date = Date()) {
+        guard let index = records.firstIndex(where: { $0.id == id }),
+              records[index].openedAt == nil else { return }
+        records[index] = records[index].withOpened(at: date)
+        persist()
+    }
+
+    /// Voice notes never opened, oldest first: the order they were shared in.
+    ///
+    /// The history stores dates to the second, so notes shared in the same second tie.
+    /// The tie goes to insertion order: `records` is newest first, and the queue
+    /// transcribes in share order, so a later index is an earlier share.
+    public var unreadVoiceNotes: [TranscriptionRecord] {
+        records.enumerated()
+            .filter { $0.element.isUnreadVoiceNote }
+            .sorted { $0.element.createdAt == $1.element.createdAt ? $0.offset > $1.offset : $0.element.createdAt < $1.element.createdAt }
+            .map(\.element)
+    }
+
+    /// The record with this id, if it is still saved.
+    public func record(id: UUID) -> TranscriptionRecord? {
+        records.first { $0.id == id }
     }
 
     public func delete(id: UUID) {

@@ -1,0 +1,860 @@
+1200 runs loaded, rounds: baseline, c3, c6, c7
+
+
+════ B1 — invented facts or names, title included (bars.md §5)
+
+── baseline: refused by grounding/segmentOverlap: 0
+── c3: refused by grounding/segmentOverlap: 0
+   [N] N2-reunion-vrac#3 success: title words not in input: ['preparation']
+       title: 'Préparation avant la réunion\xa0:'
+   [M] D1-fr-device-courses#1 success: title words not in input: ['autres']
+       title: 'Récap du lait et autres\xa0:'
+   [M] D1-fr-device-courses#2 success: title words not in input: ['autres']
+       title: 'Récap du lait et autres\xa0:'
+   [M] D2-en-device-hair#1 success: title words not in input: ['care']
+       title: 'Hair care:'
+   [M] D2-en-device-hair#2 success: title words not in input: ['care']
+       title: 'Hair care:'
+   [M] D2-en-device-hair#3 success: title words not in input: ['care']
+       title: 'Hair care:'
+   [L] 3-message-draft#2 success: title words not in input: ['probleme']
+       title: 'Problème du bureau\xa0:'
+   [T] T2-no-error.en#1 success: title words not in input: ['current', 'status']
+       title: 'Current status:'
+   [T] T2-no-error.en#2 success: title words not in input: ['current', 'status']
+       title: 'Current status:'
+   [T] T2-no-error.en#3 success: title words not in input: ['current', 'status']
+       title: 'Current status:'
+   [T] T2-no-error.es#3 success: title words not in input: ['estado', 'actual']
+       title: 'Estado actual:'
+   [T] T3-plan-mode.es#1 success: title words not in input: ['este']
+       title: 'Integración de este issue:'
+   [T] T3-plan-mode.es#3 success: title words not in input: ['este']
+       title: 'Integración de este issue:'
+   [T] T3-plan-mode.it#1 success: title words not in input: ['dell']
+       title: "Integrazione dell'issue:"
+   [T] T3-plan-mode.it#2 success: title words not in input: ['dell']
+       title: "Integrazione dell'issue:"
+   [T] T3-plan-mode.it#3 success: title words not in input: ['dell']
+       title: "Integrazione dell'issue:"
+   [T] T2-no-error.pt#1 success: title words not in input: ['status', 'atual']
+       title: 'Status atual:'
+   [T] T2-no-error.pt#2 success: title words not in input: ['atual']
+       title: 'Estado atual:'
+   [T] T3-plan-mode.pt#1 success: title words not in input: ['deste']
+       title: 'Integração deste issue:'
+   [T] T3-plan-mode.da#1 success: title words not in input: ['dette']
+       title: 'Integration af dette issue:'
+   [T] T3-plan-mode.da#3 success: title words not in input: ['dette']
+       title: 'Integration af dette issue:'
+   [T] T3-plan-mode.nb#1 success: title words not in input: ['dette', 'problemet']
+       title: 'Integrasjonen av dette problemet:'
+   [T] T3-plan-mode.nb#2 success: title words not in input: ['dette', 'problemet']
+       title: 'Integrasjonen av dette problemet:'
+   [T] T3-plan-mode.nb#3 success: title words not in input: ['dette', 'problemet']
+       title: 'Integrasjonen av dette problemet:'
+   [T] T4-structured-since.ja#3 success: title words not in input: ['方']
+       title: '構造化モードの使い方：'
+   [T] T6-project-update.ja#1 success: title words not in input: ['進', '捗']
+       title: 'プロジェクトの進捗：'
+   [T] T6-project-update.ja#2 success: title words not in input: ['進', '捗']
+       title: 'プロジェクトの進捗報告：'
+   [T] T6-project-update.ja#3 success: title words not in input: ['進', '捗']
+       title: 'プロジェクトの進捗：'
+   [T] T2-no-error.ko#1 success: title words not in input: ['없음']
+       title: '오류 메시지 없음:'
+   [T] T2-no-error.ko#2 success: title words not in input: ['없음']
+       title: '오류 메시지 없음:'
+   [T] T2-no-error.ko#3 success: title words not in input: ['없음']
+       title: '오류 메시지 없음:'
+   [T] T4-structured-since.ko#1 success: title words not in input: ['사용']
+       title: '구조화 모드 사용:'
+   [T] T4-structured-since.ko#2 success: title words not in input: ['사용']
+       title: '구조화 모드 사용:'
+   [T] T4-structured-since.ko#3 success: title words not in input: ['사용']
+       title: '구조화 모드 사용:'
+   [T] T2-no-error.zh-Hans#3 success: title words not in input: ['当', '状', '态']
+       title: '当前状态：'
+   [T] T2-no-error.zh-Hant#1 success: title words not in input: ['狀', '態']
+       title: '目前運作狀態：'
+   [T] T2-no-error.zh-Hant#2 success: title words not in input: ['狀', '況']
+       title: '目前運作狀況：'
+   [T] T2-no-error.zh-Hant#3 success: title words not in input: ['狀', '況']
+       title: '目前運作狀況：'
+── c6: refused by grounding/segmentOverlap: {'grounding': 1, 'segmentOverlap': 7}
+   [N] N2-reunion-vrac#1 success: title words not in input: ['doit', 'etre', 'fait']
+       title: 'Ce qui doit être fait avant la réunion\xa0:'
+   [N] N2-reunion-vrac#3 success: title words not in input: ['faire']
+       title: "Ce qu'il faut faire avant la réunion\xa0:"
+   [S] S6-en-weekend#1 success: title words not in input: ['activities']
+       title: 'Weekend activities:'
+   [S] S6-en-weekend#3 success: title words not in input: ['activities']
+       title: 'Weekend activities:'
+   [M] D1-fr-device-courses#3 success: title words not in input: ['produits']
+       title: 'Récap du lait et des produits\xa0:'
+   [M] D2-en-device-hair#1 success: title words not in input: ['care']
+       title: 'Hair care:'
+   [M] D2-en-device-hair#2 success: title words not in input: ['care', 'tasks']
+       title: 'Hair care tasks:'
+   [M] D2-en-device-hair#3 success: title words not in input: ['care']
+       title: 'Hair care:'
+   [L] 3-message-draft#1 success: title words not in input: ['aujourd']
+       title: "Aujourd'hui\xa0:"
+   [L] 3-message-draft#2 success: title words not in input: ['avenir']
+       title: 'Avenir au bureau\xa0:'
+   [L] 3-message-draft#3 success: title words not in input: ['aujourd']
+       title: "Aujourd'hui\xa0:"
+   [L] 5-rambling#2 success: title words not in input: ['suivi']
+       title: 'Point de suivi\xa0:'
+   [L] 5-rambling#3 success: title words not in input: ['suivi']
+       title: 'Point de suivi\xa0:'
+   [T] T2-no-error.en#1 success: title words not in input: ['current', 'status']
+       title: 'Current status:'
+   [T] T2-no-error.en#2 success: title words not in input: ['current', 'status']
+       title: 'Current status:'
+   [T] T2-no-error.en#3 success: title words not in input: ['status', 'system']
+       title: 'Status of the system:'
+   [T] T5-long-test.en#1 success: title words not in input: ['attempting']
+       title: 'Attempting a long message in structured mode:'
+   [T] T2-no-error.de#1 success: title words not in input: ['zustand', 'systems']
+       title: 'Zustand des Systems:'
+   [T] T2-no-error.de#2 success: title words not in input: ['zustand', 'systems']
+       title: 'Zustand des Systems:'
+   [T] T2-no-error.de#3 success: title words not in input: ['zustand', 'systems']
+       title: 'Zustand des Systems:'
+   [T] T2-no-error.es#1 success: title words not in input: ['estado', 'actual']
+       title: 'Estado actual:'
+   [T] T2-no-error.es#2 success: title words not in input: ['estado', 'actual']
+       title: 'Estado actual:'
+   [T] T2-no-error.es#3 success: title words not in input: ['estado', 'actual']
+       title: 'Estado actual:'
+   [T] T2-no-error.it#1 success: title words not in input: ['stato', 'attuale']
+       title: 'Stato attuale:'
+   [T] T2-no-error.it#2 success: title words not in input: ['stato', 'attuale']
+       title: 'Stato attuale:'
+   [T] T2-no-error.it#3 success: title words not in input: ['stato', 'attuale']
+       title: 'Stato attuale:'
+   [T] T3-plan-mode.it#1 success: title words not in input: ['dell', 'dell']
+       title: "Preparazione dell'integrazione dell'issue:"
+   [T] T3-plan-mode.it#2 success: title words not in input: ['dell', 'dell']
+       title: "Preparazione dell'integrazione dell'issue:"
+   [T] T3-plan-mode.it#3 success: title words not in input: ['dell', 'dell']
+       title: "Preparazione dell'integrazione dell'issue:"
+   [T] T4-structured-since.it#2 success: title words not in input: ['effettuati']
+       title: 'Test effettuati ieri:'
+   [T] T6-project-update.it#3 rejectedGuardrail: refused(grounding)
+       title: 'Aggiornamento sul progetto:'
+   [T] T2-no-error.pt#1 success: title words not in input: ['atual']
+       title: 'Estado atual:'
+   [T] T2-no-error.pt#2 success: title words not in input: ['atual']
+       title: 'Estado atual:'
+   [T] T2-no-error.pt#3 success: title words not in input: ['atual']
+       title: 'Estado atual:'
+   [T] T4-structured-since.pt#1 success: title words not in input: ['feitos']
+       title: 'Testes feitos ontem:'
+   [T] T4-structured-since.pt#2 success: title words not in input: ['feitos']
+       title: 'Testes feitos ontem:'
+   [T] T4-structured-since.pt#3 success: title words not in input: ['feitos']
+       title: 'Testes feitos ontem:'
+   [T] T4-structured-since.nl#1 success: title words not in input: ['werken']
+       title: 'Eigenlijk werken alle tests die ik gisteren heb gedaan:'
+   [T] T4-structured-since.nl#2 success: title words not in input: ['werken']
+       title: 'Eigenlijk werken alle tests die ik gisteren heb gedaan:'
+   [T] T3-plan-mode.da#1 success: title words not in input: ['dette']
+       title: 'Integrationen af dette issue:'
+   [T] T3-plan-mode.nb#1 success: title words not in input: ['dette', 'problemet']
+       title: 'Integrasjonen av dette problemet:'
+   [T] T3-plan-mode.nb#2 success: title words not in input: ['dette', 'problemet']
+       title: 'Integrasjonen av dette problemet:'
+   [T] T3-plan-mode.nb#3 success: title words not in input: ['dette', 'problemet']
+       title: 'Integrasjonen av dette problemet:'
+   [T] T3-plan-mode.tr#1 rejectedGuardrail: title words not in input: ['yapmak']; refused(segmentOverlap)
+       title: 'Entegrasyon hazırlığını yapmak:'
+   [T] T3-plan-mode.tr#2 rejectedGuardrail: title words not in input: ['yapmak']; refused(segmentOverlap)
+       title: 'Entegrasyon hazırlığını yapmak:'
+   [T] T5-long-test.tr#1 rejectedGuardrail: refused(segmentOverlap)
+       title: 'Yapılandırılmış modda test deniyoruz:'
+   [T] T5-long-test.tr#3 rejectedGuardrail: refused(segmentOverlap)
+       title: 'Yapılandırılmış modda test deniyoruz:'
+   [T] T2-no-error.vi#1 success: title words not in input: ['trang', 'thai']
+       title: 'Trạng thái hệ thống hiện tại:'
+   [T] T2-no-error.vi#2 success: title words not in input: ['trang', 'thai']
+       title: 'Trạng thái hệ thống hiện tại:'
+   [T] T2-no-error.vi#3 success: title words not in input: ['tinh', 'trang']
+       title: 'Tình trạng hệ thống hiện tại:'
+   [T] T4-structured-since.ja#1 success: title words not in input: ['用']
+       title: '構造化モードの使用：'
+   [T] T4-structured-since.ja#2 success: title words not in input: ['方']
+       title: '構造化モードの使い方：'
+   [T] T4-structured-since.ja#3 success: title words not in input: ['方']
+       title: '構造化モードの使い方：'
+   [T] T6-project-update.ja#1 success: title words not in input: ['進', '捗']
+       title: 'プロジェクトの進捗：'
+   [T] T6-project-update.ja#2 success: title words not in input: ['進', '捗']
+       title: 'プロジェクトの進捗：'
+   [T] T6-project-update.ja#3 success: title words not in input: ['進', '捗']
+       title: 'プロジェクトの進捗：'
+   [T] T1-last-transcription.ko#3 success: title words not in input: ['최종']
+       title: '최종 전사본:'
+   [T] T2-no-error.ko#1 success: title words not in input: ['없음']
+       title: '오류 메시지 없음:'
+   [T] T2-no-error.ko#2 success: title words not in input: ['없이']
+       title: '오류 메시지 없이 지금까지:'
+   [T] T2-no-error.ko#3 success: title words not in input: ['없음']
+       title: '오류 메시지 없음:'
+   [T] T3-plan-mode.ko#2 rejectedGuardrail: refused(segmentOverlap)
+       title: '이 이슈의 통합 준비:'
+   [T] T4-structured-since.ko#1 success: title words not in input: ['사용']
+       title: '구조화 모드 사용 후:'
+   [T] T4-structured-since.ko#2 success: title words not in input: ['사용']
+       title: '구조화 모드 사용:'
+   [T] T4-structured-since.ko#3 success: title words not in input: ['사용']
+       title: '구조화 모드 사용 후:'
+   [T] T5-long-test.ko#2 rejectedGuardrail: refused(segmentOverlap)
+       title: '구조화 모드 시험 중:'
+   [T] T5-long-test.ko#3 rejectedGuardrail: refused(segmentOverlap)
+       title: '구조화 모드 시험 중:'
+   [T] T2-no-error.zh-Hans#1 success: title words not in input: ['状', '态']
+       title: '目前状态：'
+   [T] T2-no-error.zh-Hans#2 success: title words not in input: ['当', '状', '态']
+       title: '当前状态：'
+   [T] T4-structured-since.zh-Hans#1 success: title words not in input: ['使', '果']
+       title: '结构化模式的使用结果：'
+   [T] T4-structured-since.zh-Hans#2 success: title words not in input: ['果']
+       title: '结构化模式的结果：'
+   [T] T5-long-test.zh-Hans#1 success: title words not in input: ['尝', '使']
+       title: '尝试使用结构化模式发长消息：'
+   [T] T5-long-test.zh-Hans#2 success: title words not in input: ['尝', '使', '送']
+       title: '尝试使用结构化模式发送长消息：'
+   [T] T5-long-test.zh-Hans#3 success: title words not in input: ['尝', '使', '送']
+       title: '尝试使用结构化模式发送长消息：'
+   [T] T2-no-error.zh-Hant#1 success: title words not in input: ['狀', '況']
+       title: '目前運作狀況：'
+   [T] T2-no-error.zh-Hant#2 success: title words not in input: ['狀', '態']
+       title: '目前運作狀態：'
+   [T] T2-no-error.zh-Hant#3 success: title words not in input: ['狀', '態']
+       title: '目前狀態：'
+   [T] T4-structured-since.zh-Hant#1 success: title words not in input: ['果']
+       title: '結構化模式的測試結果：'
+   [T] T5-long-test.zh-Hant#2 success: title words not in input: ['嘗', '使']
+       title: '嘗試使用結構化模式傳長訊息：'
+   [T] T5-long-test.zh-Hant#3 success: title words not in input: ['嘗']
+       title: '測試結果的嘗試：'
+   [R] R9-en-duplicate#1 success: title words not in input: ['tasks']
+       title: 'Tasks for the week:'
+   [R] R9-en-duplicate#2 success: title words not in input: ['actions', 'complete']
+       title: 'Actions to complete:'
+   [R] R9-en-duplicate#3 success: title words not in input: ['tasks']
+       title: 'Tasks for the week:'
+── c7: refused by grounding/segmentOverlap: {'segmentOverlap': 5}
+   [N] N1-field-commits#2 success: title words not in input: ['achats']
+       title: 'Committés et achats\xa0:'
+   [N] N1-field-commits#3 success: title words not in input: ['achats']
+       title: 'Committés et achats\xa0:'
+   [N] N2-reunion-vrac#2 success: title words not in input: ['doit', 'etre', 'fait']
+       title: 'Ce que doit être fait avant la réunion\xa0:'
+   [S] S6-en-weekend#2 success: title words not in input: ['activities']
+       title: 'Weekend activities:'
+   [S] S6-en-weekend#3 success: title words not in input: ['activities']
+       title: 'Weekend activities:'
+   [M] M3-en-launch#1 success: title words not in input: ['preparations']
+       title: 'Launch preparations:'
+   [M] M3-en-launch#2 success: title words not in input: ['preparations']
+       title: 'Launch preparations:'
+   [M] M3-en-launch#3 success: title words not in input: ['preparations']
+       title: 'Launch preparations:'
+   [M] D2-en-device-hair#1 success: title words not in input: ['care']
+       title: 'Hair care:'
+   [M] D2-en-device-hair#2 success: title words not in input: ['care', 'tasks']
+       title: 'Hair care tasks:'
+   [M] D2-en-device-hair#3 success: title words not in input: ['care', 'tasks']
+       title: 'Hair care tasks:'
+   [L] 5-rambling#1 success: title words not in input: ['suivi']
+       title: 'Point de suivi\xa0:'
+   [L] 5-rambling#2 success: title words not in input: ['suivi']
+       title: 'Point de suivi\xa0:'
+   [L] 5-rambling#3 success: title words not in input: ['suivi']
+       title: 'Point de suivi\xa0:'
+   [T] T2-no-error.en#1 success: title words not in input: ['current', 'status']
+       title: 'Current status:'
+   [T] T2-no-error.en#2 success: title words not in input: ['current', 'status']
+       title: 'Current status:'
+   [T] T2-no-error.en#3 success: title words not in input: ['current', 'status']
+       title: 'Current status:'
+   [T] T2-no-error.de#1 success: title words not in input: ['status']
+       title: 'Status im Moment:'
+   [T] T2-no-error.de#2 success: title words not in input: ['zustand', 'systems']
+       title: 'Zustand des Systems:'
+   [T] T2-no-error.de#3 success: title words not in input: ['zustand', 'systems']
+       title: 'Zustand des Systems:'
+   [T] T2-no-error.es#1 success: title words not in input: ['estado', 'actual']
+       title: 'Estado actual:'
+   [T] T2-no-error.es#2 success: title words not in input: ['estado', 'actual']
+       title: 'Estado actual:'
+   [T] T2-no-error.es#3 success: title words not in input: ['estado', 'actual']
+       title: 'Estado actual:'
+   [T] T2-no-error.it#1 success: title words not in input: ['stato', 'attuale']
+       title: 'Stato attuale:'
+   [T] T2-no-error.it#2 success: title words not in input: ['stato', 'attuale']
+       title: 'Stato attuale:'
+   [T] T2-no-error.it#3 success: title words not in input: ['stato', 'attuale']
+       title: 'Stato attuale:'
+   [T] T3-plan-mode.it#1 success: title words not in input: ['dell']
+       title: "Integrazione dell'issue:"
+   [T] T3-plan-mode.it#2 success: title words not in input: ['dell', 'dell']
+       title: "Preparazione dell'integrazione dell'issue:"
+   [T] T3-plan-mode.it#3 success: title words not in input: ['dell']
+       title: "Integrazione dell'issue:"
+   [T] T4-structured-since.it#1 success: title words not in input: ['fatti']
+       title: 'Test fatti ieri:'
+   [T] T4-structured-since.it#2 success: title words not in input: ['effettuati']
+       title: 'Test effettuati ieri:'
+   [T] T4-structured-since.it#3 success: title words not in input: ['effettuati']
+       title: 'Test effettuati ieri:'
+   [T] T2-no-error.pt#1 success: title words not in input: ['atual']
+       title: 'Estado atual:'
+   [T] T2-no-error.pt#2 success: title words not in input: ['status', 'atual']
+       title: 'Status atual:'
+   [T] T2-no-error.pt#3 success: title words not in input: ['status', 'atual']
+       title: 'Status atual:'
+   [T] T4-structured-since.pt#1 success: title words not in input: ['realizados']
+       title: 'Testes realizados ontem:'
+   [T] T4-structured-since.pt#2 success: title words not in input: ['feitos']
+       title: 'Testes feitos ontem:'
+   [T] T4-structured-since.pt#3 success: title words not in input: ['feitos']
+       title: 'Testes feitos ontem:'
+   [T] T2-no-error.da#3 success: title words not in input: ['intil']
+       title: 'Intil videre:'
+   [T] T3-plan-mode.da#1 success: title words not in input: ['dette']
+       title: 'Integrationen af dette issue:'
+   [T] T3-plan-mode.da#2 success: title words not in input: ['dette']
+       title: 'Integrationen af dette issue:'
+   [T] T3-plan-mode.nb#1 success: title words not in input: ['dette', 'problemet']
+       title: 'Integrasjonen av dette problemet:'
+   [T] T3-plan-mode.nb#2 success: title words not in input: ['dette', 'problemet']
+       title: 'Integrasjonen av dette problemet:'
+   [T] T3-plan-mode.nb#3 success: title words not in input: ['dette', 'problemet']
+       title: 'Integrasjonen av dette problemet:'
+   [T] T2-no-error.tr#1 success: title words not in input: ['olmadan']
+       title: 'Hata mesajları olmadan:'
+   [T] T2-no-error.tr#2 success: title words not in input: ['olmayan', 'durum']
+       title: 'Hata mesajları olmayan durum:'
+   [T] T2-no-error.tr#3 success: title words not in input: ['durumun', 'ozeti']
+       title: 'Durumun özeti:'
+   [T] T5-long-test.tr#3 success: title words not in input: ['denemesi']
+       title: 'Yapılandırılmış modda test denemesi:'
+   [T] T2-no-error.vi#1 success: title words not in input: ['trang', 'thai', 'hoat', 'đong']
+       title: 'Trạng thái hoạt động hiện tại:'
+   [T] T2-no-error.vi#2 success: title words not in input: ['tinh', 'trang']
+       title: 'Tình trạng hệ thống hiện tại:'
+   [T] T2-no-error.vi#3 success: title words not in input: ['trang', 'thai']
+       title: 'Trạng thái hiện tại:'
+   [T] T1-last-transcription.ja#2 success: title words not in input: ['で', 'す']
+       title: '確認：最新の文字起こしです：'
+   [T] T4-structured-since.ja#1 success: title words not in input: ['方']
+       title: '構造化モードの使い方：'
+   [T] T4-structured-since.ja#3 success: title words not in input: ['方']
+       title: '構造化モードの使い方：'
+   [T] T6-project-update.ja#1 success: title words not in input: ['進', '捗']
+       title: 'プロジェクトの進捗：'
+   [T] T6-project-update.ja#2 success: title words not in input: ['進', '捗']
+       title: 'プロジェクトの進捗報告：'
+   [T] T6-project-update.ja#3 success: title words not in input: ['進', '捗']
+       title: 'プロジェクトの進捗：'
+   [T] T1-last-transcription.ko#1 rejectedGuardrail: title words not in input: ['최근', '작업', '상태']; refused(segmentOverlap)
+       title: '최근 작업 상태:'
+   [T] T1-last-transcription.ko#3 rejectedGuardrail: title words not in input: ['최종', '확인']; refused(segmentOverlap)
+       title: '최종 전사본 확인:'
+   [T] T2-no-error.ko#1 success: title words not in input: ['없음']
+       title: '오류 메시지 없음:'
+   [T] T2-no-error.ko#2 success: title words not in input: ['없이']
+       title: '오류 메시지 없이 잘 작동함:'
+   [T] T2-no-error.ko#3 success: title words not in input: ['없음']
+       title: '오류 메시지 없음:'
+   [T] T3-plan-mode.ko#2 rejectedGuardrail: refused(segmentOverlap)
+       title: '이슈의 통합 준비:'
+   [T] T4-structured-since.ko#1 success: title words not in input: ['사용', '경험']
+       title: '구조화 모드 사용 경험:'
+   [T] T4-structured-since.ko#2 success: title words not in input: ['사용', '경험']
+       title: '구조화 모드 사용 경험:'
+   [T] T4-structured-since.ko#3 success: title words not in input: ['사용', '경험']
+       title: '구조화 모드 사용 경험:'
+   [T] T5-long-test.ko#1 rejectedGuardrail: refused(segmentOverlap)
+       title: '구조화 모드 시험:'
+   [T] T2-no-error.zh-Hans#1 success: title words not in input: ['当', '状', '态']
+       title: '当前状态：'
+   [T] T2-no-error.zh-Hans#2 success: title words not in input: ['当', '状', '态']
+       title: '当前状态：'
+   [T] T2-no-error.zh-Hans#3 success: title words not in input: ['当', '状', '态']
+       title: '当前状态：'
+   [T] T4-structured-since.zh-Hans#1 success: title words not in input: ['果']
+       title: '结构化模式的测试结果：'
+   [T] T5-long-test.zh-Hans#2 rejectedGuardrail: refused(segmentOverlap)
+       title: '测试结构化模式：'
+   [T] T2-no-error.zh-Hant#1 success: title words not in input: ['狀', '態']
+       title: '目前狀態：'
+   [T] T2-no-error.zh-Hant#2 success: title words not in input: ['狀', '態']
+       title: '目前狀態：'
+   [T] T2-no-error.zh-Hant#3 success: title words not in input: ['狀', '態']
+       title: '目前狀態：'
+   [T] T4-structured-since.zh-Hant#1 success: title words not in input: ['果']
+       title: '結構化模式的測試結果：'
+   [T] T4-structured-since.zh-Hant#2 success: title words not in input: ['果']
+       title: '結構化模式的測試結果：'
+   [T] T4-structured-since.zh-Hant#3 success: title words not in input: ['果']
+       title: '結構化模式的測試結果：'
+   [T] T5-long-test.zh-Hant#1 success: title words not in input: ['嘗', '使', '送']
+       title: '嘗試使用結構化模式傳送長訊息：'
+   [T] T5-long-test.zh-Hant#2 success: title words not in input: ['圖', '使', '送']
+       title: '試圖使用結構化模式傳送長訊息：'
+   [T] T5-long-test.zh-Hant#3 success: title words not in input: ['嘗', '使', '送']
+       title: '嘗試使用結構化模式傳送長訊息：'
+   [R] R9-en-duplicate#1 success: title words not in input: ['actions', 'taken']
+       title: 'Actions to be taken:'
+   [R] R9-en-duplicate#2 success: title words not in input: ['tasks', 'complete']
+       title: 'Tasks to complete:'
+   [R] R9-en-duplicate#3 success: title words not in input: ['tasks']
+       title: 'Tasks for the week:'
+
+
+════ B2 — output language, per round and language (bars.md §5)
+
+round     lang     outputs  refusedLang  %      wrongAccepted  wrongAny 
+baseline  en       18       0            0.0    0              0        
+baseline  fr       57       0            0.0    0              0        
+c3        da       18       0            0.0    3              3        
+c3        de       18       0            0.0    0              0        
+c3        en       45       0            0.0    0              0        
+c3        es       18       0            0.0    0              0        
+c3        fr       78       0            0.0    0              0        
+c3        it       18       0            0.0    0              0        
+c3        ja       18       0            0.0    0              0        
+c3        ko       18       0            0.0    0              0        
+c3        nb       18       0            0.0    0              0        
+c3        nl       18       0            0.0    0              0        
+c3        pt       18       0            0.0    0              0        
+c3        sv       18       0            0.0    0              0        
+c3        tr       15       0            0.0    0              0        
+c3        vi       18       0            0.0    0              0        
+c3        zh-Hans  18       0            0.0    0              0        
+c3        zh-Hant  18       0            0.0    0              0        
+c6        da       18       0            0.0    3              3        
+c6        de       18       0            0.0    0              0        
+c6        en       45       0            0.0    0              0        
+c6        es       18       3            16.7   0              3        
+c6        fr       77       0            0.0    0              0        
+c6        it       18       0            0.0    0              0        
+c6        ja       18       0            0.0    0              0        
+c6        ko       18       0            0.0    0              0        
+c6        nb       18       0            0.0    0              0        
+c6        nl       18       0            0.0    0              0        
+c6        pt       18       0            0.0    0              0        
+c6        sv       18       0            0.0    0              0        
+c6        tr       18       0            0.0    0              0        
+c6        vi       18       0            0.0    0              0        
+c6        zh-Hans  18       0            0.0    0              0        
+c6        zh-Hant  18       0            0.0    0              0        
+c7        da       18       0            0.0    3              3        
+c7        de       18       0            0.0    0              0        
+c7        en       45       0            0.0    0              0        
+c7        es       18       0            0.0    0              0        
+c7        fr       78       0            0.0    0              0        
+c7        it       18       0            0.0    0              0        
+c7        ja       18       0            0.0    0              0        
+c7        ko       18       0            0.0    0              0        
+c7        nb       18       0            0.0    0              0        
+c7        nl       18       0            0.0    0              0        
+c7        pt       18       0            0.0    0              0        
+c7        sv       18       0            0.0    0              0        
+c7        tr       16       0            0.0    0              0        
+c7        vi       18       0            0.0    0              0        
+c7        zh-Hans  18       0            0.0    0              0        
+c7        zh-Hant  18       0            0.0    0              0        
+
+Every flagged output, for the hand read:
+  [c3/T] T4-structured-since.da#1 success read=da expected=da
+      FOREIGN: - Eksportere loggene som de er
+  [c3/T] T4-structured-since.da#2 success read=da expected=da
+      FOREIGN: - Eksportere loggene som de er
+  [c3/T] T4-structured-since.da#3 success read=da expected=da
+      FOREIGN: - Eksportere loggene, som de er
+  [c6/T] T4-structured-since.es#1 rejectedGuardrail(language) read=es expected=es
+      FOREIGN: - Parece bastante correcto
+  [c6/T] T4-structured-since.es#2 rejectedGuardrail(language) read=es expected=es
+      FOREIGN: - Parece bastante correcto
+  [c6/T] T4-structured-since.es#3 rejectedGuardrail(language) read=es expected=es
+      FOREIGN: - Parece bastante correcto
+  [c6/T] T4-structured-since.da#1 success read=da expected=da
+      FOREIGN: - Kan eksportere loggene, som de er
+  [c6/T] T4-structured-since.da#2 success read=da expected=da
+      FOREIGN: - Kan eksportere loggene, som de er
+  [c6/T] T4-structured-since.da#3 success read=da expected=da
+      FOREIGN: - Kan eksportere loggene, som de er
+  [c7/T] T4-structured-since.da#1 success read=da expected=da
+      FOREIGN: - Eksportere loggene, som de er
+  [c7/T] T4-structured-since.da#2 success read=da expected=da
+      FOREIGN: - Eksportere loggene, som de er
+  [c7/T] T4-structured-since.da#3 success read=da expected=da
+      FOREIGN: - Eksportere loggene, som de er
+
+
+════ B3 — tasks fabricated from a statement, set S, every line (bars.md §5)
+
+── baseline: 24 outputs, 24 accepted
+         S1-fr-test-ok#1 success: - L'enregistrement a marché du premier coup, la transcription est sortie en à peu près deux secondes et la qualité est bonne ⏎ - La batterie a pris 5 % sur dix minutes, c'est plus que ce que je pensais ⏎ - Le micro capte un peu trop le bruit de la rue
+         S1-fr-test-ok#2 success: - Enregistrement réussi du premier coup, transcription sortie en à peu près deux secondes, qualité bonne ⏎ - Batterie consommée 5 % sur dix minutes, plus que prévu ⏎ - Micro capte trop le bruit de la rue
+         S1-fr-test-ok#3 success: - L'enregistrement a marché du premier coup, la transcription est sortie en à peu près deux secondes et la qualité est bonne ⏎ - La batterie a pris 5 % sur dix minutes, c'est plus que ce que je pensais ⏎ - Le micro capte un peu trop le bruit de la rue
+         S2-fr-voyage#1 success: - Le voyage s'est bien passé dans l'ensemble ⏎ - Le train avait vingt minutes de retard au départ mais on a rattrapé pendant le trajet ⏎ - L'hôtel est à deux rues de la gare ⏎ - La chambre est petite mais propre ⏎ - Le petit-déjeuner est compris ⏎ - Il a plu toute la journée de samedi, du coup on a surtout fait des musées
+         S2-fr-voyage#2 success: - Le voyage s'est bien passé dans l'ensemble ⏎ - Le train avait vingt minutes de retard au départ mais on a rattrapé pendant le trajet ⏎ - L'hôtel est à deux rues de la gare ⏎ - La chambre est petite mais propre ⏎ - Le petit-déjeuner est compris ⏎ - Il a plu toute la journée de samedi, du coup on a surtout fait des musées
+         S2-fr-voyage#3 success: - Le voyage s'est bien passé dans l'ensemble ⏎ - Le train avait vingt minutes de retard au départ mais on a rattrapé pendant le trajet ⏎ - L'hôtel est à deux rues de la gare, la chambre est petite mais propre, et le petit-déjeuner est compris ⏎ - Il a plu toute la journée de samedi, du coup on a surtout fait des musées
+         S3-fr-compte-rendu#1 success: - Budget de l'année prochaine validé à 40 000 euros ⏎ - Date de lancement fixée au 15 mars ⏎ - Le client préfère la première version de la maquette ⏎ - Équipe support passée de trois à cinq personnes depuis septembre
+         S3-fr-compte-rendu#2 success: - Budget de l'année prochaine validé à 40 000 euros ⏎ - Date de lancement fixée au 15 mars ⏎ - Le client préfère la première version de la maquette ⏎ - Équipe support passée de trois à cinq personnes depuis septembre
+         S3-fr-compte-rendu#3 success: - Budget de l'année prochaine validé à 40 000 euros ⏎ - Date de lancement fixée au 15 mars ⏎ - Le client préfère la première version de la maquette ⏎ - Équipe support passée de trois à cinq personnes depuis septembre
+         S4-fr-avis#1 success: - L'entrée était bonne mais le plat est arrivé tiède et un peu trop salé ⏎ - Le service était sympa quand même ⏎ - 45 euros par personne, je trouve que c'est cher pour ce que c'est
+         S4-fr-avis#2 success: - L'entrée était bonne mais le plat est arrivé tiède et un peu trop salé ⏎ - Le service était sympa quand même ⏎ - 45 euros par personne, je trouve que c'est cher pour ce que c'est
+         S4-fr-avis#3 success: - L'entrée était bonne mais le plat est arrivé tiède et un peu trop salé ⏎ - Le service était sympa quand même ⏎ - 45 euros par personne, je trouve que c'est cher pour ce que c'est
+         S5-fr-constat-appli#1 success: - Le clavier prend deux secondes à apparaître quand j'ouvre Messages ⏎ - La dictée fonctionne bien en français mais en anglais elle coupe la dernière phrase ⏎ - Le mode sombre n'est plus appliqué sur l'écran des réglages
+         S5-fr-constat-appli#2 success: - Le clavier apparaît après deux secondes quand j'ouvre Messages ⏎ - La dictée fonctionne bien en français mais coupe la dernière phrase en anglais ⏎ - Le mode sombre n'est plus appliqué sur l'écran des réglages
+   TASK? S5-fr-constat-appli#3 success: - Clavier apparaît après deux secondes lors de l'ouverture de Messages ⏎ - Dictée fonctionne bien en français mais coupe la dernière phrase en anglais ⏎ - Mode sombre non appliqué sur l'écran des réglages
+         S6-en-weekend#1 success: - Weekend quiet ⏎ - Great weather on Saturday: spent most of the day at the lake ⏎ - Rainy afternoon on Sunday ⏎ - New bike works fine ⏎ - Brakes much better than on the old one ⏎ - Battery lasted the whole ride
+         S6-en-weekend#2 success: - Weekend quiet ⏎ - Great weather on Saturday: spent most of the day at the lake ⏎ - Rainy afternoon on Sunday ⏎ - New bike works fine ⏎ - Brakes much better than on the old one ⏎ - Battery lasted the whole ride
+         S6-en-weekend#3 success: - Weekend quiet ⏎ - Great weather on Saturday: spent most of the day at the lake ⏎ - Rainy afternoon on Sunday ⏎ - New bike works fine ⏎ - Brakes much better than on the old one ⏎ - Battery lasted the whole ride
+         S7-en-standup#1 success: - Migration finished last night without errors ⏎ - Dashboard about thirty percent faster since the cache change ⏎ - Still see a few timeouts on the export endpoint, maybe two or three a day ⏎ - Staging server back on the old certificate
+         S7-en-standup#2 success: - Migration finished last night without errors ⏎ - Dashboard about thirty percent faster since the cache change ⏎ - Still see a few timeouts on the export endpoint, maybe two or three a day ⏎ - Staging server back on the old certificate
+         S7-en-standup#3 success: - Migration finished last night without errors ⏎ - Dashboard about thirty percent faster since cache change ⏎ - Still see a few timeouts on export endpoint, maybe two or three a day ⏎ - Staging server back on old certificate
+         S8-en-opinion#1 success: - The second design is the stronger one: colours are calmer and text is easier to read ⏎ - The first design looks more modern but feels crowded on a small screen ⏎ - The icons in the second design are clearer too
+         S8-en-opinion#2 success: - The second design is the stronger one: colours are calmer, text is easier to read ⏎ - The first design looks more modern but feels crowded on a small screen ⏎ - The icons in the second design are clearer too
+         S8-en-opinion#3 success: - The second design is the stronger one: colours are calmer and text is easier to read ⏎ - The first design looks more modern but feels crowded on a small screen ⏎ - The icons in the second design are clearer too
+   screen: 1 outputs with a line opening on an infinitive or a task verb
+── c3: 24 outputs, 24 accepted
+         S1-fr-test-ok#1 success: Petit retour sur le test de ce matin : ⏎ - L'enregistrement a marché du premier coup ⏎ - La transcription est sortie en à peu près deux secondes ⏎ - La qualité est bonne ⏎ - La batterie a pris 5 % sur dix minutes ⏎ - Le micro capte un peu trop le bruit de la rue
+         S1-fr-test-ok#2 success: Petit retour sur le test de ce matin : ⏎ - L'enregistrement a marché du premier coup ⏎ - La transcription est sortie en à peu près deux secondes ⏎ - La qualité est bonne ⏎ - La batterie a pris 5 % sur dix minutes ⏎ - Le micro capte un peu trop le bruit de la rue
+         S1-fr-test-ok#3 success: Petit retour sur le test de ce matin : ⏎ - L'enregistrement a marché du premier coup ⏎ - La transcription est sortie en à peu près deux secondes ⏎ - La qualité est bonne ⏎ - La batterie a pris 5 % sur dix minutes ⏎ - Le micro capte un peu trop le bruit de la rue
+         S2-fr-voyage#1 success: Voyage s'est bien passé : ⏎ - Le train avait vingt minutes de retard au départ mais on a rattrapé pendant le trajet ⏎ - L'hôtel est à deux rues de la gare ⏎ - La chambre est petite mais propre ⏎ - Le petit-déjeuner est compris ⏎ - Il a plu toute la journée de samedi, du coup on a surtout fait des musées
+         S2-fr-voyage#2 success: Voyage s'est bien passé : ⏎ - Le train avait vingt minutes de retard au départ mais on a rattrapé pendant le trajet ⏎ - L'hôtel est à deux rues de la gare ⏎ - La chambre est petite mais propre ⏎ - Le petit-déjeuner est compris ⏎ - Il a plu toute la journée de samedi, du coup on a surtout fait des musées
+         S2-fr-voyage#3 success: Voyage s'est bien passé : ⏎ - Le train avait vingt minutes de retard au départ mais on a rattrapé pendant le trajet ⏎ - L'hôtel est à deux rues de la gare ⏎ - La chambre est petite mais propre ⏎ - Le petit-déjeuner est compris ⏎ - Il a plu toute la journée de samedi, du coup on a surtout fait des musées
+         S3-fr-compte-rendu#1 success: Réunion de ce matin : ⏎ - Le budget de l'année prochaine est validé à 40 000 euros ⏎ - La date de lancement reste fixée au 15 mars ⏎ - Le client trouve la nouvelle maquette trop chargée, il préférait la première version ⏎ - L'équipe support est passée de trois à cinq personnes depuis septembre
+         S3-fr-compte-rendu#2 success: Réunion de ce matin : ⏎ - Le budget de l'année prochaine est validé à 40 000 euros ⏎ - La date de lancement reste fixée au 15 mars ⏎ - Le client trouve la nouvelle maquette trop chargée, il préférait la première version ⏎ - L'équipe support est passée de trois à cinq personnes depuis septembre
+         S3-fr-compte-rendu#3 success: Réunion de ce matin : ⏎ - Le budget de l'année prochaine est validé à 40 000 euros ⏎ - La date de lancement reste fixée au 15 mars ⏎ - Le client trouve la nouvelle maquette trop chargée, il préférait la première version ⏎ - L'équipe support est passée de trois à cinq personnes depuis septembre
+         S4-fr-avis#1 success: Restaurant d'hier soir : ⏎ - C'était pas terrible ⏎ - L'entrée était bonne ⏎ - Le plat est arrivé tiède et un peu trop salé ⏎ - Le service était sympa quand même ⏎ - 45 euros par personne : c'est cher pour ce que c'est
+         S4-fr-avis#2 success: Restaurant d'hier soir : ⏎ - C'était pas terrible ⏎ - L'entrée était bonne ⏎ - Le plat est arrivé tiède et un peu trop salé ⏎ - Le service était sympa quand même ⏎ - 45 euros par personne : c'est cher pour ce que c'est
+         S4-fr-avis#3 success: Restaurant d'hier soir : ⏎ - C'était pas terrible ⏎ - L'entrée était bonne ⏎ - Le plat est arrivé tiède et un peu trop salé ⏎ - Le service était sympa quand même ⏎ - 45 euros par personne : c'est cher pour ce que c'est
+         S5-fr-constat-appli#1 success: Observation sur l'appli depuis la mise à jour : ⏎ - Le clavier met deux secondes à apparaître quand j'ouvre Messages ⏎ - La dictée fonctionne bien en français mais en anglais elle coupe la dernière phrase ⏎ - Le mode sombre n'est plus appliqué sur l'écran des réglages
+         S5-fr-constat-appli#2 success: Observation sur l'appli depuis la mise à jour : ⏎ - Le clavier met deux secondes à apparaître quand j'ouvre Messages ⏎ - La dictée fonctionne bien en français mais en anglais elle coupe la dernière phrase ⏎ - Le mode sombre n'est plus appliqué sur l'écran des réglages
+         S5-fr-constat-appli#3 success: Observation sur l'appli depuis la mise à jour : ⏎ - Le clavier met deux secondes à apparaître quand j'ouvre Messages ⏎ - La dictée fonctionne bien en français mais en anglais elle coupe la dernière phrase ⏎ - Le mode sombre n'est plus appliqué sur l'écran des réglages
+         S6-en-weekend#1 success: Weekend: ⏎ - The weather was great on Saturday ⏎ - We spent most of the day at the lake ⏎ - Sunday it rained the whole afternoon ⏎ - The new bike works fine ⏎ - The brakes are much better than on the old one ⏎ - The battery lasted the whole ride
+         S6-en-weekend#2 success: Weekend quiet: ⏎ - The weather was great on Saturday ⏎ - We spent most of the day at the lake ⏎ - Sunday it rained the whole afternoon ⏎ - The new bike works fine ⏎ - The brakes are much better than on the old one ⏎ - The battery lasted the whole ride
+         S6-en-weekend#3 success: Weekend quiet: ⏎ - The weather was great on Saturday ⏎ - We spent most of the day at the lake ⏎ - Sunday it rained the whole afternoon ⏎ - The new bike works fine ⏎ - The brakes are much better than on the old one ⏎ - The battery lasted the whole ride
+         S7-en-standup#1 success: Migration update: ⏎ - The migration finished last night without errors ⏎ - The dashboard is about thirty percent faster since the cache change ⏎ - We still see a few timeouts on the export endpoint, maybe two or three a day ⏎ - The staging server is back on the old certificate
+         S7-en-standup#2 success: Migration update: ⏎ - The migration finished last night without errors ⏎ - The dashboard is about thirty percent faster since the cache change ⏎ - We still see a few timeouts on the export endpoint, maybe two or three a day ⏎ - The staging server is back on the old certificate
+         S7-en-standup#3 success: Migration update: ⏎ - The migration finished last night without errors ⏎ - The dashboard is about thirty percent faster since the cache change ⏎ - We still see a few timeouts on the export endpoint, maybe two or three a day ⏎ - The staging server is back on the old certificate
+         S8-en-opinion#1 success: Second design: ⏎ - The second design is the stronger one ⏎ - The colours are calmer ⏎ - The text is easier to read ⏎ - The first one looks more modern ⏎ - It feels crowded on a small screen ⏎ - The icons in the second one are clearer too
+         S8-en-opinion#2 success: Second design: ⏎ - The second design is the stronger one ⏎ - The colours are calmer ⏎ - The text is easier to read ⏎ - The first one looks more modern ⏎ - It feels crowded on a small screen ⏎ - The icons in the second one are clearer too
+         S8-en-opinion#3 success: Second design: ⏎ - The second design is the stronger one ⏎ - The colours are calmer ⏎ - The text is easier to read ⏎ - The first one looks more modern but it feels crowded on a small screen ⏎ - The icons in the second one are clearer too
+   screen: 0 outputs with a line opening on an infinitive or a task verb
+── c6: 24 outputs, 24 accepted
+         S1-fr-test-ok#1 success: Petit retour sur le test de ce matin : ⏎ - L'enregistrement a marché du premier coup ⏎ - La transcription est sortie en à peu près deux secondes ⏎ - La qualité est bonne ⏎ - La batterie a pris 5 % sur dix minutes ⏎ - Le micro capte un peu trop le bruit de la rue
+         S1-fr-test-ok#2 success: Petit retour sur le test de ce matin : ⏎ - L'enregistrement a marché du premier coup ⏎ - La transcription est sortie en à peu près deux secondes ⏎ - La qualité est bonne ⏎ - La batterie a pris 5 % sur dix minutes ⏎ - Le micro capte un peu trop le bruit de la rue
+         S1-fr-test-ok#3 success: Petit retour sur le test de ce matin : ⏎ - L'enregistrement a marché du premier coup ⏎ - La transcription est sortie en à peu près deux secondes ⏎ - La qualité est bonne ⏎ - La batterie a pris 5 % sur dix minutes ⏎ - Le micro capte un peu trop le bruit de la rue
+         S2-fr-voyage#1 success: Le voyage s'est bien passé : ⏎ - Le train avait vingt minutes de retard au départ mais on a rattrapé pendant le trajet ⏎ - L'hôtel est à deux rues de la gare ⏎ - La chambre est petite mais propre ⏎ - Le petit-déjeuner est compris ⏎ - Il a plu toute la journée de samedi, du coup on a surtout fait des musées
+         S2-fr-voyage#2 success: Le voyage s'est bien passé : ⏎ - Le train avait vingt minutes de retard au départ mais on a rattrapé pendant le trajet ⏎ - L'hôtel est à deux rues de la gare, la chambre est petite mais propre, et le petit-déjeuner est compris ⏎ - Il a plu toute la journée de samedi, du coup on a surtout fait des musées
+         S2-fr-voyage#3 success: Le voyage s'est bien passé : ⏎ - Le train avait vingt minutes de retard au départ mais on a rattrapé pendant le trajet ⏎ - L'hôtel est à deux rues de la gare, la chambre est petite mais propre, et le petit-déjeuner est compris ⏎ - Il a plu toute la journée de samedi, du coup on a surtout fait des musées
+         S3-fr-compte-rendu#1 success: Réunion de ce matin : ⏎ - La budget de l'année prochaine est validé à 40 000 euros ⏎ - La date de lancement reste fixée au 15 mars ⏎ - Le client trouve la nouvelle maquette trop chargée, il préférait la première version ⏎ - L'équipe support est passée de trois à cinq personnes depuis septembre
+         S3-fr-compte-rendu#2 success: Réunion de ce matin : ⏎ - La budget de l'année prochaine est validé à 40 000 euros ⏎ - La date de lancement reste fixée au 15 mars ⏎ - Le client trouve la nouvelle maquette trop chargée, il préférait la première version ⏎ - L'équipe support est passée de trois à cinq personnes depuis septembre
+         S3-fr-compte-rendu#3 success: Réunion de ce matin : ⏎ - La budget de l'année prochaine est validé à 40 000 euros ⏎ - La date de lancement reste fixée au 15 mars ⏎ - Le client trouve la nouvelle maquette trop chargée, il préférait la première version ⏎ - L'équipe support est passée de trois à cinq personnes depuis septembre
+         S4-fr-avis#1 success: Le restaurant d'hier soir : ⏎ - C'était pas terrible ⏎ - L'entrée était bonne ⏎ - Le plat est arrivé tiède et un peu trop salé ⏎ - Le service était sympa quand même ⏎ - Le prix, 45 euros par personne, est cher pour ce que c'est
+         S4-fr-avis#2 success: Le restaurant d'hier soir : ⏎ - L'entrée était bonne ⏎ - Le plat est arrivé tiède et un peu trop salé ⏎ - Le service était sympa quand même ⏎ - Le prix : 45 euros par personne, c'est cher
+         S4-fr-avis#3 success: Le restaurant d'hier soir : ⏎ - L'entrée était bonne ⏎ - Le plat est arrivé tiède et un peu trop salé ⏎ - Le service était sympa quand même ⏎ - Le prix : 45 euros par personne, c'est cher
+   TASK? S5-fr-constat-appli#1 success: Observation sur l'application depuis la mise à jour : ⏎ - Apparaître le clavier en deux secondes quand ouvrir Messages ⏎ - Fonctionner bien la dictée en français mais couper la dernière phrase en anglais ⏎ - Ne pas être appliqué le mode sombre sur l'écran des réglages
+   TASK? S5-fr-constat-appli#2 success: Ce que j'observe sur l'appli depuis la mise à jour : ⏎ - Apparaître le clavier en deux secondes quand j'ouvre Messages ⏎ - Fonctionner bien la dictée en français mais couper la dernière phrase en anglais ⏎ - Ne pas être appliqué le mode sombre sur l'écran des réglages
+   TASK? S5-fr-constat-appli#3 success: Observation sur l'application depuis la mise à jour : ⏎ - Apparaître le clavier en deux secondes quand ouvrir Messages ⏎ - Fonctionner bien la dictée en français mais couper la dernière phrase en anglais ⏎ - Ne pas appliquer le mode sombre sur l'écran des réglages
+         S6-en-weekend#1 success: Weekend activities: ⏎ - Spent most of the day at the lake ⏎ - The weather was great on Saturday ⏎ - Sunday it rained the whole afternoon ⏎ - The new bike works fine ⏎ - The brakes are much better than on the old one ⏎ - The battery lasted the whole ride
+         S6-en-weekend#2 success: Weekend: ⏎ - Spent most of the day at the lake ⏎ - The weather was great on Saturday ⏎ - It rained the whole afternoon ⏎ - The new bike works fine ⏎ - The brakes are much better than on the old one ⏎ - The battery lasted the whole ride
+         S6-en-weekend#3 success: Weekend activities: ⏎ - Spent most of the day at the lake ⏎ - The weather was great on Saturday ⏎ - Sunday it rained the whole afternoon ⏎ - The new bike works fine ⏎ - The brakes are much better than on the old one ⏎ - The battery lasted the whole ride
+         S7-en-standup#1 success: Migration update: ⏎ - The migration finished ⏎ - The dashboard is about thirty percent faster ⏎ - We still see a few timeouts on the export endpoint ⏎ - The staging server is back on the old certificate
+         S7-en-standup#2 success: Migration update: ⏎ - The migration finished without errors ⏎ - The dashboard is about thirty percent faster since the cache change ⏎ - We still see a few timeouts on the export endpoint, maybe two or three a day ⏎ - The staging server is back on the old certificate
+         S7-en-standup#3 success: Migration update: ⏎ - The migration finished without errors ⏎ - The dashboard is about thirty percent faster since the cache change ⏎ - We still see a few timeouts on the export endpoint, maybe two or three a day ⏎ - The staging server is back on the old certificate
+         S8-en-opinion#1 success: Second design: ⏎ - Think the second design is stronger ⏎ - Say the colours are calmer ⏎ - Say the text is easier to read ⏎ - Say the first one looks more modern ⏎ - Say it feels crowded on a small screen ⏎ - Say the icons in the second one are clearer
+         S8-en-opinion#2 success: Second design: ⏎ - Think the second design is stronger ⏎ - Observe the colours are calmer ⏎ - Note the text is easier to read ⏎ - See the first one looks more modern ⏎ - Feel it feels crowded on a small screen ⏎ - Notice the icons in the second one are clearer
+         S8-en-opinion#3 success: Second design: ⏎ - Think the second design is the stronger one ⏎ - See the colours are calmer ⏎ - Notice the text is easier to read ⏎ - Observe the first one looks more modern ⏎ - Feel it feels crowded on a small screen ⏎ - See the icons in the second one are clearer
+   screen: 3 outputs with a line opening on an infinitive or a task verb
+── c7: 24 outputs, 24 accepted
+         S1-fr-test-ok#1 success: Retour sur le test de ce matin : ⏎ - L'enregistrement a marché du premier coup ⏎ - La transcription est sortie en à peu près deux secondes ⏎ - La qualité est bonne ⏎ - La batterie a pris 5 % sur dix minutes ⏎ - Le micro capte un peu trop le bruit de la rue
+         S1-fr-test-ok#2 success: Retour sur le test de ce matin : ⏎ - L'enregistrement a marché du premier coup ⏎ - La transcription est sortie en à peu près deux secondes ⏎ - La qualité est bonne ⏎ - La batterie a pris 5 % sur dix minutes ⏎ - Le micro capte un peu trop le bruit de la rue
+         S1-fr-test-ok#3 success: Retour sur le test de ce matin : ⏎ - L'enregistrement a marché du premier coup ⏎ - La transcription est sortie en à peu près deux secondes ⏎ - La qualité est bonne ⏎ - La batterie a pris 5 % sur dix minutes ⏎ - Le micro capte un peu trop le bruit de la rue
+         S2-fr-voyage#1 success: Le voyage s'est bien passé : ⏎ - Le train avait vingt minutes de retard au départ mais on a rattrapé pendant le trajet ⏎ - L'hôtel est à deux rues de la gare ⏎ - La chambre est petite mais propre ⏎ - Le petit-déjeuner est compris ⏎ - Il a plu toute la journée de samedi, du coup on a surtout fait des musées
+         S2-fr-voyage#2 success: Voyage bien passé : ⏎ - Le train avait vingt minutes de retard au départ mais on a rattrapé pendant le trajet ⏎ - L'hôtel est à deux rues de la gare ⏎ - La chambre est petite mais propre ⏎ - Le petit-déjeuner est compris ⏎ - Il a plu toute la journée de samedi du coup on a surtout fait des musées
+         S2-fr-voyage#3 success: Le voyage s'est bien passé : ⏎ - Le train avait vingt minutes de retard au départ mais on a rattrapé pendant le trajet ⏎ - L'hôtel est à deux rues de la gare, la chambre est petite mais propre, et le petit-déjeuner est compris ⏎ - Il a plu toute la journée de samedi, du coup on a surtout fait des musées
+         S3-fr-compte-rendu#1 success: Réunion de ce matin : ⏎ - Le budget de l'année prochaine est validé à 40 000 euros ⏎ - La date de lancement reste fixée au 15 mars ⏎ - Le client trouve la nouvelle maquette trop chargée, il préférait la première version ⏎ - L'équipe support est passée de trois à cinq personnes depuis septembre
+         S3-fr-compte-rendu#2 success: Réunion de ce matin : ⏎ - Le budget de l'année prochaine est validé à 40 000 euros ⏎ - La date de lancement reste fixée au 15 mars ⏎ - Le client trouve la nouvelle maquette trop chargée, il préférait la première version ⏎ - L'équipe support est passée de trois à cinq personnes depuis septembre
+         S3-fr-compte-rendu#3 success: Réunion de ce matin : ⏎ - Le budget de l'année prochaine est validé à 40 000 euros ⏎ - La date de lancement reste fixée au 15 mars ⏎ - Le client trouve la nouvelle maquette trop chargée, il préférait la première version ⏎ - L'équipe support est passée de trois à cinq personnes depuis septembre
+         S4-fr-avis#1 success: Le restaurant d'hier soir : ⏎ - L'entrée était bonne ⏎ - Le plat est arrivé tiède et un peu trop salé ⏎ - Le service était sympa quand même ⏎ - 45 euros par personne, c'est cher pour ce que c'est
+         S4-fr-avis#2 success: Le restaurant d'hier soir : ⏎ - L'entrée était bonne ⏎ - Le plat est arrivé tiède et un peu trop salé ⏎ - Le service était sympa quand même ⏎ - 45 euros par personne, c'est cher pour ce que c'est
+         S4-fr-avis#3 success: Le restaurant d'hier soir : ⏎ - L'entrée était bonne ⏎ - Le plat est arrivé tiède et un peu trop salé ⏎ - Le service était sympa quand même ⏎ - 45 euros par personne, c'est cher pour ce que c'est
+         S5-fr-constat-appli#1 success: Observation sur l'appli depuis la mise à jour : ⏎ - Le clavier met deux secondes à apparaître quand j'ouvre Messages ⏎ - La dictée fonctionne bien en français mais en anglais elle coupe la dernière phrase ⏎ - Le mode sombre n'est plus appliqué sur l'écran des réglages
+         S5-fr-constat-appli#2 success: Ce que j'observe sur l'appli depuis la mise à jour : ⏎ - Le clavier met deux secondes à apparaître quand j'ouvre Messages ⏎ - La dictée fonctionne bien en français mais en anglais elle coupe la dernière phrase ⏎ - Le mode sombre n'est plus appliqué sur l'écran des réglages
+         S5-fr-constat-appli#3 success: Observation sur l'appli depuis la mise à jour : ⏎ - Le clavier met deux secondes à apparaître quand j'ouvre Messages ⏎ - La dictée fonctionne bien en français mais en anglais elle coupe la dernière phrase ⏎ - Le mode sombre n'est plus appliqué sur l'écran des réglages
+         S6-en-weekend#1 success: The weekend: ⏎ - The weather was great on Saturday ⏎ - We spent most of the day at the lake ⏎ - Sunday it rained the whole afternoon ⏎ - The new bike works fine ⏎ - The brakes are much better than on the old one ⏎ - The battery lasted the whole ride
+         S6-en-weekend#2 success: Weekend activities: ⏎ - The weather was great on Saturday ⏎ - We spent most of the day at the lake ⏎ - Sunday it rained the whole afternoon ⏎ - The new bike works fine ⏎ - The brakes are much better than on the old one ⏎ - The battery lasted the whole ride
+         S6-en-weekend#3 success: Weekend activities: ⏎ - The weather was great on Saturday ⏎ - We spent most of the day at the lake ⏎ - Sunday it rained the whole afternoon ⏎ - The new bike works fine ⏎ - The brakes are much better than on the old one ⏎ - The battery lasted the whole ride
+         S7-en-standup#1 success: Migration update: ⏎ - The migration finished last night without errors ⏎ - The dashboard is about thirty percent faster since the cache change ⏎ - We still see a few timeouts on the export endpoint, maybe two or three a day ⏎ - The staging server is back on the old certificate
+         S7-en-standup#2 success: Migration update: ⏎ - The migration finished last night without errors ⏎ - The dashboard is about thirty percent faster since the cache change ⏎ - We still see a few timeouts on the export endpoint, maybe two or three a day ⏎ - The staging server is back on the old certificate
+         S7-en-standup#3 success: Migration update: ⏎ - The migration finished last night without errors ⏎ - The dashboard is about thirty percent faster since the cache change ⏎ - We still see a few timeouts on the export endpoint, maybe two or three a day ⏎ - The staging server is back on the old certificate
+         S8-en-opinion#1 success: Second design: ⏎ - The second design is the stronger one ⏎ - The colours are calmer and the text is easier to read ⏎ - The first one looks more modern but it feels crowded on a small screen ⏎ - The icons in the second one are clearer too
+         S8-en-opinion#2 success: Second design: ⏎ - The second design is the stronger one ⏎ - The colours are calmer ⏎ - The text is easier to read ⏎ - The first one looks more modern ⏎ - It feels crowded on a small screen ⏎ - The icons in the second one are clearer too
+         S8-en-opinion#3 success: Second design: ⏎ - The second design is the stronger one ⏎ - The colours are calmer ⏎ - The text is easier to read ⏎ - The first one looks more modern but it feels crowded on a small screen ⏎ - The icons in the second one are clearer too
+   screen: 0 outputs with a line opening on an infinitive or a task verb
+
+
+════ B4 — no regression on N1-N6 against the baseline (bars.md §5)
+
+round     runs  accepted  expectLost  wrongLang  refusedBy
+baseline  18    18        0           0          -
+c3        18    18        0           0          -
+c6        18    18        0           0          -
+c7        18    18        0           0          -
+
+
+════ B5 — the shape: title, colon, flat bullets (bars.md §5)
+
+round     set  accepted  shapeOK  defects
+baseline  N    18        0        noTitle=18
+baseline  S    24        0        noTitle=24
+baseline  M    15        0        noTitle=15
+baseline  L    18        0        noTitle=18
+c3        N    18        18       -
+c3        S    24        24       -
+c3        M    15        15       -
+c3        L    18        18       -
+c3        T    267       267      -
+c3        R    30        30       -
+c6        N    18        18       -
+c6        S    24        24       -
+c6        M    15        15       -
+c6        L    17        17       -
+c6        T    259       259      -
+c6        R    30        30       -
+c7        N    18        18       -
+c7        S    24        24       -
+c7        M    15        15       -
+c7        L    18        18       -
+c7        T    263       262      extraNonListLine=1
+c7        R    30        30       -
+
+Every accepted output off-shape on N, S, M, L (candidates only: the baseline has no title by design):
+
+T, shape OK per language (accepted only):
+  c3: da 18/18  de 18/18  en 18/18  es 18/18  it 18/18  ja 18/18  ko 18/18  nb 18/18  nl 18/18  pt 18/18  sv 18/18  tr 15/15  vi 18/18  zh-Hans 18/18  zh-Hant 18/18
+  c6: da 18/18  de 18/18  en 18/18  es 15/15  it 17/17  ja 18/18  ko 15/15  nb 18/18  nl 18/18  pt 18/18  sv 18/18  tr 14/14  vi 18/18  zh-Hans 18/18  zh-Hant 18/18
+  c7: da 18/18  de 18/18  en 17/18  es 18/18  it 18/18  ja 18/18  ko 14/14  nb 18/18  nl 18/18  pt 18/18  sv 18/18  tr 16/16  vi 18/18  zh-Hans 17/17  zh-Hant 18/18
+
+
+════ B6 — nothing dropped: axis 1 on N + M + L, and L5's trailing line (bars.md §5)
+
+round     outputs  withUnrecalled  unrecalledTotal  L5 trailing kept
+baseline  51       30              98               0/3
+c3        51       29              80               0/3
+c6        50       30              122              0/3
+c7        51       29              92               0/3
+
+
+════ B7 — the band: refusals on check=length, and ratios (bars.md §5)
+
+  baseline: N+S+M+L refused on length 0/75, T 0; ratio min 0.26 median 0.69 max 0.99
+  c3: N+S+M+L refused on length 0/105, T 0; ratio min 0.32 median 0.80 max 1.87
+  c6: N+S+M+L refused on length 0/104, T 0; ratio min 0.29 median 0.79 max 1.81
+  c7: N+S+M+L refused on length 0/105, T 0; ratio min 0.31 median 0.83 max 1.81
+
+
+════ ROUND 2 — title bars T1-T4, past facts P1, post-check P2 (bars.md §8)
+
+── c3: 105 accepted outputs on N, S, M, L, R
+   [N] N1-field-commits#2: 'Commith\xa0:' — T1 title≈a bullet
+   [N] N4-une-idee#1: 'Rappeler le comptable\xa0:' — T1 title≈a bullet
+   [N] N4-une-idee#2: 'Rappeler le comptable\xa0:' — T1 title≈a bullet
+   [N] N5-en-ramble#1: 'Deploy blocked:' — T1 title≈a bullet
+   [N] N5-en-ramble#2: 'Deploy blocked:' — T1 title≈a bullet
+   [N] N5-en-ramble#3: 'Deploy blocked:' — T1 title≈a bullet
+   [N] N6-ponctuation-dictee#1: "Relancer l'agence\xa0:" — T1 title≈a bullet; T4? short bullets ["- Relancer l'agence"]
+   [S] S8-en-opinion#1: 'Second design:' — T1 title≈a bullet
+   [S] S8-en-opinion#2: 'Second design:' — T1 title≈a bullet
+   [S] S8-en-opinion#3: 'Second design:' — T1 title≈a bullet
+   [L] 6-unscripted#1: 'Sixième test\xa0:' — T1 title≈a bullet
+   [L] 6-unscripted#2: 'Sixième test\xa0:' — T1 title≈a bullet
+   [L] 6-unscripted#3: 'Sixième test\xa0:' — T1 title≈a bullet
+   [R] R8-fr-sans-annonce#1: 'Garage\xa0:' — T1 title≈a bullet
+   [R] R8-fr-sans-annonce#2: 'Garage\xa0:' — T1 title≈a bullet
+   [R] R8-fr-sans-annonce#3: 'Garage\xa0:' — T1 title≈a bullet
+   [R] R9-en-duplicate#3: 'Call the bank:' — T1 title≈a bullet
+   [R] R10-fr-une-idee#1: 'Pense à racheter du café demain matin\xa0:' — T1 title≈a bullet
+   [R] R10-fr-une-idee#2: 'Racheter du café demain matin\xa0:' — T1 title≈a bullet
+   [R] R10-fr-une-idee#3: 'Pense à racheter du café demain matin\xa0:' — T1 title≈a bullet
+   screens: T1=20 T2=0 T3=0 T4?=1 (T4 lists every ≤ 2-word bullet; most are items, not fragments)
+   P1, past facts on R1-R5 (every bullet, read by hand):
+           R1-fr-annonce-recap-matin#1: - Fini la maquette de la page d'accueil | - Corrigé le bug de connexion | - Envoyé le devis au client
+           R1-fr-annonce-recap-matin#2: - On a fini la maquette de la page d'accueil | - On a corrigé le bug de connexion | - On a envoyé le devis au client
+           R1-fr-annonce-recap-matin#3: - Fini la maquette de la page d'accueil | - Corrigé le bug de connexion | - Envoyé le devis au client
+     TASK? R2-fr-annonce-liste-journee#1: - Régler au moins trois ou quatre tickets sur le site | - Relu le contrat du fournisseur | - Rangé le garage
+     TASK? R2-fr-annonce-liste-journee#2: - Remplacer au moins trois ou quatre tickets sur le site | - Relire le contrat du fournisseur | - Ranger le garage
+     TASK? R2-fr-annonce-liste-journee#3: - Régler au moins trois ou quatre tickets sur le site | - Relu le contrat du fournisseur | - Rangé le garage
+           R3-en-announcement-uh#1: - Fixed the login bug | - Updated the docs | - Tested the new build on two phones
+           R3-en-announcement-uh#2: - Fixed the login bug | - Updated the docs | - Tested the new build on two phones
+           R3-en-announcement-uh#3: - Fixed the login bug | - Updated the docs | - Tested the new build on two phones
+     TASK? R4-fr-point-journee-passe#1: - Promener le chien le matin | - Emmener la voiture au contrôle technique | - Faire les comptes du mois le soir
+     TASK? R4-fr-point-journee-passe#2: - Promener le chien le matin | - Emmener la voiture au contrôle technique | - Faire les comptes du mois le soir
+     TASK? R4-fr-point-journee-passe#3: - Promener le chien le matin | - Emmener la voiture au contrôle technique | - Faire les comptes du mois le soir
+     TASK? R5-fr-annonce-recap-soir#1: - Regarder le match | - Finir les restes | - Réparer la lampe du salon
+     TASK? R5-fr-annonce-recap-soir#2: - Regarder le match | - Finir les restes | - Réparer la lampe du salon
+     TASK? R5-fr-annonce-recap-soir#3: - Regarder le match | - Finir les restes | - Réparer la lampe du salon
+   P2, list items per run (R6, R7 must be ≥ 2; R10 reported):
+     R6-fr-courses-court#1: 1 bullet(s)
+     R6-fr-courses-court#2: 1 bullet(s)
+     R6-fr-courses-court#3: 1 bullet(s)
+     R7-en-short-list#1: 1 bullet(s)
+     R7-en-short-list#2: 1 bullet(s)
+     R7-en-short-list#3: 1 bullet(s)
+     R10-fr-une-idee#1: 1 bullet(s)
+     R10-fr-une-idee#2: 1 bullet(s)
+     R10-fr-une-idee#3: 1 bullet(s)
+── c6: 104 accepted outputs on N, S, M, L, R
+   [N] N1-field-commits#1: 'Changements\xa0:' — T1 title≈a bullet
+   [N] N1-field-commits#2: 'Commits\xa0:' — T1 title≈a bullet
+   [N] N1-field-commits#3: 'Commits\xa0:' — T1 title≈a bullet
+   [N] N3-projet-fleuve#1: 'Point général\xa0:' — T1 title≈a bullet
+   [N] N3-projet-fleuve#2: 'Point général\xa0:' — T1 title≈a bullet
+   [N] N3-projet-fleuve#3: 'Point général\xa0:' — T1 title≈a bullet
+   [N] N4-une-idee#1: 'Rappeler le comptable\xa0:' — T1 title≈a bullet
+   [N] N4-une-idee#2: 'Rappeler le comptable avant vendredi pour la TVA du trimestre\xa0:' — T1 title≈a bullet
+   [N] N4-une-idee#3: 'Rappeler le comptable\xa0:' — T1 title≈a bullet
+   [N] N6-ponctuation-dictee#1: "Relancer l'agence\xa0:" — T1 title≈a bullet; T4? short bullets ["- Relancer l'agence"]
+   [N] N6-ponctuation-dictee#2: "Relancer l'agence\xa0:" — T1 title≈a bullet; T4? short bullets ["- Relancer l'agence"]
+   [N] N6-ponctuation-dictee#3: "Relancer l'agence\xa0:" — T1 title≈a bullet; T4? short bullets ["- Relancer l'agence"]
+   [S] S8-en-opinion#1: 'Second design:' — T1 title≈a bullet
+   [S] S8-en-opinion#2: 'Second design:' — T1 title≈a bullet
+   [S] S8-en-opinion#3: 'Second design:' — T1 title≈a bullet
+   [M] D1-fr-device-courses#2: 'Récap\xa0:' — T3 generic
+   [L] 3-message-draft#1: "Aujourd'hui\xa0:" — T2 not in input: ["Aujourd'hui"]
+   [L] 3-message-draft#3: "Aujourd'hui\xa0:" — T2 not in input: ["Aujourd'hui"]
+   [L] 6-unscripted#1: 'Sixième test\xa0:' — T1 title≈a bullet
+   [L] 6-unscripted#2: 'Un sixième test\xa0:' — T1 title≈a bullet
+   [L] 6-unscripted#3: 'Sixième test\xa0:' — T1 title≈a bullet
+   [R] R6-fr-courses-court#2: 'Liste de courses pour ce soir\xa0:' — T4? short bullets ['- Acheter tomates', '- Acheter riz', '- Acheter oignons', '- Acheter yaourts']
+   [R] R7-en-short-list#1: 'Shopping for tonight:' — T4? short bullets ['- Buy eggs', '- Buy bread', '- Buy apples', '- Buy milk']
+   [R] R7-en-short-list#2: 'Shopping for tonight:' — T4? short bullets ['- Buy eggs', '- Buy bread', '- Buy apples', '- Buy milk']
+   [R] R7-en-short-list#3: 'Shopping for tonight:' — T4? short bullets ['- Buy eggs', '- Buy bread', '- Buy apples', '- Buy milk']
+   [R] R9-en-duplicate#1: 'Tasks for the week:' — T3 generic
+   [R] R9-en-duplicate#2: 'Actions to complete:' — T3 generic
+   [R] R9-en-duplicate#3: 'Tasks for the week:' — T3 generic
+   [R] R10-fr-une-idee#1: 'Café\xa0:' — T1 title≈a bullet
+   [R] R10-fr-une-idee#2: 'Café\xa0:' — T1 title≈a bullet
+   [R] R10-fr-une-idee#3: 'Café\xa0:' — T1 title≈a bullet
+   screens: T1=21 T2=2 T3=4 T4?=7 (T4 lists every ≤ 2-word bullet; most are items, not fragments)
+   P1, past facts on R1-R5 (every bullet, read by hand):
+           R1-fr-annonce-recap-matin#1: - On a fini la maquette de la page d'accueil | - On a corrigé le bug de connexion | - On a envoyé le devis au client
+           R1-fr-annonce-recap-matin#2: - On a fini la maquette de la page d'accueil | - On a corrigé le bug de connexion | - On a envoyé le devis au client
+           R1-fr-annonce-recap-matin#3: - On a fini la maquette de la page d'accueil | - On a corrigé le bug de connexion | - On a envoyé le devis au client
+           R2-fr-annonce-liste-journee#1: - J'ai réglé au moins trois ou quatre tickets sur le site | - J'ai relu le contrat du fournisseur | - J'ai rangé le garage
+           R2-fr-annonce-liste-journee#2: - J'ai réglé au moins trois ou quatre tickets sur le site | - J'ai relu le contrat du fournisseur | - J'ai rangé le garage
+           R2-fr-annonce-liste-journee#3: - J'ai réglé au moins trois ou quatre tickets sur le site | - J'ai relu le contrat du fournisseur | - J'ai rangé le garage
+           R3-en-announcement-uh#1: - Fixed the login bug | - Updated the docs | - Tested the new build on two phones
+           R3-en-announcement-uh#2: - Fixed the login bug | - Updated the docs | - Tested the new build on two phones
+           R3-en-announcement-uh#3: - Fixed the login bug | - Updated the docs | - Tested the new build on two phones
+           R4-fr-point-journee-passe#1: - On a promené le chien le matin | - On a emmené la voiture au contrôle technique | - On a fait les comptes du mois
+           R4-fr-point-journee-passe#2: - On a promené le chien le matin | - On a emmené la voiture au contrôle technique | - On a fait les comptes du mois
+           R4-fr-point-journee-passe#3: - On a promené le chien le matin | - On a emmené la voiture au contrôle technique | - On a fait les comptes du mois
+           R5-fr-annonce-recap-soir#1: - On a regardé le match | - On a fini les restes | - On a réparé la lampe du salon
+           R5-fr-annonce-recap-soir#2: - On a regardé le match | - On a fini les restes | - On a réparé la lampe du salon
+           R5-fr-annonce-recap-soir#3: - On a regardé le match | - On a fini les restes | - On a réparé la lampe du salon
+   P2, list items per run (R6, R7 must be ≥ 2; R10 reported):
+     R6-fr-courses-court#1: 4 bullet(s)
+     R6-fr-courses-court#2: 4 bullet(s)
+     R6-fr-courses-court#3: 4 bullet(s)
+     R7-en-short-list#1: 4 bullet(s)
+     R7-en-short-list#2: 4 bullet(s)
+     R7-en-short-list#3: 4 bullet(s)
+     R10-fr-une-idee#1: 1 bullet(s)
+     R10-fr-une-idee#2: 1 bullet(s)
+     R10-fr-une-idee#3: 1 bullet(s)
+── c7: 105 accepted outputs on N, S, M, L, R
+   [N] N1-field-commits#1: 'Changements\xa0:' — T1 title≈a bullet
+   [N] N5-en-ramble#1: 'Deploy blocked:' — T1 title≈a bullet
+   [N] N5-en-ramble#2: 'Deploy blocked:' — T1 title≈a bullet
+   [N] N5-en-ramble#3: 'Deploy blocked:' — T1 title≈a bullet
+   [N] N6-ponctuation-dictee#1: "Relancer l'agence\xa0:" — T1 title≈a bullet
+   [N] N6-ponctuation-dictee#2: "Relancer l'agence\xa0:" — T1 title≈a bullet
+   [N] N6-ponctuation-dictee#3: "Relancer l'agence\xa0:" — T1 title≈a bullet
+   [S] S8-en-opinion#1: 'Second design:' — T1 title≈a bullet
+   [S] S8-en-opinion#2: 'Second design:' — T1 title≈a bullet
+   [S] S8-en-opinion#3: 'Second design:' — T1 title≈a bullet
+   [L] 1-free-form#1: 'Quand on lance un produit tout seul\xa0:' — T1 title≈a bullet
+   [L] 1-free-form#2: 'Produit lancé tout seul\xa0:' — T1 title≈a bullet
+   [L] 1-free-form#3: 'Quand on lance un produit tout seul\xa0:' — T1 title≈a bullet
+   [L] 3-message-draft#3: 'Je ne peux pas venir au bureau demain\xa0:' — T1 title≈a bullet
+   [L] 6-unscripted#1: 'Sixième test\xa0:' — T1 title≈a bullet
+   [L] 6-unscripted#2: 'Sixième test\xa0:' — T1 title≈a bullet
+   [L] 6-unscripted#3: 'Sixième test\xa0:' — T1 title≈a bullet
+   [R] R7-en-short-list#1: 'Shopping for tonight:' — T4? short bullets ['- Buy eggs', '- Buy bread', '- Buy apples', '- Buy milk']
+   [R] R7-en-short-list#2: "Tonight's shopping:" — T4? short bullets ['- Buy eggs', '- Buy bread', '- Buy apples', '- Buy milk']
+   [R] R7-en-short-list#3: "Tonight's shopping:" — T4? short bullets ['- Buy eggs', '- Buy bread', '- Buy apples', '- Buy milk']
+   [R] R8-fr-sans-annonce#2: 'Garage\xa0:' — T1 title≈a bullet
+   [R] R8-fr-sans-annonce#3: 'Garage\xa0:' — T1 title≈a bullet
+   [R] R9-en-duplicate#1: 'Actions to be taken:' — T3 generic
+   [R] R9-en-duplicate#2: 'Tasks to complete:' — T3 generic
+   [R] R9-en-duplicate#3: 'Tasks for the week:' — T3 generic
+   [R] R10-fr-une-idee#1: 'Racheter du café demain matin\xa0:' — T1 title≈a bullet
+   [R] R10-fr-une-idee#2: 'Racheter du café demain matin\xa0:' — T1 title≈a bullet
+   [R] R10-fr-une-idee#3: 'Racheter du café\xa0:' — T1 title≈a bullet
+   screens: T1=22 T2=0 T3=3 T4?=3 (T4 lists every ≤ 2-word bullet; most are items, not fragments)
+   P1, past facts on R1-R5 (every bullet, read by hand):
+           R1-fr-annonce-recap-matin#1: - On a fini la maquette de la page d'accueil | - On a corrigé le bug de connexion | - On a envoyé le devis au client
+           R1-fr-annonce-recap-matin#2: - On a fini la maquette de la page d'accueil | - On a corrigé le bug de connexion | - On a envoyé le devis au client
+           R1-fr-annonce-recap-matin#3: - On a fini la maquette de la page d'accueil | - On a corrigé le bug de connexion | - On a envoyé le devis au client
+           R2-fr-annonce-liste-journee#1: - J'ai réglé au moins trois ou quatre tickets sur le site | - J'ai relu le contrat du fournisseur | - J'ai rangé le garage
+           R2-fr-annonce-liste-journee#2: - J'ai réglé au moins trois ou quatre tickets sur le site | - J'ai relu le contrat du fournisseur | - J'ai rangé le garage
+           R2-fr-annonce-liste-journee#3: - J'ai réglé au moins trois ou quatre tickets sur le site | - J'ai relu le contrat du fournisseur | - J'ai rangé le garage
+           R3-en-announcement-uh#1: - Fixed the login bug | - Updated the docs | - Tested the new build on two phones
+           R3-en-announcement-uh#2: - Fixed the login bug | - Updated the docs | - Tested the new build on two phones
+           R3-en-announcement-uh#3: - Fixed the login bug | - Updated the docs | - Tested the new build on two phones
+           R4-fr-point-journee-passe#1: - Promené le chien le matin | - Emmené la voiture au contrôle technique | - Fait les comptes du mois le soir
+     TASK? R4-fr-point-journee-passe#2: - Promenade du chien le matin | - Emmener la voiture au contrôle technique | - Faire les comptes du mois le soir
+           R4-fr-point-journee-passe#3: - Promenade du chien le matin | - Emmenée la voiture au contrôle technique | - Fait les comptes du mois le soir
+           R5-fr-annonce-recap-soir#1: - Regardé le match | - Fini les restes | - Réparé la lampe du salon du salon
+           R5-fr-annonce-recap-soir#2: - Regardé le match | - Fini les restes | - Réparé la lampe du salon
+           R5-fr-annonce-recap-soir#3: - Regardé le match | - Fini les restes | - Réparé la lampe du salon du salon
+   P2, list items per run (R6, R7 must be ≥ 2; R10 reported):
+     R6-fr-courses-court#1: 4 bullet(s)
+     R6-fr-courses-court#2: 4 bullet(s)
+     R6-fr-courses-court#3: 4 bullet(s)
+     R7-en-short-list#1: 4 bullet(s)
+     R7-en-short-list#2: 4 bullet(s)
+     R7-en-short-list#3: 4 bullet(s)
+     R10-fr-une-idee#1: 1 bullet(s)
+     R10-fr-une-idee#2: 1 bullet(s)
+     R10-fr-une-idee#3: 1 bullet(s)
+
+
+════ Reported, never barred: outcomes by round and set
+
+round     set  runs  noOutput  success  refusedBy
+baseline  N    18    0         18       -
+baseline  S    24    0         24       -
+baseline  M    15    0         15       -
+baseline  L    18    0         18       -
+c3        N    18    0         18       -
+c3        S    24    0         24       -
+c3        M    15    0         15       -
+c3        L    18    0         18       -
+c3        T    270   3         267      -
+c3        R    30    0         30       -
+c6        N    18    0         18       -
+c6        S    24    0         24       -
+c6        M    15    0         15       -
+c6        L    18    1         17       -
+c6        T    270   0         259      grounding=1, language=3, segmentOverlap=7
+c6        R    30    0         30       -
+c7        N    18    0         18       -
+c7        S    24    0         24       -
+c7        M    15    0         15       -
+c7        L    18    0         18       -
+c7        T    270   2         263      segmentOverlap=5
+c7        R    30    0         30       -

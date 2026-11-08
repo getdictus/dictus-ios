@@ -188,7 +188,7 @@ struct SmartModeFanView: View {
     /// ### Why only the highlighted row is blue
     ///
     /// Between #79's visual pass and #399 every enabled row was accent blue. The
-    /// commit that did it was getting the Smart Mode purple out of the keyboard,
+    /// commit that did it was getting the old Smart Mode colour out of the keyboard,
     /// which was right; it took `.primary` with it, which was not. Three blue rows
     /// on three pale capsules read as three chosen things, and the highlight was
     /// left saying "this one" against two neighbours wearing its own colour.

@@ -1,11 +1,11 @@
 // DictusApp/Models/ParakeetCacheRepair.swift
-// Completes a Parakeet cache the loader cannot use, from the app bundle when it can (#558).
+// Completes a Parakeet cache the loader cannot use, before any load (#558).
 import Foundation
 import DictusCore
 import FluidAudio
 
-/// Makes an incomplete Parakeet cache whole again without the network, when the app
-/// bundle carries what is missing.
+/// Moves an old Parakeet cache into the folder FluidAudio 0.15 reads, and says what it
+/// still lacks so the download repair can fetch it.
 ///
 /// WHY THIS EXISTS: FluidAudio 0.15 loads Parakeet v3 with `JointDecisionv3.mlmodelc`
 /// where 0.12 loaded `JointDecision.mlmodelc`. Every install that downloaded Parakeet
@@ -14,34 +14,33 @@ import FluidAudio
 /// fetching it itself (`ModelHub.offlineMode`, set in `DictusApp.init`), and it should
 /// be: that fetch is the silent download #252 removed from the load path.
 ///
-/// Three layers answer it, decided on #558, and they run in this order:
+/// Three layers answered it, decided on #558; two remain, and they run in this order:
 /// - **Layer 0, here, permanent.** FluidAudio 0.15 also renamed the cache folder,
 ///   `parakeet-tdt-0.6b-v3-coreml` to `parakeet-tdt-0.6b-v3`. `migrateLegacyCacheFolder`
 ///   moves a 0.12 cache into the folder 0.15 reads, before anything judges it.
-/// - **Layer 2, here, temporary.** The bundle carries the new joint, byte-identical to
-///   the repository file, and a missing copy is restored from it before any load. The
-///   first launch after the update works offline, with no download at all.
-/// - **Layer 1, permanent.** Whatever the bundle cannot supply is fetched through
-///   `ModelRepoDownloader` by `ModelManager.repairIncompleteModelsIfNeeded`, with
-///   progress on the model card. It covers a user who skips the release carrying the
-///   bundled joint, an interrupted transfer, and the next SDK bump that renames a file.
+/// - **Layer 2, removed in 2.0.0 (#769).** 1.9.0 shipped the new joint in the app bundle
+///   and restored a missing copy from it before any load, so the first launch after that
+///   update worked offline. The resource was temporary and went before the 2.0.0 cut;
+///   `bundledModelBundles` is empty and the copy path below no longer finds anything to do.
+/// - **Layer 1, permanent.** Whatever is missing is fetched through `ModelRepoDownloader`
+///   by `ModelManager.repairIncompleteModelsIfNeeded`, with progress on the model card.
+///   It now covers a user updating from a pre-1.9.0 install (the cache lacks
+///   `JointDecisionv3.mlmodelc`), an interrupted transfer, and the next SDK bump that
+///   renames a file.
 ///
 /// DictusApp only. FluidAudio is not linked into the keyboard extension, and the
 /// extension never loads a model.
 enum ParakeetCacheRepair {
 
-    /// The compiled bundles the app ships for the migration, by name.
+    /// The compiled bundles the app ships for the migration, by name. Empty since 2.0.0.
     ///
-    /// REMOVE BEFORE THE 2.0.0 CUT, with the resource itself. The resource is the folder
-    /// reference `DictusApp/ParakeetMigration/JointDecisionv3.mlmodelc` (12 658 756 bytes,
-    /// fetched from `FluidInference/parakeet-tdt-0.6b-v3-coreml` at revision `7dd20fe`
-    /// and checked byte for byte against the repository's hashes). It exists for 1.8.3,
-    /// the release that moves users from FluidAudio 0.12 to 0.15, which is cut before
-    /// 2.0.0. Removing it means: delete the folder and its `project.pbxproj` entries,
-    /// empty this list, and leave everything else alone. A user who updates straight
-    /// from a pre-1.8.3 build to 2.0.0 then goes through layer 1, which downloads the
-    /// 12.7 MB joint with progress on the card. See `DictusApp/ParakeetMigration/README.md`.
-    static let bundledModelBundles: Set<String> = ["JointDecisionv3.mlmodelc"]
+    /// 1.9.0 carried `JointDecisionv3.mlmodelc` here (12 658 756 bytes, from
+    /// `FluidInference/parakeet-tdt-0.6b-v3-coreml` at revision `7dd20fe`) for the move from
+    /// FluidAudio 0.12 to 0.15 (#558). #769 removed the resource before the 2.0.0 cut, so a
+    /// user who updates from a pre-1.9.0 install goes through layer 1, which downloads the
+    /// 12.7 MB joint with progress on the card. Kept as an empty set rather than deleted so
+    /// the restore path and its callers stay as they are.
+    static let bundledModelBundles: Set<String> = []
 
     /// The Parakeet v3 cache directory FluidAudio loads from.
     static var cacheDirectory: URL {
@@ -123,7 +122,14 @@ enum ParakeetCacheRepair {
         )
     }
 
-    /// Restores from the app bundle every missing entry the bundle carries.
+    /// A list for a log field, `none` when empty.
+    private static func list(_ names: [String]) -> String {
+        names.isEmpty ? "none" : names.joined(separator: ",")
+    }
+
+    /// Runs layer 0, then restores from the app bundle every missing entry the bundle
+    /// carries. Since 2.0.0 the bundle carries nothing (#769), so past layer 0 this only
+    /// reports what is missing.
     ///
     /// Cheap when there is nothing to do, and that is the common case: one directory
     /// check, then four bundle checks. So it runs at launch AND in front of every
@@ -131,17 +137,11 @@ enum ParakeetCacheRepair {
     /// between them and "before any Parakeet load" is the rule the brief states.
     ///
     /// Acts only on a cache that exists. A user who never downloaded Parakeet has no
-    /// directory, and copying 12.7 MB into one would put a partial model on a device
-    /// that asked for none. `downloadParakeetModel` creates the directory before it
-    /// calls this, which is how a fresh download also takes the joint from here.
+    /// directory, and copying into one would put a partial model on a device that asked
+    /// for none.
     ///
     /// - Parameter context: who asked, for the log.
     /// - Returns: what is still missing afterwards, which is what layer 1 has to fetch.
-    /// A list for a log field, `none` when empty.
-    private static func list(_ names: [String]) -> String {
-        names.isEmpty ? "none" : names.joined(separator: ",")
-    }
-
     @discardableResult
     static func restoreFromBundleIfNeeded(context: String, fileManager: FileManager = .default) -> [String] {
         // Layer 0 first, every time: the bundle restore below acts only on a cache that exists
@@ -158,7 +158,10 @@ enum ParakeetCacheRepair {
         sweepStaleStaging(fileManager: fileManager)
 
         let missing = missingEntries(fileManager: fileManager)
-        let restorable = missing.filter { bundledModelBundles.contains($0) }
+        let restorable = ParakeetModelRepository.repairSources(
+            missing: missing,
+            bundledModelBundles: bundledModelBundles
+        ).fromBundle
         guard !restorable.isEmpty else { return missing }
 
         var restored: [String] = []

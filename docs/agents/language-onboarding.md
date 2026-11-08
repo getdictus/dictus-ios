@@ -167,6 +167,10 @@ The compiler enforces exhaustiveness — adding a new `SupportedLanguage` case w
 
 No Xcode project edits are needed: the prompts live in the `DictusCore` SwiftPM target (`path: "Sources/DictusCore"`), which auto-discovers every `.swift` file under it. Just create the file in the `Prompts/` directory and it compiles.
 
+### Lost-word lexicon (optional, measured first)
+
+The `lostWord` guardrail (#575, ADR 0003's 2026-09-24 amendment) refuses a free-polish output that loses a dictated word. It runs on French only: `PolishLostWordsLexicon.lexicon(for:)` returns `nil` for every other language, and the check then passes the output untested. A new language gets it only by adding a lexicon (function words, fillers, spoken numbers, negations, politeness formulas and sign-offs, register pairs) **and** a replay of recorded outputs in that language showing its false-refusal rate — `docs/research/575-normal-polish-damage/harness/replay.py` is the template. Without the measurement, leave it off.
+
 ### Repair prompts
 
 Each language also needs a `PolishRepairPrompt<XX>.swift` (Repair mode, ADR 0002). Repair fires on Parakeet when the language detected on the raw STT output differs from the target — Parakeet ignores the language picker, so a speaker who code-switches can get a transcript in the wrong language, and Repair reconstructs the intent in the target language.

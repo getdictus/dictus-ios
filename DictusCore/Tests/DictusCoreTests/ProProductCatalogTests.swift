@@ -18,7 +18,7 @@ final class ProProductCatalogTests: XCTestCase {
         // Values from the product table in #215.
         XCTAssertEqual(ProProductID.monthly, "solutions.pivi.dictus.pro.monthly")
         XCTAssertEqual(ProProductID.yearly, "solutions.pivi.dictus.pro.yearly")
-        XCTAssertEqual(ProProductID.lifetime, "solutions.pivi.dictus.pro.lifetime")
+        XCTAssertEqual(ProProductID.lifetime, "solutions.pivi.dictus.pro.lifetime2")
     }
 
     func testEveryIdentifierIsRequestedFromStoreKit() {
@@ -61,23 +61,30 @@ final class ProProductCatalogTests: XCTestCase {
         XCTAssertEqual(yearly["recurringSubscriptionPeriod"] as? String, "P1Y")
     }
 
-    func testTrialIsOnTheYearlyPlanOnly() throws {
-        // A non-consumable cannot carry an introductory offer at all, so the
-        // absence below is structural rather than a configuration choice.
+    /// No plan carries a StoreKit free trial (#593, #215 comment of 2026-09-23).
+    ///
+    /// Pro launches with a reverse trial instead, and a user who has just finished two
+    /// free weeks must never be offered "7 more days free" on the end-of-trial paywall.
+    /// This used to pin the 7-day offer on the yearly plan; the local configuration now
+    /// matches the App Store Connect catalogue #215 creates without it.
+    ///
+    /// A non-consumable cannot carry an introductory offer at all, so the lifetime's
+    /// absence is structural rather than a configuration choice.
+    func testNoPlanCarriesAStoreKitFreeTrial() throws {
         let config = try storeKitConfiguration()
-        XCTAssertNotNil(config.subscriptions[ProProductID.yearly]?["introductoryOffer"] as? [String: Any])
+        XCTAssertNil(config.subscriptions[ProProductID.yearly]?["introductoryOffer"] as? [String: Any])
         XCTAssertNil(config.subscriptions[ProProductID.monthly]?["introductoryOffer"] as? [String: Any])
         XCTAssertNil(config.nonConsumables[ProProductID.lifetime]?["introductoryOffer"])
     }
 
     func testPricesMatchThePricingDecision() throws {
-        // #54 revised 2026-08-14: 4,99 € monthly, 39,99 € yearly, 79,99 € lifetime
-        // during the founder window. The lifetime goes to 149,99 € afterwards,
-        // which is an App Store Connect change and never a change to this file.
+        // #54 revised 2026-08-14: 4,99 € monthly, 39,99 € yearly. The lifetime
+        // is 149,99 € on its replacement product `lifetime2` (#892); a later
+        // price move is an App Store Connect change, never a change to this file.
         let config = try storeKitConfiguration()
         XCTAssertEqual(config.subscriptions[ProProductID.monthly]?["displayPrice"] as? String, "4.99")
         XCTAssertEqual(config.subscriptions[ProProductID.yearly]?["displayPrice"] as? String, "39.99")
-        XCTAssertEqual(config.nonConsumables[ProProductID.lifetime]?["displayPrice"] as? String, "79.99")
+        XCTAssertEqual(config.nonConsumables[ProProductID.lifetime]?["displayPrice"] as? String, "149.99")
     }
 
     // MARK: - Founder window

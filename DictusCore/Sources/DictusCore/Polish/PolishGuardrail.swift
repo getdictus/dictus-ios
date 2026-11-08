@@ -53,7 +53,7 @@ public struct PolishLanguageSegmentThresholds: Equatable, Sendable {
 
 /// Runtime sanity check on every polish output.
 ///
-/// Five complementary checks:
+/// Seven complementary checks:
 /// 1. `accepts(raw:polished:mode:)` — character-length ratio. Catches catastrophic
 ///    over- or under-generation (empty output, runaway generation).
 /// 2. `detectedLanguageMatches(polished:target:)` — language detection on the
@@ -73,9 +73,18 @@ public struct PolishLanguageSegmentThresholds: Equatable, Sendable {
 ///    cannot see by construction: a preamble (#466) and a refusal (#349), both of
 ///    them the model writing about its own task in the language it was told to
 ///    write in. Its own type for the same reason check 3 is.
+/// 6. `PolishIncompleteness` — whether the output reports the speaker's memory
+///    failing when the transcript does not (#581, #587). The one sentence a mode that
+///    keeps a speaker-flagged incompleteness has been seen inventing, and one check 4
+///    passes on a long input because a generic sentence shares its ordinary words.
+///    Runs only where the contract asks for it.
+/// 7. `PolishLostWords` — whether a word the speaker dictated is gone from the
+///    output, once the Natural contract's licences are applied (#575). The only check
+///    that sees one replaced word — `preneur` → `prêt` — which moves none of the six
+///    above. Free polish only, French only, short input only.
 public enum PolishGuardrail {
 
-    /// Which of the five refused an output.
+    /// Which of the seven refused an output.
     ///
     /// One `PolishMetrics.Outcome.rejectedGuardrail` covers five questions with five
     /// different answers — the band is mis-sized for the mode, the prompt drifted
@@ -100,6 +109,15 @@ public enum PolishGuardrail {
         case grounding
         case segmentOverlap
         case prefixAlignment
+        /// The output reports the speaker's memory failing and the transcript does
+        /// not (#587). Named apart from `segmentOverlap`, which refuses some of the
+        /// same outputs, so an export counts #581's shape under its own name.
+        case incompleteness
+        /// A word the speaker dictated is gone, and no licence of the Natural contract
+        /// explains it (#575): `je suis preneur` → `je suis prêt`. Named apart from
+        /// every other check because it is the one that answers "the model changed
+        /// what the speaker said" rather than "the model added something".
+        case lostWord
 
         public var description: String { rawValue }
     }
@@ -134,10 +152,14 @@ public enum PolishGuardrail {
     /// The intended failure to catch is the Apple FM chat-reply pattern: target=fr
     /// but the engine emitted English. The char-ratio guardrail misses this when
     /// the chat reply happens to be similar length to the raw input.
+    ///
+    /// `raw`, when given, is the transcript the output was polished from: a segment
+    /// found in it word for word passes the per-segment pass (#861).
     public static func detectedLanguageMatches(polished: String,
                                                target: SupportedLanguage,
+                                               raw: String? = nil,
                                                thresholds: PolishLanguageSegmentThresholds = .default) -> Bool {
-        matches(polished: polished, expectedCode: target.rawValue, thresholds: thresholds)
+        matches(polished: polished, expectedCode: target.rawValue, raw: raw, thresholds: thresholds)
     }
 
     /// Auto-mode variant (#239): there is no target language, but the INPUT's
@@ -151,8 +173,9 @@ public enum PolishGuardrail {
     /// sides share one namespace.
     public static func detectedLanguageMatches(polished: String,
                                                inputLanguageCode: String,
+                                               raw: String? = nil,
                                                thresholds: PolishLanguageSegmentThresholds = .default) -> Bool {
-        matches(polished: polished, expectedCode: inputLanguageCode, thresholds: thresholds)
+        matches(polished: polished, expectedCode: inputLanguageCode, raw: raw, thresholds: thresholds)
     }
 
     /// Shared core: `true` when the output reads as `expectedCode` **as a whole and
@@ -187,15 +210,27 @@ public enum PolishGuardrail {
     /// Apple FM chat reply this guardrail was written for — which has no segment
     /// structure to inspect. The per-segment pass only ever adds rejections; free
     /// polish, which returns one continuous passage, sees no change.
+    ///
+    /// ### A segment the speaker said is never refused (#861)
+    ///
+    /// The per-segment pass refused `It's a folie.` on a French `smart.message`
+    /// dictation (device, 2026-10-29) although the transcript holds it word for word.
+    /// The check exists to catch the model writing in another language; a segment
+    /// copied from the transcript is the speaker's own code-switch, not the model's.
+    /// So a segment found verbatim in `raw` passes before it is read. A segment that
+    /// is not in `raw` is read exactly as before.
     private static func matches(polished: String,
                                 expectedCode: String,
+                                raw: String?,
                                 thresholds: PolishLanguageSegmentThresholds) -> Bool {
         let trimmed = polished.trimmingCharacters(in: .whitespacesAndNewlines)
         guard trimmed.count >= 12 else { return true }
         guard reads(trimmed, as: expectedCode, confidenceFloor: 0.5) else { return false }
         let segments = PolishSegmentation.segments(of: trimmed)
         guard segments.count > 1 else { return true }
+        let spoken = raw.map(verbatimKey)
         return segments.allSatisfy { segment in
+            if let spoken, spoken.contains(verbatimKey(segment)) { return true }
             // A segment too short for the recogniser is not evidence of anything, so
             // it passes untested rather than being guessed at. Every uncertainty in
             // this check resolves toward accepting: a wrong rejection costs a Smart
@@ -203,6 +238,17 @@ public enum PolishGuardrail {
             guard segment.count >= thresholds.minimumSegmentCharacters else { return true }
             return reads(segment, as: expectedCode, confidenceFloor: thresholds.confidenceFloor)
         }
+    }
+
+    /// `text` lower-cased, its whitespace runs collapsed to one space and its typographic
+    /// apostrophe folded, so a segment matches the transcript it was copied from through
+    /// the casing, the French no-break spaces and the `’` the post-pass and the model add.
+    static func verbatimKey(_ text: String) -> String {
+        text.lowercased()
+            .replacingOccurrences(of: "\u{2019}", with: "'")
+            .components(separatedBy: .whitespacesAndNewlines)
+            .filter { !$0.isEmpty }
+            .joined(separator: " ")
     }
 
     /// `true` when `text` reads as `expectedCode`, or when the reading is too weak
@@ -215,6 +261,40 @@ public enum PolishGuardrail {
               top.value >= confidenceFloor else {
             return true
         }
-        return top.key.rawValue == expectedCode
+        return matches(read: top.key.rawValue, expected: expectedCode)
     }
+
+    /// Whether a reading answers the expected language.
+    ///
+    /// Equal codes, or **both inside the continental Scandinavian set** — Danish,
+    /// Norwegian Bokmål, the `no` macrolanguage, and Swedish.
+    ///
+    /// ### Why that exception, and why only that one
+    ///
+    /// Measured on #587's bench, 2026-09-22: a `Structuré` output in correct Danish
+    /// was refused twice on `check=language` because one of its sentences —
+    /// `Jeg tror, jeg kan eksportere loggene, som de er.`, copied verbatim from the
+    /// Danish transcript — reads as **`nb` at 0.993**. Danish and Bokmål are close
+    /// enough in writing that `NLLanguageRecognizer` confidently picks the wrong one
+    /// on an ordinary sentence, so the per-segment check (#413) refuses a faithful
+    /// output. What the user loses is real: since #580 the refusal hands back the raw
+    /// transcript, so a Danish or Norwegian speaker gets no Smart Mode at all on the
+    /// dictations where the misreading lands.
+    ///
+    /// **It is a whitelist of four codes and not a notion of "similar languages".**
+    /// The check's job is catching Apple FM answering in another language — the chat
+    /// reply, the translation drift — and the confusions that matter there are
+    /// between distant languages, which stay refused. Widening this to a general
+    /// similarity rule would reopen exactly the hole #413 closed: Spanish accepted for
+    /// Portuguese, Simplified accepted for Traditional. Nothing outside these four is
+    /// affected, and the cost of the exception is bounded by the same four: a Swedish
+    /// output on a Danish dictation is accepted, and nobody has measured that
+    /// happening.
+    static func matches(read: String, expected: String) -> Bool {
+        if read == expected { return true }
+        return continentalScandinavian.contains(read) && continentalScandinavian.contains(expected)
+    }
+
+    /// Danish, Bokmål, the `no` macrolanguage and Swedish. See `matches(read:expected:)`.
+    private static let continentalScandinavian: Set<String> = ["da", "nb", "no", "sv"]
 }

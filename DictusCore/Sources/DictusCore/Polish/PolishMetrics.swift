@@ -77,6 +77,72 @@ public struct PolishMetrics: Sendable, Codable {
         /// it means *we* read the transcript as a language the model does not
         /// publish, which is a fact about the dictation rather than about the model.
         case unsupportedInputLanguage
+        /// An armed Smart Mode declined the dictation as too short for it, and the
+        /// dictation took the path it takes with nothing armed. Two rules write it:
+        /// an input floor (`Structuré`, #587 round 4; `Résumé`, #650), before the
+        /// engine is asked, and `Liste`'s output check (#573), after the engine
+        /// returned a list of fewer than two items. `SmartModeLengthSkip` says which.
+        /// A voice note whose mode declined its transcript writes the same event
+        /// (#650), so an export tells "skipped" from "never tried" on both surfaces.
+        ///
+        /// Its own outcome rather than a flag on the Normal event that follows: until
+        /// #747 there was no event that followed with the polish toggle off, and the
+        /// first export of this behaviour (2026-09-23) therefore showed a short
+        /// dictation as no event at all. The event that follows is now a
+        /// `skippedToggleOff`, which says nothing about the mode. An outcome is also
+        /// what `outcomes` in the debug export counts, which is the number that answers
+        /// "how often did the mode I armed decline to run".
+        ///
+        /// Distinct from `skippedShort`, which is the **recording-duration** gate on
+        /// the free polish (#141): that one is about how long the user spoke, this one
+        /// about how much they said, and they can fire on different dictations.
+        case smartModeSkippedShortInput
+        /// The polish toggle is off, so no polish was attempted (#747). Written so the
+        /// journal holds every dictation, not only the polished ones: it is the one
+        /// place the engine output and the custom-vocabulary rewrite (#80) are kept as
+        /// text, and a user with polish off used to export an empty file.
+        ///
+        /// Its own outcome rather than `skipped`, which is the gibberish gate *inside*
+        /// a polish that was asked for. A reader of an export has to tell "polish off"
+        /// from "polish ran and fell back", and every count and rate over polish runs
+        /// has to be able to leave these out: nothing ran, nothing was timed
+        /// (`timings` is nil), nothing was refused.
+        case skippedToggleOff
+    }
+
+    /// Why an armed Smart Mode declined a dictation for length (#587), on the event
+    /// that records the skip.
+    ///
+    /// Carries the numbers the decision was made on rather than only the verdict: a
+    /// reader asking whether the rule is right needs to see what it refused, and the
+    /// rule travels with the mode's record, which an export does not hold.
+    ///
+    /// Two rules write it. `Structuré` and `Résumé` decline on the input's length,
+    /// before the model runs, and fill `floor`. `Liste` declines on its output's item
+    /// count, after the model ran (#573, decision 5 amended), and fills `listItems`
+    /// and `minimumListItems` instead. Same event and same outcome either way: from the
+    /// user's side it is one behaviour, the dictation was too short for the mode.
+    public struct SmartModeLengthSkip: Sendable, Codable, Equatable {
+        /// `SmartMode.id` of the mode that declined.
+        public let mode: String
+        /// Characters in the transcript it was handed.
+        public let characters: Int
+        /// The mode's `minimumInputCharacters` at the time, on an input-length skip.
+        /// Optional since #573: an output check has no input floor to report.
+        public let floor: Int?
+        /// `- ` lines in the declined output, on an output check (#573).
+        public let listItems: Int?
+        /// The mode's `minimumListItems` at the time, on an output check (#573).
+        public let minimumListItems: Int?
+
+        public init(mode: String, characters: Int, floor: Int? = nil,
+                    listItems: Int? = nil, minimumListItems: Int? = nil) {
+            self.mode = mode
+            self.characters = characters
+            self.floor = floor
+            self.listItems = listItems
+            self.minimumListItems = minimumListItems
+        }
     }
 
     /// The inputs that decided the polish target, captured per event (#332).
@@ -279,6 +345,10 @@ public struct PolishMetrics: Sendable, Codable {
     /// key means "written before this existed", never "no check fired".
     public let guardrailCheck: PolishGuardrail.Check?
 
+    /// Set on a `smartModeSkippedShortInput` event and nowhere else: which mode
+    /// declined, on how many characters, against which floor (#587).
+    public let smartModeLengthSkip: SmartModeLengthSkip?
+
     public init(engine: String,
                 mode: String?,
                 targetLanguage: SupportedLanguage?,
@@ -292,7 +362,8 @@ public struct PolishMetrics: Sendable, Codable {
                 timings: PolishTimings? = nil,
                 failureReason: PolishFailureReason? = nil,
                 guardrailCheck: PolishGuardrail.Check? = nil,
-                languageResolution: LanguageResolution? = nil) {
+                languageResolution: LanguageResolution? = nil,
+                smartModeLengthSkip: SmartModeLengthSkip? = nil) {
         self.engine = engine
         self.mode = mode
         self.targetLanguage = targetLanguage
@@ -307,6 +378,7 @@ public struct PolishMetrics: Sendable, Codable {
         self.timings = timings
         self.failureReason = failureReason
         self.guardrailCheck = guardrailCheck
+        self.smartModeLengthSkip = smartModeLengthSkip
     }
 
     /// Emit one line for a pre-call context refusal (#270). The metrics event

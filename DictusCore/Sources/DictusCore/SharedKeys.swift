@@ -53,6 +53,11 @@ public enum SharedKeys {
     public static let waveformEnergy = "dictus.waveformEnergy"
     /// Bool flag set by keyboard to request recording stop
     public static let stopRequested = "dictus.stopRequested"
+    /// Double: wall-clock time of the keyboard's stop tap, seconds since 1970 (#862).
+    /// Read and written only through `StopTimingTrace`.
+    public static let stopTapEpoch = "dictus.stopTapEpoch"
+    /// String: the keyboard session id the stop tap above belongs to (#862).
+    public static let stopTapSessionID = "dictus.stopTapSessionID"
     /// Bool flag set by keyboard to request recording cancellation
     public static let cancelRequested = "dictus.cancelRequested"
     /// Double: elapsed recording seconds, updated at ~5Hz during recording
@@ -89,10 +94,39 @@ public enum SharedKeys {
     public static let hapticsEnabled = "dictus.hapticsEnabled"
     /// Whether the user has completed onboarding, default false
     public static let hasCompletedOnboarding = "dictus.hasCompletedOnboarding"
-    /// Current onboarding step index (0-5). Persisted to UserDefaults so the user
-    /// resumes at the right step even after iOS TCC-triggered terminations
-    /// (e.g., when "Allow Full Access" is toggled during keyboard setup).
+    /// LEGACY. The onboarding step as an integer index (0-5) in the flow before #649.
+    /// Since #649 the step is `onboardingStep` below; this key is only read once, by
+    /// `OnboardingStep.current`, to place an install that was mid-onboarding on the old
+    /// numbering, and is removed right after.
     public static let onboardingCurrentPage = "dictus.onboardingCurrentPage"
+    /// Current onboarding step, stored as an `OnboardingStep` raw value (#649). Persisted
+    /// so the user resumes at the right step even after iOS TCC-triggered terminations
+    /// (e.g., when "Allow Full Access" is toggled during keyboard setup).
+    ///
+    /// WHY a name instead of the old index: the index meant a different page every time
+    /// a page was added or removed, so a persisted value had to be reinterpreted on every
+    /// change to the flow. A step name means the same thing for as long as the step exists.
+    public static let onboardingStep = "dictus.onboardingStep"
+    /// Bool: whether the onboarding's Smart Mode pick was confirmed by its Continue during
+    /// the onboarding run in progress (#725). Set by `SmartModePick.commit()`, removed when
+    /// the onboarding finishes. Absent means the pinned list, if any, was not written by
+    /// this run, so the pick opens empty instead of reloading it.
+    /// Read and written only through `SmartModePick`.
+    public static let onboardingSmartModePickCommitted = "dictus.onboardingSmartModePickCommitted"
+    /// The app version this install is up to date with (#685), as a marketing version
+    /// string ("2.0.0"). It gates What's new: an install that completed onboarding and is
+    /// behind `WhatsNew.edition` sees it once. Absent on every install from before 2.0.0,
+    /// which is how an existing user is told apart on the first launch that has the key.
+    /// Read and written only through `WhatsNew`.
+    public static let lastVersionSeen = "dictus.lastVersionSeen"
+    /// The language the user said they speak, as an ISO 639-1 code (#649). Written by the
+    /// onboarding language screen. Can be a language with no Dictus keyboard ("zh").
+    ///
+    /// It is the input the model recommendation needs when the transcription language is
+    /// Auto-detect, the one mode where the settings alone do not say which language comes
+    /// out of the user's mouth. Absent on installs that onboarded before #649, where the
+    /// recommendation falls back to the iPhone's language — see `SpokenLanguage`.
+    public static let spokenLanguage = "dictus.spokenLanguage"
 
     // Text prediction preferences (added for Phase 08)
     /// Whether autocorrect is enabled, default true
@@ -115,11 +149,30 @@ public enum SharedKeys {
     /// to find. Every reader is `#if DEBUG` too, so the constant has no Release caller to
     /// lose.
     public static let debugProEntitlementForced = "dictus.debugProEntitlementForced"
+
+    // Forced Apple Intelligence (DEBUG builds only - see SmartModeAvailability.engineState).
+    /// Bool: when true, the Smart Mode surfaces read Apple Foundation Models as available,
+    /// so a simulator without Apple Intelligence can draw an armable mode (#489's dial
+    /// captures). It forces what the surfaces *show*: a generation still asks the real
+    /// model and fails where it is missing. Inside the conditional for the reason above.
+    public static let debugAppleIntelligenceForced = "dictus.debugAppleIntelligenceForced"
+
+    /// Bool: when true, the keyboard never opens the voice note reader on its own; it
+    /// opens from a tap on ☰ only (#637 decision 3, #639). Absent reads false,
+    /// the default "auto-open". Exists for one device comparison between the two
+    /// behaviours; the losing branch and this key are deleted in a follow-up. Inside
+    /// the conditional for `debugProEntitlementForced`'s reason.
+    public static let debugVoiceNoteAutoOpenDisabled = "dictus.debugVoiceNoteAutoOpenDisabled"
     #endif
 
     // Live Activity preference
     /// Whether Live Activity (Dynamic Island + Lock Screen) is enabled, default true
     public static let liveActivityEnabled = "dictus.liveActivityEnabled"
+
+    // Inactivity timeout (issue #380)
+    /// Raw value of `WarmEngineTimeoutOption`: how long the warm audio engine waits after
+    /// a dictation before releasing. Missing means the 10-minute default.
+    public static let warmEngineTimeout = "dictus.warmEngineTimeout"
 
     // Post-STT polish (issue #141)
     /// Whether the polish layer runs between STT final output and App Group write, default false.
@@ -196,6 +249,11 @@ public enum SharedKeys {
     public static let handoffToken = "dictus.handoffToken"
     /// String: the token the keyboard echoes beside `lastPolishedTranscription`.
     public static let lastPolishedHandoffToken = "dictus.lastPolishedHandoffToken"
+    /// String: the text of the last keyboard dictation the document refused, until the
+    /// user opens it in DictusApp or starts another dictation (#860). Read and written
+    /// only through `RecoveredTranscriptionChannel`; the keyboard's banner is drawn
+    /// from it.
+    public static let recoveredTranscription = "dictus.recoveredTranscription"
 
     // MARK: - Smart Modes (issue #79)
     /// String: identifier of the armed Smart Mode, or absent for Normal. Sticky —
@@ -304,6 +362,58 @@ public enum SharedKeys {
     public static let historyEnabled = "dictus.historyEnabled"
     /// Bool: per-feature toggle for Vocabulary. Seeded like `smartModeEnabled` above.
     public static let vocabularyEnabled = "dictus.vocabularyEnabled"
+    /// [String]: folded spellings the user dismissed from the vocabulary suggestions
+    /// (#512). Read and written only through `VocabularySuggestionIgnoreList`.
+    public static let vocabularySuggestionsIgnored = "dictus.vocabularySuggestionsIgnored"
+    /// Bool: per-feature toggle for shared voice notes (#620). Seeded like
+    /// `smartModeEnabled` above, and read by the share extension.
+    public static let voiceNotesEnabled = "dictus.voiceNotesEnabled"
+
+    // MARK: - Shared voice notes (#620)
+    /// String: the language a shared voice note is transcribed in — "auto" or a
+    /// `SupportedLanguage` raw value. Absent reads as "auto". See `VoiceNoteSettings`.
+    public static let voiceNoteLanguage = "dictus.voiceNoteLanguage"
+    /// String: what runs on the transcript when the result opens — "none" or a Smart
+    /// Mode identifier. Absent reads as `Résumé`. See `VoiceNoteSettings`.
+    public static let voiceNoteMode = "dictus.voiceNoteMode"
+    /// Bool: whether a Live Activity was running when DictusApp last took a voice note
+    /// from the inbox, so the share extension can say where progress will be shown.
+    public static let voiceNoteAcceptedWithActivity = "dictus.voiceNoteAcceptedWithActivity"
+    /// Bool: whether the user has ever opened the keyboard's voice note reader with a
+    /// tap on ☰ (#639). Arms the toolbar hint that teaches where the panel went: a
+    /// user who has met the new tap is the one who needs telling. Set once, never
+    /// cleared. See `MenuPanelDiscovery`.
+    public static let voiceNoteReaderOpenedByTap = "dictus.voiceNoteReaderOpenedByTap"
+    /// Bool: whether the user has ever opened the keyboard panel with a long press on
+    /// ☰ (#639). Retires that hint. Set once and never cleared, `smartModeGestureUsed`'s
+    /// reasoning. See `MenuPanelDiscovery`.
+    public static let menuLongPressUsed = "dictus.menuLongPressUsed"
+
+    // MARK: - Reverse trial (#593)
+    /// Double (seconds since 1970): when the reverse trial started. The App Group
+    /// **mirror** of a record whose source of truth is the Keychain; see
+    /// `ProTrialStore`. Absent when no trial was ever granted.
+    public static let proTrialStartedAt = "dictus.proTrialStartedAt"
+    /// Double (seconds since 1970): when the reverse trial ends. Mirrored beside
+    /// `proTrialStartedAt`, and what the keyboard reads to agree with the app.
+    public static let proTrialEndsAt = "dictus.proTrialEndsAt"
+    /// Bool: the end-of-trial paywall has been shown. It is shown once (#593).
+    public static let proTrialEndPaywallShown = "dictus.proTrialEndPaywallShown"
+    /// Bool: the launch reconcile restored, into an empty App Group, a trial that had
+    /// already ended (a reinstall). Its end-of-trial paywall is the ordinary one (#837).
+    public static let proTrialEndedBeforeInstall = "dictus.proTrialEndedBeforeInstall"
+    /// Int: Smart Mode dictations that succeeded while the trial ran. Written by
+    /// whichever process ran the mode, read by the end-of-trial recap.
+    public static let proTrialSmartModeUses = "dictus.proTrialSmartModeUses"
+    /// Int: words the custom vocabulary rewrote while the trial ran.
+    public static let proTrialVocabularyFixes = "dictus.proTrialVocabularyFixes"
+
+    // MARK: - Dictation tally (#726)
+    /// [String: [String: Int]]: words dictated and seconds of audio, per local day
+    /// (`"2026-10-20"` → `["words": 312, "audioSeconds": 140]`). Every user, Pro or
+    /// not, from the first dictation on 2.0.0. Integers only, never text. See
+    /// `DictationTally`.
+    public static let dictationTally = "dictus.dictationTally"
 
     // MARK: - Retired keys
     /// The #357 probe's arming flag, removed with the probe in #361. Kept as a

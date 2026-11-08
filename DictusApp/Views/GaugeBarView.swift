@@ -16,7 +16,11 @@ struct GaugeBarView: View {
     /// Score value from 0.0 (empty) to 1.0 (full).
     let value: Double
     /// Label displayed above the gauge (e.g. "Accuracy", "Speed").
-    let label: String
+    ///
+    /// WHY `LocalizedStringKey` and not `String` (issue #661): `Text(String)` shows
+    /// the string verbatim, so the literals passed here never reached the string
+    /// catalog and a French iPhone read "Accuracy" and "Speed".
+    let label: LocalizedStringKey
     /// Color for filled segments.
     let color: Color
     /// Number of segments in the gauge bar.

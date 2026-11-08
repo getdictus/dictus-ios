@@ -5,6 +5,7 @@ import NaturalLanguage
 /// Orchestrates the polish layer:
 /// 1. Honour the global toggle (`SharedKeys.polishEnabled`) — unless a Smart Mode
 ///    is armed, which is a narrower and later instruction (#79, `PolishGatePolicy`).
+///    A dictation the toggle stops is still recorded (#747).
 /// 2. Branch on the resolved prompt selection (#239): per-language path for
 ///    follow/explicit modes, language-agnostic auto path for Auto-detect.
 /// 3. Detect the language of the raw STT output via `NLLanguageRecognizer`;
@@ -64,13 +65,30 @@ public final class PolishService {
     /// the keyboard writes `PolishAvailabilityChannel` and raises its toolbar notice.
     private let onBecameUnavailable: (() -> Void)?
 
-    public init(sink: PolishEventSink, onBecameUnavailable: (() -> Void)? = nil) {
+    /// The engine every call uses instead of the availability rule, and the clock the
+    /// declined-list budget reads. Both exist for the test seam below and nothing else:
+    /// production leaves the engine nil and the clock on `Date.init`.
+    private var fixedEngine: PolishEngineProtocol?
+    private var now: () -> Date = Date.init
+
+    /// `appState` names the caller's application state in the `translateEngineCall` log
+    /// line (#648); the keyboard extension, which has none, keeps the default.
+    /// `translationBudget` is how long Translate may wait on the Translation framework in
+    /// this process: the keyboard's flat 8 s by default, DictusApp's scaled one there.
+    public init(sink: PolishEventSink,
+                onBecameUnavailable: (() -> Void)? = nil,
+                translationBudget: TranslationTimeBudget = .keyboard,
+                appState: @escaping @Sendable () async -> String = { "extension" }) {
         self.defaults = AppGroup.defaults
         self.sink = sink
         self.onBecameUnavailable = onBecameUnavailable
         #if canImport(FoundationModels)
         if #available(iOS 26.0, macOS 26.0, *) {
-            self.appleFMEngine = AppleFoundationModelsPolishEngine()
+            // Translate runs on Apple's Translation framework, with this Apple FM engine
+            // as its fallback; every other task goes straight through (#648).
+            self.appleFMEngine = TranslateRoutingPolishEngine(
+                wrapping: AppleFoundationModelsPolishEngine(), budget: translationBudget, appState: appState
+            )
         } else {
             self.appleFMEngine = nil
         }
@@ -79,10 +97,21 @@ public final class PolishService {
         #endif
     }
 
+    /// A service on a fixed engine and clock (PR #629 review). Internal, reached from
+    /// the test target through `@testable import`: the declined-list path decides on
+    /// elapsed time and on what the engine returned, and neither can be produced on
+    /// demand from Apple Intelligence.
+    convenience init(sink: PolishEventSink, engine: PolishEngineProtocol, now: @escaping () -> Date) {
+        self.init(sink: sink)
+        self.fixedEngine = engine
+        self.now = now
+    }
+
     /// Resolve the engine for this call. Re-checked on every `polish()` so a
     /// late availability flip (model finishes downloading, user toggles Apple
     /// Intelligence on) takes effect without an app relaunch.
     private var activeEngine: PolishEngineProtocol {
+        if let fixedEngine { return fixedEngine }
         if let appleFMEngine, PolishAvailability.isAppleFMAvailable {
             return appleFMEngine
         }
@@ -124,11 +153,20 @@ public final class PolishService {
         // a warm-up is not a dictation. Warming the session of a mode that turns out
         // to be unrunnable costs nothing — the engine only exists where the SDK does,
         // and the dictation resolves the mode again from scratch.
-        let task = SmartModeStore.armedMode.map(PolishTask.smart)
+        let armedTask = SmartModeStore.armedMode.map(PolishTask.smart)
         guard PolishGatePolicy.runsDespiteToggle(
-            task: task ?? .natural,
+            task: armedTask ?? .natural,
             polishEnabled: defaults.bool(forKey: SharedKeys.polishEnabled)
         ) else { return }
+        let policy = TranscriptionLanguagePolicy.snapshot()
+        // A mode's worked examples follow the transcript's language (#587), and there
+        // is no transcript yet. A forced transcription language is the one thing known
+        // in advance, so it warms the matching prompt; otherwise the fallback is warmed,
+        // and a dictation in another language pays for a cold session rather than
+        // being sent the wrong examples (the engine keys its cache on the prompt).
+        let task = armedTask?.resolvingExamples(
+            forTranscriptLanguage: PolishJob.transcriptLanguageCode(mode: policy.mode, detectedCode: nil)
+        )
         // Resolve the prompt selection through the language policy
         // (#226/#239/#332): explicit mode targets the language the user chose,
         // not the keyboard one; Auto mode warms the language-agnostic auto
@@ -138,8 +176,7 @@ public final class PolishService {
         // its own — and passes an undetermined language mix, since there is no
         // transcript yet. A stale warm target is harmless: prewarm is
         // best-effort, and `polish()` resolves the real target from scratch.
-        let selection = TranscriptionLanguagePolicy.snapshot()
-            .polishPromptSelection(languageMix: .undetermined)
+        let selection = policy.polishPromptSelection(languageMix: .undetermined)
         Task {
             switch selection {
             case .language(let target):
@@ -153,6 +190,9 @@ public final class PolishService {
     /// Polish raw STT output. Returns `raw` unchanged when the toggle is off, when
     /// language detection skips, when the engine throws/cancels, or when the
     /// guardrail rejects the output.
+    ///
+    /// Every call writes at least one journal event, the toggle-off one included
+    /// (`skippedToggleOff`, #747).
     ///
     /// `languagePolicy` is the per-dictation snapshot captured by
     /// DictationCoordinator at transcription start (#226). It carries the STT
@@ -185,11 +225,82 @@ public final class PolishService {
                        recordingDuration: TimeInterval,
                        engineRaw: String? = nil,
                        onEngineWillRun: (() -> Void)? = nil) async -> PolishOutcome {
+        // A mode with a length floor declines below it, and declining is not failing
+        // (#587, round 4): the dictation continues exactly as if nothing were armed —
+        // Normal polish when the toggle is on, the raw text otherwise.
+        //
+        // Two things happen around that, and both are answers to what the first device
+        // round of this behaviour showed. The user is **told**, through the same
+        // `SmartModeFailure` channel every other did-not-run sentence takes: someone who
+        // armed `Structuré` and receives plain text cannot otherwise tell a deliberate
+        // skip from a broken mode. And the skip is **recorded as its own event**, here,
+        // before the delegated call — with the toggle off that call writes nothing at
+        // all, which is why Pierre's 2026-09-23 export showed his short dictation as no
+        // event whatsoever.
+        // When the keyboard's stage watchdog started, to within the call's own latency:
+        // it is armed right before this method is called. #573's declined list checks
+        // the remaining budget against it before any second model call.
+        let polishStart = now()
+        let call = PolishCall(raw: raw, languagePolicy: languagePolicy,
+                              recordingDuration: recordingDuration, engineRaw: engineRaw)
+        if let armed = smartMode, !armed.runs(onInputOfLength: raw.count) {
+            return await skipForShortInput(armed, request: call, onEngineWillRun: onEngineWillRun)
+        }
+        let outcome = await polishDispatched(call, smartMode: smartMode, onEngineWillRun: onEngineWillRun)
+        guard let armed = smartMode, let failure = outcome.smartModeFailure,
+              failure.reason == Self.tooFewListItemsReason else { return outcome }
+        return await replaceDeclinedList(armed, outcome: outcome, failure: failure, call: call,
+                                         elapsed: now().timeIntervalSince(polishStart))
+    }
+
+    /// The `SmartModeFailure.reason` a path returns when #573's output check declined a
+    /// one-item list. The path has already recorded the event; `polish` only chooses
+    /// what replaces the output.
+    static let tooFewListItemsReason = "tooFewListItems"
+
+    /// What a declined `Liste` output is replaced with (#573, decision 5 amended).
+    ///
+    /// Normal polish when it can finish inside the keyboard's watchdog, the
+    /// deterministic floor the path already computed otherwise — see
+    /// `SmartModeListCheck.secondCallFits` for why the second call is gated at all
+    /// (PR #629 review, finding 1: an overrun loses the dictation). Either way the
+    /// outcome keeps the `smartModeSkippedShortInput` failure, so the keyboard shows
+    /// "Trop court pour une liste".
+    private func replaceDeclinedList(_ mode: SmartMode,
+                                     outcome: PolishOutcome,
+                                     failure: SmartModeFailure,
+                                     call: PolishCall,
+                                     elapsed: TimeInterval) async -> PolishOutcome {
+        let floor = outcome.text ?? call.raw
+        guard SmartModeListCheck.secondCallFits(elapsed: elapsed, characters: call.raw.count) else {
+            PersistentLog.log(.smartModeSkipped(
+                mode: mode.id,
+                reason: "\(Self.tooFewListItemsReason) floorInserted elapsedMs=\(Int(elapsed * 1000))",
+                disarmed: false
+            ))
+            return PolishOutcome(degradedTo: floor, failure: failure, engineMs: outcome.engineMs)
+        }
+        // `onEngineWillRun` is not passed on: the stage it announces was announced for
+        // the mode's call, and the Normal polish that replaces it is the same wait.
+        let normal = await polishDispatched(call, smartMode: nil, onEngineWillRun: nil)
+        // The mode's own engine time, plus the Normal call's: both ran for this outcome.
+        let engineMs = (outcome.engineMs ?? 0) + (normal.engineMs ?? 0)
+        return PolishOutcome(degradedTo: normal.text ?? floor, failure: failure, engineMs: engineMs)
+    }
+
+    /// Everything `polish` did before #573's output check, unchanged: the toggle gate,
+    /// detection, and the branch to one of the two paths.
+    private func polishDispatched(_ call: PolishCall,
+                                  smartMode: SmartMode?,
+                                  onEngineWillRun: (() -> Void)?) async -> PolishOutcome {
+        let (raw, languagePolicy, recordingDuration, engineRaw) =
+            (call.raw, call.languagePolicy, call.recordingDuration, call.engineRaw)
         let task = smartMode.map(PolishTask.smart)
         guard PolishGatePolicy.runsDespiteToggle(
             task: task ?? .natural,
             polishEnabled: defaults.bool(forKey: SharedKeys.polishEnabled)
         ) else {
+            await recordToggleOff(call)
             return PolishOutcome(text: raw)
         }
 
@@ -298,6 +409,14 @@ public final class PolishService {
         /// leading language decides whether the polish has anything to repair.
         let detected: SupportedLanguage?
 
+        /// Which language's worked examples a Smart Mode shows (#587): the forced
+        /// transcription language, else the mix's leader, else the whole-blob reading.
+        var transcriptLanguageCode: String? {
+            PolishJob.transcriptLanguageCode(
+                mode: languagePolicy.mode, detectedCode: languageMix.dominantCode ?? detectedCode
+            )
+        }
+
         /// The armed Smart Mode as a task, when there is one. Nil means the free
         /// polish, and each path resolves its own prompt variant.
         var smartTask: PolishTask? { smartMode.map(PolishTask.smart) }
@@ -325,7 +444,14 @@ public final class PolishService {
         // `resolvedOutput` only withholds text for a Smart Mode, and only degrades
         // for one, so anything else is a plain success or a free-polish floor.
         guard let mode = job.task.smartMode, bundle.outcome != .success else {
-            return PolishOutcome(text: returned ?? raw)
+            // A Smart Mode that delivered is one line of the end-of-trial recap
+            // (#593). Counted here because both processes run this, and it is the
+            // one place a mode's success is known as such; the counter itself
+            // decides whether a trial is running.
+            // A one-item `Liste` output declined by #573's check never reaches this
+            // line: the path returns before it, so it is not counted as a use.
+            if job.task.smartMode != nil { ProTrialUsage.recordSmartModeUse() }
+            return PolishOutcome(text: returned ?? raw, engineMs: bundle.engineMs)
         }
         let reason = bundle.failureReason?.slug ?? "-"
         let degraded = PolishPipeline.degradesToFloor(mode, outcome: bundle.outcome)
@@ -359,8 +485,8 @@ public final class PolishService {
             reason: degraded ? "\(reason)|degraded" : reason,
             check: failure.guardrailCheck ?? "-"
         ))
-        guard degraded, let returned else { return PolishOutcome(failure: failure) }
-        return PolishOutcome(degradedTo: returned, failure: failure)
+        guard degraded, let returned else { return PolishOutcome(failure: failure, engineMs: bundle.engineMs) }
+        return PolishOutcome(degradedTo: returned, failure: failure, engineMs: bundle.engineMs)
     }
 
     // MARK: - Per-language path
@@ -490,7 +616,8 @@ public final class PolishService {
             // What the pipeline's input-language pre-flight judges (#490). The whole
             // mix, not the leader: it answers "is any of this readable", and the
             // measurement is already in hand.
-            inputLanguageCodes: request.languageMix.countedCodes
+            inputLanguageCodes: request.languageMix.countedCodes,
+            transcriptLanguageCode: request.transcriptLanguageCode
         )
 
         // Resolve the engine for this call — see `activeEngine` doc-comment.
@@ -525,17 +652,20 @@ public final class PolishService {
         // polish falls back to the deterministic floor, never the literal raw (#185),
         // and a Smart Mode falls back to nothing at all (#79) — see
         // `PolishPipeline.resolvedOutput`.
-        let returned = PolishPipeline.resolvedOutput(bundle, preprocessed: preprocessed, job: job)
+        let list = checkList(bundle, preprocessed: preprocessed, job: job, engine: currentEngine, raw: raw)
+        let returned = list.returned
 
         let m = PolishMetrics(
-            engine: currentEngine.identifier,
+            // The engine that wrote the output, not the one called (#648): Translate
+            // runs on the Translation framework and falls back to Apple FM.
+            engine: bundle.producedBy ?? currentEngine.identifier,
             mode: job.task.identifier,
             targetLanguage: target,
             detectedLanguage: request.detectedCode,
             rawCharCount: raw.count,
             polishedCharCount: returned?.count ?? 0,
             latencyMs: totalMs,
-            outcome: bundle.outcome,
+            outcome: list.decline == nil ? bundle.outcome : .smartModeSkippedShortInput,
             sttEngine: sttEngine.rawValue,
             sttModelID: sttModelID,
             timings: PolishTimings(
@@ -545,9 +675,11 @@ public final class PolishService {
             ),
             failureReason: bundle.failureReason,
             guardrailCheck: bundle.rejectedCheck,
-            languageResolution: resolution
+            languageResolution: resolution,
+            smartModeLengthSkip: list.decline
         )
         await emit(m, raw: raw, engineRaw: request.engineRaw, polished: bundle.engineOutput)
+        if let declined = list.declinedOutcome { return declined }
 
         return finalOutcome(
             returned: returned, bundle: bundle, job: job, raw: raw,
@@ -634,7 +766,8 @@ public final class PolishService {
             task: request.smartTask ?? .auto,
             promptLanguage: contextLanguage,
             languageAgnosticPath: true,
-            inputLanguageCodes: request.languageMix.countedCodes
+            inputLanguageCodes: request.languageMix.countedCodes,
+            transcriptLanguageCode: request.transcriptLanguageCode
         )
         let currentEngine = activeEngine
         supersedeInflight()
@@ -655,10 +788,12 @@ public final class PolishService {
         clearInflight(inflightTask)
         recordAvailability(bundle, engine: currentEngine)
         let totalMs = Int(Date().timeIntervalSince(methodStart) * 1000)
-        let returned = PolishPipeline.resolvedOutput(bundle, preprocessed: preprocessed, job: job)
+        let list = checkList(bundle, preprocessed: preprocessed, job: job, engine: currentEngine, raw: raw)
+        let returned = list.returned
         let m = autoEventMetrics(
-            outcome: bundle.outcome, request: request, finalCount: returned?.count ?? 0,
-            engineID: currentEngine.identifier,
+            outcome: list.decline == nil ? bundle.outcome : .smartModeSkippedShortInput,
+            request: request, finalCount: returned?.count ?? 0,
+            engineID: bundle.producedBy ?? currentEngine.identifier,
             mode: job.task.identifier, detectedLanguage: request.detectedCode,
             latencyMs: totalMs,
             timings: PolishTimings(
@@ -667,9 +802,11 @@ public final class PolishService {
                 postprocessMs: bundle.postprocessMs
             ),
             failureReason: bundle.failureReason,
-            guardrailCheck: bundle.rejectedCheck
+            guardrailCheck: bundle.rejectedCheck,
+            smartModeLengthSkip: list.decline
         )
         await emit(m, raw: raw, engineRaw: request.engineRaw, polished: bundle.engineOutput)
+        if let declined = list.declinedOutcome { return declined }
         return finalOutcome(
             returned: returned, bundle: bundle, job: job, raw: raw,
             detectedLanguage: request.languageMix.dominantCode ?? request.detectedCode
@@ -700,7 +837,8 @@ public final class PolishService {
                                   timings: PolishTimings =
                                       PolishTimings(preprocessMs: 0, engineMs: 0, postprocessMs: 0),
                                   failureReason: PolishFailureReason? = nil,
-                                  guardrailCheck: PolishGuardrail.Check? = nil
+                                  guardrailCheck: PolishGuardrail.Check? = nil,
+                                  smartModeLengthSkip: PolishMetrics.SmartModeLengthSkip? = nil
     ) -> PolishMetrics {
         PolishMetrics(
             engine: engineID,
@@ -718,8 +856,62 @@ public final class PolishService {
             guardrailCheck: guardrailCheck,
             languageResolution: PolishMetrics.LanguageResolution(
                 policy: request.languagePolicy, mix: request.languageMix
-            )
+            ),
+            smartModeLengthSkip: smartModeLengthSkip
         )
+    }
+
+    // MARK: - #573's output check, shared by both paths
+
+    /// What a path does with its engine result once #573's list check has run.
+    private struct ListCheckResult {
+        /// The text to insert on acceptance: the output with normalised list markers.
+        let returned: String?
+        /// Set when a one-item list was declined, and recorded on the path's event in
+        /// place of `success`, so a discarded output is never counted as delivered
+        /// (PR #629 review, finding 3).
+        let decline: PolishMetrics.SmartModeLengthSkip?
+        /// What the path returns instead of `finalOutcome` on a decline: the
+        /// deterministic floor, with the failure the keyboard turns into the notice.
+        let declinedOutcome: PolishOutcome?
+    }
+
+    /// Run `SmartModeListCheck` on a successful transformation. Only a delivered
+    /// output of a mode with `minimumListItems`, from an engine that generates, is
+    /// judged; every other result passes through untouched.
+    private func checkList(_ bundle: PolishPipeline.Result,
+                           preprocessed: String,
+                           job: PolishJob,
+                           engine: PolishEngineProtocol,
+                           raw: String) -> ListCheckResult {
+        let returned = PolishPipeline.resolvedOutput(bundle, preprocessed: preprocessed, job: job)
+        guard let mode = job.task.smartMode, bundle.outcome == .success, let output = returned else {
+            return ListCheckResult(returned: returned, decline: nil, declinedOutcome: nil)
+        }
+        switch SmartModeListCheck.evaluate(output, mode: mode, engineIsModel: engine.announcesProcessingStage) {
+        case .accept(let text):
+            return ListCheckResult(returned: text, decline: nil, declinedOutcome: nil)
+        case .decline(let items, let minimum):
+            PersistentLog.log(.smartModeSkipped(
+                mode: mode.id,
+                reason: "\(Self.tooFewListItemsReason) items=\(items) minimum=\(minimum)",
+                disarmed: false
+            ))
+            let failure = SmartModeFailure(
+                modeIdentifier: mode.id,
+                modeDisplayName: mode.displayName,
+                outcome: PolishMetrics.Outcome.smartModeSkippedShortInput.rawValue,
+                reason: Self.tooFewListItemsReason
+            )
+            let floor = PolishPipeline.deterministicFloor(preprocessed: preprocessed, job: job)
+            return ListCheckResult(
+                returned: nil,
+                decline: PolishMetrics.SmartModeLengthSkip(
+                    mode: mode.id, characters: raw.count, listItems: items, minimumListItems: minimum
+                ),
+                declinedOutcome: PolishOutcome(degradedTo: floor, failure: failure, engineMs: bundle.engineMs)
+            )
+        }
     }
 
     // MARK: - Serialisation (#361 decisions 10 and 15)
@@ -800,6 +992,114 @@ public final class PolishService {
             consecutiveRefusals: PolishAvailabilityGate.consecutiveRefusalsBeforeUnavailable
         ))
         onBecameUnavailable?()
+    }
+
+    /// What `polish` was called with, for the dispatch and the skip path to pass along
+    /// unchanged. Named for the skip until #573 made the dispatch a second reader.
+    /// Grouped for the reason `Request` below is grouped: four values with no type
+    /// distinction between them, and a fixed argument order is how the wrong one ends
+    /// up in the wrong slot.
+    private struct PolishCall {
+        let raw: String
+        let languagePolicy: TranscriptionLanguagePolicy
+        let recordingDuration: TimeInterval
+        let engineRaw: String?
+    }
+
+    /// Record that `mode` declined `raw` for being under its `minimumInputCharacters`,
+    /// without running anything: the persistent log line and the
+    /// `smartModeSkippedShortInput` metrics event, with the length and the floor.
+    ///
+    /// ### Why this is public (#650)
+    ///
+    /// `polish` writes it on its own short-input branch, below. The voice note result
+    /// card decides the same question **before** calling `polish`, because a voice note
+    /// whose mode declined shows its transcript alone, and calling `polish` anyway would
+    /// spend a Normal polish on a text nobody reads. Before #650 that early return wrote
+    /// nothing at all, so a 7-second note that never ran its mode left no trace in the
+    /// export, and "skipped" could not be told from "never tried". The card now calls
+    /// this, and the event is byte for byte the keyboard's.
+    public func recordSkippedForLength(_ mode: SmartMode, raw: String, engineRaw: String? = nil) async {
+        let floor = mode.minimumInputCharacters ?? 0
+        PersistentLog.log(.smartModeSkipped(
+            mode: mode.id, reason: "shortInput chars=\(raw.count) floor=\(floor)", disarmed: false
+        ))
+        await emit(
+            PolishMetrics(
+                engine: activeEngine.identifier,
+                mode: PolishTask.smart(mode).identifier,
+                targetLanguage: nil,
+                detectedLanguage: PolishPipeline.detectLanguageCode(in: raw),
+                rawCharCount: raw.count,
+                polishedCharCount: raw.count,
+                latencyMs: 0,
+                outcome: .smartModeSkippedShortInput,
+                smartModeLengthSkip: PolishMetrics.SmartModeLengthSkip(
+                    mode: mode.id, characters: raw.count, floor: floor
+                )
+            ),
+            raw: raw, engineRaw: engineRaw, polished: nil
+        )
+    }
+
+    /// Record a dictation the polish toggle stopped (#747), so the journal holds it.
+    ///
+    /// Without this the toggle-off path wrote nothing, and a user who keeps polish off
+    /// exported an empty journal: the engine output and the vocabulary rewrite (#80)
+    /// are kept as text nowhere else, the debug log being counts only.
+    ///
+    /// Nothing is measured that the dictation did not already pay for. No language
+    /// detection, no timings (nil, not zero: nothing ran, so nothing was timed), no
+    /// mode and no target, because no task was chosen. `polished` is nil, which is
+    /// what the entry already means by "the engine produced no output". The policy
+    /// snapshot is in hand, so the event still says which STT model and which
+    /// language settings produced the text.
+    private func recordToggleOff(_ call: PolishCall) async {
+        let policy = call.languagePolicy
+        await emit(
+            PolishMetrics(
+                engine: activeEngine.identifier,
+                mode: nil,
+                targetLanguage: nil,
+                detectedLanguage: nil,
+                rawCharCount: call.raw.count,
+                polishedCharCount: call.raw.count,
+                latencyMs: 0,
+                outcome: .skippedToggleOff,
+                sttEngine: policy.engine.rawValue,
+                sttModelID: policy.modelIdentifier,
+                languageResolution: PolishMetrics.LanguageResolution(policy: policy)
+            ),
+            raw: call.raw, engineRaw: call.engineRaw, polished: nil
+        )
+    }
+
+    /// Record the skip, then run the dictation as if nothing were armed (#587).
+    /// `Liste`'s output check (#573) records its own decline in `checkList` and
+    /// replaces the output in `replaceDeclinedList`; it does not come through here.
+    ///
+    /// The returned outcome carries the text of that run **and** a `SmartModeFailure`,
+    /// which is what `isDegraded` already means everywhere else: text was inserted and
+    /// the mode did not run. The keyboard's toolbar says so in one sentence.
+    private func skipForShortInput(_ mode: SmartMode,
+                                   request: PolishCall,
+                                   onEngineWillRun: (() -> Void)?) async -> PolishOutcome {
+        let raw = request.raw
+        await recordSkippedForLength(mode, raw: raw, engineRaw: request.engineRaw)
+        let outcome = await polish(
+            raw: raw, languagePolicy: request.languagePolicy, smartMode: nil,
+            recordingDuration: request.recordingDuration, engineRaw: request.engineRaw,
+            onEngineWillRun: onEngineWillRun
+        )
+        return PolishOutcome(
+            degradedTo: outcome.text ?? raw,
+            failure: SmartModeFailure(
+                modeIdentifier: mode.id,
+                modeDisplayName: mode.displayName,
+                outcome: PolishMetrics.Outcome.smartModeSkippedShortInput.rawValue,
+                reason: "shortInput"
+            )
+        )
     }
 
     /// Log one metrics event and hand it to whichever sink this process owns.

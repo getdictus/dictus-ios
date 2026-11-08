@@ -25,6 +25,10 @@ public struct ModelInfo: Identifiable {
     public var id: String { identifier }
 
     public let identifier: String
+
+    /// English name, unlocalized: DictusCore ships no string catalog. The app shows
+    /// `localizedDisplayName` (DictusApp), which translates the qualifier in
+    /// "Small (Quantized)" and "Turbo (Legacy)" and falls back to this (issue #665).
     public let displayName: String
 
     /// Total bytes the downloader will pull for this model. See the measurement
@@ -42,7 +46,26 @@ public struct ModelInfo: Identifiable {
     /// `ModelManager.updateDownloadProgress` does for the `mbTotal` it logs and
     /// for the MB counter under the progress bar, so the size promised on the
     /// card and the total counted during the download print the same number.
-    public var sizeLabel: String { "~\(sizeBytes / 1_000_000) MB" }
+    ///
+    /// WHY the unit goes through a formatter (issue #661): a hard-coded "MB"
+    /// showed on French iPhones, where the unit is "Mo". The figure stays the
+    /// truncated one above; only the unit and its spacing follow the locale.
+    public var sizeLabel: String { sizeLabel(locale: .autoupdatingCurrent) }
+
+    /// `sizeLabel` rendered for an explicit locale. Tests pin the locale through
+    /// this, since `swift test` runs in whatever locale the Mac is set to.
+    public func sizeLabel(locale: Locale) -> String {
+        let formatter = MeasurementFormatter()
+        formatter.locale = locale
+        // `.providedUnit` keeps megabytes even where the formatter would pick GB.
+        formatter.unitOptions = .providedUnit
+        formatter.unitStyle = .medium
+        formatter.numberFormatter.maximumFractionDigits = 0
+        // No grouping, to match the "%lld MB of %lld MB" download counter.
+        formatter.numberFormatter.usesGroupingSeparator = false
+        let megabytes = Measurement(value: Double(sizeBytes / 1_000_000), unit: UnitInformationStorage.megabytes)
+        return "~" + formatter.string(from: megabytes)
+    }
 
     /// Speech-to-text engine this model uses (WhisperKit or Parakeet).
     public let engine: SpeechEngine
@@ -609,12 +632,14 @@ public struct ModelInfo: Identifiable {
     /// first, then device RAM.
     ///
     /// WHY compatibility before RAM:
-    /// Argmax only supports Tiny/Base on A12/A13 iPhones, while A14 devices with the
+    /// Argmax only supports Tiny/Base on A12/A13 chips, while A14 devices with the
     /// same 4 GB RAM tier support Small — so RAM alone cannot separate them, and
     /// recommending Small on an iPhone 11 traps onboarding in Core ML optimization
-    /// and can jetsam the app (issue #362). `DeviceCapabilities.isA12OrA13iPhone`
-    /// owns that test; `isSupported(on:)` reads the same predicate. After the
-    /// hardware exception, Parakeet v3 (~800 MB) remains the pick for >= 6 GB.
+    /// and can jetsam the app (issue #362). `DeviceCapabilities.isPreA14` owns that
+    /// test for iPhones and iPads alike; `isSupported(on:)` reads the same predicate.
+    /// The exception comes before the RAM rule, so a 6 GB A12X/A12Z iPad Pro gets
+    /// Base and never Parakeet (issue #612). After it, Parakeet v3 (~800 MB) remains
+    /// the pick for >= 6 GB.
     ///
     /// WHY in ModelInfo (not ModelManager):
     /// This is catalog-level logic — which model fits this device. It doesn't
@@ -625,11 +650,16 @@ public struct ModelInfo: Identifiable {
     /// Phase 37 introduces per-device gating that needs deterministic inputs for
     /// unit testing. The caller-less overload still exists for convenience — it
     /// reads the current device, same behaviour as before.
-    /// Turbo is intentionally never recommended by default during Phase 37.
+    ///
+    /// SINCE #649 this is the device half of the rule only: the recommendation for a
+    /// language Parakeet speaks, which includes all four Dictus keyboard languages.
+    /// `recommendedIdentifier(forSpokenLanguage:on:)` is the whole rule and calls this.
+    /// `available(on:)` still calls it directly, because the only thing it asks of the
+    /// recommendation is the pre-A14 exception, which does not depend on language.
     public static func recommendedIdentifier(for capabilities: DeviceCapabilities) -> String {
-        if capabilities.isA12OrA13iPhone {
+        if capabilities.isPreA14 {
             // Base, not Tiny: it is the most accurate variant Argmax lists for this
-            // tier, and `a12a13SupportedIdentifiers` keeps the two consistent.
+            // tier, and `preA14SupportedIdentifiers` keeps the two consistent.
             return "openai_whisper-base"
         }
         return capabilities.physicalMemoryGB >= 6
@@ -637,11 +667,68 @@ public struct ModelInfo: Identifiable {
             : "openai_whisper-small"
     }
 
-    public static func recommendedIdentifier() -> String {
-        recommendedIdentifier(for: DeviceCapabilities.current())
+    /// The Turbo variant the catalogue offers (issue #408).
+    static let turboIdentifier = "openai_whisper-large-v3-v20240930_turbo_632MB"
+
+    /// The model to recommend to someone who speaks `spokenLanguage` on `capabilities`
+    /// (#649).
+    ///
+    /// WHY THE LANGUAGE IS AN INPUT NOW: until #649 the rule read the device only, so a
+    /// Chinese speaker on a 6 GB iPhone was recommended Parakeet, which does not speak
+    /// Chinese (NVIDIA documents 25 European languages, `ModelLanguageSupport.parakeetV3`).
+    ///
+    /// The rule, in order:
+    /// 1. A pre-A14 device gets today's answer, Base, whatever the language: the Argmax
+    ///    matrix allows nothing else there, and Base is multilingual.
+    /// 2. A language Parakeet speaks gets today's answer too: Parakeet on 6 GB or more,
+    ///    Small below. All four Dictus keyboard languages land here, so nobody who
+    ///    onboarded before #649 sees their recommendation move.
+    /// 3. Any other language gets the best Whisper the device runs reliably: Turbo where
+    ///    Argmax lists it AND the catalogue's own Turbo gate (6 GB) lets it run, Small
+    ///    everywhere else.
+    ///
+    /// WHY TURBO AND NOT MEDIUM for rule 3: Medium is in no iPhone entry of Argmax's
+    /// matrix, and it is the larger download (1.53 GB against 646 MB). Turbo is listed from
+    /// the A15 on, it is the variant #408 chose after the #171 corpus run (won or tied four
+    /// clips of five), it transcribes at 8.78x real time on an iPhone 15 Pro Max against
+    /// Medium's 4.16-6.10x, and on the one Mandarin capture taken (18.6 s, poor audio,
+    /// 2026-08-25) it came back mostly right where Medium returned only a subtitle
+    /// artefact. One noisy clip is an anecdote, not a CER run; it is cited because it is
+    /// the only Chinese evidence there is, and it does not point the other way. The history #144
+    /// recorded belongs to the `_954MB` variant and to dictation reaching an unloaded
+    /// model; #408 replaced the first and #164 gated the second.
+    ///
+    /// WHAT TURBO STILL COSTS, stated rather than hidden: its first preparation takes
+    /// about four minutes on an iPhone 15 Pro Max (236 s, the slowest of four cold
+    /// readings), and nobody has timed one on an A15. Small is the fallback rule 3 uses on
+    /// every device that is not inside both gates.
+    public static func recommendedIdentifier(
+        forSpokenLanguage spokenLanguage: String,
+        on capabilities: DeviceCapabilities
+    ) -> String {
+        if capabilities.isPreA14 || ModelLanguageSupport.parakeetV3LanguageCodes.contains(spokenLanguage) {
+            return recommendedIdentifier(for: capabilities)
+        }
+        if capabilities.isA15OrLater,
+           let turbo = forIdentifier(turboIdentifier),
+           turbo.isSupported(on: capabilities) {
+            return turboIdentifier
+        }
+        return "openai_whisper-small"
     }
 
-    /// Whether the given model identifier matches the device-recommended model.
+    /// The recommendation for this device and the language the current settings say the
+    /// user speaks (see `SpokenLanguage.forRecommendation()`).
+    public static func recommendedIdentifier() -> String {
+        recommendedIdentifier(
+            forSpokenLanguage: SpokenLanguage.forRecommendation(),
+            on: DeviceCapabilities.current()
+        )
+    }
+
+    /// Whether the given model identifier is the one recommended for this device and the
+    /// user's language. Drives the "Recommended" mark on the Models screen, which has to
+    /// agree with the model onboarding installed (#649).
     public static func isRecommended(_ identifier: String) -> Bool {
         identifier == recommendedIdentifier()
     }
@@ -662,7 +749,8 @@ public struct ModelInfo: Identifiable {
     /// "Available" section. Backend paths (ModelManager download/delete, already-
     /// downloaded list) intentionally do NOT filter by this, so a user who obtained
     /// Turbo under a more permissive build can still manage it.
-    /// The only Whisper variants Argmax lists as supported on A12/A13 iPhones.
+    /// The only Whisper variants Argmax lists as supported on A12/A13 chips, applied
+    /// to every pre-A14 device (`DeviceCapabilities.isPreA14`).
     ///
     /// WHY the `.en` variants are listed even though Dictus does not ship them:
     /// this set is a transcription of Argmax's published matrix, so it stays
@@ -670,7 +758,7 @@ public struct ModelInfo: Identifiable {
     /// never match a catalog entry today.
     ///
     /// Source of truth: https://huggingface.co/argmaxinc/whisperkit-coreml/raw/main/config.json
-    static let a12a13SupportedIdentifiers: Set<String> = [
+    static let preA14SupportedIdentifiers: Set<String> = [
         "openai_whisper-tiny",
         "openai_whisper-tiny.en",
         "openai_whisper-base",
@@ -697,14 +785,16 @@ public struct ModelInfo: Identifiable {
     /// "is it gated" and "why is it gated" would be visible as a greyed card with no
     /// explanation, or an explanation on a tappable card. One function, no drift.
     public func incompatibilityReason(on capabilities: DeviceCapabilities) -> IncompatibilityReason? {
-        // WHY this branch comes first: on A12/A13 the limit is the Core ML support
+        // WHY this branch comes first: before A14 the limit is the Core ML support
         // matrix, not memory. Falling through to the RAM rule would leave Small,
-        // Small (Quantized) and Medium selectable in Settings on an iPhone 11, and
-        // downloading any of them reproduces the issue #362 optimization hang.
-        // Parakeet is excluded here too — it is absent from Argmax's matrix and
-        // needs ~800 MB of headroom these 3-4 GB devices do not have.
-        if capabilities.isA12OrA13iPhone {
-            return Self.a12a13SupportedIdentifiers.contains(identifier) ? nil : .hardwareGeneration
+        // Small (Quantized) and Medium selectable in Settings on an iPhone 11 or an
+        // A12X iPad Pro, and downloading any of them reproduces the issue #362
+        // optimization hang. Parakeet is excluded here too — it is absent from
+        // Argmax's matrix, needs ~800 MB of headroom the 3-4 GB devices do not have,
+        // and was never validated on a pre-A14 Neural Engine, which is why the 6 GB
+        // A12X/A12Z iPads are excluded along with the rest (issue #612).
+        if capabilities.isPreA14 {
+            return Self.preA14SupportedIdentifiers.contains(identifier) ? nil : .hardwareGeneration
         }
         switch identifier {
         // Both quantized Turbo variants (issue #408): Argmax lists them for exactly
@@ -728,14 +818,14 @@ public struct ModelInfo: Identifiable {
     ///
     /// WHY incompatible models are NOT filtered out (issue #369, reversing #104):
     /// hiding them told the user nothing, and the absence read as a property of
-    /// Dictus rather than of their phone. On an A12/A13 iPhone the gating from
+    /// Dictus rather than of their phone. On a pre-A14 device the gating from
     /// issue #362 would collapse this list to a single entry. They stay in the list
     /// and the card renders them disabled with a reason; `incompatibilityReason(on:)`
     /// is what the view asks. Deprecation still filters — deprecated means superseded,
     /// not unrunnable, so those rows would have nothing to explain.
     ///
     /// WHY the recommendation is force-included (issue #362):
-    /// On A12/A13 iPhones the recommendation is Base, which is `.deprecated` and so
+    /// On pre-A14 devices the recommendation is Base, which is `.deprecated` and so
     /// absent from `all`. Without this exception the app has a reachable dead end:
     /// onboarding installs Base, the user downloads a second model, deleting Base
     /// then becomes permitted, and Base cannot be reinstalled from anywhere. Base

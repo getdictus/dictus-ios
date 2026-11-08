@@ -30,6 +30,26 @@ public protocol PolishEngineProtocol: Sendable {
                 targetLanguage: SupportedLanguage,
                 task: PolishTask) async throws -> String
 
+    /// The same call, told the language the dictation is in, answering with the name
+    /// of the engine that actually produced the text (#648).
+    ///
+    /// `sourceLanguageCode` is `PolishJob.transcriptLanguageCode`: the transcription
+    /// language the user forced, else the one detected in the transcript. A prompt-
+    /// driven engine has no use for it, since its prompt is written for every input
+    /// language. A dedicated translation engine cannot do without it: Apple's
+    /// Translation framework handed the wrong source returns the text untranslated,
+    /// without an error (measured for #648).
+    ///
+    /// The label exists because one engine can hand the work to another. Translate
+    /// runs on the Translation framework and falls back to Apple FM, so `identifier`
+    /// cannot say which of the two wrote a given output, and the polish record has to.
+    /// `PolishPipeline` calls this one; the default runs the method above and labels
+    /// it with `identifier`, so no other engine changes.
+    func polishLabelled(raw: String,
+                        targetLanguage: SupportedLanguage,
+                        task: PolishTask,
+                        sourceLanguageCode: String?) async throws -> PolishEngineOutput
+
     /// Warm up backend state for `(task, targetLanguage)` (e.g. preload
     /// weights, prime the session with the matching instructions). Called at
     /// app launch and at recording start by `PolishService`, which passes
@@ -94,6 +114,14 @@ public protocol PolishEngineProtocol: Sendable {
 public extension PolishEngineProtocol {
     var announcesProcessingStage: Bool { true }
 
+    func polishLabelled(raw: String,
+                        targetLanguage: SupportedLanguage,
+                        task: PolishTask,
+                        sourceLanguageCode: String?) async throws -> PolishEngineOutput {
+        PolishEngineOutput(text: try await polish(raw: raw, targetLanguage: targetLanguage, task: task),
+                           engine: identifier)
+    }
+
     func prewarm(task: PolishTask, targetLanguage: SupportedLanguage) async {}
 
     func contextFit(input: String,
@@ -103,4 +131,17 @@ public extension PolishEngineProtocol {
     func inputLanguageSupport(countedCodes: Set<String>) -> PolishInputLanguageSupport { .unknown }
 
     func failureReason(for error: Error) -> PolishFailureReason { .other(error) }
+}
+
+/// An engine's text and the name of the engine that wrote it (#648).
+public struct PolishEngineOutput: Equatable, Sendable {
+    public let text: String
+    /// What the polish record's `engine` field says: `apple-fm`, or
+    /// `translation.highFidelity` when Apple's Translation framework produced the text.
+    public let engine: String
+
+    public init(text: String, engine: String) {
+        self.text = text
+        self.engine = engine
+    }
 }

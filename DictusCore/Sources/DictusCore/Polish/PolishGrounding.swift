@@ -436,6 +436,15 @@ public enum PolishGrounding {
             }
             if matches { return true }
         }
+        // A one-word name the speech recogniser split in two — `type less` for
+        // `TypeLess`, the #523 false refusal — is grounded by the two input words
+        // written together, with the same spelling tolerance.
+        if words.count == 1, inputWords.count >= 2 {
+            for start in 0..<(inputWords.count - 1)
+            where isNearSpelling(words[0], of: inputWords[start] + inputWords[start + 1]) {
+                return true
+            }
+        }
         return false
     }
 
@@ -444,8 +453,95 @@ public enum PolishGrounding {
                               matches inputWord: String,
                               allowInflection: Bool) -> Bool {
         if anchorWord == inputWord { return true }
+        if isNearSpelling(anchorWord, of: inputWord) { return true }
         guard allowInflection, inputWord.count == anchorWord.count + 1 else { return false }
         return inputWord.hasPrefix(anchorWord)
+    }
+
+    // MARK: - Near spelling (#587, round 4)
+
+    /// Whether a name the output writes is a near spelling of a word the speaker said.
+    ///
+    /// ### Why the check needs this at all
+    ///
+    /// The input is a **speech recogniser's** spelling of a name, and the model is
+    /// asked to write it properly. Device capture of 2026-09-23 (iPhone16,2, iOS 27.0,
+    /// `Structuré`): the speaker said *Hermes*, Parakeet wrote `airmes`, the model wrote
+    /// `Airmesh`, `NLTagger` tagged it a personal name, and an exact match refused a
+    /// faithful four-item English list — the mode's best output of the round. The same
+    /// shape is the one legitimate refusal #523 recorded: `TypeLess` against `type
+    /// less`. In both, the name is **the speaker's word respelled**, which is not what
+    /// this check exists to catch: it exists for a person or a place the speaker never
+    /// mentioned at all (#414).
+    ///
+    /// ### The rule: added or dropped letters only, never a changed one
+    ///
+    /// Insertion-deletion distance on folded words — how many letters must be added to
+    /// or dropped from one to get the other — bounded by the **anchor's** length:
+    ///
+    /// | Anchor length | Accepted letters added or dropped |
+    /// |---|---|
+    /// | 1-5 | 0 — exact match only |
+    /// | 6 | 1 |
+    /// | 7 or more | 2 |
+    ///
+    /// **A substituted letter is not accepted, and that is measured, not taste.** A
+    /// Damerau-Levenshtein rule was tried first and replayed on #414's corpus: it
+    /// grounded `Sophie` against a dictation naming `Sophia` — `W2-nom-prefixe`, a
+    /// fixture labelled fabricated, whose note says it is *"exactly the shape this check
+    /// exists to catch"*. It was still refused, but only because the same output also
+    /// invented `Marion`; the anchor itself was lost. One changed vowel is how one name
+    /// becomes another — `Sophia`/`Sophie`, `Maria`/`Marie`, `Paul`/`Saul` — while the
+    /// respellings the device showed add or drop letters: `airmes`/`Airmesh` is one
+    /// added, `type less`/`TypeLess` none once joined. Under this rule `Sophia` to
+    /// `Sophie` costs two (drop `a`, add `e`), over the bound for six letters, and the
+    /// corpus replays identically, anchor by anchor.
+    ///
+    /// **Names of five letters or fewer get nothing**, and that is an existing decision
+    /// this rule does not reopen: `PolishGroundingTests` already pins that a
+    /// single-word name gets no letter allowance — `Marc` is not grounded by `Marco` —
+    /// and that a surname must match exactly — `Mülle` is not `Müller`. On a short name
+    /// one letter is identity (`Marc`/`Marco`, `Ana`/`Anna`, `Jean`/`Jeane`). A first
+    /// draft allowed one letter from four letters up and broke both pins; the floor
+    /// moved to six rather than the pins. The bound of 2 from seven letters up is what
+    /// a recogniser's respelling of one syllable costs, and it is what `Airmesh` needs
+    /// only one of.
+    ///
+    /// ### What it knowingly admits
+    ///
+    /// A near neighbour of a name the speaker **did** say, by a letter added or
+    /// dropped: `Martine` for `Martin`, `Johanna` for `Johana`. A changed letter —
+    /// `Jonathan` for `Jonathon` — stays refused. What is admitted is an alteration of
+    /// a named person rather than an invention of one, and it is the trade the device
+    /// evidence asked for. `Paul` is still not grounded by `Pauline`
+    /// (three letters added), the prefix hole this matcher was rewritten to close.
+    static func isNearSpelling(_ anchorWord: String, of inputWord: String) -> Bool {
+        let allowed = allowedDistance(forAnchorOfLength: anchorWord.count)
+        guard allowed > 0, abs(anchorWord.count - inputWord.count) <= allowed else { return false }
+        return insertionDeletionDistance(anchorWord, inputWord) <= allowed
+    }
+
+    static func allowedDistance(forAnchorOfLength length: Int) -> Int {
+        switch length {
+        case ..<6: return 0
+        case 6: return 1
+        default: return 2
+        }
+    }
+
+    /// Letters to add or drop to turn one word into the other: the two lengths minus
+    /// twice their longest common subsequence.
+    private static func insertionDeletionDistance(_ lhs: String, _ rhs: String) -> Int {
+        let a = Array(lhs), b = Array(rhs)
+        var previous = [Int](repeating: 0, count: b.count + 1)
+        for letter in a {
+            var current = [Int](repeating: 0, count: b.count + 1)
+            for j in 1...max(1, b.count) where j <= b.count {
+                current[j] = letter == b[j - 1] ? previous[j - 1] + 1 : max(previous[j], current[j - 1])
+            }
+            previous = current
+        }
+        return a.count + b.count - 2 * (previous.last ?? 0)
     }
 
     /// Lowercased, diacritic-folded words, **in order**. Both sides go through this,

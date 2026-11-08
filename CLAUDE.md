@@ -45,7 +45,7 @@ Les issues du milestone `Someday` sont hors de vue volontairement. Ne pas les re
 
 **`docs/ROADMAP.md` et `docs/RELEASE-PLAN.md` se committent directement sur `develop`.** Ce sont des fichiers de pilotage : ils ne compilent pas, ne cassent rien, et une PR sur eux n'a ni relecture indépendante utile ni test device — les deux seules choses qui valident une PR ici. Ils restent versionnés parce qu'un worktree ne voit que ce qui est dans git, et que ce fichier pointe dessus.
 
-`develop` est protégé (PR requise, 2 status checks) et le compte de Pierre a le droit de contournement, donc le push passe en affichant `Bypassed rule violations`. **C'est délibéré pour ces deux fichiers et pour eux seuls** : faire tourner deux builds iOS sur une modification de markdown coûte des minutes pour zéro information, et de toute façon — la CI ne teste rien. Tout le reste, y compris la moindre ligne de Swift, passe par une PR.
+`develop` est protégé (PR requise, status checks requis) et le compte de Pierre a le droit de contournement, donc le push passe en affichant `Bypassed rule violations`. **C'est délibéré pour ces deux fichiers et pour eux seuls** : faire tourner le build iOS et la suite de tests `DictusCore` sur une modification de markdown coûte des minutes pour zéro information — aucun de ces fichiers n'est compilé, et aucun test ne les lit. Tout le reste, y compris la moindre ligne de Swift, passe par une PR.
 
 ## Git et releases
 
@@ -54,6 +54,7 @@ Les issues du milestone `Someday` sont hors de vue volontairement. Ne pas les re
 - Merge, jamais squash.
 - Les trois targets partagent un numéro de version et de build. Ne jamais les bumper hors d'une coupe TestFlight (`scripts/cut-testflight.sh`).
 - Une PR n'est pas validée par une CI verte : elle passe par une relecture indépendante et un test sur device avant merge.
+- Après le merge (ou la fermeture) d'une PR, et avant de créer un nouveau worktree : `scripts/prune-worktrees.sh` liste ce qu'il retirerait, `--apply` le fait, `--apply <chemin>` vise un seul worktree. Il supprime le worktree, son `build/DerivedData`, les DerivedData Xcode qui pointent dedans et le simulateur qui porte **exactement le nom de la branche**, ce qui exécute la suppression au merge exigée pour les simulateurs de PR. Il garde, en disant pourquoi, le checkout principal, `device`, toute branche sans PR ou dont une PR est ouverte, et tout worktree avec un changement non commité ou un commit non poussé. Relancer ne fait rien de plus.
 
 ## Build, test, lint
 
@@ -64,15 +65,42 @@ Les issues du milestone `Someday` sont hors de vue volontairement. Ne pas les re
 - Lint : `swiftlint lint --strict`. Pas de baseline ni de fichier d'exemptions (la baseline a été supprimée en #146), donc toute violation introduite se corrige ou porte un `swiftlint:disable` avec sa raison écrite.
 - Xcode régénère `Localizable.xcstrings` au build (état d'extraction `stale`, newline finale perdue). C'est du bruit de build : le jeter, jamais le committer.
 
+### Device builds
+
+Notes for the global `ios-build` skill (Pivii/skills) when it puts Dictus on Pierre's iPhone.
+
+- Scheme: `DictusApp`.
+- Build from the dedicated worktree `/Users/pierreviviere/dev/dictus-wt/device`, never the main clone (a checkout there has been seen moving back under an agent seconds later, which stamps the wrong sha). Derived data: `/Users/pierreviviere/dev/dictus-wt/device/build/DerivedData`. Check out the commit detached, by sha.
+- Fresh worktree only, resolve packages first:
+
+  ```bash
+  cd /Users/pierreviviere/dev/dictus-wt/device
+  xcodebuild -resolvePackageDependencies -project Dictus.xcodeproj -scheme DictusApp \
+    -derivedDataPath build/DerivedData
+  ```
+
+- Before installing, both bundles must print the sha you checked out. A different sha, or a missing file: stop, do not install.
+
+  ```bash
+  APP=build/DerivedData/Build/Products/Debug-iphoneos/DictusApp.app
+  plutil -p "$APP/DictusBuildInfo.plist"
+  plutil -p "$APP/PlugIns/DictusKeyboard.appex/DictusBuildInfo.plist"
+  ```
+
+- Installing over a build signed by the same team normally keeps the app data (observed 2026-10-22, `devicectl` install over a Debug build). Uninstalling, or installing over a TestFlight or App Store build (different signature), wipes it.
+
 ### Rester headless
 
 Pierre travaille sur cette machine : toute fenêtre qui s'ouvre lui vole le focus.
 
 - `xcrun simctl boot <udid>` est headless, donc autorisé.
 - La suite de tests n'a besoin d'aucun simulateur (`cd DictusCore && swift test`). Seuls les builds d'app en demandent un.
-- Ne jamais mettre une fenêtre Simulator au premier plan : `open -a Simulator` est interdit. `open -g -a Simulator` ne l'est pas, et il est requis pour piloter l'UI (`axe` ne peut taper que si Simulator.app est attaché au device booté). Mesuré : `-g` ne change pas l'app au premier plan.
+- Ne jamais mettre une fenêtre Simulator au premier plan : `open -a Simulator` est interdit. `open -g -a Simulator` ne l'est pas, et sous Xcode 26 il est requis pour piloter l'UI (`axe` ne peut taper que si Simulator.app est attaché au device booté). Mesuré : `-g` ne change pas l'app au premier plan. Sous Xcode 27, installé ici (mesuré le 2026-10-14), il n'y a plus de Simulator.app et `axe` fonctionne sans.
 - Un agent ne peut pas valider sur device physique : ce qui l'exige part dans la liste de validation manuelle, avec les étapes exactes.
 - Le simulateur se pilote au tap, au clavier et par l'arbre d'accessibilité avec `axe`. Le clavier Dictus **s'y affiche**, y prend le Full Access et y déclenche toute la chaîne clavier → app. On l'atteint en **appuyant longuement** sur le globe puis en le choisissant dans le menu : un tap simple fait défiler les claviers et saute les claviers tiers. La recette complète est dans `docs/agents/simulator.md`, qui fait autorité sur ce que le simulateur sait faire.
+- Pour vérifier qu'un changement de DictusApp, DictusKeyboard, de l'onboarding ou du passage par l'App Group n'a pas cassé la chaîne app → clavier : `scripts/simulator-smoke-test.sh` (headless, ~2 min, `SMOKE PASS` ou `SMOKE FAIL step N`). Il ne remplace pas le test sur device : voir `docs/agents/simulator-smoke-test.md`.
+- Tout simulateur se lance allégé avec simslim (`brew install mobai-app/tap/simslim`) : `simslim on <udid> --keep com.apple.remindd`, avant le premier build. L'allègement vit dans les overrides launchd du device : il est **par simulateur**, survit au reboot et à `simctl erase`, et il n'existe pas de réglage global (seul `simslim watch`, qui doit tourner en continu, allège chaque device qui boote). Mesuré le 2026-10-19 (iOS 26.5, iPhone 17, Dictus installé, au repos) : 3,01 Go et 205 processus en normal, 850 Mo et 64 en allégé. En allégé, le clavier Dictus s'affiche, tape, prend l'Accès complet et lance la chaîne micro comme en normal, et le smoke test passe. `--keep com.apple.remindd` sert seulement à Rappels, que la catégorie `pim` casse (aucune liste, bouton « + » grisé) ; Safari et Dictus n'ont besoin d'aucune exception. Non mesuré : un test de Live Activity demande `--except widgets`, un test StoreKit ou push `--except store`. `simslim off <udid>` rend le device d'origine.
+- Un simulateur créé pour une PR se supprime au merge de cette PR : `xcrun simctl delete <udid>`. Le device du smoke test (`Dictus Smoke`) est permanent et fait exception ; le script le recrée en version d'origine s'il manque, il faut donc l'alléger une fois après sa création.
 
 ## Contexte utilisateur
 
@@ -98,7 +126,6 @@ Quand tu as besoin de générer des assets visuels :
 - Accent highlight : #6BA3FF
 - Surface : #161C2C
 - Recording : #EF4444
-- Smart mode : #8B5CF6
 - Success : #22C55E
 
 ### Logo
@@ -107,7 +134,7 @@ Quand tu as besoin de générer des assets visuels :
 Barre centrale = dégradé #6BA3FF → #2563EB
 Barres latérales = blanc à 45% et 65% d'opacité
 Fond icône = dégradé #0D2040 → #071020 à 135°
-Border radius barres = 4.5pt
+Largeur des barres = 9/42 de la plus haute, écart = 7,5/42, bouts en capsule (rayon = largeur / 2, jamais une valeur fixe en points). Source : `assets/brand/appicon-dark.svg`, code : `DictusLogoGeometry` (#636)
 
 ## Agent skills
 
@@ -126,6 +153,15 @@ Single-context — `CONTEXT.md` + `docs/adr/` at the repo root (created lazily b
 ### Headless simulator
 
 Boot, build, install, launch, capture, and what a simulator cannot show. See `docs/agents/simulator.md`.
+
+**Smoke test:** `scripts/simulator-smoke-test.sh` runs the app → keyboard → app path headlessly in about two minutes and ends with `SMOKE PASS` or `SMOKE FAIL step N`. Run it while verifying any change to DictusApp, DictusKeyboard, onboarding or the App Group hand-off, and before a TestFlight cut. A pass is not a device validation. See `docs/agents/simulator-smoke-test.md`.
+
+### Verification and device tests
+
+- **`verify-dictus-ios`** (`.claude/skills/verify-dictus-ios/`): use it when a change to DictusApp or DictusKeyboard has to be seen working in the real app rather than in `swift test`, when a feature of its map (`.claude/skills/verify-dictus-ios/features/README.md`) must be exercised, or when screens need re-capturing.
+- **Keep the map current (mandatory):** a PR that adds or changes a screen or a feature updates `.claude/skills/verify-dictus-ios/features/` and its `screens.md` in the same PR (stable ID, capture). See the skill's "Keeping the map current".
+- **Follow the physical test shortlist (mandatory):** a PR that changes a behavior or a screen classified "iPhone" by the skill carries the `needs-physical-test` label and goes through the `batch-device-test` skill (until that skill exists, its steps by hand, as the skill describes). See the skill's "Physical test shortlist".
+- **pstack** (https://github.com/cursor/plugins/tree/main/pstack) is the reference toolkit for agent workflows, including `/maintain-verification-skill` for the map. It is enabled for this repo through `.claude/settings.json`; Claude Code asks you to trust the `cursor-plugins` marketplace on first use.
 
 ### Releasing
 

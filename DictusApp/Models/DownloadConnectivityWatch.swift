@@ -40,6 +40,16 @@ final class DownloadConnectivityWatch: @unchecked Sendable {
     private let interval: TimeInterval
     private let onTick: @Sendable (DownloadStallConditions) -> Void
 
+    /// Called on the main thread, from the `didEnterBackground` notification itself, while
+    /// the watcher is running (#707). The download service hands its foreground-session
+    /// chunks back to the background session from here.
+    ///
+    /// WHY ON THE MAIN THREAD AND NOT ON `queue`. The app is about to be suspended, and
+    /// whatever this triggers has to secure its background time before that happens. The
+    /// notification's own thread is the earliest moment there is; a hop to `queue` first
+    /// would spend some of the few seconds iOS grants on a queue that may be busy.
+    private let onEnterBackground: @Sendable () -> Void
+
     /// Serialises every member below, and is the queue the monitor, the timer and the
     /// lifecycle handlers all report on. One thread of control, which is what makes
     /// `@unchecked Sendable` true here.
@@ -62,9 +72,11 @@ final class DownloadConnectivityWatch: @unchecked Sendable {
 
     init(
         interval: TimeInterval = DownloadConnectivityWatch.tickInterval,
+        onEnterBackground: @escaping @Sendable () -> Void = {},
         onTick: @escaping @Sendable (DownloadStallConditions) -> Void
     ) {
         self.interval = interval
+        self.onEnterBackground = onEnterBackground
         self.onTick = onTick
     }
 
@@ -144,7 +156,15 @@ final class DownloadConnectivityWatch: @unchecked Sendable {
                 object: nil,
                 queue: nil
             ) { [weak self] _ in
-                self?.setForegrounded(false)
+                guard let self else { return }
+                self.setForegrounded(false)
+                // `setForegrounded` only enqueues the new reading. Waiting for it here, on a
+                // queue that only ever does a few lines of work, means that from now on
+                // `conditions` says "background" to everyone — including a watchdog tick
+                // the download service runs after its hand-off, which would otherwise read
+                // a stale foreground and move a chunk onto a session about to be suspended.
+                self.queue.sync {}
+                self.onEnterBackground()
             }
         ]
 

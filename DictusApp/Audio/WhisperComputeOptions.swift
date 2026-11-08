@@ -14,7 +14,7 @@ import WhisperKit
 ///
 /// WHY it can return nil rather than always building an options object:
 /// `WhisperKitConfig.computeOptions` is optional and every site passes nothing today.
-/// Returning nil off the A12/A13 path is what makes "every other device is unchanged"
+/// Returning nil off the pre-A14 path is what makes "every other device is unchanged"
 /// exact rather than approximate — WhisperKit receives the same nil it receives now,
 /// so no default can be accidentally restated wrongly here.
 enum WhisperComputeOptions {

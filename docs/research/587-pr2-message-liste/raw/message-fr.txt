@@ -1,0 +1,125 @@
+
+
+████ ARM shipping — 3 run(s) × 4 fixture(s), floor 0.35
+
+━━ [1-message] 295 chars, lang=fr
+  #1 295→296 2256ms success recall=8/8 inversions=0/28
+     engineOut: Yo man, j'espère que tu vas bien.⏎⏎Écoute, je suis en train de regarder le projet, je t'ai pas répondu mais je suis en train de travailler dessus, je te tiens au jus dès que dès que.⏎⏎Dès que j'ai avancé un petit peu plus dessus, s'il te plaît.⏎⏎Enfin pardon, pas s'il te plaît je me suis planté.
+  #2 295→296 2763ms success recall=8/8 inversions=0/28
+     engineOut: Yo man, j'espère que tu vas bien.⏎⏎Écoute, je suis en train de regarder le projet, je t'ai pas répondu mais je suis en train de travailler dessus, je te tiens au jus dès que dès que.⏎⏎dès que j'ai avancé un petit peu plus dessus, s'il te plaît.⏎⏎Enfin pardon, pas s'il te plaît je me suis planté.
+  #3 295→296 3324ms success recall=8/8 inversions=0/28
+     engineOut: Yo man, j'espère que tu vas bien.⏎⏎Écoute, je suis en train de regarder le projet, je t'ai pas répondu mais je suis en train de travailler dessus, je te tiens au jus dès que dès que.⏎⏎dés que j'ai avancé un petit peu plus dessus, s'il te plaît.⏎⏎Enfin pardon, pas s'il te plaît je me suis planté.
+
+━━ [2-message] 147 chars, lang=fr
+  #1 147→150 2804ms success recall=3/3 inversions=0/3
+     engineOut: Salut Manu, comment tu vas ?⏎⏎Est-ce que tu pourrais checker si tu as bien reçu le mail que je t'ai envoyé tout à l'heure s'il te plaît ?⏎⏎Des bisous.
+  #2 147→150 2724ms success recall=3/3 inversions=0/3
+     engineOut: Salut Manu, comment tu vas ?⏎⏎Est-ce que tu pourrais checker si tu as bien reçu le mail que je t'ai envoyé tout à l'heure s'il te plaît ?⏎⏎Des bisous.
+  #3 147→150 2632ms success recall=3/3 inversions=0/3
+     engineOut: Salut Manu, comment tu vas ?⏎⏎Est-ce que tu pourrais checker si tu as bien reçu le mail que je t'ai envoyé tout à l'heure s'il te plaît ?⏎⏎Des bisous.
+
+━━ [3-message] 225 chars, lang=fr
+  #1 225→227 2952ms success recall=5/5 inversions=0/10
+     engineOut: Je te tiens au jus, je vais tester ça rapidement.⏎⏎Il faut juste que je prenne l'abonnement pour pouvoir essayer.⏎⏎Mais honnêtement, de ce que j'ai cru comprendre, c'est peut-être un petit peu moins bien que Hermes et OpenClaw.
+  #2 225→227 2800ms success recall=5/5 inversions=0/10
+     engineOut: Je te tiens au jus, je vais tester ça rapidement.⏎⏎Il faut juste que je prenne l'abonnement pour pouvoir essayer.⏎⏎Mais honnêtement, de ce que j'ai cru comprendre, c'est peut-être un petit peu moins bien que Hermes et OpenClaw.
+  #3 225→226 3090ms success recall=5/5 inversions=0/10
+     engineOut: Je te tiens au jus, je vais tester ça rapidement.⏎⏎Il faut juste que je prenne l'abonnement pour pouvoir essayer.⏎⏎Mais honnêtement, de ce que j'ai cru comprendre, c'est peut-être un petit peu moins bien que Hermes et OpenClaw
+
+━━ [4-message] 346 chars, lang=fr
+  #1 346→349 2363ms success recall=7/7 inversions=0/21
+     engineOut: Yo les gars, vous savez comment on peut voir les limites d'usage du modèle Astra.⏎⏎Parce que ce matin j'ai voulu le tester et visiblement j'ai atteint les limites.⏎⏎Mais quand je vais voir dans les dans les settings utilisation de ChatGPT, je vois juste l'usage global, je vois pas l'usage par modèle.⏎⏎Si vous avez l'info les gars, je suis preneur.
+  #2 346→349 2455ms success recall=7/7 inversions=0/21
+     engineOut: Yo les gars, vous savez comment on peut voir les limites d'usage du modèle Astra.⏎⏎Parce que ce matin j'ai voulu le tester et visiblement j'ai atteint les limites.⏎⏎Mais quand je vais voir dans les dans les settings utilisation de ChatGPT, je vois juste l'usage global, je vois pas l'usage par modèle.⏎⏎Si vous avez l'info les gars, je suis preneur.
+  #3 346→349 2629ms success recall=7/7 inversions=0/21
+     engineOut: Yo les gars, vous savez comment on peut voir les limites d'usage du modèle Astra.⏎⏎Parce que ce matin j'ai voulu le tester et visiblement j'ai atteint les limites.⏎⏎Mais quand je vais voir dans les dans les settings utilisation de ChatGPT, je vois juste l'usage global, je vois pas l'usage par modèle.⏎⏎Si vous avez l'info les gars, je suis preneur.
+
+
+████ ARM message-develop — 3 run(s) × 4 fixture(s), floor 0.35
+     prompt: ../docs/research/587-pr2-message-liste/arms/message-develop.txt
+
+━━ [1-message] 295 chars, lang=fr
+  #1 295→296 2684ms success recall=8/8 inversions=0/28
+     engineOut: Yo man, j'espère que tu vas bien.⏎⏎Écoute, je suis en train de regarder le projet, je t'ai pas répondu mais je suis en train de travailler dessus.⏎⏎Je te tiens au jus dès que dès que. dès que j'ai avancé un petit peu plus dessus, s'il te plaît.⏎⏎Enfin pardon, pas s'il te plaît je me suis planté.
+  #2 295→296 2784ms success recall=8/8 inversions=0/28
+     engineOut: Yo man, j'espère que tu vas bien.⏎⏎Écoute, je suis en train de regarder le projet, je t'ai pas répondu mais je suis en train de travailler dessus, je te tiens au jus dès que dès que.⏎⏎dès que j'ai avancé un petit peu plus dessus, s'il te plaît.⏎⏎Enfin pardon, pas s'il te plaît je me suis planté.
+  #3 295→295 2591ms success recall=8/8 inversions=0/28
+     engineOut: Yo man, j'espère que tu vas bien.⏎⏎Écoute, je suis en train de regarder le projet, je t'ai pas répondu mais je suis en train de travailler dessus, je te tiens au jus dès que dès que. dès que j'ai avancé un petit peu plus dessus, s'il te plaît.⏎⏎Enfin pardon, pas s'il te plaît je me suis planté.
+
+━━ [2-message] 147 chars, lang=fr
+  #1 147→150 1897ms success recall=3/3 inversions=0/3
+     engineOut: Salut Manu, comment tu vas ?⏎⏎Est-ce que tu pourrais checker si tu as bien reçu le mail que je t'ai envoyé tout à l'heure s'il te plaît ?⏎⏎Des bisous.
+  #2 147→150 1869ms success recall=3/3 inversions=0/3
+     engineOut: Salut Manu, comment tu vas ?⏎⏎Est-ce que tu pourrais checker si tu as bien reçu le mail que je t'ai envoyé tout à l'heure s'il te plaît ?⏎⏎Des bisous.
+  #3 147→150 1950ms success recall=3/3 inversions=0/3
+     engineOut: Salut Manu, comment tu vas ?⏎⏎Est-ce que tu pourrais checker si tu as bien reçu le mail que je t'ai envoyé tout à l'heure s'il te plaît ?⏎⏎Des bisous.
+
+━━ [3-message] 225 chars, lang=fr
+  #1 225→227 2612ms success recall=5/5 inversions=0/10
+     engineOut: Je te tiens au jus, je vais tester ça rapidement.⏎⏎Il faut juste que je prenne l'abonnement pour pouvoir essayer.⏎⏎Mais honnêtement, de ce que j'ai cru comprendre, c'est peut-être un petit peu moins bien que Hermes et OpenClaw.
+  #2 225→224 2426ms success recall=5/5 inversions=0/10
+     engineOut: Je te tiens au jus, je vais tester ça rapidement⏎⏎Il faut juste que je prenne l'abonnement pour pouvoir essayer⏎⏎Mais honnêtement, de ce que j'ai cru comprendre, c'est peut-être un petit peu moins bien que Hermes et OpenClaw
+  #3 225→227 2994ms success recall=5/5 inversions=0/10
+     engineOut: Je te tiens au jus, je vais tester ça rapidement.⏎⏎Il faut juste que je prenne l'abonnement pour pouvoir essayer.⏎⏎Mais honnêtement, de ce que j'ai cru comprendre, c'est peut-être un petit peu moins bien que Hermes et OpenClaw.
+
+━━ [4-message] 346 chars, lang=fr
+  #1 346→345 3246ms success recall=7/7 inversions=0/21
+     engineOut: Yo les gars, vous savez comment on peut voir les limites d'usage du modèle Astra⏎⏎Parce que ce matin j'ai voulu le tester et visiblement j'ai atteint les limites⏎⏎Mais quand je vais voir dans les dans les settings utilisation de ChatGPT, je vois juste l'usage global, je vois pas l'usage par modèle⏎⏎Si vous avez l'info les gars, je suis preneur
+  #2 346→349 2714ms success recall=7/7 inversions=0/21
+     engineOut: Yo les gars, vous savez comment on peut voir les limites d'usage du modèle Astra.⏎⏎Parce que ce matin j'ai voulu le tester et visiblement j'ai atteint les limites.⏎⏎Mais quand je vais voir dans les dans les settings utilisation de ChatGPT, je vois juste l'usage global, je vois pas l'usage par modèle.⏎⏎Si vous avez l'info les gars, je suis preneur.
+  #3 346→349 2607ms success recall=7/7 inversions=0/21
+     engineOut: Yo les gars, vous savez comment on peut voir les limites d'usage du modèle Astra.⏎⏎Parce que ce matin j'ai voulu le tester et visiblement j'ai atteint les limites.⏎⏎Mais quand je vais voir dans les dans les settings utilisation de ChatGPT, je vois juste l'usage global, je vois pas l'usage par modèle.⏎⏎Si vous avez l'info les gars, je suis preneur.
+
+
+════ AXES, per arm (bars.md §4)
+
+arm                   outputs  unrecalled  personLost  hedgeLost   hardened    fabricated  dropped     clean       noOutput
+shipping              12       0/12        0/12        0/12        0/12        0/12        0/12        12/12       0
+message-develop       12       0/12        0/12        0/12        0/12        0/12        0/12        12/12       0
+
+  Counts are OUTPUTS carrying at least one, not occurrences.
+  noOutput runs are in NO column and in no denominator: a run whose engine
+  produced nothing has violated nothing, whatever the outcome that caused it.
+  `clean` = no defect on any of the three SCORED axes. Axis 3 and the negation
+  count are observables by declaration (bars.md §1, §4) and are in no column here.
+
+
+════ OBSERVABLES, per arm — reported, never barred
+
+arm                   inversions    dispersed     negDropped    speakerState preserved
+shipping              0             0             0/12          0/12
+message-develop       0             0             0/12          0/12
+
+
+════ LANGUAGE AND LISTS, per arm and expected language (#587 bars.md §4)
+
+arm                   lang      outputs  refusedLang  wrongAccepted  wrongAny  withList  incompleteness
+shipping              fr        12       0            0              0         0         0
+message-develop       fr        12       0            0              0         0         0
+
+  refusedLang   = refused on check=language (B1b; > 10 % in any language stops the round).
+  wrongAccepted = accepted, and the whole output or a sentence reads as another language
+                  (B1a's screen: a fragment the speaker said in that language is legitimate).
+  wrongAny      = the same screen over every output, refused or not (B1c for English).
+  withList      = outputs carrying a list line (B3 reads it on prose fixtures only).
+
+
+════ PER FIXTURE, per arm (never pooled)
+
+── shipping
+   1-message               ·  ·  ·
+   2-message               ·  ·  ·
+   3-message               ·  ·  ·
+   4-message               ·  ·  ·
+── message-develop
+   1-message               ·  ·  ·
+   2-message               ·  ·  ·
+   3-message               ·  ·  ·
+   4-message               ·  ·  ·
+
+   e = the engine produced no output; the run is in no denominator above.
+   U<n> unrecalled propositions · P person lost · H hedge lost · B stance hardened
+   F speaker-state fabricated · D speaker-state dropped · o<n> order inversions
+   · no defect and no observable. Order is an OBSERVABLE: `o` is not a defect.
+
+── wrote 24 runs to ../docs/research/587-pr2-message-liste/capture-message-fr.json

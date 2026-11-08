@@ -1,0 +1,30 @@
+Corpus C: 227 dictations, 450 scored runs (3 dictations with no engine output in any run).
+
+Runs with ≤ 1 bullet / runs, per length bucket:
+    0- 24   41/42   ( 98 %)
+   25- 49   69/72   ( 96 %)
+   50- 74   58/66   ( 88 %)
+   75- 99   52/57   ( 91 %)
+  100-124   14/38   ( 37 %)
+  125-149   27/48   ( 56 %)
+  150-174   11/33   ( 33 %)
+  175-199   11/30   ( 37 %)
+  200-224    3/14   ( 21 %)
+  225-249    5/12   ( 42 %)
+  250-274    0/16   (  0 %)
+  275-299    5/20   ( 25 %)
+
+Floor F   A(F) lone dash-lines left ≥ F   B(F) lists lost < F   A+B
+   50       186                             4                 190
+   75       128                            12                 140
+  100        76                            17                  93
+  125        62                            41                 103
+  150        35                            62                  97
+  175        24                            84                 108
+  200        13                           103                 116
+  225        10                           114                 124
+  250         5                           121                 126
+  275         5                           137                 142
+  300         0                           152                 152
+
+Decision rule (bars.md §6): minimum A+B, ties to the lower F → F = 100

@@ -1,0 +1,26 @@
+[
+  {
+    "id": "E1-free-form",
+    "raw": "Okay so I was thinking about something this morning while walking, it's that in the end when you launch a product on your own, the hardest part isn't coding it, it's deciding what not to do actually. Because there's always an idea that looks better than the one you're working on right now. And so you jump on it and after 6 months actually you've got 15 things started and nothing finished.",
+    "lang": "en",
+    "sttEngine": "PK"
+  },
+  {
+    "id": "E2-project-update",
+    "raw": "Okay so quick update on the project, we switched over the subscription part last Monday, Thomas finished the StoreKit integration and it works in sandbox. There are two things left. The first one is the transcription history which hasn't been started at all. And the second one is the custom vocabulary. And on that one we have a spec but no code. On the numbers side, we're at 412 downloads since launch, with a 7-day retention rate of 19%, which is low, but not a disaster for a first version. The goal is to get past 1000 before the end of October. I'm seeing Sarah on Thursday at 2pm to sort out the App Store part. And if all goes well, we submit the week of the 12th.",
+    "lang": "en",
+    "sttEngine": "PK"
+  },
+  {
+    "id": "E3-todo-enumeration",
+    "raw": "okay so uh let me go over what I need to do before the meeting so first I need to get the January numbers from Marion she told me she'd have them Tuesday well no Wednesday and uh so then I'll have to do the comparison table with last year's and also you know I absolutely have to call the contractor because their quote went up again from 12000 to 15000 euros and nobody signed off on that and well yeah I should also remember to book the room on the second floor because the other one is taken all week",
+    "lang": "en",
+    "sttEngine": "PK"
+  },
+  {
+    "id": "E4-native-brain-dump",
+    "raw": "okay so quick brain dump before I forget the deploy is blocked because the certificate expired on the staging box and uh Sam said he'd rotate it tomorrow morning but we also need to bump the node version because the build image is on eighteen and the new package needs twenty and honestly I think we should just do both in the same window otherwise we're doing two freezes for nothing",
+    "lang": "en",
+    "sttEngine": "PK"
+  }
+]

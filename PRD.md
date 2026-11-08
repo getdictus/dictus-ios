@@ -89,7 +89,7 @@ Existing free tools do raw transcription only. There is no open-source app that 
 
 ### 3.1 Vision
 
-Let any iOS user — French or English speaking — dictate text into any app, correct it instantly without switching keyboards, and optionally reformat it with AI, all without a subscription.
+Let any iOS user, French or English speaking, dictate text into any app and correct it instantly without switching keyboards, for free. Dictus Pro optionally adds AI reformatting.
 
 ### 3.2 V1 Success metrics
 
@@ -470,7 +470,7 @@ Dictus fully embraces **iOS 26 Liquid Glass** — Apple's new design language �
 - **Idle**: frosted glass, `mic.fill` SF Symbol, subtle inner glow
 - **Recording**: glass tints red/orange, pulsing ring, real-time waveform
 - **Transcribing**: spinning shimmer progress ring
-- **Smart mode active**: subtle blue/purple tint to signal LLM is processing
+- **Smart mode active**: subtle blue tint to signal LLM is processing
 
 #### Mode pill
 - Floating Liquid Glass pill next to the mic button showing active mode name + icon

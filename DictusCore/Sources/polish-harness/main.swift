@@ -113,7 +113,7 @@ func corpusPaths(in args: [String], valuedOptions: Set<String> = []) -> [String]
 }
 
 let args = Array(CommandLine.arguments.dropFirst())
-guard let command = args.first, ["show", "eval", "ab", "prompt", "paragraph", "fidelity", "guardrail", "target", "vocabulary"].contains(command), args.count >= 2 else {
+guard let command = args.first, ["show", "eval", "ab", "prompt", "paragraph", "fidelity", "summary", "guardrail", "target", "vocabulary", "lostword", "langcheck"].contains(command), args.count >= 2 else {
     print("""
     polish-harness — off-device polish eval (macOS + Apple Intelligence)
 
@@ -125,9 +125,12 @@ guard let command = args.first, ["show", "eval", "ab", "prompt", "paragraph", "f
       fidelity  <fixtures.json> --mode <id> [--runs N] [--arm <prompt.txt> …] [--floor N] [--json <out.json>]
       fidelity  <corpus.json> --replay [--floor N] [--sweep] [--json <out.json>]
       fidelity  --rescore <capture.json> --fixtures <fixtures.json> [--floor N] [--json <out.json>]
+      summary   <fixtures.json> [--mode <id>] [--runs N] [--arm <prompt.txt> …] [--json <out.json>]
       guardrail <corpus.json> [<corpus.json> …] [--segments] [--sweep] [--anchors]
       target    <corpus.json> [<corpus.json> …] [--sweep] [--floor N]
       vocabulary <corpus.json> [<corpus.json> …]
+      lostword  <pairs.jsonl>   (#575, no model: recorded outputs through the pipeline)
+      langcheck <corpus-or-capture.json> [… ] --fixtures <fixtures.json> [--fixtures …] --out <readings.jsonl>
 
     --lang (#439) reroutes every fixture in the file — `--lang auto` runs a
     per-language set through the Auto-detect prompt, `--lang fr` pins an auto set
@@ -158,6 +161,11 @@ guard let command = args.first, ["show", "eval", "ab", "prompt", "paragraph", "f
     committed, hand-labelled outputs. It drives NO model and needs no Apple
     Intelligence, so the measurement behind their thresholds is re-runnable by
     anyone. Corpora live in docs/research/413-414-guardrail/.
+
+    langcheck (#598) records every reading the language check makes on committed
+    outputs — the whole output's and each segment's — plus the shipping verdict, so
+    the variants in docs/research/598-short-line-language-check/ are scored by its
+    summarise.py without editing the check. Drives no model.
 
     vocabulary (#80) replays the custom-vocabulary replacement pass over committed
     term/transcript pairs and checks idempotence. Deterministic, drives no model.
@@ -251,7 +259,8 @@ let fixtures: [Fixture]
 // with the transcripts they rewrite, none of which is a fixture, so those three
 // have nothing to load here. `--lang` (#439) reroutes what IS loaded,
 // so it stays inside the loading branch.
-if ["guardrail", "target", "vocabulary"].contains(command) || (command == "fidelity" && isModelFreeFidelity) {
+if ["guardrail", "target", "vocabulary", "lostword", "langcheck"].contains(command)
+    || (command == "fidelity" && isModelFreeFidelity) {
     fixtures = []
 } else {
     do {
@@ -302,7 +311,7 @@ guard #available(macOS 26.0, *) else {
 #if canImport(FoundationModels)
 // `prompt` never runs a model — it prints the bytes one would be sent — so it is
 // usable on a machine with Apple Intelligence off, which is the point of it.
-if command != "prompt", command != "guardrail", command != "vocabulary",
+if command != "prompt", command != "guardrail", command != "vocabulary", command != "lostword", command != "langcheck",
    !(command == "fidelity" && isModelFreeFidelity), engineKind == "apple-fm" {
     switch SystemLanguageModel.default.availability {
     case .available:
@@ -541,7 +550,11 @@ func runOnce(_ fx: Fixture,
         // mix the target was elected from, exactly as `PolishService` does it — a
         // harness that skipped it would let a fixture reach the engine where the app
         // refuses it locally, which is a path no user takes.
-        inputLanguageCodes: mix.countedCodes
+        inputLanguageCodes: mix.countedCodes,
+        // Which language's worked examples a Smart Mode shows (#587). A fixture's
+        // `lang` stands for the transcription language the user forced, exactly as
+        // it stands for the prompt target above.
+        transcriptLanguageCode: PolishJob.transcriptLanguageCode(mode: .explicit(target), detectedCode: detectedCode)
     )
     let r = await PolishPipeline.transform(preprocessed: preprocessed, engine: engine, job: job)
     // nil for a Smart Mode on any non-success: it inserts nothing rather than the
@@ -582,7 +595,12 @@ func runOnceAuto(_ fx: Fixture,
         task: smartTask ?? .auto, promptLanguage: .english, languageAgnosticPath: true,
         // Same pre-flight input as the per-language path (#490). Measured on the raw
         // for the reason the other path measures it there.
-        inputLanguageCodes: PolishLanguageMix.measure(fx.raw).countedCodes
+        inputLanguageCodes: PolishLanguageMix.measure(fx.raw).countedCodes,
+        // Nothing is forced on the auto path, so the transcript's language is the
+        // one detected in it (#587) — the mix's leader, as `PolishService` reads it.
+        transcriptLanguageCode: PolishJob.transcriptLanguageCode(
+            mode: .autoDetect, detectedCode: PolishLanguageMix.measure(fx.raw).dominantCode ?? detectedCode
+        )
     )
     let r = await PolishPipeline.transform(preprocessed: preprocessed, engine: engine, job: job)
     let final = PolishPipeline.resolvedOutput(r, preprocessed: preprocessed, job: job)
@@ -616,8 +634,13 @@ func promptResolution(_ fx: Fixture, mode: SmartMode?) -> PromptResolution {
     if let mode {
         let preprocessed = fx.language.map { VerbalPunctuationPrepass.apply(fx.raw, language: $0) }
             ?? PolishPipeline.autoPreprocess(fx.raw, detectedCode: detectedCode)
+        // Since #587 a mode carries one prompt per transcript language, which
+        // `PolishPipeline.transform` resolves before the engine call. Printing the
+        // unresolved record showed the fallback for every fixture — found in #573,
+        // where a per-language dump came back as sixteen copies of the French prompt.
+        // Resolved here off the language `runOnce` passes, so this prints what is sent.
         return PromptResolution(
-            task: .smart(mode),
+            task: .smart(mode.resolvingExamples(forTranscriptLanguage: transcriptLanguage(of: fx))),
             preprocessed: preprocessed,
             language: fx.language ?? .english,
             detected: detectedCode
@@ -779,6 +802,30 @@ func runFidelityRescore() {
 // model runs: the election is `PolishLanguageMix.measure` plus a comparison, both
 // deterministic local calls, which is what makes the dominance floor a measurement
 // rather than a claim.
+/// #598. Every reading the language check makes on the given corpora and captures,
+/// written to `--out`. See `LanguageCheckReadings`.
+func runLanguageCheckReadings() {
+    let paths = corpusPaths(in: args, valuedOptions: ["--fixtures", "--out"])
+    let fixturePaths: [String] = args.indices.compactMap { index in
+        guard args[index] == "--fixtures", index + 1 < args.count else { return nil }
+        return args[index + 1]
+    }
+    guard !paths.isEmpty, let out = optionValue("--out", in: args) else {
+        print("error: langcheck needs at least one corpus or capture and --out, e.g.\n"
+              + "  swift run polish-harness langcheck ../docs/research/413-414-guardrail/corpus.json "
+              + "--out readings.jsonl")
+        exit(2)
+    }
+    let records = LanguageCheckReadings.records(
+        paths: paths, fixtures: LanguageCheckReadings.loadFixtures(fixturePaths)
+    )
+    LanguageCheckReadings.write(records, to: out)
+    let refused = records.count { $0.shippingAccepts == false }
+    let unread = records.count { $0.shippingAccepts == nil }
+    print("langcheck: \(records.count) outputs from \(paths.count) file(s), "
+          + "\(refused) refused by the shipping check, \(unread) with no expected code → \(out)")
+}
+
 func runTargetElection() {
     // Same reasoning as `runGuardrail`: a flag-only invocation must error rather
     // than report a clean 0/0 that reads like a result.
@@ -1001,6 +1048,13 @@ case "target":
     runTargetElection()
 case "vocabulary":
     runVocabulary()
+// #598. Records the language check's readings on committed outputs. Drives no model.
+case "langcheck":
+    runLanguageCheckReadings()
+// #575. Replays recorded outputs through the shipped pipeline with an engine that
+// returns them verbatim. Drives no model, like the three above.
+case "lostword":
+    await runLostWordReplay()
 // #570. The replay half drives no model and needs neither macOS 26 nor Apple
 // Intelligence, which is the point of it: the floor behind axes 1 and 2 is
 // re-runnable by anyone. The live half is a pipeline round and is dispatched from
@@ -1009,6 +1063,16 @@ case "fidelity" where rescorePath != nil:
     runFidelityRescore()
 case "fidelity" where isReplay:
     runFidelityReplay()
+// #571. The Résumé bench: bars in docs/research/571-summary/bars.md. Dispatched here
+// rather than inside `runHarness`, whose switch is at the complexity ceiling.
+case "summary":
+    if #available(macOS 26.0, *) {
+        await runSummaryRound(fixtures: fixtures, mode: loadSmartMode(modeIdentifier),
+                              armPaths: armPaths, runs: runs, jsonOut: paragraphJSONOut)
+    } else {
+        print("error: this command drives Apple Foundation Models and needs macOS 26.")
+        exit(1)
+    }
 default:
     if #available(macOS 26.0, *) {
         await runHarness()

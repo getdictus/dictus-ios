@@ -1,0 +1,426 @@
+[
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "S1-free-form",
+    "hasEngineOutput" : true,
+    "lang" : "fr",
+    "languageMatches" : true,
+    "listLines" : 4,
+    "ms" : 3154,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "- Le plus dur quand on lance un produit tout seul ce n'est pas de le coder, c'est de décider quoi ne pas faire\n- Il y a toujours une idée qui a l'air meilleure que celle sur laquelle on est en train de bosser\n- On saute dessus\n- Au bout de 6 mois on a 15 trucs commencés et rien de fini",
+    "outputChars" : 286,
+    "outputLanguage" : "fr",
+    "preamble" : false,
+    "ratio" : 0.7240506329113924,
+    "rawChars" : 395,
+    "reportFraming" : [
+
+    ],
+    "run" : 1
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "S1-free-form",
+    "hasEngineOutput" : true,
+    "lang" : "fr",
+    "languageMatches" : true,
+    "listLines" : 4,
+    "ms" : 3501,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "- Lancer un produit seul, le plus dur n'est pas coder, c'est décider quoi ne pas faire\n- Une idée semble meilleure que celle sur laquelle on travaille\n- Sauter sur l'idée meilleure\n- 6 mois, 15 trucs commencés, rien de fini",
+    "outputChars" : 223,
+    "outputLanguage" : "fr",
+    "preamble" : false,
+    "ratio" : 0.5645569620253165,
+    "rawChars" : 395,
+    "reportFraming" : [
+
+    ],
+    "run" : 2
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "S1-free-form",
+    "hasEngineOutput" : true,
+    "lang" : "fr",
+    "languageMatches" : true,
+    "listLines" : 3,
+    "ms" : 3312,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "- Quand on lance un produit tout seul, le plus dur ce n'est pas de le coder, c'est de décider quoi ne pas faire\n- Il y a toujours une idée qui a l'air meilleure que celle sur laquelle on est en train de bosser\n- On saute dessus et au bout de 6 mois on a 15 trucs commencés et rien de fini",
+    "outputChars" : 288,
+    "outputLanguage" : "fr",
+    "preamble" : false,
+    "ratio" : 0.7291139240506329,
+    "rawChars" : 395,
+    "reportFraming" : [
+
+    ],
+    "run" : 3
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "S3-rambling",
+    "hasEngineOutput" : true,
+    "lang" : "fr",
+    "languageMatches" : true,
+    "listLines" : 5,
+    "ms" : 4453,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "- Répéter le comptable : l'assurance à rappeler pour le truc de la voiture\n- Répondre à Julien : il attend depuis peut-être une semaine et demie\n- Changer la page d'accueil du site : ne pas dire ce qu'on fait, les gens lisent trois lignes et partent\n- Annuler l'abonnement à 19 euros par mois : non utilisé depuis février, 6 mois de paiement inutile\n- Préparer les questions pour l'entretien de mardi",
+    "outputChars" : 400,
+    "outputLanguage" : "fr",
+    "preamble" : false,
+    "ratio" : 0.3117692907248636,
+    "rawChars" : 1283,
+    "reportFraming" : [
+
+    ],
+    "run" : 1
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "S3-rambling",
+    "hasEngineOutput" : true,
+    "lang" : "fr",
+    "languageMatches" : true,
+    "listLines" : 5,
+    "ms" : 4620,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "- Répéter le comptable : l'assurance, le truc de la voiture\n- Répondre à Julien : il attend depuis peut-être une semaine et demie, il commence à se demander si je les zappais\n- Refaire le site : changer la page d'accueil parce qu'elle ne dit pas ce qu'on fait, les gens lisent trois lignes et partent\n- Annuler l'abonnement à 19 euros par mois, inutilisé depuis février, cela fait 6 mois pour payer pour rien\n- Préparer les questions pour l'entretien de mardi",
+    "outputChars" : 459,
+    "outputLanguage" : "fr",
+    "preamble" : false,
+    "ratio" : 0.35775526110678096,
+    "rawChars" : 1283,
+    "reportFraming" : [
+
+    ],
+    "run" : 2
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "S3-rambling",
+    "hasEngineOutput" : true,
+    "lang" : "fr",
+    "languageMatches" : true,
+    "listLines" : 5,
+    "ms" : 4311,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "- Répéter le comptable : l'assurance à rappeler pour le truc de la voiture\n- Répondre à Julien : il attend depuis peut-être une semaine et demie\n- Changer la page d'accueil du site : ne pas dire ce qu'on fait, les gens lisent trois lignes et partent\n- Annuler l'abonnement à 19 euros par mois : non utilisé depuis février, 6 mois de paiement pour rien\n- Préparer les questions pour l'entretien de mardi",
+    "outputChars" : 402,
+    "outputLanguage" : "fr",
+    "preamble" : false,
+    "ratio" : 0.3133281371784879,
+    "rawChars" : 1283,
+    "reportFraming" : [
+
+    ],
+    "run" : 3
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : true,
+    "fixture" : "S5-todo-enumeration",
+    "hasEngineOutput" : true,
+    "lang" : "fr",
+    "languageMatches" : true,
+    "listLines" : 4,
+    "ms" : 4175,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "- Récupérer les chiffres de janvier auprès de Marion : elle les aurait mardi, mais ce sera mercredi\n- Faire le tableau comparatif avec ceux de l'année dernière\n- Appeler le prestataire : leur devis est passé de 12000 à 15000 euros et personne ne l'a validé\n- Réserver la salle du deuxième étage : l'autre salle est prise toute la semaine",
+    "outputChars" : 337,
+    "outputLanguage" : "fr",
+    "preamble" : false,
+    "ratio" : 0.576068376068376,
+    "rawChars" : 585,
+    "reportFraming" : [
+
+    ],
+    "run" : 1
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : true,
+    "fixture" : "S5-todo-enumeration",
+    "hasEngineOutput" : true,
+    "lang" : "fr",
+    "languageMatches" : true,
+    "listLines" : 4,
+    "ms" : 4404,
+    "novelFigures" : [
+      "12",
+      "000",
+      "15",
+      "000"
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "- Récupérer les chiffres de janvier auprès de Marion, qui les aura mercredi\n- Faire le tableau comparatif avec ceux de l'année dernière\n- Appeler le prestataire, car leur devis est passé de 12 000 à 15 000 euros et personne ne l'a validé\n- Réserver la salle du deuxième étage, car l'autre est prise toute la semaine",
+    "outputChars" : 315,
+    "outputLanguage" : "fr",
+    "preamble" : false,
+    "ratio" : 0.5384615384615384,
+    "rawChars" : 585,
+    "reportFraming" : [
+
+    ],
+    "run" : 2
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : true,
+    "fixture" : "S5-todo-enumeration",
+    "hasEngineOutput" : true,
+    "lang" : "fr",
+    "languageMatches" : true,
+    "listLines" : 4,
+    "ms" : 4689,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "- Récupérer les chiffres de janvier auprès de Marion : elle les aurait mercredi\n- Faire le tableau comparatif avec ceux de l'année dernière\n- Appeler le prestataire : leur devis est passé de 12000 à 15000 euros et personne ne l'a validé\n- Réserver la salle du deuxième étage : l'autre salle est prise toute la semaine",
+    "outputChars" : 317,
+    "outputLanguage" : "fr",
+    "preamble" : false,
+    "ratio" : 0.5418803418803418,
+    "rawChars" : 585,
+    "reportFraming" : [
+
+    ],
+    "run" : 3
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : true,
+    "fixture" : "E3-todo-enumeration",
+    "hasEngineOutput" : true,
+    "lang" : "en",
+    "languageMatches" : false,
+    "listLines" : 4,
+    "ms" : 7149,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "rejectedGuardrail",
+    "output" : "- Gérer les chiffres de janvier avec Marion, qui a eux le mardi, mais ils seront disponibles le mercredi\n- Créer le tableau comparatif avec l'année précédente\n- Appeler le contratant car le devis est passé de 12000 à 15000 euros et personne n'a signé\n- Réserver la salle au deuxième étage car l'autre est occupée toute la semaine",
+    "outputChars" : 329,
+    "outputLanguage" : "fr",
+    "preamble" : false,
+    "ratio" : 0.6540755467196819,
+    "rawChars" : 503,
+    "rejectedCheck" : "language",
+    "reportFraming" : [
+
+    ],
+    "run" : 1
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : true,
+    "fixture" : "E3-todo-enumeration",
+    "hasEngineOutput" : true,
+    "lang" : "en",
+    "languageMatches" : true,
+    "listLines" : 4,
+    "ms" : 5889,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "- Get the January numbers from Marion: Tuesday, then Wednesday\n- Create the comparison table with last year's data\n- Call the contractor because their quote increased from 12000 to 15000 euros and no one signed off\n- Book the room on the second floor because the other one is taken all week",
+    "outputChars" : 290,
+    "outputLanguage" : "en",
+    "preamble" : false,
+    "ratio" : 0.5765407554671969,
+    "rawChars" : 503,
+    "reportFraming" : [
+
+    ],
+    "run" : 2
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : true,
+    "fixture" : "E3-todo-enumeration",
+    "hasEngineOutput" : true,
+    "lang" : "en",
+    "languageMatches" : true,
+    "listLines" : 4,
+    "ms" : 6138,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "- Get the January numbers from Marion: Tuesday, well Wednesday\n- Do the comparison table with last year's\n- Call the contractor because their quote went up from 12000 to 15000 euros and nobody signed off on that\n- Book the room on the second floor because the other one is taken all week",
+    "outputChars" : 287,
+    "outputLanguage" : "en",
+    "preamble" : false,
+    "ratio" : 0.5705765407554672,
+    "rawChars" : 503,
+    "reportFraming" : [
+
+    ],
+    "run" : 3
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : true,
+    "fixture" : "E4-native-brain-dump",
+    "hasEngineOutput" : true,
+    "lang" : "en",
+    "languageMatches" : true,
+    "listLines" : 4,
+    "ms" : 2764,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "- Deploy blocked because certificate expired on staging box\n- Sam said he'd rotate certificate tomorrow morning\n- Need to bump node version because build image on eighteen and new package needs twenty\n- Do both in same window or risk two freezes",
+    "outputChars" : 245,
+    "outputLanguage" : "en",
+    "preamble" : false,
+    "ratio" : 0.6380208333333334,
+    "rawChars" : 384,
+    "reportFraming" : [
+
+    ],
+    "run" : 1
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : true,
+    "fixture" : "E4-native-brain-dump",
+    "hasEngineOutput" : true,
+    "lang" : "en",
+    "languageMatches" : true,
+    "listLines" : 4,
+    "ms" : 2784,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "- Deploy blocked because certificate expired on staging box\n- Sam said rotate certificate tomorrow morning\n- Need to bump node version because build image on eighteen and new package needs twenty\n- Do both in same window otherwise two freezes for nothing",
+    "outputChars" : 254,
+    "outputLanguage" : "en",
+    "preamble" : false,
+    "ratio" : 0.6614583333333334,
+    "rawChars" : 384,
+    "reportFraming" : [
+
+    ],
+    "run" : 2
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : true,
+    "fixture" : "E4-native-brain-dump",
+    "hasEngineOutput" : true,
+    "lang" : "en",
+    "languageMatches" : true,
+    "listLines" : 4,
+    "ms" : 2605,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "- Deploy blocked because certificate expired on staging box\n- Sam will rotate certificate tomorrow morning\n- Bump node version because build image on eighteen and new package needs twenty\n- Do both in same window otherwise two freezes for nothing",
+    "outputChars" : 246,
+    "outputLanguage" : "en",
+    "preamble" : false,
+    "ratio" : 0.640625,
+    "rawChars" : 384,
+    "reportFraming" : [
+
+    ],
+    "run" : 3
+  }
+]

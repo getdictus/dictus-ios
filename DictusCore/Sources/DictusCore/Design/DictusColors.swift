@@ -28,9 +28,6 @@ public extension Color {
     /// Success state green (#22C55E)
     static let dictusSuccess = Color(hex: 0x22C55E)
 
-    /// Smart mode purple (#8B5CF6)
-    static let dictusSmartMode = Color(hex: 0x8B5CF6)
-
     // MARK: - Adaptive Colors (light/dark mode)
 
     /// Background color: #0A1628 dark / system background light

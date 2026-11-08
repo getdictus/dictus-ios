@@ -32,7 +32,8 @@ final class ProGatingTests: XCTestCase {
         SharedKeys.proActive,
         SharedKeys.smartModeEnabled,
         SharedKeys.historyEnabled,
-        SharedKeys.vocabularyEnabled
+        SharedKeys.vocabularyEnabled,
+        SharedKeys.voiceNotesEnabled
     ]
 
     override func setUp() {
@@ -47,14 +48,16 @@ final class ProGatingTests: XCTestCase {
 
     // MARK: - ProFeature
 
-    func testProFeatureHasExactlyThreeCases() {
-        XCTAssertEqual(ProFeature.allCases.count, 3)
+    /// Four since #620 added shared voice notes.
+    func testProFeatureHasExactlyFourCases() {
+        XCTAssertEqual(ProFeature.allCases.count, 4)
     }
 
     func testSettingsKeyMapping() {
         XCTAssertEqual(ProFeature.smartMode.settingsKey, SharedKeys.smartModeEnabled)
         XCTAssertEqual(ProFeature.history.settingsKey, SharedKeys.historyEnabled)
         XCTAssertEqual(ProFeature.vocabulary.settingsKey, SharedKeys.vocabularyEnabled)
+        XCTAssertEqual(ProFeature.voiceNotes.settingsKey, SharedKeys.voiceNotesEnabled)
     }
 
     func testDisplayMetadataNonEmpty() {
@@ -234,5 +237,29 @@ final class ProGatingTests: XCTestCase {
         XCTAssertEqual(event.level, .error)
         XCTAssertEqual(event.name, "subscriptionError")
         XCTAssertEqual(event.message, "action=purchase error=cancelled")
+    }
+
+    /// A failed purchase names its product and the bridged NSError (#842): the
+    /// localized text is shared by several StoreKit errors.
+    func testSubscriptionErrorPurchaseCarriesProductDomainAndCode() {
+        let event = LogEvent.subscriptionError(
+            action: "purchase",
+            error: "Cannot process the request",
+            product: "solutions.pivi.dictus.pro.monthly",
+            domain: "SKErrorDomain",
+            code: 0
+        )
+        XCTAssertEqual(
+            event.message,
+            "action=purchase product=solutions.pivi.dictus.pro.monthly"
+                + " error=Cannot process the request domain=SKErrorDomain code=0"
+        )
+    }
+
+    /// `loadProducts` and `restore` pass none of the new fields, so their line
+    /// stays byte-identical to the two-field form.
+    func testSubscriptionErrorWithoutOptionalFieldsIsUnchanged() {
+        let event = LogEvent.subscriptionError(action: "restore", error: "offline")
+        XCTAssertEqual(event.message, "action=restore error=offline")
     }
 }

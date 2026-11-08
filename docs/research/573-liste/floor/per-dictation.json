@@ -1,0 +1,4064 @@
+[
+ {
+  "id": "8fdb7e2fa8",
+  "characters": 4,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "rejectedGuardrail",
+    "rejectedCheck": "length",
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "rejectedGuardrail",
+    "rejectedCheck": "length",
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "d5445583ef",
+  "characters": 4,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "rejectedGuardrail",
+    "rejectedCheck": "length",
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "rejectedGuardrail",
+    "rejectedCheck": "length",
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "f3db7d04c2",
+  "characters": 4,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "rejectedGuardrail",
+    "rejectedCheck": "length",
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "rejectedGuardrail",
+    "rejectedCheck": "length",
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "4371ac3060",
+  "characters": 5,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "rejectedGuardrail",
+    "rejectedCheck": "length",
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "rejectedGuardrail",
+    "rejectedCheck": "length",
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "530330d523",
+  "characters": 6,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "rejectedGuardrail",
+    "rejectedCheck": "length",
+    "bullets": 2
+   },
+   {
+    "run": 2,
+    "outcome": "rejectedGuardrail",
+    "rejectedCheck": "length",
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "0acc97c8ea",
+  "characters": 7,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "rejectedGuardrail",
+    "rejectedCheck": "length",
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "rejectedGuardrail",
+    "rejectedCheck": "grounding",
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "d06de1233c",
+  "characters": 8,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "rejectedGuardrail",
+    "rejectedCheck": "length",
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "rejectedGuardrail",
+    "rejectedCheck": "length",
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "174534c6b3",
+  "characters": 10,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "rejectedGuardrail",
+    "rejectedCheck": "length",
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "rejectedGuardrail",
+    "rejectedCheck": "length",
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "400a56e900",
+  "characters": 14,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "8b3c24ab36",
+  "characters": 15,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "0fa07aa008",
+  "characters": 16,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "f849893fd8",
+  "characters": 16,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "113e49cc9d",
+  "characters": 17,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "9b0aa0d3a2",
+  "characters": 20,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "rejectedGuardrail",
+    "rejectedCheck": "language",
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "d459919265",
+  "characters": 20,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "rejectedGuardrail",
+    "rejectedCheck": "length",
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "2ba6380108",
+  "characters": 21,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "rejectedGuardrail",
+    "rejectedCheck": "length",
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "rejectedGuardrail",
+    "rejectedCheck": "length",
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "2f171cbc88",
+  "characters": 21,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "cfe3277691",
+  "characters": 22,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "0059de9818",
+  "characters": 24,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "3b6c59c4c0",
+  "characters": 24,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "af44715f04",
+  "characters": 24,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "9248f0282d",
+  "characters": 25,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "69e1d94b32",
+  "characters": 27,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "9886718738",
+  "characters": 27,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "4a4c2361f8",
+  "characters": 28,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "rejectedGuardrail",
+    "rejectedCheck": "length",
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "76fea7808e",
+  "characters": 28,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "687b7e2de9",
+  "characters": 29,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "28560520df",
+  "characters": 30,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "8719897ba8",
+  "characters": 30,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "rejectedGuardrail",
+    "rejectedCheck": "length",
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "d2f84b3a28",
+  "characters": 30,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "d40537cb66",
+  "characters": 30,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "db9b3cbb94",
+  "characters": 32,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "048c945db4",
+  "characters": 34,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "d17efcfe5a",
+  "characters": 34,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "f30cb6fda0",
+  "characters": 34,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "f79d454f6c",
+  "characters": 34,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "48a6fa5b3e",
+  "characters": 35,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "rejectedGuardrail",
+    "rejectedCheck": "length",
+    "bullets": 2
+   },
+   {
+    "run": 2,
+    "outcome": "rejectedGuardrail",
+    "rejectedCheck": "length",
+    "bullets": 2
+   }
+  ]
+ },
+ {
+  "id": "a8081076bb",
+  "characters": 35,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "125b20fca0",
+  "characters": 37,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "e9f19de067",
+  "characters": 37,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "34a58f0543",
+  "characters": 38,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "36612bff40",
+  "characters": 38,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "56fba99f30",
+  "characters": 38,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "2a33691fc0",
+  "characters": 39,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "8d50eeca2b",
+  "characters": 42,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "9ccdead4b3",
+  "characters": 42,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "a0ab05192c",
+  "characters": 43,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "e89782aa15",
+  "characters": 43,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "150a38b59a",
+  "characters": 44,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "3038b7f3fa",
+  "characters": 45,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "57d62cd630",
+  "characters": 45,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 2
+   }
+  ]
+ },
+ {
+  "id": "c81eb6e0aa",
+  "characters": 45,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "56cf59d9cf",
+  "characters": 47,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "rejectedGuardrail",
+    "rejectedCheck": "language",
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "bbf1faa54a",
+  "characters": 47,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "dd06cc4351",
+  "characters": 47,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "66ff2cc2b6",
+  "characters": 48,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "9163bcd701",
+  "characters": 49,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "d8649165ef",
+  "characters": 50,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "ed309b208d",
+  "characters": 50,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "7dcd32f015",
+  "characters": 54,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "92ab4aa808",
+  "characters": 54,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "f6931aec6c",
+  "characters": 55,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "2064bd0195",
+  "characters": 56,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "rejectedGuardrail",
+    "rejectedCheck": "segmentOverlap",
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "0c192ca350",
+  "characters": 58,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "f4e18ccb70",
+  "characters": 58,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "rejectedGuardrail",
+    "rejectedCheck": "language",
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "90e306378c",
+  "characters": 59,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "fa94336178",
+  "characters": 59,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "3e6d98d2ac",
+  "characters": 60,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "150d6db3fb",
+  "characters": 61,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "421fbbe8b1",
+  "characters": 61,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "8d2b5fe02d",
+  "characters": 61,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 2
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 2
+   }
+  ]
+ },
+ {
+  "id": "a3e713abcc",
+  "characters": 61,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 2
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 2
+   }
+  ]
+ },
+ {
+  "id": "274e63fa6a",
+  "characters": 64,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "rejectedGuardrail",
+    "rejectedCheck": "language",
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "d0cc8a689d",
+  "characters": 65,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "0fdedd390f",
+  "characters": 66,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "rejectedGuardrail",
+    "rejectedCheck": "segmentOverlap",
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "2e89fb111c",
+  "characters": 67,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "rejectedGuardrail",
+    "rejectedCheck": "language",
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "rejectedGuardrail",
+    "rejectedCheck": "language",
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "7f5aa45a89",
+  "characters": 67,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "b62b2ecbde",
+  "characters": 67,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "c2cfe90226",
+  "characters": 68,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "1914499ff5",
+  "characters": 69,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "3df5b0a3da",
+  "characters": 69,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "4a7dad8456",
+  "characters": 69,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 2
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 2
+   }
+  ]
+ },
+ {
+  "id": "588b8d0fb8",
+  "characters": 72,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "908f206d78",
+  "characters": 72,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "fcaed37e88",
+  "characters": 72,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 2
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 2
+   }
+  ]
+ },
+ {
+  "id": "1417b37f0f",
+  "characters": 73,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "5b8c8c15c4",
+  "characters": 73,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "8be95d1fa0",
+  "characters": 73,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "dca657b0e6",
+  "characters": 73,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "cd48013e3d",
+  "characters": 74,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "3d18f68d87",
+  "characters": 76,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "d0dc1402b9",
+  "characters": 76,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "111fddad4c",
+  "characters": 77,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "b45902ff39",
+  "characters": 77,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "bd7f66ef21",
+  "characters": 77,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "be6292d222",
+  "characters": 78,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "5f4eb4a82d",
+  "characters": 80,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 2
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 2
+   }
+  ]
+ },
+ {
+  "id": "612b61f864",
+  "characters": 80,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "d65daf2ecf",
+  "characters": 80,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "02abaedfe0",
+  "characters": 81,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "60b01a0aa6",
+  "characters": 81,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 2
+   }
+  ]
+ },
+ {
+  "id": "9595244291",
+  "characters": 81,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "rejectedGuardrail",
+    "rejectedCheck": "segmentOverlap",
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "a1d8b290b6",
+  "characters": 81,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "017600d3f4",
+  "characters": 83,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "7164036575",
+  "characters": 83,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "a3e77515ea",
+  "characters": 83,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "06927268d9",
+  "characters": 84,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "d37e6c98fa",
+  "characters": 84,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "150074c089",
+  "characters": 87,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "75b2dce258",
+  "characters": 87,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "d6b2843232",
+  "characters": 90,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "rejectedGuardrail",
+    "rejectedCheck": "language",
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "27c8752eab",
+  "characters": 91,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "50c38b7ce9",
+  "characters": 91,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "d099747114",
+  "characters": 91,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "0d8850a2aa",
+  "characters": 92,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "2c6de534d4",
+  "characters": 93,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "bca0de6e2a",
+  "characters": 93,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "b4eea2e21d",
+  "characters": 94,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 2
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 2
+   }
+  ]
+ },
+ {
+  "id": "7ea5f0e325",
+  "characters": 97,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "c694d639ec",
+  "characters": 104,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 2
+   }
+  ]
+ },
+ {
+  "id": "f19c0286e7",
+  "characters": 105,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 3
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 3
+   }
+  ]
+ },
+ {
+  "id": "ac5768fd45",
+  "characters": 107,
+  "runs": [
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "a22d791b8c",
+  "characters": 108,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "22616e56ea",
+  "characters": 111,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 2
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 2
+   }
+  ]
+ },
+ {
+  "id": "442d733b76",
+  "characters": 111,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 2
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 2
+   }
+  ]
+ },
+ {
+  "id": "f8b7bba40e",
+  "characters": 111,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "e669d9c638",
+  "characters": 112,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 2
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 2
+   }
+  ]
+ },
+ {
+  "id": "61e1471884",
+  "characters": 115,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 2
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 2
+   }
+  ]
+ },
+ {
+  "id": "160a1946ab",
+  "characters": 116,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 2
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 2
+   }
+  ]
+ },
+ {
+  "id": "7240c48582",
+  "characters": 117,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 2
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 2
+   }
+  ]
+ },
+ {
+  "id": "b2d519bb92",
+  "characters": 119,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 2
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "0c494fff49",
+  "characters": 120,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 2
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 2
+   }
+  ]
+ },
+ {
+  "id": "ae6c2cd5bc",
+  "characters": 120,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "b59d1cd323",
+  "characters": 120,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "f8661b7ce8",
+  "characters": 121,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "fc1c75f73b",
+  "characters": 122,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "1263c76354",
+  "characters": 124,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 4
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 4
+   }
+  ]
+ },
+ {
+  "id": "7cada273f2",
+  "characters": 124,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 3
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 2
+   }
+  ]
+ },
+ {
+  "id": "e122e7b4c8",
+  "characters": 124,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 2
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 2
+   }
+  ]
+ },
+ {
+  "id": "65995b5cf5",
+  "characters": 125,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 3
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 3
+   }
+  ]
+ },
+ {
+  "id": "f0ad18ddc5",
+  "characters": 127,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "5cae987b13",
+  "characters": 128,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "c3d9200df7",
+  "characters": 128,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "10fa341531",
+  "characters": 129,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 2
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "414ae3eed8",
+  "characters": 129,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 3
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 3
+   }
+  ]
+ },
+ {
+  "id": "495087b709",
+  "characters": 129,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "0aa7dea5a1",
+  "characters": 131,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 2
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 2
+   }
+  ]
+ },
+ {
+  "id": "df9d609c10",
+  "characters": 131,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "fde1df614d",
+  "characters": 131,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 2
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 3
+   }
+  ]
+ },
+ {
+  "id": "95a6adc1df",
+  "characters": 132,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 3
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 3
+   }
+  ]
+ },
+ {
+  "id": "dabe4a9309",
+  "characters": 134,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "ddb3fe3019",
+  "characters": 134,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "6c024f2ae2",
+  "characters": 135,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "629aba954a",
+  "characters": 140,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "rejectedGuardrail",
+    "rejectedCheck": "segmentOverlap",
+    "bullets": 2
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 2
+   }
+  ]
+ },
+ {
+  "id": "4688fb70d2",
+  "characters": 141,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 3
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 3
+   }
+  ]
+ },
+ {
+  "id": "29c5f81fc6",
+  "characters": 143,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "e2c10941d7",
+  "characters": 144,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 3
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 2
+   }
+  ]
+ },
+ {
+  "id": "e75c335d4c",
+  "characters": 145,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "321410955b",
+  "characters": 146,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "62992df3f2",
+  "characters": 146,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "655285ab75",
+  "characters": 148,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "03664c5497",
+  "characters": 149,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 3
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 3
+   }
+  ]
+ },
+ {
+  "id": "66dc894ddf",
+  "characters": 149,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 2
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 2
+   }
+  ]
+ },
+ {
+  "id": "9ea18dcc18",
+  "characters": 151,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "5bc3fea54f",
+  "characters": 152,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 2
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 2
+   }
+  ]
+ },
+ {
+  "id": "83cd06baae",
+  "characters": 153,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 2
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "9ecad1ea22",
+  "characters": 154,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "e58e7ab5c5",
+  "characters": 160,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 2
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 3
+   }
+  ]
+ },
+ {
+  "id": "005ec8a185",
+  "characters": 161,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "61d150befd",
+  "characters": 161,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 2
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 2
+   }
+  ]
+ },
+ {
+  "id": "943bf5dc1e",
+  "characters": 162,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 2
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 2
+   }
+  ]
+ },
+ {
+  "id": "3587685908",
+  "characters": 163,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 2
+   },
+   {
+    "run": 2,
+    "outcome": "rejectedGuardrail",
+    "rejectedCheck": "language",
+    "bullets": 3
+   }
+  ]
+ },
+ {
+  "id": "3b6fc00b7b",
+  "characters": 163,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 2
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 2
+   }
+  ]
+ },
+ {
+  "id": "1f789079c1",
+  "characters": 164,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 2
+   }
+  ]
+ },
+ {
+  "id": "b0f378d3a8",
+  "characters": 167,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 2
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 2
+   }
+  ]
+ },
+ {
+  "id": "3a85ffff21",
+  "characters": 168,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "f975eb9e68",
+  "characters": 170,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 3
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 3
+   }
+  ]
+ },
+ {
+  "id": "7fcf9e0fcb",
+  "characters": 172,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 2
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 2
+   }
+  ]
+ },
+ {
+  "id": "023374b98b",
+  "characters": 173,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 2
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 2
+   }
+  ]
+ },
+ {
+  "id": "296e95fb76",
+  "characters": 173,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "58510935d4",
+  "characters": 175,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 2
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 2
+   }
+  ]
+ },
+ {
+  "id": "d707d779c0",
+  "characters": 177,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "7212be89a0",
+  "characters": 179,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 2
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 2
+   }
+  ]
+ },
+ {
+  "id": "edf9210bcb",
+  "characters": 179,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "42848c7970",
+  "characters": 181,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "f706f3eee9",
+  "characters": 181,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 2
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 2
+   }
+  ]
+ },
+ {
+  "id": "c1430a4d0b",
+  "characters": 184,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 3
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 3
+   }
+  ]
+ },
+ {
+  "id": "97023e9992",
+  "characters": 185,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 2
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "8523c98190",
+  "characters": 187,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "fe6ed0f047",
+  "characters": 187,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "a6f30c8e0c",
+  "characters": 188,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 2
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 2
+   }
+  ]
+ },
+ {
+  "id": "88f1409cf8",
+  "characters": 192,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 3
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 3
+   }
+  ]
+ },
+ {
+  "id": "f3546bdf68",
+  "characters": 192,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 3
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 3
+   }
+  ]
+ },
+ {
+  "id": "82bb0aec6d",
+  "characters": 196,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 3
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 3
+   }
+  ]
+ },
+ {
+  "id": "1800235af2",
+  "characters": 197,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 2
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 2
+   }
+  ]
+ },
+ {
+  "id": "df0bbdb197",
+  "characters": 200,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 3
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 2
+   }
+  ]
+ },
+ {
+  "id": "2901c88cf2",
+  "characters": 203,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 2
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 2
+   }
+  ]
+ },
+ {
+  "id": "29223f195f",
+  "characters": 206,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 2
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "0780d07f65",
+  "characters": 210,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 3
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 3
+   }
+  ]
+ },
+ {
+  "id": "c4a91beedb",
+  "characters": 220,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 2
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 2
+   }
+  ]
+ },
+ {
+  "id": "07bf9ab73f",
+  "characters": 222,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 2
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 2
+   }
+  ]
+ },
+ {
+  "id": "5309ba9a04",
+  "characters": 223,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "3b0d947ca4",
+  "characters": 225,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 2
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 2
+   }
+  ]
+ },
+ {
+  "id": "6b0c88dc8b",
+  "characters": 229,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 3
+   }
+  ]
+ },
+ {
+  "id": "1f1d4ee9ab",
+  "characters": 239,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "30892347a8",
+  "characters": 241,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 4
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 4
+   }
+  ]
+ },
+ {
+  "id": "420573cbd5",
+  "characters": 244,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "6c035c10fb",
+  "characters": 246,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 3
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 3
+   }
+  ]
+ },
+ {
+  "id": "02c7e043f2",
+  "characters": 256,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 3
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 4
+   }
+  ]
+ },
+ {
+  "id": "018decee6c",
+  "characters": 261,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 2
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 2
+   }
+  ]
+ },
+ {
+  "id": "e5dab0d162",
+  "characters": 263,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 4
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 4
+   }
+  ]
+ },
+ {
+  "id": "d74293d18f",
+  "characters": 264,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 3
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 3
+   }
+  ]
+ },
+ {
+  "id": "89f43ada3a",
+  "characters": 268,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 4
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 5
+   }
+  ]
+ },
+ {
+  "id": "29fd868a86",
+  "characters": 272,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 3
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 4
+   }
+  ]
+ },
+ {
+  "id": "a97476ba9b",
+  "characters": 273,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 4
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 4
+   }
+  ]
+ },
+ {
+  "id": "5604b18eb3",
+  "characters": 274,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 3
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 3
+   }
+  ]
+ },
+ {
+  "id": "7fb2136ec4",
+  "characters": 275,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "46670e2db9",
+  "characters": 280,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 2
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 2
+   }
+  ]
+ },
+ {
+  "id": "ca1c11d1ab",
+  "characters": 281,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 4
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 4
+   }
+  ]
+ },
+ {
+  "id": "c21ba8ea50",
+  "characters": 283,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 4
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 3
+   }
+  ]
+ },
+ {
+  "id": "048f27e90c",
+  "characters": 284,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 3
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 3
+   }
+  ]
+ },
+ {
+  "id": "fb2018c10c",
+  "characters": 284,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 4
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 4
+   }
+  ]
+ },
+ {
+  "id": "30d0e478be",
+  "characters": 285,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   }
+  ]
+ },
+ {
+  "id": "74be6f5874",
+  "characters": 285,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 3
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 2
+   }
+  ]
+ },
+ {
+  "id": "8560a8b889",
+  "characters": 287,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 3
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 3
+   }
+  ]
+ },
+ {
+  "id": "3a1a13ab56",
+  "characters": 295,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 1
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 3
+   }
+  ]
+ },
+ {
+  "id": "1d39a31253",
+  "characters": 300,
+  "runs": [
+   {
+    "run": 1,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 3
+   },
+   {
+    "run": 2,
+    "outcome": "success",
+    "rejectedCheck": null,
+    "bullets": 3
+   }
+  ]
+ }
+]

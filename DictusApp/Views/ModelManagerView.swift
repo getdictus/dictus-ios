@@ -90,7 +90,7 @@ struct ModelManagerView: View {
     /// Available models — excludes downloaded, downloading, and prewarming models.
     /// Users won't see Tiny/Base here since they're deprecated, with one exception:
     /// `available(on:)` keeps the device's recommended model even when deprecated, so
-    /// an A12/A13 iPhone can always reinstall Base after deleting it (issue #362).
+    /// a pre-A14 device can always reinstall Base after deleting it (issue #362).
     ///
     /// Issue #369 REVERSES the Phase 37 (#104) decision quoted here before: per-device
     /// gated models are no longer hidden. They stay in this list and `ModelCardView`
@@ -285,7 +285,7 @@ struct ModelManagerView: View {
                 }
             }
         } message: { model in
-            Text("Delete \(model.displayName)? The model will be removed from your device.")
+            Text("Delete \(model.localizedDisplayName)? The model will be removed from your device.")
         }
         // Partial-download delete confirmation alert (issue #235).
         // WHY no ModelManager error handling here: cleanupFailedModel cannot
@@ -297,7 +297,7 @@ struct ModelManagerView: View {
                 modelManager.cleanupFailedModel(model.identifier)
             }
         } message: { model in
-            Text("Delete the partially downloaded files for \(model.displayName)? The next download will start from the beginning.")
+            Text("Delete the partially downloaded files for \(model.localizedDisplayName)? The next download will start from the beginning.")
         }
         // Error alert
         .alert("Error", isPresented: $showErrorAlert) {

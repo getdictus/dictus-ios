@@ -1,0 +1,576 @@
+[
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "es-free-form",
+    "hasEngineOutput" : true,
+    "lang" : "es",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 4025,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "rejectedGuardrail",
+    "output" : "Al final cuando lanzas un producto tú solo lo más difícil no es programarlo es decidir qué no hacer porque siempre hay una idea que parece mejor que la que estás haciendo ahora mismo y te lanzas a por ella y a los 6 meses tienes 15 cosas empezadas y nada terminado.",
+    "outputChars" : 265,
+    "outputLanguage" : "es",
+    "preamble" : false,
+    "ratio" : 0.7181571815718157,
+    "rawChars" : 369,
+    "rejectedCheck" : "length",
+    "reportFraming" : [
+
+    ],
+    "run" : 1
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "es-free-form",
+    "hasEngineOutput" : true,
+    "lang" : "es",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 4046,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "rejectedGuardrail",
+    "output" : "Al final cuando lanzas un producto tú solo lo más difícil no es programarlo es decidir qué no hacer porque siempre hay una idea que parece mejor que la que estás haciendo ahora mismo y te lanzas a por ella y a los 6 meses tienes 15 cosas empezadas y nada terminado.",
+    "outputChars" : 265,
+    "outputLanguage" : "es",
+    "preamble" : false,
+    "ratio" : 0.7181571815718157,
+    "rawChars" : 369,
+    "rejectedCheck" : "length",
+    "reportFraming" : [
+
+    ],
+    "run" : 2
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "es-free-form",
+    "hasEngineOutput" : true,
+    "lang" : "es",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 3677,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "rejectedGuardrail",
+    "output" : "Pensé esta mañana que lo más difícil al lanzar un producto solo no es programarlo sino decidir qué no hacer porque siempre hay una idea que parece mejor que lo que estás haciendo y te lanzas a por ella y a los seis meses tienes quince cosas empezadas y nada terminado.",
+    "outputChars" : 268,
+    "outputLanguage" : "es",
+    "preamble" : false,
+    "ratio" : 0.7262872628726287,
+    "rawChars" : 369,
+    "rejectedCheck" : "length",
+    "reportFraming" : [
+
+    ],
+    "run" : 3
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "es-free-form",
+    "hasEngineOutput" : true,
+    "lang" : "es",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 3848,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "rejectedGuardrail",
+    "output" : "Al final cuando lanzas un producto tú solo lo más difícil no es programarlo es decidir qué no hacer porque siempre hay una idea que parece mejor que la que estás haciendo ahora mismo y te lanzas a por ella y a los 6 meses tienes 15 cosas empezadas y nada terminado.",
+    "outputChars" : 265,
+    "outputLanguage" : "es",
+    "preamble" : false,
+    "ratio" : 0.7181571815718157,
+    "rawChars" : 369,
+    "rejectedCheck" : "length",
+    "reportFraming" : [
+
+    ],
+    "run" : 4
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "es-free-form",
+    "hasEngineOutput" : true,
+    "lang" : "es",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 3231,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "rejectedGuardrail",
+    "output" : "Cuando lanzas un producto solo lo más difícil no es programarlo es decidir qué no hacer porque siempre hay una idea que parece mejor que lo que estás haciendo ahora y te lanzas a por ella y a los seis meses tienes quince cosas empezadas y nada terminado.",
+    "outputChars" : 254,
+    "outputLanguage" : "es",
+    "preamble" : false,
+    "ratio" : 0.6883468834688347,
+    "rawChars" : 369,
+    "rejectedCheck" : "length",
+    "reportFraming" : [
+
+    ],
+    "run" : 5
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "es-todo-enumeration",
+    "hasEngineOutput" : true,
+    "lang" : "es",
+    "languageMatches" : false,
+    "listLines" : 0,
+    "ms" : 4251,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "rejectedGuardrail",
+    "output" : "I need to get Marion's January figures by Tuesday, make a comparative table with last year's data, call the supplier because their budget rose from 12000 to 15000 euros without approval, and reserve the second floor room because the other is occupied all week.",
+    "outputChars" : 260,
+    "outputLanguage" : "en",
+    "preamble" : false,
+    "ratio" : 0.49429657794676807,
+    "rawChars" : 526,
+    "rejectedCheck" : "language",
+    "reportFraming" : [
+
+    ],
+    "run" : 1
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "es-todo-enumeration",
+    "hasEngineOutput" : true,
+    "lang" : "es",
+    "languageMatches" : false,
+    "listLines" : 0,
+    "ms" : 5362,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "rejectedGuardrail",
+    "output" : "I must get Marion's January figures on Tuesday, make the comparative table with last year's data, call the supplier because their budget rose from 12000 to 15000 euros and no one approved, and remember to reserve the second floor room because the other one is occupied all week.",
+    "outputChars" : 278,
+    "outputLanguage" : "en",
+    "preamble" : false,
+    "ratio" : 0.5285171102661597,
+    "rawChars" : 526,
+    "rejectedCheck" : "language",
+    "reportFraming" : [
+
+    ],
+    "run" : 2
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "es-todo-enumeration",
+    "hasEngineOutput" : true,
+    "lang" : "es",
+    "languageMatches" : false,
+    "listLines" : 0,
+    "ms" : 5050,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "rejectedGuardrail",
+    "output" : "I must get Marion's January figures by Tuesday, make a comparative table with last year's, call the supplier about the budget rising from 12000 to 15000 euros, and reserve the second floor room because the other is occupied all week.",
+    "outputChars" : 233,
+    "outputLanguage" : "en",
+    "preamble" : false,
+    "ratio" : 0.4429657794676806,
+    "rawChars" : 526,
+    "rejectedCheck" : "language",
+    "reportFraming" : [
+
+    ],
+    "run" : 3
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "es-todo-enumeration",
+    "hasEngineOutput" : true,
+    "lang" : "es",
+    "languageMatches" : false,
+    "listLines" : 0,
+    "ms" : 4709,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "rejectedGuardrail",
+    "output" : "I must get Marion's January figures by Tuesday, make the comparative table with last year's data, call the supplier because their budget rose from 12000 to 15000 euros and no one approved it, and reserve the second floor room because the other one is occupied all week.",
+    "outputChars" : 269,
+    "outputLanguage" : "en",
+    "preamble" : false,
+    "ratio" : 0.5114068441064639,
+    "rawChars" : 526,
+    "rejectedCheck" : "language",
+    "reportFraming" : [
+
+    ],
+    "run" : 4
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "es-todo-enumeration",
+    "hasEngineOutput" : true,
+    "lang" : "es",
+    "languageMatches" : false,
+    "listLines" : 0,
+    "ms" : 3531,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "rejectedGuardrail",
+    "output" : "I need to get Marion's January figures by Tuesday, make a comparative table with last year's data, call the supplier because their budget rose from 12000 to 15000 euros and no one approved it, and reserve the second floor room because the other one is occupied all week.",
+    "outputChars" : 270,
+    "outputLanguage" : "en",
+    "preamble" : false,
+    "ratio" : 0.5133079847908745,
+    "rawChars" : 526,
+    "rejectedCheck" : "language",
+    "reportFraming" : [
+
+    ],
+    "run" : 5
+  },
+  {
+    "arm" : "arm-es-examples",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "es-free-form",
+    "hasEngineOutput" : true,
+    "lang" : "es",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 2330,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "rejectedGuardrail",
+    "output" : "Al final cuando lanzas un producto tú solo lo más difícil no es programarlo, es decidir qué no hacer porque siempre hay una idea que parece mejor que la que estás haciendo ahora mismo y te lanzas a por ella y a los 6 meses tienes 15 cosas empezadas y nada terminado.",
+    "outputChars" : 266,
+    "outputLanguage" : "es",
+    "preamble" : false,
+    "ratio" : 0.7208672086720868,
+    "rawChars" : 369,
+    "rejectedCheck" : "length",
+    "reportFraming" : [
+
+    ],
+    "run" : 1
+  },
+  {
+    "arm" : "arm-es-examples",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "es-free-form",
+    "hasEngineOutput" : true,
+    "lang" : "es",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 2198,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "rejectedGuardrail",
+    "output" : "Al final cuando lanzas un producto solo lo más difícil no es programarlo es decidir qué no hacer porque siempre hay una idea que parece mejor que la que estás haciendo ahora mismo y te lanzas a por ella y a los 6 meses tienes 15 cosas empezadas y nada terminado.",
+    "outputChars" : 262,
+    "outputLanguage" : "es",
+    "preamble" : false,
+    "ratio" : 0.7100271002710027,
+    "rawChars" : 369,
+    "rejectedCheck" : "length",
+    "reportFraming" : [
+
+    ],
+    "run" : 2
+  },
+  {
+    "arm" : "arm-es-examples",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "es-free-form",
+    "hasEngineOutput" : true,
+    "lang" : "es",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 3703,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "rejectedGuardrail",
+    "output" : "Al final cuando lanzas un producto solo lo más difícil es decidir qué no hacer porque siempre hay una idea que parece mejor que lo que estás haciendo ahora y te lanzas a por ella y a los seis meses tienes quince cosas empezadas y nada terminado.",
+    "outputChars" : 245,
+    "outputLanguage" : "es",
+    "preamble" : false,
+    "ratio" : 0.6639566395663956,
+    "rawChars" : 369,
+    "rejectedCheck" : "length",
+    "reportFraming" : [
+
+    ],
+    "run" : 3
+  },
+  {
+    "arm" : "arm-es-examples",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "es-free-form",
+    "hasEngineOutput" : true,
+    "lang" : "es",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 3519,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "Al lanzar un producto solo lo más difícil es decidir qué no hacer porque siempre hay una idea mejor que la actual y te lanzas a por ella y a los 6 meses tienes 15 cosas empezadas y nada terminado.",
+    "outputChars" : 196,
+    "outputLanguage" : "es",
+    "preamble" : false,
+    "ratio" : 0.5311653116531165,
+    "rawChars" : 369,
+    "reportFraming" : [
+
+    ],
+    "run" : 4
+  },
+  {
+    "arm" : "arm-es-examples",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "es-free-form",
+    "hasEngineOutput" : true,
+    "lang" : "es",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 3717,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "rejectedGuardrail",
+    "output" : "Al final cuando lanzas un producto solo lo más difícil no es programarlo es decidir qué no hacer porque siempre hay una idea que parece mejor que la que estás haciendo ahora y te lanzas a por ella y a los 6 meses tienes 15 cosas empezadas y nada terminado.",
+    "outputChars" : 256,
+    "outputLanguage" : "es",
+    "preamble" : false,
+    "ratio" : 0.6937669376693767,
+    "rawChars" : 369,
+    "rejectedCheck" : "length",
+    "reportFraming" : [
+
+    ],
+    "run" : 5
+  },
+  {
+    "arm" : "arm-es-examples",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "es-todo-enumeration",
+    "hasEngineOutput" : true,
+    "lang" : "es",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 2705,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "Tengo que conseguir las cifras de enero de Marion el martes, hacer la tabla comparativa con las del año pasado, llamar al proveedor porque su presupuesto subió de 12000 a 15000 euros, y reservar la sala del segundo piso porque la otra está ocupada toda la semana.",
+    "outputChars" : 263,
+    "outputLanguage" : "es",
+    "preamble" : false,
+    "ratio" : 0.5,
+    "rawChars" : 526,
+    "reportFraming" : [
+
+    ],
+    "run" : 1
+  },
+  {
+    "arm" : "arm-es-examples",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "es-todo-enumeration",
+    "hasEngineOutput" : true,
+    "lang" : "es",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 2929,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "Tengo que conseguir las cifras de enero de Marion el martes, hacer la tabla comparativa con las del año pasado, llamar al proveedor porque su presupuesto ha subido de 12000 a 15000 euros, y reservar la sala del segundo piso porque la otra está ocupada toda la semana.",
+    "outputChars" : 267,
+    "outputLanguage" : "es",
+    "preamble" : false,
+    "ratio" : 0.5076045627376425,
+    "rawChars" : 526,
+    "reportFraming" : [
+
+    ],
+    "run" : 2
+  },
+  {
+    "arm" : "arm-es-examples",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "es-todo-enumeration",
+    "hasEngineOutput" : true,
+    "lang" : "es",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 3101,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "Tengo que conseguir las cifras de enero de Marion el martes, hacer la tabla comparativa con las del año pasado, llamar al proveedor porque el presupuesto subió de 12000 a 15000 euros y reservar la sala del segundo piso porque la otra está ocupada toda la semana.",
+    "outputChars" : 262,
+    "outputLanguage" : "es",
+    "preamble" : false,
+    "ratio" : 0.49809885931558934,
+    "rawChars" : 526,
+    "reportFraming" : [
+
+    ],
+    "run" : 3
+  },
+  {
+    "arm" : "arm-es-examples",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "es-todo-enumeration",
+    "hasEngineOutput" : true,
+    "lang" : "es",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 3867,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "Tengo que conseguir las cifras de enero de Marion el martes, hacer la tabla comparativa con las del año pasado, llamar al proveedor porque su presupuesto ha subido de 12000 a 15000 euros, y reservar la sala del segundo piso porque la otra está ocupada toda la semana.",
+    "outputChars" : 267,
+    "outputLanguage" : "es",
+    "preamble" : false,
+    "ratio" : 0.5076045627376425,
+    "rawChars" : 526,
+    "reportFraming" : [
+
+    ],
+    "run" : 4
+  },
+  {
+    "arm" : "arm-es-examples",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "es-todo-enumeration",
+    "hasEngineOutput" : true,
+    "lang" : "es",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 2965,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "Tengo que conseguir las cifras de enero de Marion el martes, hacer la tabla comparativa con las del año pasado, llamar al proveedor porque el presupuesto ha subido de 12000 a 15000 euros, y reservar la sala del segundo piso porque la otra está ocupada toda la semana.",
+    "outputChars" : 267,
+    "outputLanguage" : "es",
+    "preamble" : false,
+    "ratio" : 0.5076045627376425,
+    "rawChars" : 526,
+    "reportFraming" : [
+
+    ],
+    "run" : 5
+  }
+]

@@ -16,8 +16,20 @@ final class LogPrivacyTests: XCTestCase {
             .audioEngineStopped,
             .audioSessionConfigured(category: "playAndRecord"),
             .audioSessionFailed(error: "configError"),
+            .audioSessionActivationFailed(step: "setActive", domain: "NSOSStatusErrorDomain", code: 560557684,
+                                          status: "560557684 '!int'", errorDescription: "Session activation failed",
+                                          context: "mediaServicesLost=false route=none"),
             .transcriptionStarted(modelName: "base"),
             .transcriptionCompleted(durationMs: 2500, wordCount: 42, confidence: 0.916),
+            .transcriptionCompleted(durationMs: 3400, wordCount: 214, confidence: 0.916,
+                                    retry: DriftRetryStats(spans: 3, wins: 2, durationMs: 2210)),
+            // The one deliberate exception (#861): the text of a span the drift retry
+            // replaced, and nothing of the dictation around it, in a test build only. The
+            // App Store line carries the two lengths; `testTheAppStoreDriftRetryLineCarriesNoText`.
+            .driftRetrySpanReplaced(startMs: 11_520, endMs: 18_960, before: "english9 english10",
+                                    after: "français français", channel: .testBuild),
+            .driftRetrySpanReplaced(startMs: 11_520, endMs: 18_960, before: "english9 english10",
+                                    after: "français français", channel: .appStore),
             .transcriptionFailed(error: "modelNotLoaded"),
             // #80's pass reports counters only. A term the user typed is their own
             // vocabulary, and a character count of the transcript is not the transcript.
@@ -61,6 +73,51 @@ final class LogPrivacyTests: XCTestCase {
                 path: "Encoder.mlmodelc/weights/weight.bin",
                 secondsWithoutProgress: 15
             ),
+            // Task diagnosis (#690, #707): task state, the session that holds it, byte
+            // counts and an error domain and code. Nothing the user said or typed.
+            .modelDownloadTaskState(
+                name: "parakeet-tdt-0.6b-v3",
+                path: "Encoder.mlmodelc/weights/weight.bin",
+                chunk: 0,
+                phase: "restore",
+                origin: "adopted",
+                session: "bg",
+                state: "suspended",
+                receivedBytes: 11_534_336,
+                error: "none"
+            ),
+            .modelDownloadTaskState(
+                name: "parakeet-tdt-0.6b-v3",
+                path: "Encoder.mlmodelc/weights/weight.bin",
+                chunk: 6,
+                phase: "start+10s",
+                origin: "new",
+                session: "fg",
+                state: "running",
+                receivedBytes: 0,
+                error: "none"
+            ),
+            .modelDownloadBackgroundTaskSilent(
+                name: "parakeet-tdt-0.6b-v3",
+                path: "Encoder.mlmodelc/weights/weight.bin",
+                chunk: 0,
+                origin: "new",
+                secondsWithoutByte: 30
+            ),
+            .modelDownloadTaskCancelled(
+                name: "parakeet-tdt-0.6b-v3",
+                path: "Encoder.mlmodelc/weights/weight.bin",
+                chunk: 0,
+                caller: "silentTaskWatchdog"
+            ),
+            // Orphaned chunks (#732): indices and a length reason. No bytes, no URL.
+            .modelDownloadOrphanedChunks(
+                name: "parakeet-tdt-0.6b-v3",
+                path: "Encoder.mlmodelc/weights/weight.bin",
+                file: 7,
+                absorbed: [0, 1],
+                discarded: ["2:chunk-length-100-expected-33554432"]
+            ),
             .modelSelected(name: "base"),
             .modelCompilationStarted(name: "base"),
             .modelCompilationCompleted(name: "base", durationMs: 5000),
@@ -71,6 +128,9 @@ final class LogPrivacyTests: XCTestCase {
             .keyRepeatStarted,
             .keyRepeatStopped(ticks: 12, reason: "touch"),
             .appLaunched(version: "1.2"),
+            .appLaunchState(state: "background"),
+            // The background session's identifier, a constant of the app (#707).
+            .appBackgroundSessionEvents(identifier: "com.pivi.dictus.model-download"),
             .appDidBecomeActive,
             .appWillResignActive,
             .appDidEnterBackground,
@@ -97,6 +157,22 @@ final class LogPrivacyTests: XCTestCase {
                     "Event \(formatted) contains sensitive pattern '\(pattern)'"
                 )
             }
+        }
+    }
+
+    /// #861: the App Store build logs where the replaced span sits and how long it was on
+    /// each side, never its words. So does an event built without a channel.
+    func testTheAppStoreDriftRetryLineCarriesNoText() {
+        for event in [
+            LogEvent.driftRetrySpanReplaced(startMs: 11_520, endMs: 18_960, before: "english9 english10",
+                                            after: "français français", channel: .appStore),
+            LogEvent.driftRetrySpanReplaced(startMs: 11_520, endMs: 18_960, before: "english9 english10",
+                                            after: "français français")
+        ] {
+            let formatted = event.formatted()
+            XCTAssertFalse(formatted.contains("english"), formatted)
+            XCTAssertFalse(formatted.contains("français"), formatted)
+            XCTAssertTrue(formatted.hasSuffix("startMs=11520 endMs=18960 beforeLen=18 afterLen=17"), formatted)
         }
     }
 

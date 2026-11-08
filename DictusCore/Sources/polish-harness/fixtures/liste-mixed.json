@@ -1,0 +1,37 @@
+[
+  {
+    "id": "M1-fr-week-end",
+    "lang": "fr",
+    "sttEngine": "PK",
+    "_note": "#573 decision 2's own example, spoken: actions and a statement interleaved, with a self-correction. Expected shape: a title from 'pour le week-end', two infinitive tasks, and the train time kept as a statement in its corrected form (9 h, not 10 h).",
+    "raw": "Bon alors pour le week-end il faut que je réserve le restaurant pour samedi, ah et le train il part à 9h, pas 10h, je me suis trompé l'autre jour, et faut que je demande à Julie si elle vient ou pas."
+  },
+  {
+    "id": "M2-fr-chantier",
+    "lang": "fr",
+    "sttEngine": "PK",
+    "_note": "#573 decision 1. Mixed again, with a repeated point that must be merged and an opinion that must stay one.",
+    "raw": "Alors pour l'appartement, le plombier passe mardi matin, donc il faut que je sois là avant huit heures. La peinture du salon est sèche, elle rend bien, franchement je suis content de la couleur. Et il faut que je rachète des ampoules pour la cuisine, oui des ampoules pour la cuisine, j'oublie tout le temps."
+  },
+  {
+    "id": "M3-en-launch",
+    "lang": "en",
+    "sttEngine": "PK",
+    "_note": "#573 decision 1, English. Two actions, two statements, one of them a figure.",
+    "raw": "Okay so for the launch, I need to send the press kit by Friday. The landing page is live and we had about two hundred sign ups yesterday. The pricing page still says the old price, I noticed that this morning. And I have to book the photographer for next week."
+  },
+  {
+    "id": "D1-fr-device-courses",
+    "lang": "fr",
+    "sttEngine": "PK",
+    "_note": "DEVICE. A `Liste` dictation of 2026-09-24 (1.9.0, iPhone16,2, iOS 27.0), raw verbatim. 196 characters, three tasks, one reason. The device output was three infinitive bullets.",
+    "raw": "Alors je te fais un petit récap de ce qu'il faut qu'on fasse, mais en gros il faut que absolument qu'on achète du lait parce qu'on n'en a plus, acheter du gris à râper et donner à manger au chien."
+  },
+  {
+    "id": "D2-en-device-hair",
+    "lang": "en",
+    "sttEngine": "PK",
+    "_note": "DEVICE. A `Liste` dictation of 2026-09-24, raw verbatim: English, addresses the assistant, carries a Parakeet garble at the end ('hit a big stack with my own'). 124 characters, four points.",
+    "raw": "Okay could you not this please? Uh I need to uh wash my hair, cut my hair and brush my hair and hit a big stack with my own."
+  }
+]

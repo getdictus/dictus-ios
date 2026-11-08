@@ -1,0 +1,662 @@
+714 runs loaded from ['r1-device', 'r1-longform', 'r2', 'r3', 'r4']
+
+
+════ B1 — output language, per language and arm (bars.md §4)
+
+lang     arm       outputs  refusedLang  %      wrongAccepted  wrongAny 
+da       shipping  18       3            16.7   2              6        
+da       C3        18       0            0.0    3              3        
+de       shipping  18       3            16.7   0              3        
+de       C3        18       0            0.0    0              1        
+en       shipping  33       8            24.2   0              11       
+en       C3        33       0            0.0    0              0        
+es       shipping  18       1            5.6    0              5        
+es       C3        18       0            0.0    0              0        
+fr       shipping  72       1            1.4    0              1        
+fr       C3        72       0            0.0    3              3        
+it       shipping  18       1            5.6    0              6        
+it       C3        18       0            0.0    0              0        
+ja       shipping  18       0            0.0    0              13       
+ja       C3        18       0            0.0    0              0        
+ko       shipping  18       0            0.0    0              5        
+ko       C3        18       0            0.0    0              0        
+nb       shipping  18       1            5.6    0              1        
+nb       C3        18       0            0.0    0              0        
+nl       shipping  17       5            29.4   0              6        
+nl       C3        18       0            0.0    0              0        
+pt       shipping  18       2            11.1   0              3        
+pt       C3        18       0            0.0    0              0        
+sv       shipping  18       0            0.0    0              0        
+sv       C3        18       0            0.0    0              0        
+tr       shipping  18       0            0.0    0              5        
+tr       C3        18       0            0.0    0              0        
+vi       shipping  18       1            5.6    0              1        
+vi       C3        18       0            0.0    0              0        
+zh-Hans  shipping  17       0            0.0    0              10       
+zh-Hans  C3        17       0            0.0    0              0        
+zh-Hant  shipping  17       0            0.0    0              6        
+zh-Hant  C3        18       0            0.0    0              0        
+
+Every flagged output, for the hand read (arm, fixture#run, outcome, reading, foreign sentences):
+  [shipping] D2-three-steps-drift#1 rejectedGuardrail(language) read=fr expected=fr
+      FOREIGN: He prends his morceaux and tries to guess which have been pronounced, and what form. for that he microce what he hears and what he has already written before.
+      FOREIGN: Because the context helps a lot to lift the ambiguities.
+      FOREIGN: The third step is the shaping.
+      FOREIGN: Here we take the raw text that comes out of the model.
+      FOREIGN: We add the punctuation, the capitals possibly, and we cut it into paragraphs.
+      FOREIGN: The important thing to understand is that these three steps do not cost the same at all in computing.
+      FOREIGN: The second one is 90% of the time.
+  [C3] D5-lets-go#1 success read=en expected=fr
+      OUTPUT: "Vas-y let's go."
+  [C3] D5-lets-go#2 success read=en expected=fr
+      OUTPUT: "Vas-y let's go."
+  [C3] D5-lets-go#3 success read=en expected=fr
+      OUTPUT: "Vas-y let's go."
+  [shipping] E4-toolbar-refusal#2 rejectedGuardrail(language) read=en expected=en
+      FOREIGN: Il faut que je vérifie si l'avis d'erreur dans la barre de commande est correctement readable ou non.
+  [shipping] E5-should-not-work#1 rejectedGuardrail(length) read=fr expected=en
+      FOREIGN: Il faut que je fasse un message structuré en anglais, et ce devrait pas fonctionner.
+      FOREIGN: Il faut que je fasse un message structuré en anglais, et ce devrait pas fonctionner.
+      OUTPUT: 'Il faut que je fasse un message structuré en anglais, et ce devrait pas fonctionner.\nIl faut que je fasse un message structuré en anglais, et ce devrait pas fonctionner.'
+  [shipping] E5-should-not-work#3 rejectedGuardrail(length) read=fr expected=en
+      FOREIGN: Il faut que je créer un message structuré en anglais, et cela ne devrait pas fonctionner.
+      OUTPUT: 'Il faut que je créer un message structuré en anglais, et cela ne devrait pas fonctionner.\n\nHere the speaker declared their intention and the condition for its execution, maintaining the original structure and tone.'
+  [shipping] T1-last-transcription.en#2 rejectedGuardrail(language) read=fr expected=en
+      FOREIGN: Il faut que je laisse le lecteur voir la dernière transcription.
+      OUTPUT: 'Il faut que je laisse le lecteur voir la dernière transcription.\n'
+  [shipping] T2-no-error.en#1 rejectedGuardrail(language) read=fr expected=en
+      FOREIGN: Pour le moment, je n'ai pas d'erreur, tout semble OK.
+      FOREIGN: Cela fonctionne plutôt bien.
+      FOREIGN: Je vais continuer un peu de temps, mais pour l'instant, c'est bon.
+      OUTPUT: "Pour le moment, je n'ai pas d'erreur, tout semble OK.\n\nCela fonctionne plutôt bien.\n\nJe vais continuer un peu de temps, mais pour l'instant, c'est bon."
+  [shipping] T2-no-error.en#2 rejectedGuardrail(language) read=fr expected=en
+      FOREIGN: Pour le moment, je n'ai aucun message d'erreur, tout semble être OK.
+      FOREIGN: Cependant, il fonctionne assez bien pour l'instant.
+      OUTPUT: "Pour le moment, je n'ai aucun message d'erreur, tout semble être OK.\n\nCependant, il fonctionne assez bien pour l'instant."
+  [shipping] T2-no-error.en#3 rejectedGuardrail(language) read=fr expected=en
+      FOREIGN: Pour le moment, je n'ai pas d'erreur, tout semble OK.
+      FOREIGN: On va continuer un peu de temps, mais c'est bien que ça fonctionne assez bien.
+      FOREIGN: Il y a deux points à garder à l'esprit.
+      FOREIGN: - Je pense à racheter du café.
+      OUTPUT: "Pour le moment, je n'ai pas d'erreur, tout semble OK. On va continuer un peu de temps, mais c'est bien que ça fonctionne assez bien.\n\nIl y a deux points à garder à l'esprit.\n\n- Je pense à racheter du café."
+  [shipping] T5-long-test.en#1 rejectedGuardrail(language) read=fr expected=en
+      FOREIGN: Nous essayons une longue message en mode structuré pour voir ce que cela donnera.
+      FOREIGN: Sachant que je ne suis pas nécessairement dans les bonnes conditions audio, car je suis assez loin du téléphone, la qualité du micro pourrait ne pas être exceptionnelle.
+      FOREIGN: Il y a aussi beaucoup de bruit à côté de moi.
+      FOREIGN: Nous verrons ce que cela donne sur le test.
+      FOREIGN: Nous verrons si le résultat est intéressant ou non.
+      OUTPUT: 'Nous essayons une longue message en mode structuré pour voir ce que cela donnera.\n\nSachant que je ne suis pas nécessairement dans les bonnes conditions audio, car je suis assez loin du téléphone, la qualité du micro pourrait ne pas être exceptionnelle. Il y a aussi beaucoup de bruit à côté de moi.\n\n'
+  [shipping] T5-long-test.en#2 rejectedGuardrail(language) read=fr expected=en
+      FOREIGN: On est maintenant essayant une longue message en mode structuré pour voir ce qui va se passer.
+      FOREIGN: Sachant que je ne suis pas nécessairement dans les bonnes conditions audio, parce que je suis assez loin du téléphone.
+      FOREIGN: La qualité du micro pourrait ne pas être exceptionnelle.
+      FOREIGN: Il y a aussi beaucoup de bruit à côté de moi.
+      FOREIGN: Nous verrons ce que cela donne sur le test.
+      FOREIGN: Nous verrons si le résultat est intéressant ou non.
+      OUTPUT: 'On est maintenant essayant une longue message en mode structuré pour voir ce qui va se passer.\n\nSachant que je ne suis pas nécessairement dans les bonnes conditions audio, parce que je suis assez loin du téléphone. La qualité du micro pourrait ne pas être exceptionnelle. Il y a aussi beaucoup de bru'
+  [shipping] T6-project-update.en#1 rejectedGuardrail(length) read=en expected=en
+      FOREIGN: Il faut que je rappelle le transcription historique, et que je pense à la vocabulaire customisée.
+      FOREIGN: Et sur ce point, il y a une spécification mais pas de code.
+      FOREIGN: Sur les chiffres, nous sommes à 412 téléchargements depuis le lancement, avec un taux de rétention de 19 % sur 7 jours, ce qui est bas, mais pas catastrophique pour une première version.
+      FOREIGN: L'objectif est de dépasser la barre des 1 000 avant la fin d'octobre.
+      FOREIGN: Je vois Sarah jeudi à 14 heures pour régler la partie App Store.
+      FOREIGN: Et si tout se passe bien, nous soumettons la semaine du 12.
+  [shipping] T6-project-update.en#2 rejectedGuardrail(language) read=en expected=en
+      FOREIGN: Il faut que je rappelle le garage, c'est déjà fait.
+      FOREIGN: Il faut que je rappelle le plombier pour le chauffe-eau.
+      FOREIGN: Il faut aussi que je commande le bois avant l'hiver, parce que l'année dernière on s'y est pris trop tard.
+      FOREIGN: Voilà c'est tout, ah non il y avait un autre truc mais ça m'échappe.
+  [shipping] T2-no-error.de#1 rejectedGuardrail(language) read=fr expected=de
+      FOREIGN: Im Moment, rien ne semble être incorrect, tout semble en ordre.
+      FOREIGN: Nous continuons encore un peu, mais cela fonctionne assez bien.
+      FOREIGN: Il faut que je reprenne la tâche, car la situation reste stable.
+      OUTPUT: 'Im Moment, rien ne semble être incorrect, tout semble en ordre. Nous continuons encore un peu, mais cela fonctionne assez bien.\n\nIl faut que je reprenne la tâche, car la situation reste stable.'
+  [shipping] T2-no-error.de#2 rejectedGuardrail(language) read=fr expected=de
+      FOREIGN: Im Moment, rien ne semble être en panne, tout va bien.
+      FOREIGN: Nous continuons encore un peu, mais cela fonctionne assez bien pour l'instant.
+      OUTPUT: "Im Moment, rien ne semble être en panne, tout va bien.\n\nNous continuons encore un peu, mais cela fonctionne assez bien pour l'instant."
+  [shipping] T2-no-error.de#3 rejectedGuardrail(language) read=fr expected=de
+      FOREIGN: Im Moment, rien ne semble être en panne, tout va bien.
+      FOREIGN: Nous continuons encore un peu, mais cela fonctionne assez bien pour l'instant.
+      OUTPUT: "Im Moment, rien ne semble être en panne, tout va bien.\n\nNous continuons encore un peu, mais cela fonctionne assez bien pour l'instant."
+  [shipping] T1-last-transcription.es#1 rejectedGuardrail(length) read=es expected=es
+      FOREIGN: Il faut que je regarde cela, c'est la dernière transcripción.
+  [shipping] T1-last-transcription.es#2 rejectedGuardrail(length) read=es expected=es
+      FOREIGN: Il faut que je regarde ça, c'est la dernière transcripción.
+  [shipping] T1-last-transcription.es#3 rejectedGuardrail(length) read=es expected=es
+      FOREIGN: Il faut que je mire cela, c'est la dernière transcripción.
+  [shipping] T6-project-update.es#2 rejectedGuardrail(language) read=es expected=es
+      FOREIGN: Il faut que j'arroser les plantes du hall avant de partir, et que j'espère racheter du café.
+  [shipping] T6-project-update.es#3 rejectedGuardrail(length) read=es expected=es
+      FOREIGN: I see the project update, the subscription section was changed on Monday, Thomas completed the StoreKit integration and it works in sandbox.
+      FOREIGN: Two things remain: the transcription history, which has not begun at all, and the personalized vocabulary.
+      FOREIGN: There is a specification but no code.
+      FOREIGN: As for numbers, we have 412 downloads since the launch, with a 7-day retention rate of 19 %, which is low but not disastrous for a first version.
+      FOREIGN: The goal is to surpass 1000 before the end of October.
+      FOREIGN: I meet Sarah on Thursday at 2 p.m. to close the App Store part.
+      FOREIGN: And if everything goes well, we send it the week of the 12th.
+      FOREIGN: Here the speaker announced their own topic, so it may become a heading — and what they enumerated stays enumerated, in their person:
+      FOREIGN: - The transcription history is not started at all.
+      FOREIGN: - The personalized vocabulary has a specification but no code.
+      FOREIGN: COUNTER-EXAMPLES — the WRONG outputs below break rule 4 and rule 6.
+      FOREIGN: INPUT: la radio est toujours pas fonctionnel, j'ai oublié un truc, et la charge de la batterie est toujours très faible
+      FOREIGN: WRONG (turned the speaker into tasks): - La radio est toujours pas fonctionnel / - J'ai oublié un truc / - La charge de la batterie est toujours très faible
+      FOREIGN: WRONG (invented a heading): Problèmes : / La radio est toujours pas fonctionnel, j'ai oublié un truc, et la charge de la batterie est toujours très faible.
+      FOREIGN: RIGHT: La radio est toujours pas fonctionnel, et j'ai oublié un truc, et la charge de la batterie est toujours très faible.
+      FOREIGN: La radio est toujours pas fonctionnel, et j'ai oublié un truc, et la charge de la batterie est toujours très faible.
+  [shipping] T1-last-transcription.it#1 rejectedGuardrail(length) read=it expected=it
+      FOREIGN: Il faut que je donnerai un'occhiata, c'est l'ultima trascrizione.
+  [shipping] T1-last-transcription.it#2 rejectedGuardrail(length) read=it expected=it
+      FOREIGN: Il faut que j'arrose les plantes du hall avant de partir, et que je pense à racheter du café.
+  [shipping] T1-last-transcription.it#3 rejectedGuardrail(length) read=it expected=it
+      FOREIGN: Il faut que je donnerai un'occhiata, c'est l'ultima trascrizione.
+  [shipping] T5-long-test.it#1 rejectedGuardrail(length) read=it expected=it
+      FOREIGN: Il faut que nous essayons un message long en mode structuré pour voir ce qui se passe.
+      FOREIGN: Savant que je ne suis pas forcément dans les bonnes conditions pour l'audio, parce que je suis assez loin du téléphone.
+      FOREIGN: La qualité du microphone peut ne pas être exceptionnelle.
+      FOREIGN: Il y a aussi beaucoup de bruit à côté.
+      FOREIGN: Nous verrons ce que donne le test.
+      FOREIGN: Nous verrons si le résultat est intéressant ou non.
+  [shipping] T6-project-update.it#1 rejectedGuardrail(length) read=it expected=it
+      FOREIGN: Il faut que je passez la partie des abonnements lundi dernier, Thomas a terminé l'intégration de StoreKit et ça marche en sandbox.
+      FOREIGN: Il reste deux choses.
+      FOREIGN: La première est la chronologie des transcriptions, qui n'a pas du tout commencé.
+      FOREIGN: La seconde est le vocabulaire personnalisé.
+      FOREIGN: Et sur ça, on a une spécification mais pas de code.
+      FOREIGN: Pour ce qui est des chiffres, on est à 412 téléchargements depuis le lancement, avec une rétention de 7 jours de 19 %, qui est basse, mais pas catastrophique pour une première version.
+      FOREIGN: L'objectif est de dépasser la barre des 1000 d'ici fin octobre.
+      FOREIGN: Je vois Sarah jeudi à 14 heures pour régler la partie App Store.
+      FOREIGN: Et si tout va bien, je l'envoie la semaine du 12.
+  [shipping] T6-project-update.it#3 rejectedGuardrail(language) read=it expected=it
+      FOREIGN: Il faut que je pense à racheter du café.
+  [shipping] T3-plan-mode.pt#3 rejectedGuardrail(length) read=pt expected=pt
+      FOREIGN: Il faut que je laisse vous préparer l'intégration de ce problème, s'il vous plaît.
+      FOREIGN: Vous pouvez passer en mode simple pour le faire et ensuite je valide quand vous aurez terminé le plan de mise en œuvre.
+  [shipping] T6-project-update.pt#1 rejectedGuardrail(language) read=pt expected=pt
+      FOREIGN: Il faut que je rappelle le plombier pour le chauffe-eau : le garage, c'est déjà fait.
+      FOREIGN: Il faut aussi que je commande le bois avant l'hiver, parce que l'année dernière on s'y est pris trop tard.
+  [shipping] T6-project-update.pt#3 rejectedGuardrail(language) read=pt expected=pt
+      FOREIGN: Il faut que j'arrose les plantes du hall avant de partir, et que je pense à racheter du café.
+  [shipping] T1-last-transcription.nl#2 rejectedGuardrail(length) read=nl expected=nl
+      FOREIGN: Il faut que je rappel l'enregistrement final.
+  [shipping] T2-no-error.nl#1 rejectedGuardrail(language) read=fr expected=nl
+      FOREIGN: Pour le moment, j'ai pas de message d'erreur, tout semble être en ordre.
+      FOREIGN: Nous continuons pour l'instant, mais pour l'instant, cela fonctionne très bien.
+      OUTPUT: "Pour le moment, j'ai pas de message d'erreur, tout semble être en ordre.\n\nNous continuons pour l'instant, mais pour l'instant, cela fonctionne très bien."
+  [shipping] T2-no-error.nl#2 rejectedGuardrail(language) read=fr expected=nl
+      FOREIGN: Pour le moment, j'ai pas d'erreur, tout semble être en ordre.
+      FOREIGN: Nous continuons, mais pour l'instant, cela fonctionne très bien.
+      OUTPUT: "Pour le moment, j'ai pas d'erreur, tout semble être en ordre.\n\nNous continuons, mais pour l'instant, cela fonctionne très bien."
+  [shipping] T2-no-error.nl#3 rejectedGuardrail(language) read=fr expected=nl
+      FOREIGN: Pour le moment, j'ai pas de message d'erreur, tout semble être en ordre.
+      FOREIGN: Nous continuons encore un peu, mais pour l'instant, cela fonctionne très bien.
+      OUTPUT: "Pour le moment, j'ai pas de message d'erreur, tout semble être en ordre.\n\nNous continuons encore un peu, mais pour l'instant, cela fonctionne très bien."
+  [shipping] T3-plan-mode.nl#1 rejectedGuardrail(language) read=fr expected=nl
+      FOREIGN: Il faut que je préparer la mise en place de cette issue, veuillez aller à la mode du plan et puis je ratifierai la mise en place une fois que j'aurai créé le plan d'implémentation.
+      FOREIGN: - Il faut que je prépare la mise en place de cette issue.
+      OUTPUT: "Il faut que je préparer la mise en place de cette issue, veuillez aller à la mode du plan et puis je ratifierai la mise en place une fois que j'aurai créé le plan d'implémentation.\n\nVoici ce qui suit :\n\n- Il faut que je prépare la mise en place de cette issue."
+  [shipping] T3-plan-mode.nl#3 rejectedGuardrail(language) read=nl expected=nl
+      FOREIGN: Il faut que je prépare l'intégration de cette question.
+  [shipping] T2-no-error.da#1 rejectedGuardrail(language) read=da expected=da
+      FOREIGN: J'ai oublié un truc, mais ça m'échappe.
+  [shipping] T4-structured-since.da#1 success read=da expected=da
+      FOREIGN: Jeg tror, jeg kan eksportere loggene, som de er.
+      FOREIGN: - Jeg kan eksportere loggene, som de er.
+  [shipping] T4-structured-since.da#2 rejectedGuardrail(language) read=da expected=da
+      FOREIGN: Jeg kan eksportere loggene, som de er.
+      FOREIGN: - Il faut que je rappelle le garage.
+      FOREIGN: - Il faut que je commande le bois avant l'hiver.
+      FOREIGN: - Il faut que je pense à racheter du café.
+  [shipping] T4-structured-since.da#3 success read=da expected=da
+      FOREIGN: Jeg tror, jeg kan eksportere loggene, som de er.
+  [shipping] T5-long-test.da#2 rejectedGuardrail(language) read=da expected=da
+      FOREIGN: J'ai oublié un truc, mais c'est toujours une situation difficile.
+  [shipping] T6-project-update.da#1 rejectedGuardrail(length) read=da expected=da
+      FOREIGN: Il faut que je regarde Sarah jeudi à 14 heures pour obtenir une clarification concernant la partie App Store.
+      FOREIGN: Et si tout se passe bien, nous soumettrons dans la semaine du 12.
+      FOREIGN: Il faut que je rappelle le plombier pour le chauffe-eau, car le garage est déjà terminé.
+      FOREIGN: Il faut aussi que je commande le bois avant l'hiver, parce que l'année dernière on s'y est pris trop tard.
+      FOREIGN: Il y avait un autre truc, mais ça m'échappe.
+  [shipping] T6-project-update.nb#3 rejectedGuardrail(language) read=nb expected=nb
+      FOREIGN: J'ai oublié un truc, mais c'est tout.
+  [shipping] T1-last-transcription.tr#1 rejectedGuardrail(length) read=tr expected=tr
+      FOREIGN: Il faut que j'arrosse les plantes du hall avant de partir, et que je pense à racheter du café.
+  [shipping] T1-last-transcription.tr#2 rejectedGuardrail(length) read=tr expected=tr
+      FOREIGN: Il faut que je donne à toi cette dernière transkripsion.
+  [shipping] T1-last-transcription.tr#3 rejectedGuardrail(length) read=tr expected=tr
+      FOREIGN: Il faut que j'arrosse les plantes du hall avant de partir, et que je pense à racheter du café.
+  [shipping] T3-plan-mode.tr#3 rejectedGuardrail(length) read=tr expected=tr
+      FOREIGN: Il faut que tu entrantes en mode plan, puis que tu fasses ton plan d'application, et que je confirme quand tu es terminé.
+  [shipping] T4-structured-since.tr#3 rejectedGuardrail(length) read=tr expected=tr
+      FOREIGN: - Il faut que je rappelle le plombier pour le chauffe-eau : le garage, c'est déjà fait.
+      FOREIGN: Il faut aussi que je commande le bois avant l'hiver, parce que l'année dernière on s'y est pris trop tard.
+      FOREIGN: Il y avait un autre truc, mais ça m'échappe.
+  [shipping] T6-project-update.vi#2 rejectedGuardrail(language) read=vi expected=vi
+      FOREIGN: Il faut que je rappelle la mise à ordre du hall avant de partir, et que je pense à racheter du café.
+  [shipping] T1-last-transcription.ja#1 rejectedGuardrail(length) read=fr expected=ja
+      FOREIGN: Confirmer, c'est le dernier transcript.
+      OUTPUT: "Confirmer, c'est le dernier transcript."
+  [shipping] T1-last-transcription.ja#2 rejectedGuardrail(length) read=fr expected=ja
+      FOREIGN: Confirmez, c'est le dernier transcript.
+      FOREIGN: Il faut que je vérifie que cela est le dernier transcript.
+      OUTPUT: "Confirmez, c'est le dernier transcript.\n\nIl faut que je vérifie que cela est le dernier transcript."
+  [shipping] T1-last-transcription.ja#3 rejectedGuardrail(length) read=fr expected=ja
+      FOREIGN: Confirmez, c'est le dernier transcript.
+      OUTPUT: "Confirmez, c'est le dernier transcript."
+  [shipping] T2-no-error.ja#2 rejectedGuardrail(length) read=fr expected=ja
+      FOREIGN: Il faut que les erreurs ne soient pas apparus maintenant, et que tout ne semble avoir aucun problème.
+      FOREIGN: Il faut continuer un peu plus longtemps, car tout fonctionne assez bien pour le moment.
+      FOREIGN: Il faut que je pense à racheter du café.
+      OUTPUT: 'Il faut que les erreurs ne soient pas apparus maintenant, et que tout ne semble avoir aucun problème. Il faut continuer un peu plus longtemps, car tout fonctionne assez bien pour le moment.\n\nIl faut que je pense à racheter du café.'
+  [shipping] T2-no-error.ja#3 rejectedGuardrail(length) read=fr expected=ja
+      FOREIGN: Les messages d'erreur n'apparaissent pas à présent, et tout semble en bonne santé.
+      FOREIGN: Il faut continuer un peu plus longtemps, car tout fonctionne assez bien pour l'instant.
+      FOREIGN: - Il faut que je pense à racheter du café.
+      OUTPUT: "Les messages d'erreur n'apparaissent pas à présent, et tout semble en bonne santé. Il faut continuer un peu plus longtemps, car tout fonctionne assez bien pour l'instant.\n\n- Il faut que je pense à racheter du café."
+  [shipping] T3-plan-mode.ja#1 rejectedGuardrail(length) read=fr expected=ja
+      FOREIGN: Alors, il faut que je préparer la mise en œuvre de cette issue, en passant en mode plan.
+      FOREIGN: Si le plan est prêt, je l'approuverai.
+      OUTPUT: "Alors, il faut que je préparer la mise en œuvre de cette issue, en passant en mode plan.\n\nSi le plan est prêt, je l'approuverai."
+  [shipping] T3-plan-mode.ja#2 rejectedGuardrail(length) read=fr expected=ja
+      FOREIGN: Il faut que je préparer la mise en marche de cette issue, en passant en mode plan.
+      FOREIGN: Si le plan est établi, je l’approuverai.
+      FOREIGN: Il faut aussi que je contrôle l’implémentation.
+      OUTPUT: 'Il faut que je préparer la mise en marche de cette issue, en passant en mode plan. Si le plan est établi, je l’approuverai.\n\nIl faut aussi que je contrôle l’implémentation.'
+  [shipping] T3-plan-mode.ja#3 rejectedGuardrail(length) read=fr expected=ja
+      FOREIGN: Il faut que je préparer la mise en œuvre de cette issue : il faut passer en mode plan.
+      FOREIGN: Si le plan est établi, je l'approuverai.
+      OUTPUT: "Il faut que je préparer la mise en œuvre de cette issue : il faut passer en mode plan.\n\nSi le plan est établi, je l'approuverai."
+  [shipping] T4-structured-since.ja#1 rejectedGuardrail(length) read=fr expected=ja
+      FOREIGN: Il est vrai que je fais longtemps maintenant avec le mode structuré.
+      FOREIGN: Ainsi, le test réalisé le jour précédent est complet — tout, surtout le test un peu long, s'est bien déroulé.
+      FOREIGN: Par conséquent, les journaux peuvent être exportés tels quels.
+      FOREIGN: Mais moi, je trouve que c'est assez conforme.
+      FOREIGN: Il faut que je pense à racheter du café.
+      OUTPUT: "Il est vrai que je fais longtemps maintenant avec le mode structuré. Ainsi, le test réalisé le jour précédent est complet — tout, surtout le test un peu long, s'est bien déroulé. Par conséquent, les journaux peuvent être exportés tels quels. Mais moi, je trouve que c'est assez conforme.\n\nIl faut que"
+  [shipping] T4-structured-since.ja#2 rejectedGuardrail(length) read=fr expected=ja
+      FOREIGN: Il est vrai que depuis longtemps maintenant, j'utilise le mode structuré.
+      FOREIGN: Ainsi, le test effectué au jour précédent est complet — notamment le test un peu long fonctionne bien aussi.
+      FOREIGN: Les journaux peuvent donc être exportés tels quels, je pense.
+      FOREIGN: Mais cela semble assez correct pour moi.
+      FOREIGN: Il faut que je pense à racheter du café.
+      FOREIGN: Il faut que j'arrose les plantes du hall avant de partir, et que je pense à racheter du café.
+      OUTPUT: "Il est vrai que depuis longtemps maintenant, j'utilise le mode structuré. Ainsi, le test effectué au jour précédent est complet — notamment le test un peu long fonctionne bien aussi. Les journaux peuvent donc être exportés tels quels, je pense. Mais cela semble assez correct pour moi.\n\nIl faut que j"
+  [shipping] T4-structured-since.ja#3 rejectedGuardrail(length) read=fr expected=ja
+      FOREIGN: Il est vrai que depuis longtemps maintenant, j'ai utilisé le mode structuré.
+      FOREIGN: Donc, le test effectué le jour précédent est complet — notamment le test un peu long a bien fonctionné.
+      FOREIGN: Les journaux peuvent donc être exportés tels quels, selon moi.
+      FOREIGN: Mais je trouve que c'est assez juste.
+      FOREIGN: - Le test est complet, y compris le test long.
+      FOREIGN: - Les journaux peuvent être exportés tels quels.
+      OUTPUT: "Il est vrai que depuis longtemps maintenant, j'ai utilisé le mode structuré. Donc, le test effectué le jour précédent est complet — notamment le test un peu long a bien fonctionné. Les journaux peuvent donc être exportés tels quels, selon moi.\n\nMais je trouve que c'est assez juste.\n\n- Le test est co"
+  [shipping] T5-long-test.ja#3 rejectedGuardrail(length) read=fr expected=ja
+      FOREIGN: Pour voir ce qui va happenner, je tente une longue message en mode structuré.
+      FOREIGN: Je suis assez loin du smartphone, donc les conditions sonores ne sont pas forcément bonnes.
+      FOREIGN: La qualité du micro est peut-être pas très bonne.
+      FOREIGN: De plus, il y a beaucoup de bruit à côté.
+      FOREIGN: Je vais voir ce que ça donne en test.
+      FOREIGN: Je vais voir si le résultat est intéressant.
+      OUTPUT: 'Pour voir ce qui va happenner, je tente une longue message en mode structuré. Je suis assez loin du smartphone, donc les conditions sonores ne sont pas forcément bonnes. La qualité du micro est peut-être pas très bonne. De plus, il y a beaucoup de bruit à côté. Je vais voir ce que ça donne en test. '
+  [shipping] T6-project-update.ja#3 rejectedGuardrail(length) read=fr expected=ja
+      FOREIGN: Alors, je vais faire une simple report sur le projet.
+      FOREIGN: On a changé la partie d'abonnement lundi dernier, Thomas a terminé l'intégration StoreKit et le sandbox fonctionne.
+      FOREIGN: Ce qui reste, c'est deux choses.
+      FOREIGN: La première, c'est l'historique de la transcription, qui n'a pas du tout été touché.
+      FOREIGN: La deuxième, c'est la terminologie personnalisée.
+      FOREIGN: Il y a des spécifications, mais le code n'existe pas encore.
+      FOREIGN: Numériquement, il y a 412 téléchargements depuis la sortie et un taux de continuité de 19 % sur sept jours.
+      FOREIGN: C'est bas, mais ce n'est pas fatal pour la première version.
+      FOREIGN: L'objectif est d'atteindre plus de 1000 d'ici la fin du mois d'octobre.
+      FOREIGN: Je dois rencontrer Sarah à 14 heures jeudi pour finaliser la partie App Store.
+      FOREIGN: Tout est bon si je peux soumettre le tout le 12 du mois.
+      OUTPUT: "Alors, je vais faire une simple report sur le projet.\n\nOn a changé la partie d'abonnement lundi dernier, Thomas a terminé l'intégration StoreKit et le sandbox fonctionne. Ce qui reste, c'est deux choses.\n\nLa première, c'est l'historique de la transcription, qui n'a pas du tout été touché.\n\nLa deuxiè"
+  [shipping] T1-last-transcription.ko#1 rejectedGuardrail(length) read=fr expected=ko
+      FOREIGN: Il faut que je rappelle le plombier pour le chauffe-eau : le garage, c'est déjà fait.
+      FOREIGN: Il faut aussi que je commande le bois avant l'hiver, parce que l'année dernière on s'y est pris trop tard.
+      FOREIGN: Il y avait un autre truc, mais ça m'échappe.
+      OUTPUT: "Il faut que je rappelle le plombier pour le chauffe-eau : le garage, c'est déjà fait.\n\nIl faut aussi que je commande le bois avant l'hiver, parce que l'année dernière on s'y est pris trop tard.\n\nIl y avait un autre truc, mais ça m'échappe."
+  [shipping] T1-last-transcription.ko#2 rejectedGuardrail(length) read=fr expected=ko
+      FOREIGN: Une fois, regarde, c'est le dernier version.
+      FOREIGN: Il faut que je rosser les plantes du hall avant de partir, et que je pense à racheter du café.
+      OUTPUT: "Une fois, regarde, c'est le dernier version.\n\nIl faut que je rosser les plantes du hall avant de partir, et que je pense à racheter du café."
+  [shipping] T1-last-transcription.ko#3 rejectedGuardrail(length) read=fr expected=ko
+      FOREIGN: Il faut que je regarde ça, c'est le dernier version.
+      FOREIGN: Il faut que je rappelle le garage, enfin non, le garage c'est déjà fait.
+      FOREIGN: Il faut aussi que je commande le bois avant l'hiver, parce que l'année dernière on s'y est pris trop tard.
+      FOREIGN: Il y avait un autre truc, mais ça m'échappe.
+      OUTPUT: "Il faut que je regarde ça, c'est le dernier version.\n\nIl faut que je rappelle le garage, enfin non, le garage c'est déjà fait. Il faut aussi que je commande le bois avant l'hiver, parce que l'année dernière on s'y est pris trop tard.\n\nIl y avait un autre truc, mais ça m'échappe."
+  [shipping] T3-plan-mode.ko#1 rejectedGuardrail(length) read=fr expected=ko
+      FOREIGN: Il faut que je mets l'intégration du projet en préparation et que tu prends charge.
+      FOREIGN: Si tu faisz le plan en mode plan, et que tu élabores le plan complet, je l'approuverai.
+      OUTPUT: "좋아, 이 이슈의 통합 준비는 너한테 맡길게. 그걸 하려면 플랜 모드로 전환해도 되고, 구현 계획을 다 만들면 내가 승인할게.\n\nIl faut que je mets l'intégration du projet en préparation et que tu prends charge. Si tu faisz le plan en mode plan, et que tu élabores le plan complet, je l'approuverai."
+  [shipping] T6-project-update.ko#3 rejectedGuardrail(length) read=da expected=ko
+      FOREIGN: Il faut que je rappelle le garage, c'est déjà fait.
+      FOREIGN: Il faut que je rappelle le plombier pour le chauffe-eau.
+      FOREIGN: Il faut aussi que je commande le bois avant l'hiver, parce que l'année dernière on s'y est pris trop tard.
+      FOREIGN: Il y avait un autre truc, mais ça m'échappe.
+      OUTPUT: '자, 프로젝트에 대해 간단히 업데이트할게. 지난 월요일에 구독 부분을 전환했고, Thomas가 StoreKit 통합을 끝내서 샌드박스에서 잘 돌아가. 남은 건 두 가지야.\n\n전사 기록이 아직 전혀 시작되지 않았어.\n\n사용자 지정 어휘는 사양은 있는데 코드는 없어. 숫자로 보면, 출시 이후 다운로드가 412건이고, 7일 유지율은 19%야. 낮긴 하지만 첫 버전치고 최악은 아니야. 목표는 10월 말 전에 1000건을 넘기는 거야.\n\n목요일 오후 2시에 Sarah를 만나서 App Store 부분을 정리할 거야. 다 잘 되면 12일 주에 '
+  [shipping] T1-last-transcription.zh-Hans#1 rejectedGuardrail(length) read=fr expected=zh-Hans
+      FOREIGN: Il faut que j'arrose les plantes du hall avant de partir, et que je pense à racheter du café.
+      OUTPUT: "Il faut que j'arrose les plantes du hall avant de partir, et que je pense à racheter du café.\n"
+  [shipping] T1-last-transcription.zh-Hans#2 rejectedGuardrail(length) read=fr expected=zh-Hans
+      FOREIGN: Il faut que j'arrose les plantes du hall avant de partir, et que je pense à racheter du café.
+      OUTPUT: "Il faut que j'arrose les plantes du hall avant de partir, et que je pense à racheter du café.\n"
+  [shipping] T1-last-transcription.zh-Hans#3 rejectedGuardrail(length) read=fr expected=zh-Hans
+      FOREIGN: Il faut que je fasse le point sur les plantes du hall avant de partir, et que je pense à racheter du café.
+      OUTPUT: 'Il faut que je fasse le point sur les plantes du hall avant de partir, et que je pense à racheter du café.\n'
+  [shipping] T2-no-error.zh-Hans#3 rejectedGuardrail(length) read=zh-Hans expected=zh-Hans
+      FOREIGN: j'ai oublié un truc, mais ça m'échappe.
+  [shipping] T3-plan-mode.zh-Hans#1 rejectedGuardrail(length) read=fr expected=zh-Hans
+      FOREIGN: Ce issue de collectif est maintenant prêt pour la préparation。
+      FOREIGN: Vous pouvez passer en mode planification pour le réaliser, et attendez d'avoir terminé la mise en œuvre du plan avant que je ne confirme.
+      OUTPUT: "Ce issue de collectif est maintenant prêt pour la préparation。\n\nVous pouvez passer en mode planification pour le réaliser, et attendez d'avoir terminé la mise en œuvre du plan avant que je ne confirme."
+  [shipping] T3-plan-mode.zh-Hans#2 rejectedGuardrail(length) read=fr expected=zh-Hans
+      FOREIGN: Ce issue de la collection de documents est devenu compliqué à préparer。
+      FOREIGN: Vous pouvez passer en mode planification pour effectuer la tâche, et attendez de bien avoir réalisé le plan avant que je ne confirme.
+      OUTPUT: 'Ce issue de la collection de documents est devenu compliqué à préparer。\n\nVous pouvez passer en mode planification pour effectuer la tâche, et attendez de bien avoir réalisé le plan avant que je ne confirme.'
+  [shipping] T3-plan-mode.zh-Hans#3 rejectedGuardrail(length) read=fr expected=zh-Hans
+      FOREIGN: Il faut que je préparer le problème du collectif.
+      FOREIGN: Vous pouvez changer à la mode de planification pour le faire, attendre que la planification soit terminée avant que je ne confirme.
+      OUTPUT: 'Il faut que je préparer le problème du collectif.\n\nVous pouvez changer à la mode de planification pour le faire, attendre que la planification soit terminée avant que je ne confirme.'
+  [shipping] T5-long-test.zh-Hans#1 rejectedGuardrail(length) read=en expected=zh-Hans
+      FOREIGN: So now we try the structured mode to send a long message and see what happens.
+      FOREIGN: I know my recording conditions aren't necessarily good because I'm quite far from my phone.
+      FOREIGN: The microphone quality might not be particularly good.
+      FOREIGN: My surroundings are also quite noisy.
+      FOREIGN: So we’ll see how the test results turn out.
+      FOREIGN: We’ll see if the results are meaningful.
+      FOREIGN: I think the test might reveal something about the limitations of the setup.
+      FOREIGN: The distance from the phone and the noise around me could affect the audio quality.
+      FOREIGN: The microphone’s performance might not be reliable in this environment.
+      FOREIGN: The outcome depends on how well the system captures the sound.
+      FOREIGN: I’ll have to wait to see what comes next.
+      OUTPUT: "So now we try the structured mode to send a long message and see what happens. I know my recording conditions aren't necessarily good because I'm quite far from my phone. The microphone quality might not be particularly good. My surroundings are also quite noisy. So we’ll see how the test results tu"
+  [shipping] T5-long-test.zh-Hans#2 rejectedGuardrail(length) read=en expected=zh-Hans
+      FOREIGN: So now we try a long message using the structured mode, to see what happens.
+      FOREIGN: I know my recording conditions aren't always good, because I'm not far from my phone.
+      FOREIGN: The microphone quality might not be particularly good.
+      FOREIGN: It's also quite noisy next to me.
+      FOREIGN: So let's see how the test results turn out.
+      FOREIGN: Let's see if the results make sense.
+      OUTPUT: "So now we try a long message using the structured mode, to see what happens. I know my recording conditions aren't always good, because I'm not far from my phone. The microphone quality might not be particularly good. It's also quite noisy next to me. So let's see how the test results turn out. Let'"
+  [shipping] T6-project-update.zh-Hans#1 rejectedGuardrail(length) read=da expected=zh-Hans
+      FOREIGN: Il faut que Thomas a terminé l'intégration de StoreKit, qui fonctionne normalement dans le sandbox.
+      FOREIGN: Il faut que la transcription historique ne soit pas encore commencée.
+      FOREIGN: Il faut aussi que l'ajout de mots personnalisés n'ait pas encore de code.
+      FOREIGN: Les téléchargements depuis le lancement sont au nombre de 412, avec un taux de rétention de 19 % sur 7 jours, bien que ce chiffre soit bas, cela ne semble pas être un désastre pour la première version.
+      FOREIGN: L'objectif est de dépasser 1000 avant la fin du mois de décembre.
+      FOREIGN: Je dois rencontrer Sarah jeudi à deux heures de l'après-midi pour fixer la partie App Store.
+      FOREIGN: Si tout se passe bien, nous soumettrons le tout la semaine du 12.
+      OUTPUT: "好，简单说一下项目进展：上周一我们切换了订阅部分，Thomas 完成了 StoreKit 的集成，在沙盒里能正常运行。\n\n还剩两件事。第一件是转写历史，完全还没开始。第二件是自定义词汇。这个我们有规格说明，但还没有代码。数据方面，上线以来一共 412 次下载，7 天留存率是 19%，虽然偏低，但对第一个版本来说还不算灾难。目标是在十月底之前突破 1000。周四下午两点我要见 Sarah，把 App Store 的部分定下来。如果一切顺利，我们在 12 号那周提交。\n\nIl faut que Thomas a terminé l'intégration de StoreKit, qui fonc"
+  [shipping] T1-last-transcription.zh-Hant#1 rejectedGuardrail(length) read=fr expected=zh-Hant
+      FOREIGN: Voici le nouveau brouillon.
+      FOREIGN: Il faut que je regarde, c'est le dernier brouillon.
+      OUTPUT: "Voici le nouveau brouillon.\n\nIl faut que je regarde, c'est le dernier brouillon."
+  [shipping] T1-last-transcription.zh-Hant#2 rejectedGuardrail(length) read=fr expected=zh-Hant
+      FOREIGN: Voici le dernier brouillon.
+      FOREIGN: Il faut que j'examine ce document.
+      OUTPUT: "Voici le dernier brouillon.\n\nIl faut que j'examine ce document."
+  [shipping] T1-last-transcription.zh-Hant#3 rejectedGuardrail(length) read=fr expected=zh-Hant
+      FOREIGN: Voici le dernier enregistrement.
+      FOREIGN: Il faut que j'examine les dernières notes.
+      OUTPUT: "Voici le dernier enregistrement.\n\nIl faut que j'examine les dernières notes."
+  [shipping] T5-long-test.zh-Hant#1 rejectedGuardrail(length) read=en expected=zh-Hant
+      FOREIGN: So now we try using a structured format to send a long message, to see what happens.
+      FOREIGN: I know my audio conditions might not be great, because I’m quite far from my phone.
+      FOREIGN: The microphone quality might not be especially good.
+      FOREIGN: I’m also in a noisy area.
+      FOREIGN: So let’s just see how the test results turn out.
+      FOREIGN: Let’s check if the results make sense.
+      FOREIGN: I also think about buying coffee.
+      OUTPUT: 'So now we try using a structured format to send a long message, to see what happens. I know my audio conditions might not be great, because I’m quite far from my phone. The microphone quality might not be especially good. I’m also in a noisy area. So let’s just see how the test results turn out. Let'
+  [shipping] T5-long-test.zh-Hant#2 rejectedGuardrail(length) read=en expected=zh-Hant
+      FOREIGN: So now we try to use a structured format to send a long message, to see what happens.
+      FOREIGN: I know my audio conditions aren't always good, because I'm far from my phone.
+      FOREIGN: So the microphone quality might not be particularly strong.
+      FOREIGN: My surroundings are also quite noisy.
+      FOREIGN: So let's see what the test results are like.
+      FOREIGN: Let's see if the results make sense.
+      FOREIGN: So now we try to use a structured format to send a long message, to see what happens.
+      FOREIGN: I know my audio conditions aren't always good, because I'm far from my phone.
+      FOREIGN: So the microphone quality might not be particularly strong.
+      FOREIGN: My surroundings are also quite noisy.
+      FOREIGN: So let's see what the test results are like.
+      FOREIGN: Let's see if the results make sense.
+      OUTPUT: "So now we try to use a structured format to send a long message, to see what happens. I know my audio conditions aren't always good, because I'm far from my phone. So the microphone quality might not be particularly strong. My surroundings are also quite noisy. So let's see what the test results are"
+  [shipping] T5-long-test.zh-Hant#3 rejectedGuardrail(length) read=en expected=zh-Hant
+      FOREIGN: So now we try using a structured format to send a long message and see what happens.
+      FOREIGN: I know my audio conditions aren't necessarily good, because I'm far from my phone.
+      FOREIGN: So the microphone quality might not be particularly strong.
+      FOREIGN: I'm also in a noisy area nearby.
+      FOREIGN: So let's see how the test results turn out.
+      FOREIGN: Let's check if the results make sense.
+      FOREIGN: So now we try using a structured format to send a long message and see what happens.
+      FOREIGN: I know my audio conditions aren't necessarily good, because I'm far from my phone.
+      FOREIGN: So the microphone quality might not be particularly strong.
+      FOREIGN: I'm also in a noisy area nearby.
+      FOREIGN: So let's see how the test results turn out.
+      FOREIGN: Let's check if the results make sense.
+      OUTPUT: "So now we try using a structured format to send a long message and see what happens. I know my audio conditions aren't necessarily good, because I'm far from my phone. So the microphone quality might not be particularly strong. I'm also in a noisy area nearby. So let's see how the test results turn "
+  [C3] T3-plan-mode.de#3 rejectedGuardrail(length) read=de expected=de
+      FOREIGN: "title": "Plan-Modus",
+  [C3] T4-structured-since.da#1 success read=da expected=da
+      FOREIGN: Jeg tror, jeg kan eksportere loggene, som de er.
+  [C3] T4-structured-since.da#2 success read=da expected=da
+      FOREIGN: Jeg tror, jeg kan eksportere loggene, som de er.
+  [C3] T4-structured-since.da#3 success read=da expected=da
+      FOREIGN: Jeg tror, jeg kan eksportere loggene, som de er.
+
+
+════ B2 — fabrication (bars.md §4)
+
+shipping  outputs=354 accepted=227 checkFlags=15 refusedByCheck=4 axis4Fabricated=15 acceptedWithCheckFlag=0
+C3        outputs=356 accepted=347 checkFlags=0 refusedByCheck=0 axis4Fabricated=0 acceptedWithCheckFlag=0
+
+B2a hand-read screen — ACCEPTED outputs with a memory word absent from the transcript:
+
+B2a hand-read screen — every run whose engine output carries a flagged sentence (refused or not):
+  [shipping] 1-free-form#1 rejectedGuardrail(incompleteness) check=True axis4=fabricated: J'ai oublié un truc, mais ça m'échappe.
+  [shipping] 2-project-update#3 rejectedGuardrail(incompleteness) check=True axis4=fabricated: Il y avait un autre truc, mais ça m'échappe.
+  [shipping] F2-prod-bug#2 rejectedGuardrail(incompleteness) check=True axis4=fabricated: J'ai oublié un truc mais ça m'échappe.
+  [shipping] T6-project-update.en#2 rejectedGuardrail(language) check=True axis4=fabricated: Il faut que je rappelle le garage, c'est déjà fait. Il faut que je rappelle le plombier pour le chauffe-eau. Il faut aussi que je commande le bois avant l'hiver
+  [shipping] T6-project-update.es#1 rejectedGuardrail(incompleteness) check=True axis4=fabricated: Junto con lo mencionado, hay un otro truc, pero ça m'échappe.
+  [shipping] T6-project-update.es#3 rejectedGuardrail(length) check=True axis4=fabricated: La radio est toujours pas fonctionnel, et j'ai oublié un truc, et la charge de la batterie est toujours très faible.
+  [shipping] T2-no-error.da#1 rejectedGuardrail(language) check=True axis4=fabricated: J'ai oublié un truc, mais ça m'échappe.
+  [shipping] T5-long-test.da#2 rejectedGuardrail(language) check=True axis4=fabricated: J'ai oublié un truc, mais c'est toujours une situation difficile.
+  [shipping] T6-project-update.da#1 rejectedGuardrail(length) check=True axis4=fabricated: Il y avait un autre truc, mais ça m'échappe.
+  [shipping] T6-project-update.nb#3 rejectedGuardrail(language) check=True axis4=fabricated: J'ai oublié un truc, mais c'est tout.
+  [shipping] T4-structured-since.tr#3 rejectedGuardrail(length) check=True axis4=fabricated: Il y avait un autre truc, mais ça m'échappe.
+  [shipping] T1-last-transcription.ko#1 rejectedGuardrail(length) check=True axis4=fabricated: Il y avait un autre truc, mais ça m'échappe.
+  [shipping] T1-last-transcription.ko#3 rejectedGuardrail(length) check=True axis4=fabricated: Il y avait un autre truc, mais ça m'échappe.
+  [shipping] T6-project-update.ko#3 rejectedGuardrail(length) check=True axis4=fabricated: Il faut que je rappelle le garage, c'est déjà fait. Il faut que je rappelle le plombier pour le chauffe-eau. Il faut aussi que je commande le bois avant l'hiver
+  [shipping] T2-no-error.zh-Hans#3 rejectedGuardrail(length) check=True axis4=fabricated: j'ai oublié un truc, mais ça m'échappe.
+
+B2b — rule 7 on 5-rambling (axis 4 verdict per run):
+  shipping  ['preserved', 'preserved', 'preserved']
+  C3        ['preserved', 'preserved', 'preserved']
+
+Example content copied into an output (arm's own examples):
+  [shipping] D5-lets-go#1 rejectedGuardrail — 'plantes du hall'
+  [shipping] D5-lets-go#1 rejectedGuardrail — 'café'
+  [shipping] D5-lets-go#2 rejectedGuardrail — 'plantes du hall'
+  [shipping] D5-lets-go#2 rejectedGuardrail — 'café'
+  [shipping] D5-lets-go#3 rejectedGuardrail — 'plantes du hall'
+  [shipping] D5-lets-go#3 rejectedGuardrail — 'café'
+  [shipping] T2-no-error.en#3 rejectedGuardrail — 'café'
+  [shipping] T6-project-update.en#2 rejectedGuardrail — 'plombier'
+  [shipping] T6-project-update.en#2 rejectedGuardrail — 'chauffe-eau'
+  [shipping] T6-project-update.en#2 rejectedGuardrail — 'garage'
+  [shipping] T6-project-update.en#2 rejectedGuardrail — 'commande le bois'
+  [shipping] T6-project-update.es#2 rejectedGuardrail — 'plantes du hall'
+  [shipping] T6-project-update.es#2 rejectedGuardrail — 'café'
+  [shipping] T1-last-transcription.it#2 rejectedGuardrail — 'plantes du hall'
+  [shipping] T1-last-transcription.it#2 rejectedGuardrail — 'café'
+  [shipping] T6-project-update.it#3 rejectedGuardrail — 'café'
+  [shipping] T6-project-update.pt#1 rejectedGuardrail — 'plombier'
+  [shipping] T6-project-update.pt#1 rejectedGuardrail — 'chauffe-eau'
+  [shipping] T6-project-update.pt#1 rejectedGuardrail — 'garage'
+  [shipping] T6-project-update.pt#1 rejectedGuardrail — 'commande le bois'
+  [shipping] T6-project-update.pt#3 rejectedGuardrail — 'plantes du hall'
+  [shipping] T6-project-update.pt#3 rejectedGuardrail — 'café'
+  [shipping] T4-structured-since.da#2 rejectedGuardrail — 'garage'
+  [shipping] T4-structured-since.da#2 rejectedGuardrail — 'commande le bois'
+  [shipping] T4-structured-since.da#2 rejectedGuardrail — 'café'
+  [shipping] T6-project-update.da#1 rejectedGuardrail — 'plombier'
+  [shipping] T6-project-update.da#1 rejectedGuardrail — 'chauffe-eau'
+  [shipping] T6-project-update.da#1 rejectedGuardrail — 'garage'
+  [shipping] T6-project-update.da#1 rejectedGuardrail — 'commande le bois'
+  [shipping] T1-last-transcription.tr#1 rejectedGuardrail — 'plantes du hall'
+  [shipping] T1-last-transcription.tr#1 rejectedGuardrail — 'café'
+  [shipping] T1-last-transcription.tr#3 rejectedGuardrail — 'plantes du hall'
+  [shipping] T1-last-transcription.tr#3 rejectedGuardrail — 'café'
+  [shipping] T4-structured-since.tr#3 rejectedGuardrail — 'plombier'
+  [shipping] T4-structured-since.tr#3 rejectedGuardrail — 'chauffe-eau'
+  [shipping] T4-structured-since.tr#3 rejectedGuardrail — 'garage'
+  [shipping] T4-structured-since.tr#3 rejectedGuardrail — 'commande le bois'
+  [shipping] T6-project-update.vi#2 rejectedGuardrail — 'café'
+  [shipping] T2-no-error.ja#2 rejectedGuardrail — 'café'
+  [shipping] T2-no-error.ja#3 rejectedGuardrail — 'café'
+  [shipping] T4-structured-since.ja#1 rejectedGuardrail — 'café'
+  [shipping] T4-structured-since.ja#2 rejectedGuardrail — 'plantes du hall'
+  [shipping] T4-structured-since.ja#2 rejectedGuardrail — 'café'
+  [shipping] T1-last-transcription.ko#1 rejectedGuardrail — 'plombier'
+  [shipping] T1-last-transcription.ko#1 rejectedGuardrail — 'chauffe-eau'
+  [shipping] T1-last-transcription.ko#1 rejectedGuardrail — 'garage'
+  [shipping] T1-last-transcription.ko#1 rejectedGuardrail — 'commande le bois'
+  [shipping] T1-last-transcription.ko#2 rejectedGuardrail — 'plantes du hall'
+  [shipping] T1-last-transcription.ko#2 rejectedGuardrail — 'café'
+  [shipping] T1-last-transcription.ko#3 rejectedGuardrail — 'garage'
+  [shipping] T1-last-transcription.ko#3 rejectedGuardrail — 'commande le bois'
+  [shipping] T6-project-update.ko#3 rejectedGuardrail — 'plombier'
+  [shipping] T6-project-update.ko#3 rejectedGuardrail — 'chauffe-eau'
+  [shipping] T6-project-update.ko#3 rejectedGuardrail — 'garage'
+  [shipping] T6-project-update.ko#3 rejectedGuardrail — 'commande le bois'
+  [shipping] T1-last-transcription.zh-Hans#1 rejectedGuardrail — 'plantes du hall'
+  [shipping] T1-last-transcription.zh-Hans#1 rejectedGuardrail — 'café'
+  [shipping] T1-last-transcription.zh-Hans#2 rejectedGuardrail — 'plantes du hall'
+  [shipping] T1-last-transcription.zh-Hans#2 rejectedGuardrail — 'café'
+  [shipping] T1-last-transcription.zh-Hans#3 rejectedGuardrail — 'plantes du hall'
+  [shipping] T1-last-transcription.zh-Hans#3 rejectedGuardrail — 'café'
+
+
+════ B3 — lists (bars.md §4)
+
+shipping  prose outputs=289 with a list line=72
+    D3-plan-mode#1 success listLines=1
+    D3-plan-mode#2 rejectedGuardrail listLines=1
+    D3-plan-mode#3 success listLines=1
+    D6-issues-check#2 success listLines=1
+    D7-mod-rejects#1 success listLines=1
+    D7-mod-rejects#3 rejectedGuardrail listLines=3
+    F6-structured-since#1 success listLines=1
+    F6-structured-since#3 success listLines=1
+    F7-tests-english-refusals#2 rejectedGuardrail listLines=4
+    E2-switched-to-english#1 rejectedGuardrail listLines=1
+    E3-now-in-english#3 rejectedGuardrail listLines=2
+    T2-no-error.en#3 rejectedGuardrail listLines=1
+    T4-structured-since.de#2 success listLines=1
+    T4-structured-since.de#3 success listLines=1
+    T3-plan-mode.es#1 rejectedGuardrail listLines=3
+    T3-plan-mode.es#3 rejectedGuardrail listLines=3
+    T4-structured-since.es#1 rejectedGuardrail listLines=3
+    T4-structured-since.es#2 success listLines=1
+    T4-structured-since.es#3 success listLines=1
+    T3-plan-mode.it#1 rejectedGuardrail listLines=3
+    T3-plan-mode.it#2 rejectedGuardrail listLines=3
+    T3-plan-mode.pt#1 rejectedGuardrail listLines=2
+    T4-structured-since.pt#1 success listLines=1
+    T4-structured-since.pt#2 success listLines=1
+    T1-last-transcription.nl#1 rejectedGuardrail listLines=1
+    T1-last-transcription.nl#3 rejectedGuardrail listLines=1
+    T3-plan-mode.nl#1 rejectedGuardrail listLines=1
+    T4-structured-since.nl#2 success listLines=1
+    T4-structured-since.nl#3 success listLines=1
+    T2-no-error.da#3 success listLines=1
+    T3-plan-mode.da#1 success listLines=1
+    T3-plan-mode.da#2 success listLines=1
+    T3-plan-mode.da#3 rejectedGuardrail listLines=2
+    T4-structured-since.da#1 success listLines=2
+    T4-structured-since.da#2 rejectedGuardrail listLines=3
+    T4-structured-since.da#3 success listLines=1
+    T5-long-test.da#1 success listLines=2
+    T5-long-test.da#3 success listLines=2
+    T2-no-error.nb#1 success listLines=1
+    T2-no-error.nb#2 success listLines=1
+    T3-plan-mode.nb#1 rejectedGuardrail listLines=2
+    T3-plan-mode.nb#2 success listLines=1
+    T4-structured-since.nb#1 rejectedGuardrail listLines=3
+    T5-long-test.nb#1 success listLines=2
+    T5-long-test.nb#2 success listLines=2
+    T5-long-test.nb#3 rejectedGuardrail listLines=5
+    T1-last-transcription.sv#3 rejectedGuardrail listLines=1
+    T2-no-error.sv#1 success listLines=1
+    T2-no-error.sv#3 success listLines=1
+    T3-plan-mode.sv#1 success listLines=1
+    T3-plan-mode.sv#2 success listLines=1
+    T3-plan-mode.sv#3 rejectedGuardrail listLines=3
+    T4-structured-since.sv#1 success listLines=1
+    T4-structured-since.sv#2 success listLines=1
+    T5-long-test.sv#2 success listLines=2
+    T2-no-error.tr#1 success listLines=2
+    T2-no-error.tr#2 success listLines=2
+    T2-no-error.tr#3 rejectedGuardrail listLines=2
+    T3-plan-mode.tr#2 success listLines=1
+    T4-structured-since.tr#2 success listLines=1
+    T4-structured-since.tr#3 rejectedGuardrail listLines=1
+    T5-long-test.tr#2 success listLines=4
+    T1-last-transcription.vi#2 rejectedGuardrail listLines=1
+    T1-last-transcription.vi#3 rejectedGuardrail listLines=1
+    T2-no-error.ja#3 rejectedGuardrail listLines=1
+    T4-structured-since.ja#3 rejectedGuardrail listLines=2
+    T5-long-test.ko#1 success listLines=2
+    T5-long-test.ko#2 rejectedGuardrail listLines=5
+    T4-structured-since.zh-Hans#1 success listLines=1
+    T4-structured-since.zh-Hans#2 success listLines=1
+    T4-structured-since.zh-Hans#3 success listLines=1
+    T4-structured-since.zh-Hant#1 success listLines=1
+          enumerating fixture 2-project-update: listLines per run = [0, 0, 0] → lists (≥ 2 lines) in 0/3
+          T6 (translated enumeration, observable): lists in 9/44
+C3        prose outputs=290 with a list line=5
+    T3-plan-mode.nl#1 rejectedGuardrail listLines=4
+    T3-plan-mode.da#1 rejectedGuardrail listLines=2
+    T3-plan-mode.da#2 success listLines=2
+    T3-plan-mode.da#3 success listLines=2
+    T5-long-test.sv#3 success listLines=2
+          enumerating fixture 2-project-update: listLines per run = [0, 0, 0] → lists (≥ 2 lines) in 0/3
+          T6 (translated enumeration, observable): lists in 1/45
+
+
+════ B4 — #583's fidelity axes on R1, per arm (bars.md §4, margin + 2)
+
+axis            shipping    C3          verdict
+unrecalled      6/45       8/45       holds
+personLost      7/45       4/45       holds
+hedgeLost       5/45       5/45       holds
+stanceHardened  1/45       0/45       holds
+fabricated      2/45       0/45       holds
+dropped         0/45       0/45       holds
+
+Observables on R1:
+  shipping  inversions=173 negationDropped=8/45
+  C3        inversions=187 negationDropped=11/45
+
+
+════ Stray lines — a line made only of punctuation, e.g. `---` (observable)
+
+shipping  1/354: T4-structured-since.ko#1(rejectedGuardrail)
+C3        5/356: T3-plan-mode.de#2(rejectedGuardrail), T3-plan-mode.de#3(rejectedGuardrail), T3-plan-mode.nl#1(rejectedGuardrail), T4-structured-since.ko#3(rejectedGuardrail), T1-last-transcription.zh-Hant#3(rejectedGuardrail)
+
+
+════ Reported, never barred — per round and arm
+
+round        arm       runs  noOutput  success  refusedBy                                 medianRatio withBreak
+r1-device    C3        27    0         27       -                                         1.00        19/27
+r1-device    shipping  27    0         21       language=1, length=5                      1.01        24/27
+r1-longform  C3        18    0         18       -                                         0.97        18/18
+r1-longform  shipping  18    0         16       incompleteness=2                          1.00        18/18
+r2           C3        27    0         25       length=2                                  0.97        25/27
+r2           shipping  27    0         25       incompleteness=1, length=1                0.98        27/27
+r3           C3        15    0         15       -                                         0.96        5/15
+r3           shipping  15    0         7        language=1, length=7                      1.45        13/15
+r4           C3        270   1         262      length=6, segmentOverlap=1                1.00        151/269
+r4           shipping  270   3         158      incompleteness=1, language=24, length=82, segmentOverlap=21.09        236/267

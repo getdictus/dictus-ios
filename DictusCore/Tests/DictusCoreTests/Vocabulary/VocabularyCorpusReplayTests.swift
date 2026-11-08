@@ -5,8 +5,8 @@
 // reason `PolishGuardrailCorpusReplayTests` does, in its own words — "a threshold
 // whose evidence only exists in a command nobody runs is a threshold that drifts".
 // `polish-harness vocabulary` prints these numbers, and it is a macOS executable
-// that needs a human to run it. CI runs nothing in this repo, so a corpus that does
-// not run here is a corpus nobody replays.
+// that needs a human to run it. `swift test` is what CI runs on every pull request
+// (#534), so a corpus that does not run here is a corpus nobody replays.
 //
 // It resolves the repo from `#filePath` rather than copying the corpus into test
 // resources, following that suite and `DictationErrorCopyTests`: a copy would drift,

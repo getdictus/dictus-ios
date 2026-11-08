@@ -48,6 +48,14 @@ public enum PolishTask: Equatable, Sendable {
         }
     }
 
+    /// The same task with a Smart Mode's worked examples resolved for a transcript in
+    /// `code` (#587). The free polish is returned unchanged: its prompts are chosen by
+    /// `PolishMode` and `SupportedLanguage`, not by this.
+    public func resolvingExamples(forTranscriptLanguage code: String?) -> PolishTask {
+        guard case .smart(let mode) = self else { return self }
+        return .smart(mode.resolvingExamples(forTranscriptLanguage: code))
+    }
+
     /// What the engine's output has to look like to be accepted.
     public var contract: PolishAcceptanceContract {
         switch self {

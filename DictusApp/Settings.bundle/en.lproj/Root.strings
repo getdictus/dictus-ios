@@ -1,0 +1,20 @@
+/* Dictus settings shown by the iOS Settings app. */
+"Enable Dictus" = "Enable Dictus";
+
+"1. Tap Keyboards" = "1. Tap Keyboards";
+
+"2. Enable Dictus" = "2. Enable Dictus";
+
+"3. Turn on Allow Full Access" = "3. Turn on Allow Full Access";
+
+"Privacy" = "Privacy";
+
+"Dictus transcribes on your device. Full Access lets the keyboard exchange dictation requests and results with the app." = "Dictus transcribes on your device. Full Access lets the keyboard exchange dictation requests and results with the app.";
+
+"Can't find Keyboards?" = "Can't find Keyboards?";
+
+"Close Settings, then reopen the app settings for Dictus." = "Close Settings, then reopen the app settings for Dictus.";
+
+"Information" = "Information";
+
+"Version" = "Version";

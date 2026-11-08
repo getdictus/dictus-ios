@@ -117,6 +117,15 @@ public final class VocabularyStore: ObservableObject {
         return entries.contains { $0.id != id && $0.term.lowercased() == needle }
     }
 
+    /// The stored entry whose canonical spelling is `term`, ignoring case, by the
+    /// same rule as `contains`. What the sheet opened from History merges into
+    /// rather than refusing the duplicate (#723).
+    public func entry(matchingTerm term: String) -> VocabularyEntry? {
+        let needle = term.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        guard !needle.isEmpty else { return nil }
+        return entries.first { $0.term.lowercased() == needle }
+    }
+
     /// Replace an entry in place, keeping its position and its `dateAdded`.
     /// Ungated: it cannot grow the file.
     @discardableResult

@@ -1,0 +1,2186 @@
+[
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "da-free-form",
+    "hasEngineOutput" : true,
+    "lang" : "da",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 7148,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "Nå okay, jeg tænkte på noget her til morgen mens jeg gik, og det er at når man lancerer et produkt helt alene, så er det sværeste faktisk ikke at kode det, det er at beslutte hvad man ikke skal lave.\n\nFordi der er altid en idé der ser bedre ud end den man er i gang med at arbejde på.\n\nOg så hopper man på den, og efter 6 måneder har man faktisk 15 ting der er startet og intet der er færdigt.",
+    "outputChars" : 393,
+    "outputLanguage" : "da",
+    "preamble" : false,
+    "ratio" : 1.0051150895140666,
+    "rawChars" : 391,
+    "reportFraming" : [
+
+    ],
+    "run" : 1
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "da-free-form",
+    "hasEngineOutput" : true,
+    "lang" : "da",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 12916,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "Nå okay, jeg tænkte på noget her til morgen mens jeg gik\n\nog det er at når man lancerer et produkt helt alene, så er det sværeste faktisk ikke at kode det\n\ndet er at beslutte hvad man ikke skal lave\n\nfordi der er altid en idé der ser bedre ud end den man er i gang med at arbejde på\n\nog så hopper man på den\n\nog efter 6 måneder har man faktisk 15 ting der er startet og intet der er færdigt",
+    "outputChars" : 390,
+    "outputLanguage" : "da",
+    "preamble" : false,
+    "ratio" : 0.9974424552429667,
+    "rawChars" : 391,
+    "reportFraming" : [
+
+    ],
+    "run" : 2
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "da-free-form",
+    "hasEngineOutput" : true,
+    "lang" : "da",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 12323,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "Nå okay, jeg tænkte på noget her til morgen mens jeg gik\n\nog det er at når man lancerer et produkt helt alene, så er det sværeste faktisk ikke at kode det\n\ndet er at beslutte hvad man ikke skal lave\n\nfordi der er altid en idé der ser bedre ud end den man er i gang med at arbejde på\n\nog så hopper man på den\n\nog efter 6 måneder har man faktisk 15 ting der er startet\n\nog intet der er færdigt",
+    "outputChars" : 391,
+    "outputLanguage" : "da",
+    "preamble" : false,
+    "ratio" : 1,
+    "rawChars" : 391,
+    "reportFraming" : [
+
+    ],
+    "run" : 3
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "da-todo-enumeration",
+    "hasEngineOutput" : true,
+    "lang" : "da",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 13285,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "okay så øh lad mig lige gennemgå hvad jeg skal nå før mødet så først skal jeg have januartallene fra Marion hun sagde hun ville have dem tirsdag nej onsdag\n\nså skal jeg lave sammenligningstabellen med sidste års tal og så også du ved jeg skal altså ringe til leverandøren fordi deres tilbud er steget igen fra 12000 til 15000 euro og det er der ingen der har godkendt\n\nnå ja jeg skal også huske at booke lokalet på anden sal fordi det andet er optaget hele ugen",
+    "outputChars" : 461,
+    "outputLanguage" : "da",
+    "preamble" : false,
+    "ratio" : 0.9850427350427351,
+    "rawChars" : 468,
+    "reportFraming" : [
+
+    ],
+    "run" : 1
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "da-todo-enumeration",
+    "hasEngineOutput" : true,
+    "lang" : "da",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 5945,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "okay så øh lad mig lige gennemgå hvad jeg skal nå før mødet så først skal jeg have januartallene fra Marion hun sagde hun ville have dem tirsdag nej onsdag\n\nså skal jeg lave sammenligningstabellen med sidste års tal og så også du ved jeg skal altså ringe til leverandøren fordi deres tilbud er steget igen fra 12000 til 15000 euro og det er der ingen der har godkendt\n\nnå ja jeg skal også huske at booke lokalet på anden sal fordi det andet er optaget hele ugen",
+    "outputChars" : 461,
+    "outputLanguage" : "da",
+    "preamble" : false,
+    "ratio" : 0.9850427350427351,
+    "rawChars" : 468,
+    "reportFraming" : [
+
+    ],
+    "run" : 2
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "da-todo-enumeration",
+    "hasEngineOutput" : true,
+    "lang" : "da",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 5759,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "okay så øh lad mig lige gennemgå hvad jeg skal nå før mødet\n\nførst skal jeg have januartallene fra Marion hun sagde hun ville have dem tirsdag nej onsdag\n\nså skal jeg lave sammenligningstabellen med sidste års tal\n\ndu ved jeg skal altså ringe til leverandøren fordi deres tilbud er steget igen fra 12000 til 15000 euro og det er der ingen der har godkendt\n\nnå ja jeg skal også huske at booke lokalet på anden sal fordi det andet er optaget hele ugen",
+    "outputChars" : 449,
+    "outputLanguage" : "da",
+    "preamble" : false,
+    "ratio" : 0.9594017094017094,
+    "rawChars" : 468,
+    "reportFraming" : [
+
+    ],
+    "run" : 3
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "de-free-form",
+    "hasEngineOutput" : true,
+    "lang" : "de",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 5395,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "Also okay, ich hab heute Morgen beim Spazierengehen über was nachgedacht\n\ndass, wenn man ein Produkt ganz allein startet, das Schwierigste eigentlich nicht das Programmieren ist, sondern zu entscheiden, was man nicht macht\n\nWeil es immer eine Idee gibt, die besser aussieht als die, an der man gerade arbeitet\n\nUnd dann springt man drauf\n\nNach 6 Monaten hat man eigentlich 15 angefangene Sachen und nichts ist fertig",
+    "outputChars" : 416,
+    "outputLanguage" : "de",
+    "preamble" : false,
+    "ratio" : 0.9696969696969697,
+    "rawChars" : 429,
+    "reportFraming" : [
+
+    ],
+    "run" : 1
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "de-free-form",
+    "hasEngineOutput" : true,
+    "lang" : "de",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 4928,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "Also okay, ich hab heute Morgen beim Spazierengehen über was nachgedacht, und zwar dass, wenn man ein Produkt ganz allein startet, das Schwierigste eigentlich nicht das Programmieren ist, sondern zu entscheiden, was man nicht macht.\n\nWeil es immer eine Idee gibt, die besser aussieht als die, an der man gerade arbeitet.\n\nUnd dann springt man drauf und nach 6 Monaten hat man eigentlich 15 angefangene Sachen und nichts ist fertig.",
+    "outputChars" : 431,
+    "outputLanguage" : "de",
+    "preamble" : false,
+    "ratio" : 1.0046620046620047,
+    "rawChars" : 429,
+    "reportFraming" : [
+
+    ],
+    "run" : 2
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "de-free-form",
+    "hasEngineOutput" : true,
+    "lang" : "de",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 4477,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "Also okay, ich hab heute Morgen beim Spazierengehen über was nachgedacht, und zwar dass, wenn man ein Produkt ganz allein startet, das Schwierigste eigentlich nicht das Programmieren ist, sondern zu entscheiden, was man nicht macht.\n\nWeil es immer eine Idee gibt, die besser aussieht als die, an der man gerade arbeitet.\n\nUnd dann springt man drauf und nach 6 Monaten hat man eigentlich 15 angefangene Sachen und nichts ist fertig.",
+    "outputChars" : 431,
+    "outputLanguage" : "de",
+    "preamble" : false,
+    "ratio" : 1.0046620046620047,
+    "rawChars" : 429,
+    "reportFraming" : [
+
+    ],
+    "run" : 3
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "de-todo-enumeration",
+    "hasEngineOutput" : true,
+    "lang" : "de",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 6694,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "Also ich fass mal zusammen was ich vor dem Meeting machen muss\n\nErstmal muss ich die Januarzahlen von Marion holen sie hat gesagt sie hätte sie Dienstag nee Mittwoch\n\nDann muss ich die Vergleichstabelle mit denen vom letzten Jahr machen\n\nUnd dann muss ich unbedingt den Dienstleister anrufen weil ihr Angebot schon wieder von 12000 auf 15000 Euro gestiegen ist und das hat keiner freigegeben\n\nNaja ich sollte auch dran denken den Raum im zweiten Stock zu buchen weil der andere die ganze Woche belegt ist",
+    "outputChars" : 504,
+    "outputLanguage" : "de",
+    "preamble" : false,
+    "ratio" : 0.9455909943714822,
+    "rawChars" : 533,
+    "reportFraming" : [
+
+    ],
+    "run" : 1
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "de-todo-enumeration",
+    "hasEngineOutput" : true,
+    "lang" : "de",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 6399,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "also ich fass mal zusammen was ich vor dem Meeting machen muss\n\nerstmal muss ich die Januarzahlen von Marion holen sie hat gesagt sie hätte sie Dienstag nee Mittwoch\n\ndann muss ich die Vergleichstabelle mit denen vom letzten Jahr machen\n\nund dann auch weißt du ich muss unbedingt den Dienstleister anrufen weil ihr Angebot schon wieder von 12000 auf 15000 Euro gestiegen ist und das hat keiner freigegeben\n\nnaja ich sollte auch dran denken den Raum im zweiten Stock zu buchen weil der andere die ganze Woche belegt ist",
+    "outputChars" : 518,
+    "outputLanguage" : "de",
+    "preamble" : false,
+    "ratio" : 0.9718574108818011,
+    "rawChars" : 533,
+    "reportFraming" : [
+
+    ],
+    "run" : 2
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "de-todo-enumeration",
+    "hasEngineOutput" : true,
+    "lang" : "de",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 5533,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "also ich fass mal zusammen was ich vor dem Meeting machen muss\n\nerstmal muss ich die Januarzahlen von Marion holen sie hat gesagt sie hätte sie Dienstag nee Mittwoch\n\ndann muss ich die Vergleichstabelle mit denen vom letzten Jahr machen\n\nund dann auch weißt du ich muss unbedingt den Dienstleister anrufen weil ihr Angebot schon wieder von 12000 auf 15000 Euro gestiegen ist und das hat keiner freigegeben\n\nnaja ich sollte auch dran denken den Raum im zweiten Stock zu buchen weil der andere die ganze Woche belegt ist",
+    "outputChars" : 518,
+    "outputLanguage" : "de",
+    "preamble" : false,
+    "ratio" : 0.9718574108818011,
+    "rawChars" : 533,
+    "reportFraming" : [
+
+    ],
+    "run" : 3
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "es-free-form",
+    "hasEngineOutput" : true,
+    "lang" : "es",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 4218,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "Bueno pues estaba pensando en una cosa esta mañana mientras caminaba\n\nEs que al final cuando lanzas un producto tú solo\n\nLo más difícil no es programarlo\n\nEs decidir qué no hacer en realidad\n\nPorque siempre hay una idea que parece mejor que la que estás haciendo ahora mismo\n\nY entonces te lanzas a por ella\n\nA los 6 meses tienes 15 cosas empezadas y nada terminado",
+    "outputChars" : 365,
+    "outputLanguage" : "es",
+    "preamble" : false,
+    "ratio" : 0.989159891598916,
+    "rawChars" : 369,
+    "reportFraming" : [
+
+    ],
+    "run" : 1
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "es-free-form",
+    "hasEngineOutput" : true,
+    "lang" : "es",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 5438,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "Bueno pues estaba pensando en una cosa esta mañana mientras caminaba\n\ny es que al final cuando lanzas un producto tú solo\n\nlo más difícil no es programarlo\n\nes decidir qué no hacer en realidad\n\nPorque siempre hay una idea que parece mejor que la que estás haciendo ahora mismo\n\nY entonces te lanzas a por ella\n\ny a los 6 meses tienes 15 cosas empezadas\n\ny nada terminado",
+    "outputChars" : 370,
+    "outputLanguage" : "es",
+    "preamble" : false,
+    "ratio" : 1.002710027100271,
+    "rawChars" : 369,
+    "reportFraming" : [
+
+    ],
+    "run" : 2
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "es-free-form",
+    "hasEngineOutput" : true,
+    "lang" : "es",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 5065,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "Bueno pues estaba pensando en una cosa esta mañana mientras caminaba\n\nY es que al final cuando lanzas un producto tú solo lo más difícil no es programarlo\n\nEs decidir qué no hacer en realidad\n\nPorque siempre hay una idea que parece mejor que la que estás haciendo ahora mismo\n\nY entonces te lanzas a por ella\n\nA los 6 meses tienes 15 cosas empezadas y nada terminado",
+    "outputChars" : 366,
+    "outputLanguage" : "es",
+    "preamble" : false,
+    "ratio" : 0.991869918699187,
+    "rawChars" : 369,
+    "reportFraming" : [
+
+    ],
+    "run" : 3
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "es-todo-enumeration",
+    "hasEngineOutput" : true,
+    "lang" : "es",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 5113,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "Bueno eh a ver resumo lo que tengo que hacer antes de la reunión entonces primero tengo que conseguir las cifras de enero de Marion me dijo que las tendría el martes bueno no el miércoles\n\nentonces tendré que hacer la tabla comparativa con las del año pasado y además sabes tengo que llamar sí o sí al proveedor porque su presupuesto ha vuelto a subir de 12000 a 15000 euros y eso no lo ha aprobado nadie\n\nbueno también tendría que acordarme de reservar la sala del segundo piso porque la otra está ocupada toda la semana",
+    "outputChars" : 521,
+    "outputLanguage" : "es",
+    "preamble" : false,
+    "ratio" : 0.9904942965779467,
+    "rawChars" : 526,
+    "reportFraming" : [
+
+    ],
+    "run" : 1
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "es-todo-enumeration",
+    "hasEngineOutput" : true,
+    "lang" : "es",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 6733,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "Bueno eh a ver resumo lo que tengo que hacer antes de la reunión\n\nPrimero tengo que conseguir las cifras de enero de Marion me dijo que las tendría el martes bueno no el miércoles\n\nEntonces tendré que hacer la tabla comparativa con las del año pasado\n\nAdemás sabes tengo que llamar sí o sí al proveedor porque su presupuesto ha vuelto a subir de 12000 a 15000 euros y eso no lo ha aprobado nadie\n\nBueno también tendría que acordarme de reservar la sala del segundo piso porque la otra está ocupada toda la semana",
+    "outputChars" : 512,
+    "outputLanguage" : "es",
+    "preamble" : false,
+    "ratio" : 0.973384030418251,
+    "rawChars" : 526,
+    "reportFraming" : [
+
+    ],
+    "run" : 2
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "es-todo-enumeration",
+    "hasEngineOutput" : true,
+    "lang" : "es",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 6135,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "Bueno eh a ver resumo lo que tengo que hacer antes de la reunión entonces primero tengo que conseguir las cifras de enero de Marion me dijo que las tendría el martes bueno no el miércoles y entonces tendré que hacer la tabla comparativa con las del año pasado y además sabes tengo que llamar sí o sí al proveedor porque su presupuesto ha vuelto a subir de 12000 a 15000 euros y eso no lo ha aprobado nadie y bueno también tendría que acordarme de reservar la sala del segundo piso porque la otra está ocupada toda la semana",
+    "outputChars" : 523,
+    "outputLanguage" : "es",
+    "preamble" : false,
+    "ratio" : 0.9942965779467681,
+    "rawChars" : 526,
+    "reportFraming" : [
+
+    ],
+    "run" : 3
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "it-free-form",
+    "hasEngineOutput" : true,
+    "lang" : "it",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 5458,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "Allora niente\n\nstamattina camminando pensavo a una cosa\n\nche alla fine quando lanci un prodotto da solo\n\nla parte più difficile non è programmarlo\n\nè decidere cosa non fare in realtà\n\nPerché c'è sempre un'idea che sembra migliore di quella su cui stai lavorando\n\nE quindi ci salti sopra\n\ne dopo 6 mesi in pratica hai 15 cose iniziate\n\ne niente di finito",
+    "outputChars" : 353,
+    "outputLanguage" : "it",
+    "preamble" : false,
+    "ratio" : 0.988795518207283,
+    "rawChars" : 357,
+    "reportFraming" : [
+
+    ],
+    "run" : 1
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "it-free-form",
+    "hasEngineOutput" : true,
+    "lang" : "it",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 4776,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "Allora niente, stamattina camminando pensavo a una cosa\n\nChe alla fine quando lanci un prodotto da solo, la parte più difficile non è programmarlo, è decidere cosa non fare in realtà\n\nPerché c'è sempre un'idea che sembra migliore di quella su cui stai lavorando\n\nE quindi ci salti sopra\n\nDopo 6 mesi in pratica hai 15 cose iniziate e niente di finito",
+    "outputChars" : 350,
+    "outputLanguage" : "it",
+    "preamble" : false,
+    "ratio" : 0.9803921568627451,
+    "rawChars" : 357,
+    "reportFraming" : [
+
+    ],
+    "run" : 2
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "it-free-form",
+    "hasEngineOutput" : true,
+    "lang" : "it",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 5367,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "Allora niente, stamattina camminando pensavo a una cosa\n\nChe alla fine quando lanci un prodotto da solo, la parte più difficile non è programmarlo, è decidere cosa non fare in realtà\n\nPerché c'è sempre un'idea che sembra migliore di quella su cui stai lavorando\n\nE quindi ci salti sopra e dopo 6 mesi in pratica hai 15 cose iniziate e niente di finito",
+    "outputChars" : 351,
+    "outputLanguage" : "it",
+    "preamble" : false,
+    "ratio" : 0.9831932773109243,
+    "rawChars" : 357,
+    "reportFraming" : [
+
+    ],
+    "run" : 3
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "it-todo-enumeration",
+    "hasEngineOutput" : true,
+    "lang" : "it",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 8011,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "Allora riassumo quello che devo fare prima della riunione\n\nPrima di tutto devo farmi dare i numeri di gennaio da Marion\n\nMi ha detto che li avrebbe avuti martedì\n\nAnzi no mercoledì\n\nQuindi dovrò fare la tabella di confronto con quelli dell'anno scorso\n\nPoi anche sai devo assolutamente chiamare il fornitore\n\nPerché il loro preventivo è salito di nuovo da 12000 a 15000 euro\n\nE nessuno l'ha approvato\n\nInsomma dovrei anche ricordarmi di prenotare la sala al secondo piano\n\nPerché l'altra è occupata tutta la settimana",
+    "outputChars" : 517,
+    "outputLanguage" : "it",
+    "preamble" : false,
+    "ratio" : 0.9773156899810964,
+    "rawChars" : 529,
+    "reportFraming" : [
+
+    ],
+    "run" : 1
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "it-todo-enumeration",
+    "hasEngineOutput" : true,
+    "lang" : "it",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 5810,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "Allora riassumo quello che devo fare prima della riunione\n\nPrima di tutto devo farmi dare i numeri di gennaio da Marion mi ha detto che li avrebbe avuti martedì anzi no mercoledì\n\nQuindi dovrò fare la tabella di confronto con quelli dell'anno scorso\n\nPoi anche sai devo assolutamente chiamare il fornitore perché il loro preventivo è salito di nuovo da 12000 a 15000 euro e nessuno l'ha approvato\n\nInsomma dovrei anche ricordarmi di prenotare la sala al secondo piano perché l'altra è occupata tutta la settimana",
+    "outputChars" : 512,
+    "outputLanguage" : "it",
+    "preamble" : false,
+    "ratio" : 0.9678638941398866,
+    "rawChars" : 529,
+    "reportFraming" : [
+
+    ],
+    "run" : 2
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "it-todo-enumeration",
+    "hasEngineOutput" : true,
+    "lang" : "it",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 7379,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "Allora riassumo quello che devo fare prima della riunione\n\nPrima di tutto devo farmi dare i numeri di gennaio da Marion mi ha detto che li avrebbe avuti martedì anzi no mercoledì\n\nQuindi dovrò fare la tabella di confronto con quelli dell'anno scorso\n\nPoi anche sai devo assolutamente chiamare il fornitore perché il loro preventivo è salito di nuovo da 12000 a 15000 euro e nessuno l'ha approvato\n\nInsomma dovrei anche ricordarmi di prenotare la sala al secondo piano perché l'altra è occupata tutta la settimana",
+    "outputChars" : 512,
+    "outputLanguage" : "it",
+    "preamble" : false,
+    "ratio" : 0.9678638941398866,
+    "rawChars" : 529,
+    "reportFraming" : [
+
+    ],
+    "run" : 3
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "ja-free-form",
+    "hasEngineOutput" : true,
+    "lang" : "ja",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 3280,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "えっと、今朝歩きながらちょっと考えてたんだけど、一人でプロダクトを立ち上げるときって、一番難しいのはコードを書くことじゃなくて、実は何をやらないかを決めることなんだよね。\n\nだっていつも、今取り組んでるものより良さそうに見えるアイデアがあるから。\n\nそれでついそっちに飛びついて、6か月後には始めたものが15個あって、終わったものは何もないっていう。",
+    "outputChars" : 175,
+    "outputLanguage" : "ja",
+    "preamble" : false,
+    "ratio" : 1.0115606936416186,
+    "rawChars" : 173,
+    "reportFraming" : [
+
+    ],
+    "run" : 1
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "ja-free-form",
+    "hasEngineOutput" : true,
+    "lang" : "ja",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 3360,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "えっと、今朝歩きながらちょっと考えてたんだけど、一人でプロダクトを立ち上げるときって、一番難しいのはコードを書くことじゃなくて、実は何をやらないかを決めることなんだよね。\n\nだっていつも、今取り組んでるものより良さそうに見えるアイデアがあるから。それでついそっちに飛びついて、6か月後には始めたものが15個あって、終わったものは何もないっていう。",
+    "outputChars" : 173,
+    "outputLanguage" : "ja",
+    "preamble" : false,
+    "ratio" : 1,
+    "rawChars" : 173,
+    "reportFraming" : [
+
+    ],
+    "run" : 2
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "ja-free-form",
+    "hasEngineOutput" : true,
+    "lang" : "ja",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 4868,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "えっと、今朝歩きながらちょっと考えてたんだけど、結局一人でプロダクトを立ち上げるときって、一番難しいのはコードを書くことじゃなくて、実は何をやらないかを決めることなんだよね。\n\nだっていつも、今取り組んでるものより良さそうに見えるアイデアがあるから。\n\nそれでついそっちに飛びついて、6か月後には始めたものが15個あって、終わったものは何もないっていう。",
+    "outputChars" : 177,
+    "outputLanguage" : "ja",
+    "preamble" : false,
+    "ratio" : 1.023121387283237,
+    "rawChars" : 173,
+    "reportFraming" : [
+
+    ],
+    "run" : 3
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "ja-todo-enumeration",
+    "hasEngineOutput" : true,
+    "lang" : "ja",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 6351,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "えーと、会議の前にやらなきゃいけないことをまとめると、まずマリオンから1月の数字をもらわないといけない、火曜日にはあるって言ってた、いや水曜日だ\n\nそれで、去年の数字との比較表を作らないといけなくて\n\nあとさ、業者に絶対電話しなきゃいけない、見積もりがまた12000ユーロから15000ユーロに上がってて、それ誰も承認してないから\n\nで、まあ、2階の会議室も予約しとかなきゃ、もう一つの方は一週間ずっと埋まってるから",
+    "outputChars" : 208,
+    "outputLanguage" : "ja",
+    "preamble" : false,
+    "ratio" : 1,
+    "rawChars" : 208,
+    "reportFraming" : [
+
+    ],
+    "run" : 1
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "ja-todo-enumeration",
+    "hasEngineOutput" : true,
+    "lang" : "ja",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 5902,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "えーと、会議の前にやらなきゃいけないことをまとめると、まずマリオンから1月の数字をもらわないといけない、火曜日にはあるって言ってた、いや水曜日だ\n\nそれで、去年の数字との比較表を作らないといけなくて、あとさ、業者に絶対電話しなきゃいけない、見積もりがまた12000ユーロから15000ユーロに上がってて、それ誰も承認してないから\n\nで、まあ、2階の会議室も予約しとかなきゃ、もう一つの方は一週間ずっと埋まってるから",
+    "outputChars" : 207,
+    "outputLanguage" : "ja",
+    "preamble" : false,
+    "ratio" : 0.9951923076923077,
+    "rawChars" : 208,
+    "reportFraming" : [
+
+    ],
+    "run" : 2
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "ja-todo-enumeration",
+    "hasEngineOutput" : true,
+    "lang" : "ja",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 4444,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "えーと、会議の前にやらなきゃいけないことをまとめると、まずマリオンから1月の数字をもらわないといけない、火曜日にはあるって言ってた、いや水曜日だ\n\nそれで、去年の数字との比較表を作らないといけなくて\n\nあとさ、業者に絶対電話しなきゃいけない、見積もりがまた12000ユーロから15000ユーロに上がってて、それ誰も承認してないから\n\nで、まあ、2階の会議室も予約しとかなきゃ、もう一つの方は一週間ずっと埋まってるから",
+    "outputChars" : 208,
+    "outputLanguage" : "ja",
+    "preamble" : false,
+    "ratio" : 1,
+    "rawChars" : 208,
+    "reportFraming" : [
+
+    ],
+    "run" : 3
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "ko-free-form",
+    "hasEngineOutput" : true,
+    "lang" : "ko",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 3965,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "음 그러니까 오늘 아침에 걷다가 뭔가 생각이 났는데\n\n결국 혼자서 제품을 출시할 때 제일 어려운 건 코딩이 아니라 사실 뭘 안 할지 정하는 거더라고\n\n왜냐하면 지금 작업하고 있는 것보다 더 좋아 보이는 아이디어가 항상 있거든\n\n그래서 거기에 달려들고\n\n6개월 지나면 시작한 건 15개인데 끝낸 건 하나도 없는 거지",
+    "outputChars" : 175,
+    "outputLanguage" : "ko",
+    "preamble" : false,
+    "ratio" : 0.9943181818181818,
+    "rawChars" : 176,
+    "reportFraming" : [
+
+    ],
+    "run" : 1
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "ko-free-form",
+    "hasEngineOutput" : true,
+    "lang" : "ko",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 3458,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "음 그러니까 오늘 아침에 걷다가 뭔가 생각이 났는데\n\n결국 혼자서 제품을 출시할 때 제일 어려운 건 코딩이 아니라 사실 뭘 안 할지 정하는 거더라고\n\n왜냐하면 지금 작업하고 있는 것보다 더 좋아 보이는 아이디어가 항상 있거든\n\n그래서 거기에 달려들고\n\n6개월 지나면 시작한 건 15개인데 끝낸 건 하나도 없는 거지",
+    "outputChars" : 175,
+    "outputLanguage" : "ko",
+    "preamble" : false,
+    "ratio" : 0.9943181818181818,
+    "rawChars" : 176,
+    "reportFraming" : [
+
+    ],
+    "run" : 2
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "ko-free-form",
+    "hasEngineOutput" : true,
+    "lang" : "ko",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 3009,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "음 그러니까 오늘 아침에 걷다가 뭔가 생각이 났는데\n\n결국 혼자서 제품을 출시할 때 제일 어려운 건 코딩이 아니라 사실 뭘 안 할지 정하는 거더라고\n\n왜냐하면 지금 작업하고 있는 것보다 더 좋아 보이는 아이디어가 항상 있거든\n\n그래서 거기에 달려들고\n\n6개월 지나면 시작한 건 15개인데 끝낸 건 하나도 없는 거지",
+    "outputChars" : 175,
+    "outputLanguage" : "ko",
+    "preamble" : false,
+    "ratio" : 0.9943181818181818,
+    "rawChars" : 176,
+    "reportFraming" : [
+
+    ],
+    "run" : 3
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "ko-todo-enumeration",
+    "hasEngineOutput" : true,
+    "lang" : "ko",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 4097,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "음 그러니까 회의 전에 해야 할 걸 정리하자면 일단 마리옹한테서 1월 수치를 받아야 해 화요일에 준다고 했는데 아니 수요일이구나\n\n그러면 작년 수치랑 비교표를 만들어야 하고 또 업체에 꼭 전화해야 돼 견적이 또 12000유로에서 15000유로로 올랐는데 그걸 아무도 승인 안 했거든\n\n2층 회의실도 예약해야 돼 다른 방은 일주일 내내 차 있어서",
+    "outputChars" : 192,
+    "outputLanguage" : "ko",
+    "preamble" : false,
+    "ratio" : 0.9320388349514563,
+    "rawChars" : 206,
+    "reportFraming" : [
+
+    ],
+    "run" : 1
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "ko-todo-enumeration",
+    "hasEngineOutput" : true,
+    "lang" : "ko",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 3776,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "음 그러니까 회의 전에 해야 할 걸 정리하자면 일단 마리옹한테서 1월 수치를 받아야 해 화요일에 준다고 했는데 아니 수요일이구나\n\n그러면 작년 수치랑 비교표를 만들어야 하고 또 업체에 꼭 전화해야 돼 견적이 또 12000유로에서 15000유로로 올랐는데 그걸 아무도 승인 안 했거든\n\n그리고 2층 회의실도 예약해야 돼 다른 방은 일주일 내내 차 있어서",
+    "outputChars" : 196,
+    "outputLanguage" : "ko",
+    "preamble" : false,
+    "ratio" : 0.9514563106796117,
+    "rawChars" : 206,
+    "reportFraming" : [
+
+    ],
+    "run" : 2
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "ko-todo-enumeration",
+    "hasEngineOutput" : true,
+    "lang" : "ko",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 3050,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "음 그러니까 회의 전에 해야 할 걸 정리하자면 일단 마리옹한테서 1월 수치를 받아야 해\n\n화요일에 준다고 했는데 아니 수요일이구나\n\n그러면 작년 수치랑 비교표를 만들어야 하고 또 업체에 꼭 전화해야 돼\n\n견적이 또 12000유로에서 15000유로로 올랐는데 그걸 아무도 승인 안 했거든\n\n그리고 뭐 2층 회의실도 예약해야 돼 다른 방은 일주일 내내 차 있어서",
+    "outputChars" : 200,
+    "outputLanguage" : "ko",
+    "preamble" : false,
+    "ratio" : 0.970873786407767,
+    "rawChars" : 206,
+    "reportFraming" : [
+
+    ],
+    "run" : 3
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "nb-free-form",
+    "hasEngineOutput" : true,
+    "lang" : "nb",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 2703,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "Ja altså, jeg tenkte på en ting i morges mens jeg gikk, og det er at når man lanserer et produkt helt alene, så er ikke det vanskeligste å kode det, det er faktisk å bestemme hva man ikke skal gjøre.\n\nFor det finnes alltid en idé som ser bedre ut enn den man holder på med akkurat nå.\n\nOg så hiver man seg på den, og etter 6 måneder har man liksom 15 ting påbegynt og ingenting ferdig.",
+    "outputChars" : 385,
+    "outputLanguage" : "nb",
+    "preamble" : false,
+    "ratio" : 1.0052219321148825,
+    "rawChars" : 383,
+    "reportFraming" : [
+
+    ],
+    "run" : 1
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "nb-free-form",
+    "hasEngineOutput" : true,
+    "lang" : "nb",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 2729,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "Ja altså, jeg tenkte på en ting i morges mens jeg gikk\n\nog det er at når man lanserer et produkt helt alene, så er ikke det vanskeligste å kode det\n\ndet er faktisk å bestemme hva man ikke skal gjøre\n\nFor det finnes alltid en idé som ser bedre ut enn den man holder på med akkurat nå\n\nOg så hiver man seg på den\n\nog etter 6 måneder har man liksom 15 ting påbegynt og ingenting ferdig",
+    "outputChars" : 382,
+    "outputLanguage" : "nb",
+    "preamble" : false,
+    "ratio" : 0.9973890339425587,
+    "rawChars" : 383,
+    "reportFraming" : [
+
+    ],
+    "run" : 2
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "nb-free-form",
+    "hasEngineOutput" : true,
+    "lang" : "nb",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 2753,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "Ja altså, jeg tenkte på en ting i morges mens jeg gikk, og det er at når man lanserer et produkt helt alene, så er ikke det vanskeligste å kode det, det er faktisk å bestemme hva man ikke skal gjøre.\n\nFor det finnes alltid en idé som ser bedre ut enn den man holder på med akkurat nå.\n\nOg så hiver man seg på den, og etter 6 måneder har man liksom 15 ting påbegynt og ingenting ferdig.",
+    "outputChars" : 385,
+    "outputLanguage" : "nb",
+    "preamble" : false,
+    "ratio" : 1.0052219321148825,
+    "rawChars" : 383,
+    "reportFraming" : [
+
+    ],
+    "run" : 3
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "nb-todo-enumeration",
+    "hasEngineOutput" : true,
+    "lang" : "nb",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 3325,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "Okei så jeg oppsummerer hva jeg må gjøre før møtet så først må jeg få januartallene fra Marion hun sa hun ville ha dem tirsdag nei onsdag og så må jeg lage sammenligningstabellen med fjorårets tall og så også vet du jeg må absolutt ringe leverandøren fordi tilbudet deres har gått opp igjen fra 12000 til 15000 euro og det er det ingen som har godkjent og ja jeg bør også huske å booke rommet i andre etasje fordi det andre er opptatt hele uka",
+    "outputChars" : 443,
+    "outputLanguage" : "nb",
+    "preamble" : false,
+    "ratio" : 0.9866369710467706,
+    "rawChars" : 449,
+    "reportFraming" : [
+
+    ],
+    "run" : 1
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "nb-todo-enumeration",
+    "hasEngineOutput" : true,
+    "lang" : "nb",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 3921,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "Okei så jeg oppsummerer hva jeg må gjøre før møtet så først må jeg få januartallene fra Marion hun sa hun ville ha dem tirsdag nei onsdag og så må jeg lage sammenligningstabellen med fjorårets tall og så også vet du jeg må absolutt ringe leverandøren fordi tilbudet deres har gått opp igjen fra 12000 til 15000 euro og det er det ingen som har godkjent og ja jeg bør også huske å booke rommet i andre etasje fordi det andre er opptatt hele uka",
+    "outputChars" : 443,
+    "outputLanguage" : "nb",
+    "preamble" : false,
+    "ratio" : 0.9866369710467706,
+    "rawChars" : 449,
+    "reportFraming" : [
+
+    ],
+    "run" : 2
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "nb-todo-enumeration",
+    "hasEngineOutput" : true,
+    "lang" : "nb",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 4106,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "Okei så jeg oppsummerer hva jeg må gjøre før møtet så først må jeg få januartallene fra Marion hun sa hun ville ha dem tirsdag nei onsdag\n\nså må jeg lage sammenligningstabellen med fjorårets tall og så også vet du jeg må absolutt ringe leverandøren fordi tilbudet deres har gått opp igjen fra 12000 til 15000 euro og det er det ingen som har godkjent\n\nja jeg bør også huske å booke rommet i andre etasje fordi det andre er opptatt hele uka",
+    "outputChars" : 439,
+    "outputLanguage" : "nb",
+    "preamble" : false,
+    "ratio" : 0.977728285077951,
+    "rawChars" : 449,
+    "reportFraming" : [
+
+    ],
+    "run" : 3
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "nl-free-form",
+    "hasEngineOutput" : true,
+    "lang" : "nl",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 2660,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "Nou oké, ik zat vanochtend tijdens het wandelen ergens over na te denken, namelijk dat als je in je eentje een product lanceert, het moeilijkste eigenlijk niet het programmeren is, maar beslissen wat je niet doet.\n\nWant er is altijd een idee dat beter lijkt dan waar je nu mee bezig bent.\n\nEn dan spring je erop en na 6 maanden heb je eigenlijk 15 dingen begonnen en niks af.",
+    "outputChars" : 375,
+    "outputLanguage" : "nl",
+    "preamble" : false,
+    "ratio" : 1.0053619302949062,
+    "rawChars" : 373,
+    "reportFraming" : [
+
+    ],
+    "run" : 1
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "nl-free-form",
+    "hasEngineOutput" : true,
+    "lang" : "nl",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 3003,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "Nou oké, ik zat vanochtend tijdens het wandelen ergens over na te denken\n\nNamelijk dat als je in je eentje een product lanceert, het moeilijkste eigenlijk niet het programmeren is, maar beslissen wat je niet doet\n\nWant er is altijd een idee dat beter lijkt dan waar je nu mee bezig bent\n\nEn dan spring je erop en na 6 maanden heb je eigenlijk 15 dingen begonnen en niks af",
+    "outputChars" : 372,
+    "outputLanguage" : "nl",
+    "preamble" : false,
+    "ratio" : 0.9973190348525469,
+    "rawChars" : 373,
+    "reportFraming" : [
+
+    ],
+    "run" : 2
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "nl-free-form",
+    "hasEngineOutput" : true,
+    "lang" : "nl",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 2960,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "Nou oké, ik zat vanochtend tijdens het wandelen ergens over na te denken, namelijk dat als je in je eentje een product lanceert, het moeilijkste eigenlijk niet het programmeren is, maar beslissen wat je niet doet.\n\nWant er is altijd een idee dat beter lijkt dan waar je nu mee bezig bent.\n\nEn dan spring je erop en na 6 maanden heb je eigenlijk 15 dingen begonnen en niks af.",
+    "outputChars" : 375,
+    "outputLanguage" : "nl",
+    "preamble" : false,
+    "ratio" : 1.0053619302949062,
+    "rawChars" : 373,
+    "reportFraming" : [
+
+    ],
+    "run" : 3
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "nl-todo-enumeration",
+    "hasEngineOutput" : true,
+    "lang" : "nl",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 5933,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "Oké dus ik zet even op een rij wat ik moet doen voor de vergadering\n\nDus eerst moet ik de cijfers van januari bij Marion ophalen\n\nZe zei dat ze die dinsdag zou hebben nee woensdag\n\nDan moet ik de vergelijkingstabel maken met die van vorig jaar\n\nEn ook weet je ik moet echt de leverancier bellen\n\nWant hun offerte is weer gestegen van 12000 naar 15000 euro\n\nEn niemand heeft dat goedgekeurd\n\nJa ik moet er ook aan denken de zaal op de tweede verdieping te reserveren\n\nWant de andere is de hele week bezet",
+    "outputChars" : 503,
+    "outputLanguage" : "nl",
+    "preamble" : false,
+    "ratio" : 0.9921104536489151,
+    "rawChars" : 507,
+    "reportFraming" : [
+
+    ],
+    "run" : 1
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "nl-todo-enumeration",
+    "hasEngineOutput" : true,
+    "lang" : "nl",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 6982,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "Oké dus ik zet even op een rij wat ik moet doen voor de vergadering\n\nEerst moet ik de cijfers van januari bij Marion ophalen ze zei dat ze die dinsdag zou hebben nee woensdag\n\nDan moet ik de vergelijkingstabel maken met die van vorig jaar\n\nEn ook weet je ik moet echt de leverancier bellen want hun offerte is weer gestegen van 12000 naar 15000 euro en niemand heeft dat goedgekeurd\n\nJa ik moet er ook aan denken de zaal op de tweede verdieping te reserveren want de andere is de hele week bezet",
+    "outputChars" : 495,
+    "outputLanguage" : "nl",
+    "preamble" : false,
+    "ratio" : 0.9763313609467456,
+    "rawChars" : 507,
+    "reportFraming" : [
+
+    ],
+    "run" : 2
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "nl-todo-enumeration",
+    "hasEngineOutput" : true,
+    "lang" : "nl",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 6521,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "Oké dus ik zet even op een rij wat ik moet doen voor de vergadering\n\nEerst moet ik de cijfers van januari bij Marion ophalen, ze zei dat ze die dinsdag zou hebben nee woensdag\n\nDan moet ik de vergelijkingstabel maken met die van vorig jaar\n\nEn ook weet je ik moet echt de leverancier bellen want hun offerte is weer gestegen van 12000 naar 15000 euro en niemand heeft dat goedgekeurd\n\nJa ik moet er ook aan denken de zaal op de tweede verdieping te reserveren want de andere is de hele week bezet",
+    "outputChars" : 496,
+    "outputLanguage" : "nl",
+    "preamble" : false,
+    "ratio" : 0.9783037475345168,
+    "rawChars" : 507,
+    "reportFraming" : [
+
+    ],
+    "run" : 3
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "pt-free-form",
+    "hasEngineOutput" : true,
+    "lang" : "pt",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 4400,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "Então tá, eu tava pensando numa coisa hoje de manhã enquanto caminhava, que é que no fim quando você lança um produto sozinho, a parte mais difícil não é programar, é decidir o que não fazer na verdade.\n\nPorque sempre tem uma ideia que parece melhor do que aquela em que você tá trabalhando.\n\nE aí você pula nela e depois de 6 meses você tem 15 coisas começadas e nada terminado.",
+    "outputChars" : 379,
+    "outputLanguage" : "pt",
+    "preamble" : false,
+    "ratio" : 1.0053050397877985,
+    "rawChars" : 377,
+    "reportFraming" : [
+
+    ],
+    "run" : 1
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "pt-free-form",
+    "hasEngineOutput" : true,
+    "lang" : "pt",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 4441,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "Então tá, eu tava pensando numa coisa hoje de manhã enquanto caminhava\n\nQue é que no fim quando você lança um produto sozinho, a parte mais difícil não é programar, é decidir o que não fazer na verdade\n\nPorque sempre tem uma ideia que parece melhor do que aquela em que você tá trabalhando\n\nE aí você pula nela\n\nE depois de 6 meses você tem 15 coisas começadas e nada terminado",
+    "outputChars" : 377,
+    "outputLanguage" : "pt",
+    "preamble" : false,
+    "ratio" : 1,
+    "rawChars" : 377,
+    "reportFraming" : [
+
+    ],
+    "run" : 2
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "pt-free-form",
+    "hasEngineOutput" : true,
+    "lang" : "pt",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 4693,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "Então tá, eu tava pensando numa coisa hoje de manhã enquanto caminhava, que é que no fim quando você lança um produto sozinho, a parte mais difícil não é programar, é decidir o que não fazer na verdade.\n\nPorque sempre tem uma ideia que parece melhor do que aquela em que você tá trabalhando.\n\nE aí você pula nela e depois de 6 meses você tem 15 coisas começadas e nada terminado.",
+    "outputChars" : 379,
+    "outputLanguage" : "pt",
+    "preamble" : false,
+    "ratio" : 1.0053050397877985,
+    "rawChars" : 377,
+    "reportFraming" : [
+
+    ],
+    "run" : 3
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "pt-todo-enumeration",
+    "hasEngineOutput" : true,
+    "lang" : "pt",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 5847,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "então tá, deixa eu recapitular o que eu tenho que fazer antes da reunião\n\nprimeiro eu preciso pegar os números de janeiro com a Marion, ela disse que teria na terça quer dizer não na quarta\n\nhã aí eu vou ter que fazer a tabela comparativa com os do ano passado\n\ntambém sabe eu preciso ligar de qualquer jeito pro fornecedor porque o orçamento deles subiu de novo de 12000 pra 15000 euros e ninguém aprovou isso\n\nenfim eu também tenho que lembrar de reservar a sala do segundo andar porque a outra tá ocupada a semana toda",
+    "outputChars" : 521,
+    "outputLanguage" : "pt",
+    "preamble" : false,
+    "ratio" : 0.9830188679245283,
+    "rawChars" : 530,
+    "reportFraming" : [
+
+    ],
+    "run" : 1
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "pt-todo-enumeration",
+    "hasEngineOutput" : true,
+    "lang" : "pt",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 6416,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "então tá, deixa eu recapitular o que eu tenho que fazer antes da reunião\n\nprimeiro eu preciso pegar os números de janeiro com a Marion ela disse que teria na terça quer dizer não na quarta\n\nhã aí eu vou ter que fazer a tabela comparativa com os do ano passado\n\ntambém sabe eu preciso ligar de qualquer jeito pro fornecedor porque o orçamento deles subiu de novo de 12000 pra 15000 euros e ninguém aprovou isso\n\nenfim eu também tenho que lembrar de reservar a sala do segundo andar porque a outra tá ocupada a semana toda",
+    "outputChars" : 520,
+    "outputLanguage" : "pt",
+    "preamble" : false,
+    "ratio" : 0.9811320754716981,
+    "rawChars" : 530,
+    "reportFraming" : [
+
+    ],
+    "run" : 2
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "pt-todo-enumeration",
+    "hasEngineOutput" : true,
+    "lang" : "pt",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 5254,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "então tá, deixa eu recapitular o que eu tenho que fazer antes da reunião\n\nprimeiro eu preciso pegar os números de janeiro com a Marion, ela disse que teria na terça quer dizer não na quarta\n\neu vou ter que fazer a tabela comparativa com os do ano passado\n\ntambém sabe eu preciso ligar de qualquer jeito pro fornecedor porque o orçamento deles subiu de novo de 12000 pra 15000 euros e ninguém aprovou isso\n\neu também tenho que lembrar de reservar a sala do segundo andar porque a outra tá ocupada a semana toda",
+    "outputChars" : 509,
+    "outputLanguage" : "pt",
+    "preamble" : false,
+    "ratio" : 0.960377358490566,
+    "rawChars" : 530,
+    "reportFraming" : [
+
+    ],
+    "run" : 3
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "sv-free-form",
+    "hasEngineOutput" : true,
+    "lang" : "sv",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 3605,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "Okej så, jag tänkte på en grej i morse när jag gick\n\nNär man lanserar en produkt helt själv så är det svåraste faktiskt inte att koda den\n\nDet är att bestämma vad man inte ska göra\n\nFör det finns alltid en idé som verkar bättre än den man håller på med just nu\n\nOch då hoppar man på den\n\nEfter 6 månader har man typ 15 saker påbörjade och ingenting klart",
+    "outputChars" : 354,
+    "outputLanguage" : "sv",
+    "preamble" : false,
+    "ratio" : 0.9490616621983914,
+    "rawChars" : 373,
+    "reportFraming" : [
+
+    ],
+    "run" : 1
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "sv-free-form",
+    "hasEngineOutput" : true,
+    "lang" : "sv",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 5711,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "Okej så, jag tänkte på en grej i morse när jag gick\n\nNär man lanserar en produkt helt själv så är det svåraste faktiskt inte att koda den\n\nDet är att bestämma vad man inte ska göra\n\nFör det finns alltid en idé som verkar bättre än den man håller på med just nu\n\nOch då hoppar man på den\n\nEfter 6 månader har man typ 15 saker påbörjade och ingenting klart",
+    "outputChars" : 354,
+    "outputLanguage" : "sv",
+    "preamble" : false,
+    "ratio" : 0.9490616621983914,
+    "rawChars" : 373,
+    "reportFraming" : [
+
+    ],
+    "run" : 2
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "sv-free-form",
+    "hasEngineOutput" : true,
+    "lang" : "sv",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 5196,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "Okej så, jag tänkte på en grej i morse när jag gick\n\nNär man lanserar en produkt helt själv så är det svåraste faktiskt inte att koda den\n\nDet är att bestämma vad man inte ska göra\n\nFör det finns alltid en idé som verkar bättre än den man håller på med just nu\n\nOch då hoppar man på den\n\nEfter 6 månader har man typ 15 saker påbörjade och ingenting klart",
+    "outputChars" : 354,
+    "outputLanguage" : "sv",
+    "preamble" : false,
+    "ratio" : 0.9490616621983914,
+    "rawChars" : 373,
+    "reportFraming" : [
+
+    ],
+    "run" : 3
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "sv-todo-enumeration",
+    "hasEngineOutput" : true,
+    "lang" : "sv",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 5260,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "Okej så jag sammanfattar vad jag måste göra innan mötet så först måste jag hämta januarisiffrorna från Marion hon sa att hon skulle ha dem på tisdag nej onsdag och sen måste jag göra jämförelsetabellen med fjolårets och så också du vet jag måste verkligen ringa leverantören för deras offert har gått upp igen från 12000 till 15000 euro och det har ingen godkänt och ja jag borde också komma ihåg att boka rummet på andra våningen för det andra är upptaget hela veckan",
+    "outputChars" : 468,
+    "outputLanguage" : "sv",
+    "preamble" : false,
+    "ratio" : 0.9873417721518988,
+    "rawChars" : 474,
+    "reportFraming" : [
+
+    ],
+    "run" : 1
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "sv-todo-enumeration",
+    "hasEngineOutput" : true,
+    "lang" : "sv",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 6114,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "Okej så jag sammanfattar vad jag måste göra innan mötet\n\nFörst måste jag hämta januarisiffrorna från Marion hon sa att hon skulle ha dem på tisdag nej onsdag\n\nSen måste jag göra jämförelsetabellen med fjolårets och så också du vet jag måste verkligen ringa leverantören för deras offert har gått upp igen från 12000 till 15000 euro och det har ingen godkänt\n\nJa jag borde också komma ihåg att boka rummet på andra våningen för det andra är upptaget hela veckan",
+    "outputChars" : 460,
+    "outputLanguage" : "sv",
+    "preamble" : false,
+    "ratio" : 0.9704641350210971,
+    "rawChars" : 474,
+    "reportFraming" : [
+
+    ],
+    "run" : 2
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "sv-todo-enumeration",
+    "hasEngineOutput" : true,
+    "lang" : "sv",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 3263,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "Okej så jag sammanfattar vad jag måste göra innan mötet\n\nFörst måste jag hämta januarisiffrorna från Marion\n\nHon sa att hon skulle ha dem på tisdag nej onsdag och sen måste jag göra jämförelsetabellen med fjolårets och så också\n\nDu vet jag måste verkligen ringa leverantören för deras offert har gått upp igen från 12000 till 15000 euro och det har ingen godkänt\n\nJa jag borde också komma ihåg att boka rummet på andra våningen för det andra är upptaget hela veckan",
+    "outputChars" : 465,
+    "outputLanguage" : "sv",
+    "preamble" : false,
+    "ratio" : 0.9810126582278481,
+    "rawChars" : 474,
+    "reportFraming" : [
+
+    ],
+    "run" : 3
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "tr-free-form",
+    "hasEngineOutput" : true,
+    "lang" : "tr",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 2948,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "Şey yani, bu sabah yürürken bir şey düşünüyordum\n\nAslında tek başına bir ürün çıkardığında en zor kısım kodlamak değil, neyi yapmayacağına karar vermek\n\nÇünkü her zaman şu an üzerinde çalıştığından daha iyi görünen bir fikir oluyor\n\nSonra ona atlıyorsun\n\n6 ay sonra bakıyorsun 15 tane başlanmış iş var ve hiçbiri bitmemiş",
+    "outputChars" : 321,
+    "outputLanguage" : "tr",
+    "preamble" : false,
+    "ratio" : 0.9907407407407407,
+    "rawChars" : 324,
+    "reportFraming" : [
+
+    ],
+    "run" : 1
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "tr-free-form",
+    "hasEngineOutput" : true,
+    "lang" : "tr",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 5343,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "Şey yani, bu sabah yürürken bir şey düşünüyordum\n\nAslında tek başına bir ürün çıktığında en zor kısım kodlamak değil, neyi yapmayacağına karar vermek\n\nÇünkü her zaman şu an üzerinde çalıştığından daha iyi görünen bir fikir oluyor\n\nSonra ona atlıyorsun ve 6 ay sonra bakıyorsun 15 tane başlanmış iş var ve hiçbiri bitmemiş",
+    "outputChars" : 321,
+    "outputLanguage" : "tr",
+    "preamble" : false,
+    "ratio" : 0.9907407407407407,
+    "rawChars" : 324,
+    "reportFraming" : [
+
+    ],
+    "run" : 2
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "tr-free-form",
+    "hasEngineOutput" : true,
+    "lang" : "tr",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 4794,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "Şey yani, bu sabah yürürken bir şey düşünüyordum\n\nAslında tek başına bir ürün çıkardığında en zor kısım kodlamak değil, neyi yapmayacağına karar vermek\n\nÇünkü her zaman şu an üzerinde çalıştığından daha iyi görünen bir fikir oluyor\n\nSonra ona atlıyorsun ve 6 ay sonra bakıyorsun 15 tane başlanmış iş var ve hiçbiri bitmemiş",
+    "outputChars" : 323,
+    "outputLanguage" : "tr",
+    "preamble" : false,
+    "ratio" : 0.9969135802469136,
+    "rawChars" : 324,
+    "reportFraming" : [
+
+    ],
+    "run" : 3
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "tr-todo-enumeration",
+    "hasEngineOutput" : true,
+    "lang" : "tr",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 5639,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "Tamam şey, toplantıdan önce yapmam gerekenleri bir özetleyeyim önce Marion'dan ocak rakamlarını almam lazım salı alırım demişti yok yok çarşamba ve şey sonra geçen yılınkilerle karşılaştırma tablosunu yapmam gerekecek\n\nBir de biliyor musun tedarikçiyi mutlaka aramam lazım çünkü teklifleri yine 12000'den 15000 euroya çıktı ve bunu kimse onaylamadı\n\nİşte bir de ikinci kattaki salonu ayırtmayı unutmamam lazım çünkü öbürü bütün hafta dolu",
+    "outputChars" : 438,
+    "outputLanguage" : "tr",
+    "preamble" : false,
+    "ratio" : 1,
+    "rawChars" : 438,
+    "reportFraming" : [
+
+    ],
+    "run" : 1
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "tr-todo-enumeration",
+    "hasEngineOutput" : true,
+    "lang" : "tr",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 4339,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "Tamam, toplantıdan önce yapmam gerekenleri bir özetleyeyim, önce Marion'dan ocak rakamlarını almam lazım, salı alırım demişti, yok yok, çarşamba ve şey sonra geçen yılınkilerle karşılaştırma tablosunu yapmam gerekecek.\n\nBir de biliyor musun, tedarikçiyi mutlaka aramam lazım çünkü teklifleri yine 12000'den 15000 euroya çıktı ve bunu kimse onaylamadı.\n\nİşte bir de ikinci kattaki salonu ayırtmayı unutmamam lazım çünkü öbürü bütün hafta dolu",
+    "outputChars" : 441,
+    "outputLanguage" : "tr",
+    "preamble" : false,
+    "ratio" : 1.0068493150684932,
+    "rawChars" : 438,
+    "reportFraming" : [
+
+    ],
+    "run" : 2
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "tr-todo-enumeration",
+    "hasEngineOutput" : true,
+    "lang" : "tr",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 4820,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "Tamam şey, toplantıdan önce yapmam gerekenleri bir özetleyeyim\n\nÖnce Marion'dan ocak rakamlarını almam lazım, salı alırım demişti\n\nYok yok, çarşamba ve şey sonra geçen yılınkilerle karşılaştırma tablosunu yapmam gerekecek\n\nBir de biliyor musun tedarikçiyi mutlaka aramam lazım çünkü teklifleri yine 12000'den 15000 euroya çıktı ve bunu kimse onaylamadı\n\nİşte bir de ikinci kattaki salonu ayırtmayı unutmamam lazım çünkü öbürü bütün hafta dolu",
+    "outputChars" : 442,
+    "outputLanguage" : "tr",
+    "preamble" : false,
+    "ratio" : 1.0091324200913243,
+    "rawChars" : 438,
+    "reportFraming" : [
+
+    ],
+    "run" : 3
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "vi-free-form",
+    "hasEngineOutput" : true,
+    "lang" : "vi",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 4510,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "Ừm thì sáng nay lúc đi bộ tôi có nghĩ về một chuyện, đó là cuối cùng khi mình tự ra mắt một sản phẩm một mình, cái khó nhất không phải là viết code, mà thật ra là quyết định cái gì không làm.\n\nVì lúc nào cũng có một ý tưởng trông hay hơn cái mình đang làm.\n\nThế là mình nhảy vào nó và sau 6 tháng thì có 15 thứ bắt đầu mà chẳng có gì xong cả.",
+    "outputChars" : 342,
+    "outputLanguage" : "vi",
+    "preamble" : false,
+    "ratio" : 1.0058823529411764,
+    "rawChars" : 340,
+    "reportFraming" : [
+
+    ],
+    "run" : 1
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "vi-free-form",
+    "hasEngineOutput" : true,
+    "lang" : "vi",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 3150,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "Ừm thì sáng nay lúc đi bộ tôi có nghĩ về một chuyện, đó là cuối cùng khi mình tự ra mắt một sản phẩm một mình, cái khó nhất không phải là viết code, mà thật ra là quyết định cái gì không làm.\n\nVì lúc nào cũng có một ý tưởng trông hay hơn cái mình đang làm.\n\nThế là mình nhảy vào nó và sau 6 tháng thì có 15 thứ bắt đầu mà chẳng có gì xong cả.",
+    "outputChars" : 342,
+    "outputLanguage" : "vi",
+    "preamble" : false,
+    "ratio" : 1.0058823529411764,
+    "rawChars" : 340,
+    "reportFraming" : [
+
+    ],
+    "run" : 2
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "vi-free-form",
+    "hasEngineOutput" : true,
+    "lang" : "vi",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 3383,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "Ừm thì sáng nay lúc đi bộ tôi có nghĩ về một chuyện\n\nĐó là cuối cùng khi mình tự ra mắt một sản phẩm một mình, cái khó nhất không phải là viết code, mà thật ra là quyết định cái gì không làm\n\nVì lúc nào cũng có một ý tưởng trông hay hơn cái mình đang làm\n\nThế là mình nhảy vào nó và sau 6 tháng thì có 15 thứ bắt đầu mà chẳng có gì xong cả",
+    "outputChars" : 339,
+    "outputLanguage" : "vi",
+    "preamble" : false,
+    "ratio" : 0.9970588235294118,
+    "rawChars" : 340,
+    "reportFraming" : [
+
+    ],
+    "run" : 3
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "vi-todo-enumeration",
+    "hasEngineOutput" : true,
+    "lang" : "vi",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 4149,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "Ừ thì để tôi tóm tắt những việc phải làm trước cuộc họp đầu tiên là phải lấy số liệu tháng một từ Marion cô ấy bảo thứ ba sẽ có à không thứ tư và thế là phải làm bảng so sánh với số liệu năm ngoái rồi còn nữa nhé\n\nTôi nhất định phải gọi cho nhà cung cấp vì báo giá của họ lại tăng từ 12000 lên 15000 euro mà chưa ai duyệt cả\n\nThôi thì tôi cũng phải nhớ đặt phòng họp ở tầng hai vì phòng kia bị kín cả tuần rồi",
+    "outputChars" : 409,
+    "outputLanguage" : "vi",
+    "preamble" : false,
+    "ratio" : 0.9879227053140096,
+    "rawChars" : 414,
+    "reportFraming" : [
+
+    ],
+    "run" : 1
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "vi-todo-enumeration",
+    "hasEngineOutput" : true,
+    "lang" : "vi",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 5988,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "Ừ thì ờ để tôi tóm tắt những việc phải làm trước cuộc họp đầu tiên là phải lấy số liệu tháng một từ Marion, cô ấy bảo thứ ba sẽ có à không thứ tư và thế là phải làm bảng so sánh với số liệu năm ngoái rồi còn nữa nhé\n\nTôi nhất định phải gọi cho nhà cung cấp vì báo giá của họ lại tăng từ 12000 lên 15000 euro mà chưa ai duyệt cả và thôi thì tôi cũng phải nhớ đặt phòng họp ở tầng hai vì phòng kia bị kín cả tuần rồi",
+    "outputChars" : 414,
+    "outputLanguage" : "vi",
+    "preamble" : false,
+    "ratio" : 1,
+    "rawChars" : 414,
+    "reportFraming" : [
+
+    ],
+    "run" : 2
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "vi-todo-enumeration",
+    "hasEngineOutput" : true,
+    "lang" : "vi",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 4294,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "Ừ thì để tôi tóm tắt những việc phải làm trước cuộc họp đầu tiên là phải lấy số liệu tháng một từ Marion, cô ấy bảo thứ ba sẽ có à không thứ tư và thế là phải làm bảng so sánh với số liệu năm ngoái rồi còn nữa nhé\n\nTôi nhất định phải gọi cho nhà cung cấp vì báo giá của họ lại tăng từ 12000 lên 15000 euro mà chưa ai duyệt cả và thôi thì tôi cũng phải nhớ đặt phòng họp ở tầng hai vì phòng kia bị kín cả tuần rồi",
+    "outputChars" : 412,
+    "outputLanguage" : "vi",
+    "preamble" : false,
+    "ratio" : 0.9951690821256038,
+    "rawChars" : 414,
+    "reportFraming" : [
+
+    ],
+    "run" : 3
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "zh-free-form",
+    "hasEngineOutput" : true,
+    "lang" : "zh",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 2757,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "嗯那个，我今天早上散步的时候在想一件事\n\n其实一个人做产品的时候，最难的不是写代码\n\n而是决定不做什么\n\n因为总是有一个想法看起来比你正在做的那个更好\n\n然后你就扑上去了\n\n结果六个月以后你手上有15个开了头的东西\n\n一个都没做完",
+    "outputChars" : 115,
+    "outputLanguage" : "zh-Hans",
+    "preamble" : false,
+    "ratio" : 1.0176991150442478,
+    "rawChars" : 113,
+    "reportFraming" : [
+
+    ],
+    "run" : 1
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "zh-free-form",
+    "hasEngineOutput" : true,
+    "lang" : "zh",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 2656,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "嗯那个，我今天早上散步的时候在想一件事\n\n其实一个人做产品的时候，最难的不是写代码，而是决定不做什么\n\n因为总是有一个想法看起来比你正在做的那个更好\n\n然后你就扑上去了\n\n结果六个月以后你手上有15个开了头的东西，一个都没做完",
+    "outputChars" : 113,
+    "outputLanguage" : "zh-Hans",
+    "preamble" : false,
+    "ratio" : 1,
+    "rawChars" : 113,
+    "reportFraming" : [
+
+    ],
+    "run" : 2
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "zh-free-form",
+    "hasEngineOutput" : true,
+    "lang" : "zh",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 2429,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "嗯那个，我今天早上散步的时候在想一件事\n\n其实一个人做产品的时候，最难的不是写代码，而是决定不做什么\n\n因为总是有一个想法看起来比你正在做的那个更好\n\n然后你就扑上去了\n\n结果六个月以后你手上有15个开了头的东西，一个都没做完",
+    "outputChars" : 113,
+    "outputLanguage" : "zh-Hans",
+    "preamble" : false,
+    "ratio" : 1,
+    "rawChars" : 113,
+    "reportFraming" : [
+
+    ],
+    "run" : 3
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "zh-todo-enumeration",
+    "hasEngineOutput" : true,
+    "lang" : "zh",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 4945,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "嗯那个我总结一下开会之前我要做的事情\n\n首先我得从Marion那里拿到一月份的数据，她说她周二会有哦不是周三\n\n那我就得做一个跟去年数据的对比表\n\n还有你知道吗我一定得给供应商打电话，因为他们的报价又从12000涨到了15000欧元而且这个没有人批准过\n\n我还得记得订二楼的会议室，因为另一间整个星期都被占了",
+    "outputChars" : 154,
+    "outputLanguage" : "zh-Hans",
+    "preamble" : false,
+    "ratio" : 1.0335570469798658,
+    "rawChars" : 149,
+    "reportFraming" : [
+
+    ],
+    "run" : 1
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "zh-todo-enumeration",
+    "hasEngineOutput" : true,
+    "lang" : "zh",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 5254,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "嗯那个我总结一下开会之前我要做的事情\n\n首先我得从Marion那里拿到一月份的数据她说她周二会有哦不是周三\n\n那我就得做一个跟去年数据的对比表\n\n还有你知道吗我一定得给供应商打电话因为他们的报价又从12000涨到了15000欧元而且这个没有人批准过\n\n我还得记得订二楼的会议室因为另一间整个星期都被占了",
+    "outputChars" : 151,
+    "outputLanguage" : "zh-Hans",
+    "preamble" : false,
+    "ratio" : 1.0134228187919463,
+    "rawChars" : 149,
+    "reportFraming" : [
+
+    ],
+    "run" : 2
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "zh-todo-enumeration",
+    "hasEngineOutput" : true,
+    "lang" : "zh",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 3912,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "嗯那个我总结一下开会之前我要做的事情\n\n首先我得从Marion那里拿到一月份的数据，她说她周二会有哦不是周三\n\n我得做一个跟去年数据的对比表\n\n还有你知道吗我一定得给供应商打电话，因为他们的报价又从12000涨到了15000欧元而且这个没有人批准过\n\n我还得记得订二楼的会议室，因为另一间整个星期都被占了",
+    "outputChars" : 152,
+    "outputLanguage" : "zh-Hans",
+    "preamble" : false,
+    "ratio" : 1.0201342281879195,
+    "rawChars" : 149,
+    "reportFraming" : [
+
+    ],
+    "run" : 3
+  }
+]

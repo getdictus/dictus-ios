@@ -1,0 +1,71 @@
+
+
+████ ARM shipping — mode summary, 5 run(s) × 2 fixture(s)
+
+━━ [es-free-form] 369 chars, lang=es
+  raw: Bueno pues estaba pensando en una cosa esta mañana mientras caminaba, y es que al final cuando lanzas un producto tú solo, lo más difícil no es programarlo, es decidir qué no hacer en realidad. Porque siempre hay una idea que parece mejor que la que estás haciendo ahora mismo. Y entonces te lanzas a por ella y a los 6 meses tienes 15 cosas empezadas y nada terminado.
+  #1 rejectedGuardrail/length ratio=0.72 OUT-OF-BAND 4025ms
+     out: Al final cuando lanzas un producto tú solo lo más difícil no es programarlo es decidir qué no hacer porque siempre hay una idea que parece mejor que la que estás haciendo ahora mismo y te lanzas a por ella y a los 6 meses tienes 15 cosas empezadas y nada terminado.
+  #2 rejectedGuardrail/length ratio=0.72 OUT-OF-BAND 4046ms
+     out: Al final cuando lanzas un producto tú solo lo más difícil no es programarlo es decidir qué no hacer porque siempre hay una idea que parece mejor que la que estás haciendo ahora mismo y te lanzas a por ella y a los 6 meses tienes 15 cosas empezadas y nada terminado.
+  #3 rejectedGuardrail/length ratio=0.73 OUT-OF-BAND 3677ms
+     out: Pensé esta mañana que lo más difícil al lanzar un producto solo no es programarlo sino decidir qué no hacer porque siempre hay una idea que parece mejor que lo que estás haciendo y te lanzas a por ella y a los seis meses tienes quince cosas empezadas y nada terminado.
+  #4 rejectedGuardrail/length ratio=0.72 OUT-OF-BAND 3848ms
+     out: Al final cuando lanzas un producto tú solo lo más difícil no es programarlo es decidir qué no hacer porque siempre hay una idea que parece mejor que la que estás haciendo ahora mismo y te lanzas a por ella y a los 6 meses tienes 15 cosas empezadas y nada terminado.
+  #5 rejectedGuardrail/length ratio=0.69 OUT-OF-BAND 3231ms
+     out: Cuando lanzas un producto solo lo más difícil no es programarlo es decidir qué no hacer porque siempre hay una idea que parece mejor que lo que estás haciendo ahora y te lanzas a por ella y a los seis meses tienes quince cosas empezadas y nada terminado.
+
+━━ [es-todo-enumeration] 526 chars, lang=es
+  raw: bueno eh a ver resumo lo que tengo que hacer antes de la reunión entonces primero tengo que conseguir las cifras de enero de Marion me dijo que las tendría el martes bueno no el miércoles y eh entonces tendré que hacer la tabla comparativa con las del año pasado y además sabes tengo que llamar sí o sí al proveedor porque su presupuesto ha vuelto a subir de 12000 a 15000 euros y eso no lo ha aprobado nadie y bueno también tendría que acordarme de reservar la sala del segundo piso porque la otra está ocupada toda la semana
+  #1 rejectedGuardrail/language ratio=0.49 4251ms  ⚑ LANG=en
+     out: I need to get Marion's January figures by Tuesday, make a comparative table with last year's data, call the supplier because their budget rose from 12000 to 15000 euros without approval, and reserve the second floor room because the other is occupied all week.
+  #2 rejectedGuardrail/language ratio=0.53 5362ms  ⚑ LANG=en
+     out: I must get Marion's January figures on Tuesday, make the comparative table with last year's data, call the supplier because their budget rose from 12000 to 15000 euros and no one approved, and remember to reserve the second floor room because the other one is occupied all week.
+  #3 rejectedGuardrail/language ratio=0.44 5050ms  ⚑ LANG=en
+     out: I must get Marion's January figures by Tuesday, make a comparative table with last year's, call the supplier about the budget rising from 12000 to 15000 euros, and reserve the second floor room because the other is occupied all week.
+  #4 rejectedGuardrail/language ratio=0.51 4709ms  ⚑ LANG=en
+     out: I must get Marion's January figures by Tuesday, make the comparative table with last year's data, call the supplier because their budget rose from 12000 to 15000 euros and no one approved it, and reserve the second floor room because the other one is occupied all week.
+  #5 rejectedGuardrail/language ratio=0.51 3531ms  ⚑ LANG=en
+     out: I need to get Marion's January figures by Tuesday, make a comparative table with last year's data, call the supplier because their budget rose from 12000 to 15000 euros and no one approved it, and reserve the second floor room because the other one is occupied all week.
+
+
+████ ARM arm-es-examples — mode summary, 5 run(s) × 2 fixture(s)
+     prompt: ../docs/research/571-summary/step2/arm-es-examples.txt
+
+━━ [es-free-form] 369 chars, lang=es
+  raw: Bueno pues estaba pensando en una cosa esta mañana mientras caminaba, y es que al final cuando lanzas un producto tú solo, lo más difícil no es programarlo, es decidir qué no hacer en realidad. Porque siempre hay una idea que parece mejor que la que estás haciendo ahora mismo. Y entonces te lanzas a por ella y a los 6 meses tienes 15 cosas empezadas y nada terminado.
+  #1 rejectedGuardrail/length ratio=0.72 OUT-OF-BAND 2330ms
+     out: Al final cuando lanzas un producto tú solo lo más difícil no es programarlo, es decidir qué no hacer porque siempre hay una idea que parece mejor que la que estás haciendo ahora mismo y te lanzas a por ella y a los 6 meses tienes 15 cosas empezadas y nada terminado.
+  #2 rejectedGuardrail/length ratio=0.71 OUT-OF-BAND 2198ms
+     out: Al final cuando lanzas un producto solo lo más difícil no es programarlo es decidir qué no hacer porque siempre hay una idea que parece mejor que la que estás haciendo ahora mismo y te lanzas a por ella y a los 6 meses tienes 15 cosas empezadas y nada terminado.
+  #3 rejectedGuardrail/length ratio=0.66 OUT-OF-BAND 3703ms
+     out: Al final cuando lanzas un producto solo lo más difícil es decidir qué no hacer porque siempre hay una idea que parece mejor que lo que estás haciendo ahora y te lanzas a por ella y a los seis meses tienes quince cosas empezadas y nada terminado.
+  #4 success ratio=0.53 3519ms
+     out: Al lanzar un producto solo lo más difícil es decidir qué no hacer porque siempre hay una idea mejor que la actual y te lanzas a por ella y a los 6 meses tienes 15 cosas empezadas y nada terminado.
+  #5 rejectedGuardrail/length ratio=0.69 OUT-OF-BAND 3717ms
+     out: Al final cuando lanzas un producto solo lo más difícil no es programarlo es decidir qué no hacer porque siempre hay una idea que parece mejor que la que estás haciendo ahora y te lanzas a por ella y a los 6 meses tienes 15 cosas empezadas y nada terminado.
+
+━━ [es-todo-enumeration] 526 chars, lang=es
+  raw: bueno eh a ver resumo lo que tengo que hacer antes de la reunión entonces primero tengo que conseguir las cifras de enero de Marion me dijo que las tendría el martes bueno no el miércoles y eh entonces tendré que hacer la tabla comparativa con las del año pasado y además sabes tengo que llamar sí o sí al proveedor porque su presupuesto ha vuelto a subir de 12000 a 15000 euros y eso no lo ha aprobado nadie y bueno también tendría que acordarme de reservar la sala del segundo piso porque la otra está ocupada toda la semana
+  #1 success ratio=0.50 2705ms
+     out: Tengo que conseguir las cifras de enero de Marion el martes, hacer la tabla comparativa con las del año pasado, llamar al proveedor porque su presupuesto subió de 12000 a 15000 euros, y reservar la sala del segundo piso porque la otra está ocupada toda la semana.
+  #2 success ratio=0.51 2929ms
+     out: Tengo que conseguir las cifras de enero de Marion el martes, hacer la tabla comparativa con las del año pasado, llamar al proveedor porque su presupuesto ha subido de 12000 a 15000 euros, y reservar la sala del segundo piso porque la otra está ocupada toda la semana.
+  #3 success ratio=0.50 3101ms
+     out: Tengo que conseguir las cifras de enero de Marion el martes, hacer la tabla comparativa con las del año pasado, llamar al proveedor porque el presupuesto subió de 12000 a 15000 euros y reservar la sala del segundo piso porque la otra está ocupada toda la semana.
+  #4 success ratio=0.51 3867ms
+     out: Tengo que conseguir las cifras de enero de Marion el martes, hacer la tabla comparativa con las del año pasado, llamar al proveedor porque su presupuesto ha subido de 12000 a 15000 euros, y reservar la sala del segundo piso porque la otra está ocupada toda la semana.
+  #5 success ratio=0.51 2965ms
+     out: Tengo que conseguir las cifras de enero de Marion el martes, hacer la tabla comparativa con las del año pasado, llamar al proveedor porque el presupuesto ha subido de 12000 a 15000 euros, y reservar la sala del segundo piso porque la otra está ocupada toda la semana.
+
+
+══ bars (engine outputs; `acc` = accepted by the pipeline)
+arm | lang | runs | wrong-lang (acc) | refused on language | list lines | in band | report/infinitive/person-lost | preamble | example | figure | accepted
+shipping | es | 10 | 5 (0) | 5 (50%) | 0 | 5/10 (50%) | 0 | 0 | 0 | 0 | 0/10
+shipping | ALL | 10 | 5 (0) | 5 (50%) | 0 | 5/10 (50%) | 0 | 0 | 0 | 0 | 0/10
+   refusals, shipping: language×5, length×5
+arm-es-examples | es | 10 | 0 (0) | 0 (0%) | 0 | 6/10 (60%) | 0 | 0 | 0 | 0 | 6/10
+arm-es-examples | ALL | 10 | 0 (0) | 0 (0%) | 0 | 6/10 (60%) | 0 | 0 | 0 | 0 | 6/10
+   refusals, arm-es-examples: length×4
+
+capture written: ../docs/research/571-summary/step2/run-es.json

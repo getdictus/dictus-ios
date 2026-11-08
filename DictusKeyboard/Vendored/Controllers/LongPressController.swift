@@ -165,6 +165,13 @@ class LongPressOverlayController: NSObject,
         collectionView?.delegate = self
         collectionView?.dataSource = self
         collectionView?.backgroundColor = .clear
+        // The popup never scrolls, and iOS 27 blurs its letters with the scroll edge effect (#884).
+        if #available(iOS 26.0, *) {
+            collectionView?.topEdgeEffect.isHidden = true
+            collectionView?.bottomEdgeEffect.isHidden = true
+            collectionView?.leftEdgeEffect.isHidden = true
+            collectionView?.rightEdgeEffect.isHidden = true
+        }
 
         if let delegate = self.delegate {
             delegate.longpress(didCreateOverlayContentView: collectionView!)

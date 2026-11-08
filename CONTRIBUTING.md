@@ -5,13 +5,16 @@ Thank you for your interest in contributing to Dictus! Whether you are fixing a 
 ## How to Contribute
 
 1. **Fork** the repository.
-2. **Create a feature branch** from `main`:
+2. **Create a feature branch** from `develop`:
    ```bash
+   git checkout develop
    git checkout -b feature/your-feature-name
    ```
 3. **Make your changes** following the conventions below.
-4. **Test** your changes on a real device (the keyboard extension requires a physical iPhone).
-5. **Open a Pull Request** against `main`.
+4. **Test** your changes on a real device before merge. The keyboard extension only behaves correctly on a physical iPhone, so every pull request carries a device test and an independent review. [The issue governance guide](docs/ISSUE-GOVERNANCE.md) defines what automated, simulator, device and product evidence must accompany that test.
+5. **Open a Pull Request** against `develop`. `main` tracks the App Store release and is promoted separately by the maintainer.
+
+Before starting an issue, read [Issue governance and delivery](docs/ISSUE-GOVERNANCE.md). An issue labelled `ready-for-agent` is specified, but it is not necessarily scheduled: [the roadmap](docs/ROADMAP.md) holds the order the maintainer is working through.
 
 ## Code Conventions
 
@@ -46,10 +49,11 @@ swift test
 
 ## Continuous Integration
 
-Every pull request runs through GitHub Actions. Two checks must pass before a PR can be merged:
+Every pull request runs through GitHub Actions. Three checks run, each reported separately, and all three must pass before a PR can be merged:
 
 - **SwiftLint** -- enforces style rules defined in `.swiftlint.yml`. Runs on Linux, completes in under a minute.
-- **Build** -- compiles the `DictusApp` scheme (which embeds `DictusKeyboard`, `DictusWidgets`, and depends on `DictusCore`) for iOS Simulator. Runs on macOS, takes 5-10 minutes.
+- **Build (iOS Simulator)** -- compiles the `DictusApp` scheme (which embeds `DictusKeyboard`, `DictusWidgets`, and depends on `DictusCore`) for iOS Simulator. Runs on macOS, takes 5-10 minutes.
+- **DictusCore Tests** -- runs the command above, `cd DictusCore && swift test`, on the pull request's head commit. Runs on macOS with the same Xcode as the build, no simulator.
 
 To check locally before pushing:
 
@@ -69,7 +73,7 @@ file. If you need a force unwrap, keep it and write a
 saying why the value cannot be nil — that is the project convention, not a
 workaround.
 
-The CI does **not** sign builds, run tests, or upload to TestFlight. Its only job is to catch broken compilations and obvious style regressions.
+The CI does **not** sign builds, run the app or the keyboard extension (no simulator, no UI tests), or upload to TestFlight. It catches broken compilations, style regressions and `DictusCore` test failures. A green CI is not a device test: keyboard behaviour still has to be checked on a physical iPhone.
 
 ## Adding an App to Auto-Return
 

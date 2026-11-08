@@ -17,6 +17,7 @@ included:
   - DictusKeyboard
   - DictusCore/Sources
   - DictusWidgets
+  - DictusShare
 
 excluded:
   - build

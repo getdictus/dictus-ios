@@ -33,6 +33,30 @@ import Foundation
 /// cost of a wrong entry is bounded — `open()` returns false and the user gets the
 /// swipe-back overlay they would have got anyway.
 ///
+/// ## Keeping it in sync
+///
+/// Upstream has no standalone catalogue file. The table lives inline in
+/// `VivaDicta/VivaDictaApp.swift`, in three places: `knownURLs` inside
+/// `returnURL(forHostId:)`, `knownNoSchemeHosts`, and `StateLosingHostApps`. They grow it
+/// in batches from their analytics (`scripts/unrecognized_host_apps.py`, then a weekly
+/// commit), and each release note says how many apps were added. To sync, diff those
+/// blocks against this file, port the new entries into the matching tier, and move the
+/// sync point below.
+///
+/// **Last synced:** upstream `fac75995` (2026-09-28, after VivaDicta 3.11.1), on
+/// 2026-10-01.
+///
+/// Two upstream entries are deliberately **not** followed, because we measured them on
+/// device and upstream did not:
+///
+/// - Messages: upstream maps `sms://`, which opens the compose sheet. Ours is `ichat://`.
+/// - Safari: upstream maps `x-web-search://`, which opens a new search. Ours lists Safari
+///   in `knownNoSchemeHosts`.
+///
+/// Upstream is right about Claude, and we followed it: `claude://` opens a new chat. We
+/// had it marked verified on 2026-09-11; a re-test on 2026-10-01 contradicted that, so
+/// it moved to `knownNoSchemeHosts`.
+///
 /// Their copyright notice and the full MIT text ship with the app, in `LicensesView`.
 /// That is the licence's condition for redistributing this table, not a courtesy, and
 /// this comment does not discharge it on its own.
@@ -68,11 +92,11 @@ public enum KnownAppSchemes {
     ///
     /// **Verified to resume:** `com.apple.mobilenotes`, `com.apple.MobileSMS`,
     /// `net.whatsapp.WhatsApp`, `com.apple.mobilemail`, `com.github.stormbreaker.prod`,
-    /// `com.openai.chat`, `com.anthropic.claude`, `com.tinyspeck.chatlyio` (all on
-    /// device, 2026-09-11), plus
+    /// `com.openai.chat`, `com.tinyspeck.chatlyio` (all on device, 2026-09-11), plus
     /// `com.apple.reminders` on a simulator, and `com.t3tools.t3code` (on device, T3 Code
-    /// 1.2.0, 2026-09-22). **Rejected by measurement:** `com.apple.mobilesafari`, now in
-    /// `knownNoSchemeHosts`.
+    /// 1.2.0, 2026-09-22). `com.apple.MobileSMS` re-checked on device 2026-10-01.
+    /// **Rejected by measurement:** `com.apple.mobilesafari` and `com.anthropic.claude`,
+    /// both now in `knownNoSchemeHosts`.
     ///
     /// Four of those were inherited entries nobody had checked, and all four worked
     /// first time — which is mild evidence that the upstream catalogue is sound, and no
@@ -91,7 +115,7 @@ public enum KnownAppSchemes {
     ///   construction*: it opens the app at that page, not where the user was. They fail
     ///   the resume test on paper. They are kept because landing on an app's home is
     ///   still better than no return at all for a shopping or media app, and because
-    ///   removing ten entries on reasoning rather than measurement would be trading one
+    ///   removing them on reasoning rather than measurement would be trading one
     ///   unverified claim for another — but do not read them as verified.
     ///
     /// Most values are custom schemes. A few apps register none but claim a universal
@@ -161,8 +185,6 @@ public enum KnownAppSchemes {
         // Verified on device.
         "com.openai.chat": "com.openai.chat://",
         "ai.perplexity.app": "perplexity-app://",
-        // Verified on device.
-        "com.anthropic.claude": "claude://",
         // Verified on device, T3 Code 1.2.0, 2026-09-22. The first entry added on purpose
         // rather than inherited, and it was in `knownNoSchemeHosts` until then. The scheme
         // always opened the app; up to 1.1.0 it also reset navigation to Home, measured on
@@ -197,6 +219,37 @@ public enum KnownAppSchemes {
         "psyche.kelivo": "kelivo://",
         "com.agiletortoise.Drafts5": "drafts://",
         "com.ubercab.UberClient": "uber://",
+        // Synced from upstream on 2026-10-01 (VivaDicta 3.11.0 and 3.11.1). Read from the
+        // app's own Info.plist, source or published docs, never tested here.
+        "com.logseq.logseq": "logseq://",
+        // NOT `matrix://`, which other Matrix clients share.
+        "io.element.elementx": "io.element.elementx://",
+        "ai.openclawfoundation.app": "openclaw://",
+        "com.apple.shortcuts": "shortcuts://",
+        "com.apple.Maps": "maps://",
+        "com.apple.mobilecal": "calshow://",
+        "com.google.Maps": "comgooglemaps://",
+        // The inline Notes editor drawn inside other apps. The note lives in Notes, so
+        // that is where the user came from.
+        "com.apple.mobilenotes.EditorExtension": "mobilenotes://",
+        "sh.paseo": "paseo://",
+        // NOT `sip:`, which is shared.
+        "com.silentcircle.SilentPhone": "silentphone://",
+        "ai.pocketpal": "pocketpal://",
+        "app.cogwheel.conduit": "conduit://",
+        // NOT `http`/`https`, which both browsers also claim.
+        "com.brave.ios.browser": "brave://",
+        "org.mozilla.ios.Firefox": "firefox://",
+        "com.mattermost.rn": "mattermost://",
+        "io.raindrop.ios": "raindrop://",
+        "com.ntoporcov.openclient": "openclient://",
+        // NOT `tg://`, which is shared with official Telegram.
+        "app.nicegram": "nicegram://",
+        // Both were in `knownNoSchemeHosts` until upstream read a scheme out of their
+        // source on 2026-09-28.
+        "com.stably.orca.mobile": "orca://",
+        "h3p.Neon-Vision-Editor": "neonvisioneditor://",
+        "xyz.block.buzz.mobile": "buzz://",
 
         // Corroborated across independent sources but not read from a shipping app, so a
         // miss is possible. It degrades to the overlay.
@@ -210,6 +263,13 @@ public enum KnownAppSchemes {
         "com.google.Docs": "googledocs://",
         "com.taobao.taobao4iphone": "taobao://",
         "company.thebrowser.ArcMobile2": "arcmobile2://",
+        "com.linear.ios": "linear://",
+        "com.iwilab.KakaoTalk": "kakaotalk://",
+        "com.apple.AppStore": "itms-apps://",
+        // rednote / Xiaohongshu.
+        "com.xingin.discover": "xhsdiscover://",
+        "doordash.DoorDashConsumer": "doordash://",
+        "pinterest": "pinterest://",
 
         // Single-source or inferred from a sibling platform. Weaker still, and kept only
         // because a miss costs nothing beyond the prompt the user would otherwise get.
@@ -219,6 +279,18 @@ public enum KnownAppSchemes {
         // VK Messenger. NOT the `vk.me` universal link — the main VK client claims that
         // domain with the same wildcard, so iOS picks between them.
         "com.vk.vkme": "vkme://",
+        "com.overdesigned.Cheatsheet": "cheatsheet://",
+        "net.ichi2.anki": "anki://",
+        "net.shinyfrog.bear-iOS": "bear://",
+        "app.getmoshi.ios": "moshi://",
+        "com.google.Keep": "comgooglekeep://",
+        // WeCom.
+        "com.tencent.ww": "wxwork://",
+        "com.dianping.dpscope": "dianping://",
+        // Yandex Browser, not the Yandex app. An open-URL scheme: action-shaped by name.
+        "ru.yandex.mobile.search": "yandexbrowser-open-url://",
+        // Upstream notes the simulator carries only a stub of Translate.app.
+        "com.apple.Translate": "translate://",
 
         // No custom scheme; a universal link confirmed in the app's AASA file. See the
         // trade-off in this property's doc comment, and the audit note above: a root URL
@@ -233,7 +305,46 @@ public enum KnownAppSchemes {
         "ru.ozon.OzonStore": "https://www.ozon.ru/",
         "com.ClassDojo": "https://www.classdojo.com/ul/home",
         "com.kouzoh.ios.mercari": "https://jp.mercari.com/",
-        "com.ubercab.UberEats": "https://www.ubereats.com/"
+        "com.ubercab.UberEats": "https://www.ubereats.com/",
+        // Synced from upstream on 2026-10-01, same caveat.
+        "com.zhiliaoapp.musically": "https://www.tiktok.com/",
+        "com.google.NotebookLM": "https://notebooklm.google/app",
+        "com.360buy.jdmobile": "https://m.jd.com/",
+        "com.waze.iphone": "https://www.waze.com/ul",
+        "ru.avito.app": "https://www.avito.ru/",
+        "vn.com.vng.zingalo": "https://zalo.me/",
+        // NOT `vk://`: several VK apps share one team.
+        "com.vk.vkclient": "https://vk.com/feed",
+        "com.dazz.hoop": "https://hoop.photo/",
+        "com.airbnb.app": "https://www.airbnb.com/",
+        "com.kk2.rootshell": "https://rootshell.com/",
+        "com.moonshot.kimichat": "https://kimi.com/app/",
+        "co.hinge.mobile.ios": "https://hinge.co/app/",
+        // `raycast://` is the macOS scheme.
+        "com.raycast.ios.release": "https://raycast.com/ios-app-link/",
+        "com.duolingo.DuolingoMobile": "https://duolingo.com/home",
+        // Meta AI.
+        "com.facebook.stellaapp": "https://www.meta.ai/",
+        "com.yandex.alice-app": "https://alice.yandex.ru/",
+        // Google Chat.
+        "com.google.Dynamite": "https://chat.google.com/",
+        // Google Flow Music.
+        "com.google.producer": "https://www.flowmusic.app/",
+        "com.beeasy.shopee.my": "https://shopee.com.my/",
+        "com.abbyhealth.app": "https://app.abbyhealth.app/",
+        // Alza.
+        "cz.juicymo.contracts.ios.Alza-01": "https://www.alza.cz/",
+        "com.google.Drive": "https://drive.google.com/drive/my-drive",
+        // Weaker: the AASA lists the bundle only for a specific page.
+        "com.quizlet.quizlet": "https://quizlet.com/latest/",
+        // Qwen international.
+        "com.tongyi.intl": "https://qwen.com/app/",
+        "com.audible.iphone": "https://www.audible.com/iosinstall/",
+        // Kuaishou.
+        "com.jiangjia.gif": "https://m.ssl.kuaishou.com/app/",
+        "com.bloomberg.Bloomberg": "https://www.bloomberg.com/latest",
+        // eXpress messenger.
+        "ru.unlimitedtech.express": "https://xlnk.ms/open/"
     ]
 
     /// Bundle identifiers already checked by hand and found to have no way back.
@@ -266,6 +377,12 @@ public enum KnownAppSchemes {
         // as having no way back rather than a bad one.
         "com.apple.mobilesafari",
 
+        // Claude, for the same reason as Safari: `claude://` opens it on a new chat, not
+        // the conversation the user was typing in. Measured on device 2026-10-01, and
+        // Wispr Flow does not auto-return to Claude either. A 2026-09-11 check had passed
+        // it, so retest on a Claude update rather than trusting either result forever.
+        "com.anthropic.claude",
+
         // Apple view services and system apps that register no URL types.
         "com.apple.SafariViewService",
         "com.apple.springboard",
@@ -281,7 +398,6 @@ public enum KnownAppSchemes {
         // the app at its root.
         "com.deepseek.chat",
         "com.hevyapp.hevy",
-        "com.stably.orca.mobile",
         "org.edupage",
         "com.rivetrune.cognilog",
         "com.davetech.todo",
@@ -297,12 +413,64 @@ public enum KnownAppSchemes {
         "com.elaborapp.NoteBox",
         "com.lixkit.diary",
         "com.weichart.Zettel",
-        "h3p.Neon-Vision-Editor",
         "ru.ozon.sellerApp",
         "kz.origon.empapp",
         "com.cloud-compiler",
         "com.corp.messenger.syncer",
-        "com.yottaram.eMoods"
+        "com.yottaram.eMoods",
+
+        // Synced from upstream on 2026-10-01 (VivaDicta 3.11.0 and 3.11.1).
+        // System apps and view services that register no URL types.
+        "com.apple.campo",
+        "com.apple.siri",
+        "com.apple.Preferences",
+        "com.apple.WritingToolsUIService",
+        "com.apple.GenerativePlaygroundApp",
+        // `tel:` needs a number; nothing opens Phone bare.
+        "com.apple.mobilephone",
+        // Share extensions: the surface the user typed into is gone on return, and the
+        // parent app is not where they were.
+        "net.whatsapp.WhatsApp.ShareExtension",
+        "ph.telegra.Telegraph.Share",
+        "io.raindrop.ios.share",
+        // Telegram forks and a Happy fork: they share the upstream app's scheme, so
+        // mapping them would let iOS pick which claimant opens.
+        "org.denshe.telegramdev",
+        "com.olcorporation.olai",
+        "com.omachala.happy",
+        // A sibling bundle of T3 Code, untested (see the T3 Code entry).
+        "com.t3tools.t3code.swiftui",
+        // Third-party apps with no custom scheme and no usable universal link.
+        "tech.baye.OpenCat",
+        "Mailroom.Canary-iOS",
+        "4GU63N96WE.com.p5sys.jumpdesktop",
+        "org.kodiakgaming.Whisper-Secrets",
+        "ch.migrosbank.iphonebanking",
+        "com.tencent.workbuddy.app",
+        "com.whisper.social",
+        "com.yottagames.gameofmafia",
+        "cz.mobilcomm.askwatch",
+        "ru.kwork.messenger",
+        "com.anuvadini.keyboard",
+        "com.booking.pulse",
+        "com.doordash.dasher",
+        "com.larksuite.feishu.ka.fssw",
+        "com.microsoft.to-do",
+        "com.supersethealth.superset",
+        "ru.yandex.uber",
+        "ai.qwenlm.chat.ios",
+        "com.scaleforce.mobile.myexcitel",
+        "co.anysphere.sand",
+        "com.x.xchat",
+        "com.gingerlabs.Notability",
+        "agata.Snippets",
+        "ru.bankffin.ffbank",
+        "ru.wildberries.wbworkspace",
+        "kras-abs.ru.MC-VK-Komfort",
+        "cz.chmu.pocasi",
+        "online.anero.app",
+        "com.ios.aquaMagic062516.cn",
+        "mystxtalk"
     ]
 
     /// The URL that sends the user back to `bundleId`, or nil when there is no known way.

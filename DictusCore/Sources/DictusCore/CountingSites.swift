@@ -37,6 +37,9 @@ public enum AutocorrectCountingSite {
     ///   - editor: the live document. Its `contextBeforeInput` is the mirror.
     ///   - word: the word the pipeline intends to replace.
     ///   - correction: what to put in its place.
+    ///   - trailing: written after the correction. A space when the space bar
+    ///     committed the word; empty when a punctuation mark or a return did, since
+    ///     the caller inserts that character itself (#872).
     ///   - previousWord: only for the DEBUG log.
     ///   - mirror: the surplus accounting, read for the decision and updated after.
     @discardableResult
@@ -44,6 +47,7 @@ public enum AutocorrectCountingSite {
         editor: TextDocumentEditing,
         word: String,
         correction: String,
+        trailing: String = " ",
         previousWord: String? = nil,
         mirror: MirrorSyncState
     ) -> Outcome {
@@ -83,19 +87,22 @@ public enum AutocorrectCountingSite {
             #endif
 
             editor.insertText(correction)
-            editor.insertText(" ")
+            if !trailing.isEmpty { editor.insertText(trailing) }
             mirror.observe(
                 before: mirrorBefore,
                 after: editor.contextLength,
                 deleted: deleteCount,
-                inserted: correction.count + 1
+                inserted: correction.count + trailing.count
             )
             // The trailing space is a boundary this keyboard wrote, so anything the
-            // mirror is still over-reporting now lies behind it (#530).
-            mirror.noteBoundaryInserted(reason: "autocorrect-space", atLength: editor.contextLength)
+            // mirror is still over-reporting now lies behind it (#530). Without one,
+            // the caller's own insert reports its boundary.
+            if !trailing.isEmpty {
+                mirror.noteBoundaryInserted(reason: "autocorrect-space", atLength: editor.contextLength)
+            }
 
             #if DEBUG
-            MirrorProbe.shared.record(.insert(correction + " "))
+            MirrorProbe.shared.record(.insert(correction + trailing))
             MirrorProbe.shared.probe(event: "autocorrect-applied", mirror: editor.contextBeforeInput)
             AutocorrectDebugLog.applyAfterInsert(contextTail: contextTail(editor.contextBeforeInput))
             AutocorrectDebugLog.autocorrectApplied(

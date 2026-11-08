@@ -217,6 +217,25 @@ extension ModelLanguageSupport {
         ]
     )
 
+    /// Every language Parakeet v3 transcribes: the 25 codes of NVIDIA's documented list,
+    /// read back out of `parakeetV3` rather than typed a second time.
+    ///
+    /// WHY a set derived from the display data (#649): the model recommendation has to
+    /// ask "does Parakeet speak this language?", and the answer already lives above, with
+    /// its source. Writing the list again would give the recommendation and the Models
+    /// screen's language sheet two lists that could disagree.
+    public static let parakeetV3LanguageCodes: Set<String> = Set(
+        parakeetV3.highlights.map(\.code) + parakeetV3.additionalCodes
+    )
+
+    /// Every language a multilingual Whisper checkpoint transcribes (~100 codes), in the
+    /// published-quality order of `whisperTierGroups`.
+    ///
+    /// This is the widest set any model in the catalogue covers, so it is the list a user
+    /// can declare as the language they speak (#649): whatever they pick, at least one
+    /// model the device runs can transcribe it.
+    public static let whisperLanguageCodes: [String] = whisperTierGroups.flatMap(\.codes)
+
     /// Nemotron 3.5 ASR streaming 0.6B, multilingual ship (#558).
     ///
     /// SOURCE OF TRUTH: the "Supported Languages" table of NVIDIA's model card,

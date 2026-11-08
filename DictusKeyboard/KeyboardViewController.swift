@@ -489,16 +489,17 @@ class KeyboardViewController: UIInputViewController {
         // During cold start, applyAreaMode was skipped (hasAppeared was false).
         // Now that activeControllerID matches, KeyboardRootView.presentedMode agrees
         // with us, so the constraint and SwiftUI content change together — no
-        // displaced toolbar. This also restores a picker the user left open when
-        // iOS hands the keyboard to a fresh controller.
+        // displaced toolbar. The pickers are closed first (below): an appearance
+        // starts on the keys (#241, #505).
         let statusBeforeHandle = KeyboardState.shared.dictationStatus.rawValue
 
         // The hamburger panel does not survive leaving the keyboard (#241 device
         // feedback). Switching away with the globe and coming back put the user
         // straight back into the menu instead of the keys, which is not what
-        // returning to a keyboard should mean. The emoji picker deliberately keeps
-        // the old restore behaviour: browsing emoji is a task worth resuming,
-        // choosing a language is not.
+        // returning to a keyboard should mean. The emoji picker follows the same rule
+        // since #505: Apple's keyboard always comes back on the letters, and a user
+        // asking for a keyboard in a new field is asking for a keyboard. Inside one
+        // activation nothing changes — the picker stays until ABC or a dictation.
         // The Smart Mode fan does not survive either, and for a stronger reason than
         // the panel's (#79): it is the visible half of a gesture, and the finger that
         // opened it is long gone by the time a fresh controller mounts. Restoring it
@@ -509,9 +510,18 @@ class KeyboardViewController: UIInputViewController {
             KeyboardSmartModeState.shared.close()
         }
 
-        if KeyboardState.shared.areaMode == .panel {
+        if KeyboardState.shared.areaMode == .panel || KeyboardState.shared.areaMode == .emoji {
             KeyboardState.shared.presentAreaMode(.keys)
         }
+
+        // Shared voice notes (#637). A reader left open by an earlier appearance is
+        // closed, like the panel above; then, for a note this keyboard has never
+        // shown, the reader opens by itself — here, at the appearance, because that is
+        // when the user has come back to the conversation and has not started typing.
+        // A note that lands while the keyboard is already on screen only ever rings
+        // the ☰ (decision 1, #639). Ordered after registration and the subscription, so
+        // the mode change it may make is applied by this controller like any other.
+        KeyboardVoiceNoteState.shared.keyboardWillAppear(controllerID: controllerID)
 
         applyAreaMode(KeyboardState.shared.areaMode)
         PersistentLog.log(.diagnosticProbe(
@@ -552,6 +562,10 @@ class KeyboardViewController: UIInputViewController {
         // dictionary in the app, this cached keyboard process must drop the
         // stale copy or learned words keep bypassing autocorrect.
         UserDictionary.shared.reload()
+
+        // Contact names and text replacements (#873), re-read on every appearance
+        // so a contact or replacement added meanwhile is picked up.
+        suggestionState.refreshSupplementaryLexicon(from: self)
 
         // Set default opening layer from user preference.
         // WHY here not viewDidLoad: viewWillAppear fires each time the keyboard appears,
@@ -1075,11 +1089,12 @@ class KeyboardViewController: UIInputViewController {
         // path in viewDidDisappear covers the well-behaved case; this guard
         // short-circuits stale controllers that iOS forgot to notify.
         //
-        // It applies to `.recording` only, mirroring KeyboardRootView.presentedMode
-        // exactly — the two layers have to agree on what is presented, and that is
+        // It applies to the two full-surface modes only, `.recording` and the voice
+        // note reader (#637), through the predicate KeyboardRootView.presentedMode
+        // asks too — the two layers have to agree on what is presented, and that is
         // where the reasoning lives. A picker is opened by a key on the visible
         // keyboard, which is not the case #128 was ever about.
-        guard mode != .recording || KeyboardState.shared.activeControllerID == controllerID else {
+        guard !mode.requiresVisibleOwner || KeyboardState.shared.activeControllerID == controllerID else {
             PersistentLog.log(.diagnosticProbe(
                 component: "KeyboardViewController",
                 instanceID: controllerID,
@@ -1167,7 +1182,14 @@ class KeyboardViewController: UIInputViewController {
                 details: "old=\(oldHosting) new=\(fanHeight) status=\(status) mode=\(mode.rawValue)"
             ))
 
-        case .recording:
+        case .recording, .voiceNoteResult:
+            // The voice note reader (#637) shares this branch rather than copying it:
+            // it replaces the toolbar too, so its geometry is `.recording`'s exactly —
+            // full hosting height, expanded anchor, grid hidden — and one branch is how
+            // that stays true. It fits inside today's keyboard: a long transcript
+            // scrolls in the view, and `heightConstraint` is not touched here or
+            // anywhere on this path (#166, #92, #116, #117, #202). Only the probe's
+            // name differs, so a device log can tell the two apart.
             giellaKeyboard?.isHidden = true
             let fullHeight = computeKeyboardHeight()
             hostingHeightConstraint?.constant = fullHeight
@@ -1175,7 +1197,7 @@ class KeyboardViewController: UIInputViewController {
             PersistentLog.log(.diagnosticProbe(
                 component: "KeyboardViewController",
                 instanceID: controllerID,
-                action: "hostingSet_recording",
+                action: mode == .recording ? "hostingSet_recording" : "hostingSet_voiceNoteResult",
                 details: "old=\(oldHosting) new=\(fullHeight) status=\(status) mode=\(mode.rawValue)"
             ))
         }
@@ -1239,6 +1261,8 @@ class KeyboardViewController: UIInputViewController {
         KeyboardState.shared.revalidateDictationUndo()
         // Invalidate autocorrect undo on external text changes (paste, cursor tap, host autocorrect).
         bridge?.suggestionState?.pendingUndo = nil
+        // A sent message empties the field under the same documentIdentifier (#872).
+        bridge?.hostTextChanged()
         // When text changes externally (paste, cursor move, autocorrect by host app),
         // recheck autocapitalization. This ensures shift state stays correct even when
         // the user moves the cursor to a different position in the text.
