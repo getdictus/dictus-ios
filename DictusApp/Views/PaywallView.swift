@@ -408,13 +408,14 @@ struct PaywallView: View {
         VStack(spacing: 0) {
             subscribeCTA
 
-            // Two lines rather than a shrink: the price and its terms are what
-            // guideline 3.1.2 asks to be legible, and the German runs long.
+            // Never capped and never shrunk: the price and its terms are what
+            // guideline 3.1.2 asks to be legible, at every text size. At large
+            // Dynamic Type it wraps and the pinned footer grows; the content above
+            // scrolls (#913, CodeRabbit on #920).
             billingLine
                 .font(.dmSans(.regular, size: 12, relativeTo: .caption))
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
-                .lineLimit(2)
                 .fixedSize(horizontal: false, vertical: true)
                 // The one line under the CTA that follows the selection: it fades to
                 // the new price with the radio and the card border (#913).
