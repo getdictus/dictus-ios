@@ -134,10 +134,13 @@ struct PaywallView: View {
             }
         }
         .onGeometryChange(for: Bool.self) { $0.size.height < 700 } action: { isCompact = $0 }
-        // The paywall has no bar (#913): its hero is the title, and the bar's height is
-        // what an iPhone SE needs for the plans. The cross floats over the content.
+        // Neither the paywall nor the hub has a bar (#913): the hero is the title, the
+        // bar's height is what an iPhone SE needs for the plans, and with the same
+        // geometry on both the logo does not jump when the hub opens the paywall. The
+        // cross floats over the content. Absent while the thank-you screen is up, so
+        // the only way forward from it is Continue.
         .overlay(alignment: .topLeading) {
-            if showsSales && !showPurchaseSuccess {
+            if !showPurchaseSuccess {
                 floatingCloseButton
             }
         }
@@ -145,8 +148,9 @@ struct PaywallView: View {
         // Empty bar title: the hero's gradient title is the screen title.
         .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
-        .toolbar(showsSales ? .hidden : .automatic, for: .navigationBar)
-        .toolbar { closeButton }
+        // The root only: a feature screen pushed from the hub keeps its bar and back
+        // button.
+        .toolbar(.hidden, for: .navigationBar)
         // Pushed inside this screen's own stack (decision 4), so the back button
         // returns to the hub rather than closing it.
         .navigationDestination(item: $openedFeature) { feature in
@@ -292,25 +296,8 @@ struct PaywallView: View {
 
     // MARK: - Close
 
-    /// Dismisses the cover. Absent while the thank-you screen is up, so the
-    /// only way forward from it is Continue — a cover has no swipe-back to
-    /// serve as the escape hatch a pushed screen had.
-    @ToolbarContentBuilder
-    private var closeButton: some ToolbarContent {
-        ToolbarItem(placement: .topBarLeading) {
-            if !showPurchaseSuccess {
-                Button {
-                    close()
-                } label: {
-                    Image(systemName: "xmark")
-                        .font(.body.weight(.semibold))
-                }
-                .accessibilityLabel("Close")
-            }
-        }
-    }
-
-    /// The paywall's cross, over the content since the paywall has no bar (#913).
+    /// The cross of the paywall and the hub, over the content since neither has a bar
+    /// (#913).
     private var floatingCloseButton: some View {
         Button {
             close()
@@ -323,8 +310,8 @@ struct PaywallView: View {
         }
         .buttonStyle(.plain)
         .accessibilityLabel("Close")
-        // Distinct from the hub's cross under the offers cover, which shares the label.
-        .accessibilityIdentifier("paywall.close")
+        // Distinct ids: with the offers cover up, the hub's cross is still in the tree.
+        .accessibilityIdentifier(showsSales ? "paywall.close" : "proHub.close")
         .padding(.leading, 16)
         .padding(.top, 4)
     }
@@ -429,6 +416,10 @@ struct PaywallView: View {
                 .multilineTextAlignment(.center)
                 .lineLimit(2)
                 .fixedSize(horizontal: false, vertical: true)
+                // The one line under the CTA that follows the selection: it fades to
+                // the new price with the radio and the card border (#913).
+                .contentTransition(.opacity)
+                .animation(.easeInOut(duration: 0.2), value: selectedProductID)
                 .padding(.top, 8)
 
             if framing == .trialEnded {
@@ -453,7 +444,9 @@ struct PaywallView: View {
     /// verdict: the small bar wordmark left the hub unbalanced.
     private var hubContent: some View {
         VStack(spacing: 14) {
-            ProHubHero()
+            // Same geometry as the paywall's hero (#913), so opening the offers from
+            // the trial hub moves neither the logo nor « Dictus Pro ».
+            ProHubHero(compact: isCompact)
 
             VStack(spacing: 10) {
                 ForEach(ProFeature.allCases, id: \.self) { feature in
@@ -631,9 +624,13 @@ struct PaywallView: View {
                     detail: founderOfferLabel ?? Text("one-time payment"),
                     badge: nil
                 )
-                if selectedProductID == lifetime.id {
-                    lifetimeScopeLine
-                }
+                // Always laid out, shown by opacity only (#913): inserting it moved
+                // the whole spread column each time the lifetime was (de)selected.
+                let showsScope = selectedProductID == lifetime.id
+                lifetimeScopeLine
+                    .opacity(showsScope ? 1 : 0)
+                    .allowsHitTesting(showsScope)
+                    .accessibilityHidden(!showsScope)
             }
             if ProPaywallPlans.showsSeeAllPlansLink(
                 loaded: Set(subscriptionManager.products.map(\.id)),
@@ -666,9 +663,9 @@ struct PaywallView: View {
     /// so the CTA never changes price behind a tap that did not mean to buy.
     private var seeAllPlansLink: some View {
         Button {
-            withAnimation(.easeInOut(duration: 0.25)) {
-                showsAllPlans = true
-            }
+            // No animation (#913): a cross-fade left the link and the monthly row
+            // on top of each other for a few frames.
+            showsAllPlans = true
         } label: {
             Text("See all plans")
                 .font(.dmSans(.semiBold, size: 14, relativeTo: .subheadline))

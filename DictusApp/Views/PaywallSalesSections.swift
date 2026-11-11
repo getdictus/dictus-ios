@@ -127,7 +127,9 @@ struct PaywallPlanRow: View {
             .frame(minHeight: minHeight)
             .background(Color.dictusSurface, in: shape)
             .overlay(shape.strokeBorder(isSelected ? Color.dictusAccent : Color.secondary.opacity(0.25),
-                                        lineWidth: isSelected ? 2 : 1))
+                                        lineWidth: isSelected ? 2 : 1)
+                // Selecting a plan animates the border and the radio, nothing else.
+                .animation(.easeInOut(duration: 0.2), value: isSelected))
             .contentShape(shape)
         }
         .buttonStyle(GlassPressStyle(pressedScale: 0.97))
@@ -150,6 +152,7 @@ struct PaywallPlanRow: View {
             }
         }
         .frame(width: 22, height: 22)
+        .animation(.easeInOut(duration: 0.2), value: isSelected)
         .accessibilityHidden(true)
     }
 }
