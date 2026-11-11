@@ -689,6 +689,82 @@ final class ModelInfoTests: XCTestCase {
         }
     }
 
+    // MARK: - Issue #931: Turbo fails on the iPad Pro M4
+
+    /// The four iPad Pro M4 identifiers (11" and 13", Wi-Fi and cellular), at the RAM they
+    /// ship with (8 GB, 16 GB on the 1 TB and 2 TB models). A tester's `iPad16,5` failed
+    /// about 29 of 38 Turbo transcriptions with a Core ML prediction error, so the picker
+    /// stops offering either Turbo variant there, whatever the memory.
+    func testTurboRefusedOnTheIPadProM4() {
+        let devices = [
+            makeCapabilities(ramGB: 8, model: "iPad16,3"),     // iPad Pro 11" M4, Wi-Fi
+            makeCapabilities(ramGB: 8, model: "iPad16,4"),     // iPad Pro 11" M4, cellular
+            makeCapabilities(ramGB: 8, model: "iPad16,5"),     // iPad Pro 13" M4, Wi-Fi (#931)
+            makeCapabilities(ramGB: 16, model: "iPad16,6")     // iPad Pro 13" M4, cellular
+        ]
+        for identifier in turboVariants {
+            guard let turbo = ModelInfo.forIdentifier(identifier) else {
+                return XCTFail("\(identifier) is missing from the catalogue")
+            }
+            for device in devices {
+                XCTAssertEqual(turbo.incompatibilityReason(on: device), .hardwareGeneration,
+                               "\(identifier) on \(device.deviceModelIdentifier)")
+            }
+        }
+    }
+
+    /// Only Turbo is refused on the iPad Pro M4: every other catalogue model keeps the
+    /// verdict it had, Parakeet included (it works on the reporter's iPad).
+    func testOnlyTurboChangesOnTheIPadProM4() {
+        let ipadProM4 = makeCapabilities(ramGB: 8, model: "iPad16,5")
+        for model in ModelInfo.allIncludingDeprecated where !ModelInfo.turboIdentifiers.contains(model.identifier) {
+            XCTAssertNil(model.incompatibilityReason(on: ipadProM4), model.identifier)
+        }
+    }
+
+    /// Devices #931 must not touch: the reporter's iPad mini, the other `iPad16,*` iPads
+    /// (iPad mini A17 Pro, iPad Air M4), the M5 iPad Pro and the A15+ iPhones keep Turbo.
+    func testTurboStaysOfferedOutsideTheIPadProM4() {
+        let devices = [
+            makeCapabilities(ramGB: 8, model: "iPad19,1"),     // iPad mini, where Turbo works (#931)
+            makeCapabilities(ramGB: 8, model: "iPad16,1"),     // iPad mini A17 Pro
+            makeCapabilities(ramGB: 8, model: "iPad16,8"),     // iPad Air 11" M4
+            makeCapabilities(ramGB: 8, model: "iPad16,11"),    // iPad Air 13" M4
+            makeCapabilities(ramGB: 12, model: "iPad17,3"),    // iPad Pro 13" M5
+            makeCapabilities(ramGB: 8, model: "iPad14,3"),     // iPad Pro M2
+            makeCapabilities(ramGB: 6, model: "iPhone14,2"),   // iPhone 13 Pro
+            makeCapabilities(ramGB: 8, model: "iPhone16,2"),   // iPhone 15 Pro Max
+            makeCapabilities(ramGB: 12, model: "iPhone18,1")   // iPhone 17 Pro
+        ]
+        for identifier in turboVariants {
+            for device in devices {
+                XCTAssertNil(ModelInfo.forIdentifier(identifier)?.incompatibilityReason(on: device),
+                             "\(identifier) on \(device.deviceModelIdentifier)")
+            }
+        }
+    }
+
+    /// The recommendation agrees with the picker on the iPad Pro M4: never Turbo, always a
+    /// model the device can download. An installed Turbo still resolves with its 300 s
+    /// preload budget, so a user who holds it keeps dictating with it (no migration).
+    func testTheIPadProM4IsNeverRecommendedTurboAndKeepsAnInstalledOne() {
+        let ipadProM4 = makeCapabilities(ramGB: 8, model: "iPad16,5")
+        for language in ["fr", "en", "zh", "ja", "ko", "ar"] {
+            let target = ModelInfo.recommendedIdentifier(forSpokenLanguage: language, on: ipadProM4)
+            XCTAssertFalse(ModelInfo.turboIdentifiers.contains(target), language)
+            XCTAssertEqual(ModelInfo.forIdentifier(target)?.isSupported(on: ipadProM4), true,
+                           "\(language) → \(target)")
+        }
+        for identifier in turboVariants {
+            XCTAssertNotNil(ModelInfo.forIdentifier(identifier), identifier)
+            XCTAssertEqual(ModelInfo.preloadDeadlineSeconds(for: identifier), 300, identifier)
+        }
+        // Unchanged for the iPad mini: a non-Parakeet language is still recommended Turbo.
+        XCTAssertEqual(ModelInfo.recommendedIdentifier(forSpokenLanguage: "zh",
+                                                       on: makeCapabilities(ramGB: 8, model: "iPad19,1")),
+                       turbo632)
+    }
+
     /// The gate's set is exactly the two catalogue variants, both still resolvable (#660).
     func testTurboIdentifiersAreBothCatalogueVariants() {
         XCTAssertEqual(ModelInfo.turboIdentifiers, Set(turboVariants))

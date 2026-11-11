@@ -748,7 +748,7 @@ public struct ModelInfo: Identifiable {
     /// Whether this model is safe to expose on a device with the given capabilities.
     ///
     /// For the quantized Whisper Turbo variants (`_v20240930_turbo_632MB` and the
-    /// deprecated `_954MB`): requires an A15 or later (#660) and ≥ 6 GB RAM. This matches Argmax's published
+    /// deprecated `_954MB`): requires an A15 or later (#660), not an iPad Pro M4 (#931), and ≥ 6 GB RAM. This matches Argmax's published
     /// compatibility matrix: the iPhone 14/15/16/17 families (iPhone14,X through
     /// iPhone18,X in Apple identifier nomenclature) list both variants as supported,
     /// and those devices ship with 6 GB+ RAM.
@@ -782,7 +782,8 @@ public struct ModelInfo: Identifiable {
     /// and that sentence must be localized. DictusCore owns the policy; the app layer
     /// maps each case to its French/English wording in `ModelInfo+Localized.swift`.
     public enum IncompatibilityReason: Equatable, Sendable {
-        /// The chip predates the variant. Argmax's support matrix, not memory.
+        /// The chip cannot run the variant: it predates it in Argmax's support matrix, or
+        /// the variant is known to fail on it (Turbo on the iPad Pro M4, #931). Not memory.
         case hardwareGeneration
         /// The device has less RAM than the variant needs.
         case insufficientMemory(requiredGB: Int)
@@ -818,8 +819,13 @@ public struct ModelInfo: Identifiable {
         // only greys the Available row: an A14 user who installed Turbo under an earlier
         // build keeps it, usable and selectable from the ungated Downloaded section, until
         // they change model themselves. Nothing moves them off it (Pierre, 2026-11-06).
+        //
+        // The iPad Pro M4 is refused the same way, on a measured failure rather than the
+        // matrix (#931, see `DeviceCapabilities.isIPadProM4`). Same consequences: the
+        // Available row is greyed, the recommendation falls back through `isSupported`,
+        // and an installed Turbo stays usable from the Downloaded section.
         guard Self.turboIdentifiers.contains(identifier) else { return nil }
-        if capabilities.isPreA15 { return .hardwareGeneration }
+        if capabilities.isPreA15 || capabilities.isIPadProM4 { return .hardwareGeneration }
         return capabilities.physicalMemoryGB >= 6 ? nil : .insufficientMemory(requiredGB: 6)
     }
 
