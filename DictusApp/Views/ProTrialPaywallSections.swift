@@ -1,5 +1,5 @@
 // DictusApp/Views/ProTrialPaywallSections.swift
-// The paywall's reverse-trial pieces: the end-of-trial framing and its monthly offer (#593, #724).
+// The paywall's reverse-trial pieces: the end-of-trial framing, the running-trial line, the monthly offer (#593, #724).
 import SwiftUI
 import DictusCore
 
@@ -13,6 +13,42 @@ enum PaywallFraming: Equatable {
     /// (#593). Framed as the end of something the user had rather than as an offer,
     /// with the recap and an obvious way to continue for free.
     case trialEnded
+}
+
+/// The Pro hub's line while the trial runs (#216, kept by #913): when it ends, and
+/// that subscribing now costs nothing of it.
+///
+/// WHY it exists: without it the paywall, opened mid-trial, sells a subscription to
+/// someone who already has every feature and does not know for how long. The line
+/// answers the question they would otherwise have to leave to ask.
+struct TrialRunningNotice: View {
+    let endsAt: Date
+
+    /// The count the home badge shows, repeated here as the line's headline (#216
+    /// decision 2): the hub is where a trial user looks for how long they have left.
+    /// Nil only if the trial ended between the state read and this render.
+    var daysLeft: Int?
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 10) {
+            Image(systemName: "gift.fill")
+                .foregroundColor(.dictusAccent)
+            VStack(alignment: .leading, spacing: 2) {
+                if let daysLeft {
+                    Text("\(daysLeft) days left in your free trial")
+                        .font(.dictusBody.weight(.semibold))
+                }
+                Text("Your free trial ends on \(endsAt.formatted(date: .long, time: .omitted)). Subscribe now and Pro stays on with no interruption.")
+                    .font(.dictusCaption)
+                    .foregroundColor(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            Spacer(minLength: 0)
+        }
+        .padding(12)
+        .dictusGlass()
+        .accessibilityElement(children: .combine)
+    }
 }
 
 /// The sheet the end-of-trial paywall shows when it is closed without buying (#724

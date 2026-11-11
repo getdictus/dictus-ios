@@ -64,6 +64,48 @@ final class AudioStartReadinessPolicyTests: XCTestCase {
         )
     }
 
+    // MARK: - Reading the route change
+
+    /// #515's signal, kept: the notification arrives while the route is empty.
+    func testARouteChangeLeavingNoInputRaisesTheFlag() {
+        XCTAssertTrue(AudioStartReadinessPolicy.routeChangeShowsEmptyInput(
+            currentInputPortCount: 0, previousInputPortCount: 1, isCategoryChange: false
+        ))
+    }
+
+    /// 2026-11-07 19:22:29, `audioRouteChanged reason=unknown(0) previous=none
+    /// route=MicrophoneBuiltIn`, then `Zombie engine: 0 samples`. The AirPods left while
+    /// DictusApp was suspended, so no notification came while the route was empty: this
+    /// `previous` is the only trace of it (#925).
+    func testARouteThatCameBackFromEmptyWhileSuspendedRaisesTheFlag() {
+        XCTAssertTrue(AudioStartReadinessPolicy.routeChangeShowsEmptyInput(
+            currentInputPortCount: 1, previousInputPortCount: 0, isCategoryChange: false
+        ))
+    }
+
+    /// A change between two real inputs is a plain device switch, with AirPods still
+    /// connected for instance. Nothing about the next start may change.
+    func testARouteChangeBetweenTwoInputsLeavesTheFlagDown() {
+        XCTAssertFalse(AudioStartReadinessPolicy.routeChangeShowsEmptyInput(
+            currentInputPortCount: 1, previousInputPortCount: 1, isCategoryChange: false
+        ))
+    }
+
+    /// Our own `setCategory`, from a category with no input (launch's default, the
+    /// keyboard step's `.playback` Picture in Picture): no route was lost.
+    func testOurOwnCategoryChangeFromAnInputlessCategoryLeavesTheFlagDown() {
+        XCTAssertFalse(AudioStartReadinessPolicy.routeChangeShowsEmptyInput(
+            currentInputPortCount: 1, previousInputPortCount: 0, isCategoryChange: true
+        ))
+    }
+
+    /// A notification with no previous route says nothing about emptiness.
+    func testAMissingPreviousRouteLeavesTheFlagDown() {
+        XCTAssertFalse(AudioStartReadinessPolicy.routeChangeShowsEmptyInput(
+            currentInputPortCount: 1, previousInputPortCount: nil, isCategoryChange: false
+        ))
+    }
+
     // MARK: - The bound
 
     /// The wait is bounded by what was observed, not chosen freely: the route returned

@@ -639,7 +639,7 @@ public struct ModelInfo: Identifiable {
     /// test for iPhones and iPads alike; `isSupported(on:)` reads the same predicate.
     /// The exception comes before the RAM rule, so a 6 GB A12X/A12Z iPad Pro gets
     /// Base and never Parakeet (issue #612). After it, Parakeet v3 (~800 MB) remains
-    /// the pick for >= 6 GB.
+    /// the pick for >= 6 GB, and for 4 GB on an A15 or later (#921).
     ///
     /// WHY in ModelInfo (not ModelManager):
     /// This is catalog-level logic — which model fits this device. It doesn't
@@ -662,13 +662,23 @@ public struct ModelInfo: Identifiable {
             // tier, and `preA14SupportedIdentifiers` keeps the two consistent.
             return "openai_whisper-base"
         }
-        return capabilities.physicalMemoryGB >= 6
-            ? "parakeet-tdt-0.6b-v3"
-            : "openai_whisper-small"
+        // #921: Parakeet also runs well on a 4 GB A15. Measured on an iPhone 13
+        // (iPhone14,5), TestFlight 39.804: 126 s of audio transcribed in 14.5 s, no
+        // failure. No 4 GB A14 was measured, so the iPhone 12 family keeps Small.
+        let parakeetFits = capabilities.physicalMemoryGB >= 6
+            || (capabilities.isA15OrLater && capabilities.physicalMemoryGB >= 4)
+        return parakeetFits ? "parakeet-tdt-0.6b-v3" : "openai_whisper-small"
     }
 
     /// The Turbo variant the catalogue offers (issue #408).
     static let turboIdentifier = "openai_whisper-large-v3-v20240930_turbo_632MB"
+
+    /// Both quantized Turbo variants, the offered one and the superseded `_954MB`. Argmax lists
+    /// them for exactly the same devices, so every rule about Turbo applies to both.
+    public static let turboIdentifiers: Set<String> = [
+        turboIdentifier,
+        "openai_whisper-large-v3_turbo_954MB"
+    ]
 
     /// The model to recommend to someone who speaks `spokenLanguage` on `capabilities`
     /// (#649).
@@ -680,8 +690,8 @@ public struct ModelInfo: Identifiable {
     /// The rule, in order:
     /// 1. A pre-A14 device gets today's answer, Base, whatever the language: the Argmax
     ///    matrix allows nothing else there, and Base is multilingual.
-    /// 2. A language Parakeet speaks gets today's answer too: Parakeet on 6 GB or more,
-    ///    Small below. All four Dictus keyboard languages land here, so nobody who
+    /// 2. A language Parakeet speaks gets today's answer too: Parakeet on 6 GB or more
+    ///    and on a 4 GB A15 or later (#921), Small below. All four Dictus keyboard languages land here, so nobody who
     ///    onboarded before #649 sees their recommendation move.
     /// 3. Any other language gets the best Whisper the device runs reliably: Turbo where
     ///    Argmax lists it AND the catalogue's own Turbo gate (6 GB) lets it run, Small
@@ -738,7 +748,7 @@ public struct ModelInfo: Identifiable {
     /// Whether this model is safe to expose on a device with the given capabilities.
     ///
     /// For the quantized Whisper Turbo variants (`_v20240930_turbo_632MB` and the
-    /// deprecated `_954MB`): requires ≥ 6 GB RAM. This matches Argmax's published
+    /// deprecated `_954MB`): requires an A15 or later (#660) and ≥ 6 GB RAM. This matches Argmax's published
     /// compatibility matrix: the iPhone 14/15/16/17 families (iPhone14,X through
     /// iPhone18,X in Apple identifier nomenclature) list both variants as supported,
     /// and those devices ship with 6 GB+ RAM.
@@ -796,16 +806,21 @@ public struct ModelInfo: Identifiable {
         if capabilities.isPreA14 {
             return Self.preA14SupportedIdentifiers.contains(identifier) ? nil : .hardwareGeneration
         }
-        switch identifier {
         // Both quantized Turbo variants (issue #408): Argmax lists them for exactly
         // the same device families, so they share one rule. The deprecated `_954MB`
         // is matched here too — it is still installed on devices, so the Settings
         // "Downloaded" row it renders must be able to say why it is disabled.
-        case "openai_whisper-large-v3-v20240930_turbo_632MB", "openai_whisper-large-v3_turbo_954MB":
-            return capabilities.physicalMemoryGB >= 6 ? nil : .insufficientMemory(requiredGB: 6)
-        default:
-            return nil
-        }
+        //
+        // The chip test comes before the RAM test (#660): Argmax lists neither variant for
+        // the A14 or the M1 iPads, so a 6 GB iPhone 12 Pro has the memory and lacks the
+        // generation. This is the same line `recommendedIdentifier(forSpokenLanguage:on:)`
+        // reads through `isA15OrLater`, so the picker and the recommendation agree. It
+        // only greys the Available row: an A14 user who installed Turbo under an earlier
+        // build keeps it, usable and selectable from the ungated Downloaded section, until
+        // they change model themselves. Nothing moves them off it (Pierre, 2026-11-06).
+        guard Self.turboIdentifiers.contains(identifier) else { return nil }
+        if capabilities.isPreA15 { return .hardwareGeneration }
+        return capabilities.physicalMemoryGB >= 6 ? nil : .insufficientMemory(requiredGB: 6)
     }
 
     public func isSupported(on capabilities: DeviceCapabilities) -> Bool {
@@ -835,7 +850,7 @@ public struct ModelInfo: Identifiable {
     /// WHY the exception is guarded on `.deprecated` rather than matching the
     /// identifier alone: `all` also drops Parakeet on iOS 16 through a runtime OS
     /// check, while `recommendedIdentifier(for:)` returns Parakeet on any >= 6 GB
-    /// device regardless of OS. A bare identifier match would smuggle Parakeet back
+    /// device (and any 4 GB A15) regardless of OS. A bare identifier match would smuggle Parakeet back
     /// onto iOS 16. This exception must undo deprecation and nothing else.
     ///
     /// Filters `allIncludingDeprecated` rather than `all` so the rendered order stays
