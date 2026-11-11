@@ -542,6 +542,7 @@ class LiveActivityManager {
 
         // WHY: State machine guard prevents DI desync from concurrent transitions (#42)
         guard validateTransition(to: .recording) else { return }
+        clearPauseForDictation()  // #935
 
         // Cancel any pending auto-return from a previous dictation's ready/failed state.
         // WHY AFTER validation (not before): If state is .failed and validation rejects,
@@ -1308,9 +1309,28 @@ extension LiveActivityManager {
         let pauseLimit = WarmEngineTimeout.option().idleTimerInterval ?? 10 * 60
         interruptionPauseTimeout = Task { [weak self] in
             try? await Task.sleep(for: .seconds(pauseLimit))
-            guard !Task.isCancelled, let self, self.isPausedForInterruption else { return }
-            self.endActivityForAudioInterruption(reason: "interruptionTimeout")
+            guard !Task.isCancelled, let self else { return }
+            // #935: a warm engine by now (a dictation, or the app warmed it) unpauses.
+            let action = LiveActivityInterruptionPolicy.atPauseTimeout(
+                isPaused: self.isPausedForInterruption, hasActivity: self.currentActivity != nil,
+                engineWarm: DictationCoordinator.shared.isEngineRunning
+            )
+            switch action {
+            case .resume: self.setPausedForInterruption(false)
+            case .end: self.endActivityForAudioInterruption(reason: "interruptionTimeout")
+            case .pause, .none: break
+            }
         }
+    }
+
+    /// A dictation reached recording: the audio is back even if `.ended` never came
+    /// (#935). Clear the pause without pushing standby content, since the recording
+    /// update follows, so the next return to standby shows the plain pill.
+    private func clearPauseForDictation() {
+        guard LiveActivityInterruptionPolicy.atDictationStarted(isPaused: isPausedForInterruption) == .resume else { return }
+        isPausedForInterruption = false
+        interruptionPauseTimeout?.cancel()
+        PersistentLog.log(.liveActivityTransition(from: "paused", to: "standby"))
     }
 
     /// The dictation an interruption cut short failed (#851): end its pill, which
