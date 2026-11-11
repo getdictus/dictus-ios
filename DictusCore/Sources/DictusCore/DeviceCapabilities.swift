@@ -136,6 +136,28 @@ public struct DeviceCapabilities: Sendable, Equatable {
         return family < 14
     }
 
+    /// The iPad Pro M4 identifiers: 11-inch (`iPad16,3` Wi-Fi, `iPad16,4` cellular) and
+    /// 13-inch (`iPad16,5` Wi-Fi, `iPad16,6` cellular).
+    ///
+    /// WHY a list and not a family test (#931): `iPad16,*` also holds the iPad mini A17 Pro
+    /// (`iPad16,1-2`) and the iPad Air M4 (`iPad16,8-11`), and neither has failed. The
+    /// failure is known on one iPad Pro M4 only, so the rule names those four and nothing
+    /// around them.
+    static let iPadProM4Identifiers: Set<String> = ["iPad16,3", "iPad16,4", "iPad16,5", "iPad16,6"]
+
+    /// Whether this device is an iPad Pro M4, where Whisper Turbo fails at inference (#931).
+    ///
+    /// Argmax's matrix lists both Turbo variants for `iPad16` (its "M2, M3, M4" entry), so
+    /// this is not the matrix: it is a measured failure. A tester's `iPad16,5` (8 GB,
+    /// iPadOS 27.2.1) loaded Turbo and ran its warm inference, then failed about 29 of 38
+    /// transcriptions with Core ML's "Unable to compute the asynchronous prediction using
+    /// ML Program", while Parakeet worked on the same iPad and Turbo worked on an iPad mini.
+    ///
+    /// Source of truth for the identifiers: DeviceKit 5.10.0, `Device.generated.swift`.
+    public var isIPadProM4: Bool {
+        Self.iPadProM4Identifiers.contains(deviceModelIdentifier)
+    }
+
     /// The family number of an identifier such as "iPad8,1" (→ 8), or nil when the
     /// identifier does not start with `prefix` followed by digits and a comma.
     ///
