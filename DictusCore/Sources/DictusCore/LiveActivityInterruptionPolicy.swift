@@ -50,4 +50,19 @@ public enum LiveActivityInterruptionPolicy {
         guard isPaused, hasActivity else { return .none }
         return engineWarm ? .resume : .end
     }
+
+    /// When a dictation reaches recording. The audio is back, so a pause still pending
+    /// is cleared and the return to standby is plain (#935): an interruption whose
+    /// `.ended` never came (a call on AirPods) would otherwise keep every standby after
+    /// it paused while dictation works.
+    public static func atDictationStarted(isPaused: Bool) -> LiveActivityInterruptionAction {
+        isPaused ? .resume : .none
+    }
+
+    /// When the pause outlives its window with no `.ended` (#935). Same answer as
+    /// `.ended`: a warm engine (the user dictated, or the app warmed it, meanwhile)
+    /// unpauses the pill; only a cold one ends it.
+    public static func atPauseTimeout(isPaused: Bool, hasActivity: Bool, engineWarm: Bool) -> LiveActivityInterruptionAction {
+        atEnded(isPaused: isPaused, hasActivity: hasActivity, engineWarm: engineWarm)
+    }
 }

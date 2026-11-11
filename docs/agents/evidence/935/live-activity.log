@@ -1,0 +1,7 @@
+# build 7c055d89, device Dictus Verify 20261111-133827-7c055d89 (iPhone 17, iOS 26.5)
+# before simslim --except widgets:
+[2026-11-11T12:40:54Z] INFO    [lifecycle] <APP> liveActivityStandbySkipped reason=systemActivitiesDisabled isEnabled=true areActivitiesEnabled=false activityState=none
+# after simslim --except widgets:
+[2026-11-11T12:41:23Z] INFO    [lifecycle] <APP> liveActivityTransition from=idle to=recovery-standby
+[2026-11-11T12:41:23Z] INFO    [lifecycle] <APP> liveActivityStarted id=D8059012-97D2-4ABB-9F8B-1B860F0DE1B8
+[2026-11-11T12:41:31Z] INFO    [lifecycle] <APP> liveActivityStandbySkipped reason=alreadyStandby isEnabled=true areActivitiesEnabled=true activityState=active
