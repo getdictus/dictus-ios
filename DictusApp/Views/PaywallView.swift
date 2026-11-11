@@ -10,10 +10,11 @@ import DictusCore
 /// it, and a second screen beside it is exactly what #216 decided against. The layout
 /// follows `ProHub.bottomBlock`:
 ///
-/// - **Free:** one screen, no scroll on an iPhone SE (#913): wordmark, headline, four
-///   checkmark lines, the plan rows, and a pinned CTA with Restore, Redeem a code and
-///   the legal links.
-/// - **Trial:** the same, with the days left, and the lines open their screens.
+/// - **Free and trial ended:** the paywall, one screen with no scroll on an iPhone SE
+///   (#913): the large hero, the headline, four checkmark lines, the plan rows, and a
+///   pinned CTA with Restore, Redeem a code and the legal links.
+/// - **Trial:** the hub, as on develop: active cards, the days left, and « Continue
+///   with Dictus Pro », which opens the paywall in a cover of its own.
 /// - **Subscriber:** active cards, the plan, its date, Manage subscription.
 /// - **Lifetime:** active cards, "Dictus Pro Lifetime", nothing to manage.
 ///
@@ -28,6 +29,10 @@ struct PaywallView: View {
     /// Set when the app opened this paywall because the trial is over (#593), with
     /// how it is framed (#837); nil for every entry point the user chose.
     var trialEnd: ProTrialEndPaywall?
+
+    /// Set when the Pro hub opened this screen for its offers during the trial (#913):
+    /// the paywall, where the same state would otherwise show the hub.
+    var offersOnly = false
 
     /// Why this paywall is up. `.trialEnded` only for the end-of-trial framing; a
     /// reinstall over an ended trial gets the ordinary one (#837).
@@ -62,9 +67,6 @@ struct PaywallView: View {
 
     /// Shows the thank-you screen after a successful purchase or restore.
     @State private var showPurchaseSuccess = false
-
-    /// Drives the staged entrance animation of the thank-you screen elements.
-    @State private var successEntrance = false
 
     /// Presents Apple's offer code sheet (#787).
     @State private var showsOfferCodeRedemption = false
@@ -108,28 +110,42 @@ struct PaywallView: View {
     }
 
     var body: some View {
-        ScrollView {
-            if hubBlock.sellsPlans {
-                salesContent
-            } else {
-                hubContent
+        GeometryReader { proxy in
+            ScrollView {
+                if showsSales {
+                    salesContent
+                        // At least the visible height, so the spacers inside share out
+                        // what a tall iPhone has left instead of leaving it under the
+                        // plans (#913, device test on an iPhone 15 Pro Max).
+                        .frame(minHeight: proxy.size.height)
+                } else {
+                    hubContent
+                }
             }
+            // Scrolls only when the content outgrows the screen: large Dynamic Type,
+            // or a device smaller than the iPhone SE the layout is measured on (#913).
+            .scrollBounceBehavior(.basedOnSize)
         }
-        // Scrolls only when the content outgrows the screen: large Dynamic Type, or a
-        // device smaller than the iPhone SE the layout is measured on (#913).
-        .scrollBounceBehavior(.basedOnSize)
-        .onGeometryChange(for: Bool.self) { $0.size.height < 680 } action: { isCompact = $0 }
         // The purchase area is pinned (#913): the CTA, the price it charges, Restore,
         // Redeem a code and the legal links never need a scroll to find.
         .safeAreaInset(edge: .bottom) {
-            if hubBlock.sellsPlans {
+            if showsSales {
                 purchaseFooter
+            }
+        }
+        .onGeometryChange(for: Bool.self) { $0.size.height < 700 } action: { isCompact = $0 }
+        // The paywall has no bar (#913): its hero is the title, and the bar's height is
+        // what an iPhone SE needs for the plans. The cross floats over the content.
+        .overlay(alignment: .topLeading) {
+            if showsSales && !showPurchaseSuccess {
+                floatingCloseButton
             }
         }
         .background(Color.dictusBackground.ignoresSafeArea())
         // Empty bar title: the hero's gradient title is the screen title.
         .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar(showsSales ? .hidden : .automatic, for: .navigationBar)
         .toolbar { closeButton }
         // Pushed inside this screen's own stack (decision 4), so the back button
         // returns to the hub rather than closing it.
@@ -160,7 +176,9 @@ struct PaywallView: View {
         .onChange(of: subscriptionManager.purchaseState) { _, newState in
             // Celebrate instead of silently ejecting the user who just paid:
             // the thank-you screen takes over and Continue dismisses.
-            if newState == .success {
+            // While the offers cover is up it shows the thank-you screen itself, and
+            // a second one here would ask for a second Continue.
+            if newState == .success && !showsOffers {
                 withAnimation(.easeOut(duration: 0.25)) {
                     showPurchaseSuccess = true
                 }
@@ -171,7 +189,7 @@ struct PaywallView: View {
         }
         .overlay {
             if showPurchaseSuccess {
-                purchaseSuccessView
+                PurchaseSuccessView(continueAction: { dismiss() })
                     .transition(.opacity)
             }
         }
@@ -194,6 +212,13 @@ struct PaywallView: View {
         }, content: {
             monthlyOfferSheet
         })
+        // The paywall the trial hub opens (#913): a cover of its own, so the hub stays
+        // underneath and closing the offers returns to it.
+        .fullScreenCover(isPresented: $showsOffers) {
+            NavigationStack {
+                PaywallView(offersOnly: true)
+            }
+        }
     }
 
     // MARK: - Hub state (#216)
@@ -283,18 +308,49 @@ struct PaywallView: View {
                 .accessibilityLabel("Close")
             }
         }
-        // On the sales states the wordmark sits in the bar, level with the cross
-        // (#913): on an iPhone SE a row of its own under the bar cost the plans their
-        // room. The hub keeps its large hero instead (`hubContent`).
-        ToolbarItem(placement: .principal) {
-            if hubBlock.sellsPlans {
-                PaywallWordmark()
-            }
-        }
     }
 
+    /// The paywall's cross, over the content since the paywall has no bar (#913).
+    private var floatingCloseButton: some View {
+        Button {
+            close()
+        } label: {
+            Image(systemName: "xmark")
+                .font(.body.weight(.semibold))
+                .foregroundColor(.dictusAccent)
+                .frame(width: 44, height: 44)
+                .dictusGlass(in: Circle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("Close")
+        // Distinct from the hub's cross under the offers cover, which shares the label.
+        .accessibilityIdentifier("paywall.close")
+        .padding(.leading, 16)
+        .padding(.top, 4)
+    }
+
+    // MARK: - Paywall or hub (#913)
+
+    /// Whether this screen is the paywall rather than the Pro hub.
+    ///
+    /// Free and the end of the trial get the paywall only. During the trial Dictus Pro
+    /// is the hub, as on develop, and its « Continue with Dictus Pro » opens the
+    /// paywall (`offersOnly`). Subscribers and lifetime owners get the hub.
+    ///
+    /// WHY the hub during the trial: the trial user has every feature, and the hub is
+    /// where they reach each one's settings. The paywall must not double as it.
+    private var showsSales: Bool {
+        guard hubBlock.sellsPlans else { return false }
+        if case .offers(_?, _) = hubBlock { return offersOnly }
+        return true
+    }
+
+    /// Set by the trial hub's « Continue with Dictus Pro ».
+    @State private var showsOffers = false
+
     /// Whether the screen is short enough to need the tighter spacing (#913): the
-    /// iPhone SE's 375×667 leaves about 600 pt under the bar, an iPhone 17 about 750.
+    /// iPhone SE's 375×667 leaves about 650 pt under the status bar, an iPhone 17
+    /// about 760.
     ///
     /// WHY read from the container and not from the content: the content's height
     /// depends on this answer, and deciding on it would flip back and forth.
@@ -315,11 +371,14 @@ struct PaywallView: View {
     /// way out sits under the CTA rather than on a step of its own.
     private var salesContent: some View {
         VStack(spacing: 0) {
+            ProHubHero(showsTagline: false, compact: isCompact)
+
+            Spacer(minLength: space(18, compact: 6))
+
             Text(framing == .trialEnded ? "Your trial has ended" : "All the power of your voice")
                 .font(.dmSans(.semiBold, size: isCompact ? 24 : 26, relativeTo: .title2))
                 .multilineTextAlignment(.center)
                 .fixedSize(horizontal: false, vertical: true)
-                .padding(.top, space(16, compact: 4))
 
             if framing == .trialEnded {
                 TrialRecapLine(usage: proStatus.trialUsage)
@@ -338,18 +397,22 @@ struct PaywallView: View {
                 .padding(.top, space(10, compact: 6))
             }
 
+            Spacer(minLength: space(22, compact: 10))
+
             PaywallFeatureList(
                 showsVoiceNoteDetail: framing == .standard,
-                lineSpacing: space(10, compact: 6),
-                open: cardsAreActive ? { openedFeature = $0 } : nil
+                lineSpacing: space(10, compact: 5)
             )
-            .padding(.top, space(22, compact: 14))
+
+            Spacer(minLength: space(22, compact: 10))
 
             planSelector
-                .padding(.top, space(22, compact: 14))
+
+            // The smallest share: the plans sit close to the CTA they feed.
+            Spacer(minLength: space(12, compact: 2))
+                .frame(maxHeight: 32)
         }
         .padding(.horizontal, 20)
-        .padding(.bottom, space(12, compact: 4))
     }
 
     /// The pinned bottom: CTA, what it charges, the way out on the end-of-trial screen,
@@ -406,22 +469,50 @@ struct PaywallView: View {
                 }
             }
 
-            ProHubMembershipCard(
-                block: hubBlock,
-                refresh: { subscriptionManager.recheckAfterManageSheet() },
-                upgrade: ProLifetimeUpgrade.offer(
-                    for: hubBlock, paywallVisible: PremiumFlags.paywallVisible
-                ),
-                lifetimePrice: subscriptionManager.lifetimeProduct?.displayPrice,
-                isPurchasing: subscriptionManager.purchaseState == .purchasing,
-                buyLifetime: buyLifetime
-            )
+            if case .offers(let endsAt?, let daysLeft) = hubBlock {
+                // The trial hub, as on develop (#216), with its way to the offers in
+                // place of the plans it used to list (#913).
+                TrialRunningNotice(endsAt: endsAt, daysLeft: daysLeft)
+                continueToOffersButton
+            } else {
+                membershipCard
+            }
 
             legalLinksRow
                 .padding(.top, 8)
                 .padding(.bottom, 32)
         }
         .padding(.horizontal, 16)
+    }
+
+    /// Opens the paywall over the trial hub.
+    private var continueToOffersButton: some View {
+        Button {
+            showsOffers = true
+        } label: {
+            Text("Continue with Dictus Pro")
+                .font(.dictusSubheading)
+                .frame(maxWidth: .infinity)
+                .padding()
+                .background(Color.dictusAccent)
+                .foregroundColor(.white)
+                .clipShape(RoundedRectangle(cornerRadius: 12))
+        }
+        .buttonStyle(GlassPressStyle())
+        .accessibilityIdentifier("proHub.continueToOffers")
+    }
+
+    private var membershipCard: some View {
+        ProHubMembershipCard(
+            block: hubBlock,
+            refresh: { subscriptionManager.recheckAfterManageSheet() },
+            upgrade: ProLifetimeUpgrade.offer(
+                for: hubBlock, paywallVisible: PremiumFlags.paywallVisible
+            ),
+            lifetimePrice: subscriptionManager.lifetimeProduct?.displayPrice,
+            isPurchasing: subscriptionManager.purchaseState == .purchasing,
+            buyLifetime: buyLifetime
+        )
     }
 
     // MARK: - Feature Card
@@ -976,82 +1067,6 @@ struct PaywallView: View {
         .minimumScaleFactor(0.7)
     }
 
-    // MARK: - Purchase Success
-
-    /// Thank-you screen shown after a successful purchase or restore.
-    /// Staged entrance: the checkmark springs in first, then the texts rise
-    /// with small delays, then the Continue button. Each element animates on
-    /// the same trigger with its own delay, which reads as one choreography.
-    private var purchaseSuccessView: some View {
-        VStack(spacing: 0) {
-            Spacer()
-
-            Image(systemName: "checkmark.circle.fill")
-                .font(.system(size: 72))
-                .foregroundStyle(.white, Color.dictusSuccess)
-                .shadow(color: Color.dictusSuccess.opacity(0.6), radius: 12)
-                .shadow(color: Color.dictusSuccess.opacity(0.3), radius: 28)
-                .scaleEffect(successEntrance ? 1 : 0.4)
-                .opacity(successEntrance ? 1 : 0)
-                .animation(.spring(response: 0.45, dampingFraction: 0.6), value: successEntrance)
-
-            Text("Welcome to Dictus Pro")
-                .font(.system(.title, design: .rounded, weight: .bold))
-                .foregroundStyle(
-                    LinearGradient(
-                        colors: [.dictusGradientStart, .dictusGradientEnd],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                )
-                .padding(.top, 28)
-                .opacity(successEntrance ? 1 : 0)
-                .offset(y: successEntrance ? 0 : 12)
-                .animation(.easeOut(duration: 0.35).delay(0.2), value: successEntrance)
-
-            Text("All Pro features are now unlocked. Thank you for your support.")
-                .font(.dictusBody)
-                .foregroundColor(.secondary)
-                .multilineTextAlignment(.center)
-                .padding(.top, 12)
-                .padding(.horizontal, 24)
-                .opacity(successEntrance ? 1 : 0)
-                .offset(y: successEntrance ? 0 : 12)
-                .animation(.easeOut(duration: 0.35).delay(0.3), value: successEntrance)
-
-            Spacer()
-
-            Button {
-                dismiss()
-            } label: {
-                Text("Continue")
-                    .font(.dictusSubheading)
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.dictusAccent)
-                    .foregroundColor(.white)
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
-            }
-            .buttonStyle(GlassPressStyle())
-            .padding(.horizontal, 16)
-            .padding(.bottom, 32)
-            .opacity(successEntrance ? 1 : 0)
-            .animation(.easeOut(duration: 0.35).delay(0.45), value: successEntrance)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color.dictusBackground.ignoresSafeArea())
-        .onAppear {
-            successEntrance = true
-            // UIKit generator instead of SwiftUI sensoryFeedback: the state
-            // change happens while the StoreKit payment sheet still holds
-            // scene focus, where sensoryFeedback is silently dropped. The
-            // delay lands the haptic as the checkmark spring settles.
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                HapticFeedback.purchaseSucceeded()
-            }
-        }
-    }
-
     // MARK: - Error Handling
 
     /// Whether a purchase error is up, on the screen that is in front.
@@ -1063,6 +1078,8 @@ struct PaywallView: View {
     private func showsErrorAlert(fromOffer: Bool) -> Binding<Bool> {
         Binding(
             get: {
+                // The offers cover (#913) shows its own alert: the hub under it stays quiet.
+                guard !showsOffers else { return false }
                 if case .failed = subscriptionManager.purchaseState { return showsMonthlyOffer == fromOffer }
                 return false
             },

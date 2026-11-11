@@ -1,46 +1,10 @@
 // DictusApp/Views/PaywallSalesSections.swift
-// The pieces of the one-screen paywall (#913): wordmark, feature checklist, plan row, trial recap line.
+// The pieces of the one-screen paywall (#913): feature checklist, plan row, trial recap line, thank-you screen.
 import SwiftUI
 import DictusCore
 
-/// The official wordmark with the Pro badge: icon glyph, « dictus » in DM Sans 200,
-/// a blue "Pro" (#913). In the navigation bar of every state, the hub included.
-struct PaywallWordmark: View {
-    /// The wordmark's point size. Fixed rather than Dynamic Type: it lives in the
-    /// navigation bar, whose height does not grow.
-    private let wordSize: CGFloat = 30
-
-    var body: some View {
-        HStack(spacing: 8) {
-            // logoHeight 19 gives a 36 pt tile (80/42 ratio, `DictusLogoGeometry`),
-            // the tallest that sits in the bar beside the close button.
-            DictusIconTile(logoHeight: 19)
-
-            Text(verbatim: "dictus")
-                .font(.custom(DMSansWeight.extraLight.rawValue, fixedSize: wordSize))
-                // The brand kit's -0.03em, in points for this size.
-                .tracking(-0.03 * wordSize)
-                .foregroundColor(.primary)
-
-            Text(verbatim: "Pro")
-                .font(.custom(DMSansWeight.semiBold.rawValue, fixedSize: 13))
-                .foregroundColor(.white)
-                .padding(.horizontal, 8)
-                .padding(.vertical, 3)
-                .background(Color.dictusAccent, in: RoundedRectangle(cornerRadius: 6, style: .continuous))
-        }
-        .lineLimit(1)
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel(Text(verbatim: "Dictus Pro"))
-        .accessibilityAddTraits(.isHeader)
-    }
-}
-
-/// The four Pro features, one line each with a blue checkmark (#913).
-///
-/// WHY the lines open their screens while Pro is on: during the trial this screen is
-/// the hub, the only way into each feature's settings (#216 decision 4). The rows keep
-/// that job with a chevron, and stay one line so the plans still fit.
+/// The four Pro features, one line each with a blue checkmark (#913). Informational
+/// only: the feature screens belong to the Pro hub, which the paywall is not.
 struct PaywallFeatureList: View {
     /// Whether the voice-message line carries its second line, « visible from your
     /// keyboard ». Dropped on the end-of-trial screen, which needs the room.
@@ -49,24 +13,18 @@ struct PaywallFeatureList: View {
     /// The gap between two lines: tighter on an iPhone SE.
     var lineSpacing: CGFloat
 
-    /// Set while the user has Pro (the trial): a tap opens the feature's screen.
-    var open: ((ProFeature) -> Void)?
-
     var body: some View {
         VStack(alignment: .leading, spacing: lineSpacing) {
             ForEach(ProFeature.allCases, id: \.self) { feature in
-                if let open {
-                    Button { open(feature) } label: { row(feature, opens: true) }
-                        .buttonStyle(.plain)
-                } else {
-                    row(feature, opens: false)
-                }
+                row(feature)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+        // The spacers around it give way first (#913): the lines never truncate.
+        .fixedSize(horizontal: false, vertical: true)
     }
 
-    private func row(_ feature: ProFeature, opens: Bool) -> some View {
+    private func row(_ feature: ProFeature) -> some View {
         HStack(alignment: .firstTextBaseline, spacing: 12) {
             Image(systemName: "checkmark")
                 .font(.system(size: 15, weight: .bold))
@@ -96,17 +54,8 @@ struct PaywallFeatureList: View {
             .multilineTextAlignment(.leading)
 
             Spacer(minLength: 0)
-
-            if opens {
-                Image(systemName: "chevron.forward")
-                    .font(.footnote.weight(.semibold))
-                    .foregroundStyle(.tertiary)
-                    .accessibilityHidden(true)
-            }
         }
-        .contentShape(Rectangle())
         .accessibilityElement(children: .combine)
-        .accessibilityAddTraits(opens ? .isButton : [])
     }
 
     private func title(_ feature: ProFeature) -> LocalizedStringKey {
@@ -220,6 +169,8 @@ struct TrialRecapLine: View {
                 .font(.dmSans(.medium, size: 14, relativeTo: .subheadline))
                 .foregroundColor(.primary)
                 .multilineTextAlignment(.center)
+                // Never truncated by the spacers around it (#913): it wraps instead.
+                .fixedSize(horizontal: false, vertical: true)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 10)
                 .padding(.horizontal, 12)
@@ -258,6 +209,91 @@ struct TrialRecapLine: View {
         case .hours(let hours, let minutes):
             return String(localized: "\(hours) h \(minutes) min saved",
                           comment: "End-of-trial recap value: estimated time saved, hours then minutes (#913).")
+        }
+    }
+}
+
+/// Thank-you screen shown after a successful purchase or restore, over the paywall.
+/// Moved out of `PaywallView` unchanged (#913), so that type stays under its length
+/// limit.
+struct PurchaseSuccessView: View {
+    /// Continue: closes the paywall.
+    let continueAction: () -> Void
+
+    /// Drives the staged entrance animation of the thank-you screen elements.
+    @State private var successEntrance = false
+
+    /// Thank-you screen shown after a successful purchase or restore.
+    /// Staged entrance: the checkmark springs in first, then the texts rise
+    /// with small delays, then the Continue button. Each element animates on
+    /// the same trigger with its own delay, which reads as one choreography.
+    var body: some View {
+        VStack(spacing: 0) {
+            Spacer()
+
+            Image(systemName: "checkmark.circle.fill")
+                .font(.system(size: 72))
+                .foregroundStyle(.white, Color.dictusSuccess)
+                .shadow(color: Color.dictusSuccess.opacity(0.6), radius: 12)
+                .shadow(color: Color.dictusSuccess.opacity(0.3), radius: 28)
+                .scaleEffect(successEntrance ? 1 : 0.4)
+                .opacity(successEntrance ? 1 : 0)
+                .animation(.spring(response: 0.45, dampingFraction: 0.6), value: successEntrance)
+
+            Text("Welcome to Dictus Pro")
+                .font(.system(.title, design: .rounded, weight: .bold))
+                .foregroundStyle(
+                    LinearGradient(
+                        colors: [.dictusGradientStart, .dictusGradientEnd],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+                .padding(.top, 28)
+                .opacity(successEntrance ? 1 : 0)
+                .offset(y: successEntrance ? 0 : 12)
+                .animation(.easeOut(duration: 0.35).delay(0.2), value: successEntrance)
+
+            Text("All Pro features are now unlocked. Thank you for your support.")
+                .font(.dictusBody)
+                .foregroundColor(.secondary)
+                .multilineTextAlignment(.center)
+                .padding(.top, 12)
+                .padding(.horizontal, 24)
+                .opacity(successEntrance ? 1 : 0)
+                .offset(y: successEntrance ? 0 : 12)
+                .animation(.easeOut(duration: 0.35).delay(0.3), value: successEntrance)
+
+            Spacer()
+
+            Button {
+                continueAction()
+            } label: {
+                Text("Continue")
+                    .font(.dictusSubheading)
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Color.dictusAccent)
+                    .foregroundColor(.white)
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+            }
+            .buttonStyle(GlassPressStyle())
+            .padding(.horizontal, 16)
+            .padding(.bottom, 32)
+            .opacity(successEntrance ? 1 : 0)
+            .animation(.easeOut(duration: 0.35).delay(0.45), value: successEntrance)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color.dictusBackground.ignoresSafeArea())
+        .onAppear {
+            successEntrance = true
+            // UIKit generator instead of SwiftUI sensoryFeedback: the state
+            // change happens while the StoreKit payment sheet still holds
+            // scene focus, where sensoryFeedback is silently dropped. The
+            // delay lands the haptic as the checkmark spring settles.
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                HapticFeedback.purchaseSucceeded()
+            }
         }
     }
 }

@@ -3,25 +3,30 @@
 import SwiftUI
 import DictusCore
 
-/// The hub's brand hero (Subscriber, Lifetime and the in-between states): app-icon
-/// style tile (fixed dark gradient from the brand kit) with a blue glow, the gradient
-/// title and the tagline.
+/// The Dictus Pro brand hero: app-icon style tile (fixed dark gradient from the brand
+/// kit) with a blue glow, and the gradient title. The hub adds its tagline; the
+/// paywall, whose headline follows right under it, does not (#913).
 ///
-/// WHY the hub keeps it after #913: the sales states moved to a small wordmark in the
-/// bar to fit one screen, and on the hub the same small logo left the screen
-/// unbalanced (Pierre, on device). The hub has the room, so it keeps its hero.
+/// WHY both screens open on it: the small wordmark #913 first put in the bar left
+/// both the hub and the paywall unbalanced on device (Pierre). The large logo is the
+/// one Dictus Pro already had.
 /// Glow uses the double-shadow pattern (tight + wide) from SwipeBackOverlayView.
 struct ProHubHero: View {
+    var showsTagline = true
+
+    /// A smaller tile and title, for the paywall on an iPhone SE.
+    var compact = false
+
     var body: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: compact ? 6 : 12) {
             // The tile is the app icon itself (square, continuous corners, same
             // ratios); only the glow below belongs to this screen.
-            DictusIconTile(logoHeight: 48)
-                .shadow(color: Color.dictusAccent.opacity(0.7), radius: 10)
-                .shadow(color: Color.dictusAccent.opacity(0.4), radius: 20)
+            DictusIconTile(logoHeight: compact ? 26 : 48)
+                .shadow(color: Color.dictusAccent.opacity(0.7), radius: compact ? 7 : 10)
+                .shadow(color: Color.dictusAccent.opacity(0.4), radius: compact ? 14 : 20)
 
             Text("Dictus Pro")
-                .font(.system(.largeTitle, design: .rounded, weight: .bold))
+                .font(.system(compact ? .title2 : .largeTitle, design: .rounded, weight: .bold))
                 .foregroundStyle(
                     LinearGradient(
                         colors: [.dictusGradientStart, .dictusGradientEnd],
@@ -30,11 +35,13 @@ struct ProHubHero: View {
                     )
                 )
 
-            Text("Your voice, unlimited")
-                .font(.dictusBody)
-                .foregroundColor(.secondary)
+            if showsTagline {
+                Text("Your voice, unlimited")
+                    .font(.dictusBody)
+                    .foregroundColor(.secondary)
+            }
         }
-        .padding(.top, 8)
+        .padding(.top, compact ? 2 : 8)
         .accessibilityElement(children: .combine)
     }
 }
