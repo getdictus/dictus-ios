@@ -79,13 +79,16 @@ argent run screenshot --udid <udid> --scale 1 --out ~/dev/dictus-evidence/verify
 | `onboarding.checkFullAccess`, `onboarding.fullAccess.why`, `onboarding.fullAccess.close`, `onboarding.fullAccess.github` | Full Access explainer |
 | `onboarding.smartModePick.counter`, `onboarding.smartModePick.<mode>` | Smart Mode tiles: `structured`, `notes`, `message`, `summary`, `translate.fr/en/es/de` |
 | `onboarding.firstDictation.field`, `onboarding.firstDictation.banner` | Practice field |
-| `paywall.redeemCode` | « Saisir un code » under « Restaurer les achats » in the Pro hub (#787), only where plans are sold |
+| `paywall.redeemCode` | « Saisir un code », right of « Restaurer les achats » on the paywall's pinned footer (#787, #913) |
+| `paywall.close` / `proHub.close` | The cross floating top left of the paywall / of the Pro hub (#913: neither has a navigation bar). Two ids because the hub's cross stays in the tree under the offers cover |
+| `proHub.continueToOffers` | « Continuer avec Dictus Pro » under the trial hub's cards: opens the paywall in a full-screen cover (#913) |
+| `paywall.continueForFree` / `monthlyOffer.continueForFree` | « Continuer gratuitement » on the end-of-trial paywall / on the monthly offer sheet that closing it shows once (#724, #793) |
 | `proFeatureDemoLink`, `proFeatureScene.ok` | "Voir la démonstration" on a Pro screen, its OK |
 | `home.newDictation` | The round mic on Home that starts a dictation (label « Nouvelle dictée »; value: the mode the next dictation runs, when Smart Modes are offered; one VoiceOver action per choosable row, « Utiliser <mode> » / « Dictus Pro »; only with a model). Holding it opens the Smart Mode ring |
 | `home.smartModeRing` | The Smart Mode ring around the Home mic, while it is open (#489). `accessibilityHidden`, so **not** in `axe describe-ui`: prove it with a screenshot and the `smartModeRing*` log lines (features/smart-modes.md) |
 | `voiceNoteReaderClose`, `voiceNoteReaderDelete`, `voiceNoteReaderEmpty`, `voiceNoteReaderOpen`, `voiceNoteReaderInsert` | Keyboard voice-note reader (inside the keyboard, so not in the host's tree) |
 
-Labels that are stable and unique (French device): tabs `Accueil` / `Modèles` / `Réglages` (RadioButtons; reach them with `drive.sh tab`, since the Models screen also has a « Modèles » heading); `Dictus Pro, Pro actif`; the Pro hub rows `Mode intelligent, …`, `Historique, …`, `Vocabulaire, …`, `Messages vocaux, …`; `Langues prises en charge`; `Sons`, `Diagnostic`, `Debug Logs`, `Licences`, `Exporter les logs`; navigation back is the identifier `BackButton`, a modal close `xmark` or the label `Fermer`.
+Labels that are stable and unique (French device): tabs `Accueil` / `Modèles` / `Réglages` (RadioButtons; reach them with `drive.sh tab`, since the Models screen also has a « Modèles » heading); `Dictus Pro, Pro actif`; the Pro hub rows `Mode intelligent, …`, `Historique, …`, `Vocabulaire, …`, `Messages vocaux, …`; `Langues prises en charge`; `Sons`, `Diagnostic`, `Debug Logs`, `Licences`, `Exporter les logs`; navigation back is the identifier `BackButton`, a modal close `xmark` or the label `Fermer` (the paywall and the Pro hub: `paywall.close` / `proHub.close`, see above).
 
 **The Dictus keyboard is one opaque element**, `inputView`, in the host app's tree: none of its keys or buttons is listed. `drive.sh kbd <control>` presses them at measured offsets from that frame, and the App Group log is what proves the press landed.
 
