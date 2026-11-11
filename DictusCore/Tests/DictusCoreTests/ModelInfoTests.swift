@@ -247,6 +247,23 @@ final class ModelInfoTests: XCTestCase {
                        "openai_whisper-small")
     }
 
+    /// #921: Parakeet ran a 126 s dictation on an iPhone 13 (A15, 4 GB) in 14.5 s, so the
+    /// 4 GB A15 recommends it. The 4 GB A14 was not measured and keeps Small.
+    func testRecommendedIdentifierIsParakeetOnA15FourGBIPhone() {
+        for identifier in ["iPhone14,4", "iPhone14,5"] {
+            XCTAssertEqual(ModelInfo.recommendedIdentifier(for: makeCapabilities(ramGB: 4, model: identifier)),
+                           "parakeet-tdt-0.6b-v3", identifier)
+        }
+        for identifier in ["iPhone13,1", "iPhone13,2"] {
+            XCTAssertEqual(ModelInfo.recommendedIdentifier(for: makeCapabilities(ramGB: 4, model: identifier)),
+                           "openai_whisper-small", identifier)
+        }
+        for identifier in ["iPhone13,3", "iPhone14,2", "iPhone16,2"] {
+            XCTAssertEqual(ModelInfo.recommendedIdentifier(for: makeCapabilities(ramGB: 6, model: identifier)),
+                           "parakeet-tdt-0.6b-v3", identifier)
+        }
+    }
+
     // MARK: - Issue #362: A12/A13 catalog gating
 
     /// On an iPhone 11 only the Argmax-listed variants may be RUNNABLE. Before the
