@@ -300,3 +300,28 @@ struct PurchaseSuccessView: View {
         }
     }
 }
+
+/// A footer text line on the paywall (#913): one line that shrinks to fit at the
+/// usual text sizes, and wraps in full at the accessibility sizes, where shrinking
+/// would truncate a link App Review asks to be legible (guideline 3.1.2).
+struct FooterLineFit: ViewModifier {
+    let isAccessibilitySize: Bool
+
+    /// A footer link pair: side by side with a « · » between, or stacked at the
+    /// accessibility text sizes, where one line cannot hold both.
+    static func pairLayout(isAccessibilitySize: Bool) -> AnyLayout {
+        isAccessibilitySize ? AnyLayout(VStackLayout(spacing: 6)) : AnyLayout(HStackLayout(spacing: 6))
+    }
+
+    func body(content: Content) -> some View {
+        if isAccessibilitySize {
+            content
+                .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
+        } else {
+            content
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+        }
+    }
+}

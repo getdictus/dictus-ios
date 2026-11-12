@@ -26,6 +26,11 @@ struct PaywallView: View {
     @EnvironmentObject var proStatus: ProStatusManager
     @Environment(\.dismiss) private var dismiss
 
+    /// At the accessibility text sizes the footer's one-line texts wrap and its link
+    /// pairs stack instead of truncating (#913, App Review 3.1.2). Every smaller size
+    /// keeps the one-line, shrink-to-fit layout.
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+
     /// Set when the app opened this paywall because the trial is over (#593), with
     /// how it is framed (#837); nil for every entry point the user chose.
     var trialEnd: ProTrialEndPaywall?
@@ -398,6 +403,11 @@ struct PaywallView: View {
             // The smallest share: the plans sit close to the CTA they feed.
             Spacer(minLength: space(12, compact: 2))
                 .frame(maxHeight: 32)
+
+            if dynamicTypeSize.isAccessibilitySize {
+                secondaryActions
+                    .padding(.bottom, 16)
+            }
         }
         .padding(.horizontal, 20)
     }
@@ -423,6 +433,25 @@ struct PaywallView: View {
                 .animation(.easeInOut(duration: 0.2), value: selectedProductID)
                 .padding(.top, 8)
 
+            // At the accessibility sizes these move to the end of the scrolling
+            // content (`secondaryActions`): with them the footer outgrew an iPhone
+            // SE at AX5 and was squeezed into overlapping, truncated lines. The CTA
+            // and its price stay pinned together.
+            if !dynamicTypeSize.isAccessibilitySize {
+                secondaryActions
+            }
+        }
+        .padding(.horizontal, 20)
+        .padding(.top, space(12, compact: 8))
+        .padding(.bottom, 4)
+        .background(Color.dictusBackground.ignoresSafeArea())
+    }
+
+    /// The way out on the end-of-trial screen, Restore · Redeem a code, and Terms ·
+    /// Privacy: under the CTA in the pinned footer, or at the end of the scrolling
+    /// content at the accessibility text sizes, each line in full.
+    private var secondaryActions: some View {
+        VStack(spacing: 0) {
             if framing == .trialEnded {
                 continueForFreeButton
                     .padding(.top, space(4, compact: 0))
@@ -434,10 +463,6 @@ struct PaywallView: View {
             legalLinksRow
                 .padding(.top, space(6, compact: 2))
         }
-        .padding(.horizontal, 20)
-        .padding(.top, space(12, compact: 8))
-        .padding(.bottom, 4)
-        .background(Color.dictusBackground.ignoresSafeArea())
     }
 
     /// Subscriber, Lifetime and the in-between states: no sales block, the hub as
@@ -843,8 +868,11 @@ struct PaywallView: View {
                 } else {
                     ctaTitle
                         .font(.dmSans(.semiBold, size: 17, relativeTo: .headline))
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.8)
+                        .multilineTextAlignment(.center)
+                        .lineLimit(dynamicTypeSize.isAccessibilitySize ? nil : 1)
+                        .minimumScaleFactor(dynamicTypeSize.isAccessibilitySize ? 1 : 0.8)
+                        .fixedSize(horizontal: false, vertical: dynamicTypeSize.isAccessibilitySize)
+                        .padding(.vertical, dynamicTypeSize.isAccessibilitySize ? 10 : 0)
                 }
             }
             .frame(maxWidth: .infinity, minHeight: space(52, compact: 48))
@@ -994,6 +1022,8 @@ struct PaywallView: View {
             Text("Continue for free")
                 .font(.dmSans(.semiBold, size: 16, relativeTo: .callout))
                 .foregroundColor(.dictusAccent)
+                .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: dynamicTypeSize.isAccessibilitySize)
                 .frame(maxWidth: .infinity, minHeight: 36)
                 .contentShape(Rectangle())
         }
@@ -1022,15 +1052,17 @@ struct PaywallView: View {
     /// to subscribers, and during the reverse trial (#593) a returning buyer is
     /// exactly who needs it.
     private var restoreAndRedeemRow: some View {
-        HStack(spacing: 6) {
+        FooterLineFit.pairLayout(isAccessibilitySize: dynamicTypeSize.isAccessibilitySize).callAsFunction {
             Button("Restore purchases") {
                 Task { await subscriptionManager.restorePurchases() }
             }
             .accessibilityLabel("Restore previous purchases")
 
-            Text(verbatim: "·")
-                .foregroundColor(.secondary)
-                .accessibilityHidden(true)
+            if !dynamicTypeSize.isAccessibilitySize {
+                Text(verbatim: "·")
+                    .foregroundColor(.secondary)
+                    .accessibilityHidden(true)
+            }
 
             // Apple's own offer code sheet (#787): the codes are made in App Store
             // Connect, so a gifted code grants the same Pro product the plans above
@@ -1044,25 +1076,25 @@ struct PaywallView: View {
         .buttonStyle(.plain)
         .font(.dmSans(.medium, size: 14, relativeTo: .footnote))
         .foregroundColor(.dictusAccent)
-        .lineLimit(1)
-        .minimumScaleFactor(0.7)
+        .modifier(FooterLineFit(isAccessibilitySize: dynamicTypeSize.isAccessibilitySize))
         .frame(minHeight: 28)
     }
 
     /// « Conditions d’utilisation · Confidentialité » (guideline 3.1.2).
     private var legalLinksRow: some View {
-        HStack(spacing: 6) {
+        FooterLineFit.pairLayout(isAccessibilitySize: dynamicTypeSize.isAccessibilitySize).callAsFunction {
             Link("Terms of Service", destination: Self.termsURL)
-            Text(verbatim: "·")
-                .accessibilityHidden(true)
+            if !dynamicTypeSize.isAccessibilitySize {
+                Text(verbatim: "·")
+                    .accessibilityHidden(true)
+            }
             Link("Privacy", destination: Self.privacyURL)
                 .accessibilityLabel("Privacy Policy")
         }
         .font(.dmSans(.regular, size: 12, relativeTo: .caption))
         .foregroundColor(.secondary)
         .tint(.secondary)
-        .lineLimit(1)
-        .minimumScaleFactor(0.7)
+        .modifier(FooterLineFit(isAccessibilitySize: dynamicTypeSize.isAccessibilitySize))
     }
 
     // MARK: - Error Handling
