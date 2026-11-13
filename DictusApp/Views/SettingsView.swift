@@ -154,6 +154,10 @@ struct SettingsView: View {
     /// Confirmation dialog for emptying the transcription history (#70).
     @State private var showClearHistoryConfirmation = false
 
+    /// The feedback sheet (#565). Its content lives in `FeedbackComposer` so a
+    /// closed sheet keeps what the user typed.
+    @State private var showFeedback = false
+
     /// Drives the Dictus Pro hub's cover, opened by the one Dictus Pro row (#216).
     @State private var showPaywall = false
 
@@ -510,6 +514,17 @@ struct SettingsView: View {
                         showPolishDebug = true
                     }
 
+                Button {
+                    showFeedback = true
+                } label: {
+                    HStack {
+                        Text("Send feedback")
+                        Spacer()
+                        listDisclosureIndicator
+                    }
+                }
+                .accessibilityIdentifier("settings.sendFeedback")
+
                 // WHY Button instead of Link:
                 // Link doesn't respond to ButtonStyle and gets no press highlight
                 // in a List with .scrollContentBackground(.hidden). Using Button
@@ -565,6 +580,9 @@ struct SettingsView: View {
             PolishDebugView()
         }
         .paywallCover(isPresented: $showPaywall)
+        .sheet(isPresented: $showFeedback) {
+            FeedbackView()
+        }
         .sheet(isPresented: Binding(
             get: { exportURL != nil },
             set: { isPresented in
@@ -756,7 +774,7 @@ struct SettingsView: View {
     }
 }
 
-private struct ShareSheet: UIViewControllerRepresentable {
+struct ShareSheet: UIViewControllerRepresentable {
     let items: [Any]
 
     func makeUIViewController(context: Context) -> UIActivityViewController {
