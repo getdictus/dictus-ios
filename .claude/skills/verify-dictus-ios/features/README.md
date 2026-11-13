@@ -95,7 +95,7 @@ Every ID in this map, in one table: the 18 features first, then their 118 sub-fe
 | `history.search` | Pro | non |
 | `history.delete` | Pro | non |
 | `history.detail` | Pro | non |
-| `history.clear` | Pro | non |
+| `history.clear` | Gratuit (journal), Pro (history) | non |
 | `history.toggle` | Pro | non |
 | `history.home-entry` | Pro | non |
 | `vocabulary.add` | Pro | non |
