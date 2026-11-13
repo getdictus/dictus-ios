@@ -232,8 +232,10 @@ class TranscriptionService {
         )
 
         do {
+            // Issue #932, as in WhisperKitEngine: no room tail for Whisper to fill.
+            let spokenSamples = TrailingSilence.trimmed(audioSamples)
             let results: [TranscriptionResult] = try await whisperKit.transcribe(
-                audioArray: audioSamples,
+                audioArray: spokenSamples,
                 decodeOptions: options
             )
 
@@ -246,11 +248,12 @@ class TranscriptionService {
             let totalCharCount = results.reduce(0) { $0 + $1.text.count }
             let lastSegmentEnd = results.flatMap { $0.segments }.map { $0.end }.max() ?? 0
             let audioDurationSec = Float(audioSamples.count) / 16_000.0
+            let sentSec = Float(spokenSamples.count) / 16_000.0
             PersistentLog.log(.diagnosticProbe(
                 component: "TranscriptionService",
                 instanceID: "transcribeLegacy",
                 action: "segmentsReturned",
-                details: "results=\(results.count) segments=\(totalSegments) chars=\(totalCharCount) audioSec=\(String(format: "%.2f", audioDurationSec)) lastSegmentEndSec=\(String(format: "%.2f", lastSegmentEnd))"
+                details: "results=\(results.count) segments=\(totalSegments) chars=\(totalCharCount) audioSec=\(String(format: "%.2f", audioDurationSec)) sentSec=\(String(format: "%.2f", sentSec)) lastSegmentEndSec=\(String(format: "%.2f", lastSegmentEnd))"
             ))
 
             // Join all segment texts into a single string.
