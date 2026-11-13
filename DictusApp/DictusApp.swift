@@ -444,6 +444,11 @@ struct DictusApp: App {
                         // #620's cold path: a voice note shared while the app was not
                         // running starts now, with the list on screen.
                         VoiceNoteProcessor.shared.appBecameActive()
+                        // Drop polish journal entries past 7 days (#946). The keyboard
+                        // writes most of them and only ever appends, so without this they
+                        // stay until the app happens to record a polish event itself.
+                        // Off the main actor: the file coordinator blocks its thread.
+                        Task.detached(priority: .utility) { PolishEventStore.pruneOldEntries() }
                     case .inactive:
                         PersistentLog.log(.appWillResignActive)
                     case .background:
