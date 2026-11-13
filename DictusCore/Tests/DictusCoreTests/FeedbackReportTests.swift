@@ -15,6 +15,7 @@ final class FeedbackReportTests: XCTestCase {
         draft.name = name
         draft.email = email
         draft.message = message
+        draft.attachesLog = true
         return draft
     }
 
@@ -23,16 +24,23 @@ final class FeedbackReportTests: XCTestCase {
         return try XCTUnwrap(JSONSerialization.jsonObject(with: body) as? [String: Any])
     }
 
-    func testTheLogIsOnByDefaultForABugOnly() {
+    func testTheLogIsOffByDefaultForEveryKindAndTheChoiceSurvivesAKindChange() {
         var draft = FeedbackDraft()
-        XCTAssertTrue(draft.attachesLog)
-        draft.kind = .idea
         XCTAssertFalse(draft.attachesLog)
+        for kind in FeedbackKind.allCases {
+            draft.kind = kind
+            XCTAssertFalse(draft.attachesLog, "\(kind)")
+        }
         draft.attachesLog = true
-        draft.kind = .other
-        XCTAssertFalse(draft.attachesLog)
-        draft.kind = .bug
+        draft.kind = .idea
         XCTAssertTrue(draft.attachesLog)
+    }
+
+    func testAFreshDraftSendsNoLog() throws {
+        var fresh = FeedbackDraft()
+        fresh.name = "Pierre"
+        fresh.message = "Hello"
+        XCTAssertNil(try json(FeedbackPayload(draft: fresh, device: device, log: "line\n"))["log"])
     }
 
     func testTheBodyCarriesExactlyTheContractFields() throws {
@@ -47,7 +55,7 @@ final class FeedbackReportTests: XCTestCase {
 
     func testAbsentEmailAndDetachedLogAreLeftOut() throws {
         var idea = draft(.idea)
-        XCTAssertFalse(idea.attachesLog)
+        idea.attachesLog = false
         let object = try json(FeedbackPayload(draft: idea, device: device, log: "line\n"))
         XCTAssertNil(object["email"])
         XCTAssertNil(object["log"])

@@ -6,9 +6,6 @@ import Foundation
 /// The three kinds the form offers. The raw values are the contract's `type`.
 public enum FeedbackKind: String, CaseIterable, Sendable {
     case bug, idea, other
-
-    /// A bug report is what the log is for; an idea rarely needs one.
-    public var attachesLogByDefault: Bool { self == .bug }
 }
 
 /// Why the form cannot be sent yet. Each one matches a server-side `400`, so a
@@ -20,13 +17,13 @@ public enum FeedbackDraftProblem: Hashable, Sendable {
 /// What the user typed, kept as typed so nothing is lost between edits.
 /// The cleaned values the server sees are derived on demand.
 public struct FeedbackDraft: Equatable, Sendable {
-    public var kind: FeedbackKind = .bug {
-        didSet { if kind != oldValue { attachesLog = kind.attachesLogByDefault } }
-    }
+    public var kind: FeedbackKind = .bug
     public var name = ""
     public var email = ""
     public var message = ""
-    public var attachesLog = FeedbackKind.bug.attachesLogByDefault
+    /// Off for every kind until the user turns it on (#939 security review):
+    /// the log leaves the device only by an explicit choice.
+    public var attachesLog = false
 
     public init() {}
 
