@@ -1,6 +1,6 @@
 # Politique de confidentialité — Dictus
 
-*Dernière mise à jour : 17 mars 2026*
+*Dernière mise à jour : 13 novembre 2026*
 
 ## Résumé
 
@@ -26,8 +26,8 @@ Les seules données enregistrées sur votre appareil sont :
 - **Préférences utilisateur** — langue, modèle sélectionné, réglages (via App Group UserDefaults)
 - **Fichiers de modèles** — modèles de reconnaissance vocale téléchargés (WhisperKit CoreML)
 - **Journaux de débogage** — logs techniques pour diagnostiquer les problèmes (aucun contenu de transcription). Ils nomment l'application depuis laquelle une dictée a été lancée — par exemple Messages ou WhatsApp — jamais ce qui y a été dicté
-- **Journal de diagnostic** — le texte dicté (brut et corrigé) des 7 derniers jours, conservé uniquement sur l'appareil pour diagnostiquer la qualité de la transcription. Il est supprimé automatiquement après 7 jours, visible et exportable uniquement depuis un écran de diagnostic masqué, et jamais envoyé
-- **Historique de dictée** (Dictus Pro) — vos 200 dernières transcriptions, texte uniquement, jamais l'audio. Rien n'est enregistré sans Dictus Pro actif (essai, abonnement ou achat à vie), et vous pouvez l'effacer à tout moment depuis Réglages > Transcription > Effacer l'historique, même après la fin de Dictus Pro
+- **Journal de diagnostic** — pour chaque dictée, avec ou sans Dictus Pro : le texte produit par la reconnaissance vocale, le texte après votre vocabulaire personnalisé, le texte corrigé, et des mesures techniques (langue, modèle, durées de traitement, résultat). Il sert à diagnostiquer la qualité de la transcription. Il est enregistré dans le conteneur partagé de l'app (App Group), sur votre appareil uniquement. L'app Dictus en efface les entrées de plus de 7 jours la première fois qu'elle y écrit après son lancement, ou quand l'écran de diagnostic s'ouvre ; cet écran et son export ne montrent jamais que les 7 derniers jours. Vous pouvez le vider à tout moment depuis Réglages > Transcription > Effacer l'historique, qui efface aussi l'historique de dictée, ou depuis l'écran de diagnostic. Il n'est visible et exportable que depuis cet écran masqué, et n'est jamais envoyé
+- **Historique de dictée** (Dictus Pro) — vos 200 dernières transcriptions, texte uniquement, jamais l'audio. Rien n'est enregistré sans Dictus Pro actif (essai, abonnement ou achat à vie), et vous pouvez l'effacer à tout moment depuis Réglages > Transcription > Effacer l'historique, même après la fin de Dictus Pro. Ce bouton vide aussi le journal de diagnostic
 
 Ces données ne quittent jamais votre appareil sauf si vous choisissez explicitement d'exporter les logs de débogage ou le journal de diagnostic.
 
@@ -55,7 +55,7 @@ Pour toute question relative à la confidentialité :
 
 # Privacy Policy — Dictus
 
-*Last updated: March 17, 2026*
+*Last updated: November 13, 2026*
 
 ## Summary
 
@@ -81,8 +81,8 @@ The only data saved on your device:
 - **User preferences** — language, selected model, settings (via App Group UserDefaults)
 - **Model files** — downloaded speech recognition models (WhisperKit CoreML)
 - **Debug logs** — technical logs for diagnosing issues (no transcription content). They name the app a dictation was started from — Messages or WhatsApp, for instance — never what was dictated into it
-- **Diagnostic journal** — the dictated text (raw and corrected) of the last 7 days, kept only on the device to diagnose transcription quality. It is deleted automatically after 7 days, visible and exportable only from a hidden diagnostic screen, and never sent
-- **Dictation history** (Dictus Pro) — your last 200 transcriptions, text only, never the audio. Nothing is stored without active Dictus Pro (trial, subscription or lifetime purchase), and you can erase it at any time from Settings > Transcription > Clear history, including after Dictus Pro ends
+- **Diagnostic journal** — for every dictation, with or without Dictus Pro: the text produced by speech recognition, the text after your custom vocabulary, the polished text, and technical measurements (language, model, processing times, outcome). It is used to diagnose transcription quality. It is stored in the app's shared container (App Group), on your device only. The Dictus app removes entries older than 7 days the first time it writes to the journal after launching, or when the diagnostic screen opens; that screen and its export only ever show the last 7 days. You can empty it at any time from Settings > Transcription > Clear history, which also erases the dictation history, or from the diagnostic screen. It is visible and exportable only from that hidden screen, and never sent
+- **Dictation history** (Dictus Pro) — your last 200 transcriptions, text only, never the audio. Nothing is stored without active Dictus Pro (trial, subscription or lifetime purchase), and you can erase it at any time from Settings > Transcription > Clear history, including after Dictus Pro ends. That button empties the diagnostic journal too
 
 This data never leaves your device unless you explicitly choose to export the debug logs or the diagnostic journal.
 
