@@ -393,12 +393,13 @@ final class DictusKeyboardBridge: NSObject,
     /// NOTE: Haptic and click fire in GiellaKeyboardView.touchesBegan() for ALL keys
     /// on touchDown, so neither is emitted here.
     private func handleInputKey(_ character: String) {
+        revertCorrectionInsideAddress(before: character)
         learnWordMovedPast()
 
         // A comma, a full stop and the like end the word before them (#872): it is
         // corrected there, without a space, and the mark is inserted below.
         if AutocorrectTrigger.commitsWord(character) {
-            autocorrectBeforeCursor(trailing: "")
+            autocorrectBeforeCursor(trailing: "", committedBy: character)
         }
 
         // Insert the character. When on shifted/capslock page, the key definition
@@ -613,7 +614,7 @@ final class DictusKeyboardBridge: NSObject,
             mirrorSync.noteSpaceWhileSuspect()
         }
 
-        if autocorrectBeforeCursor(trailing: " ") {
+        if autocorrectBeforeCursor(trailing: " ", committedBy: " ") {
             return
         }
 
@@ -664,7 +665,7 @@ final class DictusKeyboardBridge: NSObject,
         learnWordMovedPast()
         suggestionState?.pendingUndo = nil
         // Return ends the word before it, like a punctuation mark (#872).
-        autocorrectBeforeCursor(trailing: "")
+        autocorrectBeforeCursor(trailing: "", committedBy: "\n")
         let mirrorBefore = mirrorLength()
         controller?.textDocumentProxy.insertText("\n")
         observeMirror(before: mirrorBefore, inserted: 1)
@@ -895,9 +896,10 @@ final class DictusKeyboardBridge: NSObject,
     /// correction was written, followed by `trailing`.
     ///
     /// `trailing` is " " for the space bar. It is empty for a punctuation mark or a
-    /// return (#872), whose caller inserts its own character afterwards.
+    /// return (#872), whose caller inserts its own character afterwards. `key` is
+    /// the key that commits the word.
     @discardableResult
-    private func autocorrectBeforeCursor(trailing: String) -> Bool {
+    private func autocorrectBeforeCursor(trailing: String, committedBy key: String) -> Bool {
         guard let state = suggestionState, let memory = rejectionMemory,
               let context = controller?.textDocumentProxy.documentContextBeforeInput,
               let (prefix, freshWord) = AutocorrectRejectionMemory.wordAtCursor(context: context)
@@ -907,6 +909,7 @@ final class DictusKeyboardBridge: NSObject,
         // has its own branch for them; a punctuation mark just inserts itself.
         guard !freshWord.unicodeScalars.contains(where: { CharacterSet.decimalDigits.contains($0) })
         else { return false }
+        guard !endsInAddress(context, word: freshWord, committedBy: key) else { return false }
 
         // Extract previous word for n-gram context boost
         let previousWord: String? = {
@@ -1255,5 +1258,37 @@ final class DictusKeyboardBridge: NSObject,
         default: // .none
             break
         }
+    }
+}
+
+// MARK: - Addresses (#919)
+
+extension DictusKeyboardBridge {
+
+    /// Whether the word before the cursor, committed by `key`, is part of an e-mail
+    /// address or a URL, which is never corrected whatever the field. The key counts:
+    /// `www` followed by `.` is already an address.
+    fileprivate func endsInAddress(_ context: String, word: String, committedBy key: String) -> Bool {
+        guard AddressLikeToken.atCursor(context, followedBy: key) else { return false }
+        #if DEBUG
+        AutocorrectDebugLog.autocorrectSkipped(word: word, reason: "address")
+        #endif
+        return true
+    }
+
+    /// Puts back the word a punctuation mark just corrected when `character`, glued
+    /// after the mark, shows the mark sat inside an address (#919): `helene.` became
+    /// `Hélène.`, and the `b` restores `helene.` before it is written.
+    fileprivate func revertCorrectionInsideAddress(before character: String) {
+        guard let undo = suggestionState?.pendingUndo, !undo.insertedSpace,
+              AddressCorrectionRevert.apply(
+                  editor: documentEditor,
+                  original: undo.originalWord,
+                  corrected: undo.correctedWord,
+                  next: character,
+                  mirror: mirrorSync
+              )
+        else { return }
+        suggestionState?.pendingUndo = nil
     }
 }
