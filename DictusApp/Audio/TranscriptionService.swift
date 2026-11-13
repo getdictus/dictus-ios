@@ -273,8 +273,8 @@ class TranscriptionService {
             PersistentLog.log(.transcriptionFailed(error: error.diagnosticDescription))
             throw error
         } catch {
-            PersistentLog.log(.transcriptionFailed(error: error.localizedDescription))
-            throw TranscriptionError.transcriptionFailed(error.localizedDescription)
+            PersistentLog.log(.transcriptionFailed(error: LoggedError.domainAndCode(error)))
+            throw TranscriptionError.transcriptionFailed(LoggedError.domainAndCode(error))
         }
     }
 

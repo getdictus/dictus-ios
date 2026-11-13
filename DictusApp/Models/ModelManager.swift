@@ -1264,7 +1264,7 @@ class ModelManager: ObservableObject {
                     component: route.repairLogComponent,
                     instanceID: identifier,
                     action: "networkFetchFailed",
-                    details: "missing=\(route.missingEntries().joined(separator: ",")) error=\(error.localizedDescription)"
+                    details: "missing=\(route.missingEntries().joined(separator: ",")) error=\(LoggedError.domainAndCode(error))"
                 ))
             }
             throw error
@@ -1468,7 +1468,7 @@ class ModelManager: ObservableObject {
         case .success:
             return "success"
         case .failure(let error):
-            return "failure:\(error.localizedDescription)"
+            return "failure:\(LoggedError.domainAndCode(error))"
         }
     }
 
