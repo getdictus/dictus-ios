@@ -22,6 +22,29 @@ public enum FeedbackFailure: Equatable, Sendable {
     }
 }
 
+/// When Retry may be tapped again after a failure. A `429` holds it for the
+/// server's `Retry-After`, or a minute without one; the other retryable
+/// failures allow it at once, and a rejected request never.
+public struct FeedbackRetryWindow: Equatable, Sendable {
+    public static let defaultRateLimitWait: TimeInterval = 60
+
+    public let opensAt: Date
+
+    public init?(failure: FeedbackFailure, failedAt: Date) {
+        switch failure {
+        case .rejected:
+            return nil
+        case .rateLimited(let seconds):
+            let wait = seconds.map(TimeInterval.init).flatMap { $0 > 0 ? $0 : nil } ?? Self.defaultRateLimitWait
+            opensAt = failedAt.addingTimeInterval(wait)
+        case .unreachable, .deliveryFailed, .unavailable:
+            opensAt = failedAt
+        }
+    }
+
+    public func isOpen(at date: Date) -> Bool { date >= opensAt }
+}
+
 public enum FeedbackOutcome: Equatable, Sendable {
     case delivered
     case failed(FeedbackFailure)

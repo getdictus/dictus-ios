@@ -12,7 +12,6 @@ import SwiftUI
 struct FeedbackView: View {
     @ObservedObject private var composer = FeedbackComposer.shared
     @Environment(\.dismiss) private var dismiss
-    @State private var isSharing = false
 
     var body: some View {
         NavigationStack {
@@ -46,10 +45,16 @@ struct FeedbackView: View {
         }
         .task { await composer.sheetDidAppear() }
         .onDisappear {
+            composer.shareDidEnd()
             if composer.phase == .sent { composer.startOver() }
         }
-        .sheet(isPresented: $isSharing) {
-            ShareSheet(items: composer.shareItems())
+        .sheet(isPresented: Binding(
+            get: { composer.shareItems != nil },
+            set: { if !$0 { composer.shareDidEnd() } }
+        ), onDismiss: composer.shareDidEnd) {
+            if let items = composer.shareItems {
+                ShareSheet(items: items)
+            }
         }
     }
 
@@ -171,7 +176,7 @@ struct FeedbackView: View {
                     .disabled(!composer.canSend)
                     .accessibilityIdentifier("feedback.retry")
             }
-            Button("Share instead") { isSharing = true }
+            Button("Share instead") { composer.prepareShare() }
                 .accessibilityIdentifier("feedback.share")
         }
     }

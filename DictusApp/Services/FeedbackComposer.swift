@@ -20,6 +20,13 @@ final class FeedbackComposer: ObservableObject {
     /// The `PersistentLog.exportContent()` text "See what will be sent" shows.
     /// Send attaches this same string, never a fresher read.
     @Published private(set) var logSnapshot: String?
+    /// Set while a `429` holds Retry back; cleared when the wait is over, which
+    /// re-enables Retry and Send on its own.
+    @Published private(set) var retryWindow: FeedbackRetryWindow?
+    /// The share sheet's items, prepared once per presentation so its log file
+    /// can be deleted when it closes.
+    @Published private(set) var shareItems: [Any]?
+    private var shareDirectory: URL?
 
     let device = FeedbackDeviceInfo.current
 
@@ -38,7 +45,7 @@ final class FeedbackComposer: ObservableObject {
     /// Send waits for the log read, so a report never leaves without the log
     /// the user chose to attach.
     var canSend: Bool {
-        phase != .sending && draft.problems.isEmpty && (!draft.attachesLog || logSnapshot != nil)
+        phase != .sending && retryWindow == nil && draft.problems.isEmpty && (!draft.attachesLog || logSnapshot != nil)
     }
 
     func send() async {
@@ -51,6 +58,7 @@ final class FeedbackComposer: ObservableObject {
             phase = .sent
         case .failed(let failure):
             phase = .failed(failure)
+            holdRetry(after: failure)
         }
         PersistentLog.log(.diagnosticProbe(component: "feedback", instanceID: payload.type,
                                            action: outcome == .delivered ? "delivered" : "failed",
@@ -68,20 +76,48 @@ final class FeedbackComposer: ObservableObject {
         phase = .editing
     }
 
+    /// Keeps Retry and Send disabled until the window opens, then publishes the change.
+    private func holdRetry(after failure: FeedbackFailure) {
+        guard let window = FeedbackRetryWindow(failure: failure, failedAt: Date()), !window.isOpen(at: Date()) else {
+            retryWindow = nil
+            return
+        }
+        retryWindow = window
+        Task { [weak self] in
+            try? await Task.sleep(for: .seconds(window.opensAt.timeIntervalSinceNow))
+            guard let self, self.retryWindow == window else { return }
+            self.retryWindow = nil
+        }
+    }
+
     /// The report as text, plus the log as a file when it is attached, for the
-    /// share sheet offered when sending fails.
-    func shareItems() -> [Any] {
+    /// share sheet offered when sending fails. The file sits in a folder of its
+    /// own under the temporary directory, removed by `shareDidEnd()`.
+    func prepareShare() {
+        shareDidEnd()
         guard let payload = FeedbackPayload(draft: draft, device: device, log: logSnapshot) else {
-            return [draft.message]
+            shareItems = [draft.message]
+            return
         }
         var items: [Any] = [payload.shareText]
         if let log = payload.log {
-            let url = FileManager.default.temporaryDirectory.appendingPathComponent("dictus-logs.txt")
-            if (try? log.write(to: url, atomically: true, encoding: .utf8)) != nil {
+            let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+            let url = directory.appendingPathComponent("dictus-logs.txt")
+            if (try? FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)) != nil,
+               (try? log.write(to: url, atomically: true, encoding: .utf8)) != nil {
                 items.append(url)
+                shareDirectory = directory
             }
         }
-        return items
+        shareItems = items
+    }
+
+    /// Deletes the shared log file. Called when the share sheet or the feedback
+    /// sheet closes; a second call does nothing.
+    func shareDidEnd() {
+        if let shareDirectory { try? FileManager.default.removeItem(at: shareDirectory) }
+        shareDirectory = nil
+        shareItems = nil
     }
 
     private static func logName(_ outcome: FeedbackOutcome) -> String {

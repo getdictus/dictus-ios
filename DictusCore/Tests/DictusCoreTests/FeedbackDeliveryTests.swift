@@ -35,6 +35,28 @@ final class FeedbackDeliveryTests: XCTestCase {
         }
     }
 
+    func testRetryWaitsForRetryAfterOrAMinuteAfterA429() throws {
+        let failedAt = Date(timeIntervalSince1970: 1_000)
+        let withHeader = try XCTUnwrap(FeedbackRetryWindow(failure: .rateLimited(retryAfterSeconds: 600), failedAt: failedAt))
+        XCTAssertFalse(withHeader.isOpen(at: failedAt))
+        XCTAssertFalse(withHeader.isOpen(at: failedAt.addingTimeInterval(599.9)))
+        XCTAssertTrue(withHeader.isOpen(at: failedAt.addingTimeInterval(600)))
+
+        for missing in [nil, 0, -5] as [Int?] {
+            let window = try XCTUnwrap(FeedbackRetryWindow(failure: .rateLimited(retryAfterSeconds: missing),
+                                                           failedAt: failedAt))
+            XCTAssertEqual(window.opensAt, failedAt.addingTimeInterval(60), "\(String(describing: missing))")
+        }
+    }
+
+    func testOtherRetryableFailuresOpenRetryAtOnceAndARejectionNever() throws {
+        let failedAt = Date(timeIntervalSince1970: 1_000)
+        for failure in [FeedbackFailure.unreachable, .deliveryFailed, .unavailable] {
+            XCTAssertTrue(try XCTUnwrap(FeedbackRetryWindow(failure: failure, failedAt: failedAt)).isOpen(at: failedAt))
+        }
+        XCTAssertNil(FeedbackRetryWindow(failure: .rejected(status: 400), failedAt: failedAt))
+    }
+
     func testTheClientPostsJSONAndReadsTheAnswer() async throws {
         let payload = try XCTUnwrap(Self.payload())
         StubProtocol.reply = (429, ["Retry-After": "42"], Data())
@@ -66,6 +88,7 @@ final class FeedbackDeliveryTests: XCTestCase {
         var draft = FeedbackDraft()
         draft.name = "Pierre"
         draft.message = "Hello"
+        draft.attachesLog = true
         let device = FeedbackDeviceInfo(appVersion: "2.0.1", build: "41", gitRevision: "abc", iosVersion: "26.5",
                                         deviceModel: "iPhone16,1", locale: "fr_FR")
         return FeedbackPayload(draft: draft, device: device, log: "log line\n")
