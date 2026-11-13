@@ -180,7 +180,7 @@ struct DebugLogView: View {
             Text(entry.params.isEmpty ? entry.eventName : "\(entry.eventName) \(entry.params)")
                 .font(.system(.caption2, design: .monospaced))
                 .foregroundColor(.primary)
-                .lineLimit(3)
+                .lineLimit(snapshot == nil ? 3 : nil)
         }
         .padding(.vertical, 2)
     }
