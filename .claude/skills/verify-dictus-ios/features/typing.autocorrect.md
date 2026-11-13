@@ -9,7 +9,7 @@
 
 - `typing.suggestions`: Suggestion bar with predictions and corrections.
 - `typing.autocorrect-on-space`: A mistyped word is corrected when space is pressed.
-- `typing.autocorrect-on-punctuation`: A mistyped word is also corrected by `, . ; : ! ?` and Return, never by `'` or `-` (#872).
+- `typing.autocorrect-on-punctuation`: A mistyped word is also corrected by `, . ; : ! ?` and Return, never by `'` or `-` (#872). Never inside an e-mail address or a URL, whatever the field (#919): a token holding `@` or `://`, starting with `www.`, or with a `.` `:` `/` `_` glued to a letter, a digit or `/ _ @ + -` is left alone. The first segment, corrected at its `.` or `:`, is put back by the next key glued to the mark (`helene.` → `gelée.`, then `b` → `helene.b`).
 - `typing.undo-correction`: The suggestion bar offers to undo the last correction.
 - `typing.refused-correction`: Erasing into a correction, Undo, or tapping the quoted typed word refuses it: the word committed at that place next is kept and learned (#872).
 - `typing.auto-full-stop`: Double space inserts a full stop.
@@ -50,9 +50,11 @@ The proof is two facts together: the field's value becomes `Bonjour ` and the lo
 
 Measured 2026-10-30 (iPhone 17 Pro, iOS 27.0, build `fef07756`), keys tapped by coordinate in Messages: `la cuisinr,` → `La cuisine,` and `le bureai` + Return → `le bureau`, each followed by the undo chip; `la montagnr` → `montagne`, the word erased and retyped, logs `REFUSED corrected="montagne" by=backspace` then `AUTOCORRECT-SKIP word="montagnr" reason=refused-here`. The punctuation keys are on the `123` page.
 
+Measured 2026-11-13 (iPhone 17, iOS 26.5, builds `fd92aaa0` and `bbaa7b36`, #919), in the Notes field of a Rappels item (tap under the title, « Ajouter une note »), every key tapped on the Dictus keys: `contact helene.bethmont@gmail.com site https://github.com/x et www.getdictus.com puis bonjoru. ` gives `Contact gelée.bethmont@émail.com site héros://github.com/x et wax.getdictus.com puis bonjour. ` before the fix and the text as typed, `bonjour.` aside, after it. The after log carries `ADDRESS-REVERT orig="helene" undone="gelée"`, `ADDRESS-REVERT orig="https" undone="héros"` and `AUTOCORRECT-SKIP word=… reason=address` for every later segment. `drive.sh type` has no punctuation; the keys were tapped at these points (iPhone 17, `inputView` at y = 548): letters rows y = 610 / 665 / 719 on the 40.2 pt pitch of `drive.sh`, `123` / `ABC` (25, 772), space (210, 772); on the `123` page `-` (20, 664), `/` (60, 664), `:` (100, 664), `@` (340, 664), `.` (104, 718), delete (371, 718). The keyboard stays on `123` after a mark, and goes back to letters by itself after `. ` and space.
+
 ## Gotchas
 
-- Safari's address bar turns suggestions off: typing there shows no suggestion bar. Test in Rappels.
+- Safari's address bar turns suggestions off: typing there shows no suggestion bar. Test in Rappels. A slimmed iOS 26.5 device has no Notes app (`simctl launch com.apple.mobilenotes` fails), and on 2026-11-13 Messages opened a conversation without drawing its compose box.
 - Reset the user dictionary first (`typing.learned-words`): a learned word silently changes what autocorrect does.
 - `axe type` does not exercise autocorrect: it sends hardware keyboard events that reach the field without going through the extension. `drive.sh type` taps the Dictus keys instead (lowercase a–z, AZERTY letters page, offsets measured on iPhone 17).
 - `typing.contacts-and-replacements`: create the contact in Contacts and the replacement in Réglages → Général → Clavier → Remplacement, then make the keyboard reappear: the lexicon is read in `viewWillAppear`. The Debug log prints `NOTE lexicon loaded: <n> shortcuts, <n> words`, then `AUTOCORRECT-SKIP ... reason=lexicon` or `AUTOCORRECT branch=lexicon`. Measured 2026-10-30 on iOS 27.0 (#873).
