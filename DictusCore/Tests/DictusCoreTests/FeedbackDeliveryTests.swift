@@ -81,7 +81,7 @@ final class FeedbackDeliveryTests: XCTestCase {
     }
 
     func testTheProductionEndpointIsTheWebsiteRoute() {
-        XCTAssertEqual(FeedbackClient.productionEndpoint.absoluteString, "https://getdictus.com/api/feedback")
+        XCTAssertEqual(FeedbackClient.productionEndpoint.absoluteString, "https://www.getdictus.com/api/feedback")
     }
 
     private static func payload() -> FeedbackPayload? {

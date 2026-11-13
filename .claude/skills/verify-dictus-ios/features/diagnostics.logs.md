@@ -11,7 +11,7 @@
 - `diagnostics.log-export`: « Exporter les logs » through the share sheet.
 - `diagnostics.app-group-check`: « Diagnostic »: checks the storage shared by app and keyboard (App Group).
 - `diagnostics.about`: Version, GitHub link (getdictus/dictus-ios), Licences.
-- `diagnostics.feedback`: « Envoyer un retour » (#565): name, optional email, Bug / Idée / Autre, message, « Joindre le journal technique » (off by default for every type; « Voir ce qui sera envoyé » appears once it is on), sent to `POST /api/feedback` on getdictus.com. On failure: one sentence, « Réessayer », « Partager à la place ».
+- `diagnostics.feedback`: « Envoyer un retour » (#565): name, optional email, Bug / Idée / Autre, message, « Joindre le journal technique » (off by default for every type; « Voir ce qui sera envoyé » appears once it is on), sent to `POST https://www.getdictus.com/api/feedback` (the apex `getdictus.com` answers 308 to `www`). On failure: one sentence, « Réessayer », « Partager à la place ».
 
 ## How to get to it (user POV)
 
@@ -33,7 +33,7 @@ The log file itself is readable from the host at `$LOG_FILE` (in `run.env`) and 
 
 ### Send feedback
 
-A Debug build reads `-DictusFeedbackEndpoint <url>` from the launch command line, so a run never posts to getdictus.com. Point it at a stub on the Mac (the simulator reaches `http://127.0.0.1`), started through Portly; one that runs the website's own handler is described in PR #565's body.
+A Debug build reads `-DictusFeedbackEndpoint <url>` from the launch command line, so a run never posts to www.getdictus.com. Point it at a stub on the Mac (the simulator reaches `http://127.0.0.1`), started through Portly; one that runs the website's own handler is described in PR #565's body.
 
 ```bash
 .claude/skills/verify-dictus-ios/scripts/drive.sh relaunch -DictusFeedbackEndpoint http://127.0.0.1:8765/api/feedback

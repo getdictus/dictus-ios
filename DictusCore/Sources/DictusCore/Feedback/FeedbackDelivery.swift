@@ -70,9 +70,10 @@ public enum FeedbackOutcome: Equatable, Sendable {
 }
 
 public struct FeedbackClient: Sendable {
+    // The www host: the apex answers 308 to it, a redirect a POST should not depend on.
     // A compile-time constant URL cannot fail to parse.
     // swiftlint:disable:next force_unwrapping
-    public static let productionEndpoint = URL(string: "https://getdictus.com/api/feedback")!
+    public static let productionEndpoint = URL(string: "https://www.getdictus.com/api/feedback")!
 
     let endpoint: URL
     let session: URLSession
