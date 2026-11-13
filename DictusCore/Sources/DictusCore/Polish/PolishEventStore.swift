@@ -189,6 +189,14 @@ public enum PolishEventStore {
         clear(at: url)
     }
 
+    /// Whether the file holds anything, read off its size so the check never loads
+    /// the seven-day window. Entries past retention but not yet pruned count: they
+    /// are still dictated text on the device.
+    static func hasEntries(at url: URL) -> Bool {
+        let size = (try? FileManager.default.attributesOfItem(atPath: url.path)[.size] as? Int) ?? 0
+        return size > 0
+    }
+
     static func clear(at url: URL) {
         let coordinator = NSFileCoordinator()
         var error: NSError?
