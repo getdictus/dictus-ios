@@ -172,6 +172,7 @@ Every ID in this map, in one table: the 18 features first, then their 118 sub-fe
 | `diagnostics.log-export` | Gratuit | non |
 | `diagnostics.app-group-check` | Gratuit | oui |
 | `diagnostics.about` | Gratuit | non |
+| `diagnostics.feedback` | Gratuit | non |
 | `app.onboarding.welcome` | Gratuit | non |
 | `app.onboarding.language` | Gratuit | non |
 | `app.onboarding.keyboard-setup` | Gratuit | oui |
