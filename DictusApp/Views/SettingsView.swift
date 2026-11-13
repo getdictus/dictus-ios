@@ -517,7 +517,7 @@ struct SettingsView: View {
                 Button {
                     // Force unwrap is safe: compile-time constant URL that cannot be malformed.
                     // swiftlint:disable:next force_unwrapping
-                    UIApplication.shared.open(URL(string: "https://github.com/Pivii/dictus")!)
+                    UIApplication.shared.open(URL(string: "https://github.com/getdictus/dictus-ios")!)
                 } label: {
                     HStack {
                         Text("GitHub")
