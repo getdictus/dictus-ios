@@ -139,6 +139,7 @@
 		AA0000A6 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000A6 /* SettingsView.swift */; };
 		AA0000A7 /* LicensesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000A7 /* LicensesView.swift */; };
 		AA0000A8 /* DebugLogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000A8 /* DebugLogView.swift */; };
+		B565F0A1 /* FeedbackView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B565F0A2 /* FeedbackView.swift */; };
 		AA0000A9 /* OnboardingSuccessView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000A9 /* OnboardingSuccessView.swift */; };
 		AA0000B0 /* EmojiData.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000B0 /* EmojiData.swift */; };
 		AA0000B1 /* RecentEmojis.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000B1 /* RecentEmojis.swift */; };
@@ -165,6 +166,7 @@
 		AA0000F0 /* SpeechModelProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000F0 /* SpeechModelProtocol.swift */; };
 		AA0000F1 /* ParakeetEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000F1 /* ParakeetEngine.swift */; };
 		AA0000F2 /* SoundFeedbackService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000F2 /* SoundFeedbackService.swift */; };
+		B565F0B1 /* FeedbackComposer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B565F0B2 /* FeedbackComposer.swift */; };
 		AA0000F3 /* SoundSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000F3 /* SoundSettingsView.swift */; };
 		AA0000F4 /* Sounds in Resources */ = {isa = PBXBuildFile; fileRef = AA1000F4 /* Sounds */; };
 		AA0000F5 /* LiveActivityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000F5 /* LiveActivityManager.swift */; };
@@ -402,6 +404,7 @@
 		AA1000A6 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		AA1000A7 /* LicensesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LicensesView.swift; sourceTree = "<group>"; };
 		AA1000A8 /* DebugLogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugLogView.swift; sourceTree = "<group>"; };
+		B565F0A2 /* FeedbackView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedbackView.swift; sourceTree = "<group>"; };
 		AA1000A9 /* OnboardingSuccessView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingSuccessView.swift; sourceTree = "<group>"; };
 		AA1000B0 /* EmojiData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmojiData.swift; sourceTree = "<group>"; };
 		AA1000B1 /* RecentEmojis.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecentEmojis.swift; sourceTree = "<group>"; };
@@ -428,6 +431,7 @@
 		AA1000F0 /* SpeechModelProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechModelProtocol.swift; sourceTree = "<group>"; };
 		AA1000F1 /* ParakeetEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParakeetEngine.swift; sourceTree = "<group>"; };
 		AA1000F2 /* SoundFeedbackService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoundFeedbackService.swift; sourceTree = "<group>"; };
+		B565F0B2 /* FeedbackComposer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedbackComposer.swift; sourceTree = "<group>"; };
 		AA1000F3 /* SoundSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoundSettingsView.swift; sourceTree = "<group>"; };
 		AA1000F4 /* Sounds */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Sounds; path = Dictus/Sounds; sourceTree = SOURCE_ROOT; };
 		AA1000F5 /* LiveActivityManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveActivityManager.swift; sourceTree = "<group>"; };
@@ -776,6 +780,7 @@
 				AA1000A6 /* SettingsView.swift */,
 				AA1000A7 /* LicensesView.swift */,
 				AA1000A8 /* DebugLogView.swift */,
+				B565F0A2 /* FeedbackView.swift */,
 				AA1000E2 /* GaugeBarView.swift */,
 				AA1000E3 /* ModelCardView.swift */,
 				AA100302 /* ModelLanguageDetailView.swift */,
@@ -917,6 +922,7 @@
 			isa = PBXGroup;
 			children = (
 				AA1000F2 /* SoundFeedbackService.swift */,
+				B565F0B2 /* FeedbackComposer.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -1475,6 +1481,7 @@
 				AA0000A6 /* SettingsView.swift in Sources */,
 				AA0000A7 /* LicensesView.swift in Sources */,
 				AA0000A8 /* DebugLogView.swift in Sources */,
+				B565F0A1 /* FeedbackView.swift in Sources */,
 				AA0000EA /* LanguageSetupPage.swift in Sources */,
 				AA0000F0 /* SpeechModelProtocol.swift in Sources */,
 				AA0000F1 /* ParakeetEngine.swift in Sources */,
@@ -1486,6 +1493,7 @@
 				AA000484 /* ModelPreparationPresentation.swift in Sources */,
 				AA000302 /* ModelLanguageDetailView.swift in Sources */,
 				AA0000F2 /* SoundFeedbackService.swift in Sources */,
+				B565F0B1 /* FeedbackComposer.swift in Sources */,
 				AA0000F3 /* SoundSettingsView.swift in Sources */,
 				AA0000F6 /* StopStandbyIntent.swift in Sources */,
 				AA0000L0 /* ModelInfo+Localized.swift in Sources */,

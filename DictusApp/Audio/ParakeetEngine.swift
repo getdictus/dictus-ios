@@ -223,7 +223,7 @@ class ParakeetEngine: SpeechModelProtocol {
         } catch let error as TranscriptionError {
             throw error
         } catch {
-            throw TranscriptionError.transcriptionFailed("Parakeet: \(error.localizedDescription)")
+            throw TranscriptionError.transcriptionFailed("Parakeet: \(LoggedError.domainAndCode(error))")
         }
     }
 }

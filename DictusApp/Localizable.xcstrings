@@ -1079,6 +1079,29 @@
         }
       }
     },
+    "A name is required. A pseudonym is fine. Give an email only if you want a reply." : {
+      "comment" : "Feedback form (#565).",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ein Name ist Pflicht, ein Pseudonym genügt. Gib eine E-Mail nur an, wenn du eine Antwort möchtest."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El nombre es obligatorio, un seudónimo vale. Indica un correo solo si quieres una respuesta."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le nom est obligatoire, un pseudonyme suffit. Indiquez un e-mail seulement si vous voulez une réponse."
+          }
+        }
+      }
+    },
     "Accept" : {
       "comment" : "Vocabulary suggestion row button: review, then add the variant to the term (#512 step 2).",
       "localizations" : {
@@ -1423,6 +1446,29 @@
         }
       }
     },
+    "Also sent" : {
+      "comment" : "Feedback form (#565).",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Außerdem gesendet"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "También se envía"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Également envoyé"
+          }
+        }
+      }
+    },
     "Also written: %@" : {
       "comment" : "Vocabulary suggestion row: the other spellings Dictus produced for the same word, comma-separated (#512).",
       "localizations" : {
@@ -1762,6 +1808,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "À l’étape 3, Apple affichera une alerte, la même pour tous les claviers."
+          }
+        }
+      }
+    },
+    "Attach the debug log" : {
+      "comment" : "Feedback form (#565).",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Technisches Protokoll anhängen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adjuntar el registro técnico"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Joindre le journal technique"
           }
         }
       }
@@ -2465,6 +2534,29 @@
         }
       }
     },
+    "Bug" : {
+      "comment" : "Feedback form (#565).",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fehler"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Error"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bug"
+          }
+        }
+      }
+    },
     "Building the inference graph…" : {
       "comment" : "Cycling phrase shown during model compilation (issue #144).",
       "extractionState" : "stale",
@@ -2605,6 +2697,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Changer"
+          }
+        }
+      }
+    },
+    "Characters over the 4,000 limit: %lld" : {
+      "comment" : "Feedback form (#565).",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zeichen über dem Limit von 4.000: %lld"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Caracteres por encima del límite de 4000: %lld"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Caractères au-delà de la limite de 4 000 : %lld"
           }
         }
       }
@@ -2787,6 +2902,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Fermer"
+          }
+        }
+      }
+    },
+    "Code revision" : {
+      "comment" : "Feedback form (#565).",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Code-Revision"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Revisión del código"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Révision du code"
           }
         }
       }
@@ -3260,6 +3398,29 @@
         }
       }
     },
+    "Device" : {
+      "comment" : "Feedback form (#565).",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gerät"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dispositivo"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Appareil"
+          }
+        }
+      }
+    },
     "Diagnostic" : {
       "comment" : "A link to a view that displays diagnostic information about the app.",
       "isCommentAutoGenerated" : true,
@@ -3446,6 +3607,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Dictus n’a pas pu accéder à son stockage. Relancez l’app et réessayez."
+          }
+        }
+      }
+    },
+    "Dictus could not reach the server. Your message is kept." : {
+      "comment" : "Feedback form (#565).",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dictus konnte den Server nicht erreichen. Deine Nachricht bleibt erhalten."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dictus no pudo conectar con el servidor. Tu mensaje se conserva."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dictus n’a pas pu joindre le serveur. Votre message est conservé."
           }
         }
       }
@@ -3917,6 +4101,29 @@
         }
       }
     },
+    "Email (optional)" : {
+      "comment" : "Feedback form (#565).",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "E-Mail (optional)"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Correo (opcional)"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "E-mail (facultatif)"
+          }
+        }
+      }
+    },
     "Every Pro feature, current and future, except those on Dictus servers." : {
       "comment" : "Paywall: short scope of the lifetime purchase, shown while it is selected (#913). The full sentence opens on tap.",
       "localizations" : {
@@ -3936,6 +4143,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Toutes les fonctions Pro, actuelles et futures, sauf celles des serveurs Dictus."
+          }
+        }
+      }
+    },
+    "Feedback is unavailable right now. Your message is kept." : {
+      "comment" : "Feedback form (#565).",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Feedback ist gerade nicht verfügbar. Deine Nachricht bleibt erhalten."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los comentarios no están disponibles ahora mismo. Tu mensaje se conserva."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L’envoi de retours est indisponible pour le moment. Votre message est conservé."
+          }
+        }
+      }
+    },
+    "From" : {
+      "comment" : "Feedback form (#565).",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Absender"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remitente"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Expéditeur"
           }
         }
       }
@@ -4170,6 +4423,52 @@
         }
       }
     },
+    "Idea" : {
+      "comment" : "Feedback form (#565).",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Idee"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Idea"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Idée"
+          }
+        }
+      }
+    },
+    "If you attach the debug log, it covers the last 7 days." : {
+      "comment" : "Feedback form (#565).",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wenn du das technische Protokoll anhängst, umfasst es die letzten 7 Tage."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Si adjuntas el registro técnico, cubre los últimos 7 días."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Si vous joignez le journal technique, il couvre les 7 derniers jours."
+          }
+        }
+      }
+    },
     "Ignore" : {
       "comment" : "Vocabulary suggestion row: hides the word from the suggestions for good (#512).",
       "localizations" : {
@@ -4362,6 +4661,75 @@
         }
       }
     },
+    "It contains neither your transcriptions nor what you type." : {
+      "comment" : "Feedback form (#565).",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Es enthält weder deine Transkriptionen noch das, was du tippst."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No contiene ni tus transcripciones ni lo que escribes."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il ne contient ni vos transcriptions, ni ce que vous tapez."
+          }
+        }
+      }
+    },
+    "It contains the iOS and Dictus versions, your device model, and the identifiers of the apps you used the keyboard in. You can read it before sending." : {
+      "comment" : "Feedback form (#565).",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Es enthält die iOS- und Dictus-Version, dein Gerätemodell und die Kennungen der Apps, in denen du die Tastatur benutzt hast. Du kannst es vor dem Senden lesen."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Contiene las versiones de iOS y de Dictus, el modelo de tu dispositivo y los identificadores de las apps en las que usaste el teclado. Puedes leerlo antes de enviarlo."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il contient la version d’iOS et de Dictus, le modèle de votre appareil, et l’identifiant des apps dans lesquelles vous avez utilisé le clavier. Vous pouvez le lire avant de l’envoyer."
+          }
+        }
+      }
+    },
+    "It does not contain what you type. In this test version, it can contain short passages of your dictations that Dictus corrected automatically." : {
+      "comment" : "Feedback form (#565).",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Es enthält nicht, was du tippst. In dieser Testversion kann es kurze Stellen deiner Diktate enthalten, die Dictus automatisch korrigiert hat."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No contiene lo que escribes. En esta versión de prueba, puede contener fragmentos cortos de tus dictados que Dictus corrigió automáticamente."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il ne contient pas ce que vous tapez. Dans cette version de test, il peut contenir de courts passages de vos dictées que Dictus a corrigés automatiquement."
+          }
+        }
+      }
+    },
     "Just once" : {
       "comment" : "Onboarding voice notes scene: caption above the drawn iPhone while it shows the one-time setup, adding Dictus to the share sheet's favorites (#680).",
       "localizations" : {
@@ -4404,6 +4772,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Gardez au moins un modèle. Téléchargez-en un autre avant de supprimer celui-ci."
+          }
+        }
+      }
+    },
+    "Language and region" : {
+      "comment" : "Feedback form (#565).",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sprache und Region"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Idioma y región"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Langue et région"
           }
         }
       }
@@ -4656,6 +5047,443 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Un appui long, un Smart Mode"
+          }
+        }
+      }
+    },
+    "Other" : {
+      "comment" : "Feedback form (#565).",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sonstiges"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Otro"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Autre"
+          }
+        }
+      }
+    },
+    "See what will be sent" : {
+      "comment" : "Feedback form (#565).",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ansehen, was gesendet wird"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ver lo que se enviará"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voir ce qui sera envoyé"
+          }
+        }
+      }
+    },
+    "Send" : {
+      "comment" : "Feedback form (#565).",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Senden"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enviar"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Envoyer"
+          }
+        }
+      }
+    },
+    "Send feedback" : {
+      "comment" : "Feedback form (#565).",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Feedback senden"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enviar comentarios"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Envoyer un retour"
+          }
+        }
+      }
+    },
+    "Sent. Thank you." : {
+      "comment" : "Feedback form (#565).",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gesendet. Danke."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enviado. Gracias."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Envoyé. Merci."
+          }
+        }
+      }
+    },
+    "Share instead" : {
+      "comment" : "Feedback form (#565).",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stattdessen teilen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Compartir en su lugar"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Partager à la place"
+          }
+        }
+      }
+    },
+    "The name is limited to 100 characters." : {
+      "comment" : "Feedback form (#565).",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Name ist auf 100 Zeichen begrenzt."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El nombre está limitado a 100 caracteres."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le nom est limité à 100 caractères."
+          }
+        }
+      }
+    },
+    "The server could not deliver your report. Your message is kept." : {
+      "comment" : "Feedback form (#565).",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Server konnte deine Meldung nicht weiterleiten. Deine Nachricht bleibt erhalten."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El servidor no pudo entregar tu informe. Tu mensaje se conserva."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le serveur n’a pas pu transmettre votre retour. Votre message est conservé."
+          }
+        }
+      }
+    },
+    "The server refused this report. Share it instead." : {
+      "comment" : "Feedback form (#565).",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Server hat diese Meldung abgelehnt. Teile sie stattdessen."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El servidor rechazó este informe. Compártelo en su lugar."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le serveur a refusé ce retour. Partagez-le à la place."
+          }
+        }
+      }
+    },
+    "This email address looks incomplete." : {
+      "comment" : "Feedback form (#565).",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diese E-Mail-Adresse scheint unvollständig."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esta dirección de correo parece incompleta."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cette adresse e-mail semble incomplète."
+          }
+        }
+      }
+    },
+    "Too many reports came from this network. Try again in %lld minutes." : {
+      "comment" : "Feedback form (#565).",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zu viele Meldungen aus diesem Netzwerk. Versuche es in %lld Minuten erneut."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Demasiados envíos desde esta red. Vuelve a intentarlo en %lld minutos."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trop de retours envoyés depuis ce réseau. Réessayez dans %lld minutes."
+          }
+        }
+      }
+    },
+    "Too many reports came from this network. Try again in a minute." : {
+      "comment" : "Feedback form (#565).",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zu viele Meldungen aus diesem Netzwerk. Versuche es in einer Minute erneut."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Demasiados envíos desde esta red. Vuelve a intentarlo en un minuto."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trop de retours envoyés depuis ce réseau. Réessayez dans une minute."
+          }
+        }
+      }
+    },
+    "Type" : {
+      "comment" : "Feedback form (#565).",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Art"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tipo"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Type"
+          }
+        }
+      }
+    },
+    "What happened, and what did you expect?" : {
+      "comment" : "Feedback form (#565).",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Was ist passiert, und was hast du erwartet?"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Qué ha pasado y qué esperabas?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Que s’est-il passé, et qu’attendiez-vous ?"
+          }
+        }
+      }
+    },
+    "What will be sent" : {
+      "comment" : "Feedback form (#565).",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Was gesendet wird"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lo que se enviará"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ce qui sera envoyé"
+          }
+        }
+      }
+    },
+    "Your idea" : {
+      "comment" : "Feedback form (#565).",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deine Idee"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu idea"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Votre idée"
+          }
+        }
+      }
+    },
+    "Your message" : {
+      "comment" : "Feedback form (#565).",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deine Nachricht"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu mensaje"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Votre message"
+          }
+        }
+      }
+    },
+    "Your name" : {
+      "comment" : "Feedback form (#565).",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dein Name"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu nombre"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Votre nom"
+          }
+        }
+      }
+    },
+    "iOS" : {
+      "comment" : "Feedback form (#565).",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iOS"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iOS"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iOS"
           }
         }
       }

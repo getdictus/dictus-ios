@@ -155,7 +155,8 @@ enum SpeechModelError: DiagnosableError {
         case .modelNotInstalled(let identifier):
             return "model not installed locally: \(identifier)"
         case .engineLoadFailed(let identifier, let underlying):
-            return "engine load failed for \(identifier): \(underlying)"
+            // Domain and code only: `\(underlying)` printed the userInfo, file paths included (#939).
+            return "engine load failed for \(identifier): \(LoggedError.domainAndCode(underlying))"
         case .loadAbandoned(let identifier):
             return "load abandoned before it completed: \(identifier)"
         }

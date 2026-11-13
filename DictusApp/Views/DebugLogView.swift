@@ -49,6 +49,11 @@ private struct LogEntry: Identifiable, Sendable {
 ///
 /// Color-coded by log level with auto-scroll to newest entry.
 struct DebugLogView: View {
+    /// A fixed text to show instead of the live file: the feedback form's
+    /// "See what will be sent" (#565). Shown whole, header included, and the
+    /// screen offers no Clear, since clearing the file would not change it.
+    var snapshot: String?
+
     /// The complete retained file. Backs Copy, which must never be bounded.
     @State private var logContent = ""
     @State private var entries: [LogEntry] = []
@@ -111,15 +116,17 @@ struct DebugLogView: View {
             }
         }
         .background(Color.dictusBackground.ignoresSafeArea())
-        .navigationTitle("Debug Logs")
+        .navigationTitle(snapshot == nil ? "Debug Logs" : "What will be sent")
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Menu {
-                    Button(role: .destructive) {
-                        PersistentLog.clear()
-                        Task { await reloadLogs() }
-                    } label: {
-                        Label("Clear", systemImage: "trash")
+                    if snapshot == nil {
+                        Button(role: .destructive) {
+                            PersistentLog.clear()
+                            Task { await reloadLogs() }
+                        } label: {
+                            Label("Clear", systemImage: "trash")
+                        }
                     }
 
                     Button {
@@ -136,7 +143,7 @@ struct DebugLogView: View {
             Task { await reloadLogs() }
         }
         .refreshable {
-            await reloadLogs()
+            if snapshot == nil { await reloadLogs() }
         }
     }
 
@@ -145,6 +152,17 @@ struct DebugLogView: View {
     /// Render a single log entry row with level icon, timestamp, subsystem tag, and message.
     @ViewBuilder
     private func logRow(_ entry: LogEntry) -> some View {
+        if entry.level.isEmpty {
+            Text(verbatim: entry.eventName)
+                .font(.system(.caption2, design: .monospaced))
+                .foregroundColor(.secondary)
+                .padding(.vertical, 2)
+        } else {
+            structuredRow(entry)
+        }
+    }
+
+    private func structuredRow(_ entry: LogEntry) -> some View {
         HStack(alignment: .top, spacing: 6) {
             Image(systemName: entry.levelIcon)
                 .font(.caption2)
@@ -162,7 +180,7 @@ struct DebugLogView: View {
             Text(entry.params.isEmpty ? entry.eventName : "\(entry.eventName) \(entry.params)")
                 .font(.system(.caption2, design: .monospaced))
                 .foregroundColor(.primary)
-                .lineLimit(3)
+                .lineLimit(snapshot == nil ? 3 : nil)
         }
         .padding(.vertical, 2)
     }
@@ -188,9 +206,10 @@ struct DebugLogView: View {
         reloadToken += 1
         let token = reloadToken
 
-        let limit = Self.displayedLineLimit
+        let snapshot = snapshot
+        let limit = snapshot == nil ? Self.displayedLineLimit : Int.max
         let (content, parsed, hidden) = await Task.detached(priority: .userInitiated) {
-            let content = PersistentLog.read()
+            let content = snapshot ?? PersistentLog.read()
             let lines = content.split(separator: "\n", omittingEmptySubsequences: true)
             return (content, Self.parseEntries(from: lines.suffix(limit)), max(0, lines.count - limit))
         }.value
@@ -220,12 +239,12 @@ struct DebugLogView: View {
     /// view state, and the whole point (#255) is that it does not run on the main
     /// thread — the isolation was never real, only invisible behind GCD.
     private nonisolated static func parseEntries(from lines: ArraySlice<Substring>) -> [LogEntry] {
-        lines.compactMap { line in
+        lines.map { line in
             // Pattern: [timestamp] LEVEL   [subsystem] eventName params...
             // The timestamp is ISO8601, level is 7-char padded, subsystem in brackets
             guard let bracketEnd = line.firstIndex(of: "]"),
                   line.first == "[" else {
-                return nil
+                return rawEntry(line)
             }
 
             let timestampFull = String(line[line.index(after: line.startIndex)..<bracketEnd])
@@ -245,7 +264,7 @@ struct DebugLogView: View {
             // Find the subsystem bracket
             guard let subStart = afterTimestamp.firstIndex(of: "["),
                   let subEnd = afterTimestamp.firstIndex(of: "]", after: subStart) else {
-                return nil
+                return rawEntry(line)
             }
 
             let level = String(afterTimestamp[afterTimestamp.startIndex..<subStart])
@@ -266,6 +285,13 @@ struct DebugLogView: View {
                 params: params
             )
         }
+    }
+
+    /// A line that does not follow `LogEvent.formatted()`, such as the export
+    /// header or a legacy free-text line, shown as it is rather than dropped, so
+    /// the snapshot view hides nothing that will be sent (#565).
+    private nonisolated static func rawEntry(_ line: Substring) -> LogEntry {
+        LogEntry(timestamp: "", level: "", subsystem: "", eventName: String(line), params: "")
     }
 }
 

@@ -186,7 +186,7 @@ enum ParakeetCacheRepair {
                     component: "ParakeetCacheRepair",
                     instanceID: name,
                     action: "bundleCopyFailed",
-                    details: "context=\(context) error=\(error.localizedDescription)"
+                    details: "context=\(context) error=\(LoggedError.domainAndCode(error))"
                 ))
             }
         }

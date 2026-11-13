@@ -192,7 +192,7 @@ final class NemotronEngine: SpeechModelProtocol {
             if let error = error as? TranscriptionError {
                 throw error
             }
-            throw TranscriptionError.transcriptionFailed("Nemotron: \(error.localizedDescription)")
+            throw TranscriptionError.transcriptionFailed("Nemotron: \(LoggedError.domainAndCode(error))")
         }
     }
 
