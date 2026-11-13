@@ -3,7 +3,7 @@
 - **ID:** `diagnostics.logs`
 - **Tier:** Gratuit (Free)
 - **Targets:** DictusApp + DictusCore
-- **Screens:** `app.settings.debug-logs`, `app.settings.diagnostic`, `app.settings.licences`, `app.settings.feedback`, `app.settings.feedback.log`, `app.settings.feedback.failed`, `app.settings.feedback.rate-limited`, `app.settings.feedback.sent` — see [screens.md](screens.md)
+- **Screens:** `app.settings.debug-logs`, `app.settings.diagnostic`, `app.settings.licences`, `app.settings.feedback`, `app.settings.feedback.log`, `app.settings.feedback.failed`, `app.settings.feedback.rate-limited`, `app.settings.feedback.rate-limited-elapsed`, `app.settings.feedback.sent` — see [screens.md](screens.md)
 
 ## Sub-features
 
