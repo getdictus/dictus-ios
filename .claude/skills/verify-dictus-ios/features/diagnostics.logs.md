@@ -3,7 +3,7 @@
 - **ID:** `diagnostics.logs`
 - **Tier:** Gratuit (Free)
 - **Targets:** DictusApp + DictusCore
-- **Screens:** `app.settings.debug-logs`, `app.settings.diagnostic`, `app.settings.licences`, `app.settings.feedback`, `app.settings.feedback.log`, `app.settings.feedback.failed`, `app.settings.feedback.sent` — see [screens.md](screens.md)
+- **Screens:** `app.settings.debug-logs`, `app.settings.diagnostic`, `app.settings.licences`, `app.settings.feedback`, `app.settings.feedback.log`, `app.settings.feedback.failed`, `app.settings.feedback.rate-limited`, `app.settings.feedback.sent` — see [screens.md](screens.md)
 
 ## Sub-features
 
@@ -11,7 +11,7 @@
 - `diagnostics.log-export`: « Exporter les logs » through the share sheet.
 - `diagnostics.app-group-check`: « Diagnostic »: checks the storage shared by app and keyboard (App Group).
 - `diagnostics.about`: Version, GitHub link (getdictus/dictus-ios), Licences.
-- `diagnostics.feedback`: « Envoyer un retour » (#565): name, optional email, Bug / Idée / Autre, message, « Joindre le journal technique » with « Voir ce qui sera envoyé », sent to `POST /api/feedback` on getdictus.com. On failure: one sentence, « Réessayer », « Partager à la place ».
+- `diagnostics.feedback`: « Envoyer un retour » (#565): name, optional email, Bug / Idée / Autre, message, « Joindre le journal technique » (off by default for every type; « Voir ce qui sera envoyé » appears once it is on), sent to `POST /api/feedback` on getdictus.com. On failure: one sentence, « Réessayer », « Partager à la place ».
 
 ## How to get to it (user POV)
 
@@ -44,6 +44,10 @@ A Debug build reads `-DictusFeedbackEndpoint <url>` from the launch command line
 ```
 
 Fields: `feedback.name`, `feedback.email`, `feedback.type`, `feedback.message`, `feedback.attachLog`, `feedback.seeLog`, `feedback.send`. After a failure: `feedback.failure`, `feedback.retry`, `feedback.share`. After a 200: `feedback.sent`.
+
+- `feedback.attachLog` reads `0` on a fresh form whatever the type. `feedback.seeLog` exists only once it is `1`; tap the switch itself (x ≈ 340), a tap on the row's label does not toggle it.
+- A `429` keeps `feedback.retry` and `feedback.send` disabled until `Retry-After` has elapsed (60 s without the header), then both enable themselves. A stub answering `429` with `Retry-After: 45` shows both states within a minute.
+- « Partager à la place » writes `tmp/<UUID>/dictus-logs.txt` in the app container (only when the log is attached) and deletes the folder when the share sheet or the feedback sheet closes: `find "$(xcrun simctl get_app_container <udid> com.pivi.dictus data)/tmp" -name dictus-logs.txt`.
 
 ## Gotchas
 

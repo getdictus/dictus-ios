@@ -33,9 +33,10 @@ Captures are in [`docs/agents/screens/`](../../../../docs/agents/screens/), one 
 | `app.settings.sounds` | Réglages → Sons | Réglages, scroll, tap-label Sons | feedback.sounds-haptics | [oui](../../../../docs/agents/screens/app.settings.sounds.png) |
 | `app.settings.diagnostic` | Réglages → Diagnostic | Réglages, scroll to À propos, tap-label Diagnostic | diagnostics.logs | [oui](../../../../docs/agents/screens/app.settings.diagnostic.png) |
 | `app.settings.debug-logs` | Réglages → Debug Logs | … tap-label « Debug Logs » | diagnostics.logs | [oui](../../../../docs/agents/screens/app.settings.debug-logs.png) |
-| `app.settings.feedback` | Réglages → « Envoyer un retour » sheet | … tap-id settings.sendFeedback | diagnostics.logs | [oui](../../../../docs/agents/screens/app.settings.feedback.png) |
+| `app.settings.feedback` | Réglages → « Envoyer un retour » sheet, log toggle off by default | … tap-id settings.sendFeedback | diagnostics.logs | [oui](../../../../docs/agents/screens/app.settings.feedback.png) |
 | `app.settings.feedback.log` | « Ce qui sera envoyé »: the exact log the form attaches | … tap-id feedback.seeLog | diagnostics.logs | [oui](../../../../docs/agents/screens/app.settings.feedback.log.png) |
 | `app.settings.feedback.failed` | The form after a failed send: the sentence, « Réessayer », « Partager à la place » | send to a stub answering 502 | diagnostics.logs | [oui](../../../../docs/agents/screens/app.settings.feedback.failed.png) |
+| `app.settings.feedback.rate-limited` | The form after a `429`: « Réessayer » and « Envoyer » disabled until `Retry-After` elapses | send to a stub answering 429 with Retry-After | diagnostics.logs | [oui](../../../../docs/agents/screens/app.settings.feedback.rate-limited.png) |
 | `app.settings.feedback.sent` | « Envoyé. Merci. » after a 200 | send to a stub answering 200 | diagnostics.logs | [oui](../../../../docs/agents/screens/app.settings.feedback.sent.png) |
 | `app.settings.licences` | Réglages → Licences | … tap-label Licences | diagnostics.logs | [oui](../../../../docs/agents/screens/app.settings.licences.png) |
 | `app.settings.polish-debug` | Polish debug screen | Réglages → tap « Version » five times | polish | non |
