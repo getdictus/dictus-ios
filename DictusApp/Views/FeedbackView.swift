@@ -129,6 +129,8 @@ struct FeedbackView: View {
                 LabeledContent("Code revision", value: composer.device.gitRevision)
             }
         }
+        // An edit made while sending would be lost when the confirmation clears the form.
+        .disabled(composer.phase == .sending)
     }
 
     private var messagePrompt: LocalizedStringKey {
@@ -145,11 +147,16 @@ struct FeedbackView: View {
     private var logDisclosure: some View {
         VStack(alignment: .leading, spacing: 4) {
             Text("If you attach the debug log, it covers the last 7 days.")
+            #if DEBUG
+            // "Autocorrect debug logs" writes typed words to this file in Debug builds.
+            Text(verbatim: "Debug build: it can contain what you type and what you dictate.")
+            #else
             if BuildChannel.current == .appStore {
                 Text("It contains neither your transcriptions nor what you type.")
             } else {
                 Text("It does not contain what you type. In this test version, it can contain short passages of your dictations that Dictus corrected automatically.")
             }
+            #endif
             Text("It contains the iOS and Dictus versions, your device model, and the identifiers of the apps you used the keyboard in. You can read it before sending.")
         }
     }

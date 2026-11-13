@@ -25,9 +25,13 @@ final class FeedbackComposer: ObservableObject {
 
     /// Reads the log when the sheet opens. A failed report keeps the log it was
     /// sent with, so the retry and the share sheet carry the text already shown.
+    /// The old snapshot is dropped first, so Send waits for the new one, and a
+    /// read that finishes after Send was tapped is discarded.
     func sheetDidAppear() async {
         guard phase == .editing else { return }
+        logSnapshot = nil
         let content = await Task.detached(priority: .userInitiated) { PersistentLog.exportContent() }.value
+        guard phase == .editing else { return }
         logSnapshot = content
     }
 
