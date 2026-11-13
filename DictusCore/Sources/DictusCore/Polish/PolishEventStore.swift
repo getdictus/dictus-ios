@@ -164,6 +164,11 @@ public enum PolishEventStore {
     /// Decision 8's "only the app performs destructive operations" is what makes the
     /// two-writer ring safe, and this is what makes that sentence true rather than
     /// merely intended.
+    ///
+    /// **No rewrite when nothing is past retention.** DictusApp calls this on every
+    /// activation (#946), so the common case must cost one read. It also means a file
+    /// this process cannot read (before the first unlock, say) decodes to nothing and
+    /// is left as it is instead of being replaced with an empty one.
     public static func pruneOldEntries() {
         guard let url = fileURL else { return }
         pruneOldEntries(at: url)
@@ -174,8 +179,12 @@ public enum PolishEventStore {
         let coordinator = NSFileCoordinator()
         var error: NSError?
         coordinator.coordinate(writingItemAt: url, options: .forReplacing, error: &error) { coordURL in
+            let cutoff = Date().addingTimeInterval(-retentionPeriod)
+            let all = decodeAll(applyingRetention: false, at: coordURL)
+            let kept = all.filter { $0.timestamp >= cutoff }
+            guard kept.count < all.count else { return }
             var rewritten = ""
-            for entry in decodeAll(applyingRetention: true, at: coordURL) {
+            for entry in kept {
                 guard let data = try? encoder.encode(entry),
                       let json = String(data: data, encoding: .utf8) else { continue }
                 rewritten += json + "\n"
@@ -187,6 +196,14 @@ public enum PolishEventStore {
     public static func clear() {
         guard let url = fileURL else { return }
         clear(at: url)
+    }
+
+    /// Whether the file holds anything, read off its size so the check never loads
+    /// the seven-day window. Entries past retention but not yet pruned count: they
+    /// are still dictated text on the device.
+    static func hasEntries(at url: URL) -> Bool {
+        let size = (try? FileManager.default.attributesOfItem(atPath: url.path)[.size] as? Int) ?? 0
+        return size > 0
     }
 
     static func clear(at url: URL) {
