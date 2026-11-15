@@ -1976,7 +1976,14 @@ extension KeyboardState {
     /// Read once per process, since the hardware cannot change under it, and from the
     /// same DictusCore predicate the onboarding notice uses, so the two cannot
     /// disagree about which devices are old.
+    ///
+    /// Debug builds lift the floor on A12X/A12Z iPads (`iPad8,*`) so Parakeet can be
+    /// measured from the keyboard (#963). Release builds are unchanged.
+    #if DEBUG
+    static let deviceSupportsDictation = PreA14ParakeetProbe.supportsKeyboardDictation(on: .current(), probeEnabled: true)
+    #else
     static let deviceSupportsDictation = DeviceCapabilities.current().supportsKeyboardDictation
+    #endif
 
     /// Decline a dictation on a device that cannot run one from the keyboard.
     ///

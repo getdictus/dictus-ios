@@ -71,6 +71,14 @@ struct ModelManagerView: View {
     /// RAM) cannot change while the view is alive.
     private let deviceCapabilities = DeviceCapabilities.current()
 
+    /// Debug builds offer Parakeet on A12X/A12Z iPads, for the #963 measurement. Release
+    /// builds keep the pre-A14 floor (#612).
+    #if DEBUG
+    private static let preA14ParakeetProbe = true
+    #else
+    private static let preA14ParakeetProbe = false
+    #endif
+
     // MARK: - Computed model lists
 
     /// Downloaded models — includes deprecated (Tiny/Base) if user has them on device,
@@ -226,7 +234,8 @@ struct ModelManagerView: View {
                             },
                             // Issue #369: nil for a model this device can run, which
                             // leaves the card fully interactive as before.
-                            incompatibilityReason: model.incompatibilityReason(on: deviceCapabilities)
+                            incompatibilityReason: PreA14ParakeetProbe.incompatibilityReason(
+                                of: model, on: deviceCapabilities, probeEnabled: Self.preA14ParakeetProbe)
                         )
                         .listRowBackground(Color.clear)
                         .listRowSeparator(.hidden)

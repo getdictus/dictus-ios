@@ -1,5 +1,6 @@
 // DictusApp/Audio/ParakeetEngine.swift
 // FluidAudio-based Parakeet STT engine, iOS 17+ only.
+import CoreML
 import Foundation
 import DictusCore
 import FluidAudio
@@ -96,6 +97,7 @@ class ParakeetEngine: SpeechModelProtocol {
         do {
             // Compile the cached Parakeet v3 CoreML models. `load` reads the bundles the
             // guard above verified; it does not resolve anything over the network.
+            let loadStart = Date()
             let models = try await AsrModels.load(from: cacheDirectory, version: .v3)
 
             // Initialize the ASR manager for transcription. `initialize(models:)` became
@@ -114,6 +116,9 @@ class ParakeetEngine: SpeechModelProtocol {
 
             self.asrManager = manager
             self.isInitialized = true
+
+            Self.logComputeUnits(of: models, modelIdentifier: modelIdentifier,
+                                 loadMs: Int(Date().timeIntervalSince(loadStart) * 1000))
 
             DictusLogger.app.info("ParakeetEngine: v3 models loaded and ready")
         } catch {
@@ -224,6 +229,48 @@ class ParakeetEngine: SpeechModelProtocol {
             throw error
         } catch {
             throw TranscriptionError.transcriptionFailed("Parakeet: \(LoggedError.domainAndCode(error))")
+        }
+    }
+}
+
+// MARK: - Compute units log (#963)
+
+@available(iOS 17.0, *)
+extension ParakeetEngine {
+
+    /// Logs the compute units each Parakeet component was loaded with, the load time and
+    /// the process footprint, as `ParakeetLoad computeUnits`.
+    ///
+    /// WHY (#963): whether Parakeet can transcribe from a backgrounded app on an A12X turns
+    /// on it never touching the GPU, which iOS refuses in the background (#635). These are
+    /// the units Core ML was ASKED for (`MLModel.configuration`); Core ML does not report
+    /// which ops it actually placed on the Neural Engine and which fell back to the CPU.
+    /// The background run is what proves the GPU stayed out.
+    static func logComputeUnits(of models: AsrModels, modelIdentifier: String, loadMs: Int) {
+        let units = [
+            "preprocessor=\(models.preprocessor.configuration.computeUnits.logLabel)",
+            "encoder=\(models.encoder?.configuration.computeUnits.logLabel ?? "fused")",
+            "decoder=\(models.decoder.configuration.computeUnits.logLabel)",
+            "joint=\(models.joint.configuration.computeUnits.logLabel)"
+        ].joined(separator: " ")
+        PersistentLog.log(.diagnosticProbe(
+            component: "ParakeetLoad",
+            instanceID: modelIdentifier,
+            action: "computeUnits",
+            details: "\(units) loadMs=\(loadMs) \(ProcessMemory.logFields())"
+        ))
+    }
+}
+
+private extension MLComputeUnits {
+    /// The case name, as the log spells it.
+    var logLabel: String {
+        switch self {
+        case .cpuOnly: return "cpuOnly"
+        case .cpuAndGPU: return "cpuAndGPU"
+        case .cpuAndNeuralEngine: return "cpuAndNeuralEngine"
+        case .all: return "all"
+        @unknown default: return "unknown(\(rawValue))"
         }
     }
 }
