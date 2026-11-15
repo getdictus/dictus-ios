@@ -314,8 +314,11 @@ class WhisperKitEngine: SpeechModelProtocol {
             chunkingStrategy: .vad
         )
 
+        // Issue #932: the room after the last spoken word is a window Whisper fills
+        // with a closing line ("Vielen Dank.", "you"). See TrailingSilence.
+        let spokenSamples = TrailingSilence.trimmed(audioSamples)
         let results: [TranscriptionResult] = try await whisperKit.transcribe(
-            audioArray: audioSamples,
+            audioArray: spokenSamples,
             decodeOptions: options
         )
 
@@ -336,11 +339,12 @@ class WhisperKitEngine: SpeechModelProtocol {
         let totalCharCount = results.reduce(0) { $0 + $1.text.count }
         let lastSegmentEnd = results.flatMap { $0.segments }.map { $0.end }.max() ?? 0
         let audioDurationSec = Float(audioSamples.count) / 16_000.0
+        let sentSec = Float(spokenSamples.count) / 16_000.0
         PersistentLog.log(.diagnosticProbe(
             component: "WhisperKitEngine",
             instanceID: "transcribe",
             action: "segmentsReturned",
-            details: "results=\(results.count) segments=\(totalSegments) chars=\(totalCharCount) audioSec=\(String(format: "%.2f", audioDurationSec)) lastSegmentEndSec=\(String(format: "%.2f", lastSegmentEnd))"
+            details: "results=\(results.count) segments=\(totalSegments) chars=\(totalCharCount) audioSec=\(String(format: "%.2f", audioDurationSec)) sentSec=\(String(format: "%.2f", sentSec)) lastSegmentEndSec=\(String(format: "%.2f", lastSegmentEnd))"
         ))
 
         let text = results.map { $0.text }.joined(separator: " ")
