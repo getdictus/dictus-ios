@@ -161,6 +161,12 @@ class TranscriptionService {
         let modelName = languagePolicy.modelIdentifier.isEmpty
             ? "unknown" : languagePolicy.modelIdentifier
         PersistentLog.log(.transcriptionStarted(modelName: modelName))
+        // The only log line carrying the length of a dictation that never completes
+        // (#933): `transcriptionPerformance` is written on success only.
+        PersistentLog.log(.diagnosticProbe(
+            component: "TranscriptionService", instanceID: "audio", action: "transcribing",
+            details: "audioSec=\(String(format: "%.1f", Double(audioSamples.count) / 16_000))"
+        ))
         // Trace the resolution so device tests (#226 acceptance: Mandarin via
         // Auto-detect, toolbar-switcher non-override) can verify it from logs.
         //

@@ -844,6 +844,10 @@ class KeyboardState: ObservableObject {
                     self.defaults.synchronize()
 
                     MainActor.assumeIsolated { self.takeTranscription(transcription) }
+                } else {
+                    // Also a repeated delivery whose text was already taken. Logged because
+                    // a dictation lost here left no line at all (#933).
+                    self.logProbe("transcriptionReadyEmpty", details: self.sessionDetails())
                 }
             }
         }
