@@ -461,11 +461,15 @@ private struct KeyboardSwitchAnimation: View {
     @State private var finger: Finger?
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
-    /// Whether the iOS system language is French (drives AZERTY vs QWERTY layout).
+    /// The Apple keyboard the drawing shows: the iOS system language's (#915). It drives
+    /// the space bar, the menu row, and AZERTY vs QWERTY.
     /// WHY read from Locale.preferredLanguages, NOT SharedKeys.language:
     /// SharedKeys.language is the Dictus *transcription* preference — it's independent
     /// from the iOS keyboard layout the user actually sees when they press the globe.
-    private let isFrench = (Locale.preferredLanguages.first ?? "en").hasPrefix("fr")
+    private let systemKeyboard = SupportedLanguage.systemKeyboard(preferredLanguages: Locale.preferredLanguages)
+
+    /// Whether that keyboard is French (drives AZERTY vs QWERTY layout).
+    private var isFrench: Bool { systemKeyboard == .french }
 
     private var row0: [String] {
         isFrench
@@ -484,17 +488,12 @@ private struct KeyboardSwitchAnimation: View {
     }
 
     /// The current keyboard's row in the menu. The real menu names each keyboard in its
-    /// own language, so the catalog spells both names the same in every locale.
-    private var systemKeyboardName: String {
-        isFrench
-            ? String(localized: "Français", comment: "Drawn globe menu row: the French keyboard, named in French (#678).")
-            : String(localized: "English", comment: "Drawn globe menu row: the English keyboard, named in English (#678).")
-    }
+    /// own language, so the name is the same in every app locale and needs no catalog (#915).
+    private var systemKeyboardName: String { systemKeyboard.displayName }
 
-    /// The space bar's label in the non-Dictus frames.
-    private var spaceLabel: String {
-        isFrench ? "espace" : "space"
-    }
+    /// The space bar's label in the non-Dictus frames: the word the keyboard of the
+    /// iPhone's language prints on it (#915).
+    private var spaceLabel: String { systemKeyboard.spaceName }
 
     var body: some View {
         let size = Self.cardSize

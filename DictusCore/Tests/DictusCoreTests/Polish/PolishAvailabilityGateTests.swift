@@ -57,7 +57,7 @@ final class PolishAvailabilityGateTests: XCTestCase {
     /// rejected — the opposite of the instant refusal this gate watches for. It
     /// breaks the run like a success does.
     func testAnotherFailureReasonResetsTheRun() {
-        for reason in [PolishFailureReason.guardrailViolation, .unsupportedLanguageOrLocale] {
+        for reason in [PolishFailureReason.safetyRefusal, .unsupportedLanguageOrLocale] {
             var gate = PolishAvailabilityGate()
             gate.record(outcome: .engineFailed, reason: .rateLimited, engine: apple)
             gate.record(outcome: .engineFailed, reason: reason, engine: apple)

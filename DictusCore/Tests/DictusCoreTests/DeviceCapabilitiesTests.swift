@@ -130,4 +130,23 @@ final class DeviceCapabilitiesTests: XCTestCase {
                            identifier)
         }
     }
+
+    // MARK: - iPad Pro M4 (issue #931)
+
+    /// Exactly the four iPad Pro M4 identifiers, and none of their `iPad16,*` neighbours.
+    func testOnlyTheIPadProM4IsDetected() {
+        for identifier in ["iPad16,3", "iPad16,4", "iPad16,5", "iPad16,6"] {
+            XCTAssertTrue(makeCapabilities(ramGB: 8, model: identifier).isIPadProM4, identifier)
+        }
+        for identifier in ["iPad16,1", "iPad16,2", "iPad16,8", "iPad16,11", "iPad16,30",
+                           "iPad17,3", "iPad19,1", "iPad14,3", "iPhone16,5", "iPhone16,2", "arm64"] {
+            XCTAssertFalse(makeCapabilities(ramGB: 8, model: identifier).isIPadProM4, identifier)
+        }
+    }
+
+    /// The iPad Pro M4 keeps WhisperKit's default compute units: #931 refuses Turbo there,
+    /// it does not move any other model off the Neural Engine.
+    func testTheIPadProM4KeepsTheWhisperKitDefault() {
+        XCTAssertEqual(makeCapabilities(ramGB: 8, model: "iPad16,5").audioEncoderComputePolicy, .whisperKitDefault)
+    }
 }

@@ -63,14 +63,6 @@ public enum SharedKeys {
     /// Double: elapsed recording seconds, updated at ~5Hz during recording
     public static let recordingElapsedSeconds = "dictus.recordingElapsedSeconds"
 
-    // Keyboard mode preference (added for Phase 09 keyboard modes)
-    /// Current keyboard mode stored as String ("micro", "emojiMicro", "full")
-    @available(*, deprecated, message: "Use defaultKeyboardLayer instead. Kept for migration only.")
-    public static let keyboardMode = "dictus.keyboardMode"
-
-    /// Default keyboard layer: "letters" or "numbers". Replaces keyboardMode.
-    public static let defaultKeyboardLayer = "dictus.defaultKeyboardLayer"
-
     // User preferences (added for Plan 4.1 onboarding + settings)
     /// Keyboard language code ("fr"/"en"/"es"/"de"), default "fr".
     /// Drives the keyboard layout, key labels, and autocorrect/prediction.
@@ -163,6 +155,13 @@ public enum SharedKeys {
     /// behaviours; the losing branch and this key are deleted in a follow-up. Inside
     /// the conditional for `debugProEntitlementForced`'s reason.
     public static let debugVoiceNoteAutoOpenDisabled = "dictus.debugVoiceNoteAutoOpenDisabled"
+
+    // Forced model refusal (DEBUG builds only - see PolishService.activeEngine).
+    /// Bool: when true, every polish call throws Apple's safety refusal, so the #455
+    /// copy and the text it keeps can be seen in a simulator, where Apple Intelligence
+    /// does not run, or on a device without a phrase Apple refuses. Inside the
+    /// conditional for `debugProEntitlementForced`'s reason.
+    public static let debugPolishRefusalForced = "dictus.debugPolishRefusalForced"
     #endif
 
     // Live Activity preference
@@ -424,8 +423,23 @@ public enum SharedKeys {
     /// Drop this and its one caller once a release has shipped with the cleanup.
     static let retiredAppleFMExtensionProbeArmed = "dictus.debug.appleFMExtensionProbeArmed"
 
+    /// The « open on 123 » setting (`"letters"` / `"numbers"`), removed in #888: the
+    /// keyboard now always opens on the letters. Nothing reads it, so a device that
+    /// had chosen 123 is already back on the letters; clearing it only leaves no
+    /// stale `"numbers"` behind.
+    static let retiredDefaultKeyboardLayer = "dictus.defaultKeyboardLayer"
+
+    /// The three-mode setting the key above replaced in v1.3 (`"micro"`, `"full"`,
+    /// `"emojiMicro"`). Its migration is gone with #888; a device that never ran it
+    /// can still carry the value.
+    static let retiredKeyboardMode = "dictus.keyboardMode"
+
     /// Every key no live code reads, cleared once per app launch.
-    static let retiredKeys = [retiredAppleFMExtensionProbeArmed]
+    static let retiredKeys = [
+        retiredAppleFMExtensionProbeArmed,
+        retiredDefaultKeyboardLayer,
+        retiredKeyboardMode
+    ]
 
     /// Remove the retired keys above. Called from DictusApp's launch, which is the
     /// only process that owns hygiene over shared state.

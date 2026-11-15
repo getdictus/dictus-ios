@@ -25,6 +25,12 @@ final class AudioSessionActivationRunTests: XCTestCase {
         /// Post the reset once the clock has moved this far into a wait, in milliseconds.
         var resetAfterMs: Int?
         var lines: [String] = []
+        /// `LogEvent`s the run logged of its own (#899).
+        var events: [LogEvent] = []
+        /// Whether the keyboard still waits, read at a given point of the clock (#899).
+        var keyboardWaiting: (_ waitedMs: Int) -> Bool = { _ in false }
+        /// Why the start is dropped after a wait, at a given point of the clock; `nil` to go on.
+        var dropReason: ((_ waitedMs: Int) -> String?)?
 
         init(failuresLeft: Int) { self.failuresLeft = failuresLeft }
 
@@ -59,8 +65,10 @@ final class AudioSessionActivationRunTests: XCTestCase {
                     return true
                 },
                 isStillWanted: { _ in true },
-                reasonToDropAfterWait: { dropAfterWait },
+                reasonToDropAfterWait: { self.dropReason?(waitedMs) ?? dropAfterWait },
+                keyboardStillWaiting: { self.keyboardWaiting(waitedMs) },
                 log: { self.lines.append("\($0) \($1)") },
+                logEvent: { self.events.append($0) },
                 now: { self.clock }
             ).run(after: firstActivation)
         }
@@ -231,5 +239,117 @@ final class AudioSessionActivationRunTests: XCTestCase {
         XCTAssertFalse(started)
         XCTAssertEqual(session.activations, 2)
         XCTAssertTrue(session.lines.contains("sessionActivationDropped keyboardStatus=failed"))
+    }
+
+    // MARK: - A reset that outlasts the wait (#899)
+
+    /// The 2026-11-04 capture: `'msrv'`, a loss, and a reset that lands after the 3 s wait.
+    /// While the keyboard still waits, the start keeps waiting, logs the retry and records,
+    /// instead of leaving the keyboard on `requested`.
+    func testALateResetStartsTheDictationTheKeyboardStillWaitsFor() async throws {
+        let session = FakeSession(failuresLeft: 2)
+        session.lost = true
+        session.resetAfterMs = 4500
+        session.keyboardWaiting = { _ in true }
+        let first = session.firstActivation()
+        let started = try await session.run(first)
+
+        XCTAssertTrue(started, session.lines.joined(separator: "\n"))
+        XCTAssertEqual(session.activations, 3, "first, after the wait, after the late reset")
+        XCTAssertEqual(session.events.map(\.name), ["coldStartRetryAfterMediaServicesReset"])
+        XCTAssertEqual(session.events.first?.formatted().contains("waitedMs=1500 failedAttempts=2"), true,
+                       session.events.first?.formatted() ?? "")
+        XCTAssertTrue(session.lines.contains { $0.hasPrefix("sessionActivationAwaitedLateReset") && $0.contains("reset=true") })
+        XCTAssertTrue(session.lines.contains { $0.hasPrefix("sessionActivationRecovered failedAttempts=2 afterReset=true") })
+    }
+
+    /// Nobody waits (an in-app start, or DictusApp no longer in front): the same late reset
+    /// changes nothing, the start fails after the 3 s wait as before.
+    func testALateResetIsNotWaitedForWhenNobodyWaits() async {
+        let session = FakeSession(failuresLeft: 3)
+        session.lost = true
+        session.resetAfterMs = 4500
+        do {
+            _ = try await session.run(session.firstActivation())
+            XCTFail("expected the activation error")
+        } catch {
+            XCTAssertEqual((error as? AudioSessionActivationFailure)?.code, 560_557_684)
+        }
+        XCTAssertEqual(session.activations, 2)
+        XCTAssertTrue(session.events.isEmpty)
+    }
+
+    /// No reset ever comes: one late wait, bounded, then the activation error ("tap again").
+    func testNoLateResetFailsWithinBothWaits() async {
+        let session = FakeSession(failuresLeft: .max)
+        session.keyboardWaiting = { _ in true }
+        let begin = session.clock
+        do {
+            _ = try await session.run(session.firstActivation())
+            XCTFail("expected the activation error")
+        } catch {
+            XCTAssertEqual((error as? AudioSessionActivationFailure)?.code, 560_557_684)
+        }
+        let elapsedMs = Int((session.clock.timeIntervalSince(begin) * 1000).rounded())
+        XCTAssertEqual(elapsedMs, AudioSessionActivationPolicy.retryDelayMilliseconds
+            + AudioSessionActivationPolicy.mediaServicesResetTimeoutMilliseconds
+            + AudioSessionActivationPolicy.lateMediaServicesResetTimeoutMilliseconds)
+        XCTAssertEqual(session.activations, 3, "no activation without a reset during the late wait")
+        XCTAssertTrue(session.events.isEmpty)
+        XCTAssertTrue(session.lines.contains { $0.hasPrefix("sessionActivationAwaitedLateReset") && $0.contains("reset=false") })
+    }
+
+    /// The keyboard gives up during the late wait: the wait stops and the start is dropped
+    /// silently, with no activation and no engine.
+    func testTheLateWaitStopsWhenTheKeyboardGivesUp() async throws {
+        let session = FakeSession(failuresLeft: .max)
+        session.lost = true
+        session.keyboardWaiting = { $0 < 4000 }
+        session.dropReason = { $0 < 4000 ? nil : "keyboardStatus=idle" }
+        let begin = session.clock
+        let started = try await session.run(session.firstActivation())
+
+        XCTAssertFalse(started)
+        XCTAssertEqual(session.activations, 2, "no activation after the keyboard gave up")
+        XCTAssertTrue(session.events.isEmpty)
+        XCTAssertTrue(session.lines.contains("sessionActivationDropped keyboardStatus=idle"))
+        let elapsedMs = Int((session.clock.timeIntervalSince(begin) * 1000).rounded())
+        XCTAssertEqual(elapsedMs, 4000, "the wait stops at the first poll after the keyboard gave up")
+    }
+
+    /// DictusApp leaves the foreground during the late wait (a swipe back, the keyboard still on
+    /// `requested`): the wait stops and the start fails with "tap again", because the engine
+    /// could not start from the background anyway (#853).
+    func testTheLateWaitStopsWhenDictusAppLeavesTheForeground() async {
+        let session = FakeSession(failuresLeft: .max)
+        session.lost = true
+        session.keyboardWaiting = { $0 < 4000 }
+        do {
+            _ = try await session.run(session.firstActivation())
+            XCTFail("expected the activation error")
+        } catch {
+            XCTAssertEqual((error as? AudioSessionActivationFailure)?.code, 560_557_684)
+        }
+        XCTAssertEqual(session.activations, 2)
+        XCTAssertTrue(session.events.isEmpty)
+        XCTAssertTrue(session.lines.contains { $0.hasPrefix("sessionActivationAwaitedLateReset waitedMs=1000") })
+    }
+
+    /// The reset comes during the late wait but the session still refuses: one retry, then
+    /// "tap again", never a second wait.
+    func testARefusalAfterTheLateResetFailsWithoutASecondWait() async {
+        let session = FakeSession(failuresLeft: .max)
+        session.lost = true
+        session.resetAfterMs = 4500
+        session.keyboardWaiting = { _ in true }
+        do {
+            _ = try await session.run(session.firstActivation())
+            XCTFail("expected the activation error")
+        } catch {
+            XCTAssertEqual((error as? AudioSessionActivationFailure)?.code, 560_557_684)
+        }
+        XCTAssertEqual(session.activations, 3)
+        XCTAssertEqual(session.events.count, 1)
+        XCTAssertEqual(session.lines.filter { $0.hasPrefix("sessionActivationAwaitedLateReset") }.count, 1)
     }
 }

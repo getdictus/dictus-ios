@@ -548,6 +548,10 @@ class KeyboardViewController: UIInputViewController {
             keyboard.updateTheme(theme: Theme.current(for: traitCollection))
         }
 
+        // Back to the letters if the keyboard was hidden on 123 or #+= (#889), before
+        // the shift state below is computed for the letters page.
+        bridge?.showLettersOnAppearance()
+
         // Set initial shift state based on the text field's autocapitalization setting.
         // WHY here and not viewDidLoad: The textDocumentProxy is not fully connected
         // until the view is about to appear. Calling in viewDidLoad would read stale data.
@@ -566,14 +570,6 @@ class KeyboardViewController: UIInputViewController {
         // Contact names and text replacements (#873), re-read on every appearance
         // so a contact or replacement added meanwhile is picked up.
         suggestionState.refreshSupplementaryLexicon(from: self)
-
-        // Set default opening layer from user preference.
-        // WHY here not viewDidLoad: viewWillAppear fires each time the keyboard appears,
-        // allowing the user to change settings in the app and see the effect immediately.
-        let defaultLayer = DefaultKeyboardLayer.active
-        if defaultLayer == .numbers {
-            giellaKeyboard?.page = .symbols1
-        }
 
         // The user dictionary's one-shot prune (#287), attempted BEFORE the load
         // below and not after it. The engine is process-wide, so at this instant

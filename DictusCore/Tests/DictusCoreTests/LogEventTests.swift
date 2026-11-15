@@ -846,7 +846,7 @@ final class LogEventTests: XCTestCase {
     func testARefusalWithNoGuardrailStillPrintsThePlaceholder() {
         let formatted = LogEvent.smartModeRefused(
             mode: "translate.en", outcome: "engineFailed",
-            reason: "guardrailViolation", check: "-"
+            reason: "safetyRefusal", check: "-"
         ).formatted()
         XCTAssertTrue(formatted.contains("check=-"), formatted)
     }

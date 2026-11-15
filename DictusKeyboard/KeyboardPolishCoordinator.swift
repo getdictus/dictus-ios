@@ -351,7 +351,7 @@ final class KeyboardPolishCoordinator {
 
     /// Tell the user their armed mode did not run (#79).
     ///
-    /// Five sentences, because five different things happened and only one of them
+    /// Seven sentences, because seven different things happened and only one of them
     /// is "try again":
     ///
     /// - **Too long, text inserted** — the mode declared the floor acceptable. The
@@ -364,10 +364,12 @@ final class KeyboardPolishCoordinator {
     ///   acceptable. Same shape as the overflow pair, and deliberately *not* the same
     ///   sentence: "too long" would be a diagnosis neither case supports. It drops
     ///   "Try again", which is wrong advice once the text is already in the field.
-    ///   The sentence says nothing about the cause, which is why it carries both: a
-    ///   guardrail rejection and an Apple `guardrailViolation` throw are two different
-    ///   refusals, and what the user can do about either is identical — nothing, and
-    ///   the words are already there.
+    ///   The sentence says nothing about the cause. An Apple refusal used to land here
+    ///   too, and has its own sentence since #455.
+    /// - **The model declined the text, text inserted** (#455) — Apple's safety
+    ///   filter or the model itself refused these words. Every mode inserts the floor
+    ///   on it, Translate included, and the sentence names the refusal as the model's
+    ///   because nothing else the user could do would change it.
     /// - **The dictated language is one the model does not read** (#490) — names that
     ///   language and stops there. It is the one refusal with a knowable cause and no
     ///   remedy: Apple Foundation Models classifies the user turn and refuses before
@@ -410,7 +412,7 @@ final class KeyboardPolishCoordinator {
     }
 
     /// The sentence for one refusal. Split out of `announce` so the copy can be read
-    /// as a set of five alternatives rather than as a presentation with branches in it.
+    /// as a set of seven alternatives rather than as a presentation with branches in it.
     private static func message(for failure: SmartModeFailure, degraded: Bool) -> String {
         let name = SmartMode.localizedDisplayName(
             identifier: failure.modeIdentifier, fallback: failure.modeDisplayName
@@ -444,6 +446,16 @@ final class KeyboardPolishCoordinator {
             return String(
                 localized: "\(name): Apple Intelligence does not support the dictated language (\(language)).",
                 comment: "Shown when an armed Smart Mode could not run because the language the user dictated is outside the set Apple Intelligence reads. First placeholder is the mode's name, second is the dictated language."
+            )
+        }
+        if failure.isModelRefusal, degraded {
+            // Apple Foundation Models declined the text (#455). Not a fault and not
+            // our guardrail: the same words are refused again, so the copy says what
+            // happened and never "failed" or "try again". It cannot say why, because
+            // Apple's error carries no reason we may read.
+            return String(
+                localized: "\(name): Apple Intelligence declined to process this text, inserted as dictated.",
+                comment: "Shown when Apple Intelligence refused to process the dictated text for an armed Smart Mode, so the untransformed text was inserted instead. The placeholder is the mode's name."
             )
         }
         let overflowed = failure.outcome == PolishMetrics.Outcome.exceededContextBudget.rawValue

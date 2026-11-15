@@ -11,7 +11,7 @@ import XCTest
 /// WHY they drive the shared singleton: `UserDictionary` has a private init and
 /// reads App Group UserDefaults directly, so there is no seam to inject storage.
 /// `resetAll()` in tearDown restores a clean slate, matching the approach in
-/// KeyboardModeTests and SupportedLanguageActivationTests.
+/// SupportedLanguageActivationTests.
 final class UserDictionaryTests: XCTestCase {
 
     /// WHY reset in setUp as well as tearDown: the singleton reads App Group

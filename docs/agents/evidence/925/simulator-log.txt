@@ -1,0 +1,33 @@
+# Normal path, no route change (commit 521133f3, iOS 26.5 simulator, cold start from the keyboard)
+[2026-11-08T08:38:44Z] INFO    [lifecycle] <APP> appLaunched version=2.0.0 protectedData=true activePrewarm=false appGroup=healthy
+[2026-11-08T08:38:45Z] INFO    [lifecycle] <APP> coldStartURLReceived isColdStart=true isEngineDead=false hasBeenActive=false
+[2026-11-08T08:38:45Z] INFO    [dictation] <APP> dictationStarted fromURL=true appState=0 engineRunning=false
+[2026-11-08T08:38:45Z] INFO    [audio] <APP> audioEngineStarted
+[2026-11-08T08:38:45Z] INFO    [dictation] <KBD> statusChanged from=requested to=recording source=keyboardState
+[2026-11-08T08:38:45Z] INFO    [audio] <APP> audioEngineStarted
+[2026-11-08T08:39:11Z] INFO    [transcription] <APP> transcriptionCompleted duration=6898ms words=6
+[2026-11-08T08:39:11Z] INFO    [transcription] <APP> polishHandoff step=finished outcome=inserted chars=42
+[2026-11-08T08:39:11Z] DEBUG   [keyboard] <KBD> keyboardTextInserted
+[2026-11-08T08:40:18Z] INFO    [lifecycle] <APP> appLaunched version=2.0.0 protectedData=true activePrewarm=false appGroup=healthy
+
+# Route change injected by route-loss-shim.m (take 1)
+[2026-11-08T08:43:15Z] INFO    [lifecycle] <APP> appLaunched version=2.0.0 protectedData=true activePrewarm=false appGroup=healthy
+[2026-11-08T08:43:16Z] INFO    [audio] <APP> audioRouteChanged reason=unknown(0) details=previous=none route=MicrophoneBuiltIn available=MicrophoneBuiltIn preferred=none
+[2026-11-08T08:43:16Z] INFO    [lifecycle] <APP> coldStartURLReceived isColdStart=true isEngineDead=false hasBeenActive=false
+[2026-11-08T08:43:16Z] INFO    [dictation] <APP> dictationStarted fromURL=true appState=0 engineRunning=false
+[2026-11-08T08:43:17Z] DEBUG   [keyboard] <APP> diagnosticProbe component=UnifiedAudioEngine instanceID=startRecording action=engineRebuiltAfterEmptyRoute details=waitedMs=0 budgetMs=0 route=MicrophoneBuiltIn available=MicrophoneBuiltIn pre
+[2026-11-08T08:43:17Z] INFO    [audio] <APP> audioEngineStarted
+[2026-11-08T08:43:17Z] INFO    [dictation] <KBD> statusChanged from=requested to=recording source=keyboardState
+[2026-11-08T08:43:17Z] INFO    [audio] <APP> audioEngineStarted
+[2026-11-08T08:43:31Z] ERROR   [transcription] <APP> transcriptionFailed error=no speech detected: non-speech markers only (19 chars)
+
+# Route change injected by route-loss-shim.m (take 2)
+[2026-11-08T08:44:41Z] INFO    [lifecycle] <APP> appLaunched version=2.0.0 protectedData=true activePrewarm=false appGroup=healthy
+[2026-11-08T08:44:42Z] INFO    [audio] <APP> audioRouteChanged reason=unknown(0) details=previous=none route=MicrophoneBuiltIn available=MicrophoneBuiltIn preferred=none
+[2026-11-08T08:44:42Z] INFO    [lifecycle] <APP> coldStartURLReceived isColdStart=true isEngineDead=false hasBeenActive=false
+[2026-11-08T08:44:42Z] INFO    [dictation] <APP> dictationStarted fromURL=true appState=0 engineRunning=false
+[2026-11-08T08:44:42Z] DEBUG   [keyboard] <APP> diagnosticProbe component=UnifiedAudioEngine instanceID=startRecording action=engineRebuiltAfterEmptyRoute details=waitedMs=0 budgetMs=0 route=MicrophoneBuiltIn available=MicrophoneBuiltIn pre
+[2026-11-08T08:44:42Z] INFO    [audio] <APP> audioEngineStarted
+[2026-11-08T08:44:42Z] INFO    [dictation] <KBD> statusChanged from=requested to=recording source=keyboardState
+[2026-11-08T08:44:42Z] INFO    [audio] <APP> audioEngineStarted
+[2026-11-08T08:45:01Z] ERROR   [transcription] <APP> transcriptionFailed error=no speech detected: non-speech markers only (9 chars)

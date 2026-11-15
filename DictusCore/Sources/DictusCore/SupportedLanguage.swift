@@ -63,6 +63,24 @@ public enum SupportedLanguage: String, CaseIterable, Codable, Sendable {
         }
     }
 
+    /// The Apple keyboard an iPhone shows first, as the onboarding's globe tutorial draws
+    /// it (#915): the iPhone's first preferred language when Dictus has it, English when
+    /// it does not. The tutorial takes its space bar (`spaceName`) and its globe-menu row
+    /// (`displayName`) from it.
+    ///
+    /// Only the language subtag of the first entry counts ("de-AT" is German): the region
+    /// does not change which keyboard is drawn, and a later language does not win over an
+    /// unsupported first one, which keeps the French AZERTY choice the page always made.
+    ///
+    /// - Parameter preferredLanguages: `Locale.preferredLanguages`, injected.
+    public static func systemKeyboard(preferredLanguages: [String]) -> SupportedLanguage {
+        let base = preferredLanguages.first?
+            .split(whereSeparator: { $0 == "-" || $0 == "_" })
+            .first
+            .map { String($0).lowercased() } ?? ""
+        return SupportedLanguage(rawValue: base) ?? .english
+    }
+
     /// Reads the active language from App Group, defaulting to French.
     public static var active: SupportedLanguage {
         guard let raw = AppGroup.defaults.string(forKey: SharedKeys.language),

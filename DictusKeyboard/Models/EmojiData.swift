@@ -17,7 +17,7 @@ enum EmojiStore {
     static let categories: [EmojiCategory] = [
         EmojiCategory(
             id: "smileys",
-            name: "Smileys",
+            name: String(localized: "Smileys", comment: "Emoji picker section header, shown uppercased above the grid."),
             icon: "face.smiling",
             representativeEmoji: "😀",
             emojis: [
@@ -41,7 +41,7 @@ enum EmojiStore {
         ),
         EmojiCategory(
             id: "people",
-            name: "People",
+            name: String(localized: "People", comment: "Emoji picker section header, shown uppercased above the grid."),
             icon: "person.fill",
             representativeEmoji: "👋",
             emojis: [
@@ -66,7 +66,7 @@ enum EmojiStore {
         ),
         EmojiCategory(
             id: "animals",
-            name: "Animals & Nature",
+            name: String(localized: "Animals & Nature", comment: "Emoji picker section header, shown uppercased above the grid."),
             icon: "leaf.fill",
             representativeEmoji: "🐻",
             emojis: [
@@ -95,7 +95,7 @@ enum EmojiStore {
         ),
         EmojiCategory(
             id: "food",
-            name: "Food & Drink",
+            name: String(localized: "Food & Drink", comment: "Emoji picker section header, shown uppercased above the grid."),
             icon: "fork.knife",
             representativeEmoji: "🍔",
             emojis: [
@@ -117,7 +117,7 @@ enum EmojiStore {
         ),
         EmojiCategory(
             id: "activities",
-            name: "Activities",
+            name: String(localized: "Activities", comment: "Emoji picker section header, shown uppercased above the grid."),
             icon: "sportscourt.fill",
             representativeEmoji: "⚽",
             emojis: [
@@ -136,7 +136,7 @@ enum EmojiStore {
         ),
         EmojiCategory(
             id: "travel",
-            name: "Travel",
+            name: String(localized: "Travel", comment: "Emoji picker section header, shown uppercased above the grid."),
             icon: "car.fill",
             representativeEmoji: "🚗",
             emojis: [
@@ -157,7 +157,7 @@ enum EmojiStore {
         ),
         EmojiCategory(
             id: "objects",
-            name: "Objects",
+            name: String(localized: "Objects", comment: "Emoji picker section header, shown uppercased above the grid."),
             icon: "lightbulb.fill",
             representativeEmoji: "💡",
             emojis: [
@@ -188,7 +188,7 @@ enum EmojiStore {
         ),
         EmojiCategory(
             id: "symbols",
-            name: "Symbols",
+            name: String(localized: "Symbols", comment: "Emoji picker section header, shown uppercased above the grid."),
             icon: "heart.fill",
             representativeEmoji: "❤️",
             emojis: [
@@ -224,7 +224,7 @@ enum EmojiStore {
         ),
         EmojiCategory(
             id: "flags",
-            name: "Flags",
+            name: String(localized: "Flags", comment: "Emoji picker section header, shown uppercased above the grid."),
             icon: "flag.fill",
             representativeEmoji: "🏁",
             emojis: [

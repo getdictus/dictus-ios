@@ -101,6 +101,9 @@ struct ModelLoadingOverlay: View {
     /// left — the safe direction under #432's rule, so no persisted start time is added.
     @State private var preparationStartedAt: Date?
 
+    /// Set by the Cancel button (issue #493) so a second tap during the cancel does nothing.
+    @State private var isCancellingDownload = false
+
     private typealias Phase = ModelPreparationPhase
     private typealias Metrics = ModelPreparationMetrics
 
@@ -146,6 +149,13 @@ struct ModelLoadingOverlay: View {
                 Spacer(minLength: 0)
                 content
                 Spacer(minLength: 0)
+            }
+        }
+        // Pinned to the bottom, outside the centred column, so showing or hiding it never
+        // moves the ring (#708's fixed layout).
+        .overlay(alignment: .bottom) {
+            if showsCancelDownload {
+                cancelDownloadButton
             }
         }
         .interactiveDismissDisabled(true)
@@ -218,6 +228,39 @@ struct ModelLoadingOverlay: View {
         // Every text block above is a fixed slot: a phase change swaps what is in it, so
         // the fade is the only movement, and nothing slides.
         .animation(.easeInOut(duration: 0.25), value: phase)
+    }
+
+    // MARK: - Cancel (issue #493)
+
+    /// Whether the screen offers to cancel: only while the model is transferring, only for a
+    /// download the user can abandon (`ModelManager.canCancelDownload`), and never in the
+    /// onboarding, which has no other model to fall back on.
+    private var showsCancelDownload: Bool {
+        context != .onboarding
+            && !showCompletion
+            && rawPhase == .downloading
+            && modelManager.canCancelDownload(modelIdentifier)
+    }
+
+    /// Stops the download and forgets it, so the next launch does not resume it (#493).
+    /// The screen closes itself once the model reads "not downloaded" (`checkForCompletion`).
+    private var cancelDownloadButton: some View {
+        Button {
+            guard !isCancellingDownload else { return }
+            isCancellingDownload = true
+            Task { await modelManager.cancelDownload(modelIdentifier) }
+        } label: {
+            Text("Cancel download", comment: "Button on the model preparation screen and the model card that stops a model download and deletes what it fetched (issue #493).")
+                .font(.body.weight(.semibold))
+                .foregroundStyle(Color.dictusAccent)
+                .frame(maxWidth: .infinity, minHeight: 44)
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .disabled(isCancellingDownload)
+        .padding(.horizontal, Metrics.horizontalPadding)
+        .padding(.bottom, 24)
+        .accessibilityIdentifier("modelPreparation.cancelDownload")
     }
 
     // MARK: - Title and subtitle
@@ -558,6 +601,14 @@ struct ModelLoadingOverlay: View {
         // "Model ready" celebration on a failure (issue #207). The parent view
         // surfaces the error message once the cover is gone.
         if case .error = currentModelState {
+            isPresented = false
+            return
+        }
+        // A download the user cancelled (issue #493): the model is back to "not
+        // downloaded", which `rawPhase` maps to `.ready` and would celebrate. Close instead.
+        // Only after work was seen, because a screen opened a frame before the download
+        // starts reads "not downloaded" too.
+        if currentModelState == .notDownloaded, hasSeenWorkPhase {
             isPresented = false
             return
         }

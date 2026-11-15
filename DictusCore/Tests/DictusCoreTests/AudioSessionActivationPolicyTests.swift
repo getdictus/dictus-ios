@@ -146,6 +146,89 @@ final class AudioSessionActivationPolicyTests: XCTestCase {
         XCTAssertLessThan(worstCase, 15_000)
     }
 
+    // MARK: - A reset that outlasts the wait (#899)
+
+    /// The 2026-11-04 capture: the reset wait ran out, the activation after it was refused,
+    /// and the keyboard was still on `requested`. Keep waiting for the reset, once.
+    func testAKeyboardStillWaitingAwaitsALateReset() {
+        XCTAssertEqual(
+            AudioSessionActivationPolicy.decide(
+                activated: false, failedAttempts: 3, mediaServicesLost: true, hasWaitedForReset: true,
+                resetSeen: false, keyboardStillWaiting: true, hasAwaitedLateReset: false),
+            .awaitLateMediaServicesReset(
+                timeoutMilliseconds: AudioSessionActivationPolicy.lateMediaServicesResetTimeoutMilliseconds)
+        )
+    }
+
+    /// Nobody is waiting (an in-app start, a keyboard that gave up, DictusApp in the
+    /// background): the #775 rule, "tap again" at once.
+    func testNobodyWaitingFailsAsBefore() {
+        XCTAssertEqual(
+            AudioSessionActivationPolicy.decide(
+                activated: false, failedAttempts: 3, mediaServicesLost: false, hasWaitedForReset: true,
+                resetSeen: false, keyboardStillWaiting: false, hasAwaitedLateReset: false),
+            .fail
+        )
+    }
+
+    /// The reset came during the wait and the session still refused: waiting longer cannot fix it.
+    func testARefusalAfterAResetStillFails() {
+        XCTAssertEqual(
+            AudioSessionActivationPolicy.decide(
+                activated: false, failedAttempts: 3, mediaServicesLost: false, hasWaitedForReset: true,
+                resetSeen: true, keyboardStillWaiting: true, hasAwaitedLateReset: false),
+            .fail
+        )
+    }
+
+    /// One late wait per start, never a second: the retry is bounded, not a loop.
+    func testTheLateWaitIsSpentOnlyOnce() {
+        XCTAssertEqual(
+            AudioSessionActivationPolicy.decide(
+                activated: false, failedAttempts: 4, mediaServicesLost: true, hasWaitedForReset: true,
+                resetSeen: false, keyboardStillWaiting: true, hasAwaitedLateReset: true),
+            .fail
+        )
+    }
+
+    /// The retry after a late reset that activates starts the engine.
+    func testTheActivationAfterALateResetStartsRecording() {
+        XCTAssertEqual(
+            AudioSessionActivationPolicy.decide(
+                activated: true, failedAttempts: 3, mediaServicesLost: false, hasWaitedForReset: true,
+                resetSeen: true, keyboardStillWaiting: true, hasAwaitedLateReset: true),
+            .startRecording
+        )
+    }
+
+    /// Before the first reset wait has been spent, a waiting keyboard changes nothing: the
+    /// warm path and the #775 / #853 recoveries take the same steps as before.
+    func testAWaitingKeyboardDoesNotChangeTheStepsBeforeTheWait() {
+        for attempts in 0...2 {
+            for lost in [false, true] {
+                for activated in [false, true] {
+                    XCTAssertEqual(
+                        AudioSessionActivationPolicy.decide(
+                            activated: activated, failedAttempts: attempts, mediaServicesLost: lost,
+                            hasWaitedForReset: false, keyboardStillWaiting: true),
+                        AudioSessionActivationPolicy.decide(
+                            activated: activated, failedAttempts: attempts, mediaServicesLost: lost,
+                            hasWaitedForReset: false),
+                        "activated=\(activated) attempts=\(attempts) lost=\(lost)"
+                    )
+                }
+            }
+        }
+    }
+
+    /// Both waits and the retry still fit the keyboard's 15 s cold-start grace.
+    func testTheWorstCaseWithTheLateWaitFitsTheKeyboardGrace() {
+        let worstCase = AudioSessionActivationPolicy.retryDelayMilliseconds
+            + AudioSessionActivationPolicy.mediaServicesResetTimeoutMilliseconds
+            + AudioSessionActivationPolicy.lateMediaServicesResetTimeoutMilliseconds
+        XCTAssertLessThan(worstCase, 15_000)
+    }
+
     // MARK: - The status in the log
 
     /// `AVAudioSessionErrorCodeCannotInterruptOthers`, the code #515's capture carried.

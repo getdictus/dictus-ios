@@ -1,0 +1,8 @@
+# #787 phase 1, simulator log lines (iPhone 17, iOS 26.5, Debug build f880804b)
+
+## FR, StoreKit daemon disabled by simslim: the sheet cannot open, the failure is logged
+[2026-11-05T15:01:05Z] ERROR   [lifecycle] <APP> subscriptionError action=offerCodeRedemption error=Impossible de communiquer avec une application d’aide.
+
+## FR then EN, StoreKit daemon on: Apple's sheet opened, then closed with its cross
+[2026-11-05T15:07:39Z] DEBUG   [keyboard] <APP> diagnosticProbe component=storeKit instanceID=0 action=offerCodeSheetClosed details=result=success
+[2026-11-05T15:12:17Z] DEBUG   [keyboard] <APP> diagnosticProbe component=storeKit instanceID=0 action=offerCodeSheetClosed details=result=success

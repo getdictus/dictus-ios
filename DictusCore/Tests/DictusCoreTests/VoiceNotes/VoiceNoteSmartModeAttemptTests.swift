@@ -89,7 +89,7 @@ final class VoiceNoteSmartModeAttemptTests: XCTestCase {
         XCTAssertFalse(attempt(PolishOutcome(failure: failure(.rejectedGuardrail))).defersToOpen)
         XCTAssertFalse(attempt(PolishOutcome(failure: failure(.exceededContextBudget))).defersToOpen,
                        "a note too long for the window (#628) is too long in the foreground too")
-        XCTAssertFalse(attempt(PolishOutcome(failure: failure(.engineFailed, reason: "guardrailViolation"))).defersToOpen)
+        XCTAssertFalse(attempt(PolishOutcome(failure: failure(.engineFailed, reason: "safetyRefusal"))).defersToOpen)
         XCTAssertFalse(attempt(PolishOutcome(failure: failure(.unsupportedInputLanguage))).defersToOpen)
         XCTAssertFalse(attempt(PolishOutcome(text: "Trois points.")).defersToOpen)
     }

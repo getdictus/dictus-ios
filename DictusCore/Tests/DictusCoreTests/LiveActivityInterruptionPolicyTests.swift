@@ -50,6 +50,29 @@ final class LiveActivityInterruptionPolicyTests: XCTestCase {
         XCTAssertEqual(LiveActivityInterruptionPolicy.atEnded(isPaused: true, hasActivity: false, engineWarm: true), .none)
     }
 
+    // MARK: - .ended never arrives (#935)
+
+    func testDictationAfterALostEndedClearsThePause() {
+        // .began paused the pill, no .ended came, the next dictation reached recording.
+        XCTAssertEqual(LiveActivityInterruptionPolicy.atDictationStarted(isPaused: true), .resume)
+    }
+
+    func testDictationWithoutAPauseChangesNothing() {
+        XCTAssertEqual(LiveActivityInterruptionPolicy.atDictationStarted(isPaused: false), .none)
+    }
+
+    func testPauseTimeoutOverAWarmEngineUnpausesInsteadOfEnding() {
+        XCTAssertEqual(LiveActivityInterruptionPolicy.atPauseTimeout(isPaused: true, hasActivity: true, engineWarm: true), .resume)
+    }
+
+    func testPauseTimeoutOverAColdEngineStillEnds() {
+        XCTAssertEqual(LiveActivityInterruptionPolicy.atPauseTimeout(isPaused: true, hasActivity: true, engineWarm: false), .end)
+    }
+
+    func testPauseTimeoutWithoutAPauseDoesNothing() {
+        XCTAssertEqual(LiveActivityInterruptionPolicy.atPauseTimeout(isPaused: false, hasActivity: true, engineWarm: false), .none)
+    }
+
     // MARK: - Content
 
     // The attributes are iOS-only (ActivityKit); `swift test` on the Mac skips these.

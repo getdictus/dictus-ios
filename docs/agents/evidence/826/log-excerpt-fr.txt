@@ -1,0 +1,15 @@
+# #826 simulator proof, FR device, head ae0ce0ca, iPhone 17 / iOS 26.5, Debug build, Xcode 27.2
+# Debug keys: debugProEntitlementForced, debugAppleIntelligenceForced, debugPolishRefusalForced = true
+[2026-11-05T15:24:47Z] DEBUG   [keyboard] <KBD> diagnosticProbe component=KeyboardState instanceID=9569611A action=smartModeArmed details=mode=translate.en
+[2026-11-05T15:24:47Z] INFO    [dictation] <APP> statusChanged from=idle to=recording source=coordinator
+[2026-11-05T15:24:47Z] INFO    [dictation] <KBD> statusChanged from=requested to=recording source=keyboardState
+[2026-11-05T15:25:04Z] INFO    [transcription] <APP> transcriptionCompleted duration=6946ms words=19
+[2026-11-05T15:25:04Z] INFO    [transcription] <APP> polishHandoff step=handedOff outcome=raw chars=102
+[2026-11-05T15:25:04Z] INFO    [transcription] <KBD> polishHandoff step=claimed outcome=pending chars=102
+[2026-11-05T15:25:04Z] INFO    [transcription] <APP> polishHandoff step=finished outcome=inserted chars=103
+[2026-11-05T15:25:04Z] WARNING [transcription] <KBD> polishEngineFailed reason=safetyRefusal engine=debug-refusal mode=smart.translate.en engineMs=0 detected=fr mix=fr 1.00
+[2026-11-05T15:25:04Z] WARNING [transcription] <KBD> smartModeRefused mode=translate.en outcome=engineFailed reason=safetyRefusal|degraded check=-
+[2026-11-05T15:25:04Z] DEBUG   [keyboard] <KBD> keyboardTextInserted
+[2026-11-05T15:25:04Z] INFO    [keyboard] <KBD> dictationMessageSet reason=smartModeFailed-engineFailed owner=48E83F07 visible=true
+[2026-11-05T15:25:04Z] INFO    [keyboard] <KBD> dictationMessageDisplayed rootView=D88D8139 controller=48E83F07 owner=48E83F07 visible=true
+[2026-11-05T15:25:07Z] INFO    [keyboard] <KBD> dictationMessageCleared reason=smartModeFailed-timeout displayedCount=1

@@ -4,6 +4,7 @@
 // WHY a file of its own: DictationCoordinator.swift sits at the file-length budget of #146,
 // the same reason `DictationCoordinator+ModelLoad.swift` exists. The engine is passed in
 // rather than exposed, and the rest is `mayReport` and the App Group defaults.
+import AVFoundation
 import Foundation
 import UIKit
 import DictusCore
@@ -86,6 +87,12 @@ extension DictationCoordinator {
         let needsRecovery = ForegroundAudioRecoveryPolicy.sessionNeedsRecovery(
             after: firstActivation, mediaServicesLost: engine.mediaServicesLost)
         isRecoveringAudioSession = needsRecovery
+        // A recovering start can wait seconds for the audio server, and with a host that has no
+        // return scheme the user swipes back during that wait (#899). Without an assertion iOS
+        // suspends DictusApp mid-wait, and the keyboard sat on `requested` until the user gave
+        // up. Held, the run reaches its end in the background, where #853 refuses the engine
+        // with "tap again". The cold-start task's `defer` releases it, like a #311 start's.
+        if needsRecovery { beginColdStartAssertion() }
 
         let run = AudioSessionActivationRun(
             activate: { try engine.configureAudioSession() },
@@ -98,6 +105,14 @@ extension DictationCoordinator {
                 let keyboardStatus = self.defaults.string(forKey: SharedKeys.dictationStatus) ?? "nil"
                 guard origin == .keyboard && keyboardStatus != DictationStatus.requested.rawValue else { return nil }
                 return "keyboardStatus=\(keyboardStatus)"
+            },
+            keyboardStillWaiting: {
+                // #899: a reset that outlasts the wait still gets this start, but only for the
+                // keyboard that is still showing it, and only in front: from the background
+                // the engine cannot start (#853), so waiting there only delays "tap again".
+                origin == .keyboard
+                    && self.defaults.string(forKey: SharedKeys.dictationStatus) == DictationStatus.requested.rawValue
+                    && UIApplication.shared.applicationState == .active
             },
             log: { self.logActivation($0, $1) }
         )
@@ -180,14 +195,30 @@ extension UIApplication.State {
 /// 2500 ms outlasts the activation retry (250 ms) and ends inside the reset wait (3 s), so
 /// the activation after the wait works, as it did on the 2026-10-28 device capture. Turn it
 /// off with `defaults delete com.pivi.dictus debugSimulateAudioServerResetMs`.
+///
+/// #899: a second key, `debugSimulateAudioServerResetPostMs`, also posts
+/// `mediaServicesWereResetNotification` that long after the first activation, so the late
+/// reset can be shown: a window and a post at 6000 ms outlast the 3 s reset wait and land in
+/// the late-reset wait.
 enum SimulatedAudioServerReset {
     private static let defaultsKey = "debugSimulateAudioServerResetMs"
+    private static let postResetKey = "debugSimulateAudioServerResetPostMs"
     private static var firstActivation: Date?
 
     static func throwWhileActive() throws {
         let windowMs = UserDefaults.standard.integer(forKey: defaultsKey)
         guard windowMs > 0 else { return }
         let start = firstActivation ?? Date()
+        if firstActivation == nil {
+            let postMs = UserDefaults.standard.integer(forKey: postResetKey)
+            if postMs > 0 {
+                DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(postMs)) {
+                    NotificationCenter.default.post(
+                        name: AVAudioSession.mediaServicesWereResetNotification,
+                        object: AVAudioSession.sharedInstance())
+                }
+            }
+        }
         firstActivation = start
         guard Date().timeIntervalSince(start) * 1000 < Double(windowMs) else { return }
         // 'msrv', what `setCategory` threw on device while the audio server was going down.

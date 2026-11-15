@@ -32,4 +32,4 @@ Debug builds show the toggle even without Apple Intelligence (`DICTUS_POLISH_DEB
 ## Gotchas
 
 - **Not drivable in the simulator:** the polish itself. Apple Intelligence is unavailable there (the keyboard's Smart Mode fan reads « Les modes exigent Apple Intelligence »), so toggling it changes a preference and nothing else.
-- The explanatory text under the toggle and « Open iPhone Settings » are English on a French device (missing translations).
+- The text under the toggle and « Open iPhone Settings » follow the app language (#792; FR, EN, DE, ES captures in `docs/agents/evidence/792/`). The simulator reaches only the « Apple Intelligence not enabled » state; the other footer sentences are pinned in the catalog by `SettingsFrenchCopyTests`.

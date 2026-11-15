@@ -1,0 +1,18 @@
+DictusCore/Tests/DictusCoreTests/SystemKeyboardLanguageTests.swift:19: error: -[DictusCoreTests.SystemKeyboardLanguageTests testEachSupportedDeviceLanguageDrawsItsOwnLabels] : XCTAssertEqual failed: ("space") is not equal to ("Leertaste")
+DictusCore/Tests/DictusCoreTests/SystemKeyboardLanguageTests.swift:20: error: -[DictusCoreTests.SystemKeyboardLanguageTests testEachSupportedDeviceLanguageDrawsItsOwnLabels] : XCTAssertEqual failed: ("English") is not equal to ("Deutsch")
+DictusCore/Tests/DictusCoreTests/SystemKeyboardLanguageTests.swift:21: error: -[DictusCoreTests.SystemKeyboardLanguageTests testEachSupportedDeviceLanguageDrawsItsOwnLabels] : XCTAssertEqual failed: ("space") is not equal to ("espacio")
+DictusCore/Tests/DictusCoreTests/SystemKeyboardLanguageTests.swift:22: error: -[DictusCoreTests.SystemKeyboardLanguageTests testEachSupportedDeviceLanguageDrawsItsOwnLabels] : XCTAssertEqual failed: ("English") is not equal to ("Español")
+Test Case '-[DictusCoreTests.SystemKeyboardLanguageTests testEachSupportedDeviceLanguageDrawsItsOwnLabels]' failed (0.490 seconds).
+DictusCore/Tests/DictusCoreTests/SystemKeyboardLanguageTests.swift:43: error: -[DictusCoreTests.SystemKeyboardLanguageTests testOnlyTheFirstPreferredLanguageCounts] : XCTAssertEqual failed: ("english") is not equal to ("spanish")
+Test Case '-[DictusCoreTests.SystemKeyboardLanguageTests testOnlyTheFirstPreferredLanguageCounts]' failed (0.000 seconds).
+DictusCore/Tests/DictusCoreTests/SystemKeyboardLanguageTests.swift:26: error: -[DictusCoreTests.SystemKeyboardLanguageTests testRegionAndScriptDoNotChangeTheLanguage] : XCTAssertEqual failed: ("english") is not equal to ("german")
+DictusCore/Tests/DictusCoreTests/SystemKeyboardLanguageTests.swift:27: error: -[DictusCoreTests.SystemKeyboardLanguageTests testRegionAndScriptDoNotChangeTheLanguage] : XCTAssertEqual failed: ("english") is not equal to ("spanish")
+DictusCore/Tests/DictusCoreTests/SystemKeyboardLanguageTests.swift:29: error: -[DictusCoreTests.SystemKeyboardLanguageTests testRegionAndScriptDoNotChangeTheLanguage] : XCTAssertEqual failed: ("english") is not equal to ("german")
+Test Case '-[DictusCoreTests.SystemKeyboardLanguageTests testRegionAndScriptDoNotChangeTheLanguage]' failed (0.000 seconds).
+Test Case '-[DictusCoreTests.SystemKeyboardLanguageTests testUnsupportedDeviceLanguageFallsBackToEnglish]' passed (0.000 seconds).
+Test Suite 'SystemKeyboardLanguageTests' failed at 2026-11-06 09:50:16.556.
+	 Executed 4 tests, with 8 failures (0 unexpected) in 0.491 (0.492) seconds
+Test Suite 'DictusCoreTests.xctest' failed at 2026-11-06 09:50:16.556.
+	 Executed 4 tests, with 8 failures (0 unexpected) in 0.491 (0.492) seconds
+Test Suite 'Selected tests' failed at 2026-11-06 09:50:16.556.
+	 Executed 4 tests, with 8 failures (0 unexpected) in 0.491 (0.493) seconds

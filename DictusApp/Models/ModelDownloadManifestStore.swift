@@ -19,7 +19,6 @@ import DictusCore
 enum ManifestStore {
 
     private static let folderName = "DictusModelDownloads"
-    private static let manifestFileName = "manifest.json"
 
     /// Root of the staging area, created on demand.
     static var rootDirectory: URL? {
@@ -34,23 +33,15 @@ enum ManifestStore {
         return root
     }
 
-    /// One model's staging directory.
-    ///
-    /// The folder name is a sanitized identifier and is never parsed back: `loadAll`
-    /// reads the identifier out of the manifest itself, so a model whose identifier
-    /// needed escaping still reports its real name.
-    static func directory(_ model: String) -> URL? {
-        let safe = model.map { character -> Character in
-            character.isLetter || character.isNumber || character == "-" || character == "_"
-                ? character
-                : "_"
-        }
-        guard let root = rootDirectory else { return nil }
-        return root.appendingPathComponent(String(safe), isDirectory: true)
+    /// The staging area itself (issue #493 moved its file-system steps to DictusCore,
+    /// where they are tested), or nil when the container is unreachable.
+    private static var area: ModelDownloadStagingArea? {
+        rootDirectory.map(ModelDownloadStagingArea.init(root:))
     }
 
-    static func manifestURL(_ model: String) -> URL? {
-        directory(model)?.appendingPathComponent(manifestFileName)
+    /// One model's staging directory. See `ModelDownloadStagingArea.directory`.
+    static func directory(_ model: String) -> URL? {
+        area?.directory(model)
     }
 
     /// The disk half of one model's staging area: chunks, partials, absorb, publish
@@ -64,48 +55,63 @@ enum ManifestStore {
     // MARK: Manifest
 
     static func save(_ manifest: ModelDownloadManifest) {
-        guard let directory = directory(manifest.modelIdentifier),
-              let url = manifestURL(manifest.modelIdentifier) else { return }
-        try? FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
-        guard let data = try? JSONEncoder().encode(manifest) else { return }
-        // Atomic so a manifest is never read half written by the next launch.
-        try? data.write(to: url, options: .atomic)
+        area?.save(manifest)
     }
 
     static func load(_ model: String) -> ModelDownloadManifest? {
-        guard let url = manifestURL(model),
-              let data = try? Data(contentsOf: url) else { return nil }
-        return try? JSONDecoder().decode(ModelDownloadManifest.self, from: data)
+        area?.load(model)
     }
 
     /// Every manifest on disk, keyed by the identifier each one names.
     static func loadAll() -> [String: ModelDownloadManifest] {
-        guard let root = rootDirectory,
-              let entries = try? FileManager.default.contentsOfDirectory(
-                  at: root,
-                  includingPropertiesForKeys: nil
-              ) else {
-            return [:]
-        }
-        var result: [String: ModelDownloadManifest] = [:]
-        for entry in entries {
-            let url = entry.appendingPathComponent(manifestFileName)
-            guard let data = try? Data(contentsOf: url),
-                  let manifest = try? JSONDecoder().decode(ModelDownloadManifest.self, from: data)
-            else { continue }
-            result[manifest.modelIdentifier] = manifest
-        }
-        return result
+        area?.loadAll() ?? [:]
+    }
+
+    /// Identifiers with a manifest on disk that has not finished transferring.
+    static func interruptedIdentifiers() -> [String] {
+        area?.interruptedIdentifiers() ?? []
     }
 
     static func discard(_ model: String) {
-        guard let directory = directory(model) else { return }
-        try? FileManager.default.removeItem(at: directory)
+        area?.discard(model)
     }
 
     /// Drops one file's partial and every chunk of it, leaving the rest of the download
     /// intact. Used when a range was refused or an assembled file failed its checksum.
     static func discardFile(_ model: String, fileIndex: Int) {
         staging(model).discardFile(fileIndex: fileIndex)
+    }
+}
+
+// MARK: - What a fresh process can read about a download
+
+// The service's answers that need nothing but the manifest on disk. Here, next to the store
+// they read, so the service's file stays within SwiftLint's length budget (issue #493).
+extension BackgroundModelDownloadService {
+
+    /// Identifiers with a manifest on disk that has not finished transferring.
+    /// Read straight from the file system so a fresh process can answer it.
+    static func interruptedModelIdentifiers() -> [String] {
+        ManifestStore.interruptedIdentifiers()
+    }
+
+    /// Whether a transfer for this model is already under way — a manifest on disk that
+    /// has not finished. Read straight from the file system, so it answers in a process
+    /// that has done nothing yet.
+    static func hasUnfinishedTransfer(for identifier: String) -> Bool {
+        guard let manifest = ManifestStore.load(identifier) else { return false }
+        return !manifest.isTransferComplete
+    }
+
+    /// Durable progress of an interrupted download, for a screen that has to show
+    /// something before the first delegate callback of this process arrives.
+    static func persistedProgress(for identifier: String) -> ModelRepoDownloader.Progress? {
+        guard let manifest = ManifestStore.load(identifier) else { return nil }
+        return ModelRepoDownloader.Progress(
+            bytesDownloaded: manifest.receivedBytes,
+            totalBytes: manifest.totalBytes,
+            completedFiles: manifest.completedFileCount,
+            totalFiles: manifest.files.count
+        )
     }
 }

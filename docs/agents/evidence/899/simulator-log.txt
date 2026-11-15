@@ -1,0 +1,73 @@
+# #899 simulator log excerpts (Dictus Verify 20261105-140519, iPhone 17, iOS 26.5, Debug build of 98a48337 + the interruption-sampling fix)
+# DEBUG hook: debugSimulateAudioServerResetMs=5800, debugSimulateAudioServerResetPostMs=6000 ('msrv' for 5.8 s, mediaServicesWereReset posted at 6 s).
+# Filtered to the app's dictation/audio lines and the keyboard's status lines; 'description=' dropped for width.
+
+## Run A: stay in DictusApp, the reset lands after the 3 s wait
+[2026-11-05T13:15:29Z] INFO    [keyboard] <KBD> keyboardMicTapped
+[2026-11-05T13:15:29Z] INFO    [dictation] <KBD> statusChanged from=failed to=requested source=keyboardState
+[2026-11-05T13:15:30Z] INFO    [lifecycle] <APP> appLaunched version=2.0.0 protectedData=true activePrewarm=false appGroup=healthy
+[2026-11-05T13:15:31Z] ERROR   [audio] <APP> audioSessionActivationFailed step=setCategory domain=NSOSStatusErrorDomain code=1836282486 status=1836282486 'msrv' mediaServicesLost=false route=none available=MicrophoneBuiltIn preferred=none
+[2026-11-05T13:15:31Z] INFO    [lifecycle] <APP> coldStartURLReceived isColdStart=true isEngineDead=false hasBeenActive=false
+[2026-11-05T13:15:31Z] INFO    [lifecycle] <APP> coldStartFlagSet active=true context=first launch
+[2026-11-05T13:15:31Z] INFO    [dictation] <APP> statusChanged from=idle to=clearing-for-new source=startDictation-reset
+[2026-11-05T13:15:31Z] INFO    [dictation] <APP> dictationStarted fromURL=true appState=1 engineRunning=false
+[2026-11-05T13:15:31Z] ERROR   [audio] <APP> audioSessionActivationFailed step=setCategory domain=NSOSStatusErrorDomain code=1836282486 status=1836282486 'msrv' mediaServicesLost=false route=none available=MicrophoneBuiltIn preferred=none
+[2026-11-05T13:15:31Z] WARNING [dictation] <APP> dictationDeferred reason=cold start deferred to didBecomeActive, appState=1
+[2026-11-05T13:15:31Z] NOTICE  [keyboard] <APP> hostReturn hostId=com.apple.mobilesafari outcome=no-scheme-known
+[2026-11-05T13:15:31Z] DEBUG   [lifecycle] <APP> appDidBecomeActive
+[2026-11-05T13:15:31Z] INFO    [lifecycle] <APP> coldStartRetry keyboardStatus=requested
+[2026-11-05T13:15:31Z] INFO    [dictation] <APP> statusChanged from=idle to=clearing-for-new source=startDictation-reset
+[2026-11-05T13:15:31Z] INFO    [dictation] <APP> dictationStarted fromURL=true appState=0 engineRunning=false
+[2026-11-05T13:15:31Z] ERROR   [audio] <APP> audioSessionActivationFailed step=setCategory domain=NSOSStatusErrorDomain code=1836282486 status=1836282486 'msrv' mediaServicesLost=false route=none available=MicrophoneBuiltIn preferred=none
+[2026-11-05T13:15:31Z] DEBUG   [keyboard] <APP> diagnosticProbe component=DictationCoordinator instanceID=coldStart action=sessionActivationRetry details=failedAttempts=1 delayMs=250
+[2026-11-05T13:15:32Z] ERROR   [audio] <APP> audioSessionActivationFailed step=setCategory domain=NSOSStatusErrorDomain code=1836282486 status=1836282486 'msrv' mediaServicesLost=false route=none available=MicrophoneBuiltIn preferred=none
+[2026-11-05T13:15:35Z] DEBUG   [keyboard] <APP> diagnosticProbe component=DictationCoordinator instanceID=coldStart action=sessionActivationWaitedForReset details=waitedMs=3002 timeoutMs=3000 reset=false lost=false
+[2026-11-05T13:15:35Z] ERROR   [audio] <APP> audioSessionActivationFailed step=setCategory domain=NSOSStatusErrorDomain code=1836282486 status=1836282486 'msrv' mediaServicesLost=false route=none available=MicrophoneBuiltIn preferred=none
+[2026-11-05T13:15:37Z] WARNING [audio] <APP> audioMediaServicesReset
+[2026-11-05T13:15:37Z] INFO    [audio] <APP> audioHapticsAllowance context=mediaServicesReset allowed=false
+[2026-11-05T13:15:38Z] DEBUG   [keyboard] <APP> diagnosticProbe component=DictationCoordinator instanceID=coldStart action=sessionActivationAwaitedLateReset details=waitedMs=2985 timeoutMs=5000 reset=true keyboardWaiting=true
+[2026-11-05T13:15:38Z] WARNING [lifecycle] <APP> coldStartRetryAfterMediaServicesReset waitedMs=2985 failedAttempts=3
+[2026-11-05T13:15:38Z] INFO    [audio] <APP> audioSessionConfigured category=playAndRecord
+[2026-11-05T13:15:38Z] INFO    [audio] <APP> audioHapticsAllowance context=configureAudioSession allowed=true
+[2026-11-05T13:15:38Z] DEBUG   [keyboard] <APP> diagnosticProbe component=DictationCoordinator instanceID=coldStart action=sessionActivationRecovered details=failedAttempts=3 afterReset=true
+[2026-11-05T13:15:38Z] INFO    [audio] <APP> audioHapticsAllowance context=startEngine-startRecording allowed=true
+[2026-11-05T13:15:38Z] INFO    [audio] <APP> audioEngineStarted
+[2026-11-05T13:15:38Z] INFO    [audio] <APP> audioHapticsAllowance context=startRecording allowed=true
+[2026-11-05T13:15:38Z] INFO    [dictation] <APP> statusChanged from=idle to=recording source=coordinator
+[2026-11-05T13:15:38Z] INFO    [audio] <APP> audioEngineStarted
+[2026-11-05T13:15:38Z] DEBUG   [keyboard] <APP> diagnosticProbe component=coldStart instanceID=0 action=assertionEnded details=reason=engine-started
+[2026-11-05T13:15:41Z] ERROR   [dictation] <APP> dictationFailed error=Cold start engine load: model not installed locally: openai_whisper-small
+[2026-11-05T13:15:41Z] INFO    [dictation] <APP> statusChanged from=recording to=failed source=coordinator
+[2026-11-05T13:16:12Z] WARNING [dictation] <KBD> watchdogReset source=keyboard staleState=requested
+[2026-11-05T13:16:12Z] INFO    [dictation] <KBD> statusChanged from=requested to=idle source=keyboardState
+[2026-11-05T13:16:12Z] INFO    [keyboard] <KBD> dictationMessageSet reason=reconciled-keyboard-watchdog-stale owner=none visible=false
+
+## Run B: leave DictusApp (breadcrumb « ◀ Safari ») during the wait
+[2026-11-05T13:16:44Z] INFO    [keyboard] <KBD> keyboardMicTapped
+[2026-11-05T13:16:44Z] INFO    [dictation] <KBD> statusChanged from=idle to=requested source=keyboardState
+[2026-11-05T13:16:45Z] INFO    [lifecycle] <APP> appLaunched version=2.0.0 protectedData=true activePrewarm=false appGroup=healthy
+[2026-11-05T13:16:45Z] ERROR   [audio] <APP> audioSessionActivationFailed step=setCategory domain=NSOSStatusErrorDomain code=1836282486 status=1836282486 'msrv' mediaServicesLost=false route=none available=MicrophoneBuiltIn preferred=none
+[2026-11-05T13:16:46Z] INFO    [lifecycle] <APP> coldStartURLReceived isColdStart=true isEngineDead=false hasBeenActive=false
+[2026-11-05T13:16:46Z] INFO    [lifecycle] <APP> coldStartFlagSet active=true context=first launch
+[2026-11-05T13:16:46Z] INFO    [dictation] <APP> statusChanged from=idle to=clearing-for-new source=startDictation-reset
+[2026-11-05T13:16:46Z] INFO    [dictation] <APP> dictationStarted fromURL=true appState=1 engineRunning=false
+[2026-11-05T13:16:46Z] ERROR   [audio] <APP> audioSessionActivationFailed step=setCategory domain=NSOSStatusErrorDomain code=1836282486 status=1836282486 'msrv' mediaServicesLost=false route=none available=MicrophoneBuiltIn preferred=none
+[2026-11-05T13:16:46Z] WARNING [dictation] <APP> dictationDeferred reason=cold start deferred to didBecomeActive, appState=1
+[2026-11-05T13:16:46Z] NOTICE  [keyboard] <APP> hostReturn hostId=com.apple.mobilesafari outcome=no-scheme-known
+[2026-11-05T13:16:46Z] INFO    [lifecycle] <APP> coldStartRetry keyboardStatus=requested
+[2026-11-05T13:16:46Z] INFO    [dictation] <APP> statusChanged from=idle to=clearing-for-new source=startDictation-reset
+[2026-11-05T13:16:46Z] INFO    [dictation] <APP> dictationStarted fromURL=true appState=0 engineRunning=false
+[2026-11-05T13:16:46Z] ERROR   [audio] <APP> audioSessionActivationFailed step=setCategory domain=NSOSStatusErrorDomain code=1836282486 status=1836282486 'msrv' mediaServicesLost=false route=none available=MicrophoneBuiltIn preferred=none
+[2026-11-05T13:16:46Z] DEBUG   [lifecycle] <APP> appDidBecomeActive
+[2026-11-05T13:16:46Z] DEBUG   [keyboard] <APP> diagnosticProbe component=DictationCoordinator instanceID=coldStart action=sessionActivationRetry details=failedAttempts=1 delayMs=250
+[2026-11-05T13:16:46Z] ERROR   [audio] <APP> audioSessionActivationFailed step=setCategory domain=NSOSStatusErrorDomain code=1836282486 status=1836282486 'msrv' mediaServicesLost=false route=none available=MicrophoneBuiltIn preferred=none
+[2026-11-05T13:16:49Z] DEBUG   [lifecycle] <APP> appWillResignActive
+[2026-11-05T13:16:49Z] DEBUG   [keyboard] <APP> diagnosticProbe component=DictationCoordinator instanceID=coldStart action=sessionActivationWaitedForReset details=waitedMs=3002 timeoutMs=3000 reset=false lost=false
+[2026-11-05T13:16:49Z] ERROR   [audio] <APP> audioSessionActivationFailed step=setCategory domain=NSOSStatusErrorDomain code=1836282486 status=1836282486 'msrv' mediaServicesLost=false route=none available=MicrophoneBuiltIn preferred=none
+[2026-11-05T13:16:49Z] ERROR   [dictation] <APP> dictationFailed error=Cold start engine load: audio session setCategory failed — OSStatus 1836282486 'msrv'
+[2026-11-05T13:16:49Z] INFO    [dictation] <APP> statusChanged from=idle to=failed source=coordinator
+[2026-11-05T13:16:49Z] INFO    [dictation] <KBD> statusChanged from=requested to=failed source=keyboardState
+[2026-11-05T13:16:49Z] DEBUG   [keyboard] <APP> diagnosticProbe component=coldStart instanceID=0 action=assertionEnded details=reason=failure-reported
+[2026-11-05T13:16:49Z] INFO    [keyboard] <KBD> dictationMessageSet reason=appError owner=none visible=false
+[2026-11-05T13:16:50Z] DEBUG   [lifecycle] <APP> appDidEnterBackground
+[2026-11-05T13:16:50Z] INFO    [lifecycle] <APP> coldStartFlagSet active=false context=background-cleanup
