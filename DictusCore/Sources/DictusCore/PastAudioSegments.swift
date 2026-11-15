@@ -33,8 +33,11 @@ public enum PastAudioSegments {
         }
     }
 
-    /// A segment starting this close to the end, or later, is dropped.
-    public static let tolerance: Float = 0.1
+    /// A segment starting this close to the end, or later, is dropped: one Whisper
+    /// timestamp step. Measured with tools/closing-phrase-bench on real recordings cut
+    /// inside a word, the invented segments started 0.01 s or more after the audio, and
+    /// real words as late as 0.11 s before its end (docs/research/953-whisper-segments-past-audio).
+    public static let tolerance: Float = 0.02
 
     /// The text of `results` joined as the app always has, without the segments that
     /// start at or after `audioSeconds - tolerance`. A result that loses no segment

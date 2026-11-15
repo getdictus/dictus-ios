@@ -31,10 +31,17 @@ final class PastAudioSegmentsTests: XCTestCase {
 
     func test_wordStartingBeforeTheCut_isKept() {
         let spoken = Segment(start: 0, end: 3.5, text: " On se voit")
-        let cutWord = Segment(start: 3.6, end: 4.0, text: " demain")
+        let cutWord = Segment(start: 3.61, end: 3.74, text: " demain")
         let outcome = PastAudioSegments.text(of: [result([spoken, cutWord])], audioSeconds: 3.72)
         XCTAssertEqual(outcome.text, "On se voit demain")
         XCTAssertEqual(outcome.dropped, [])
+    }
+
+    func test_segmentStartingAtTheLastTimestamp_isDropped() {
+        let spoken = Segment(start: 0, end: 15.22, text: " on va voir")
+        let invented = Segment(start: 15.22, end: 16.14, text: " le")
+        let outcome = PastAudioSegments.text(of: [result([spoken, invented])], audioSeconds: 15.23)
+        XCTAssertEqual(outcome.text, "on va voir")
     }
 
     func test_laterChunk_onlyItsLateSegmentIsDropped() {
