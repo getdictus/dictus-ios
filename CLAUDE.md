@@ -39,7 +39,7 @@ Voir PRD.md pour les specs complètes et DEVELOPMENT.md pour le guide de dévelo
 
 ## Priorités
 
-`docs/ROADMAP.md` est la file ordonnée du projet : trois voies séquentielles (1.8.2 bugs → 2.0.0 Pro → session clavier) et, dans chacune, une liste numérotée. **Le lire avant de proposer du travail, et prendre le premier item non fait de la voie active.** Le tracker trie par qualité de rédaction, pas par importance — c'est ce fichier qui porte l'ordre. `docs/RELEASE-PLAN.md` dit pourquoi les cycles sont ce qu'ils sont ; `docs/VERSIONING.md` dit comment les numéroter.
+L'ordre du travail est le projet d'organisation [« Dictus 2.1 »](https://github.com/orgs/getdictus/projects/3). **Le lire avant de proposer du travail** (`gh project item-list 3 --owner getdictus --limit 200 --format json`) **et prendre le premier item `À faire`, dans l'ordre où la commande les sort** ; les colonnes `Status` vont `À faire` → `En cours` → `En review` → `Fait`, et un item `En cours` ou `En review` est déjà pris. Le tracker trie par qualité de rédaction, pas par importance — c'est le projet qui porte l'ordre. `docs/ROADMAP.md` ne garde que les milestones (2.1, 2.2, plus tard) et la liste « Settled — do not reopen ». `docs/RELEASE-PLAN.md` dit pourquoi les cycles sont ce qu'ils sont ; `docs/VERSIONING.md` dit comment les numéroter.
 
 Les issues du milestone `Someday` sont hors de vue volontairement. Ne pas les remonter sans que Pierre le demande.
 
