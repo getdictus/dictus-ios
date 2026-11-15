@@ -21,7 +21,7 @@ The `Status` columns run `À faire` → `En cours` → `En review` → `Fait`. T
 
 ## Settled — do not reopen
 
-- #138 wontfix: a keyboard extension cannot extend a key's hit area (measured).
+- #138 wontfix: a keyboard extension receives no touch below its own window, so the bottom row's hit area cannot extend downward (measured). Resizing key targets inside the keyboard is possible (#949).
 - The Smart Mode set is five modes on one axis; a Typeless-like mode is refused (#523).
 - Verbal `point` in French is not a feature: Parakeet already punctuates.
 - The bullet mode stays, renamed `Liste`, re-centred on 2026-09-30 as a summary in bullets (#573).
