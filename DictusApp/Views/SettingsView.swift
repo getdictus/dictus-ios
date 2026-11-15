@@ -154,6 +154,14 @@ struct SettingsView: View {
     /// Confirmation dialog for emptying the transcription history (#70).
     @State private var showClearHistoryConfirmation = false
 
+    /// Whether "Clear history" has anything to delete, polish journal included
+    /// (#906). Kept in state because nothing publishes a change to the journal:
+    /// refreshed when the screen appears, when the app comes back to the
+    /// foreground, and after the row runs.
+    @State private var hasSomethingToClear = false
+
+    @Environment(\.scenePhase) private var scenePhase
+
     /// The feedback sheet (#565). Its content lives in `FeedbackComposer` so a
     /// closed sheet keeps what the user typed.
     @State private var showFeedback = false
@@ -295,11 +303,12 @@ struct SettingsView: View {
                     polishStateFooter
                 }
 
-                // Visible for a subscriber, and for anyone who still has saved
-                // transcriptions after an entitlement went away (#70). See
-                // `HistoryAvailability.clearRowIsVisible`.
+                // Visible for a subscriber, and for anyone who still has dictated
+                // text on the device: saved transcriptions after an entitlement
+                // went away (#70), or the polish journal, which every dictation
+                // writes Pro or not (#906). See `HistoryAvailability.clearRowIsVisible`.
                 if HistoryAvailability.clearRowIsVisible(
-                    isEntitled: historyIsEntitled, hasSavedRecords: !history.isEmpty
+                    isEntitled: historyIsEntitled, hasSavedRecords: hasSomethingToClear
                 ) {
                     clearHistoryRow
                 }
@@ -576,6 +585,11 @@ struct SettingsView: View {
         .scrollContentBackground(.hidden)
         .background(Color.dictusBackground.ignoresSafeArea())
         .navigationTitle("Settings")
+        .onAppear(perform: refreshHasSomethingToClear)
+        .onChange(of: history.count) { _, _ in refreshHasSomethingToClear() }
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .active { refreshHasSomethingToClear() }
+        }
         .navigationDestination(isPresented: $showPolishDebug) {
             PolishDebugView()
         }
@@ -608,7 +622,12 @@ struct SettingsView: View {
         return HistoryAvailability.isEntitled
     }
 
-    /// Empties the transcription history (#70, brief decision 3).
+    private func refreshHasSomethingToClear() {
+        hasSomethingToClear = ClearHistory.hasSomethingToDelete(history: history)
+    }
+
+    /// Empties the transcription history (#70, brief decision 3) and the polish
+    /// journal (#906), the two places that keep what the user dictated.
     ///
     /// WHY this row exists at all: the history is a local plaintext record of
     /// everything the user has ever dictated. A store like that needs a visible
@@ -629,11 +648,14 @@ struct SettingsView: View {
                 // `format:` rather than an interpolated literal: the latter would put
                 // a "%lld" key in the string catalogue for a number that has nothing
                 // to translate, and this way the digits group per the user's locale.
-                Text(history.count, format: .number)
-                    .foregroundStyle(.secondary)
+                // No "0" next to a row that still deletes the polish journal (#906).
+                if !history.isEmpty {
+                    Text(history.count, format: .number)
+                        .foregroundStyle(.secondary)
+                }
             }
         }
-        .disabled(history.isEmpty)
+        .disabled(!hasSomethingToClear)
         .confirmationDialog(
             "Clear history?",
             isPresented: $showClearHistoryConfirmation,
@@ -642,7 +664,8 @@ struct SettingsView: View {
             Button("Delete all", role: .destructive) {
                 // Shared voice notes among them leave the keyboard too (#639).
                 VoiceNoteProcessor.shared.withdrawKeyboardDeliveries(history.records.map(\.id), reason: "historyCleared")
-                history.clear()
+                ClearHistory.run(history: history)
+                refreshHasSomethingToClear()
             }
             Button("Cancel", role: .cancel) {}
         } message: {

@@ -77,6 +77,10 @@ public enum HistoryAvailability {
     /// It is still hidden for someone who never had the feature and has nothing
     /// stored, because there the row would only advertise a feature #236 says must
     /// not be visible yet.
+    ///
+    /// `hasSavedRecords` counts the polish journal too since #906
+    /// (`ClearHistory.hasSomethingToDelete`): the row empties both, and the journal
+    /// holds dictated text for everyone, subscriber or not.
     public static func clearRowIsVisible(isEntitled: Bool, hasSavedRecords: Bool) -> Bool {
         isEntitled || hasSavedRecords
     }
