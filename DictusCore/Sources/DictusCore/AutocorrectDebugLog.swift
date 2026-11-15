@@ -130,6 +130,13 @@ public enum AutocorrectDebugLog {
         write("UNDO orig=\"\(original)\" rejected=\"\(rejected)\"")
     }
 
+    /// A correction made at a punctuation mark was put back because the key typed
+    /// right after the mark showed it sat inside an e-mail address or a URL (#919).
+    public static func autocorrectRevertedInAddress(original: String, corrected: String) {
+        guard enabled else { return }
+        write("ADDRESS-REVERT orig=\"\(original)\" undone=\"\(corrected)\"")
+    }
+
     /// The user refused an autocorrection at its position (#872): `by` is
     /// "backspace", "undo" or "typed-word". The next word committed there is kept.
     public static func autocorrectRefused(corrected: String, by: String) {
