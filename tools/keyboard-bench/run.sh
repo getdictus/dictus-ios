@@ -79,8 +79,8 @@ cp "$ROOT"/DictusKeyboard/Resources/*_spellcheck.dict \
    "$ROOT"/DictusKeyboard/Resources/*_frequency.json "$BIN/"
 
 # Fixed hash seed. Some corrections are ties the engine breaks in Swift's hash order,
-# which changes from one process to the next: "boue" became "bone" in 3 runs out of 4
-# and "blue" in the fourth. With the seed fixed, a replay is repeatable and a change in
+# which changes from one process to the next: "boue" and "meef" each came out two
+# different ways over six runs (tools/keyboard-bench/README.md). With the seed fixed, a replay is repeatable and a change in
 # the report is a change in the code. Drop the variable to see which words flip.
 echo "== replay on $UDID" >&2
 # The engine prints its load messages on stdout; they belong with the build log, not the report.

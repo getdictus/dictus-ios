@@ -74,8 +74,10 @@ func grid(_ page: [[KeyDefinition]], width: CGFloat, height: CGFloat) -> [Cell] 
 }
 
 /// `GiellaKeyboardView.handleTouches`: clamp 4 pt inside the view, then the cell under
-/// the point, if any.
+/// the point, if any. The clamp only applies to touches the view receives: one above
+/// the grid lands in the toolbar, and on the simulator typed nothing.
 func hitTest(_ point: CGPoint, cells: [Cell], width: CGFloat, height: CGFloat) -> Cell? {
+    guard CGRect(x: 0, y: 0, width: width, height: height).contains(point) else { return nil }
     let margin: CGFloat = 4
     let p = CGPoint(x: min(max(point.x, margin), width - margin), y: min(max(point.y, margin), height - margin))
     return cells.first { $0.frame.contains(p) }

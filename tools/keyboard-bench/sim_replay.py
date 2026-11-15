@@ -41,6 +41,7 @@ import subprocess
 import time
 
 REMINDERS = "com.apple.reminders"
+RETURN_PRESSED = "[return key: field closed]"
 
 
 def tree(udid):
@@ -108,6 +109,7 @@ def main():
     parser.add_argument("--out", required=True)
     parser.add_argument("--taps", help="dictus: the taps.tsv the in-process replay wrote")
     parser.add_argument("--grid-top", type=float, help="dictus: screen y of the key grid's top edge, in points")
+    parser.add_argument("--start", type=int, default=0, help="first sentence: resumes a run that stopped, appending to its texts.tsv")
     args = parser.parse_args()
     if args.keyboard == "dictus" and (args.taps is None or args.grid_top is None):
         parser.error("--keyboard dictus needs --taps and --grid-top")
@@ -126,8 +128,15 @@ def main():
                 if r["lang"] == args.lang:
                     replayed.setdefault(int(r["sentence"]), []).append((float(r["x"]), float(r["y"]) + args.grid_top))
 
-    out = ["lang\tsentence\tintended\tfinal"]
+    # Written sentence by sentence: a run takes 15 to 30 minutes, and one that stops
+    # keeps what it typed and resumes with --start.
+    path = os.path.join(args.out, "texts.tsv")
+    if args.start == 0:
+        with open(path, "w", encoding="utf-8") as f:
+            f.write("lang\tsentence\tintended\tfinal\n")
     for s, intended in enumerate(sentences):
+        if s < args.start:
+            continue
         new_reminder(args.udid)
         nodes = tree(args.udid)
         before = titles(nodes)
@@ -135,8 +144,8 @@ def main():
             raise SystemExit(f"sentence {s}: expected one empty reminder title, found {before}")
         slot = before.index("")
         points = apple_points(args.lang, s, runs[s], nodes) if args.keyboard == "apple" else replayed[s]
-        # The run's own rhythm. Back to back, with no pause, the Dictus keyboard dropped
-        # three letters in twenty sentences that the in-process replay typed.
+        # The run's own rhythm: with the taps back to back, Apple's French keyboard
+        # typed one of twenty sentences differently ("bjdget" for "budget").
         steps = []
         times = [t for _, _, _, t in runs[s]]
         for i, (x, y) in enumerate(points):
@@ -144,12 +153,13 @@ def main():
                 steps += ["--step", f"sleep {(times[i] - times[i - 1]) / 1000:.3f}"]
             steps += ["--step", f"tap -x {x:.2f} -y {y:.2f}"]
         subprocess.run(["axe", "batch", "--udid", args.udid] + steps, check=True, capture_output=True)
-        final = titles(tree(args.udid))[slot].strip()
-        out.append(f"{args.lang}\t{s}\t{intended}\t{final}")
+        after = titles(tree(args.udid))
+        # A tap on the return key ends the title in Reminders and takes the field away.
+        # The replay types nothing for that tap, so the sentence cannot be compared.
+        final = after[slot].strip() if slot < len(after) else RETURN_PRESSED
+        with open(path, "a", encoding="utf-8") as f:
+            f.write(f"{args.lang}\t{s}\t{intended}\t{final}\n")
         print(f"{s}\t{final}", flush=True)
-
-    with open(os.path.join(args.out, "texts.tsv"), "w", encoding="utf-8") as f:
-        f.write("\n".join(out) + "\n")
 
 
 if __name__ == "__main__":
