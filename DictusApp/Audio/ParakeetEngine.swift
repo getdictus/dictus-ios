@@ -97,8 +97,17 @@ class ParakeetEngine: SpeechModelProtocol {
         do {
             // Compile the cached Parakeet v3 CoreML models. `load` reads the bundles the
             // guard above verified; it does not resolve anything over the network.
+            let configuration = Self.probeConfiguration()
+            let requestedUnits = configuration?.computeUnits.logLabel ?? "default"
+            // Written BEFORE the load (#963): on the A12X the process was jetsammed inside
+            // `AsrModels.load`, and a line written only after it never reaches the log.
+            PersistentLog.log(.diagnosticProbe(
+                component: "ParakeetLoad", instanceID: modelIdentifier, action: "loadStarted",
+                details: "units=\(requestedUnits) \(ProcessMemory.logFields())"
+            ))
             let loadStart = Date()
-            let models = try await AsrModels.load(from: cacheDirectory, version: .v3)
+            let models = try await AsrModels.load(
+                from: cacheDirectory, configuration: configuration, version: .v3)
 
             // Initialize the ASR manager for transcription. `initialize(models:)` became
             // `loadModels(_:)` in FluidAudio 0.15 (#558); same work, new name.
@@ -237,6 +246,25 @@ class ParakeetEngine: SpeechModelProtocol {
 
 @available(iOS 17.0, *)
 extension ParakeetEngine {
+
+    /// `nil` (FluidAudio's default, CPU + Neural Engine) everywhere except the #963 probe:
+    /// a Debug build on an A12X/A12Z iPad loads every component on the CPU only.
+    ///
+    /// WHY: on `iPad8,1` (4 GB) the default load was jetsammed twice inside `AsrModels.load`,
+    /// DictusApp at ~2.7 GB resident (`JetsamEvent-2026-11-15-183201`, reasons
+    /// `vm-pageshortage` and `proc-thrashing`). The v3 encoder is 6-bit palettized (425 MB on
+    /// disk); expanding it on load would explain that size. The CPU is the other unit iOS
+    /// allows in the background, so it is the next thing to measure.
+    static func probeConfiguration() -> MLModelConfiguration? {
+        #if DEBUG
+        guard PreA14ParakeetProbe.applies(to: .current(), probeEnabled: true) else { return nil }
+        let configuration = AsrModels.defaultConfiguration()
+        configuration.computeUnits = .cpuOnly
+        return configuration
+        #else
+        return nil
+        #endif
+    }
 
     /// Logs the compute units each Parakeet component was loaded with, the load time and
     /// the process footprint, as `ParakeetLoad computeUnits`.
