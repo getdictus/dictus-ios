@@ -158,6 +158,16 @@ public struct DeviceCapabilities: Sendable, Equatable {
         Self.iPadProM4Identifiers.contains(deviceModelIdentifier)
     }
 
+    /// Whether this is an A12X or A12Z iPad Pro: every `iPad8,*` identifier (11-inch and
+    /// 12.9-inch, 2018 and 2020). A subset of `isPreA14`.
+    ///
+    /// WHY ITS OWN PREDICATE (#963): the Parakeet measurement targets this family only,
+    /// because it is the one device Dictus has measured Whisper's background failure on
+    /// (`iPad8,1`, #635). The A12/A13 iPhones and iPads stay behind the floor.
+    public var isA12XOrA12ZIPadPro: Bool {
+        hardwareFamily(after: "iPad") == 8
+    }
+
     /// The family number of an identifier such as "iPad8,1" (→ 8), or nil when the
     /// identifier does not start with `prefix` followed by digits and a comma.
     ///
