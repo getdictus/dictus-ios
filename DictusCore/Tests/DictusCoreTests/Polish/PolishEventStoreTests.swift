@@ -72,6 +72,42 @@ final class PolishEventStoreTests: XCTestCase {
         )
     }
 
+    /// The edge of the window (#946): an hour on either side of seven days.
+    func testPruneKeepsJustUnderSevenDaysAndDropsJustOver() {
+        PolishEventStore.append(entry("juste-après", ageDays: 7 + 1.0 / 24), to: url)
+        PolishEventStore.append(entry("juste-avant", ageDays: 7 - 1.0 / 24), to: url)
+        PolishEventStore.pruneOldEntries(at: url)
+        XCTAssertEqual(
+            PolishEventStore.readAll(applyingRetention: false, from: url).map(\.raw),
+            ["juste-avant"]
+        )
+    }
+
+    func testPruneLeavesAnEmptyFileEmpty() throws {
+        FileManager.default.createFile(atPath: url.path, contents: nil)
+        PolishEventStore.pruneOldEntries(at: url)
+        XCTAssertEqual(try Data(contentsOf: url), Data())
+    }
+
+    /// A launch on a device that never polished must not create the file.
+    func testPruneDoesNotCreateAMissingFile() {
+        PolishEventStore.pruneOldEntries(at: url)
+        XCTAssertFalse(FileManager.default.fileExists(atPath: url.path))
+    }
+
+    /// Runs on every activation, so with nothing past retention it leaves the bytes
+    /// alone, undecodable lines included.
+    func testPruneWithNothingPastRetentionLeavesTheFileUntouched() throws {
+        PolishEventStore.append(entry("récent"), to: url)
+        let handle = try FileHandle(forWritingTo: url)
+        try handle.seekToEnd()
+        try handle.write(contentsOf: Data("not json\n".utf8))
+        try handle.close()
+        let before = try Data(contentsOf: url)
+        PolishEventStore.pruneOldEntries(at: url)
+        XCTAssertEqual(try Data(contentsOf: url), before)
+    }
+
     func testClearEmptiesTheFile() {
         PolishEventStore.append(entry("un"), to: url)
         PolishEventStore.clear(at: url)
