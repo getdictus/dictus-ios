@@ -6,6 +6,7 @@ import UIKit
 import DictusCore
 import WhisperKit
 import FluidAudio
+import os
 
 /// Represents the current state of a model in the download/preparation lifecycle.
 ///
@@ -801,7 +802,10 @@ class ModelManager: ObservableObject {
                 // Issues #370/#612: pre-A14 chips need the audio encoder off the Neural Engine.
                 // This is the site the onboarding hang happens at (prewarm/compile).
                 computeOptions: WhisperComputeOptions.current(),
-                verbose: false,
+                // Debug level so `WhisperKitPrewarmTrace` receives the per-sub-model
+                // messages (#897). Its callback drops every other line.
+                verbose: true,
+                logLevel: .debug,
                 prewarm: true,
                 load: true,
                 download: false
@@ -892,7 +896,7 @@ class ModelManager: ObservableObject {
                 ?? ModelInfo.defaultPrewarmTimeoutSeconds
             do {
                 _ = try await withPrewarmTimeout(seconds: prewarmTimeoutSeconds) {
-                    try await WhisperKit(config)
+                    try await WhisperKitPrewarmTrace.run(identifier: identifier) { try await WhisperKit(config) }
                 } whenLateCompilationLands: { result in
                     // The compile the app gave up on has landed. Two things follow.
                     // The engine is free, and this is the only place that knows it.
@@ -1675,6 +1679,94 @@ enum ModelManagerError: Error, DiagnosableError {
     var isPrewarmTimeout: Bool {
         if case .prewarmTimeout = self { return true }
         return false
+    }
+}
+
+/// Logs which WhisperKit sub-model a prewarm is compiling, and a heartbeat while it
+/// runs (#897). Diagnostic only: it changes what is logged, not what is loaded or when.
+///
+/// WHY: a Turbo preparation that hits its budget leaves `modelCompilationStarted`, then
+/// `modelPrewarmTimeout`, and nothing between. The stage lines name the sub-model Core ML
+/// is on. The heartbeat says whether the device is throttled, short of memory, or losing
+/// disk while it waits. Losing disk is what the ANE compiler bug in argmax-oss-swift#560
+/// looks like on an M6: about 3.5 GB a minute, on the Turbo audio encoder.
+///
+/// It wraps the compile itself, not the deadline, so it keeps logging after the deadline
+/// abandons the compile and ends only when the compile lands, which #897 has never seen.
+///
+/// WhisperKit's logger is one global. Another `WhisperKit(config)` created while a trace
+/// runs resets its level to `.none`, and the stage lines stop until the next prewarm.
+@MainActor
+final class WhisperKitPrewarmTrace {
+    static func run<T>(identifier: String, _ compile: @Sendable () async throws -> T) async throws -> T {
+        let trace = WhisperKitPrewarmTrace(identifier: identifier)
+        do {
+            let value = try await compile()
+            trace.finish(outcome: "success")
+            return value
+        } catch {
+            trace.finish(outcome: "failure:\(LoggedError.domainAndCode(error))")
+            throw error
+        }
+    }
+
+    private static let heartbeatSeconds: UInt64 = 30
+    /// 30 minutes. The M6 load in argmax-oss-swift#560 ran past 20.
+    private static let heartbeatLimit = 60
+
+    private let identifier: String
+    private let start = Date()
+    private let lastStage = OSAllocatedUnfairLock<WhisperKitLoadStage?>(initialState: nil)
+    private var heartbeat: Task<Void, Never>?
+
+    private init(identifier: String) {
+        self.identifier = identifier
+        let start = self.start
+        let lastStage = self.lastStage
+        // Called on WhisperKit's threads, hence no `self`.
+        Logging.shared.loggingCallback = { @Sendable message in
+            guard let stage = WhisperKitLoadStage(logMessage: message) else { return }
+            lastStage.withLock { $0 = stage }
+            PersistentLog.log(.diagnosticProbe(
+                component: "ModelPrewarm",
+                instanceID: identifier,
+                action: "stage",
+                details: "\(stage.rawValue) afterMs=\(Int(Date().timeIntervalSince(start) * 1000))"
+            ))
+        }
+        log("traceStarted")
+        heartbeat = Task { [weak self] in
+            for _ in 0..<Self.heartbeatLimit {
+                try? await Task.sleep(nanoseconds: Self.heartbeatSeconds * 1_000_000_000)
+                guard !Task.isCancelled, let self else { return }
+                self.log("heartbeat")
+            }
+        }
+    }
+
+    private func finish(outcome: String) {
+        heartbeat?.cancel()
+        Logging.shared.loggingCallback = nil
+        Logging.shared.logLevel = .none
+        log("traceEnded", "outcome=\(outcome) ")
+    }
+
+    private func log(_ action: String, _ prefix: String = "") {
+        let capabilities = DeviceCapabilities.current()
+        let diskFreeMB = (try? URL(fileURLWithPath: NSHomeDirectory())
+            .resourceValues(forKeys: [.volumeAvailableCapacityKey])
+            .volumeAvailableCapacity)
+            .map { String($0 / 1_048_576) } ?? "unknown"
+        let stage = lastStage.withLock { $0 }?.rawValue ?? "none"
+        PersistentLog.log(.diagnosticProbe(
+            component: "ModelPrewarm",
+            instanceID: identifier,
+            action: action,
+            details: prefix
+                + "afterS=\(Int(Date().timeIntervalSince(start))) lastStage=\(stage) "
+                + "thermal=\(capabilities.thermalState.logLabel) "
+                + "availableMB=\(capabilities.availableMemoryMB) diskFreeMB=\(diskFreeMB)"
+        ))
     }
 }
 
