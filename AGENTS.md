@@ -35,6 +35,12 @@ Voir PRD.md pour les specs complètes et DEVELOPMENT.md pour le guide de dévelo
 - Toutes les données partagées passent par App Group
 - RequestsOpenAccess = true dans Info.plist de l'extension (pour le micro)
 
+## Priorités
+
+L'ordre du travail est le projet d'organisation [« Dictus 2.1 »](https://github.com/orgs/getdictus/projects/3), pas `docs/ROADMAP.md`. Avant de proposer du travail : `gh project item-list 3 --owner getdictus --limit 200 --format json`, puis prendre le premier item `À faire`, dans l'ordre où la commande les sort. Les colonnes `Status` vont `À faire` → `En cours` → `En review` → `Fait` ; un item `En cours` ou `En review` est déjà pris. `docs/ROADMAP.md` ne garde que les milestones et la liste « Settled — do not reopen ».
+
+Les issues du milestone `Someday` sont hors de vue volontairement. Ne pas les remonter sans que Pierre le demande.
+
 ## Contexte utilisateur
 
 - Pierre est débutant en Swift/SwiftUI — expliquer les concepts clés au fur et à mesure
