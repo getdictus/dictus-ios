@@ -127,7 +127,7 @@ struct SwipeBackOverlayView: View {
     }
 
     private var stayHereInstruction: String {
-        String(localized: "Stay here a few seconds.\nYou can go back to your app once dictation starts.",
+        String(localized: "Stay here a few seconds\nwhile dictation starts.",
                comment: "Swipe-back overlay instruction while the microphone is being prepared; replaces the swipe-back instruction, because leaving during the wait makes the dictation fail (issue #951).")
     }
 
