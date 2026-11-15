@@ -15,8 +15,11 @@ import DictusCore
 /// recovered (#853), passed in by MainTabView.
 struct SwipeBackOverlayView: View {
     /// The cold start's audio session is recovering from an audio server reset, and the
-    /// return to the host app is held for it (#853). That can take about three seconds, so
-    /// the title says the microphone is being prepared rather than that dictation runs.
+    /// return to the host app is held for it (#853). That can take up to about eight seconds
+    /// (#899), so the title says the microphone is being prepared rather than that dictation
+    /// runs, and the swipe-back lesson gives way to "stay here" (#951): a user who swipes
+    /// back during the wait loses the dictation, since iOS refuses the engine from the
+    /// background.
     var isPreparingMicrophone = false
 
     @State private var isWaveformAnimating = false
@@ -70,12 +73,16 @@ struct SwipeBackOverlayView: View {
                         x: -30 + swipeProgress * 80,
                         y: 7 // half below the phone outline
                     )
+                    // Hidden rather than removed, so the layout does not jump when
+                    // recording starts and the lesson comes back.
+                    .opacity(isPreparingMicrophone ? 0 : 1)
                 }
 
                 // Swipe hand gesture below the phone mockup (no chevrons — they're on the dot now)
                 SwipeHandView(progress: swipeProgress)
                     .frame(width: 140, height: 48)
                     .padding(.top, 2)
+                    .opacity(isPreparingMicrophone ? 0 : 1)
 
                 // Empathetic explanation — short key to avoid Xcode xcstrings duplicate bug
                 Text("swipeback_empathy_text")
@@ -88,7 +95,7 @@ struct SwipeBackOverlayView: View {
                 Spacer()
 
                 // Bottom instruction
-                Text("Swipe right at the bottom of your screen\nto return to your app")
+                Text(isPreparingMicrophone ? stayHereInstruction : swipeBackInstruction)
                     .font(.callout.weight(.medium))
                     .foregroundColor(.dictusAccent)
                     .multilineTextAlignment(.center)
@@ -113,6 +120,15 @@ struct SwipeBackOverlayView: View {
     private var preparingMicrophoneTitle: String {
         String(localized: "Preparing the microphone…",
                comment: "Swipe-back overlay title while a cold start waits for iOS to bring the audio system back, which can take about three seconds; replaces 'Dictation in progress' until recording starts (issue #853).")
+    }
+
+    private var swipeBackInstruction: String {
+        String(localized: "Swipe right at the bottom of your screen\nto return to your app")
+    }
+
+    private var stayHereInstruction: String {
+        String(localized: "Stay here a few seconds.\nYou can go back to your app once dictation starts.",
+               comment: "Swipe-back overlay instruction while the microphone is being prepared; replaces the swipe-back instruction, because leaving during the wait makes the dictation fail (issue #951).")
     }
 
     /// Repeating hand swipe animation with pause between cycles.
@@ -256,4 +272,8 @@ private struct IPhoneMockupView: View {
 
 #Preview {
     SwipeBackOverlayView()
+}
+
+#Preview("Preparing the microphone") {
+    SwipeBackOverlayView(isPreparingMicrophone: true)
 }
