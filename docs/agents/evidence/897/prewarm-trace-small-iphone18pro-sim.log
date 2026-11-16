@@ -1,0 +1,23 @@
+[2026-11-15T11:04:46Z] INFO    [lifecycle] <APP> deviceCapabilitySnapshot model=iPhone19,2 ramGB=24 availableMB=0 thermal=nominal
+[2026-11-15T11:04:51Z] INFO    [lifecycle] <APP> deviceCapabilitySnapshot model=iPhone19,2 ramGB=24 availableMB=0 thermal=nominal
+[2026-11-15T11:06:25Z] INFO    [model] <APP> modelDownloadStarted name=openai_whisper-small_216MB size=217MB
+[2026-11-15T11:09:07Z] INFO    [model] <APP> modelDownloadCompleted name=openai_whisper-small_216MB
+[2026-11-15T11:09:07Z] INFO    [model] <APP> modelCompilationStarted name=openai_whisper-small_216MB
+[2026-11-15T11:09:09Z] DEBUG   [keyboard] <APP> diagnosticProbe component=ModelPrewarm instanceID=openai_whisper-small_216MB action=traceStarted details=afterS=0 lastStage=none thermal=nominal availableMB=0 diskFreeMB=38730
+[2026-11-15T11:09:09Z] DEBUG   [keyboard] <APP> diagnosticProbe component=ModelPrewarm instanceID=openai_whisper-small_216MB action=stage details=prewarmPassStarted afterMs=3
+[2026-11-15T11:09:09Z] DEBUG   [keyboard] <APP> diagnosticProbe component=ModelPrewarm instanceID=openai_whisper-small_216MB action=stage details=melSpectrogramStarted afterMs=5
+[2026-11-15T11:09:09Z] DEBUG   [keyboard] <APP> diagnosticProbe component=ModelPrewarm instanceID=openai_whisper-small_216MB action=stage details=melSpectrogramDone afterMs=244
+[2026-11-15T11:09:09Z] DEBUG   [keyboard] <APP> diagnosticProbe component=ModelPrewarm instanceID=openai_whisper-small_216MB action=stage details=textDecoderStarted afterMs=246
+[2026-11-15T11:09:10Z] DEBUG   [keyboard] <APP> diagnosticProbe component=ModelPrewarm instanceID=openai_whisper-small_216MB action=stage details=textDecoderDone afterMs=1941
+[2026-11-15T11:09:10Z] DEBUG   [keyboard] <APP> diagnosticProbe component=ModelPrewarm instanceID=openai_whisper-small_216MB action=stage details=audioEncoderStarted afterMs=1942
+[2026-11-15T11:09:12Z] DEBUG   [keyboard] <APP> diagnosticProbe component=ModelPrewarm instanceID=openai_whisper-small_216MB action=stage details=audioEncoderDone afterMs=3492
+[2026-11-15T11:09:12Z] DEBUG   [keyboard] <APP> diagnosticProbe component=ModelPrewarm instanceID=openai_whisper-small_216MB action=stage details=loadPassStarted afterMs=3493
+[2026-11-15T11:09:12Z] DEBUG   [keyboard] <APP> diagnosticProbe component=ModelPrewarm instanceID=openai_whisper-small_216MB action=stage details=melSpectrogramStarted afterMs=3493
+[2026-11-15T11:09:12Z] DEBUG   [keyboard] <APP> diagnosticProbe component=ModelPrewarm instanceID=openai_whisper-small_216MB action=stage details=melSpectrogramDone afterMs=3494
+[2026-11-15T11:09:12Z] DEBUG   [keyboard] <APP> diagnosticProbe component=ModelPrewarm instanceID=openai_whisper-small_216MB action=stage details=textDecoderStarted afterMs=3494
+[2026-11-15T11:09:12Z] DEBUG   [keyboard] <APP> diagnosticProbe component=ModelPrewarm instanceID=openai_whisper-small_216MB action=stage details=textDecoderDone afterMs=3495
+[2026-11-15T11:09:12Z] DEBUG   [keyboard] <APP> diagnosticProbe component=ModelPrewarm instanceID=openai_whisper-small_216MB action=stage details=audioEncoderStarted afterMs=3495
+[2026-11-15T11:09:12Z] DEBUG   [keyboard] <APP> diagnosticProbe component=ModelPrewarm instanceID=openai_whisper-small_216MB action=stage details=audioEncoderDone afterMs=3496
+[2026-11-15T11:09:14Z] DEBUG   [keyboard] <APP> diagnosticProbe component=ModelPrewarm instanceID=openai_whisper-small_216MB action=traceEnded details=outcome=success afterS=5 lastStage=audioEncoderDone thermal=nominal availableMB=0 diskFreeMB=38884
+[2026-11-15T11:09:14Z] INFO    [model] <APP> modelCompilationCompleted name=openai_whisper-small_216MB duration=7502ms
+[2026-11-15T11:09:18Z] INFO    [model] <APP> modelLoadStateChanged from=loading to=ready reason=selectModel-proactive-success

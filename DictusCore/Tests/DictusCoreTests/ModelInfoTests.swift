@@ -623,7 +623,9 @@ final class ModelInfoTests: XCTestCase {
             makeCapabilities(ramGB: 8, model: "iPhone16,2"),   // iPhone 15 Pro Max
             makeCapabilities(ramGB: 8, model: "iPhone17,1"),   // iPhone 16 Pro
             makeCapabilities(ramGB: 12, model: "iPhone18,1"),  // iPhone 17 Pro
-            makeCapabilities(ramGB: 12, model: "iPhone19,1"),  // a family not released yet
+            makeCapabilities(ramGB: 12, model: "iPhone19,1"),  // a family Argmax does not list yet
+            makeCapabilities(ramGB: 12, model: "iPhone19,2"),  // iPhone 18 Pro (#897)
+            makeCapabilities(ramGB: 12, model: "iPhone19,3"),  // iPhone 18 Pro Max (#897)
             makeCapabilities(ramGB: 8, model: "iPad14,3")      // iPad Pro M2
         ]
         for identifier in turboVariants {
