@@ -1,0 +1,959 @@
+engine	clip	language	tail	sent_seconds	result	start	end	dropped	text
+openai_whisper-small_216MB	elevenlabs/fr/fr-01-spoken-punctuation.wav	fr	clean	4.40	0	0.00	4.20	0	Salut Camille, je serai en retard ce matin.
+openai_whisper-small_216MB	elevenlabs/fr/fr-01-spoken-punctuation.wav	fr	zero-3s	4.75	0	0.00	4.20	0	Salut Camille, je serai en retard ce matin.
+openai_whisper-small_216MB	elevenlabs/fr/fr-01-spoken-punctuation.wav	fr	quiet-3s	4.75	0	0.00	4.20	0	Salut Camille, je serai en retard ce matin.
+openai_whisper-small_216MB	elevenlabs/fr/fr-01-spoken-punctuation.wav	fr	quiet-8s	4.75	0	0.00	4.20	0	Salut Camille, je serai en retard ce matin.
+openai_whisper-small_216MB	elevenlabs/fr/fr-01-spoken-punctuation.wav	fr	noisy-3s	4.65	0	0.00	4.00	0	Salut Camille, je serai en retard ce matin.
+openai_whisper-small_216MB	elevenlabs/fr/fr-01-spoken-punctuation.wav	fr	noisy-8s	4.65	0	0.00	4.00	0	Salut Camille, je serai en retard ce matin.
+openai_whisper-small_216MB	elevenlabs/fr/fr-01-spoken-punctuation.wav	fr	cut-50%	2.38	0	0.00	2.00	0	Salut Camille,
+openai_whisper-small_216MB	elevenlabs/fr/fr-01-spoken-punctuation.wav	fr	cut-70%	2.92	0	0.00	2.00	0	Salut Camille,
+openai_whisper-small_216MB	elevenlabs/fr/fr-01-spoken-punctuation.wav	fr	cut-90%	4.07	0	0.00	2.00	0	Salut Camille!
+openai_whisper-small_216MB	elevenlabs/fr/fr-01-spoken-punctuation.wav	fr	cut-90%	4.07	0	2.00	4.00	0	Je serai en retard ce matin.
+openai_whisper-small_216MB	elevenlabs/fr/fr-02-appointment-numbers.wav	fr	clean	4.80	0	0.00	4.68	0	Le rendez-vous est fixé au 14 mars à 9h30, salle 212.
+openai_whisper-small_216MB	elevenlabs/fr/fr-02-appointment-numbers.wav	fr	zero-3s	5.15	0	0.00	4.68	0	Le rendez-vous est fixé au 14 mars à 9h30, salle 212.
+openai_whisper-small_216MB	elevenlabs/fr/fr-02-appointment-numbers.wav	fr	quiet-3s	5.15	0	0.00	5.00	0	Le rendez-vous est fixé au 14 mars à 9h30, salle 212.
+openai_whisper-small_216MB	elevenlabs/fr/fr-02-appointment-numbers.wav	fr	quiet-8s	5.15	0	0.00	5.00	0	Le rendez-vous est fixé au 14 mars à 9h30, salle 212.
+openai_whisper-small_216MB	elevenlabs/fr/fr-02-appointment-numbers.wav	fr	noisy-3s	5.05	0	0.00	4.80	0	Le rendez-vous est fixé au 14 mars à 9h30, salle 212.
+openai_whisper-small_216MB	elevenlabs/fr/fr-02-appointment-numbers.wav	fr	noisy-8s	5.10	0	0.00	5.00	0	Le rendez-vous est fixé au 14 mars à 9h30, salle 212.
+openai_whisper-small_216MB	elevenlabs/fr/fr-02-appointment-numbers.wav	fr	cut-50%	2.58	0	0.00	2.64	0	Le rendez-vous est fixé au 14 mars à 9h00.
+openai_whisper-small_216MB	elevenlabs/fr/fr-02-appointment-numbers.wav	fr	cut-70%	3.53	0	0.00	3.60	0	Le rendez-vous est fixé au 14 mars à 9h30.
+openai_whisper-small_216MB	elevenlabs/fr/fr-02-appointment-numbers.wav	fr	cut-90%	4.18	0	0.00	4.20	0	Le rendez-vous est fixé au 14 mars à 9h30, salle 205.
+openai_whisper-small_216MB	elevenlabs/fr/fr-03-shopping.wav	fr	clean	4.08	0	0.00	3.92	0	Pensez à acheter du pain, des tomates et un peu de fromage en rentrant.
+openai_whisper-small_216MB	elevenlabs/fr/fr-03-shopping.wav	fr	zero-3s	4.40	0	0.00	3.92	0	Pensez à acheter du pain, des tomates et un peu de fromage en rentrant.
+openai_whisper-small_216MB	elevenlabs/fr/fr-03-shopping.wav	fr	quiet-3s	4.40	0	0.00	3.88	0	Pensez à acheter du pain, des tomates et un peu de fromage en rentrant.
+openai_whisper-small_216MB	elevenlabs/fr/fr-03-shopping.wav	fr	quiet-8s	4.40	0	0.00	3.88	0	Pensez à acheter du pain, des tomates et un peu de fromage en rentrant.
+openai_whisper-small_216MB	elevenlabs/fr/fr-03-shopping.wav	fr	noisy-3s	4.35	0	0.00	3.84	0	pensée à acheter du pain, des tomates et un peu de fromage en rentrant.
+openai_whisper-small_216MB	elevenlabs/fr/fr-03-shopping.wav	fr	noisy-8s	4.35	0	0.00	3.84	0	pensée à acheter du pain, des tomates et un peu de fromage en rentrant.
+openai_whisper-small_216MB	elevenlabs/fr/fr-03-shopping.wav	fr	cut-50%	1.98	0	0.00	2.00	0	Pensez à acheter du pain, des tomates.
+openai_whisper-small_216MB	elevenlabs/fr/fr-03-shopping.wav	fr	cut-70%	3.03	0	0.00	3.08	0	Pensez à acheter du pain, des tomates et un peu de frappes.
+openai_whisper-small_216MB	elevenlabs/fr/fr-03-shopping.wav	fr	cut-90%	3.53	0	0.00	3.56	0	Tensez à acheter du pain, des tomates et un peu de fromage en rand.
+openai_whisper-small_216MB	elevenlabs/fr/fr-04-question-mark.wav	fr	clean	5.12	0	0.00	4.00	0	Pouvez-vous m'envoyer le compte rendu de la réunion avant ce soir?
+openai_whisper-small_216MB	elevenlabs/fr/fr-04-question-mark.wav	fr	clean	5.12	0	4.00	5.00	0	Point d'interrogation.
+openai_whisper-small_216MB	elevenlabs/fr/fr-04-question-mark.wav	fr	zero-3s	5.50	0	0.00	4.00	0	Pouvez-vous m'envoyer le compte rendu de la réunion avant ce soir?
+openai_whisper-small_216MB	elevenlabs/fr/fr-04-question-mark.wav	fr	zero-3s	5.50	0	4.00	5.00	0	Point d'interrogation.
+openai_whisper-small_216MB	elevenlabs/fr/fr-04-question-mark.wav	fr	quiet-3s	5.50	0	0.00	4.00	0	Pouvez-vous m'envoyer le compte rendu de la réunion avant ce soir?
+openai_whisper-small_216MB	elevenlabs/fr/fr-04-question-mark.wav	fr	quiet-3s	5.50	0	4.00	5.00	0	Point d'interrogation.
+openai_whisper-small_216MB	elevenlabs/fr/fr-04-question-mark.wav	fr	quiet-8s	5.50	0	0.00	4.00	0	Pouvez-vous m'envoyer le compte rendu de la réunion avant ce soir?
+openai_whisper-small_216MB	elevenlabs/fr/fr-04-question-mark.wav	fr	quiet-8s	5.50	0	4.00	5.00	0	Point d'interrogation.
+openai_whisper-small_216MB	elevenlabs/fr/fr-04-question-mark.wav	fr	noisy-3s	5.45	0	0.00	4.00	0	Pouvez-vous m'envoyer le compte rendu de la réunion avant ce soir?
+openai_whisper-small_216MB	elevenlabs/fr/fr-04-question-mark.wav	fr	noisy-3s	5.45	0	4.00	5.00	0	Point d'interrogation.
+openai_whisper-small_216MB	elevenlabs/fr/fr-04-question-mark.wav	fr	noisy-8s	5.45	0	0.00	4.00	0	Pouvez-vous m'envoyer le compte rendu de la réunion avant ce soir?
+openai_whisper-small_216MB	elevenlabs/fr/fr-04-question-mark.wav	fr	noisy-8s	5.45	0	4.00	5.00	0	Point d'interrogation.
+openai_whisper-small_216MB	elevenlabs/fr/fr-04-question-mark.wav	fr	cut-50%	2.72	0	0.00	2.72	0	Pouvez-vous m'envoyer le compte rendu de la réunion à...
+openai_whisper-small_216MB	elevenlabs/fr/fr-04-question-mark.wav	fr	cut-70%	3.42	0	0.00	3.50	0	Pouvez-vous m'envoyer le compte rendu de la réunion avant ce soir?
+openai_whisper-small_216MB	elevenlabs/fr/fr-04-question-mark.wav	fr	cut-90%	4.47	0	0.00	4.00	0	Pouvez-vous m'envoyer le compte rendu de la réunion avant ce soir?
+openai_whisper-small_216MB	elevenlabs/en/en-01-move-meeting.wav	en	clean	4.16	0	0.00	4.00	0	Hey, Sarah, can we move tomorrow's meeting to 3.30 in the afternoon?
+openai_whisper-small_216MB	elevenlabs/en/en-01-move-meeting.wav	en	zero-3s	4.55	0	0.00	4.00	0	Hey, Sarah, can we move tomorrow's meeting to 3.30 in the afternoon?
+openai_whisper-small_216MB	elevenlabs/en/en-01-move-meeting.wav	en	quiet-3s	4.55	0	0.00	4.00	0	Hey Sarah, can we move tomorrow's meeting to 3.30 in the afternoon?
+openai_whisper-small_216MB	elevenlabs/en/en-01-move-meeting.wav	en	quiet-8s	4.55	0	0.00	4.00	0	Hey Sarah, can we move tomorrow's meeting to 3.30 in the afternoon?
+openai_whisper-small_216MB	elevenlabs/en/en-01-move-meeting.wav	en	noisy-3s	4.50	0	0.00	4.00	0	Hey Sarah, can we move tomorrow's meeting to 3.30 in the afternoon?
+openai_whisper-small_216MB	elevenlabs/en/en-01-move-meeting.wav	en	noisy-8s	4.50	0	0.00	4.00	0	Hey Sarah, can we move tomorrow's meeting to 3.30 in the afternoon?
+openai_whisper-small_216MB	elevenlabs/en/en-01-move-meeting.wav	en	cut-50%	2.22	0	0.00	2.24	0	Hey Sarah, can we move tomorrow's meeting?
+openai_whisper-small_216MB	elevenlabs/en/en-01-move-meeting.wav	en	cut-70%	3.03	0	0.00	3.00	0	Hey Sarah, can we move tomorrow's meeting to 3/30?
+openai_whisper-small_216MB	elevenlabs/en/en-01-move-meeting.wav	en	cut-90%	3.67	0	0.00	3.72	0	Hey Sarah, can we move tomorrow's meeting to 3.30 in the afternoon?
+openai_whisper-small_216MB	elevenlabs/en/en-02-reminder.wav	en	clean	3.84	0	0.00	3.72	0	Remind me to call the dentist and pick up the package from the post office.
+openai_whisper-small_216MB	elevenlabs/en/en-02-reminder.wav	en	zero-3s	4.20	0	0.00	3.72	0	Remind me to call the dentist and pick up the package from the post office.
+openai_whisper-small_216MB	elevenlabs/en/en-02-reminder.wav	en	quiet-3s	4.20	0	0.00	3.68	0	Remind me to call the dentist and pick up the package from the post office.
+openai_whisper-small_216MB	elevenlabs/en/en-02-reminder.wav	en	quiet-8s	4.20	0	0.00	3.68	0	Remind me to call the dentist and pick up the package from the post office.
+openai_whisper-small_216MB	elevenlabs/en/en-02-reminder.wav	en	noisy-3s	4.15	0	0.00	3.64	0	Remind me to call the dentist and pick up the package from the post office.
+openai_whisper-small_216MB	elevenlabs/en/en-02-reminder.wav	en	noisy-8s	4.15	0	0.00	3.64	0	Remind me to call the dentist and pick up the package from the post office.
+openai_whisper-small_216MB	elevenlabs/en/en-02-reminder.wav	en	cut-50%	1.92	0	0.00	2.00	0	Remind me to call the dentist and pick
+openai_whisper-small_216MB	elevenlabs/en/en-02-reminder.wav	en	cut-70%	2.78	0	0.00	2.80	0	Remind me to call the dentist and pick up the package from
+openai_whisper-small_216MB	elevenlabs/en/en-02-reminder.wav	en	cut-90%	3.33	0	0.00	3.36	0	Remind me to call the dentist and pick up the package from the post office.
+openai_whisper-small_216MB	elevenlabs/en/en-03-train-edinburgh.wav	en	clean	4.16	0	0.00	4.00	0	The train from Edinburgh arrives at Platform 4 around noon.
+openai_whisper-small_216MB	elevenlabs/en/en-03-train-edinburgh.wav	en	zero-3s	4.55	0	0.00	4.00	0	The train from Edinburgh arrives at Platform 4 around noon.
+openai_whisper-small_216MB	elevenlabs/en/en-03-train-edinburgh.wav	en	quiet-3s	4.55	0	0.00	4.00	0	The train from Edinburgh arrives at Platform 4 around noon.
+openai_whisper-small_216MB	elevenlabs/en/en-03-train-edinburgh.wav	en	quiet-8s	4.55	0	0.00	4.00	0	The train from Edinburgh arrives at Platform 4 around noon.
+openai_whisper-small_216MB	elevenlabs/en/en-03-train-edinburgh.wav	en	noisy-3s	4.50	0	0.00	4.00	0	The train from Edinburgh arrives at platform 4 around noon.
+openai_whisper-small_216MB	elevenlabs/en/en-03-train-edinburgh.wav	en	noisy-8s	4.50	0	0.00	4.00	0	The train from Edinburgh arrives at platform 4 around noon.
+openai_whisper-small_216MB	elevenlabs/en/en-03-train-edinburgh.wav	en	cut-50%	2.12	0	0.00	2.16	0	The train from Edinburgh arrives at Pla...
+openai_whisper-small_216MB	elevenlabs/en/en-03-train-edinburgh.wav	en	cut-70%	2.88	0	0.00	2.80	0	The train from Edinburgh arrives at platform 4.
+openai_whisper-small_216MB	elevenlabs/en/en-03-train-edinburgh.wav	en	cut-90%	3.62	0	0.00	3.68	0	The train from Edinburgh arrives at Platform 4 around 9.
+openai_whisper-small_216MB	elevenlabs/de/de-01-documents-friday.wav	de	clean	3.60	0	0.00	3.40	0	Kannst du mir bitte die Unterlagen für das Projekt bis Freitag schicken?
+openai_whisper-small_216MB	elevenlabs/de/de-01-documents-friday.wav	de	zero-3s	4.00	0	0.00	3.40	0	Kannst du mir bitte die Unterlagen für das Projekt bis Freitag schicken?
+openai_whisper-small_216MB	elevenlabs/de/de-01-documents-friday.wav	de	quiet-3s	3.90	0	0.00	3.36	0	Kannst du mir bitte die Unterlagen für das Projekt bis Freitag schicken?
+openai_whisper-small_216MB	elevenlabs/de/de-01-documents-friday.wav	de	quiet-8s	3.90	0	0.00	3.36	0	Kannst du mir bitte die Unterlagen für das Projekt bis Freitag schicken?
+openai_whisper-small_216MB	elevenlabs/de/de-01-documents-friday.wav	de	noisy-3s	3.90	0	0.00	3.32	0	Kannst du mir bitte die Unterlagen für das Projekt bis Freitag schicken?
+openai_whisper-small_216MB	elevenlabs/de/de-01-documents-friday.wav	de	noisy-8s	11.60	0	0.00	3.44	0	Kannst du mir bitte die Unterlagen für das Projekt bis Freitag schicken?
+openai_whisper-small_216MB	elevenlabs/de/de-01-documents-friday.wav	de	cut-50%	1.77	0	0.00	2.00	0	Kannst du mir bitte die Unterlagen für das Video machen?
+openai_whisper-small_216MB	elevenlabs/de/de-01-documents-friday.wav	de	cut-70%	2.42	0	0.00	2.48	0	Kannst du mir bitte die Unterlagen für das Projekt bitte...
+openai_whisper-small_216MB	elevenlabs/de/de-01-documents-friday.wav	de	cut-90%	3.12	0	0.00	3.16	0	Kannst du mir bitte die Unterlagen für das Projekt bis Freitag schicken?
+openai_whisper-small_216MB	elevenlabs/de/de-02-meet-munich.wav	de	clean	3.84	0	0.00	3.60	0	Wir treffen uns um 18 Uhr vor dem Bahnhof in München.
+openai_whisper-small_216MB	elevenlabs/de/de-02-meet-munich.wav	de	zero-3s	4.15	0	0.00	3.60	0	Wir treffen uns um 18 Uhr vor dem Bahnhof in München.
+openai_whisper-small_216MB	elevenlabs/de/de-02-meet-munich.wav	de	quiet-3s	4.15	0	0.00	3.60	0	Wir treffen uns um 18 Uhr vor dem Bahnhof in München.
+openai_whisper-small_216MB	elevenlabs/de/de-02-meet-munich.wav	de	quiet-8s	4.15	0	0.00	3.60	0	Wir treffen uns um 18 Uhr vor dem Bahnhof in München.
+openai_whisper-small_216MB	elevenlabs/de/de-02-meet-munich.wav	de	noisy-3s	4.05	0	0.00	4.00	0	Wir treffen uns um 18 Uhr vor dem Bahnhof in München.
+openai_whisper-small_216MB	elevenlabs/de/de-02-meet-munich.wav	de	noisy-8s	4.05	0	0.00	4.00	0	Wir treffen uns um 18 Uhr vor dem Bahnhof in München.
+openai_whisper-small_216MB	elevenlabs/de/de-02-meet-munich.wav	de	cut-50%	1.77	0	0.00	1.76	0	Wir treffen uns um 18 Uhr.
+openai_whisper-small_216MB	elevenlabs/de/de-02-meet-munich.wav	de	cut-70%	2.78	0	0.00	2.80	0	Wir treffen uns um 18 Uhr vor dem Bahnhof.
+openai_whisper-small_216MB	elevenlabs/de/de-02-meet-munich.wav	de	cut-90%	3.38	0	0.00	3.36	0	Wir treffen uns um 18 Uhr vor dem Bahnhof in München.
+openai_whisper-small_216MB	elevenlabs/de/de-03-shopping-list.wav	de	clean	4.72	0	0.00	2.80	0	Ich habe gerade die Einkaufsliste aktualisiert.
+openai_whisper-small_216MB	elevenlabs/de/de-03-shopping-list.wav	de	clean	4.72	0	2.80	4.60	0	Wir brauchen noch Milch und Eier.
+openai_whisper-small_216MB	elevenlabs/de/de-03-shopping-list.wav	de	zero-3s	5.10	0	0.00	2.80	0	Ich habe gerade die Einkaufsliste aktualisiert.
+openai_whisper-small_216MB	elevenlabs/de/de-03-shopping-list.wav	de	zero-3s	5.10	0	2.80	4.60	0	Wir brauchen noch Milch und Eier.
+openai_whisper-small_216MB	elevenlabs/de/de-03-shopping-list.wav	de	quiet-3s	5.10	0	0.00	2.80	0	Ich habe gerade die Einkaufsliste aktualisiert.
+openai_whisper-small_216MB	elevenlabs/de/de-03-shopping-list.wav	de	quiet-3s	5.10	0	2.80	4.88	0	Wir brauchen noch Milch und Eier.
+openai_whisper-small_216MB	elevenlabs/de/de-03-shopping-list.wav	de	quiet-8s	5.10	0	0.00	2.80	0	Ich habe gerade die Einkaufsliste aktualisiert.
+openai_whisper-small_216MB	elevenlabs/de/de-03-shopping-list.wav	de	quiet-8s	5.10	0	2.80	4.88	0	Wir brauchen noch Milch und Eier.
+openai_whisper-small_216MB	elevenlabs/de/de-03-shopping-list.wav	de	noisy-3s	5.00	0	0.00	2.88	0	Ich habe gerade die Einkaufsliste aktualisiert.
+openai_whisper-small_216MB	elevenlabs/de/de-03-shopping-list.wav	de	noisy-3s	5.00	0	2.88	5.04	0	Wir brauchen noch Milch und Eier.
+openai_whisper-small_216MB	elevenlabs/de/de-03-shopping-list.wav	de	noisy-8s	5.00	0	0.00	2.88	0	Ich habe gerade die Einkaufsliste aktualisiert.
+openai_whisper-small_216MB	elevenlabs/de/de-03-shopping-list.wav	de	noisy-8s	5.00	0	2.88	5.04	0	Wir brauchen noch Milch und Eier.
+openai_whisper-small_216MB	elevenlabs/de/de-03-shopping-list.wav	de	cut-50%	2.38	0	0.00	2.44	0	Ich habe gerade die Einkaufsliste aktualisiert.
+openai_whisper-small_216MB	elevenlabs/de/de-03-shopping-list.wav	de	cut-70%	3.22	0	0.00	2.72	0	Ich habe gerade die Einkaufsliste aktualisiert.
+openai_whisper-small_216MB	elevenlabs/de/de-03-shopping-list.wav	de	cut-90%	4.32	0	0.00	2.84	0	Ich habe gerade die Einkaufsliste aktualisiert.
+openai_whisper-small_216MB	elevenlabs/de/de-03-shopping-list.wav	de	cut-90%	4.32	0	2.84	4.32	0	Wir brauchen noch Milch und Eingang.
+openai_whisper-small_216MB	elevenlabs/es/es-01-arrive-madrid.wav	es	clean	3.52	0	0.00	3.28	0	Hola Lucía, llegaré a Madrid el martes por la tarde.
+openai_whisper-small_216MB	elevenlabs/es/es-01-arrive-madrid.wav	es	zero-3s	3.90	0	0.00	3.28	0	Hola Lucía, llegaré a Madrid el martes por la tarde.
+openai_whisper-small_216MB	elevenlabs/es/es-01-arrive-madrid.wav	es	quiet-3s	3.90	0	0.00	3.28	0	Hola Lucía, llegaré a Madrid el martes por la tarde.
+openai_whisper-small_216MB	elevenlabs/es/es-01-arrive-madrid.wav	es	quiet-8s	3.90	0	0.00	3.28	0	Hola Lucía, llegaré a Madrid el martes por la tarde.
+openai_whisper-small_216MB	elevenlabs/es/es-01-arrive-madrid.wav	es	noisy-3s	3.60	0	0.00	3.28	0	Hola Lucía, llegaré a Madrid el martes por la tarde.
+openai_whisper-small_216MB	elevenlabs/es/es-01-arrive-madrid.wav	es	noisy-8s	3.60	0	0.00	3.28	0	Hola Lucía, llegaré a Madrid el martes por la tarde.
+openai_whisper-small_216MB	elevenlabs/es/es-01-arrive-madrid.wav	es	cut-50%	1.73	0	0.00	2.00	0	Hola Lucia, llegaré a Madrid.
+openai_whisper-small_216MB	elevenlabs/es/es-01-arrive-madrid.wav	es	cut-70%	2.33	0	0.00	2.40	0	Hola Lucia, llegaré a Madrid el mar...
+openai_whisper-small_216MB	elevenlabs/es/es-01-arrive-madrid.wav	es	cut-90%	3.03	0	0.00	3.00	0	Hola Lucía, llegaré a Madrid el martes por la tarde.
+openai_whisper-small_216MB	elevenlabs/es/es-02-invoice-total.wav	es	clean	4.72	0	0.00	4.60	0	La factura total es de 245 euros con el IVA incluido.
+openai_whisper-small_216MB	elevenlabs/es/es-02-invoice-total.wav	es	zero-3s	5.10	0	0.00	4.60	0	La factura total es de 245 euros con el IVA incluido.
+openai_whisper-small_216MB	elevenlabs/es/es-02-invoice-total.wav	es	quiet-3s	5.05	0	0.00	4.60	0	La factura total es de 245 euros con el IVA incluido.
+openai_whisper-small_216MB	elevenlabs/es/es-02-invoice-total.wav	es	quiet-8s	5.05	0	0.00	4.60	0	La factura total es de 245 euros con el IVA incluido.
+openai_whisper-small_216MB	elevenlabs/es/es-02-invoice-total.wav	es	noisy-3s	4.95	0	0.00	4.60	0	La factura total es de 245 euros con el IVA incluido.
+openai_whisper-small_216MB	elevenlabs/es/es-02-invoice-total.wav	es	noisy-8s	4.95	0	0.00	4.60	0	La factura total es de 245 euros con el IVA incluido.
+openai_whisper-small_216MB	elevenlabs/es/es-02-invoice-total.wav	es	cut-50%	2.22	0	0.00	2.24	0	La factura total es de 240...
+openai_whisper-small_216MB	elevenlabs/es/es-02-invoice-total.wav	es	cut-70%	3.47	0	0.00	3.52	0	La factura total es de 245 euros con...
+openai_whisper-small_216MB	elevenlabs/es/es-02-invoice-total.wav	es	cut-90%	4.32	0	0.00	4.40	0	La factura total es de 245 euros con el IVA Incluido.
+openai_whisper-small_216MB	elevenlabs/es/es-03-water-plants.wav	es	clean	3.44	0	0.00	3.28	0	No te olvides de regar las plantas mientras estoy de viaje.
+openai_whisper-small_216MB	elevenlabs/es/es-03-water-plants.wav	es	zero-3s	3.80	0	0.00	3.28	0	No te olvides de regar las plantas mientras estoy de viaje.
+openai_whisper-small_216MB	elevenlabs/es/es-03-water-plants.wav	es	quiet-3s	3.80	0	0.00	3.28	0	No te olvides de regar las plantas mientras estoy de viaje.
+openai_whisper-small_216MB	elevenlabs/es/es-03-water-plants.wav	es	quiet-8s	3.80	0	0.00	3.28	0	No te olvides de regar las plantas mientras estoy de viaje.
+openai_whisper-small_216MB	elevenlabs/es/es-03-water-plants.wav	es	noisy-3s	3.75	0	0.00	3.28	0	No te olvides de regar las plantas mientras estoy de viaje.
+openai_whisper-small_216MB	elevenlabs/es/es-03-water-plants.wav	es	noisy-8s	3.75	0	0.00	3.28	0	No te olvides de regar las plantas mientras estoy de viaje.
+openai_whisper-small_216MB	elevenlabs/es/es-03-water-plants.wav	es	cut-50%	1.58	0	0.00	1.60	0	No te olvides de regar las planas.
+openai_whisper-small_216MB	elevenlabs/es/es-03-water-plants.wav	es	cut-70%	2.58	0	0.00	2.60	0	No te olvides de regar las plantas mientras estoy...
+openai_whisper-small_216MB	elevenlabs/es/es-03-water-plants.wav	es	cut-90%	2.92	0	0.00	2.92	0	No te olvides de regar las plantas mientras estoy de viaje.
+openai_whisper-small_216MB	elevenlabs/zh/zh-01-meeting-3pm.wav	zh	clean	3.28	0	0.00	3.20	0	明天下午三點,我們在三樓的會議室開會。
+openai_whisper-small_216MB	elevenlabs/zh/zh-01-meeting-3pm.wav	zh	zero-3s	3.65	0	0.00	3.20	0	明天下午三點,我們在三樓的會議室開會。
+openai_whisper-small_216MB	elevenlabs/zh/zh-01-meeting-3pm.wav	zh	quiet-3s	3.65	0	0.00	3.20	0	明天下午三點,我們在三樓的會議室開會。
+openai_whisper-small_216MB	elevenlabs/zh/zh-01-meeting-3pm.wav	zh	quiet-8s	3.65	0	0.00	3.20	0	明天下午三點,我們在三樓的會議室開會。
+openai_whisper-small_216MB	elevenlabs/zh/zh-01-meeting-3pm.wav	zh	noisy-3s	3.60	0	0.00	3.60	0	明天下午三點,我們在三樓的會議室開會。
+openai_whisper-small_216MB	elevenlabs/zh/zh-01-meeting-3pm.wav	zh	noisy-8s	3.60	0	0.00	3.60	0	明天下午三點,我們在三樓的會議室開會。
+openai_whisper-small_216MB	elevenlabs/zh/zh-01-meeting-3pm.wav	zh	cut-50%	1.48	0	0.00	1.28	0	明天下午三點
+openai_whisper-small_216MB	elevenlabs/zh/zh-01-meeting-3pm.wav	zh	cut-70%	2.38	0	0.00	3.12	0	明天下午三點,我們在三樓的會議中間
+openai_whisper-small_216MB	elevenlabs/zh/zh-01-meeting-3pm.wav	zh	cut-90%	2.97	0	0.00	3.08	0	明天下午三點,我們在三樓的會議室開會。
+openai_whisper-small_216MB	elevenlabs/zh/zh-02-send-file.wav	zh	clean	3.36	0	0.00	2.56	0	请帮我把这份文件发给王老师。
+openai_whisper-small_216MB	elevenlabs/zh/zh-02-send-file.wav	zh	clean	3.36	0	2.56	3.56	0	谢谢。
+openai_whisper-small_216MB	elevenlabs/zh/zh-02-send-file.wav	zh	zero-3s	3.70	0	0.00	2.56	0	请帮我把这份文件发给王老师。
+openai_whisper-small_216MB	elevenlabs/zh/zh-02-send-file.wav	zh	zero-3s	3.70	0	2.56	3.56	0	谢谢。
+openai_whisper-small_216MB	elevenlabs/zh/zh-02-send-file.wav	zh	quiet-3s	3.70	0	0.00	3.20	0	请帮我把这份文件发给王老师。谢谢。
+openai_whisper-small_216MB	elevenlabs/zh/zh-02-send-file.wav	zh	quiet-8s	3.70	0	0.00	3.20	0	请帮我把这份文件发给王老师。谢谢。
+openai_whisper-small_216MB	elevenlabs/zh/zh-02-send-file.wav	zh	noisy-3s	3.60	0	0.00	3.20	0	请帮我把这份文件发给王老师,谢谢。
+openai_whisper-small_216MB	elevenlabs/zh/zh-02-send-file.wav	zh	noisy-8s	3.60	0	0.00	3.20	0	请帮我把这份文件发给王老师,谢谢。
+openai_whisper-small_216MB	elevenlabs/zh/zh-02-send-file.wav	zh	cut-50%	1.67	0	0.00	2.00	0	请帮我把这份文件发给我
+openai_whisper-small_216MB	elevenlabs/zh/zh-02-send-file.wav	zh	cut-70%	2.28	0	0.00	2.32	0	请帮我把这份文件发给王老师
+openai_whisper-small_216MB	elevenlabs/zh/zh-02-send-file.wav	zh	cut-90%	2.97	0	0.00	3.00	0	请帮我把这份文件发给王老师,谢谢。
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	clean	71.84	0	0.00	2.80	0	Bonjour à tous, petit point sur ma journée.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	clean	71.84	0	2.80	8.00	0	Ce matin, j'ai repris le problème de synchronisation qu'on traîne depuis la semaine dernière.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	clean	71.84	0	8.00	15.00	0	J'ai créé une nouvelle branche à partir de Devlop pour isoler le correctif parce que je ne voulais pas mélanger ça avec le reste.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	clean	71.84	0	15.00	19.30	0	Après deux bonnes heures de recherche, j'ai fini par trouver l'origine du bug.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	clean	71.84	0	19.30	25.20	0	Quand l'utilisateur ferme l'application pendant un enregistrement, le fichier temporaire n'est jamais supprimé,
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	clean	71.84	0	25.20	28.70	0	et au lancement suivant, on relie des données à moitié écrite.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	clean	71.84	1	28.50	31.50	0	La correction elle-même tient en une vingtaine de lignes,
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	clean	71.84	1	31.50	35.50	0	mais j'ai préféré ajouter trois tests pour être sûr que le problème ne revienne pas.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	clean	71.84	1	35.50	40.50	0	J'ai ouvert la pull request vers 14h et Julien a déjà laissé quelques remarques,
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	clean	71.84	1	40.50	42.50	0	surtout sur le nom des fonctions.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	clean	71.84	1	42.50	43.50	0	Rien de bloquant.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	clean	71.84	1	43.50	45.50	0	Je pense pouvoir faire le merge demain matin,
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	clean	71.84	1	45.50	48.50	0	une fois que les tests auront tourné sur le téléphone de test.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	clean	71.84	2	48.40	52.56	0	Cet après-midi, j'ai aussi relu la documentation de l'écran des réglages,
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	clean	71.84	2	52.56	56.28	0	et j'ai noté deux phrases qui ne sont plus vraies depuis la dernière version.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	clean	71.84	2	56.28	57.88	0	Je les corrige ce soir.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	clean	71.84	2	57.88	62.88	0	Pour demain, il me reste à préparer la démo de jeudi et à trier les retours des testeurs.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	clean	71.84	2	62.88	65.56	0	Il y en a une quinzaine qui sont arrivées depuis lundi.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	clean	71.84	2	65.56	70.08	0	Si quelqu'un a cinq minutes pour relire mes changements avant midi, ce serait parfait.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	clean	71.84	2	70.08	71.88	0	Merci et bonne soirée!
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	zero-3s	72.15	0	0.00	2.80	0	Bonjour à tous, petit point sur ma journée.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	zero-3s	72.15	0	2.80	8.00	0	Ce matin, j'ai repris le problème de synchronisation qu'on traîne depuis la semaine dernière.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	zero-3s	72.15	0	8.00	15.00	0	J'ai créé une nouvelle branche à partir de Devlop pour isoler le correctif parce que je ne voulais pas mélanger ça avec le reste.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	zero-3s	72.15	0	15.00	19.30	0	Après deux bonnes heures de recherche, j'ai fini par trouver l'origine du bug.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	zero-3s	72.15	0	19.30	25.20	0	Quand l'utilisateur ferme l'application pendant un enregistrement, le fichier temporaire n'est jamais supprimé,
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	zero-3s	72.15	0	25.20	28.70	0	et au lancement suivant, on relie des données à moitié écrite.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	zero-3s	72.15	1	28.50	31.50	0	La correction elle-même tient en une vingtaine de lignes,
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	zero-3s	72.15	1	31.50	35.50	0	mais j'ai préféré ajouter trois tests pour être sûr que le problème ne revienne pas.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	zero-3s	72.15	1	35.50	40.50	0	J'ai ouvert la pull request vers 14h et Julien a déjà laissé quelques remarques,
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	zero-3s	72.15	1	40.50	42.50	0	surtout sur le nom des fonctions.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	zero-3s	72.15	1	42.50	43.50	0	Rien de bloquant.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	zero-3s	72.15	1	43.50	45.50	0	Je pense pouvoir faire le merge demain matin,
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	zero-3s	72.15	1	45.50	48.50	0	une fois que les tests auront tourné sur le téléphone de test.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	zero-3s	72.15	2	48.40	52.56	0	Cet après-midi, j'ai aussi relu la documentation de l'écran des réglages,
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	zero-3s	72.15	2	52.56	56.28	0	et j'ai noté deux phrases qui ne sont plus vraies depuis la dernière version.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	zero-3s	72.15	2	56.28	57.88	0	Je les corrige ce soir.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	zero-3s	72.15	2	57.88	62.88	0	Pour demain, il me reste à préparer la démo de jeudi et à trier les retours des testeurs.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	zero-3s	72.15	2	62.88	65.56	0	Il y en a une quinzaine qui sont arrivées depuis lundi.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	zero-3s	72.15	2	65.56	70.08	0	Si quelqu'un a cinq minutes pour relire mes changements avant midi, ce serait parfait.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	zero-3s	72.15	2	70.08	71.88	0	Merci et bonne soirée!
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	quiet-3s	72.15	0	0.00	2.80	0	Bonjour à tous, petit point sur ma journée.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	quiet-3s	72.15	0	2.80	8.00	0	Ce matin, j'ai repris le problème de synchronisation qu'on traîne depuis la semaine dernière.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	quiet-3s	72.15	0	8.00	15.00	0	J'ai créé une nouvelle branche à partir de Devlop pour isoler le correctif parce que je ne voulais pas mélanger ça avec le reste.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	quiet-3s	72.15	0	15.00	19.30	0	Après deux bonnes heures de recherche, j'ai fini par trouver l'origine du bug.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	quiet-3s	72.15	0	19.30	25.20	0	Quand l'utilisateur ferme l'application pendant un enregistrement, le fichier temporaire n'est jamais supprimé,
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	quiet-3s	72.15	0	25.20	28.50	0	et au lancement suivant, on relie des données à moitié écrite.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	quiet-3s	72.15	1	28.50	35.50	0	La correction elle-même tient en une vingtaine de lignes, mais j'ai préféré ajouter trois tests pour être sûr que le problème ne revienne pas.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	quiet-3s	72.15	1	35.50	42.00	0	J'ai ouvert la pull request vers 14h et Julien a déjà laissé quelques remarques, surtout sur le nom des fonctions.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	quiet-3s	72.15	1	42.00	48.50	0	Rien de bloquant. Je pense pouvoir faire le merge demain matin, une fois que les tests auront tourné sur le téléphone de test.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	quiet-3s	72.15	2	48.40	52.56	0	Cet après-midi, j'ai aussi relu la documentation de l'écran des réglages,
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	quiet-3s	72.15	2	52.56	56.28	0	et j'ai noté deux phrases qui ne sont plus vraies depuis la dernière version.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	quiet-3s	72.15	2	56.28	57.88	0	Je les corrige ce soir.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	quiet-3s	72.15	2	57.88	60.92	0	Pour demain, il me reste à préparer la démo de jeudi
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	quiet-3s	72.15	2	60.92	62.88	0	et à trier les retours des testeurs.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	quiet-3s	72.15	2	62.88	65.60	0	Il y en a une quinzaine qui sont arrivées depuis lundi.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	quiet-3s	72.15	2	65.60	70.08	0	Si quelqu'un a cinq minutes pour relire mes changements avant midi, ce serait parfait.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	quiet-3s	72.15	2	70.08	72.08	0	Merci et bonne soirée!
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	quiet-8s	72.15	0	0.00	2.80	0	Bonjour à tous, petit point sur ma journée.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	quiet-8s	72.15	0	2.80	8.00	0	Ce matin, j'ai repris le problème de synchronisation qu'on traîne depuis la semaine dernière.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	quiet-8s	72.15	0	8.00	15.00	0	J'ai créé une nouvelle branche à partir de Devlop pour isoler le correctif parce que je ne voulais pas mélanger ça avec le reste.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	quiet-8s	72.15	0	15.00	19.30	0	Après deux bonnes heures de recherche, j'ai fini par trouver l'origine du bug.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	quiet-8s	72.15	0	19.30	25.20	0	Quand l'utilisateur ferme l'application pendant un enregistrement, le fichier temporaire n'est jamais supprimé,
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	quiet-8s	72.15	0	25.20	28.50	0	et au lancement suivant, on relie des données à moitié écrite.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	quiet-8s	72.15	1	28.50	35.50	0	La correction elle-même tient en une vingtaine de lignes, mais j'ai préféré ajouter trois tests pour être sûr que le problème ne revienne pas.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	quiet-8s	72.15	1	35.50	42.00	0	J'ai ouvert la pull request vers 14h et Julien a déjà laissé quelques remarques, surtout sur le nom des fonctions.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	quiet-8s	72.15	1	42.00	48.50	0	Rien de bloquant. Je pense pouvoir faire le merge demain matin, une fois que les tests auront tourné sur le téléphone de test.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	quiet-8s	72.15	2	48.40	52.56	0	Cet après-midi, j'ai aussi relu la documentation de l'écran des réglages,
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	quiet-8s	72.15	2	52.56	56.28	0	et j'ai noté deux phrases qui ne sont plus vraies depuis la dernière version.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	quiet-8s	72.15	2	56.28	57.88	0	Je les corrige ce soir.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	quiet-8s	72.15	2	57.88	60.92	0	Pour demain, il me reste à préparer la démo de jeudi
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	quiet-8s	72.15	2	60.92	62.88	0	et à trier les retours des testeurs.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	quiet-8s	72.15	2	62.88	65.60	0	Il y en a une quinzaine qui sont arrivées depuis lundi.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	quiet-8s	72.15	2	65.60	70.08	0	Si quelqu'un a cinq minutes pour relire mes changements avant midi, ce serait parfait.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	quiet-8s	72.15	2	70.08	72.08	0	Merci et bonne soirée!
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	noisy-3s	72.15	0	0.00	2.80	0	Bonjour à tous, petit point sur ma journée.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	noisy-3s	72.15	0	2.80	8.00	0	Ce matin, j'ai repris le problème de synchronisation qu'on traîne depuis la semaine dernière.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	noisy-3s	72.15	0	8.00	12.30	0	J'ai créé une nouvelle branche à partir de Devlop pour isoler le correctif,
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	noisy-3s	72.15	0	12.30	15.00	0	parce que je ne voulais pas mélanger ça avec le reste.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	noisy-3s	72.15	0	15.00	19.30	0	Après deux bonnes heures de recherche, j'ai fini par trouver l'origine du bug.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	noisy-3s	72.15	0	19.30	22.70	0	Quand l'utilisateur ferme l'application pendant un enregistrement,
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	noisy-3s	72.15	0	22.70	25.10	0	le fichier temporaire n'est jamais supprimé,
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	noisy-3s	72.15	0	25.10	28.50	0	et au lancement suivant, on relie des données à moitié écrite.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	noisy-3s	72.15	1	28.50	35.50	0	La correction elle-même tient en une vingtaine de lignes, mais j'ai préféré ajouter trois tests pour être sûr que le problème ne revienne pas.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	noisy-3s	72.15	1	35.50	42.00	0	J'ai ouvert la pull request vers 14h et Julien a déjà laissé quelques remarques, surtout sur le nom des fonctions.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	noisy-3s	72.15	1	42.00	48.00	0	Rien de bloquant. Je pense pouvoir faire le merge demain matin, une fois que les tests auront tourné sur le téléphone de test.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	noisy-3s	72.15	2	48.40	52.70	0	Cet après-midi, j'ai aussi relu la documentation de l'écran des réglages,
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	noisy-3s	72.15	2	52.70	56.30	0	et j'ai noté deux phrases qui ne sont plus vraies depuis la dernière version.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	noisy-3s	72.15	2	56.30	57.70	0	Je les corrige ce soir.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	noisy-3s	72.15	2	57.70	62.80	0	Pour demain, il me reste à préparer la démo de jeudi et à trier les retours des testeurs.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	noisy-3s	72.15	2	62.80	65.50	0	Il y en a une quinzaine qui sont arrivées depuis lundi.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	noisy-3s	72.15	2	65.50	70.10	0	Si quelqu'un a cinq minutes pour relire mes changements avant midi, ce serait parfait.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	noisy-3s	72.15	2	70.10	72.10	0	Merci et bonne soirée!
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	noisy-8s	72.15	0	0.00	2.80	0	Bonjour à tous, petit point sur ma journée.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	noisy-8s	72.15	0	2.80	8.00	0	Ce matin, j'ai repris le problème de synchronisation qu'on traîne depuis la semaine dernière.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	noisy-8s	72.15	0	8.00	12.30	0	J'ai créé une nouvelle branche à partir de Devlop pour isoler le correctif,
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	noisy-8s	72.15	0	12.30	15.00	0	parce que je ne voulais pas mélanger ça avec le reste.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	noisy-8s	72.15	0	15.00	19.30	0	Après deux bonnes heures de recherche, j'ai fini par trouver l'origine du bug.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	noisy-8s	72.15	0	19.30	22.70	0	Quand l'utilisateur ferme l'application pendant un enregistrement,
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	noisy-8s	72.15	0	22.70	25.10	0	le fichier temporaire n'est jamais supprimé,
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	noisy-8s	72.15	0	25.10	28.50	0	et au lancement suivant, on relie des données à moitié écrite.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	noisy-8s	72.15	1	28.50	35.50	0	La correction elle-même tient en une vingtaine de lignes, mais j'ai préféré ajouter trois tests pour être sûr que le problème ne revienne pas.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	noisy-8s	72.15	1	35.50	42.00	0	J'ai ouvert la pull request vers 14h et Julien a déjà laissé quelques remarques, surtout sur le nom des fonctions.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	noisy-8s	72.15	1	42.00	48.00	0	Rien de bloquant. Je pense pouvoir faire le merge demain matin, une fois que les tests auront tourné sur le téléphone de test.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	noisy-8s	72.15	2	48.40	52.70	0	Cet après-midi, j'ai aussi relu la documentation de l'écran des réglages,
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	noisy-8s	72.15	2	52.70	56.30	0	et j'ai noté deux phrases qui ne sont plus vraies depuis la dernière version.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	noisy-8s	72.15	2	56.30	57.70	0	Je les corrige ce soir.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	noisy-8s	72.15	2	57.70	62.80	0	Pour demain, il me reste à préparer la démo de jeudi et à trier les retours des testeurs.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	noisy-8s	72.15	2	62.80	65.50	0	Il y en a une quinzaine qui sont arrivées depuis lundi.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	noisy-8s	72.15	2	65.50	70.10	0	Si quelqu'un a cinq minutes pour relire mes changements avant midi, ce serait parfait.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	noisy-8s	72.15	2	70.10	72.10	0	Merci et bonne soirée!
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	cut-50%	36.08	0	0.00	2.80	0	Bonjour à tous, petit point sur ma journée.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	cut-50%	36.08	0	2.80	8.00	0	Ce matin, j'ai repris le problème de synchronisation qu'on traîne depuis la semaine dernière.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	cut-50%	36.08	0	8.00	15.00	0	J'ai créé une nouvelle branche à partir de Devlop pour isoler le correctif parce que je ne voulais pas mélanger ça avec le reste.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	cut-50%	36.08	0	15.00	19.30	0	Après deux bonnes heures de recherche, j'ai fini par trouver l'origine du bug.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	cut-50%	36.08	0	19.30	25.20	0	Quand l'utilisateur ferme l'application pendant un enregistrement, le fichier temporaire n'est jamais supprimé,
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	cut-50%	36.08	0	25.20	28.70	0	et au lancement suivant, on relie des données à moitié écrite.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	cut-50%	36.08	1	28.50	35.50	0	La correction elle-même tient en une vingtaine de lignes, mais j'ai préféré ajouter trois tests pour être sûr que le problème ne revienne pas.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	cut-70%	50.33	0	0.00	2.80	0	Bonjour à tous, petit point sur ma journée.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	cut-70%	50.33	0	2.80	8.00	0	Ce matin, j'ai repris le problème de synchronisation qu'on traîne depuis la semaine dernière.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	cut-70%	50.33	0	8.00	15.00	0	J'ai créé une nouvelle branche à partir de Devlop pour isoler le correctif parce que je ne voulais pas mélanger ça avec le reste.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	cut-70%	50.33	0	15.00	19.30	0	Après deux bonnes heures de recherche, j'ai fini par trouver l'origine du bug.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	cut-70%	50.33	0	19.30	25.20	0	Quand l'utilisateur ferme l'application pendant un enregistrement, le fichier temporaire n'est jamais supprimé,
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	cut-70%	50.33	0	25.20	28.70	0	et au lancement suivant, on relie des données à moitié écrite.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	cut-70%	50.33	1	28.50	35.50	0	La correction elle-même tient en une vingtaine de lignes, mais j'ai préféré ajouter trois tests pour être sûr que le problème ne revienne pas.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	cut-70%	50.33	1	35.50	42.00	0	J'ai ouvert la pull request vers 14h et Julien a déjà laissé quelques remarques, surtout sur le nom des fonctions.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	cut-70%	50.33	1	42.00	48.50	0	Rien de bloquant. Je pense pouvoir faire le merge demain matin, une fois que les tests auront tourné sur le téléphone de test.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	cut-70%	50.33	1	48.50	52.50	0	Cet après-midi, j'ai aussi réussi à remettre un test.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	cut-90%	64.57	0	0.00	2.80	0	Bonjour à tous, petit point sur ma journée.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	cut-90%	64.57	0	2.80	8.00	0	Ce matin, j'ai repris le problème de synchronisation qu'on traîne depuis la semaine dernière.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	cut-90%	64.57	0	8.00	15.00	0	J'ai créé une nouvelle branche à partir de Devlop pour isoler le correctif parce que je ne voulais pas mélanger ça avec le reste.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	cut-90%	64.57	0	15.00	19.30	0	Après deux bonnes heures de recherche, j'ai fini par trouver l'origine du bug.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	cut-90%	64.57	0	19.30	25.20	0	Quand l'utilisateur ferme l'application pendant un enregistrement, le fichier temporaire n'est jamais supprimé,
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	cut-90%	64.57	0	25.20	28.70	0	et au lancement suivant, on relie des données à moitié écrite.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	cut-90%	64.57	1	28.50	31.50	0	La correction elle-même tient en une vingtaine de lignes,
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	cut-90%	64.57	1	31.50	35.50	0	mais j'ai préféré ajouter trois tests pour être sûr que le problème ne revienne pas.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	cut-90%	64.57	1	35.50	40.50	0	J'ai ouvert la pull request vers 14h et Julien a déjà laissé quelques remarques,
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	cut-90%	64.57	1	40.50	42.50	0	surtout sur le nom des fonctions.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	cut-90%	64.57	1	42.50	43.50	0	Rien de bloquant.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	cut-90%	64.57	1	43.50	45.50	0	Je pense pouvoir faire le merge demain matin,
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	cut-90%	64.57	1	45.50	48.50	0	une fois que les tests auront tourné sur le téléphone de test.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	cut-90%	64.57	2	48.40	53.52	0	Cette après-midi, j'ai aussi relu la documentation de l'écran des réglages, et j'ai noté deux
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	cut-90%	64.57	2	53.52	57.68	0	phrases qui ne sont plus vraies depuis la dernière version. Je les corrige ce soir.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	cut-90%	64.57	2	57.68	62.88	0	Pour demain, il me reste à préparer la démo de Judy et à trier les retours des testeurs.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	cut-90%	64.57	2	62.88	64.56	0	Il y en a une quinzaine qui sont arrivées.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	cut-14s	14.27	0	0.00	2.80	0	Bonjour à tous, petit point sur ma journée.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	cut-14s	14.27	0	2.80	8.00	0	Ce matin, j'ai repris le problème de synchronisation qu'on traîne depuis la semaine dernière.
+openai_whisper-small_216MB	elevenlabs/fr/fr-long-01-workday-sync-fix.wav	fr	cut-14s	14.27	0	8.00	14.50	0	J'ai créé une nouvelle branche à partir de Devlop pour isoler le correctif parce que je ne voulais pas mélanger ça avec le reste.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	clean	71.76	0	0.00	2.56	0	Quick update for the team before I log off.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	clean	71.76	0	2.56	5.40	0	Most of today went into the offline sync work.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	clean	71.76	0	5.40	9.00	0	This morning, I finally tracked down the crash we saw on Monday.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	clean	71.76	0	9.00	13.00	0	It only happened when the device lost its connection in the middle of an upload,
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	clean	71.76	0	13.00	15.76	0	and the retry logic kept the old request around.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	clean	71.76	0	15.76	19.48	0	So the second attempt sent an expired token, and the server rejected it.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	clean	71.76	1	19.60	24.80	0	The fix was smaller than I expected, about 40 lines, but I rewrote the retry helper
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	clean	71.76	1	24.80	29.08	0	so it builds a fresh request every time instead of reusing the old one.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	clean	71.76	1	29.08	34.08	0	I added unit tests for the three failure cases we know about, and they all pass locally.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	clean	71.76	1	34.08	37.88	0	I pushed the branch around three and opened a pull request against develop.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	clean	71.76	1	37.88	42.14	0	The build is green, but I'd like a second pair of eyes on the error handling before we
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	clean	71.76	1	42.14	44.76	0	merge because it touches the login flow as well.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	clean	71.76	2	44.90	47.90	0	After that, I spent an hour on the setting screen.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	clean	71.76	2	47.90	51.90	0	The toggle for haptic feedback wasn't saving its state after a restart,
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	clean	71.76	2	51.90	54.90	0	which turned out to be a typo in the preferences key.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	clean	71.76	2	54.90	56.90	0	That one is already merged.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	clean	71.76	2	56.90	59.90	0	Tomorrow morning, I'm going to profile memory usage in the keyboard extension,
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	clean	71.76	2	59.90	62.90	0	since we're getting close to the limit again.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	clean	71.76	2	62.90	65.90	0	And in the afternoon, I'll write the release notes for the next beta.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	clean	71.76	2	65.90	69.90	0	If anyone has time before noon, please review the sync pull request.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	clean	71.76	2	69.90	71.90	0	Thanks, and have a good evening!
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	zero-3s	72.10	0	0.00	2.56	0	Quick update for the team before I log off.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	zero-3s	72.10	0	2.56	5.40	0	Most of today went into the offline sync work.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	zero-3s	72.10	0	5.40	9.00	0	This morning, I finally tracked down the crash we saw on Monday.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	zero-3s	72.10	0	9.00	13.00	0	It only happened when the device lost its connection in the middle of an upload,
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	zero-3s	72.10	0	13.00	15.76	0	and the retry logic kept the old request around.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	zero-3s	72.10	0	15.76	19.48	0	So the second attempt sent an expired token, and the server rejected it.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	zero-3s	72.10	1	19.60	24.80	0	The fix was smaller than I expected, about 40 lines, but I rewrote the retry helper
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	zero-3s	72.10	1	24.80	29.08	0	so it builds a fresh request every time instead of reusing the old one.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	zero-3s	72.10	1	29.08	34.08	0	I added unit tests for the three failure cases we know about, and they all pass locally.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	zero-3s	72.10	1	34.08	37.88	0	I pushed the branch around three and opened a pull request against develop.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	zero-3s	72.10	1	37.88	42.14	0	The build is green, but I'd like a second pair of eyes on the error handling before we
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	zero-3s	72.10	1	42.14	44.76	0	merge because it touches the login flow as well.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	zero-3s	72.10	2	44.90	47.90	0	After that, I spent an hour on the setting screen.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	zero-3s	72.10	2	47.90	51.90	0	The toggle for haptic feedback wasn't saving its state after a restart,
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	zero-3s	72.10	2	51.90	54.90	0	which turned out to be a typo in the preferences key.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	zero-3s	72.10	2	54.90	56.90	0	That one is already merged.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	zero-3s	72.10	2	56.90	59.90	0	Tomorrow morning, I'm going to profile memory usage in the keyboard extension,
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	zero-3s	72.10	2	59.90	62.90	0	since we're getting close to the limit again.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	zero-3s	72.10	2	62.90	65.90	0	And in the afternoon, I'll write the release notes for the next beta.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	zero-3s	72.10	2	65.90	69.90	0	If anyone has time before noon, please review the sync pull request.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	zero-3s	72.10	2	69.90	71.90	0	Thanks, and have a good evening!
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	quiet-3s	72.10	0	0.00	2.60	0	Quick update for the team before I log off.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	quiet-3s	72.10	0	2.60	5.44	0	Most of today went into the offline sync work.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	quiet-3s	72.10	0	5.44	9.04	0	This morning, I finally tracked down the crash we saw on Monday.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	quiet-3s	72.10	0	9.04	13.08	0	It only happened when the device lost its connection in the middle of an upload,
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	quiet-3s	72.10	0	13.08	15.80	0	and the retry logic kept the old request around.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	quiet-3s	72.10	0	15.80	19.44	0	So the second attempt sent an expired token, and the server rejected it.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	quiet-3s	72.10	1	19.60	24.80	0	The fix was smaller than I expected, about 40 lines, but I rewrote the retry helper
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	quiet-3s	72.10	1	24.80	29.08	0	so it builds a fresh request every time instead of reusing the old one.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	quiet-3s	72.10	1	29.08	34.08	0	I added unit tests for the three failure cases we know about, and they all pass locally.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	quiet-3s	72.10	1	34.08	37.88	0	I pushed the branch around three and opened a pull request against develop.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	quiet-3s	72.10	1	37.88	42.14	0	The build is green, but I'd like a second pair of eyes on the error handling before we
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	quiet-3s	72.10	1	42.14	44.76	0	merge because it touches the login flow as well.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	quiet-3s	72.10	2	44.90	47.90	0	After that, I spent an hour on the setting screen.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	quiet-3s	72.10	2	47.90	51.90	0	The toggle for haptic feedback wasn't saving its state after a restart,
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	quiet-3s	72.10	2	51.90	54.90	0	which turned out to be a typo in the preferences key.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	quiet-3s	72.10	2	54.90	56.90	0	That one is already merged.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	quiet-3s	72.10	2	56.90	59.90	0	Tomorrow morning, I'm going to profile memory usage in the keyboard extension,
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	quiet-3s	72.10	2	59.90	62.90	0	since we're getting close to the limit again.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	quiet-3s	72.10	2	62.90	65.90	0	And in the afternoon, I'll write the release notes for the next beta.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	quiet-3s	72.10	2	65.90	69.90	0	If anyone has time before noon, please review the sync pull request.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	quiet-3s	72.10	2	69.90	71.90	0	Thanks, and have a good evening!
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	quiet-8s	72.10	0	0.00	2.60	0	Quick update for the team before I log off.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	quiet-8s	72.10	0	2.60	5.44	0	Most of today went into the offline sync work.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	quiet-8s	72.10	0	5.44	9.04	0	This morning, I finally tracked down the crash we saw on Monday.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	quiet-8s	72.10	0	9.04	13.08	0	It only happened when the device lost its connection in the middle of an upload,
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	quiet-8s	72.10	0	13.08	15.80	0	and the retry logic kept the old request around.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	quiet-8s	72.10	0	15.80	19.44	0	So the second attempt sent an expired token, and the server rejected it.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	quiet-8s	72.10	1	19.60	24.80	0	The fix was smaller than I expected, about 40 lines, but I rewrote the retry helper
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	quiet-8s	72.10	1	24.80	29.08	0	so it builds a fresh request every time instead of reusing the old one.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	quiet-8s	72.10	1	29.08	34.08	0	I added unit tests for the three failure cases we know about, and they all pass locally.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	quiet-8s	72.10	1	34.08	37.88	0	I pushed the branch around three and opened a pull request against develop.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	quiet-8s	72.10	1	37.88	42.14	0	The build is green, but I'd like a second pair of eyes on the error handling before we
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	quiet-8s	72.10	1	42.14	44.76	0	merge because it touches the login flow as well.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	quiet-8s	72.10	2	44.90	47.90	0	After that, I spent an hour on the setting screen.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	quiet-8s	72.10	2	47.90	51.90	0	The toggle for haptic feedback wasn't saving its state after a restart,
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	quiet-8s	72.10	2	51.90	54.90	0	which turned out to be a typo in the preferences key.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	quiet-8s	72.10	2	54.90	56.90	0	That one is already merged.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	quiet-8s	72.10	2	56.90	59.90	0	Tomorrow morning, I'm going to profile memory usage in the keyboard extension,
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	quiet-8s	72.10	2	59.90	62.90	0	since we're getting close to the limit again.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	quiet-8s	72.10	2	62.90	65.90	0	And in the afternoon, I'll write the release notes for the next beta.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	quiet-8s	72.10	2	65.90	69.90	0	If anyone has time before noon, please review the sync pull request.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	quiet-8s	72.10	2	69.90	71.90	0	Thanks, and have a good evening!
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	noisy-3s	72.05	0	0.00	2.60	0	Quick update for the team before I log off.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	noisy-3s	72.05	0	2.60	5.44	0	Most of today went into the offline sync work.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	noisy-3s	72.05	0	5.44	9.04	0	This morning, I finally tracked down the crash we saw on Monday.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	noisy-3s	72.05	0	9.04	13.08	0	It only happened when the device lost its connection in the middle of an upload,
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	noisy-3s	72.05	0	13.08	15.80	0	and the retry logic kept the old request around.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	noisy-3s	72.05	0	15.80	19.48	0	So the second attempt sent an expired token, and the server rejected it.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	noisy-3s	72.05	1	19.60	23.04	0	The fix was smaller than I expected, about 40 lines.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	noisy-3s	72.05	1	23.04	28.88	0	But I rewrote the retry helper so it builds a fresh request every time, instead of reusing the old one.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	noisy-3s	72.05	1	28.88	33.92	0	I added unit tests for the three failure cases we know about, and they all pass locally.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	noisy-3s	72.05	1	33.92	37.60	0	I pushed the branch around three and opened a pull request against develop.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	noisy-3s	72.05	1	37.60	42.64	0	The build is green, but I'd like a second pair of eyes on the error handling before we merge,
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	noisy-3s	72.05	1	42.64	44.64	0	because it touches the login flow as well.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	noisy-3s	72.05	2	44.90	47.90	0	After that, I spent an hour on the setting screen.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	noisy-3s	72.05	2	47.90	51.90	0	The toggle for haptic feedback wasn't saving its state after a restart,
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	noisy-3s	72.05	2	51.90	54.90	0	which turned out to be a typo in the preferences key.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	noisy-3s	72.05	2	54.90	56.90	0	That one is already merged.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	noisy-3s	72.05	2	56.90	59.90	0	Tomorrow morning, I'm going to profile memory usage in the keyboard extension,
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	noisy-3s	72.05	2	59.90	62.90	0	since we're getting close to the limit again.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	noisy-3s	72.05	2	62.90	65.90	0	And in the afternoon, I'll write the release notes for the next beta.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	noisy-3s	72.05	2	65.90	69.90	0	If anyone has time before noon, please review the sync pull request.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	noisy-3s	72.05	2	69.90	71.90	0	Thanks, and have a good evening!
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	noisy-8s	72.05	0	0.00	2.60	0	Quick update for the team before I log off.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	noisy-8s	72.05	0	2.60	5.44	0	Most of today went into the offline sync work.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	noisy-8s	72.05	0	5.44	9.04	0	This morning, I finally tracked down the crash we saw on Monday.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	noisy-8s	72.05	0	9.04	13.08	0	It only happened when the device lost its connection in the middle of an upload,
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	noisy-8s	72.05	0	13.08	15.80	0	and the retry logic kept the old request around.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	noisy-8s	72.05	0	15.80	19.48	0	So the second attempt sent an expired token, and the server rejected it.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	noisy-8s	72.05	1	19.60	23.04	0	The fix was smaller than I expected, about 40 lines.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	noisy-8s	72.05	1	23.04	28.88	0	But I rewrote the retry helper so it builds a fresh request every time, instead of reusing the old one.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	noisy-8s	72.05	1	28.88	33.92	0	I added unit tests for the three failure cases we know about, and they all pass locally.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	noisy-8s	72.05	1	33.92	37.60	0	I pushed the branch around three and opened a pull request against develop.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	noisy-8s	72.05	1	37.60	42.64	0	The build is green, but I'd like a second pair of eyes on the error handling before we merge,
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	noisy-8s	72.05	1	42.64	44.64	0	because it touches the login flow as well.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	noisy-8s	72.05	2	44.90	47.90	0	After that, I spent an hour on the setting screen.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	noisy-8s	72.05	2	47.90	51.90	0	The toggle for haptic feedback wasn't saving its state after a restart,
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	noisy-8s	72.05	2	51.90	54.90	0	which turned out to be a typo in the preferences key.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	noisy-8s	72.05	2	54.90	56.90	0	That one is already merged.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	noisy-8s	72.05	2	56.90	59.90	0	Tomorrow morning, I'm going to profile memory usage in the keyboard extension,
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	noisy-8s	72.05	2	59.90	62.90	0	since we're getting close to the limit again.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	noisy-8s	72.05	2	62.90	65.90	0	And in the afternoon, I'll write the release notes for the next beta.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	noisy-8s	72.05	2	65.90	69.90	0	If anyone has time before noon, please review the sync pull request.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	noisy-8s	72.05	2	69.90	71.90	0	Thanks, and have a good evening!
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	cut-50%	35.78	0	0.00	2.56	0	Quick update for the team before I log off.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	cut-50%	35.78	0	2.56	5.40	0	Most of today went into the offline sync work.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	cut-50%	35.78	0	5.40	9.00	0	This morning, I finally tracked down the crash we saw on Monday.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	cut-50%	35.78	0	9.00	13.00	0	It only happened when the device lost its connection in the middle of an upload,
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	cut-50%	35.78	0	13.00	15.76	0	and the retry logic kept the old request around.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	cut-50%	35.78	0	15.76	19.48	0	So the second attempt sent an expired token, and the server rejected it.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	cut-50%	35.78	1	19.60	24.80	0	The fix was smaller than I expected, about 40 lines, but I rewrote the retry helper
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	cut-50%	35.78	1	24.80	29.08	0	so it builds a fresh request every time instead of reusing the old one.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	cut-50%	35.78	1	29.08	34.08	0	I added unit tests for the three failure cases we know about, and they all pass locally.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	cut-50%	35.78	1	34.08	35.76	0	I pushed the branch around three and opened up the new one.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	cut-70%	50.28	0	0.00	2.56	0	Quick update for the team before I log off.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	cut-70%	50.28	0	2.56	5.40	0	Most of today went into the offline sync work.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	cut-70%	50.28	0	5.40	9.00	0	This morning, I finally tracked down the crash we saw on Monday.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	cut-70%	50.28	0	9.00	13.00	0	It only happened when the device lost its connection in the middle of an upload,
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	cut-70%	50.28	0	13.00	15.76	0	and the retry logic kept the old request around.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	cut-70%	50.28	0	15.76	19.48	0	So the second attempt sent an expired token, and the server rejected it.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	cut-70%	50.28	1	19.60	24.80	0	The fix was smaller than I expected, about 40 lines, but I rewrote the retry helper
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	cut-70%	50.28	1	24.80	29.08	0	so it builds a fresh request every time instead of reusing the old one.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	cut-70%	50.28	1	29.08	34.08	0	I added unit tests for the three failure cases we know about, and they all pass locally.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	cut-70%	50.28	1	34.08	37.88	0	I pushed the branch around three and opened a pull request against develop.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	cut-70%	50.28	1	37.88	42.14	0	The build is green, but I'd like a second pair of eyes on the error handling before we
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	cut-70%	50.28	1	42.14	44.76	0	merge because it touches the login flow as well.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	cut-70%	50.28	2	44.90	47.90	0	After that, I spent an hour on the setting screen.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	cut-70%	50.28	2	47.90	50.90	0	The toggle for haptic feedback wasn't saved.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	cut-90%	64.43	0	0.00	2.56	0	Quick update for the team before I log off.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	cut-90%	64.43	0	2.56	5.40	0	Most of today went into the offline sync work.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	cut-90%	64.43	0	5.40	9.00	0	This morning, I finally tracked down the crash we saw on Monday.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	cut-90%	64.43	0	9.00	13.00	0	It only happened when the device lost its connection in the middle of an upload,
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	cut-90%	64.43	0	13.00	15.76	0	and the retry logic kept the old request around.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	cut-90%	64.43	0	15.76	19.48	0	So the second attempt sent an expired token, and the server rejected it.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	cut-90%	64.43	1	19.60	24.80	0	The fix was smaller than I expected, about 40 lines, but I rewrote the retry helper
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	cut-90%	64.43	1	24.80	29.08	0	so it builds a fresh request every time instead of reusing the old one.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	cut-90%	64.43	1	29.08	34.08	0	I added unit tests for the three failure cases we know about, and they all pass locally.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	cut-90%	64.43	1	34.08	37.88	0	I pushed the branch around three and opened a pull request against develop.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	cut-90%	64.43	1	37.88	42.14	0	The build is green, but I'd like a second pair of eyes on the error handling before we
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	cut-90%	64.43	1	42.14	44.76	0	merge because it touches the login flow as well.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	cut-90%	64.43	2	44.90	48.18	0	After that, I spent an hour on the setting screen.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	cut-90%	64.43	2	48.18	52.82	0	The toggle for haptic feedback wasn't saving its state after a restart, which turned out
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	cut-90%	64.43	2	52.82	55.08	0	to be a typo in the preferences key.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	cut-90%	64.43	2	55.08	56.78	0	That one is already merged.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	cut-90%	64.43	2	56.78	60.94	0	Tomorrow morning, I'm going to profile memory usage in the keyboard extension, since we're
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	cut-90%	64.43	2	60.94	62.94	0	getting close to the limit again.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	cut-90%	64.43	2	62.94	64.46	0	And in the afternoon, I'll write the release of the keyboard extension.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	cut-14s	14.57	0	0.00	2.60	0	Quick update for the team before I log off.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	cut-14s	14.57	0	2.60	5.44	0	Most of today went into the offline sync work.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	cut-14s	14.57	0	5.44	9.04	0	This morning, I finally tracked down the crash we saw on Monday.
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	cut-14s	14.57	0	9.04	13.08	0	It only happened when the device lost its connection in the middle of an upload,
+openai_whisper-small_216MB	elevenlabs/en/en-long-01-workday-retry-fix.wav	en	cut-14s	14.57	0	13.08	14.72	0	and the retry logic kept the old
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	clean	85.44	0	0.00	2.00	0	Kurzes Update zu meinem Tag.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	clean	85.44	0	2.00	6.00	0	Heute Vormittag habe ich mich fast nur um den Export gekümmert.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	clean	85.44	0	6.00	14.00	0	Ein Kunde hatte gemeldet, dass lange Notizen beim Teilen abgeschnitten werden und ich konnte den Bug endlich reproduzieren.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	clean	85.44	0	14.00	23.00	0	Das Problem tritt nur auf, wenn der Text mehr als 4.000 Zeichen hat, weil wir an einer Stelle noch ein altes Limit aus der ersten Version verwenden.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	clean	85.44	0	23.00	29.00	0	Ich habe dafür einen eigenen Branch angelegt und das Limit durch eine saubere Prüfung ersetzt.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	clean	85.44	1	29.10	34.82	0	Der erste Commit war ehrlich gesagt etwas zu groß, deshalb habe ich ihn am Nachmittag
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	clean	85.44	1	34.82	38.70	0	in drei kleinere Schritte aufgeteilt, damit die Durchsicht leichter wird.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	clean	85.44	1	38.70	43.50	0	Danach habe ich mit Anna über das neue Feature für die Vorlagen gesprochen.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	clean	85.44	1	43.50	49.70	0	Hier sind uns einig, dass wir zuerst eine einfache Version bauen, mit nur zwei oder drei festen
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	clean	85.44	1	49.70	53.10	0	Vorlagen und erst später eigene Vorlagen erlauben.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	clean	85.44	1	53.10	58.18	0	Sie schreibt bis Donnerstag eine kurze Beschreibung und ich schätze den Aufwand dann neu.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	clean	85.44	2	58.50	63.70	0	Am späten Nachmittag habe ich noch die Übersetzungen für die Einstellungen geprüft.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	clean	85.44	2	63.70	69.14	0	Zwei Texte waren auf Deutsch deutlich zu lang und wurden auf kleinen Bildschirmen abgeschnitten.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	clean	85.44	2	69.14	71.50	0	Das habe ich gleich korrigiert.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	clean	85.44	2	71.50	76.78	0	Morgen früh teste ich den Export noch einmal auf einem älteren Gerät und wenn alles passt,
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	clean	85.44	2	76.78	80.26	0	kann die Änderung am Mittwoch in die nächste Testversion.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	clean	85.44	2	80.26	83.82	0	Falls jemand Zeit hat, schaut bitte kurz über meine Änderungen.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	clean	85.44	2	83.82	85.30	0	Danke und bis morgen!
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	zero-3s	85.85	0	0.00	2.00	0	Kurzes Update zu meinem Tag.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	zero-3s	85.85	0	2.00	6.00	0	Heute Vormittag habe ich mich fast nur um den Export gekümmert.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	zero-3s	85.85	0	6.00	14.00	0	Ein Kunde hatte gemeldet, dass lange Notizen beim Teilen abgeschnitten werden und ich konnte den Bug endlich reproduzieren.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	zero-3s	85.85	0	14.00	23.00	0	Das Problem tritt nur auf, wenn der Text mehr als 4.000 Zeichen hat, weil wir an einer Stelle noch ein altes Limit aus der ersten Version verwenden.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	zero-3s	85.85	0	23.00	29.00	0	Ich habe dafür einen eigenen Branch angelegt und das Limit durch eine saubere Prüfung ersetzt.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	zero-3s	85.85	1	29.10	34.82	0	Der erste Commit war ehrlich gesagt etwas zu groß, deshalb habe ich ihn am Nachmittag
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	zero-3s	85.85	1	34.82	38.70	0	in drei kleinere Schritte aufgeteilt, damit die Durchsicht leichter wird.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	zero-3s	85.85	1	38.70	43.50	0	Danach habe ich mit Anna über das neue Feature für die Vorlagen gesprochen.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	zero-3s	85.85	1	43.50	49.70	0	Hier sind uns einig, dass wir zuerst eine einfache Version bauen, mit nur zwei oder drei festen
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	zero-3s	85.85	1	49.70	53.10	0	Vorlagen und erst später eigene Vorlagen erlauben.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	zero-3s	85.85	1	53.10	58.18	0	Sie schreibt bis Donnerstag eine kurze Beschreibung und ich schätze den Aufwand dann neu.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	zero-3s	85.85	2	58.50	63.70	0	Am späten Nachmittag habe ich noch die Übersetzungen für die Einstellungen geprüft.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	zero-3s	85.85	2	63.70	69.14	0	Zwei Texte waren auf Deutsch deutlich zu lang und wurden auf kleinen Bildschirmen abgeschnitten.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	zero-3s	85.85	2	69.14	71.50	0	Das habe ich gleich korrigiert.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	zero-3s	85.85	2	71.50	76.78	0	Morgen früh teste ich den Export noch einmal auf einem älteren Gerät und wenn alles passt,
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	zero-3s	85.85	2	76.78	80.26	0	kann die Änderung am Mittwoch in die nächste Testversion.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	zero-3s	85.85	2	80.26	83.82	0	Falls jemand Zeit hat, schaut bitte kurz über meine Änderungen.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	zero-3s	85.85	2	83.82	85.30	0	Danke und bis morgen!
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	quiet-3s	85.85	0	0.00	2.00	0	Kurzes Update zu meinem Tag.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	quiet-3s	85.85	0	2.00	6.00	0	Heute Vormittag habe ich mich fast nur um den Export gekümmert.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	quiet-3s	85.85	0	6.00	14.00	0	Ein Kunde hatte gemeldet, dass lange Notizen beim Teilen abgeschnitten werden und ich konnte den Bug endlich reproduzieren.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	quiet-3s	85.85	0	14.00	23.00	0	Das Problem tritt nur auf, wenn der Text mehr als 4.000 Zeichen hat, weil wir an einer Stelle noch ein altes Limit aus der ersten Version verwenden.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	quiet-3s	85.85	0	23.00	29.00	0	Ich habe dafür einen eigenen Branch angelegt und das Limit durch eine saubere Prüfung ersetzt.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	quiet-3s	85.85	1	29.10	34.82	0	Der erste Commit war ehrlich gesagt etwas zu groß, deshalb habe ich ihn am Nachmittag
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	quiet-3s	85.85	1	34.82	39.38	0	in drei kleinere Schritte aufgeteilt, damit die Durchsicht leichter wird.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	quiet-3s	85.85	1	39.38	44.06	0	Danach habe ich mit Anna über das neue Feature für die Vorlagen gesprochen.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	quiet-3s	85.85	1	44.06	49.18	0	Hier sind uns einig, dass wir zuerst eine einfache Version bauen, mit nur zwei oder drei
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	quiet-3s	85.85	1	49.18	53.14	0	festen Vorlagen und erst später eigene Vorlagen erlauben.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	quiet-3s	85.85	1	53.14	58.18	0	Sie schreibt bis Donnerstag eine kurze Beschreibung und ich schätze den Aufwand dann neu.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	quiet-3s	85.85	2	58.50	63.70	0	Am späten Nachmittag habe ich noch die Übersetzungen für die Einstellungen geprüft.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	quiet-3s	85.85	2	63.70	69.18	0	Zwei Texte waren auf Deutsch deutlich zu lang und wurden auf kleinen Bildschirmen abgeschnitten.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	quiet-3s	85.85	2	69.18	71.50	0	Das habe ich gleich korrigiert.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	quiet-3s	85.85	2	71.50	76.78	0	Morgen früh teste ich den Export noch einmal auf einem älteren Gerät und wenn alles passt,
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	quiet-3s	85.85	2	76.78	80.26	0	kann die Änderung am Mittwoch in die nächste Testversion.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	quiet-3s	85.85	2	80.26	83.82	0	Falls jemand Zeit hat, schaut bitte kurz über meine Änderungen.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	quiet-3s	85.85	2	83.82	85.30	0	Danke und bis morgen!
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	quiet-8s	85.85	0	0.00	2.00	0	Kurzes Update zu meinem Tag.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	quiet-8s	85.85	0	2.00	6.00	0	Heute Vormittag habe ich mich fast nur um den Export gekümmert.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	quiet-8s	85.85	0	6.00	14.00	0	Ein Kunde hatte gemeldet, dass lange Notizen beim Teilen abgeschnitten werden und ich konnte den Bug endlich reproduzieren.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	quiet-8s	85.85	0	14.00	23.00	0	Das Problem tritt nur auf, wenn der Text mehr als 4.000 Zeichen hat, weil wir an einer Stelle noch ein altes Limit aus der ersten Version verwenden.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	quiet-8s	85.85	0	23.00	29.00	0	Ich habe dafür einen eigenen Branch angelegt und das Limit durch eine saubere Prüfung ersetzt.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	quiet-8s	85.85	1	29.10	34.82	0	Der erste Commit war ehrlich gesagt etwas zu groß, deshalb habe ich ihn am Nachmittag
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	quiet-8s	85.85	1	34.82	39.38	0	in drei kleinere Schritte aufgeteilt, damit die Durchsicht leichter wird.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	quiet-8s	85.85	1	39.38	44.06	0	Danach habe ich mit Anna über das neue Feature für die Vorlagen gesprochen.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	quiet-8s	85.85	1	44.06	49.18	0	Hier sind uns einig, dass wir zuerst eine einfache Version bauen, mit nur zwei oder drei
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	quiet-8s	85.85	1	49.18	53.14	0	festen Vorlagen und erst später eigene Vorlagen erlauben.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	quiet-8s	85.85	1	53.14	58.18	0	Sie schreibt bis Donnerstag eine kurze Beschreibung und ich schätze den Aufwand dann neu.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	quiet-8s	85.85	2	58.50	63.70	0	Am späten Nachmittag habe ich noch die Übersetzungen für die Einstellungen geprüft.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	quiet-8s	85.85	2	63.70	69.18	0	Zwei Texte waren auf Deutsch deutlich zu lang und wurden auf kleinen Bildschirmen abgeschnitten.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	quiet-8s	85.85	2	69.18	71.50	0	Das habe ich gleich korrigiert.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	quiet-8s	85.85	2	71.50	76.78	0	Morgen früh teste ich den Export noch einmal auf einem älteren Gerät und wenn alles passt,
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	quiet-8s	85.85	2	76.78	80.26	0	kann die Änderung am Mittwoch in die nächste Testversion.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	quiet-8s	85.85	2	80.26	83.82	0	Falls jemand Zeit hat, schaut bitte kurz über meine Änderungen.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	quiet-8s	85.85	2	83.82	85.30	0	Danke und bis morgen!
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	noisy-3s	85.80	0	0.00	2.00	0	Kurzes Update zu meinem Tag.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	noisy-3s	85.80	0	2.00	6.00	0	Heute Vormittag habe ich mich fast nur um den Export gekümmert.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	noisy-3s	85.80	0	6.00	14.00	0	Ein Kunde hatte gemeldet, dass lange Notizen beim Teilen abgeschnitten werden und ich konnte den Bug endlich reproduzieren.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	noisy-3s	85.80	0	14.00	23.00	0	Das Problem tritt nur auf, wenn der Text mehr als 4.000 Zeichen hat, weil wir an einer Stelle noch ein altes Limit aus der ersten Version verwenden.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	noisy-3s	85.80	0	23.00	29.00	0	Ich habe dafür einen eigenen Branch angelegt und das Limit durch eine saubere Prüfung ersetzt.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	noisy-3s	85.80	1	29.10	34.82	0	Der erste Kümmet war ehrlich gesagt etwas zu groß. Deshalb habe ich ihn am Nachmittag
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	noisy-3s	85.80	1	34.82	39.46	0	in drei kleinere Schritte aufgeteilt, damit die Durchsicht leichter wird.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	noisy-3s	85.80	1	39.46	44.06	0	Danach habe ich mit Anna über das neue Feature für die Vorlagen gesprochen.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	noisy-3s	85.80	1	44.06	49.70	0	Wir sind uns einig, dass wir zuerst eine einfache Version bauen, mit nur zwei oder drei festen
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	noisy-3s	85.80	1	49.70	53.66	0	Vorlagen und erst später eigene Vorlagen erlauben.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	noisy-3s	85.80	1	53.66	58.14	0	Sie schreibt bis Donnerstag eine kurze Beschreibung und ich schätze den Aufwand dann neu.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	noisy-3s	85.80	2	58.50	63.50	0	Am späten Nachmittag habe ich noch die Übersetzungen für die Einstellungen geprüft.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	noisy-3s	85.80	2	63.50	68.50	0	Zwei Texte waren auf Deutsch deutlich zu lang und wurden auf kleinen Bildschirmen abgeschnitten.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	noisy-3s	85.80	2	68.50	70.50	0	Das habe ich gleich korrigiert.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	noisy-3s	85.80	2	70.50	74.50	0	Morgen früh teste ich den Export noch einmal auf einem älteren Gerät.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	noisy-3s	85.80	2	74.50	79.50	0	Und wenn alles passt, kann die Änderung am Mittwoch in die nächste Testversion.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	noisy-3s	85.80	2	79.50	83.50	0	Falls jemand Zeit hat, schaut bitte kurz über meine Änderungen.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	noisy-3s	85.80	2	83.50	85.50	0	Danke und bis morgen!
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	noisy-8s	85.80	0	0.00	2.00	0	Kurzes Update zu meinem Tag.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	noisy-8s	85.80	0	2.00	6.00	0	Heute Vormittag habe ich mich fast nur um den Export gekümmert.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	noisy-8s	85.80	0	6.00	14.00	0	Ein Kunde hatte gemeldet, dass lange Notizen beim Teilen abgeschnitten werden und ich konnte den Bug endlich reproduzieren.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	noisy-8s	85.80	0	14.00	23.00	0	Das Problem tritt nur auf, wenn der Text mehr als 4.000 Zeichen hat, weil wir an einer Stelle noch ein altes Limit aus der ersten Version verwenden.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	noisy-8s	85.80	0	23.00	29.00	0	Ich habe dafür einen eigenen Branch angelegt und das Limit durch eine saubere Prüfung ersetzt.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	noisy-8s	85.80	1	29.10	34.82	0	Der erste Kümmet war ehrlich gesagt etwas zu groß. Deshalb habe ich ihn am Nachmittag
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	noisy-8s	85.80	1	34.82	39.46	0	in drei kleinere Schritte aufgeteilt, damit die Durchsicht leichter wird.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	noisy-8s	85.80	1	39.46	44.06	0	Danach habe ich mit Anna über das neue Feature für die Vorlagen gesprochen.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	noisy-8s	85.80	1	44.06	49.70	0	Wir sind uns einig, dass wir zuerst eine einfache Version bauen, mit nur zwei oder drei festen
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	noisy-8s	85.80	1	49.70	53.66	0	Vorlagen und erst später eigene Vorlagen erlauben.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	noisy-8s	85.80	1	53.66	58.14	0	Sie schreibt bis Donnerstag eine kurze Beschreibung und ich schätze den Aufwand dann neu.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	noisy-8s	85.80	2	58.50	63.50	0	Am späten Nachmittag habe ich noch die Übersetzungen für die Einstellungen geprüft.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	noisy-8s	85.80	2	63.50	68.50	0	Zwei Texte waren auf Deutsch deutlich zu lang und wurden auf kleinen Bildschirmen abgeschnitten.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	noisy-8s	85.80	2	68.50	70.50	0	Das habe ich gleich korrigiert.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	noisy-8s	85.80	2	70.50	74.50	0	Morgen früh teste ich den Export noch einmal auf einem älteren Gerät.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	noisy-8s	85.80	2	74.50	79.50	0	Und wenn alles passt, kann die Änderung am Mittwoch in die nächste Testversion.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	noisy-8s	85.80	2	79.50	83.50	0	Falls jemand Zeit hat, schaut bitte kurz über meine Änderungen.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	noisy-8s	85.80	2	83.50	85.50	0	Danke und bis morgen!
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	cut-50%	42.58	0	0.00	2.00	0	Kurzes Update zu meinem Tag.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	cut-50%	42.58	0	2.00	6.00	0	Heute Vormittag habe ich mich fast nur um den Export gekümmert.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	cut-50%	42.58	0	6.00	14.00	0	Ein Kunde hatte gemeldet, dass lange Notizen beim Teilen abgeschnitten werden und ich konnte den Bug endlich reproduzieren.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	cut-50%	42.58	0	14.00	23.00	0	Das Problem tritt nur auf, wenn der Text mehr als 4.000 Zeichen hat, weil wir an einer Stelle noch ein altes Limit aus der ersten Version verwenden.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	cut-50%	42.58	0	23.00	29.00	0	Ich habe dafür einen eigenen Branch angelegt und das Limit durch eine saubere Prüfung ersetzt.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	cut-50%	42.58	1	29.10	34.82	0	Der erste Commit war ehrlich gesagt etwas zu groß. Deshalb habe ich ihn am Nachmittag
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	cut-50%	42.58	1	34.82	40.22	0	in drei kleinere Schritte aufgeteilt, damit die Durchsicht leichter wird. Danach habe
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	cut-50%	42.58	1	40.22	42.62	0	ich mit Anna über das neue Feature für die Vorlage.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	cut-70%	59.67	0	0.00	2.00	0	Kurzes Update zu meinem Tag.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	cut-70%	59.67	0	2.00	6.00	0	Heute Vormittag habe ich mich fast nur um den Export gekümmert.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	cut-70%	59.67	0	6.00	14.00	0	Ein Kunde hatte gemeldet, dass lange Notizen beim Teilen abgeschnitten werden und ich konnte den Bug endlich reproduzieren.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	cut-70%	59.67	0	14.00	23.00	0	Das Problem tritt nur auf, wenn der Text mehr als 4.000 Zeichen hat, weil wir an einer Stelle noch ein altes Limit aus der ersten Version verwenden.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	cut-70%	59.67	0	23.00	29.00	0	Ich habe dafür einen eigenen Branch angelegt und das Limit durch eine saubere Prüfung ersetzt.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	cut-70%	59.67	1	29.10	34.82	0	Der erste Commit war ehrlich gesagt etwas zu groß, deshalb habe ich ihn am Nachmittag
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	cut-70%	59.67	1	34.82	38.70	0	in drei kleinere Schritte aufgeteilt, damit die Durchsicht leichter wird.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	cut-70%	59.67	1	38.70	43.50	0	Danach habe ich mit Anna über das neue Feature für die Vorlagen gesprochen.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	cut-70%	59.67	1	43.50	49.70	0	Hier sind uns einig, dass wir zuerst eine einfache Version bauen, mit nur zwei oder drei festen
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	cut-70%	59.67	1	49.70	53.10	0	Vorlagen und erst später eigene Vorlagen erlauben.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	cut-70%	59.67	1	53.10	58.18	0	Sie schreibt bis Donnerstag eine kurze Beschreibung und ich schätze den Aufwand dann neu.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	cut-70%	59.67	2	58.50	60.50	0	Am späten Nacht!
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	cut-90%	76.93	0	0.00	2.00	0	Kurzes Update zu meinem Tag.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	cut-90%	76.93	0	2.00	6.00	0	Heute Vormittag habe ich mich fast nur um den Export gekümmert.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	cut-90%	76.93	0	6.00	14.00	0	Ein Kunde hatte gemeldet, dass lange Notizen beim Teilen abgeschnitten werden und ich konnte den Bug endlich reproduzieren.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	cut-90%	76.93	0	14.00	23.00	0	Das Problem tritt nur auf, wenn der Text mehr als 4.000 Zeichen hat, weil wir an einer Stelle noch ein altes Limit aus der ersten Version verwenden.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	cut-90%	76.93	0	23.00	29.00	0	Ich habe dafür einen eigenen Branch angelegt und das Limit durch eine saubere Prüfung ersetzt.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	cut-90%	76.93	1	29.10	34.82	0	Der erste Commit war ehrlich gesagt etwas zu groß, deshalb habe ich ihn am Nachmittag
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	cut-90%	76.93	1	34.82	38.70	0	in drei kleinere Schritte aufgeteilt, damit die Durchsicht leichter wird.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	cut-90%	76.93	1	38.70	43.50	0	Danach habe ich mit Anna über das neue Feature für die Vorlagen gesprochen.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	cut-90%	76.93	1	43.50	49.70	0	Hier sind uns einig, dass wir zuerst eine einfache Version bauen, mit nur zwei oder drei festen
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	cut-90%	76.93	1	49.70	53.10	0	Vorlagen und erst später eigene Vorlagen erlauben.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	cut-90%	76.93	1	53.10	58.18	0	Sie schreibt bis Donnerstag eine kurze Beschreibung und ich schätze den Aufwand dann neu.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	cut-90%	76.93	2	58.50	63.70	0	Am späten Nachmittag habe ich noch die Übersetzungen für die Einstellungen geprüft.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	cut-90%	76.93	2	63.70	69.18	0	Zwei Texte waren auf Deutsch deutlich zu lang und wurden auf kleinen Bildschirmen abgeschnitten.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	cut-90%	76.93	2	69.18	71.50	0	Das habe ich gleich korrigiert.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	cut-90%	76.93	2	71.50	76.82	0	Morgen früh teste ich den Export noch einmal auf einem älteren Gerät und wenn alles passt,
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	cut-90%	76.93	2	76.82	76.94	0	kann ich noch mal ein bisschen mehr auf dem Gerät.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	cut-14s	14.32	0	0.00	2.00	0	Kurzes Update zu meinem Tag.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	cut-14s	14.32	0	2.00	6.52	0	Heute Vormittag habe ich mich fast nur um den Export gekümmert.
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	cut-14s	14.32	0	6.52	11.76	0	Ein Kunde hatte gemeldet, dass lange Notizen beim Teilen abgeschnitten werden und ich konnte
+openai_whisper-small_216MB	elevenlabs/de/de-long-01-workday-export-fix.wav	de	cut-14s	14.32	0	11.76	13.64	0	den Bug endlich reproduzieren.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	clean	76.72	0	0.00	3.16	0	Hola equipo, os dejo un resumen rápido de hoy.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	clean	76.72	0	3.16	8.44	0	Por la mañana estuve revisando el book de las notificaciones que nos reportaron la semana pasada.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	clean	76.72	0	8.44	15.48	0	Resulta que, cuando el usuario cambia de zona horaria, los recordatorios se programaban con una hora de diferencia.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	clean	76.72	0	15.48	21.56	0	Tardé un buen rato en encontrarlo, porque sólo pasaba en algunos dispositivos y con el idioma configurado en inglés.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	clean	76.72	1	21.60	26.40	0	Al final, era un cálculo de fechas que no tenía en cuenta el horario de verano.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	clean	76.72	1	26.40	31.48	0	Lo he corregido y he añadido cinco pruebas nuevas para cubrir los casos más raros.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	clean	76.72	1	31.48	35.68	0	Ya está subido en una pull request, y Marta me ha dejado un par de comentarios sobre los
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	clean	76.72	1	35.68	37.00	0	nombres de las variables.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	clean	76.72	1	37.00	37.84	0	Nada importante.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	clean	76.72	2	37.90	42.02	0	Si mañana no hay más cambios, hago el merge a primera hora.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	clean	76.72	2	42.02	44.78	0	Después de comer, me puse con la pantalla de bienvenida.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	clean	76.72	2	44.78	50.22	0	El texto del segundo paso no se entendía bien, así que lo he reescrito con frases más cortas,
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	clean	76.72	2	50.22	54.82	0	y también he cambiado el orden de los botones para que la opción principal quede abajo,
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	clean	76.72	2	54.82	56.42	0	más cerca del pulgar.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	clean	76.72	2	56.42	60.62	0	Por la tarde tuvimos la reunión semanal, que duró casi una hora y media.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	clean	76.72	2	60.62	65.50	0	Lo más importante es que la próxima versión sale el día 12, así que hay que cerrar todo
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	clean	76.72	2	65.50	67.22	0	lo pendiente antes del viernes.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	clean	76.72	3	67.30	71.38	0	Mañana quiero dedicar la mañana a probar la aplicación en un teléfono antiguo,
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	clean	76.72	3	71.38	73.62	0	porque hemos tenido quejas de lentitud.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	clean	76.72	3	73.62	76.50	0	Cualquier cosa, me escribís por aquí. Un saludo.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	zero-3s	77.05	0	0.00	3.16	0	Hola equipo, os dejo un resumen rápido de hoy.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	zero-3s	77.05	0	3.16	8.44	0	Por la mañana estuve revisando el book de las notificaciones que nos reportaron la semana pasada.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	zero-3s	77.05	0	8.44	15.48	0	Resulta que, cuando el usuario cambia de zona horaria, los recordatorios se programaban con una hora de diferencia.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	zero-3s	77.05	0	15.48	21.56	0	Tardé un buen rato en encontrarlo, porque sólo pasaba en algunos dispositivos y con el idioma configurado en inglés.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	zero-3s	77.05	1	21.60	26.40	0	Al final, era un cálculo de fechas que no tenía en cuenta el horario de verano.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	zero-3s	77.05	1	26.40	31.48	0	Lo he corregido y he añadido cinco pruebas nuevas para cubrir los casos más raros.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	zero-3s	77.05	1	31.48	35.68	0	Ya está subido en una pull request, y Marta me ha dejado un par de comentarios sobre los
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	zero-3s	77.05	1	35.68	37.00	0	nombres de las variables.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	zero-3s	77.05	1	37.00	37.84	0	Nada importante.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	zero-3s	77.05	2	37.90	42.02	0	Si mañana no hay más cambios, hago el merge a primera hora.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	zero-3s	77.05	2	42.02	44.78	0	Después de comer, me puse con la pantalla de bienvenida.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	zero-3s	77.05	2	44.78	50.22	0	El texto del segundo paso no se entendía bien, así que lo he reescrito con frases más cortas,
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	zero-3s	77.05	2	50.22	54.82	0	y también he cambiado el orden de los botones para que la opción principal quede abajo,
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	zero-3s	77.05	2	54.82	56.42	0	más cerca del pulgar.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	zero-3s	77.05	2	56.42	60.62	0	Por la tarde tuvimos la reunión semanal, que duró casi una hora y media.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	zero-3s	77.05	2	60.62	65.50	0	Lo más importante es que la próxima versión sale el día 12, así que hay que cerrar todo
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	zero-3s	77.05	2	65.50	67.22	0	lo pendiente antes del viernes.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	zero-3s	77.05	3	67.30	71.38	0	Mañana quiero dedicar la mañana a probar la aplicación en un teléfono antiguo,
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	zero-3s	77.05	3	71.38	73.62	0	porque hemos tenido quejas de lentitud.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	zero-3s	77.05	3	73.62	76.50	0	Cualquier cosa, me escribís por aquí. Un saludo.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	quiet-3s	77.05	0	0.00	3.16	0	Hola equipo, os dejo un resumen rápido de hoy.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	quiet-3s	77.05	0	3.16	7.44	0	Por la mañana estuve revisando el book de las notificaciones que nos reportaron la semana
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	quiet-3s	77.05	0	7.44	13.48	0	pasada. Resulta que, cuando el usuario cambia de zona horaria, los recordatorios se programaban
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	quiet-3s	77.05	0	13.48	18.74	0	con una hora de diferencia. Tarde un buen rato en encontrarlo, porque solo pasaba en algunos
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	quiet-3s	77.05	0	18.74	21.52	0	dispositivos y con el idioma configurado en inglés.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	quiet-3s	77.05	1	21.60	26.40	0	Al final, era un cálculo de fechas que no tenía en cuenta el horario de verano.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	quiet-3s	77.05	1	26.40	31.48	0	Lo he corregido y he añadido cinco pruebas nuevas para cubrir los casos más raros.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	quiet-3s	77.05	1	31.48	35.68	0	Ya está subido en una pull request, y Marta me ha dejado un par de comentarios sobre los
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	quiet-3s	77.05	1	35.68	37.00	0	nombres de las variables.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	quiet-3s	77.05	1	37.00	37.84	0	Nada importante.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	quiet-3s	77.05	2	37.90	42.02	0	Si mañana no hay más cambios, hago el merge a primera hora.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	quiet-3s	77.05	2	42.02	44.78	0	Después de comer, me puse con la pantalla de bienvenida.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	quiet-3s	77.05	2	44.78	50.22	0	El texto del segundo paso no se entendía bien, así que lo he reescrito con frases más cortas,
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	quiet-3s	77.05	2	50.22	54.82	0	y también he cambiado el orden de los botones para que la opción principal quede abajo,
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	quiet-3s	77.05	2	54.82	56.42	0	más cerca del pulgar.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	quiet-3s	77.05	2	56.42	60.62	0	Por la tarde tuvimos la reunión semanal, que duró casi una hora y media.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	quiet-3s	77.05	2	60.62	65.50	0	Lo más importante es que la próxima versión sale el día 12, así que hay que cerrar todo
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	quiet-3s	77.05	2	65.50	67.22	0	lo pendiente antes del viernes.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	quiet-3s	77.05	3	67.30	71.86	0	Mañana quiero dedicar la mañana a probar la aplicación en un teléfono antiguo, porque
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	quiet-3s	77.05	3	71.86	74.06	0	hemos tenido quejas de lentitud.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	quiet-3s	77.05	3	74.06	75.98	0	Cualquier cosa, me escribís por aquí.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	quiet-3s	77.05	3	75.98	76.58	0	Un saludo.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	quiet-8s	77.05	0	0.00	3.16	0	Hola equipo, os dejo un resumen rápido de hoy.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	quiet-8s	77.05	0	3.16	7.44	0	Por la mañana estuve revisando el book de las notificaciones que nos reportaron la semana
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	quiet-8s	77.05	0	7.44	13.48	0	pasada. Resulta que, cuando el usuario cambia de zona horaria, los recordatorios se programaban
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	quiet-8s	77.05	0	13.48	18.74	0	con una hora de diferencia. Tarde un buen rato en encontrarlo, porque solo pasaba en algunos
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	quiet-8s	77.05	0	18.74	21.52	0	dispositivos y con el idioma configurado en inglés.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	quiet-8s	77.05	1	21.60	26.40	0	Al final, era un cálculo de fechas que no tenía en cuenta el horario de verano.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	quiet-8s	77.05	1	26.40	31.48	0	Lo he corregido y he añadido cinco pruebas nuevas para cubrir los casos más raros.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	quiet-8s	77.05	1	31.48	35.68	0	Ya está subido en una pull request, y Marta me ha dejado un par de comentarios sobre los
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	quiet-8s	77.05	1	35.68	37.00	0	nombres de las variables.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	quiet-8s	77.05	1	37.00	37.84	0	Nada importante.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	quiet-8s	77.05	2	37.90	42.02	0	Si mañana no hay más cambios, hago el merge a primera hora.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	quiet-8s	77.05	2	42.02	44.78	0	Después de comer, me puse con la pantalla de bienvenida.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	quiet-8s	77.05	2	44.78	50.22	0	El texto del segundo paso no se entendía bien, así que lo he reescrito con frases más cortas,
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	quiet-8s	77.05	2	50.22	54.82	0	y también he cambiado el orden de los botones para que la opción principal quede abajo,
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	quiet-8s	77.05	2	54.82	56.42	0	más cerca del pulgar.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	quiet-8s	77.05	2	56.42	60.62	0	Por la tarde tuvimos la reunión semanal, que duró casi una hora y media.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	quiet-8s	77.05	2	60.62	65.50	0	Lo más importante es que la próxima versión sale el día 12, así que hay que cerrar todo
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	quiet-8s	77.05	2	65.50	67.22	0	lo pendiente antes del viernes.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	quiet-8s	77.05	3	67.30	71.86	0	Mañana quiero dedicar la mañana a probar la aplicación en un teléfono antiguo, porque
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	quiet-8s	77.05	3	71.86	74.06	0	hemos tenido quejas de lentitud.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	quiet-8s	77.05	3	74.06	75.98	0	Cualquier cosa, me escribís por aquí.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	quiet-8s	77.05	3	75.98	76.58	0	Un saludo.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	noisy-3s	77.05	0	0.00	3.06	0	Hola equipo, os dejo un resumen rápido de hoy.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	noisy-3s	77.05	0	3.06	8.44	0	Por la mañana, estuve revisando el book de las notificaciones que nos reportaron la semana pasada.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	noisy-3s	77.05	0	8.44	15.44	0	Resulta que, cuando el usuario cambia de zona horaria, los recordatorios se programaban con una hora de diferencia.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	noisy-3s	77.05	0	15.44	21.56	0	Tardé un buen rato en encontrarlo, porque sólo pasaba en algunos dispositivos y con el idioma configurado en inglés.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	noisy-3s	77.05	1	21.60	25.84	0	Al final era un cálculo de fechas que no tenía en cuenta el horario de verano.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	noisy-3s	77.05	1	25.84	30.84	0	Lo he corregido y he añadido cinco pruebas nuevas para cubrir los casos más raros.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	noisy-3s	77.05	1	30.84	35.24	0	Ya está subido en una pull request y Marta me ha dejado un par de comentarios
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	noisy-3s	77.05	1	35.24	37.76	0	sobre los nombres de las variables. Nada importante.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	noisy-3s	77.05	2	37.90	41.36	0	Si mañana no hay más cambios, hago el merch a primera hora.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	noisy-3s	77.05	2	41.36	44.60	0	Después de comer, me puse con la pantalla de bienvenida.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	noisy-3s	77.05	2	44.60	50.22	0	El texto del segundo paso no se entendía bien, así que lo he reescrito con frases más cortas,
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	noisy-3s	77.05	2	50.22	55.90	0	y también he cambiado el orden de los botones para que la opción principal quede abajo, más cerca del pulgar.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	noisy-3s	77.05	2	55.90	60.32	0	Por la tarde tuvimos la reunión semanal, que duró casi una hora y media.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	noisy-3s	77.05	2	60.32	64.02	0	Lo más importante es que la próxima versión sale el día 12,
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	noisy-3s	77.05	2	64.02	67.28	0	así que hay que cerrar todo lo pendiente antes del viernes.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	noisy-3s	77.05	3	67.30	71.38	0	Mañana quiero dedicar la mañana a probar la aplicación en un teléfono antiguo,
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	noisy-3s	77.05	3	71.38	73.46	0	porque hemos tenido quejas de lentitud.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	noisy-3s	77.05	3	73.46	76.46	0	Cualquier cosa, me escribís por aquí. Un saludo.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	noisy-8s	77.05	0	0.00	3.06	0	Hola equipo, os dejo un resumen rápido de hoy.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	noisy-8s	77.05	0	3.06	8.44	0	Por la mañana, estuve revisando el book de las notificaciones que nos reportaron la semana pasada.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	noisy-8s	77.05	0	8.44	15.44	0	Resulta que, cuando el usuario cambia de zona horaria, los recordatorios se programaban con una hora de diferencia.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	noisy-8s	77.05	0	15.44	21.56	0	Tardé un buen rato en encontrarlo, porque sólo pasaba en algunos dispositivos y con el idioma configurado en inglés.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	noisy-8s	77.05	1	21.60	25.84	0	Al final era un cálculo de fechas que no tenía en cuenta el horario de verano.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	noisy-8s	77.05	1	25.84	30.84	0	Lo he corregido y he añadido cinco pruebas nuevas para cubrir los casos más raros.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	noisy-8s	77.05	1	30.84	35.24	0	Ya está subido en una pull request y Marta me ha dejado un par de comentarios
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	noisy-8s	77.05	1	35.24	37.76	0	sobre los nombres de las variables. Nada importante.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	noisy-8s	77.05	2	37.90	41.36	0	Si mañana no hay más cambios, hago el merch a primera hora.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	noisy-8s	77.05	2	41.36	44.60	0	Después de comer, me puse con la pantalla de bienvenida.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	noisy-8s	77.05	2	44.60	50.22	0	El texto del segundo paso no se entendía bien, así que lo he reescrito con frases más cortas,
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	noisy-8s	77.05	2	50.22	55.90	0	y también he cambiado el orden de los botones para que la opción principal quede abajo, más cerca del pulgar.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	noisy-8s	77.05	2	55.90	60.32	0	Por la tarde tuvimos la reunión semanal, que duró casi una hora y media.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	noisy-8s	77.05	2	60.32	64.02	0	Lo más importante es que la próxima versión sale el día 12,
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	noisy-8s	77.05	2	64.02	67.28	0	así que hay que cerrar todo lo pendiente antes del viernes.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	noisy-8s	77.05	3	67.30	71.38	0	Mañana quiero dedicar la mañana a probar la aplicación en un teléfono antiguo,
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	noisy-8s	77.05	3	71.38	73.46	0	porque hemos tenido quejas de lentitud.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	noisy-8s	77.05	3	73.46	76.46	0	Cualquier cosa, me escribís por aquí. Un saludo.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	cut-50%	38.53	0	0.00	3.16	0	Hola equipo, os dejo un resumen rápido de hoy.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	cut-50%	38.53	0	3.16	8.44	0	Por la mañana estuve revisando el book de las notificaciones que nos reportaron la semana pasada.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	cut-50%	38.53	0	8.44	15.48	0	Resulta que, cuando el usuario cambia de zona horaria, los recordatorios se programaban con una hora de diferencia.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	cut-50%	38.53	0	15.48	21.56	0	Tardé un buen rato en encontrarlo, porque sólo pasaba en algunos dispositivos y con el idioma configurado en inglés.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	cut-50%	38.53	1	21.60	26.40	0	Al final, era un cálculo de fechas que no tenía en cuenta el horario de verano.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	cut-50%	38.53	1	26.40	31.48	0	Lo he corregido y he añadido cinco pruebas nuevas para cubrir los casos más raros.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	cut-50%	38.53	1	31.48	35.68	0	Ya está subido en una pull request, y Marta me ha dejado un par de comentarios sobre los
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	cut-50%	38.53	1	35.68	37.00	0	nombres de las variables.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	cut-50%	38.53	1	37.00	37.84	0	Nada importante.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	cut-70%	53.62	0	0.00	3.16	0	Hola equipo, os dejo un resumen rápido de hoy.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	cut-70%	53.62	0	3.16	8.44	0	Por la mañana estuve revisando el book de las notificaciones que nos reportaron la semana pasada.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	cut-70%	53.62	0	8.44	15.48	0	Resulta que, cuando el usuario cambia de zona horaria, los recordatorios se programaban con una hora de diferencia.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	cut-70%	53.62	0	15.48	21.56	0	Tardé un buen rato en encontrarlo, porque sólo pasaba en algunos dispositivos y con el idioma configurado en inglés.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	cut-70%	53.62	1	21.60	26.40	0	Al final, era un cálculo de fechas que no tenía en cuenta el horario de verano.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	cut-70%	53.62	1	26.40	31.48	0	Lo he corregido y he añadido cinco pruebas nuevas para cubrir los casos más raros.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	cut-70%	53.62	1	31.48	35.68	0	Ya está subido en una pull request, y Marta me ha dejado un par de comentarios sobre los
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	cut-70%	53.62	1	35.68	37.00	0	nombres de las variables.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	cut-70%	53.62	1	37.00	37.84	0	Nada importante.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	cut-70%	53.62	2	37.90	41.58	0	Si mañana no hay más cambios, hago el merge a primera hora.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	cut-70%	53.62	2	41.58	44.62	0	Después de comer, me puse con la pantalla de bienvenida.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	cut-70%	53.62	2	44.62	50.18	0	El texto del segundo paso no se entendía bien, así que lo he reescrito con frases más cortas,
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	cut-70%	53.62	2	50.18	53.66	0	y también he cambiado el orden de los botones para que la opción principal
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	cut-90%	69.12	0	0.00	3.16	0	Hola equipo, os dejo un resumen rápido de hoy.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	cut-90%	69.12	0	3.16	8.44	0	Por la mañana estuve revisando el book de las notificaciones que nos reportaron la semana pasada.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	cut-90%	69.12	0	8.44	15.48	0	Resulta que, cuando el usuario cambia de zona horaria, los recordatorios se programaban con una hora de diferencia.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	cut-90%	69.12	0	15.48	21.56	0	Tardé un buen rato en encontrarlo, porque sólo pasaba en algunos dispositivos y con el idioma configurado en inglés.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	cut-90%	69.12	1	21.60	26.40	0	Al final, era un cálculo de fechas que no tenía en cuenta el horario de verano.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	cut-90%	69.12	1	26.40	31.48	0	Lo he corregido y he añadido cinco pruebas nuevas para cubrir los casos más raros.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	cut-90%	69.12	1	31.48	35.68	0	Ya está subido en una pull request, y Marta me ha dejado un par de comentarios sobre los
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	cut-90%	69.12	1	35.68	37.00	0	nombres de las variables.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	cut-90%	69.12	1	37.00	37.84	0	Nada importante.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	cut-90%	69.12	2	37.90	42.02	0	Si mañana no hay más cambios, hago el merge a primera hora.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	cut-90%	69.12	2	42.02	44.78	0	Después de comer, me puse con la pantalla de bienvenida.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	cut-90%	69.12	2	44.78	50.22	0	El texto del segundo paso no se entendía bien, así que lo he reescrito con frases más cortas,
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	cut-90%	69.12	2	50.22	54.82	0	y también he cambiado el orden de los botones para que la opción principal quede abajo,
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	cut-90%	69.12	2	54.82	56.42	0	más cerca del pulgar.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	cut-90%	69.12	2	56.42	60.62	0	Por la tarde tuvimos la reunión semanal, que duró casi una hora y media.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	cut-90%	69.12	2	60.62	65.50	0	Lo más importante es que la próxima versión sale el día 12, así que hay que cerrar todo
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	cut-90%	69.12	2	65.50	67.22	0	lo pendiente antes del viernes.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	cut-90%	69.12	3	67.30	71.06	0	mañana quiero dedicar la mañana
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	cut-14s	14.57	0	0.00	3.16	0	Hola equipo, os dejo un resumen rápido de hoy.
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	cut-14s	14.57	0	3.16	7.44	0	Por la mañana estuve revisando el book de las notificaciones que nos reportaron la semana
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	cut-14s	14.57	0	7.44	13.48	0	pasada. Resulta que, cuando el usuario cambia de zona horaria, los recordatorios se programaban
+openai_whisper-small_216MB	elevenlabs/es/es-long-01-workday-reminders-fix.wav	es	cut-14s	14.57	0	13.48	14.60	0	con una hora de diferente.
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	clean	75.12	0	0.00	2.90	0	大家好,我簡單說一下今天的進展。
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	clean	75.12	0	2.90	6.70	0	上午我主要在處理上週用戶反饋的那個bug。
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	clean	75.12	0	6.70	10.50	0	問題是在網路不穩定的時候上傳會失敗,
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	clean	75.12	0	10.50	15.10	0	但是界面上一直顯示正在上傳,用戶不知道發生了什麼。
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	clean	75.12	0	15.10	17.90	0	我花了差不多兩個小時才找到原因,
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	clean	75.12	0	17.90	21.10	0	是從事的邏輯沒有正確的更新狀態。
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	clean	75.12	1	21.10	26.50	0	我新建了一个 branch 把修复和其他的改动分开,这样比较方便检查。
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	clean	75.12	1	26.50	32.10	0	修复本身不复杂,大概改了三十行代码,另外我还加了四个测试。
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	clean	75.12	1	32.10	37.10	0	下午我把代码提交了,最后一个 commit 是三点左右推上去的。
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	clean	75.12	1	37.10	41.10	0	现在已经在 GitHub 上开了合并请求,等小李帮我看一下。
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	clean	75.12	2	41.40	44.68	0	接下來我還整理了一下設置頁面的文字
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	clean	75.12	2	44.68	50.00	0	有幾個說明寫得太長,在小屏幕的手機上會被截斷,我都改短了
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	clean	75.12	2	50.00	53.76	0	另外,下一個測試版本計畫在15號發布
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	clean	75.12	2	53.76	57.12	0	所以這週五之前要把剩下的問題都處理完
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	clean	75.12	2	57.12	62.40	0	明天上午我打算在一台舊手機上再測試一次,看它速度有沒有問題
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	clean	75.12	3	62.50	66.18	0	下午要開周會,我會把這週的情況匯總一下。
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	clean	75.12	3	66.18	70.94	0	晚上我還會回復測試用戶的郵件,今天大概收到了十幾封。
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	clean	75.12	3	70.94	75.10	0	如果大家有時間,麻煩幫我看看那個合併請求。謝謝。
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	zero-3s	75.40	0	0.00	2.90	0	大家好,我簡單說一下今天的進展。
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	zero-3s	75.40	0	2.90	6.70	0	上午我主要在處理上週用戶反饋的那個bug。
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	zero-3s	75.40	0	6.70	10.50	0	問題是在網路不穩定的時候上傳會失敗,
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	zero-3s	75.40	0	10.50	15.10	0	但是界面上一直顯示正在上傳,用戶不知道發生了什麼。
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	zero-3s	75.40	0	15.10	17.90	0	我花了差不多兩個小時才找到原因,
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	zero-3s	75.40	0	17.90	21.10	0	是從事的邏輯沒有正確的更新狀態。
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	zero-3s	75.40	1	21.10	26.50	0	我新建了一个 branch 把修复和其他的改动分开,这样比较方便检查。
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	zero-3s	75.40	1	26.50	32.10	0	修复本身不复杂,大概改了三十行代码,另外我还加了四个测试。
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	zero-3s	75.40	1	32.10	37.10	0	下午我把代码提交了,最后一个 commit 是三点左右推上去的。
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	zero-3s	75.40	1	37.10	41.10	0	现在已经在 GitHub 上开了合并请求,等小李帮我看一下。
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	zero-3s	75.40	2	41.40	44.68	0	接下來我還整理了一下設置頁面的文字
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	zero-3s	75.40	2	44.68	50.00	0	有幾個說明寫得太長,在小屏幕的手機上會被截斷,我都改短了
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	zero-3s	75.40	2	50.00	53.76	0	另外,下一個測試版本計畫在15號發布
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	zero-3s	75.40	2	53.76	57.12	0	所以這週五之前要把剩下的問題都處理完
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	zero-3s	75.40	2	57.12	62.40	0	明天上午我打算在一台舊手機上再測試一次,看它速度有沒有問題
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	zero-3s	75.40	3	62.50	66.18	0	下午要開周會,我會把這週的情況匯總一下。
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	zero-3s	75.40	3	66.18	70.94	0	晚上我還會回復測試用戶的郵件,今天大概收到了十幾封。
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	zero-3s	75.40	3	70.94	75.10	0	如果大家有時間,麻煩幫我看看那個合併請求。謝謝。
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	quiet-3s	75.40	0	0.00	2.90	0	大家好,我簡單說一下今天的進展。
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	quiet-3s	75.40	0	2.90	6.70	0	上午我主要在處理上週用戶反饋的那個bug。
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	quiet-3s	75.40	0	6.70	10.50	0	問題是在網絡不穩定的時候上傳會失敗,
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	quiet-3s	75.40	0	10.50	15.10	0	但是界面上一直顯示正在上傳,用戶不知道發生了什麼。
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	quiet-3s	75.40	0	15.10	17.90	0	我花了差不多兩個小時才找到原因,
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	quiet-3s	75.40	0	17.90	21.10	0	是從事的邏輯沒有正確的更新狀態。
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	quiet-3s	75.40	1	21.10	26.50	0	我新建了一个branch,把修复和其他的改动分开,这样比较方便检查。
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	quiet-3s	75.40	1	26.50	32.10	0	修复本身不复杂,大概改了30行代码,另外我还加了4个测试。
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	quiet-3s	75.40	1	32.10	37.10	0	下午我把代码提交了,最后一个commit是3点左右推上去的,
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	quiet-3s	75.40	1	37.10	41.10	0	现在已经在github上开了合并请求,等小李帮我看一下。
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	quiet-3s	75.40	2	41.40	44.68	0	接下來我還整理了一下設置頁面的文字
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	quiet-3s	75.40	2	44.68	46.64	0	有幾個說明寫得太長
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	quiet-3s	75.40	2	46.64	48.88	0	在小屏幕的手機上會被截斷
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	quiet-3s	75.40	2	48.88	50.00	0	我都改短了
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	quiet-3s	75.40	2	50.00	53.68	0	另外下一個測試版本計畫在15號發布
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	quiet-3s	75.40	2	53.68	57.04	0	所以這週五之前要把剩下的問題都處理完
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	quiet-3s	75.40	2	57.04	60.88	0	明天上午我打算在一台舊手機上再測試一次
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	quiet-3s	75.40	2	60.88	62.40	0	看它速度有沒有問題
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	quiet-3s	75.40	3	62.50	66.18	0	下午要開周會,我會把這週的情況匯總一下。
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	quiet-3s	75.40	3	66.18	70.94	0	晚上我還會回復測試用戶的郵件,今天大概收到了十幾封。
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	quiet-3s	75.40	3	70.94	75.26	0	如果大家有時間,麻煩幫我看看那個合併請求。謝謝。
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	quiet-8s	75.40	0	0.00	2.90	0	大家好,我簡單說一下今天的進展。
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	quiet-8s	75.40	0	2.90	6.70	0	上午我主要在處理上週用戶反饋的那個bug。
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	quiet-8s	75.40	0	6.70	10.50	0	問題是在網絡不穩定的時候上傳會失敗,
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	quiet-8s	75.40	0	10.50	15.10	0	但是界面上一直顯示正在上傳,用戶不知道發生了什麼。
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	quiet-8s	75.40	0	15.10	17.90	0	我花了差不多兩個小時才找到原因,
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	quiet-8s	75.40	0	17.90	21.10	0	是從事的邏輯沒有正確的更新狀態。
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	quiet-8s	75.40	1	21.10	26.50	0	我新建了一个branch,把修复和其他的改动分开,这样比较方便检查。
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	quiet-8s	75.40	1	26.50	32.10	0	修复本身不复杂,大概改了30行代码,另外我还加了4个测试。
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	quiet-8s	75.40	1	32.10	37.10	0	下午我把代码提交了,最后一个commit是3点左右推上去的,
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	quiet-8s	75.40	1	37.10	41.10	0	现在已经在github上开了合并请求,等小李帮我看一下。
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	quiet-8s	75.40	2	41.40	44.68	0	接下來我還整理了一下設置頁面的文字
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	quiet-8s	75.40	2	44.68	46.64	0	有幾個說明寫得太長
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	quiet-8s	75.40	2	46.64	48.88	0	在小屏幕的手機上會被截斷
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	quiet-8s	75.40	2	48.88	50.00	0	我都改短了
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	quiet-8s	75.40	2	50.00	53.68	0	另外下一個測試版本計畫在15號發布
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	quiet-8s	75.40	2	53.68	57.04	0	所以這週五之前要把剩下的問題都處理完
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	quiet-8s	75.40	2	57.04	60.88	0	明天上午我打算在一台舊手機上再測試一次
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	quiet-8s	75.40	2	60.88	62.40	0	看它速度有沒有問題
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	quiet-8s	75.40	3	62.50	66.18	0	下午要開周會,我會把這週的情況匯總一下。
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	quiet-8s	75.40	3	66.18	70.94	0	晚上我還會回復測試用戶的郵件,今天大概收到了十幾封。
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	quiet-8s	75.40	3	70.94	75.26	0	如果大家有時間,麻煩幫我看看那個合併請求。謝謝。
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	noisy-3s	75.35	0	0.00	2.76	0	大家好,我簡單說一下今天的進展
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	noisy-3s	75.35	0	2.76	6.56	0	上午我主要在處理上週用戶反饋的那個bug
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	noisy-3s	75.35	0	6.56	10.52	0	問題是在網絡不穩定的時候上傳會失敗
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	noisy-3s	75.35	0	10.52	13.24	0	但是界面上一直顯示正在上傳
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	noisy-3s	75.35	0	13.24	14.84	0	用戶不知道發生了什麼
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	noisy-3s	75.35	0	14.84	17.84	0	我花了差不多兩個小時才找到原因
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	noisy-3s	75.35	0	17.84	21.00	0	是從事的邏輯沒有正確的更新狀態
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	noisy-3s	75.35	1	21.10	26.50	0	我新建了一个branch,把修复和其他的改动分开,这样比较方便检查。
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	noisy-3s	75.35	1	26.50	32.10	0	修复本身不复杂,大概改了30行代码,另外我还加了4个测试。
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	noisy-3s	75.35	1	32.10	37.10	0	下午我把代码提交了,最后一个commit是3点左右推上去的,
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	noisy-3s	75.35	1	37.10	41.10	0	现在已经在github上开了合并请求,等小李帮我看一下。
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	noisy-3s	75.35	2	41.40	44.68	0	接下来我还整理了一下设置页面的文字
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	noisy-3s	75.35	2	44.68	46.64	0	有几个说明写得太长
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	noisy-3s	75.35	2	46.64	48.88	0	在小屏幕的手机上会被截断
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	noisy-3s	75.35	2	48.88	49.88	0	我都改短了
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	noisy-3s	75.35	2	49.88	53.68	0	另外下一个测试版本计划在15号发布
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	noisy-3s	75.35	2	53.68	57.04	0	所以这周五之前要把剩下的问题都处理完
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	noisy-3s	75.35	2	57.04	60.84	0	明天上午我打算在一台旧手机上再测试一次
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	noisy-3s	75.35	2	60.84	62.44	0	看看速度有没有问题
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	noisy-3s	75.35	3	62.50	66.06	0	下午要開周會,我會把這週的情況匯總一下
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	noisy-3s	75.35	3	66.06	68.90	0	晚上我還會回復測試用戶的郵件
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	noisy-3s	75.35	3	68.90	70.90	0	今天大概收到了十幾封
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	noisy-3s	75.35	3	70.90	74.38	0	如果大家有時間,麻煩幫我看看那個合併請求
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	noisy-3s	75.35	3	74.38	75.38	0	謝謝
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	noisy-8s	75.35	0	0.00	2.76	0	大家好,我簡單說一下今天的進展
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	noisy-8s	75.35	0	2.76	6.56	0	上午我主要在處理上週用戶反饋的那個bug
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	noisy-8s	75.35	0	6.56	10.52	0	問題是在網絡不穩定的時候上傳會失敗
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	noisy-8s	75.35	0	10.52	13.24	0	但是界面上一直顯示正在上傳
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	noisy-8s	75.35	0	13.24	14.84	0	用戶不知道發生了什麼
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	noisy-8s	75.35	0	14.84	17.84	0	我花了差不多兩個小時才找到原因
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	noisy-8s	75.35	0	17.84	21.00	0	是從事的邏輯沒有正確的更新狀態
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	noisy-8s	75.35	1	21.10	26.50	0	我新建了一个branch,把修复和其他的改动分开,这样比较方便检查。
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	noisy-8s	75.35	1	26.50	32.10	0	修复本身不复杂,大概改了30行代码,另外我还加了4个测试。
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	noisy-8s	75.35	1	32.10	37.10	0	下午我把代码提交了,最后一个commit是3点左右推上去的,
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	noisy-8s	75.35	1	37.10	41.10	0	现在已经在github上开了合并请求,等小李帮我看一下。
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	noisy-8s	75.35	2	41.40	44.68	0	接下来我还整理了一下设置页面的文字
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	noisy-8s	75.35	2	44.68	46.64	0	有几个说明写得太长
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	noisy-8s	75.35	2	46.64	48.88	0	在小屏幕的手机上会被截断
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	noisy-8s	75.35	2	48.88	49.88	0	我都改短了
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	noisy-8s	75.35	2	49.88	53.68	0	另外下一个测试版本计划在15号发布
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	noisy-8s	75.35	2	53.68	57.04	0	所以这周五之前要把剩下的问题都处理完
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	noisy-8s	75.35	2	57.04	60.84	0	明天上午我打算在一台旧手机上再测试一次
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	noisy-8s	75.35	2	60.84	62.44	0	看看速度有没有问题
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	noisy-8s	75.35	3	62.50	66.06	0	下午要開周會,我會把這週的情況匯總一下
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	noisy-8s	75.35	3	66.06	68.90	0	晚上我還會回復測試用戶的郵件
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	noisy-8s	75.35	3	68.90	70.90	0	今天大概收到了十幾封
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	noisy-8s	75.35	3	70.90	74.38	0	如果大家有時間,麻煩幫我看看那個合併請求
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	noisy-8s	75.35	3	74.38	75.38	0	謝謝
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	cut-50%	37.62	0	0.00	2.90	0	大家好,我簡單說一下今天的進展。
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	cut-50%	37.62	0	2.90	6.70	0	上午我主要在處理上週用戶反饋的那個bug。
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	cut-50%	37.62	0	6.70	10.50	0	問題是在網路不穩定的時候上傳會失敗,
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	cut-50%	37.62	0	10.50	15.10	0	但是界面上一直顯示正在上傳,用戶不知道發生了什麼。
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	cut-50%	37.62	0	15.10	17.90	0	我花了差不多兩個小時才找到原因,
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	cut-50%	37.62	0	17.90	21.10	0	是從事的邏輯沒有正確的更新狀態。
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	cut-50%	37.62	1	21.10	26.42	0	我新建了一个branch,把修复和其他的改动分开, 这样比较方便检查。
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	cut-50%	37.62	1	26.42	32.02	0	修复本身不复杂,大概改了三十行代码, 另外我还加了四个测试。
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	cut-50%	37.62	1	32.02	37.10	0	下午我把代码提交了, 最后一个commit是三点左右推上去的,
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	cut-50%	37.62	1	37.10	38.10	0	现在再加上一个小码.
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	cut-70%	52.47	0	0.00	2.90	0	大家好,我簡單說一下今天的進展。
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	cut-70%	52.47	0	2.90	6.70	0	上午我主要在處理上週用戶反饋的那個bug。
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	cut-70%	52.47	0	6.70	10.50	0	問題是在網路不穩定的時候上傳會失敗,
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	cut-70%	52.47	0	10.50	15.10	0	但是界面上一直顯示正在上傳,用戶不知道發生了什麼。
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	cut-70%	52.47	0	15.10	17.90	0	我花了差不多兩個小時才找到原因,
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	cut-70%	52.47	0	17.90	21.10	0	是從事的邏輯沒有正確的更新狀態。
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	cut-70%	52.47	1	21.10	26.50	0	我新建了一个 branch 把修复和其他的改动分开,这样比较方便检查。
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	cut-70%	52.47	1	26.50	32.10	0	修复本身不复杂,大概改了三十行代码,另外我还加了四个测试。
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	cut-70%	52.47	1	32.10	37.10	0	下午我把代码提交了,最后一个 commit 是三点左右推上去的。
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	cut-70%	52.47	1	37.10	41.10	0	现在已经在 GitHub 上开了合并请求,等小李帮我看一下。
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	cut-70%	52.47	2	41.40	49.90	0	接下來我還整理了一下設置頁面的文字, 有幾個說明寫得太長,在小屏幕的手機上會被截斷,我都改短了。
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	cut-70%	52.47	2	49.90	52.90	0	另外,下一個測試版本計畫在...
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	cut-90%	67.78	0	0.00	2.90	0	大家好,我簡單說一下今天的進展。
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	cut-90%	67.78	0	2.90	6.70	0	上午我主要在處理上週用戶反饋的那個bug。
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	cut-90%	67.78	0	6.70	10.50	0	問題是在網路不穩定的時候上傳會失敗,
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	cut-90%	67.78	0	10.50	15.10	0	但是界面上一直顯示正在上傳,用戶不知道發生了什麼。
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	cut-90%	67.78	0	15.10	17.90	0	我花了差不多兩個小時才找到原因,
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	cut-90%	67.78	0	17.90	21.10	0	是從事的邏輯沒有正確的更新狀態。
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	cut-90%	67.78	1	21.10	26.50	0	我新建了一个 branch 把修复和其他的改动分开,这样比较方便检查。
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	cut-90%	67.78	1	26.50	32.10	0	修复本身不复杂,大概改了三十行代码,另外我还加了四个测试。
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	cut-90%	67.78	1	32.10	37.10	0	下午我把代码提交了,最后一个 commit 是三点左右推上去的。
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	cut-90%	67.78	1	37.10	41.10	0	现在已经在 GitHub 上开了合并请求,等小李帮我看一下。
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	cut-90%	67.78	2	41.40	44.68	0	接下來我還整理了一下設置頁面的文字
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	cut-90%	67.78	2	44.68	46.64	0	有幾個說明寫得太長
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	cut-90%	67.78	2	46.64	48.88	0	在小屏幕的手機上會被截斷
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	cut-90%	67.78	2	48.88	50.00	0	我都改短了
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	cut-90%	67.78	2	50.00	53.68	0	另外下一個測試版本計畫在15號發布
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	cut-90%	67.78	2	53.68	57.04	0	所以這週五之前要把剩下的問題都處理完
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	cut-90%	67.78	2	57.04	60.88	0	明天上午我打算在一台舊手機上再測試一次
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	cut-90%	67.78	2	60.88	62.48	0	看它速度有沒有問題
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	cut-90%	67.78	2	62.48	64.04	0	下午要開週會
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	cut-90%	67.78	2	64.04	66.04	0	我會把這週的情況匯總一下
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	cut-90%	67.78	2	66.04	68.00	0	晚上我還會回覆測試
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	cut-14s	14.32	0	0.00	2.76	0	大家好,我簡單說一下今天的進展
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	cut-14s	14.32	0	2.76	6.60	0	上午我主要在處理上週用戶反饋的那個bug
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	cut-14s	14.32	0	6.60	10.50	0	問題是在網路不穩定的時候上傳會失敗
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	cut-14s	14.32	0	10.50	13.20	0	但是界面上一直顯示正在上傳
+openai_whisper-small_216MB	elevenlabs/zh/zh-long-01-workday-upload-fix.wav	zh	cut-14s	14.32	0	13.20	14.80	0	用戶不知道發生了什麼

@@ -88,9 +88,15 @@ enum BenchError: Error {
     case usage(String)
 }
 
+/// `results` is nil for an engine with no Whisper segments.
+struct Decode {
+    let text: String
+    let results: [PastAudioSegments.Result]?
+}
+
 protocol Engine {
     var name: String { get }
-    func transcribe(_ samples: [Float], language: String) async throws -> String
+    func transcribe(_ samples: [Float], language: String) async throws -> Decode
 }
 
 /// The options of `WhisperKitEngine.transcribe` in DictusApp, language forced.
@@ -98,7 +104,7 @@ struct WhisperEngine: Engine {
     let name: String
     let kit: WhisperKit
 
-    func transcribe(_ samples: [Float], language: String) async throws -> String {
+    func transcribe(_ samples: [Float], language: String) async throws -> Decode {
         let options = DecodingOptions(
             task: .transcribe,
             language: language,
@@ -110,7 +116,13 @@ struct WhisperEngine: Engine {
             chunkingStrategy: .vad
         )
         let results = try await kit.transcribe(audioArray: samples, decodeOptions: options)
-        return results.map(\.text).joined(separator: " ")
+        return Decode(
+            text: results.map(\.text).joined(separator: " "),
+            results: results.map { result in
+                PastAudioSegments.Result(text: result.text, segments: result.segments.map {
+                    PastAudioSegments.Segment(start: $0.start, end: $0.end, text: $0.text)
+                })
+            })
     }
 }
 
@@ -120,10 +132,10 @@ struct ParakeetEngine: Engine {
     let name = "parakeet-v3"
     let manager: AsrManager
 
-    func transcribe(_ samples: [Float], language: String) async throws -> String {
-        guard samples.count >= sampleRate else { return "" }
+    func transcribe(_ samples: [Float], language: String) async throws -> Decode {
+        guard samples.count >= sampleRate else { return Decode(text: "", results: nil) }
         var state = try TdtDecoderState()
-        return try await manager.transcribe(samples, decoderState: &state).text
+        return Decode(text: try await manager.transcribe(samples, decoderState: &state).text, results: nil)
     }
 }
 
@@ -152,31 +164,95 @@ func oneLine(_ text: String) -> String {
         .trimmingCharacters(in: .whitespaces)
 }
 
+/// The clip stopped inside a word, as a stop tap during speech records it (#953): at the
+/// loudest 50 ms frame within 150 ms of `fraction` of the clip, cut in that frame's middle.
+func cutInsideWord(_ speech: [Float], at fraction: Double) -> Int {
+    let frame = sampleRate / 20
+    let target = Int(Double(speech.count) * fraction) / frame
+    let frames = max(0, target - 3)...min(speech.count / frame - 1, target + 3)
+    let loudest = frames.max { a, b in
+        energy(speech[(a * frame)..<((a + 1) * frame)]) < energy(speech[(b * frame)..<((b + 1) * frame)])
+    } ?? target
+    return loudest * frame + frame / 2
+}
+
+func energy(_ samples: ArraySlice<Float>) -> Float {
+    samples.reduce(0) { $0 + $1 * $1 }
+}
+
+/// What reaches the engine for one decode of a clip.
+struct Take {
+    let name: String
+    let samples: [Float]
+}
+
+func takes(_ speech: [Float], cuts: Bool, cutsOnly: Bool, fractions: [Double]) -> [Take] {
+    var takes = cutsOnly ? [] : tails.map { Take(name: $0.name, samples: recording(speech, $0)) }
+    guard cuts else { return takes }
+    var cutPoints = fractions.map { (String(format: "cut-%.0f%%", $0 * 100), cutInsideWord(speech, at: $0)) }
+    // Pierre's dictation in #953 stopped at 14.41 s, inside one 30 s window.
+    let issueLength = Int(14.41 * Double(sampleRate))
+    if speech.count > 2 * issueLength {
+        cutPoints.append(("cut-14s", cutInsideWord(speech, at: Double(issueLength) / Double(speech.count))))
+    }
+    takes += cutPoints.map { Take(name: $0.0, samples: Array(speech.prefix($0.1))) }
+    return takes
+}
+
+func timings(_ segments: [PastAudioSegments.Segment]) -> String {
+    segments.map { String(format: "%.2f-%.2f", $0.start, $0.end) }.joined(separator: " ")
+}
+
 guard let corpusPath = argument("--corpus"), let spec = argument("--engine"), let out = argument("--out") else {
     FileHandle.standardError.write(Data(
-        "usage: closing-phrase-bench --corpus <dictus-test-voices> --engine <whisper variant|parakeet-v3> --out <tsv> [--models <dir>] [--trim]\n".utf8))
+        "usage: closing-phrase-bench --corpus <dictus-test-voices> --engine <whisper variant|parakeet-v3> --out <tsv> [--models <dir>] [--trim] [--cuts | --cuts-only] [--cut-fractions 0.5,0.7,0.9] [--segments <tsv>]\n".utf8))
     exit(2)
 }
 let corpus = URL(fileURLWithPath: corpusPath)
 let models = URL(fileURLWithPath: argument("--models") ?? "build/closing-phrase-bench/models")
 let trim = CommandLine.arguments.contains("--trim")
+let cutsOnly = CommandLine.arguments.contains("--cuts-only")
+let cuts = cutsOnly || CommandLine.arguments.contains("--cuts")
+let fractions = (argument("--cut-fractions") ?? "0.5,0.7,0.9").split(separator: ",").compactMap { Double($0) }
+let segmentsOut = argument("--segments")
 
 let engine = try await makeEngine(spec, models: models)
 let clips = try readManifest(corpus)
+let pipeline = trim ? "trim" : "shipping"
 var rows = ["engine\tpipeline\tclip\tlanguage\ttail\tsent_seconds\ttext"]
+var segmentRows = ["engine\tclip\tlanguage\ttail\tsent_seconds\tresult\tstart\tend\tdropped\ttext"]
 for clip in clips {
     let speech = try readWAV(corpus.appendingPathComponent(clip.file))
-    for tail in tails {
-        let recorded = recording(speech, tail)
-        let sent = trim ? TrailingSilence.trimmed(recorded) : recorded
+    for take in takes(speech, cuts: cuts, cutsOnly: cutsOnly, fractions: fractions) {
+        let sent = trim ? TrailingSilence.trimmed(take.samples) : take.samples
+        let sentSeconds = Float(sent.count) / Float(sampleRate)
         let started = Date()
-        let raw = try await engine.transcribe(sent, language: clip.language)
-        let text = NonSpeechMarkers.spokenText(in: raw)
+        let decode = try await engine.transcribe(sent, language: clip.language)
         let elapsed = Date().timeIntervalSince(started)
-        rows.append([engine.name, trim ? "trim" : "shipping", clip.file, clip.language, tail.name,
-                     String(format: "%.2f", Double(sent.count) / Double(sampleRate)), oneLine(text)]
-            .joined(separator: "\t"))
-        FileHandle.standardError.write(Data(String(format: "[%.1fs] %@ %@: %@\n", elapsed, tail.name, clip.file, oneLine(text)).utf8))
+        func row(_ pipeline: String, _ raw: String) -> String {
+            [engine.name, pipeline, clip.file, clip.language, take.name, String(format: "%.2f", sentSeconds),
+             oneLine(NonSpeechMarkers.spokenText(in: raw))].joined(separator: "\t")
+        }
+        rows.append(row(pipeline, decode.text))
+        var note = ""
+        if let results = decode.results {
+            // #953: the same decode, without the segments timed after the audio.
+            let filtered = PastAudioSegments.text(of: results, audioSeconds: sentSeconds)
+            rows.append(row(pipeline + "+past-audio", filtered.text))
+            for (index, result) in results.enumerated() {
+                for segment in result.segments {
+                    segmentRows.append([engine.name, clip.file, clip.language, take.name, String(format: "%.2f", sentSeconds),
+                                        String(index), String(format: "%.2f", segment.start), String(format: "%.2f", segment.end),
+                                        filtered.dropped.contains(segment) ? "1" : "0", oneLine(segment.text)].joined(separator: "\t"))
+                }
+            }
+            if !filtered.dropped.isEmpty { note = " DROPPED " + timings(filtered.dropped) }
+        }
+        FileHandle.standardError.write(Data(String(format: "[%.1fs] %@ %@ sent=%.2f: %@%@\n", elapsed, take.name, clip.file,
+                                                   sentSeconds, oneLine(decode.text), note).utf8))
     }
 }
 try (rows.joined(separator: "\n") + "\n").write(toFile: out, atomically: true, encoding: .utf8)
+if let segmentsOut {
+    try (segmentRows.joined(separator: "\n") + "\n").write(toFile: segmentsOut, atomically: true, encoding: .utf8)
+}

@@ -264,7 +264,7 @@ class TranscriptionService {
 
             // Join all segment texts into a single string.
             // Whisper may produce multiple segments for longer audio.
-            let text = results.map { $0.text }.joined(separator: " ")
+            let text = results.textWithinAudio(seconds: sentSec, component: "TranscriptionService", instanceID: "transcribeLegacy")
 
             // Trims, and drops non-speech markers such as "[Musique]" (#766).
             let trimmed = NonSpeechMarkers.spokenText(in: text)

@@ -16,6 +16,14 @@ $B --corpus ~/dev/dictus-test-voices --engine openai_whisper-large-v3-v20240930_
 python3 -I tools/closing-phrase-bench/score.py ~/dev/dictus-test-voices before.tsv after.tsv > report.md
 ```
 
+`--cuts` adds decodes of each clip stopped inside a word (#953): at 50, 70 and 90 % of
+the clip, or the fractions given with `--cut-fractions 0.25,0.5`, plus 14.4 s on clips
+longer than 28.8 s. `--cuts-only` skips the tails. `--segments <tsv>` writes every
+Whisper segment with its start, end and whether `PastAudioSegments` drops it, and each
+Whisper decode then gives a second row, pipeline `<pipeline>+past-audio`, with the text
+the app keeps since #953. `score.py` scores a `cut-*` decode against the reference
+prefix that aligns best.
+
 `--engine` takes a WhisperKit variant (downloaded once into
 `build/closing-phrase-bench/models`) or `parakeet-v3` (FluidAudio's cache). About six
 minutes per engine on an M-series Mac. Runs on macOS, so speed numbers say nothing

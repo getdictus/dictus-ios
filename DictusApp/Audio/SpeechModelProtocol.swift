@@ -347,7 +347,7 @@ class WhisperKitEngine: SpeechModelProtocol {
             details: "results=\(results.count) segments=\(totalSegments) chars=\(totalCharCount) audioSec=\(String(format: "%.2f", audioDurationSec)) sentSec=\(String(format: "%.2f", sentSec)) lastSegmentEndSec=\(String(format: "%.2f", lastSegmentEnd))"
         ))
 
-        let text = results.map { $0.text }.joined(separator: " ")
+        let text = results.textWithinAudio(seconds: sentSec, component: "WhisperKitEngine", instanceID: "transcribe")
         let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
 
         guard !trimmed.isEmpty else {
@@ -360,5 +360,30 @@ class WhisperKitEngine: SpeechModelProtocol {
         // the same measure as Parakeet's, and a log line mixing the two under one name
         // would be read as one distribution (#554).
         return SpeechTranscription(text: trimmed, confidence: nil)
+    }
+}
+
+extension Array where Element == TranscriptionResult {
+    /// The joined text without the segments timed after the end of the audio sent (#953),
+    /// logged by count and times, never by text.
+    func textWithinAudio(seconds: Float, component: String, instanceID: String) -> String {
+        let outcome = PastAudioSegments.text(
+            of: map { result in
+                PastAudioSegments.Result(text: result.text, segments: result.segments.map {
+                    PastAudioSegments.Segment(start: $0.start, end: $0.end, text: $0.text)
+                })
+            },
+            audioSeconds: seconds
+        )
+        if !outcome.dropped.isEmpty {
+            let times = outcome.dropped.map { String(format: "%.2f-%.2f", $0.start, $0.end) }.joined(separator: ",")
+            PersistentLog.log(.diagnosticProbe(
+                component: component,
+                instanceID: instanceID,
+                action: "segmentsPastAudioDropped",
+                details: "dropped=\(outcome.dropped.count) sentSec=\(String(format: "%.2f", seconds)) times=\(times)"
+            ))
+        }
+        return outcome.text
     }
 }
