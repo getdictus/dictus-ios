@@ -1,0 +1,18 @@
+# #951 simulator run, 2026-11-15 (Dictus Verify 20261115-115817, iPhone 17, iOS 26.5, Debug)
+# Hook: debugSimulateAudioServerResetMs=600000 (every activation refused with 'msrv', no reset posted),
+# microphone permission granted, dictus.modelReady=YES. No audioEngineStarted anywhere: nothing recorded.
+# After (a12984ca), keyboard mic in Safari:
+[2026-11-15T11:07:04Z] NOTICE  [keyboard] <KBD> hostReturn hostId=com.apple.mobilesafari outcome=tap-resolved
+[2026-11-15T11:07:04Z] INFO    [keyboard] <KBD> keyboardMicTapped
+[2026-11-15T11:07:05Z] INFO    [dictation] <KBD> statusChanged from=idle to=requested source=keyboardState
+[2026-11-15T11:07:07Z] ERROR   [audio] <APP> audioSessionActivationFailed step=setCategory ... 'msrv'
+[2026-11-15T11:07:07Z] INFO    [lifecycle] <APP> coldStartURLReceived isColdStart=true isEngineDead=false hasBeenActive=false
+[2026-11-15T11:07:07Z] ERROR   [audio] <APP> audioSessionActivationFailed step=setCategory ... 'msrv'
+[2026-11-15T11:07:07Z] NOTICE  [keyboard] <APP> hostReturn hostId=com.apple.mobilesafari outcome=no-scheme-known
+[2026-11-15T11:07:07Z] ERROR   [audio] <APP> audioSessionActivationFailed step=setCategory ... 'msrv'
+[2026-11-15T11:07:07Z] DEBUG   [keyboard] <APP> diagnosticProbe component=DictationCoordinator instanceID=coldStart action=sessionActivationRetry details=failedAttempts=1 delayMs=250
+[2026-11-15T11:07:07Z] ERROR   [audio] <APP> audioSessionActivationFailed step=setCategory ... 'msrv'
+[2026-11-15T11:07:10Z] INFO    [dictation] <KBD> statusChanged from=requested to=idle source=keyboardState
+[2026-11-15T11:07:10Z] DEBUG   [keyboard] <APP> diagnosticProbe component=DictationCoordinator instanceID=coldStart action=sessionActivationWaitedForReset details=waitedMs=3002 timeoutMs=3000 reset=fa
+[2026-11-15T11:07:10Z] DEBUG   [keyboard] <APP> diagnosticProbe component=DictationCoordinator instanceID=coldStart action=sessionActivationDropped details=keyboardStatus=idle
+[2026-11-15T11:07:10Z] DEBUG   [keyboard] <APP> diagnosticProbe component=coldStart instanceID=0 action=assertionEnded details=reason=task-exit
