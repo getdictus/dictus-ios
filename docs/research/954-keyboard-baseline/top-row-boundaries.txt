@@ -1,0 +1,9 @@
+boundary 1 at 40.21 pt	dead 39.91-40.41 pt	aaaaaaaaa______zzzzzzzzzz
+boundary 2 at 80.42 pt	dead none	zzzzzzzzzzzzzeeeeeeeeeeee
+boundary 3 at 120.63 pt	dead 120.23-120.83 pt	eeeeeeee_______rrrrrrrrrr
+boundary 4 at 160.84 pt	dead none	rrrrrrrrrrrrttttttttttttt
+boundary 5 at 201.06 pt	dead none	ttttttttttttttyyyyyyyyyyy
+boundary 6 at 241.27 pt	dead 240.87-241.07 pt	yyyyyyyy___uuuuuuuuuuuuuu
+boundary 7 at 281.48 pt	dead none	uuuuuuuuuuuuuiiiiiiiiiiii
+boundary 8 at 321.69 pt	dead 321.19-321.79 pt	iiiiiii_______ooooooooooo
+boundary 9 at 361.90 pt	dead none	ooooooooooooppppppppppppp
