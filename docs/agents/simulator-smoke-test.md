@@ -118,4 +118,4 @@ xcrun simctl delete "Dictus Smoke"
 | `DICTUS_SMOKE_DEVICE_TYPE` | `com.apple.CoreSimulator.SimDeviceType.iPhone-17` |
 | `DICTUS_SMOKE_RUNTIME` | `com.apple.CoreSimulator.SimRuntime.iOS-26-5` |
 
-Measured on Xcode 27.0 (27A266a), iOS 26.5 runtime, axe 1.8.0. A pre-A14 device type would be refused at the mic by design (#635), so keep the default device type or a newer one.
+Measured on Xcode 27.0 (27A266a), iOS 26.5 runtime, axe 1.8.0. A pre-A14 device type would be refused at the mic unless Parakeet is the active model (#635, #963), so keep the default device type or a newer one.
