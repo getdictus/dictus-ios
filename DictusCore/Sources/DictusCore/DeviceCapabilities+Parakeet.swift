@@ -42,10 +42,33 @@ public extension DeviceCapabilities {
     /// WHY NOT BEFORE A14 (#963): on the CPU the retry costs as much as the first pass, or
     /// more. Measured on `iPad8,1`: the first pass of a keyboard dictation finished in
     /// about 6 s, then the retry ran 27.9 s, the 30 s keyboard watchdog reset at
-    /// 20:59:57Z, and the result was dropped as stale. The watchdog stays as it is; the
-    /// retry goes. These devices get the first pass, which is what every Parakeet
-    /// dictation returned before #623.
+    /// 20:59:57Z, and the result was dropped as stale. The retry goes; the watchdog was
+    /// only scaled later, for long dictations (`transcriptionWatchdogTimeout`). These
+    /// devices get the first pass, which is what every Parakeet dictation returned
+    /// before #623.
     var runsParakeetDriftRetry: Bool {
         !isPreA14
+    }
+
+    /// The base delay of DictusApp's transcription stage watchdog, before A14 and after.
+    static let transcriptionWatchdogBaseSeconds: TimeInterval = 30
+
+    /// Seconds of watchdog added per second of audio before A14.
+    static let preA14TranscriptionWatchdogSecondsPerAudioSecond: TimeInterval = 0.5
+
+    /// How long DictusApp's transcription stage may run before its watchdog cancels it,
+    /// for a recording of `audioSeconds`.
+    ///
+    /// WHY IT SCALES BEFORE A14 (#963): on the CPU a long dictation outlasts a fixed 30 s.
+    /// Measured on `iPad8,1` (build `21739bdb`, no drift retry): 2.3 s of audio in 6.4 s,
+    /// 4.1 s in 6.2 s, 17.1 s in 11.6 s, 64.4 s in 19.3 s; a ~71 s dictation was cancelled
+    /// by the watchdog at 30 s and nothing was inserted. 30 s + 0.5 x the audio gives that
+    /// one 65.5 s (Pierre, 2026-11-16).
+    ///
+    /// A14 and later keep the fixed 30 s.
+    func transcriptionWatchdogTimeout(audioSeconds: TimeInterval) -> TimeInterval {
+        let base = Self.transcriptionWatchdogBaseSeconds
+        guard isPreA14 else { return base }
+        return base + Self.preA14TranscriptionWatchdogSecondsPerAudioSecond * max(0, audioSeconds)
     }
 }

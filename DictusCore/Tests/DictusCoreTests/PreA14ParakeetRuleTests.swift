@@ -136,6 +136,31 @@ final class PreA14ParakeetRuleTests: XCTestCase {
         }
     }
 
+    // MARK: - Transcription watchdog
+
+    /// 30 s + 0.5 x the audio before A14 (Pierre, 2026-11-16): the ~71 s dictation the
+    /// fixed 30 s cancelled on `iPad8,1` gets 65.5 s.
+    func testTranscriptionWatchdogScalesWithAudioBeforeA14() {
+        for (identifier, ram) in preA14 {
+            let capabilities = device(identifier, ramGB: ram)
+            XCTAssertEqual(capabilities.transcriptionWatchdogTimeout(audioSeconds: 0), 30, identifier)
+            XCTAssertEqual(capabilities.transcriptionWatchdogTimeout(audioSeconds: 10), 35, identifier)
+            XCTAssertEqual(capabilities.transcriptionWatchdogTimeout(audioSeconds: 64.44), 62.22, accuracy: 0.001, identifier)
+            XCTAssertEqual(capabilities.transcriptionWatchdogTimeout(audioSeconds: 71), 65.5, identifier)
+            XCTAssertEqual(capabilities.transcriptionWatchdogTimeout(audioSeconds: 120), 90, identifier)
+            XCTAssertEqual(capabilities.transcriptionWatchdogTimeout(audioSeconds: -5), 30, identifier)
+        }
+    }
+
+    func testTranscriptionWatchdogStaysThirtySecondsFromA14() {
+        for (identifier, ram) in a14AndLater + [("arm64", 16)] {
+            let capabilities = device(identifier, ramGB: ram)
+            for audio in [0.0, 10, 71, 120, 600] {
+                XCTAssertEqual(capabilities.transcriptionWatchdogTimeout(audioSeconds: audio), 30, "\(identifier) \(audio)")
+            }
+        }
+    }
+
     // MARK: - Process memory log fields
 
     func testProcessFootprintIsReadable() throws {
