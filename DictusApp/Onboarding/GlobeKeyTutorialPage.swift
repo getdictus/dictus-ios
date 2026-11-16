@@ -67,12 +67,13 @@ struct GlobeKeyTutorialPage: View {
 
     @Environment(\.scenePhase) private var scenePhase
 
-    /// Whether the keyboard can dictate on this device (#635). False on a pre-A14
-    /// chip, where the Dictus keyboard draws its mic disabled everywhere, this page's
+    /// Whether the keyboard can dictate with the model onboarding installed (#635, #963).
+    /// When false, the Dictus keyboard draws its mic disabled everywhere, this page's
     /// text field included: the keyboard cannot tell that its host is DictusApp in
     /// the foreground, so it has no safe way to make an exception here. The page then
     /// asks for typing instead, and the same 3-character rule advances it.
-    private let keyboardCanDictate = DeviceCapabilities.current().supportsKeyboardDictation
+    private let keyboardCanDictate = DeviceCapabilities.current()
+        .supportsKeyboardDictation(activeModel: ModelInfo.recommendedIdentifier())
 
     private var stage: FirstDictationStage {
         frozenStage ?? FirstDictationStage(
