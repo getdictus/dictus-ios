@@ -186,7 +186,8 @@ func commitWord(in field: Field, memory: AutocorrectRejectionMemory,
     let proposal = engine.spellCheck(word, previousWord: previous,
                                      isAtSentenceStart: ProperNounGuard.isAtSentenceStart(context: field.text, word: word))?.correction
     var applied = false
-    if memory.commit(prefix: prefix, word: word, proposedCorrection: proposal) == .correct,
+    if memory.commit(prefix: prefix, word: word, proposedCorrection: proposal,
+                     allowsCasingChange: proposal != nil && engine.lexiconDecision(for: word) != nil) == .correct,
        let correction = proposal,
        case .applied = AutocorrectCountingSite.apply(editor: field, word: word, correction: correction,
                                                      trailing: " ", previousWord: previous, mirror: mirror) {
@@ -275,7 +276,7 @@ let h = CGFloat(height)
 var tapsOut = ["lang\tsentence\ttap\tintended\tresolved\tx\ty\tengine_us"]
 var commitsOut = ["lang\tsentence\tintended\ttyped\tfinal"]
 var textsOut = ["lang\tsentence\tintended\tfinal"]
-var registerOut = ["lang\tbefore\ttyped\texpected\treported\tfinal"]
+var registerOut = ["lang\tbefore\ttyped\texpected\treported\tlexicon\tfinal"]
 let register = readLines("\(benchDir)/register.tsv").dropFirst().map { $0.components(separatedBy: "\t") }
 
 // The engine starts loading French as soon as it exists. A `setLanguage` issued before
@@ -307,11 +308,17 @@ for code in langs {
     // The register of real cases (#500): each one in a fresh field holding what was
     // typed before it, committed by the same space bar as the runs.
     for f in register where f[0] == code {
+        let entries = f[6].split(separator: ",").map { entry -> (userInput: String, documentText: String) in
+            let parts = entry.split(separator: "=", maxSplits: 1).map(String.init)
+            return (parts[0], parts.last ?? parts[0])
+        }
+        engine.setSupplementaryLexicon(SupplementaryLexicon(entries: entries))
         let field = Field()
         field.text = f[1] + f[2]
         let final = commitWord(in: field, memory: AutocorrectRejectionMemory(), mirror: MirrorSyncState())?.final ?? f[2]
-        registerOut.append("\(code)\t\(f[1])\t\(f[2])\t\(f[3])\t\(f[4])\t\(final)")
+        registerOut.append("\(code)\t\(f[1])\t\(f[2])\t\(f[3])\t\(f[4])\t\(f[6])\t\(final)")
     }
+    engine.setSupplementaryLexicon(.empty)
     FileHandle.standardError.write(Data("\(code): \(sentences.count) sentences replayed\n".utf8))
 }
 

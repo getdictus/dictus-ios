@@ -169,15 +169,16 @@ def commit_section(rows):
 
 
 def register_section(rows):
-    right = sum(r["final"].lower() == r["expected"].lower() for r in rows)
+    # Exact comparison: a case records its characters, capitals included ("Zofiak").
+    right = sum(r["final"] == r["expected"] for r in rows)
     out = ["## Register of real cases (#500)", "",
            f"{right} of {len(rows)} come out as the person meant. Each case is committed by the space bar "
            "in a field holding the text typed before it (`register.tsv`).", "",
-           "| lang | before | typed | expected | reported | final | |", "|---|---|---|---|---|---|---|"]
+           "| lang | before | typed | expected | reported | lexicon | final | |", "|---|---|---|---|---|---|---|---|"]
     for r in rows:
-        mark = "right" if r["final"].lower() == r["expected"].lower() else "wrong"
+        mark = "right" if r["final"] == r["expected"] else "wrong"
         out.append(f"| {r['lang']} | {r['before'].strip() or '-'} | {r['typed']} | {r['expected']} | "
-                   f"{r['reported']} | {r['final']} | {mark} |")
+                   f"{r['reported']} | {r.get('lexicon') or '-'} | {r['final']} | {mark} |")
     out.append("")
     return out
 

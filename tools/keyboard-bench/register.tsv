@@ -2,13 +2,20 @@
 # `before` then `typed`, the space bar commits `typed`, and `expected` is what the
 # person meant. `reported` is what Dictus wrote when the case was filed; `filed` is
 # the date of the comment. Characters are as reported, lowercase included.
-lang	before	typed	expected	reported	filed
-fr	il 	ma	m'a	ma	2026-09-05
-fr	comment as tu 	troubz	trouvé	trouve	2026-09-05
-fr	ce que tu as 	dais	fait	dais	2026-09-24
-fr		vocaux	vocaux	bocaux	2026-10-04
-fr		styke	stylé	style	2026-10-04
-fr		styké	stylé	style	2026-10-04
-fr	bien 	arruves	arrivés	arrives	2026-10-04
-fr		stylé	stylé	style	2026-10-06
-fr		mok	moi	m'ok	2026-11-01
+# `lexicon` is what the contacts and text-replacements lexicon (#873) holds for the
+# case, comma-separated, `shortcut=phrase` or a word; empty on the simulator. A device
+# holds hundreds of entries, which is how "il ma" survived PR #970 there.
+lang	before	typed	expected	reported	filed	lexicon
+fr	il 	ma	m'a	ma	2026-09-05	
+fr	comment as tu 	troubz	trouvé	trouve	2026-09-05	
+fr	ce que tu as 	dais	fait	dais	2026-09-24	
+fr		vocaux	vocaux	bocaux	2026-10-04	
+fr		styke	stylé	style	2026-10-04	
+fr		styké	stylé	style	2026-10-04	
+fr	bien 	arruves	arrivés	arrives	2026-10-04	
+fr		stylé	stylé	style	2026-10-06	
+fr		mok	moi	m'ok	2026-11-01	
+fr	il 	ma	m'a	ma	2026-11-17	ma
+fr	il 	zofiak	Zofiak	-	2026-11-17	Zofiak
+fr	une 	pierre	pierre	-	2026-11-17	Pierre
+fr	je veux 	qqc	quelque chose	-	2026-11-17	qqc=quelque chose
