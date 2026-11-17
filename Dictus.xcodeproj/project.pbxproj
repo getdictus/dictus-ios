@@ -235,6 +235,7 @@
 		VN6200000006 /* VoiceNoteCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = VN6201000006 /* VoiceNoteCardView.swift */; };
 		VN6200000007 /* VoiceNoteIslandDriver.swift in Sources */ = {isa = PBXBuildFile; fileRef = VN6201000007 /* VoiceNoteIslandDriver.swift */; };
 		TF9000000001 /* SubscriptionForegroundRefreshTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = TF9100000001 /* SubscriptionForegroundRefreshTests.swift */; };
+		AB097403 /* ReleaseNotesSymbolTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB097404 /* ReleaseNotesSymbolTests.swift */; };
 		TF9000000002 /* StoreKitConfig.storekit in Resources */ = {isa = PBXBuildFile; fileRef = SS100004 /* StoreKitConfig.storekit */; };
 /* End PBXBuildFile section */
 
@@ -533,6 +534,7 @@
 		VN6201000006 /* VoiceNoteCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceNoteCardView.swift; sourceTree = "<group>"; };
 		VN6201000007 /* VoiceNoteIslandDriver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceNoteIslandDriver.swift; sourceTree = "<group>"; };
 		TF9100000001 /* SubscriptionForegroundRefreshTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionForegroundRefreshTests.swift; sourceTree = "<group>"; };
+		AB097404 /* ReleaseNotesSymbolTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReleaseNotesSymbolTests.swift; sourceTree = "<group>"; };
 		TF9200000001 /* DictusAppTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DictusAppTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -1083,6 +1085,7 @@
 			isa = PBXGroup;
 			children = (
 				TF9100000001 /* SubscriptionForegroundRefreshTests.swift */,
+				AB097404 /* ReleaseNotesSymbolTests.swift */,
 			);
 			path = DictusAppTests;
 			sourceTree = "<group>";
@@ -1624,6 +1627,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				TF9000000001 /* SubscriptionForegroundRefreshTests.swift in Sources */,
+				AB097403 /* ReleaseNotesSymbolTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

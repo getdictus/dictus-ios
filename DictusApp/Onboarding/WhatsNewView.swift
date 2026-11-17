@@ -22,25 +22,31 @@ struct WhatsNewView: View {
     @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
-        ZStack {
-            Color.dictusBackground
-                .ignoresSafeArea()
-
-            ReleaseNotesContent(notes: notes)
-                .safeAreaInset(edge: .bottom) {
-                    OnboardingPrimaryButton(Text("Continue")) {
-                        PersistentLog.log(.diagnosticProbe(
-                            component: "whatsNew", instanceID: "0", action: "finished", details: ""
-                        ))
-                        onFinish()
-                    }
-                    .accessibilityIdentifier("whatsNew.continue")
-                    .padding(.horizontal, OnboardingMetrics.horizontalPadding)
-                    .padding(.bottom, OnboardingMetrics.buttonBottomPadding)
+        ReleaseNotesContent(notes: notes)
+            .safeAreaInset(edge: .bottom, spacing: 0) {
+                OnboardingPrimaryButton(Text("Continue")) {
+                    PersistentLog.log(.diagnosticProbe(
+                        component: "whatsNew", instanceID: "0", action: "finished", details: ""
+                    ))
+                    onFinish()
                 }
-        }
-        .onAppear { recordSeenIfOnScreen() }
-        .onChange(of: scenePhase) { _, _ in recordSeenIfOnScreen() }
+                .accessibilityIdentifier("whatsNew.continue")
+                .padding(.horizontal, OnboardingMetrics.horizontalPadding)
+                .padding(.top, 12)
+                .padding(.bottom, OnboardingMetrics.buttonBottomPadding)
+                // The list scrolls under the button on a small iPhone: it fades out above it
+                // instead of being cut by the button's edge.
+                .background(alignment: .top) {
+                    LinearGradient(colors: [Color.dictusBackground.opacity(0), Color.dictusBackground],
+                                   startPoint: .top, endPoint: .bottom)
+                        .frame(height: 28)
+                        .offset(y: -28)
+                        .allowsHitTesting(false)
+                }
+                .background(Color.dictusBackground.ignoresSafeArea())
+            }
+            .onAppear { recordSeenIfOnScreen() }
+            .onChange(of: scenePhase) { _, _ in recordSeenIfOnScreen() }
     }
 
     /// Records What's new as seen once it is really in front of the user: on screen and the
@@ -56,38 +62,98 @@ struct WhatsNewView: View {
         WhatsNew.recordSeen()
         PersistentLog.log(.diagnosticProbe(
             component: "whatsNew", instanceID: "0", action: "shown",
-            details: "version=\(WhatsNew.runningVersion) lines=\(notes.lines.count)"
+            details: "version=\(WhatsNew.runningVersion) items=\(notes.items.count)"
         ))
     }
 }
 
-/// The notes themselves: the title, then one bulleted line per change. Shared by What's new
-/// and the Settings row that reopens it.
+/// The notes themselves: the app icon, the title, then one row per change. Shared by What's
+/// new and the Settings row that reopens it.
+///
+/// WHY THIS LAYOUT: it is the « What's new » sheet of Apple's own apps (a large centred title,
+/// one row per feature with its symbol, a bold title and one sentence), in Dictus's clothes:
+/// the app icon tile with the paywall's accent glow (#913), DM Sans, and the brand gradient
+/// behind each symbol.
 struct ReleaseNotesContent: View {
     let notes: ReleaseNotes
 
+    /// Whether the screen is short (an iPhone SE): smaller icon and title, tighter rows, as
+    /// the paywall does (#913).
+    @State private var isCompact = false
+
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 20) {
+            VStack(spacing: 0) {
+                DictusIconTile(logoHeight: isCompact ? 26 : 34)
+                    .shadow(color: Color.dictusAccent.opacity(0.6), radius: 10)
+                    .shadow(color: Color.dictusAccent.opacity(0.3), radius: 22)
+                    .accessibilityHidden(true)
+
                 Text(verbatim: notes.title)
-                    .font(.largeTitle.bold())
+                    .font(.dmSans(.bold, size: isCompact ? 27 : 32, relativeTo: .largeTitle))
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
                     .accessibilityAddTraits(.isHeader)
-                ForEach(notes.lines, id: \.self) { line in
-                    HStack(alignment: .firstTextBaseline, spacing: 12) {
-                        Text(verbatim: "•")
-                            .font(.body.bold())
-                            .foregroundStyle(Color.dictusAccent)
-                            .accessibilityHidden(true)
-                        Text(verbatim: line)
-                            .font(.body)
-                            .fixedSize(horizontal: false, vertical: true)
+                    .padding(.top, isCompact ? 14 : 20)
+
+                VStack(alignment: .leading, spacing: isCompact ? 18 : 26) {
+                    ForEach(notes.items, id: \.title) { item in
+                        ReleaseNoteRow(item: item)
                     }
                 }
+                .padding(.top, isCompact ? 24 : 36)
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.horizontal, OnboardingMetrics.horizontalPadding)
-            .padding(.vertical, OnboardingMetrics.titleTopPadding)
+            .padding(.horizontal, isCompact ? 24 : 28)
+            .padding(.top, isCompact ? 28 : 48)
+            .padding(.bottom, 24)
+            .frame(maxWidth: 560)
+            .frame(maxWidth: .infinity)
         }
+        .scrollBounceBehavior(.basedOnSize)
+        .background {
+            ZStack(alignment: .top) {
+                Color.dictusBackground
+                // A faint accent light behind the icon, as on the paywall's hero.
+                RadialGradient(colors: [Color.dictusAccent.opacity(0.16), .clear],
+                               center: .top, startRadius: 0, endRadius: 360)
+                    .frame(height: 420)
+            }
+            .ignoresSafeArea()
+        }
+        .onGeometryChange(for: Bool.self) { $0.size.height < 700 } action: { isCompact = $0 }
         .accessibilityIdentifier("whatsNew.notes")
+    }
+}
+
+/// One change: its symbol on a brand-gradient tile, a bold title, one sentence.
+private struct ReleaseNoteRow: View {
+    let item: ReleaseNotes.Item
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 16) {
+            Image(systemName: item.symbol)
+                .font(.system(size: 19, weight: .semibold))
+                .foregroundStyle(.white)
+                .frame(width: 44, height: 44)
+                .background(
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .fill(LinearGradient(colors: [.dictusGradientStart, .dictusGradientEnd],
+                                             startPoint: .topLeading, endPoint: .bottomTrailing))
+                )
+                .accessibilityHidden(true)
+
+            VStack(alignment: .leading, spacing: 3) {
+                Text(verbatim: item.title)
+                    .font(.dmSans(.semiBold, size: 17, relativeTo: .headline))
+                    .foregroundStyle(.primary)
+                Text(verbatim: item.text)
+                    .font(.dmSans(.regular, size: 15, relativeTo: .subheadline))
+                    .foregroundStyle(.secondary)
+            }
+            .fixedSize(horizontal: false, vertical: true)
+
+            Spacer(minLength: 0)
+        }
+        .accessibilityElement(children: .combine)
     }
 }

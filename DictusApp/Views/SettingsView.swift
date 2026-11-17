@@ -532,7 +532,6 @@ struct SettingsView: View {
                 if let releaseNotes {
                     NavigationLink("What's new") {
                         ReleaseNotesContent(notes: releaseNotes)
-                            .background(Color.dictusBackground.ignoresSafeArea())
                             .navigationBarTitleDisplayMode(.inline)
                     }
                     .accessibilityIdentifier("settings.whatsNew")
