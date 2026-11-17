@@ -1,6 +1,6 @@
 # Keyboard measurement: Dictus (replay, 402x216 pt grid)
 
-commit: `a46d9eb0512a22d46c98ce0910d070c4dc83e486`
+commit: `57665d0afd4563ca4e55fd7ddb116f3fd52fcd1d`
 
 ## Final text
 
@@ -24,10 +24,10 @@ The suggestion work a letter triggers and the autocorrect a space triggers, run 
 
 | lang | key | taps | p50 | p95 | max |
 |---|---|---:|---:|---:|---:|
-| fr | letter | 669 | 0.14 | 0.60 | 38.54 |
-| fr | space | 152 | 0.11 | 0.57 | 1.97 |
-| en | letter | 626 | 1.13 | 2.14 | 100.86 |
-| en | space | 156 | 0.08 | 0.66 | 1.20 |
+| fr | letter | 669 | 0.11 | 0.55 | 40.23 |
+| fr | space | 152 | 0.09 | 0.47 | 2.66 |
+| en | letter | 626 | 1.00 | 1.88 | 91.94 |
+| en | space | 156 | 0.06 | 0.64 | 0.93 |
 
 ## Autocorrect, per word the space bar committed
 
@@ -62,17 +62,21 @@ Wrong autocorrections are the two bold columns. A stray space splits one intende
 
 ## Register of real cases (#500)
 
-3 of 9 come out as the person meant. Each case is committed by the space bar in a field holding the text typed before it (`register.tsv`).
+7 of 13 come out as the person meant. Each case is committed by the space bar in a field holding the text typed before it (`register.tsv`).
 
-| lang | before | typed | expected | reported | final | |
-|---|---|---|---|---|---|---|
-| fr | il | ma | m'a | ma | m'a | right |
-| fr | comment as tu | troubz | trouvé | trouve | trouve | wrong |
-| fr | ce que tu as | dais | fait | dais | dais | wrong |
-| fr | - | vocaux | vocaux | bocaux | vocaux | right |
-| fr | - | styke | stylé | style | style | wrong |
-| fr | - | styké | stylé | style | style | wrong |
-| fr | bien | arruves | arrivés | arrives | arrives | wrong |
-| fr | - | stylé | stylé | style | stylé | right |
-| fr | - | mok | moi | m'ok | m'ok | wrong |
+| lang | before | typed | expected | reported | lexicon | final | |
+|---|---|---|---|---|---|---|---|
+| fr | il | ma | m'a | ma | - | m'a | right |
+| fr | comment as tu | troubz | trouvé | trouve | - | trouve | wrong |
+| fr | ce que tu as | dais | fait | dais | - | dais | wrong |
+| fr | - | vocaux | vocaux | bocaux | - | vocaux | right |
+| fr | - | styke | stylé | style | - | style | wrong |
+| fr | - | styké | stylé | style | - | style | wrong |
+| fr | bien | arruves | arrivés | arrives | - | arrives | wrong |
+| fr | - | stylé | stylé | style | - | stylé | right |
+| fr | - | mok | moi | m'ok | - | m'ok | wrong |
+| fr | il | ma | m'a | ma | ma | m'a | right |
+| fr | il | zofiak | Zofiak | - | Zofiak | Zofiak | right |
+| fr | une | pierre | pierre | - | Pierre | pierre | right |
+| fr | je veux | qqc | quelque chose | - | qqc=quelque chose | quelque chose | right |
 

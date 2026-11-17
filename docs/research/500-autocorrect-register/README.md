@@ -7,13 +7,15 @@ The nine cases filed on #500 up to 2026-11-01, replayed by the keyboard bench
 | File | Code measured |
 |---|---|
 | `before.md` | develop at `2e280b7f`, with the register replay of `d6863e62` (the bench only) |
-| `after.md` | `a46d9eb0`, the branch with both fixes |
+| `before-lexicon.md` | `a46d9eb0` (both fixes), with the lexicon cases of `7ac5981b`: the device failure reproduced |
+| `after.md` | `57665d0a`, the branch with the lexicon ordering fixed |
 
 ## Before and after
 
 | | before | after |
 |---|---:|---:|
-| Register, right as meant | 0 of 9 | **3 of 9** |
+| Register, the nine filed cases | 0 of 9 | **3 of 9** |
+| Register, with the four lexicon cases | 6 of 13 (`a46d9eb0`) | **7 of 13** |
 | fr bench: broken / miscorrected / missed | 0 / 4 / 5 | 0 / 4 / 5 |
 | en bench: broken / miscorrected / missed | 0 / 4 / 3 | 0 / 4 / 3 |
 | fr bench: wrong words in the final text | 9 of 152 | 9 of 152 |
@@ -21,6 +23,29 @@ The nine cases filed on #500 up to 2026-11-01, replayed by the keyboard bench
 
 Every row of the touch runs is the same before and after; only the register moves.
 Before the fixes, the replay reproduces all nine outcomes as they were reported.
+
+## The device test that failed, and the lexicon cases
+
+The first device test of the PR (2026-11-17, iPhone 15 Pro Max) left `il ma` as typed.
+Its log reads `AUTOCORRECT-SKIP word="ma" reason=lexicon`, with `lexicon loaded: 10
+shortcuts, 1575 words`. The contacts and text-replacements lexicon (#873) held `ma`,
+its verdict `.keep` returned first in `spellCheck(_:previousWord:)`, and the context
+override never ran. The simulator has no contacts, so neither the bench nor the
+simulator saw it.
+
+The order is now:
+
+1. A shortcut (`qqc` → "quelque chose") returns first, whatever precedes it.
+2. A kept word the dictionary does not know (a name: `zofiak` → "Zofiak") returns first.
+3. A kept word the dictionary knows (`ma`, `pierre`) waits for the context overrides,
+   and is kept when none applies.
+
+Step 3 can only change a word the dictionary already knows, and only through a
+context override, which exists because that word is never right in that position.
+
+`register.tsv` now carries a `lexicon` column, and four cases with one: the device
+failure, the name, the dictionary word with a contact Pierre, and the shortcut. All
+four come out right after the fix; only the first was wrong before.
 
 ## The nine cases
 
