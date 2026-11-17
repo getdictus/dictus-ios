@@ -11,7 +11,7 @@ import Foundation
 /// WHY a table of words and not the n-grams: the bundled French bigrams prefer `à`
 /// after most nouns (`le chien a`), because in books a noun is followed by `à`
 /// more often than by `a`. Choosing by bigram score accented 11% of the verb `a`
-/// in Tatoeba's French sentences; this table accents 0.07%, and 35 of those 45
+/// in Tatoeba's French sentences; this table accents 0.07%, and 33 of those 45
 /// are sentences Tatoeba itself spells wrong (#501, `tools/a-grave-eval`).
 ///
 /// One instance is one pair. Each set matches a word whole, by the elision it
