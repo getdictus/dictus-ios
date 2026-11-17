@@ -1,0 +1,7 @@
+Nouveautés de la 2.0.2
+• Envoyez-nous un retour depuis l'app : Réglages > À propos > Envoyer un retour. Vous pouvez joindre le journal de débogage si vous le souhaitez.
+• Le clavier Dictus ne corrige plus les adresses e-mail ni les adresses web.
+• Avec un modèle Whisper, les dictées ne se terminent plus par des phrases que vous n'avez pas dites, comme « Sous-titrage Société Radio-Canada ». Et si vous arrêtez en pleine phrase, Dictus n'ajoute plus de mots inventés comme « – Le... ».
+• iPhone XS, XR, 11, SE (2e génération) et iPad antérieurs à la puce A14 : la dictée depuis le clavier est de retour, avec Parakeet, désormais le seul modèle sur ces appareils.
+• Quand le micro met quelques secondes à démarrer, Dictus vous demande de rester dans l'app le temps que la dictée démarre.
+• « Effacer l’historique » supprime désormais tout le texte dicté de l'appareil, et les copies temporaires sont bien effacées après 7 jours.

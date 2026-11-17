@@ -1,0 +1,7 @@
+Neu in 2.0.2
+• Sende uns Feedback direkt aus der App: Einstellungen > Über > Feedback senden. Auf Wunsch mit dem Debug-Protokoll.
+• Die Dictus-Tastatur korrigiert keine E-Mail- und Webadressen mehr.
+• Mit einem Whisper-Modell enden Diktate nicht mehr mit Sätzen, die du nie gesagt hast, etwa „Vielen Dank“. Und wenn du mitten im Satz stoppst, fügt Dictus keine Wörter mehr hinzu, die du nicht gesagt hast.
+• iPhone XS, XR, 11, SE (2. Generation) und iPads vor dem A14-Chip: Diktieren über die Tastatur ist zurück, mit Parakeet, jetzt dem einzigen Modell auf diesen Geräten.
+• Wenn das Mikrofon ein paar Sekunden zum Starten braucht, bittet Dictus dich jetzt, in der App zu bleiben, bis das Diktat startet.
+• „Verlauf löschen“ entfernt jetzt den gesamten diktierten Text vom Gerät, und temporäre Kopien werden wie vorgesehen nach 7 Tagen gelöscht.
