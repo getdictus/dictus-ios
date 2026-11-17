@@ -6,20 +6,20 @@ Ajustes > Acerca de > Enviar comentarios, con el registro de depuración si quie
 
 at
 Direcciones tal como las escribes
-El teclado Dictus ya no corrige direcciones de correo ni direcciones web.
+El teclado ya no corrige direcciones de correo ni direcciones web.
 
 text.badge.xmark
 Se acabaron las palabras inventadas
 Con Whisper, los dictados ya no terminan con «Gracias» ni con palabras que no dijiste.
 
 iphone
-El dictado vuelve a los iPhone antiguos
-En iPhone XS, XR, 11, SE (2.ª generación) y iPads anteriores al chip A14, dicta desde el teclado con Parakeet.
+Dictado en iPhone antiguos
+iPhone XS, XR, 11, SE (2.ª generación) y iPads anteriores al A14 vuelven a dictar desde el teclado, con Parakeet.
 
 mic.fill
 Un micrófono que te avisa
-Cuando el micrófono tarda unos segundos en arrancar, Dictus te pide que te quedes en la app.
+Si el micrófono tarda en arrancar, Dictus te pide que te quedes en la app.
 
 trash.fill
 Historial borrado de verdad
-«Borrar historial» elimina todo el texto dictado, y las copias temporales se borran a los 7 días.
+«Borrar historial» elimina todo el texto dictado. Las copias temporales se borran a los 7 días.

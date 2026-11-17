@@ -84,7 +84,7 @@ struct ReleaseNotesContent: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 0) {
-                DictusIconTile(logoHeight: isCompact ? 26 : 34)
+                DictusIconTile(logoHeight: isCompact ? 24 : 30)
                     .shadow(color: Color.dictusAccent.opacity(0.6), radius: 10)
                     .shadow(color: Color.dictusAccent.opacity(0.3), radius: 22)
                     .accessibilityHidden(true)
@@ -94,17 +94,17 @@ struct ReleaseNotesContent: View {
                     .multilineTextAlignment(.center)
                     .fixedSize(horizontal: false, vertical: true)
                     .accessibilityAddTraits(.isHeader)
-                    .padding(.top, isCompact ? 14 : 20)
+                    .padding(.top, isCompact ? 12 : 16)
 
-                VStack(alignment: .leading, spacing: isCompact ? 18 : 26) {
+                VStack(alignment: .leading, spacing: isCompact ? 16 : 22) {
                     ForEach(notes.items, id: \.title) { item in
-                        ReleaseNoteRow(item: item)
+                        ReleaseNoteRow(item: item, isCompact: isCompact)
                     }
                 }
-                .padding(.top, isCompact ? 24 : 36)
+                .padding(.top, isCompact ? 20 : 30)
             }
             .padding(.horizontal, isCompact ? 24 : 28)
-            .padding(.top, isCompact ? 28 : 48)
+            .padding(.top, isCompact ? 20 : 32)
             .padding(.bottom, 24)
             .frame(maxWidth: 560)
             .frame(maxWidth: .infinity)
@@ -128,6 +128,8 @@ struct ReleaseNotesContent: View {
 /// One change: its symbol on a brand-gradient tile, a bold title, one sentence.
 private struct ReleaseNoteRow: View {
     let item: ReleaseNotes.Item
+    /// The SE's smaller sentence size.
+    let isCompact: Bool
 
     var body: some View {
         HStack(alignment: .top, spacing: 16) {
@@ -147,7 +149,7 @@ private struct ReleaseNoteRow: View {
                     .font(.dmSans(.semiBold, size: 17, relativeTo: .headline))
                     .foregroundStyle(.primary)
                 Text(verbatim: item.text)
-                    .font(.dmSans(.regular, size: 15, relativeTo: .subheadline))
+                    .font(.dmSans(.regular, size: isCompact ? 14 : 15, relativeTo: .subheadline))
                     .foregroundStyle(.secondary)
             }
             .fixedSize(horizontal: false, vertical: true)

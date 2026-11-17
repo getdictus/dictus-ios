@@ -2,24 +2,24 @@ Nouveautés de la 2.0.2
 
 envelope.fill
 Écrivez-nous depuis l'app
-Réglages > À propos > Envoyer un retour, avec le journal de débogage si vous le souhaitez.
+Réglages > À propos > Envoyer un retour, journal de débogage en option.
 
 at
 Adresses tapées telles quelles
-Le clavier Dictus ne corrige plus les adresses e-mail ni les adresses web.
+Le clavier ne corrige plus les adresses e-mail ni les adresses web.
 
 text.badge.xmark
 Fini les mots inventés
-Avec Whisper, vos dictées ne se terminent plus par « Sous-titrage Société Radio-Canada » ni par des mots jamais dits.
+Avec Whisper, plus de « Sous-titrage Société Radio-Canada » ni de mots jamais dits en fin de dictée.
 
 iphone
-La dictée revient sur les anciens iPhone
-Sur iPhone XS, XR, 11, SE (2e génération) et iPad avant la puce A14, dictez depuis le clavier avec Parakeet.
+La dictée sur les anciens iPhone
+iPhone XS, XR, 11, SE (2e génération) et iPad avant l'A14 dictent de nouveau au clavier, avec Parakeet.
 
 mic.fill
 Un micro qui prévient
-Quand le micro met quelques secondes à démarrer, Dictus vous demande de rester dans l'app.
+Si le micro tarde à démarrer, Dictus vous demande de rester dans l'app.
 
 trash.fill
 Un historique vraiment effacé
-« Effacer l'historique » supprime tout le texte dicté, et les copies temporaires partent après 7 jours.
+« Effacer l'historique » supprime tout le texte dicté. Les copies temporaires partent après 7 jours.

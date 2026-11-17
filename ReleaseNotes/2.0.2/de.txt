@@ -2,24 +2,24 @@ Neu in 2.0.2
 
 envelope.fill
 Schreib uns aus der App
-Einstellungen > Über > Feedback senden, auf Wunsch mit dem Debug-Protokoll.
+Einstellungen > Über > Feedback senden, auf Wunsch mit Debug-Protokoll.
 
 at
 Adressen bleiben, wie du sie tippst
-Die Dictus-Tastatur korrigiert keine E-Mail- und Webadressen mehr.
+Die Tastatur korrigiert keine E-Mail- und Webadressen mehr.
 
 text.badge.xmark
 Keine erfundenen Wörter mehr
 Mit Whisper enden Diktate nicht mehr mit „Vielen Dank“ oder Wörtern, die du nie gesagt hast.
 
 iphone
-Diktieren auf älteren iPhones ist zurück
-Auf iPhone XS, XR, 11, SE (2. Generation) und iPads vor dem A14-Chip diktierst du wieder über die Tastatur, mit Parakeet.
+Diktieren auf älteren iPhones
+iPhone XS, XR, 11, SE (2. Generation) und iPads vor dem A14 diktieren wieder über die Tastatur, mit Parakeet.
 
 mic.fill
 Ein Mikrofon, das Bescheid gibt
-Wenn das Mikrofon ein paar Sekunden zum Starten braucht, bittet Dictus dich, in der App zu bleiben.
+Startet das Mikrofon langsam, bittet Dictus dich, in der App zu bleiben.
 
 trash.fill
 Verlauf wirklich gelöscht
-„Verlauf löschen“ entfernt den gesamten diktierten Text, temporäre Kopien werden nach 7 Tagen gelöscht.
+„Verlauf löschen“ entfernt den gesamten diktierten Text. Temporäre Kopien verschwinden nach 7 Tagen.
