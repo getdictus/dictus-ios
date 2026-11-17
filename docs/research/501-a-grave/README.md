@@ -70,3 +70,14 @@ the verbs. The bigrams come from books, where a noun is followed by `à` more of
 by `a`, so every noun subject (`le chien a`, `ma voiture a`) flips. Two refinements were
 measured and rejected the same way: guessing infinitives from their `-er/-ir/-re`
 ending (0.69% of verbs accented) and vetoing the table with the bigrams (no change).
+
+## The real keyboard
+
+`verify-dictus-ios`, build `c9361321` (Debug), a fresh iPhone 17 simulator on iOS 26.5,
+`typing.autocorrect` recipe: `je vais a elle a ` typed key by key on the Dictus keys
+in a Rappels title. The field read `Je vais à elle a `, and the keyboard logged:
+
+```
+<KBD> APPLIED orig="a" → "à" prev="vais"
+<KBD> AUTOCORRECT-SKIP word="a" reason=already-valid
+```
