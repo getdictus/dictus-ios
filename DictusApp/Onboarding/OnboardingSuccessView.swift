@@ -21,10 +21,11 @@ struct OnboardingSuccessView: View {
     @State private var checkmarkScale: CGFloat = 0
     @State private var showText = false
 
-    /// Whether the keyboard can dictate on this device (#635). On a pre-A14 chip the
-    /// keyboard's mic is disabled, so "hold the globe and speak" would promise what the
-    /// keyboard cannot do; the message points to the app instead.
-    private let keyboardCanDictate = DeviceCapabilities.current().supportsKeyboardDictation
+    /// Whether the keyboard can dictate with the model onboarding installed (#635, #963).
+    /// When it cannot, "hold the globe and speak" would promise what the keyboard cannot
+    /// do; the message points to the app instead.
+    private let keyboardCanDictate = DeviceCapabilities.current()
+        .supportsKeyboardDictation(activeModel: ModelInfo.recommendedIdentifier())
 
     var body: some View {
         OnboardingCenteredPage(

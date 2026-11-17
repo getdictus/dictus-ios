@@ -8,7 +8,6 @@ final class SpokenLanguageModelRecommendationTests: XCTestCase {
     private let parakeet = "parakeet-tdt-0.6b-v3"
     private let turbo = "openai_whisper-large-v3-v20240930_turbo_632MB"
     private let small = "openai_whisper-small"
-    private let base = "openai_whisper-base"
 
     private func device(_ model: String, ramGB: Int) -> DeviceCapabilities {
         DeviceCapabilities(
@@ -71,9 +70,10 @@ final class SpokenLanguageModelRecommendationTests: XCTestCase {
 
     // MARK: - Languages Parakeet does not speak (acceptance: Chinese gets Whisper)
 
-    func testChineseIsNeverRecommendedParakeet() {
-        let devices = [iPhone15ProMax, iPhone13Pro, iPhone13, iPhone12Pro, iPhone12, iPhone11,
-                       iPadProA12Z, iPadProM1, iPadProM2]
+    /// From A14 on. Before A14 Parakeet is the only model (#963), see below.
+    func testChineseIsNeverRecommendedParakeetFromA14() {
+        let devices = [iPhone15ProMax, iPhone13Pro, iPhone13, iPhone12Pro, iPhone12,
+                       iPadProM1, iPadProM2]
         for capabilities in devices {
             let recommended = ModelInfo.recommendedIdentifier(forSpokenLanguage: "zh", on: capabilities)
             XCTAssertNotEqual(recommended, parakeet, capabilities.deviceModelIdentifier)
@@ -108,10 +108,13 @@ final class SpokenLanguageModelRecommendationTests: XCTestCase {
 
     // MARK: - Pre-A14 keeps today's rule whatever the language
 
-    func testPreA14GetsBaseInEveryLanguage() {
+    /// #963: Parakeet is the only model before A14, so it is recommended in every
+    /// language, those it does not speak (`zh`, `ja`) included. That is the rule's
+    /// accepted cost (Pierre, 2026-11-16), pinned here so it is not changed by accident.
+    func testPreA14GetsParakeetInEveryLanguage() {
         for code in ["fr", "en", "zh", "ja", "it"] {
-            XCTAssertEqual(ModelInfo.recommendedIdentifier(forSpokenLanguage: code, on: iPhone11), base, code)
-            XCTAssertEqual(ModelInfo.recommendedIdentifier(forSpokenLanguage: code, on: iPadProA12Z), base, code)
+            XCTAssertEqual(ModelInfo.recommendedIdentifier(forSpokenLanguage: code, on: iPhone11), parakeet, code)
+            XCTAssertEqual(ModelInfo.recommendedIdentifier(forSpokenLanguage: code, on: iPadProA12Z), parakeet, code)
         }
     }
 

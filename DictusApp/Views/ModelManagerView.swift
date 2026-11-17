@@ -170,6 +170,12 @@ struct ModelManagerView: View {
                                 downloadError = error
                                 showErrorAlert = true
                             },
+                            // #963: on a pre-A14 device an installed Tiny or Base is greyed
+                            // unless it is the active model; nil everywhere else.
+                            incompatibilityReason: model.downloadedCardIncompatibilityReason(
+                                on: deviceCapabilities,
+                                isActive: modelManager.activeModel == model.identifier
+                            ),
                             // Issue #193: explicit delete entry point via the
                             // card's overflow menu. Funnels into the same
                             // confirmation alert as swipe-to-delete.

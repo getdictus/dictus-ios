@@ -728,18 +728,20 @@ struct ToolbarView: View {
             .opacity(0.4)
     }
 
-    /// Why the mic is greyed on a pre-A14 device (#635).
+    /// Why the mic is greyed on a pre-A14 device (#635, #963).
     ///
     /// The Full Access bar's footnote, secondary, minus its icon: this bar keeps the ☰
     /// on its left, so the sentence has the width between two pills and no more. One
     /// line that shrinks a little rather than wraps, so the bar keeps its 52 pt (#166).
     ///
-    /// The copy names the device, not the chip: the user cannot act on "A12", and the
-    /// onboarding already told them the reason when they added the keyboard.
+    /// Since #963 these devices dictate from the keyboard with Parakeet, and the mic is
+    /// greyed only while another model is active: a user who had Base before the update
+    /// keeps it until Parakeet is installed. So the copy says what to do, not that the
+    /// device cannot.
     private var dictationUnavailableNotice: some View {
         Text(
-            "Dictation unavailable on this device",
-            comment: "Keyboard toolbar note beside the disabled mic on a device whose chip is too old to dictate from the keyboard (#635)."
+            "Choose Parakeet to dictate",
+            comment: "Keyboard toolbar note beside the disabled mic on a pre-A14 device whose active model is not Parakeet; only Parakeet dictates from the keyboard there (#963)."
         )
         .font(.footnote)
         .foregroundStyle(.secondary)

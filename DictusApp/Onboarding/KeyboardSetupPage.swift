@@ -48,6 +48,13 @@ struct KeyboardSetupPage: View {
     /// it cannot change while the page is on screen.
     private let device = DeviceCapabilities.current()
 
+    /// Whether the keyboard will dictate once onboarding is done: with the model the
+    /// onboarding installs, the recommendation (#963). On a pre-A14 chip that is Parakeet,
+    /// so the notice below no longer shows on any device with today's catalogue.
+    private var keyboardCanDictate: Bool {
+        device.supportsKeyboardDictation(activeModel: ModelInfo.recommendedIdentifier())
+    }
+
     /// The checklist played under the drawing and, from the Open Settings tap, in Picture
     /// in Picture over Settings (#682).
     @StateObject private var checklist = SettingsChecklistPlayer(script: KeyboardSetupChecklistScript())
@@ -74,7 +81,7 @@ struct KeyboardSetupPage: View {
 
                 detectionStatus
 
-                if !device.supportsKeyboardDictation {
+                if !keyboardCanDictate {
                     keyboardDictationNotice
                 }
             }
@@ -282,7 +289,7 @@ struct KeyboardSetupPage: View {
                 .multilineTextAlignment(.center)
                 .fixedSize(horizontal: false, vertical: true)
 
-            if device.supportsKeyboardDictation {
+            if keyboardCanDictate {
                 Button(action: openFullAccessExplainer) {
                     Text("Why Full Access?")
                         .font(.footnote.weight(.semibold))

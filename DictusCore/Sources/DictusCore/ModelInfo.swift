@@ -626,6 +626,10 @@ public struct ModelInfo: Identifiable {
         allIncludingDeprecated.first { $0.identifier == id }
     }
 
+    /// The Parakeet v3 catalogue identifier. Named because the pre-A14 rule (#963) and
+    /// the keyboard gate both single it out.
+    public static let parakeetV3Identifier = "parakeet-tdt-0.6b-v3"
+
     // MARK: - Device-compatible Recommendation
 
     /// Returns the recommended model identifier based on hardware compatibility
@@ -637,9 +641,10 @@ public struct ModelInfo: Identifiable {
     /// recommending Small on an iPhone 11 traps onboarding in Core ML optimization
     /// and can jetsam the app (issue #362). `DeviceCapabilities.isPreA14` owns that
     /// test for iPhones and iPads alike; `isSupported(on:)` reads the same predicate.
-    /// The exception comes before the RAM rule, so a 6 GB A12X/A12Z iPad Pro gets
-    /// Base and never Parakeet (issue #612). After it, Parakeet v3 (~800 MB) remains
-    /// the pick for >= 6 GB, and for 4 GB on an A15 or later (#921).
+    /// Since #963 the pre-A14 answer is Parakeet v3, loaded on the CPU, whatever the RAM:
+    /// it is the only model those devices are offered (see `preA14SelectableIdentifiers`).
+    /// After the exception, Parakeet v3 (~483 MB) remains the pick for >= 6 GB, and for
+    /// 4 GB on an A15 or later (#921).
     ///
     /// WHY in ModelInfo (not ModelManager):
     /// This is catalog-level logic — which model fits this device. It doesn't
@@ -658,16 +663,16 @@ public struct ModelInfo: Identifiable {
     /// recommendation is the pre-A14 exception, which does not depend on language.
     public static func recommendedIdentifier(for capabilities: DeviceCapabilities) -> String {
         if capabilities.isPreA14 {
-            // Base, not Tiny: it is the most accurate variant Argmax lists for this
-            // tier, and `preA14SupportedIdentifiers` keeps the two consistent.
-            return "openai_whisper-base"
+            // #963: the one model these devices are offered, so the recommendation and
+            // `preA14SelectableIdentifiers` cannot disagree.
+            return parakeetV3Identifier
         }
         // #921: Parakeet also runs well on a 4 GB A15. Measured on an iPhone 13
         // (iPhone14,5), TestFlight 39.804: 126 s of audio transcribed in 14.5 s, no
         // failure. No 4 GB A14 was measured, so the iPhone 12 family keeps Small.
         let parakeetFits = capabilities.physicalMemoryGB >= 6
             || (capabilities.isA15OrLater && capabilities.physicalMemoryGB >= 4)
-        return parakeetFits ? "parakeet-tdt-0.6b-v3" : "openai_whisper-small"
+        return parakeetFits ? parakeetV3Identifier : "openai_whisper-small"
     }
 
     /// The Turbo variant the catalogue offers (issue #408).
@@ -688,8 +693,9 @@ public struct ModelInfo: Identifiable {
     /// Chinese (NVIDIA documents 25 European languages, `ModelLanguageSupport.parakeetV3`).
     ///
     /// The rule, in order:
-    /// 1. A pre-A14 device gets today's answer, Base, whatever the language: the Argmax
-    ///    matrix allows nothing else there, and Base is multilingual.
+    /// 1. A pre-A14 device gets Parakeet whatever the language (#963): it is the only
+    ///    model those devices are offered. A spoken language outside Parakeet's 25 has no
+    ///    model there; that is the accepted cost of the rule (Pierre, 2026-11-16).
     /// 2. A language Parakeet speaks gets today's answer too: Parakeet on 6 GB or more
     ///    and on a 4 GB A15 or later (#921), Small below. All four Dictus keyboard languages land here, so nobody who
     ///    onboarded before #649 sees their recommendation move.
@@ -759,21 +765,16 @@ public struct ModelInfo: Identifiable {
     /// "Available" section. Backend paths (ModelManager download/delete, already-
     /// downloaded list) intentionally do NOT filter by this, so a user who obtained
     /// Turbo under a more permissive build can still manage it.
-    /// The only Whisper variants Argmax lists as supported on A12/A13 chips, applied
-    /// to every pre-A14 device (`DeviceCapabilities.isPreA14`).
+    /// The only model a pre-A14 device (`DeviceCapabilities.isPreA14`) is offered: Parakeet
+    /// v3, loaded on the CPU there (`parakeetComputePolicy`, #963).
     ///
-    /// WHY the `.en` variants are listed even though Dictus does not ship them:
-    /// this set is a transcription of Argmax's published matrix, so it stays
-    /// comparable against the source when that matrix is revisited. They simply
-    /// never match a catalog entry today.
-    ///
-    /// Source of truth: https://huggingface.co/argmaxinc/whisperkit-coreml/raw/main/config.json
-    static let preA14SupportedIdentifiers: Set<String> = [
-        "openai_whisper-tiny",
-        "openai_whisper-tiny.en",
-        "openai_whisper-base",
-        "openai_whisper-base.en"
-    ]
+    /// WHY NOT TINY AND BASE ANY MORE, though Argmax lists them for A12/A13
+    /// (https://huggingface.co/argmaxinc/whisperkit-coreml/raw/main/config.json): on
+    /// these chips Whisper needs the GPU, so it cannot dictate from the keyboard (#635).
+    /// Parakeet on the CPU can, and on `iPad8,1` it was as fast as Base in the app.
+    /// Offering one model makes the keyboard work for everyone who follows the
+    /// recommendation (Pierre, 2026-11-16).
+    static let preA14SelectableIdentifiers: Set<String> = [parakeetV3Identifier]
 
     /// Why a model cannot run on a given device, or `nil` when it can.
     ///
@@ -796,16 +797,13 @@ public struct ModelInfo: Identifiable {
     /// "is it gated" and "why is it gated" would be visible as a greyed card with no
     /// explanation, or an explanation on a tappable card. One function, no drift.
     public func incompatibilityReason(on capabilities: DeviceCapabilities) -> IncompatibilityReason? {
-        // WHY this branch comes first: before A14 the limit is the Core ML support
-        // matrix, not memory. Falling through to the RAM rule would leave Small,
-        // Small (Quantized) and Medium selectable in Settings on an iPhone 11 or an
-        // A12X iPad Pro, and downloading any of them reproduces the issue #362
-        // optimization hang. Parakeet is excluded here too — it is absent from
-        // Argmax's matrix, needs ~800 MB of headroom the 3-4 GB devices do not have,
-        // and was never validated on a pre-A14 Neural Engine, which is why the 6 GB
-        // A12X/A12Z iPads are excluded along with the rest (issue #612).
+        // WHY this branch comes first: before A14 the limit is the chip, not memory.
+        // Falling through to the RAM rule would leave Small, Small (Quantized) and
+        // Medium selectable on an iPhone 11 or an A12X iPad Pro, and downloading any of
+        // them reproduces the issue #362 optimization hang. Since #963 Parakeet v3 is
+        // the one model left, Tiny and Base included: see `preA14SelectableIdentifiers`.
         if capabilities.isPreA14 {
-            return Self.preA14SupportedIdentifiers.contains(identifier) ? nil : .hardwareGeneration
+            return Self.preA14SelectableIdentifiers.contains(identifier) ? nil : .hardwareGeneration
         }
         // Both quantized Turbo variants (issue #408): Argmax lists them for exactly
         // the same device families, so they share one rule. The deprecated `_954MB`
@@ -833,6 +831,26 @@ public struct ModelInfo: Identifiable {
         incompatibilityReason(on: capabilities) == nil
     }
 
+    /// The reason the Models screen's Downloaded card for this model is greyed, or `nil`
+    /// when it stays usable.
+    ///
+    /// WHY THE ACTIVE MODEL IS NEVER GREYED: it is the model every dictation runs on right
+    /// now. A pre-A14 user who had Base before #963 keeps dictating in the app with it
+    /// until Parakeet is downloaded, which then becomes active by itself; a greyed active
+    /// card would announce a broken app that still works.
+    ///
+    /// WHY ONLY BEFORE A14: there the rule is "Parakeet and nothing else" (#963), so an
+    /// installed Tiny or Base cannot be selected back once the user has moved on; it can
+    /// still be deleted. Everywhere else the Downloaded section stays ungated, so an A14
+    /// user who installed Turbo before #660 keeps it selectable (Pierre, 2026-11-06).
+    public func downloadedCardIncompatibilityReason(
+        on capabilities: DeviceCapabilities,
+        isActive: Bool
+    ) -> IncompatibilityReason? {
+        guard capabilities.isPreA14, !isActive else { return nil }
+        return incompatibilityReason(on: capabilities)
+    }
+
     /// The rows the Settings "Available" section should render for this device:
     /// the visible catalog, plus the device's recommended model even when that model
     /// is deprecated.
@@ -852,6 +870,9 @@ public struct ModelInfo: Identifiable {
     /// then becomes permitted, and Base cannot be reinstalled from anywhere. Base
     /// stays deprecated globally on purpose — on A14+ Small is strictly better — so
     /// the exception is scoped to the model this device is actually told to use.
+    /// Since #963 the pre-A14 recommendation is Parakeet, which is not deprecated, so no
+    /// device reaches the exception today. It stays because the dead end it closes
+    /// comes back the day a recommendation is a deprecated model again.
     ///
     /// WHY the exception is guarded on `.deprecated` rather than matching the
     /// identifier alone: `all` also drops Parakeet on iOS 16 through a runtime OS
