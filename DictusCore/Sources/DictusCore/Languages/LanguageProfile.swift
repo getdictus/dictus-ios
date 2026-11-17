@@ -56,6 +56,11 @@ public struct LanguageProfile: Sendable {
     /// Empty for languages without length-changing collapses.
     public let collapseRules: [(from: String, to: String)]
 
+    /// Words with two correct spellings that the words before them choose
+    /// between, such as French `a` and `à` (#501). Empty for every other language,
+    /// so nothing of this kind fires outside French.
+    public let contextualHomographs: [ContextualHomograph]
+
     public init(
         code: String,
         displayName: String,
@@ -66,7 +71,8 @@ public struct LanguageProfile: Sendable {
         overrides: [String: String],
         accentMap: [Character: [Character]],
         contractionPrefixes: [String],
-        collapseRules: [(from: String, to: String)] = []
+        collapseRules: [(from: String, to: String)] = [],
+        contextualHomographs: [ContextualHomograph] = []
     ) {
         self.code = code
         self.displayName = displayName
@@ -78,6 +84,7 @@ public struct LanguageProfile: Sendable {
         self.accentMap = accentMap
         self.contractionPrefixes = contractionPrefixes
         self.collapseRules = collapseRules
+        self.contextualHomographs = contextualHomographs
     }
 }
 
