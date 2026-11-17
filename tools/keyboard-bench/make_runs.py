@@ -27,7 +27,9 @@ import os
 import random
 import unicodedata
 
-LANGS = ["fr", "en"]
+# The learned runs type the corpus that holds the learned words of <lang>-learned.words
+# (#498). Each run seeds its own random stream, so adding one leaves the others unchanged.
+LANGS = ["fr", "en", "fr-learned", "en-learned"]
 SEED = 954
 # Spread of the landing point around the key centre, in key units.
 SIGMA_X = 0.22

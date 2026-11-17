@@ -22,6 +22,14 @@ first baseline is [`docs/research/954-keyboard-baseline/`](research/954-keyboard
   files are committed, so every run sees the same 1607 taps. Offsets are in key units,
   which is what lets the same run drive keyboards whose keys are not in the same place.
 
+- **Learned words** (#498). `corpus/fr-learned.txt` and `en-learned.txt` hold 8
+  sentences each around words the dictionary does not have (`dictus`, `testflight`,
+  `kubernetes`...), and `corpus/<lang>-learned.words` the user dictionary the replay
+  seeds before typing them: each word with its usage count, a few learned typos of
+  common words (`mzrci`, `thabks`) among them, learned once. Pass
+  `--langs fr,en,fr-learned,en-learned` to `run.sh` to replay them. The `fr` and `en`
+  runs start from an empty user dictionary.
+
 The touch model is chosen, not measured. It decides how many letters go wrong before
 any keyboard logic runs, so numbers are comparable between runs of the same files and
 not with typing studies. Changing it (`make_runs.py`) starts a new series.
@@ -149,7 +157,7 @@ xcrun xctrace export --input build/keyboard-bench/device.trace \
   a 0.2 to 0.6 pt band, typing nothing (the a/z, e/r, y/u and i/o boundaries;
   `docs/research/954-keyboard-baseline/`). A replay tap that lands there types a letter
   in the replay and nothing on the real keyboard.
-- **One keyboard state.** No learned words, no contacts lexicon, no undo, no
+- **One keyboard state.** No contacts lexicon, no undo, no
   suggestion tapped, no shift, no symbols page. A tap on shift, return, 123 or emoji
   types nothing in the replay. On the real keyboard a tap on return ends the Reminders
   title, and `sim_replay.py` records that sentence as `[return key: field closed]`.

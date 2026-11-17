@@ -13,6 +13,7 @@ file says what each piece is.
 |---|---|
 | `corpus/fr.txt`, `corpus/en.txt` | 20 everyday sentences per language, the text the typist means. Lowercase, no punctuation. |
 | `make_runs.py` | Turns the corpus into touch runs, with a fixed seed. Rerunning it rewrites the same files byte for byte. |
+| `corpus/<lang>-learned.txt`, `corpus/<lang>-learned.words` | 8 sentences per language around words the user taught the keyboard, and the learned words the replay seeds before typing them, with their usage counts (#498). |
 | `runs/fr.tsv`, `runs/en.tsv` | One row per tap: the key aimed at, where the finger lands relative to its centre (in key units), and when. Committed. |
 | `run.sh` + `main.swift` + `DeviceContext.swift` | The in-process replay: compiles the shipping layout and engine sources, replays the runs on a simulator with `simctl spawn`, and prints the report. |
 | `sim_replay.py` | Types the runs on a real keyboard in a simulator, Apple's or Dictus, through `axe`, and reads the text back. |
