@@ -171,6 +171,34 @@ struct Commit {
     let final: String
 }
 
+/// What a space tap runs: `DictusKeyboardBridge.autocorrectBeforeCursor` on the word
+/// before the cursor, then the space, then the next-word prediction. Returns the word as
+/// typed and as committed, or nil when there was no word before the cursor.
+func commitWord(in field: Field, memory: AutocorrectRejectionMemory,
+                mirror: MirrorSyncState) -> (typed: String, final: String)? {
+    guard let (prefix, word) = AutocorrectRejectionMemory.wordAtCursor(context: field.text) else {
+        field.insertText(" ")
+        return nil
+    }
+    var final = word
+    let ws = words(field.text)
+    let previous = ws.count >= 2 ? ws[ws.count - 2] : nil
+    let proposal = engine.spellCheck(word, previousWord: previous,
+                                     isAtSentenceStart: ProperNounGuard.isAtSentenceStart(context: field.text, word: word))?.correction
+    var applied = false
+    if memory.commit(prefix: prefix, word: word, proposedCorrection: proposal) == .correct,
+       let correction = proposal,
+       case .applied = AutocorrectCountingSite.apply(editor: field, word: word, correction: correction,
+                                                     trailing: " ", previousWord: previous, mirror: mirror) {
+        memory.correctionApplied(prefix: prefix, corrected: correction)
+        final = correction
+        applied = true
+    }
+    if !applied { field.insertText(" ") }
+    _ = engine.predictNextWords(after: Array(words(field.text).suffix(2)))
+    return (word, final)
+}
+
 /// Types one sentence: every tap goes through the grid, every letter triggers the
 /// suggestion work `SuggestionState.updateAsync` does, every space the autocorrect
 /// `DictusKeyboardBridge.autocorrectBeforeCursor` does.
@@ -216,32 +244,9 @@ func replay(_ taps: [Tap], cells: [Cell], width: CGFloat, height: CGFloat,
                 _ = engine.suggestions(for: partial)
             }
         case .spacebar?:
-            var typed = ""
-            var final = ""
-            cost = microseconds {
-                guard let (prefix, word) = AutocorrectRejectionMemory.wordAtCursor(context: field.text) else {
-                    field.insertText(" ")
-                    return
-                }
-                typed = word
-                final = word
-                let ws = words(field.text)
-                let previous = ws.count >= 2 ? ws[ws.count - 2] : nil
-                let proposal = engine.spellCheck(word, previousWord: previous,
-                                                 isAtSentenceStart: ProperNounGuard.isAtSentenceStart(context: field.text, word: word))?.correction
-                var applied = false
-                if memory.commit(prefix: prefix, word: word, proposedCorrection: proposal) == .correct,
-                   let correction = proposal,
-                   case .applied = AutocorrectCountingSite.apply(editor: field, word: word, correction: correction,
-                                                                 trailing: " ", previousWord: previous, mirror: mirror) {
-                    memory.correctionApplied(prefix: prefix, corrected: correction)
-                    final = correction
-                    applied = true
-                }
-                if !applied { field.insertText(" ") }
-                _ = engine.predictNextWords(after: Array(words(field.text).suffix(2)))
-            }
-            if !typed.isEmpty { commits.append(Commit(intendedWords: tokenWords, typed: typed, final: final)) }
+            var committed: (typed: String, final: String)?
+            cost = microseconds { committed = commitWord(in: field, memory: memory, mirror: mirror) }
+            if let c = committed { commits.append(Commit(intendedWords: tokenWords, typed: c.typed, final: c.final)) }
             tokenWords = []
         case .backspace?:
             field.deleteBackward()
@@ -270,6 +275,8 @@ let h = CGFloat(height)
 var tapsOut = ["lang\tsentence\ttap\tintended\tresolved\tx\ty\tengine_us"]
 var commitsOut = ["lang\tsentence\tintended\ttyped\tfinal"]
 var textsOut = ["lang\tsentence\tintended\tfinal"]
+var registerOut = ["lang\tbefore\ttyped\texpected\treported\tfinal"]
+let register = readLines("\(benchDir)/register.tsv").dropFirst().map { $0.components(separatedBy: "\t") }
 
 // The engine starts loading French as soon as it exists. A `setLanguage` issued before
 // that load lands overlaps it: in an English-only run the French load then reported
@@ -297,10 +304,19 @@ for code in langs {
         }
         textsOut.append("\(code)\t\(s)\t\(intended)\t\(text)")
     }
+    // The register of real cases (#500): each one in a fresh field holding what was
+    // typed before it, committed by the same space bar as the runs.
+    for f in register where f[0] == code {
+        let field = Field()
+        field.text = f[1] + f[2]
+        let final = commitWord(in: field, memory: AutocorrectRejectionMemory(), mirror: MirrorSyncState())?.final ?? f[2]
+        registerOut.append("\(code)\t\(f[1])\t\(f[2])\t\(f[3])\t\(f[4])\t\(final)")
+    }
     FileHandle.standardError.write(Data("\(code): \(sentences.count) sentences replayed\n".utf8))
 }
 
-for (name, rows) in [("taps.tsv", tapsOut), ("commits.tsv", commitsOut), ("texts.tsv", textsOut)] {
+for (name, rows) in [("taps.tsv", tapsOut), ("commits.tsv", commitsOut), ("texts.tsv", textsOut),
+                     ("register.tsv", registerOut)] {
     do {
         try (rows.joined(separator: "\n") + "\n").write(toFile: "\(outDir)/\(name)", atomically: true, encoding: .utf8)
     } catch {

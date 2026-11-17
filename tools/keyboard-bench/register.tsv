@@ -1,0 +1,14 @@
+# Real autocorrect cases reported on #500, replayed by main.swift: the field holds
+# `before` then `typed`, the space bar commits `typed`, and `expected` is what the
+# person meant. `reported` is what Dictus wrote when the case was filed; `filed` is
+# the date of the comment. Characters are as reported, lowercase included.
+lang	before	typed	expected	reported	filed
+fr	il 	ma	m'a	ma	2026-09-05
+fr	comment as tu 	troubz	trouvé	trouve	2026-09-05
+fr	ce que tu as 	dais	fait	dais	2026-09-24
+fr		vocaux	vocaux	bocaux	2026-10-04
+fr		styke	stylé	style	2026-10-04
+fr		styké	stylé	style	2026-10-04
+fr	bien 	arruves	arrivés	arrives	2026-10-04
+fr		stylé	stylé	style	2026-10-06
+fr		mok	moi	m'ok	2026-11-01
