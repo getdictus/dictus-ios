@@ -156,7 +156,9 @@ established: the replay's own gaps between cells are 1/9 pt, the measured bands 
   (85 / 86), but 23 and 24 broken rare-word letters, as many as it fixes. The floor is
   the parameter that keeps rare words typable.
 - **A weaker one** (λ = 0.5, floor 0.1): fewest broken taps (4 / 4 held-out, 1 / 7 rare)
-  but about a third less gain. It is the fallback if Pierre reads the rare-word bar literally.
+  but about a third less gain. It still breaks 1 French and 7 English rare-word
+  letters, so it lowers the regression without removing it: no setting tried meets the
+  bar read literally, and meeting it would take another approach.
 
 ## Limits
 

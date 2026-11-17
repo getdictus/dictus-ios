@@ -171,6 +171,10 @@ struct ModelParameters {
             default: fatalError("unknown model parameter \(kv[0])")
             }
         }
+        // A zero spread divides by zero in `pick`: every score is NaN or -infinity, nothing wins.
+        guard sigmaX.isFinite, sigmaY.isFinite, sigmaX > 0, sigmaY > 0 else {
+            fatalError("sx and sy must be positive")
+        }
     }
 }
 
