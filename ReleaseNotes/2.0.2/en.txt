@@ -1,7 +1,25 @@
 What's new in 2.0.2
-• Send us feedback from the app: Settings > About > Send feedback. You can attach the debug log if you want.
-• The Dictus keyboard no longer autocorrects e-mail addresses or web addresses.
-• With a Whisper model, dictations no longer end with phrases you never said, like "Thank you". And if you stop in the middle of a sentence, Dictus no longer adds words you did not say.
-• iPhone XS, XR, 11, SE (2nd generation) and iPads older than the A14 chip: dictation from the keyboard is back, with Parakeet, now the only model on these devices.
-• When the microphone takes a few seconds to start, Dictus now asks you to stay in the app until dictation starts.
-• Clear history now removes all dictated text from the device, and temporary copies are deleted after 7 days as intended.
+
+envelope.fill
+Write to us from the app
+Settings > About > Send feedback, with the debug log attached if you want.
+
+at
+Addresses stay as you type them
+The Dictus keyboard no longer autocorrects e-mail addresses or web addresses.
+
+text.badge.xmark
+No more invented words
+With Whisper, dictations no longer end with "Thank you" or other words you never said.
+
+iphone
+Dictation is back on older iPhones
+On iPhone XS, XR, 11, SE (2nd generation) and iPads before the A14 chip, dictate from the keyboard with Parakeet.
+
+mic.fill
+A microphone that tells you
+When the microphone takes a few seconds to start, Dictus asks you to stay in the app.
+
+trash.fill
+History really cleared
+Clear history removes all dictated text, and temporary copies are deleted after 7 days.

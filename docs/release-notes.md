@@ -23,22 +23,44 @@ language; any other language reads `en.txt`.
 
 ## Format
 
-The store's text, as it is pasted into App Store Connect:
+Blocks separated by a blank line. The first block is the title, naming the version. Every
+other block is one change, on three lines: an SF Symbol name, a short title, one sentence.
 
 ```
 What's new in 2.0.2
-• First change, in plain words.
-• Second change.
-• Third change.
+
+envelope.fill
+Write to us from the app
+Settings > About > Send feedback, with the debug log attached if you want.
+
+at
+Addresses stay as you type them
+The Dictus keyboard no longer autocorrects e-mail addresses or web addresses.
 ```
 
-- First line: the title, naming the version.
-- Then 3 to 6 lines starting with `• `. The app shows one line per bullet.
-- Under 4,000 characters (App Store Connect's limit).
+- 3 to 6 changes. The app shows each as its symbol on a blue tile, the title in bold and the
+  sentence under it.
+- The same symbols, in the same order, in the four languages. Pick them in Apple's SF Symbols
+  app; the name must exist on iOS 17 (`ReleaseNotesSymbolTests` checks it on the simulator).
+- Titles short enough for one line on an iPhone SE, sentences of one or two lines. No colon in
+  the sentence: the store line already puts one after the title.
 - French says *vous*, German *du*, Spanish *tú*. No em dashes.
 
-`ReleaseNotesTests` (DictusCore) fails if a version folder is missing a language, has fewer than
-3 or more than 6 bullets, a title without the version, or more than 4,000 characters.
+`ReleaseNotesTests` (DictusCore) fails if a version folder is missing a language, a block is
+malformed, a language has fewer than 3 or more than 6 changes or other symbols than French, the
+title does not name the version, or a file passes 4,000 characters.
+
+## What App Store Connect gets
+
+`scripts/release-notes.sh` turns the file into the store's plain text: the title line, then one
+line per change, `• <title> : <sentence>` in French and `• <title>: <sentence>` elsewhere. The
+symbol lines stay in the app.
+
+```
+What's new in 2.0.2
+• Write to us from the app: Settings > About > Send feedback, with the debug log attached if you want.
+• Addresses stay as you type them: The Dictus keyboard no longer autocorrects e-mail addresses or web addresses.
+```
 
 ## Who writes them
 
