@@ -60,13 +60,11 @@ class TextPredictionEngine {
     /// to stay within the keyboard extension's ~50MB memory budget.
     ///
     /// WHY nothing happens when neither the language nor the layout changed (#555):
-    /// `viewWillAppear` calls this on every keyboard appearance, and every load
-    /// parses a whole frequency file whose freed pages the heap then re-dirties:
-    /// 20 appearances without a keystroke took the extension from 31.8 to 36.7 MB
-    /// on the simulator. With this guard and the lighter parse in
-    /// `FrequencyDictionary` it stays at 32.0 MB; either one alone left it at 37.4.
-    /// The layout is part of the key because the trie's substitution costs are
-    /// built for the layout active at load time.
+    /// `viewWillAppear` calls this on every keyboard appearance. Each load parses
+    /// and sorts a whole frequency file on the main thread and remounts the trie
+    /// and n-grams, and before this guard every appearance paid for it with data
+    /// that had not changed. The layout is part of the key because the trie's
+    /// substitution costs are built for the layout active at load time.
     func setLanguage(_ lang: String) {
         let layout = LayoutType.active
         guard lang != language || layout != loadedLayout else { return }

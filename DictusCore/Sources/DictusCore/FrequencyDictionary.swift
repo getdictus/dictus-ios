@@ -28,8 +28,8 @@ public struct FrequencyDictionary {
     ///
     /// WHY `JSONSerialization` and not `JSONDecoder` (#555): the shipped files hold
     /// 40 000 to 50 000 words, and decoding one with `JSONDecoder` peaks 9.5 MB above
-    /// the baseline, against 3.5 MB here, for the same dictionary. In the keyboard
-    /// extension those freed pages stay in the heap and count against its footprint.
+    /// the baseline, against 3.5 MB here, for the same dictionary. The keyboard
+    /// extension runs this load inside its own memory budget, so it pays that peak.
     public mutating func load(from data: Data) {
         do {
             // The pool releases the parsed Foundation objects here rather than when
