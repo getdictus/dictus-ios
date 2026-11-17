@@ -157,6 +157,11 @@ func load(_ lang: SupportedLanguage) {
     waitUntilLoaded(lang.rawValue)
 }
 
+// `run.sh --lexicon a,ma`: those words as the iPhone's contacts and text replacements.
+let lexiconWords = (ProcessInfo.processInfo.environment["BENCH_LEXICON"] ?? "")
+    .split(separator: ",").map(String.init)
+engine.setSupplementaryLexicon(SupplementaryLexicon(entries: lexiconWords.map { (userInput: $0, documentText: $0) }))
+
 func microseconds(_ work: () -> Void) -> Int {
     let start = DispatchTime.now().uptimeNanoseconds
     work()
