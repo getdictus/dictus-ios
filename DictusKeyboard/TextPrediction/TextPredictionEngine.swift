@@ -492,10 +492,14 @@ class TextPredictionEngine {
     /// Strategy 2 is the key insight: instead of asking "what are the corrections for sui?"
     /// and hoping "suis" appears, we ask "what does the n-gram model predict after je?"
     /// and check if any prediction (like "suis") is close to what was typed ("sui").
+    ///
+    /// `context` is the text before the cursor, ending with `word`. It lets a word
+    /// with two correct spellings take the one the sentence calls for (#501).
     func spellCheck(
         _ word: String,
         previousWord: String?,
-        isAtSentenceStart: Bool = true
+        isAtSentenceStart: Bool = true,
+        context: String? = nil
     ) -> (correction: String, alternatives: [String])? {
         // Lexicon verdicts (#873) return before the bigram rerank, which could
         // otherwise swap a replacement phrase or a kept name for a neighbour.
@@ -517,6 +521,18 @@ class TextPredictionEngine {
             )
             #endif
             return override
+        }
+
+        // `a` or `à` (#501): both are words, so nothing below can choose between them.
+        if let context, let accented = profile?.contextualHomographs.lazy
+            .compactMap({ $0.accentedForm(of: word, context: context) }).first {
+            #if DEBUG
+            AutocorrectDebugLog.autocorrectDecision(
+                original: word, corrected: accented,
+                branch: "contextual-homograph", prevWord: previousWord
+            )
+            #endif
+            return (accented, [])
         }
 
         let result = spellCheck(word, isAtSentenceStart: isAtSentenceStart)

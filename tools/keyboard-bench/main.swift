@@ -211,7 +211,8 @@ func replay(_ taps: [Tap], cells: [Cell], width: CGFloat, height: CGFloat,
                 let previous = words(context).dropLast().last
                 if memory.previewsCorrection(context: context) {
                     _ = engine.spellCheck(partial, previousWord: previous,
-                                          isAtSentenceStart: ProperNounGuard.isAtSentenceStart(context: context, word: partial))
+                                          isAtSentenceStart: ProperNounGuard.isAtSentenceStart(context: context, word: partial),
+                                          context: context)
                 }
                 _ = engine.suggestions(for: partial)
             }
@@ -228,7 +229,8 @@ func replay(_ taps: [Tap], cells: [Cell], width: CGFloat, height: CGFloat,
                 let ws = words(field.text)
                 let previous = ws.count >= 2 ? ws[ws.count - 2] : nil
                 let proposal = engine.spellCheck(word, previousWord: previous,
-                                                 isAtSentenceStart: ProperNounGuard.isAtSentenceStart(context: field.text, word: word))?.correction
+                                                 isAtSentenceStart: ProperNounGuard.isAtSentenceStart(context: field.text, word: word),
+                                                 context: field.text)?.correction
                 var applied = false
                 if memory.commit(prefix: prefix, word: word, proposedCorrection: proposal) == .correct,
                    let correction = proposal,

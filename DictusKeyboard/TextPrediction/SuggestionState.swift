@@ -162,7 +162,8 @@ class SuggestionState: ObservableObject {
            let result = engine.spellCheck(
                partial,
                previousWord: previousWord,
-               isAtSentenceStart: ProperNounGuard.isAtSentenceStart(context: context, word: partial)
+               isAtSentenceStart: ProperNounGuard.isAtSentenceStart(context: context, word: partial),
+               context: context
            ),
            isVisibleCorrection(result.correction, of: partial) {
             // Standard mobile layout: [original | correction (bold) | alternative],
@@ -262,7 +263,8 @@ class SuggestionState: ObservableObject {
                 spellResult = self.engine.spellCheck(
                     partial,
                     previousWord: previousWord,
-                    isAtSentenceStart: ProperNounGuard.isAtSentenceStart(context: context, word: partial)
+                    isAtSentenceStart: ProperNounGuard.isAtSentenceStart(context: context, word: partial),
+                    context: context
                 )
             } else {
                 spellResult = nil
@@ -330,9 +332,12 @@ class SuggestionState: ObservableObject {
     func performSpellCheck(
         _ word: String,
         previousWord: String?,
-        isAtSentenceStart: Bool = true
+        isAtSentenceStart: Bool = true,
+        context: String
     ) -> (correction: String, alternatives: [String])? {
-        return engine.spellCheck(word, previousWord: previousWord, isAtSentenceStart: isAtSentenceStart)
+        return engine.spellCheck(
+            word, previousWord: previousWord, isAtSentenceStart: isAtSentenceStart, context: context
+        )
     }
 
     /// Reads the contacts + text replacements lexicon (#873) and hands it to the
