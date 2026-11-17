@@ -237,7 +237,10 @@ func replay(_ taps: [Tap], cells: [Cell], width: CGFloat, height: CGFloat,
                                                  isAtSentenceStart: ProperNounGuard.isAtSentenceStart(context: field.text, word: word),
                                                  context: field.text)?.correction
                 var applied = false
-                if memory.commit(prefix: prefix, word: word, proposedCorrection: proposal) == .correct,
+                // As DictusKeyboardBridge: a lexicon word may take a casing-only correction.
+                let casingChange = proposal != nil && engine.lexiconDecision(for: word) != nil
+                if memory.commit(prefix: prefix, word: word, proposedCorrection: proposal,
+                                 allowsCasingChange: casingChange) == .correct,
                    let correction = proposal,
                    case .applied = AutocorrectCountingSite.apply(editor: field, word: word, correction: correction,
                                                                  trailing: " ", previousWord: previous, mirror: mirror) {

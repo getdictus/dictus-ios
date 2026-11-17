@@ -9,7 +9,14 @@ guard args.count >= 2, let text = try? String(contentsOfFile: args[1], encoding:
     print("usage: a-grave-eval <fra_sentences.tsv> [--show-wrong N]")
     exit(2)
 }
-let showWrong = args.firstIndex(of: "--show-wrong").flatMap { Int(args[$0 + 1]) } ?? 0
+var showWrong = 0
+if let flag = args.firstIndex(of: "--show-wrong") {
+    guard flag + 1 < args.count, let count = Int(args[flag + 1]), count >= 0 else {
+        print("usage: a-grave-eval <fra_sentences.tsv> [--show-wrong N]")
+        exit(2)
+    }
+    showWrong = count
+}
 guard let rule = frenchProfile.contextualHomographs.first(where: { $0.typed == "a" }) else {
     print("French has no a/à rule")
     exit(1)

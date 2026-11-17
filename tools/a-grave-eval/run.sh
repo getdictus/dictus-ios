@@ -17,10 +17,12 @@ if [[ ! -s "$CORPUS" ]]; then
     bunzip2 -f "$CORPUS.bz2"
 fi
 
+SOURCES=()
+while IFS= read -r source; do SOURCES+=("$source"); done \
+    < <(find "$ROOT/DictusCore/Sources/DictusCore" -name '*.swift' | sort)
 xcrun swiftc -swift-version 5 -O -parse-as-library \
     -module-name DictusCore -emit-module -emit-module-path "$BUILD/DictusCore.swiftmodule" \
-    -emit-library -static -o "$BUILD/libDictusCore.a" \
-    $(find "$ROOT/DictusCore/Sources/DictusCore" -name '*.swift' | sort)
+    -emit-library -static -o "$BUILD/libDictusCore.a" "${SOURCES[@]}"
 xcrun swiftc -swift-version 5 -O -I "$BUILD" -L "$BUILD" -lDictusCore \
     "$ROOT/tools/a-grave-eval/main.swift" -o "$BUILD/a-grave-eval"
 

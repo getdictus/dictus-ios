@@ -28,7 +28,7 @@ keyboard path. It cannot give a rate, so the rate comes from Tatoeba below.
 ## False-positive rate on real French text
 
 `tools/a-grave-eval/run.sh` takes every standalone `a` or `à` after the first word of
-Tatoeba's 730,700 French sentences (downloaded 2026-11-17, CC BY 2.0 FR, not used to
+[Tatoeba](https://tatoeba.org)'s 730,700 French sentences (downloaded 2026-11-17, CC BY 2.0 FR, not used to
 build the bundled n-grams), types it as `a` after the sentence's own text, and asks the
 rule. Its output, the 45 sentences included: [`tatoeba.txt`](tatoeba.txt).
 
