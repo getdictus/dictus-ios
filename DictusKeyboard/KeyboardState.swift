@@ -258,6 +258,10 @@ class KeyboardState: ObservableObject {
     /// the bottom of this file.
     @Published private(set) var recoveredTranscriptionPending = false
 
+    /// Whether this keyboard can dictate with the active model (#635, #963). Written
+    /// by `refreshFromDefaults()`; see `KeyboardState+DictationSupport.swift`.
+    @Published private(set) var supportsDictation = true
+
     /// Whether this process is holding `.processing` on its own authority (#361).
     ///
     /// Polish runs here now, so the stage is set locally with no round trip through
@@ -689,6 +693,10 @@ class KeyboardState: ObservableObject {
         refreshPolishAvailability()
         // Same placement argument (#860): the banner describes a dictation that is over.
         refreshRecoveredTranscription()
+        // Same again (#963): the active model is a setting the app changes. Published
+        // only on a change, so a refresh does not redraw the keyboard for nothing.
+        let dictationSupport = currentDictationSupport()
+        if dictationSupport != supportsDictation { supportsDictation = dictationSupport }
 
         // Same placement argument as the line above (#79): the armed mode is a sticky
         // setting the app can change — block C's mode list unpins and repins — and it
@@ -1962,36 +1970,6 @@ extension KeyboardState {
         )
         guard decision == .presentPreparation else { return nil }
         return loadState == .loading ? "loading" : "cold-cache"
-    }
-}
-
-// MARK: - Pre-A14 keyboard dictation gate (#635)
-
-extension KeyboardState {
-
-    /// Whether this device can dictate from the keyboard at all (#635).
-    ///
-    /// False on a pre-A14 chip: the dictation would be transcribed by a backgrounded
-    /// DictusApp, and the GPU encoder those chips need is refused in the background.
-    /// Read once per process, since the hardware cannot change under it, and from the
-    /// same DictusCore predicate the onboarding notice uses, so the two cannot
-    /// disagree about which devices are old.
-    static let deviceSupportsDictation = DeviceCapabilities.current().supportsKeyboardDictation
-
-    /// Decline a dictation on a device that cannot run one from the keyboard.
-    ///
-    /// The toolbar already draws the mic disabled and without its Smart Mode fan
-    /// gesture; this is the guarantee for any caller that reaches `startRecording`
-    /// anyway. The mic tap and the fan's release are the two callers today, and both
-    /// go through it. Nothing is posted to DictusApp, so no backgrounded transcription
-    /// is ever attempted.
-    ///
-    /// - Returns: `true` when the tap was refused and the caller must stop.
-    func refuseMicTapOnUnsupportedDevice() -> Bool {
-        guard !Self.deviceSupportsDictation else { return false }
-        logProbe("micTapRejectedUnsupportedDevice", details: sessionDetails())
-        HapticFeedback.actionRefused()
-        return true
     }
 }
 

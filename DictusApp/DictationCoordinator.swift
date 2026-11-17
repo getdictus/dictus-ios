@@ -946,7 +946,7 @@ class DictationCoordinator: ObservableObject {
                     DictusLogger.app.info("Recording stopped. Samples: \(samples.count, privacy: .public), Duration: \(String(format: "%.1f", audioDuration), privacy: .public)s")
                 }
 
-                updateStatus(.transcribing)
+                enterTranscription(audioSeconds: audioDuration)
                 stopTrace?.log("statusTranscribing")
                 LiveActivityManager.shared.transitionToTranscribing()
                 // Arm watchdog: if DI fails to leave .recording, force recovery after 10s.

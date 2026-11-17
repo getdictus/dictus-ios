@@ -37,8 +37,9 @@ struct ModelCardView: View {
 
     /// Why this device cannot run the model, or nil when it can (issue #369).
     /// Non-nil greys the card out, drops its download control, and prints the
-    /// reason under the description. Defaults to nil so the Downloaded section
-    /// and the onboarding card keep their existing call sites untouched.
+    /// reason under the description. Defaults to nil for the onboarding card. The
+    /// Downloaded section passes one on pre-A14 devices only (#963); the overflow menu
+    /// sits outside the disabled button, so a greyed installed model stays deletable.
     var incompatibilityReason: ModelInfo.IncompatibilityReason?
 
     /// Called when the user asks to delete this model from the overflow menu

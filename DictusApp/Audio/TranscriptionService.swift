@@ -1,6 +1,7 @@
 // DictusApp/Audio/TranscriptionService.swift
 // Encapsulates speech-to-text transcription with multi-engine routing.
 import Foundation
+import UIKit
 import WhisperKit
 import DictusCore
 
@@ -201,12 +202,14 @@ class TranscriptionService {
                     language: result.language, promptId: result.promptId,
                     detectedLanguage: result.detectedLanguage, retry: result.retry))
                 logPerformance(modelName: modelName, audioSamples: audioSamples, transcriptionDurationMs: durationMs)
+                await logResources(engine: activeEngine.engineName, outcome: "completed", start: transcriptionStart)
                 return text
             } catch {
                 // The diagnostic, not `localizedDescription`: since #313 the latter is the
                 // sentence written for the user, and a log line that carried it would say
                 // nothing about what actually failed.
                 PersistentLog.log(.transcriptionFailed(error: DictationFailureMessage.diagnostic(for: error)))
+                await logResources(engine: activeEngine.engineName, outcome: "failed", start: transcriptionStart)
                 throw error
             }
         }
@@ -297,6 +300,30 @@ class TranscriptionService {
             instanceID: "languageDetection",
             action: "detected",
             details: "detected=\(detected)"
+        ))
+    }
+
+    /// One `TranscriptionService resources` line per engine transcription (#963): whether
+    /// DictusApp was in the foreground or the background, the engine, how long it took,
+    /// and the process footprint with its peak since launch.
+    ///
+    /// WHY THE APP STATE: a keyboard dictation is transcribed by a backgrounded DictusApp,
+    /// and on an A12X that is exactly where Whisper failed 7/7 (#635). Without the state a
+    /// log cannot tell an in-app success from a keyboard one. Read on the main actor,
+    /// where `UIApplication` lives; this service is not isolated to it.
+    private func logResources(engine: String, outcome: String, start: Date) async {
+        let appState = await MainActor.run { UIApplication.shared.applicationState }
+        let stateLabel: String
+        switch appState {
+        case .active: stateLabel = "foreground"
+        case .inactive: stateLabel = "inactive"
+        case .background: stateLabel = "background"
+        @unknown default: stateLabel = "unknown"
+        }
+        let elapsedMs = Int(Date().timeIntervalSince(start) * 1000)
+        PersistentLog.log(.diagnosticProbe(
+            component: "TranscriptionService", instanceID: engine, action: "resources",
+            details: "outcome=\(outcome) appState=\(stateLabel) elapsedMs=\(elapsedMs) \(ProcessMemory.logFields())"
         ))
     }
 
