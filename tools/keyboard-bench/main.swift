@@ -171,11 +171,24 @@ struct Commit {
     let final: String
 }
 
-/// Types one sentence: every tap goes through the grid, every letter triggers the
-/// suggestion work `SuggestionState.updateAsync` does, every space the autocorrect
-/// `DictusKeyboardBridge.autocorrectBeforeCursor` does.
-func replay(_ taps: [Tap], cells: [Cell], width: CGFloat, height: CGFloat,
-            tapRow: (Tap, String, CGPoint, Int) -> Void) -> (text: String, commits: [Commit]) {
+/// Picks the cell a tap types, from the point, today's answer (the cell under the
+/// point), the word being typed and the word before it (#949). Also returns the trie
+/// nodes the pick visited.
+typealias Picker = (CGPoint, Cell?, String, String?) -> (Cell?, Int)
+
+/// What the pick of one tap did: the key the plain hit test gives, the time the pick
+/// took in nanoseconds, and the trie nodes it visited (#949).
+struct PickCost {
+    let plain: String
+    let ns: Int
+    let visited: Int
+}
+
+/// Types one sentence: every tap goes through the grid (or the picker), every letter
+/// triggers the suggestion work `SuggestionState.updateAsync` does, every space the
+/// autocorrect `DictusKeyboardBridge.autocorrectBeforeCursor` does.
+func replay(_ taps: [Tap], cells: [Cell], width: CGFloat, height: CGFloat, picker: Picker?,
+            tapRow: (Tap, String, CGPoint, Int, PickCost) -> Void) -> (text: String, commits: [Commit]) {
     let field = Field()
     let memory = AutocorrectRejectionMemory()
     let mirror = MirrorSyncState()
@@ -186,7 +199,24 @@ func replay(_ taps: [Tap], cells: [Cell], width: CGFloat, height: CGFloat,
     for tap in taps {
         let aim = target(of: tap.key, in: cells)
         let point = CGPoint(x: aim.frame.midX + tap.dx * aim.unitWidth, y: aim.frame.midY + tap.dy * aim.frame.height)
-        let hit = hitTest(point, cells: cells, width: width, height: height)
+        // The word being typed and the one before it. The keyboard tracks these as it
+        // types; the replay reads them off the field, outside the timed pick.
+        let current = field.text.split(separator: " ", omittingEmptySubsequences: false).last.map(String.init) ?? ""
+        let ws = words(field.text)
+        let previous = current.isEmpty ? ws.last : ws.dropLast().last
+        // After an apostrophe (`l'`, `d'`) a new word starts.
+        let word = current.split(separator: "'", omittingEmptySubsequences: false).last.map(String.init) ?? ""
+
+        let start = DispatchTime.now().uptimeNanoseconds
+        let plain = hitTest(point, cells: cells, width: width, height: height)
+        var hit = plain
+        var visited = 0
+        // A touch outside the grid never reaches the keyboard view: no model sees it.
+        if let picker = picker, CGRect(x: 0, y: 0, width: width, height: height).contains(point) {
+            (hit, visited) = picker(point, plain, word, previous)
+        }
+        let pickCost = PickCost(plain: label(plain), ns: Int(DispatchTime.now().uptimeNanoseconds - start),
+                                visited: visited)
         let resolved = label(hit)
         if tap.key != "space", tokenWords.last != wordIndex { tokenWords.append(wordIndex) }
 
@@ -250,7 +280,7 @@ func replay(_ taps: [Tap], cells: [Cell], width: CGFloat, height: CGFloat,
             break
         }
         if tap.key == "space" { wordIndex += 1 }
-        tapRow(tap, resolved, point, cost)
+        tapRow(tap, resolved, point, cost, pickCost)
     }
     return (field.text.trimmingCharacters(in: .whitespaces), commits)
 }
@@ -267,7 +297,16 @@ let outDir = args[3]
 let w = CGFloat(width)
 let h = CGFloat(height)
 
-var tapsOut = ["lang\tsentence\ttap\tintended\tresolved\tx\ty\tengine_us"]
+// #949 spike: the runs to replay and the hit test to replay them through. run.sh sets
+// these; unset, the bench replays its committed runs through today's hit test.
+let env = ProcessInfo.processInfo.environment
+let corpusDir = env["KB_CORPUS"] ?? "\(benchDir)/corpus"
+let runsDir = env["KB_RUNS"] ?? "\(benchDir)/runs"
+let hitMode = env["KB_HIT"] ?? "plain"
+guard ["plain", "model"].contains(hitMode) else { fatalError("KB_HIT must be plain or model") }
+let modelParameters = ModelParameters(env["KB_MODEL"] ?? "")
+
+var tapsOut = ["lang\tsentence\ttap\tintended\tresolved\tx\ty\tengine_us\tplain\thit_ns\tvisited"]
 var commitsOut = ["lang\tsentence\tintended\ttyped\tfinal"]
 var textsOut = ["lang\tsentence\tintended\tfinal"]
 
@@ -283,13 +322,40 @@ for code in langs {
         fatalError("no letter page for \(code)")
     }
     let cells = grid(page, width: w, height: h)
-    let sentences = readLines("\(benchDir)/corpus/\(code).txt")
-    let run = readRun("\(benchDir)/runs/\(code).tsv")
+    let sentences = readLines("\(corpusDir)/\(code).txt")
+    let run = readRun("\(runsDir)/\(code).tsv")
 
-    for (s, intended) in sentences.enumerated() {
+    var model: KeyTargetModel?
+    if hitMode == "model" {
+        // Bundle.main is the directory run.sh copied the shipped dictionaries into.
+        guard let trie = PrefixMass(path: "\(Bundle.main.bundlePath)/\(code)_spellcheck.dict") else {
+            fatalError("cannot read \(code)_spellcheck.dict")
+        }
+        // The engine keeps its n-grams private: the spike opens the same file a second time.
+        var ngrams: AOSPTrieBridge?
+        if modelParameters.ngram {
+            let bridge = AOSPTrieBridge()
+            guard bridge.loadNgrams(atPath: "\(Bundle.main.bundlePath)/\(code)_ngrams.dict") else {
+                fatalError("cannot read \(code)_ngrams.dict")
+            }
+            ngrams = bridge
+        }
+        model = KeyTargetModel(parameters: modelParameters, trie: trie, ngrams: ngrams)
+    }
+    let picker: Picker? = model.map { m in
+        { (m.pick($0, plain: $1, cells: cells, word: $2, previous: $3), m.visited) }
+    }
+
+    var order: [Int] = []
+    for tap in run where order.last != tap.sentence { order.append(tap.sentence) }
+    for s in order {
+        // A run of several passes keeps numbering its sentences: sentence s is corpus line s modulo its length.
+        let intended = sentences[s % sentences.count]
         let intendedWords = intended.components(separatedBy: " ")
-        let (text, commits) = replay(run.filter { $0.sentence == s }, cells: cells, width: w, height: h) { tap, resolved, p, us in
-            tapsOut.append("\(code)\t\(s)\t\(tap.index)\t\(tap.key)\t\(resolved)\t\(String(format: "%.2f", p.x))\t\(String(format: "%.2f", p.y))\t\(us)")
+        let (text, commits) = replay(run.filter { $0.sentence == s }, cells: cells, width: w, height: h,
+                                     picker: picker) { tap, resolved, p, us, pick in
+            tapsOut.append("\(code)\t\(s)\t\(tap.index)\t\(tap.key)\t\(resolved)\t\(String(format: "%.2f", p.x))\t"
+                           + "\(String(format: "%.2f", p.y))\t\(us)\t\(pick.plain)\t\(pick.ns)\t\(pick.visited)")
         }
         for c in commits {
             let meant = c.intendedWords.map { intendedWords[$0] }.joined(separator: " ")
@@ -297,7 +363,7 @@ for code in langs {
         }
         textsOut.append("\(code)\t\(s)\t\(intended)\t\(text)")
     }
-    FileHandle.standardError.write(Data("\(code): \(sentences.count) sentences replayed\n".utf8))
+    FileHandle.standardError.write(Data("\(code): \(order.count) sentences replayed, hit test \(hitMode)\n".utf8))
 }
 
 for (name, rows) in [("taps.tsv", tapsOut), ("commits.tsv", commitsOut), ("texts.tsv", textsOut)] {
