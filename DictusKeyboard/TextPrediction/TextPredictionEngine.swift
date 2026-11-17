@@ -503,6 +503,19 @@ class TextPredictionEngine {
             return lexiconResult(decision, for: word)
         }
 
+        // Context overrides (#500): a valid word that is never valid after this
+        // previous word, "il ma" → "il m'a". The valid-word guard would keep it.
+        if let prev = previousWord, let profile,
+           let corrected = applyContextOverride(profile: profile, previousWord: prev, word: word) {
+            #if DEBUG
+            AutocorrectDebugLog.autocorrectDecision(
+                original: word, corrected: corrected,
+                branch: "context-override", prevWord: prev
+            )
+            #endif
+            return (corrected, [])
+        }
+
         // Language overrides are authoritative — return before the bigram
         // rerank can replace them. Concrete failure this prevents (#222):
         // "je lai" → override "l'ai", but the corpus tokenizes "j'ai" as ONE

@@ -25,3 +25,20 @@ public func applyOverride(profile: LanguageProfile, word: String) -> String? {
     let isCapitalized = word.first?.isUppercase == true
     return isCapitalized ? override.capitalized : override
 }
+
+/// Looks up `word` in `profile.contextOverrides` for `previousWord` and returns the
+/// forced correction with case preserved, or `nil` when no override applies.
+///
+/// The previous word is matched on its part after the last apostrophe, so
+/// `qu'il ma` and `s'il ma` read as `il ma`.
+///
+/// WHY a table and not the n-grams: the bigram store keeps the 16 most frequent
+/// followers of each word, so a zero score says "rare", not "impossible". After
+/// `il`, `ma` and `la` both score zero, and only one of them is wrong (#500).
+public func applyContextOverride(profile: LanguageProfile, previousWord: String, word: String) -> String? {
+    let previous = previousWord.lowercased()
+    let key = previous.lastIndex(of: "'").map { String(previous[previous.index(after: $0)...]) } ?? previous
+    guard let override = profile.contextOverrides[key]?[word.lowercased()] else { return nil }
+    let isCapitalized = word.first?.isUppercase == true
+    return isCapitalized ? override.prefix(1).uppercased() + override.dropFirst() : override
+}
