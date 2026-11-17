@@ -5396,6 +5396,29 @@
         }
       }
     },
+    "What's new" : {
+      "comment" : "Settings, About: the row that reopens the running version's release notes (#974).",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Neuigkeiten"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Novedades"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nouveautés"
+          }
+        }
+      }
+    },
     "Your idea" : {
       "comment" : "Feedback form (#565).",
       "localizations" : {
@@ -8983,29 +9006,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Nouvelle dictée"
-          }
-        }
-      }
-    },
-    "New in Dictus" : {
-      "comment" : "What's new for existing users: small label above the title of its first page, the Smart Modes scene (#685).",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Neu in Dictus"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Novedades en Dictus"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nouveau dans Dictus"
           }
         }
       }
