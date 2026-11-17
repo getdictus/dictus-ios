@@ -122,4 +122,68 @@ final class FrenchAGraveTests: XCTestCase {
             XCTAssertTrue(language.profile.contextualHomographs.isEmpty, "\(language)")
         }
     }
+
+    // MARK: - The user's lexicon (#873), as on a real iPhone
+
+    /// What the iPhone of the device test held (#501 review): `a` as a lexicon word,
+    /// from a contact or a text replacement, next to a name and a shortcut.
+    private let deviceLexicon = SupplementaryLexicon(entries: [
+        (userInput: "a", documentText: "a"),
+        (userInput: "Zofiak", documentText: "Zofiak"),
+        (userInput: "qqc", documentText: "quelque chose")
+    ])
+
+    private func earlyAnswer(_ word: String, _ context: String, isDictionaryWord: Bool = true)
+        -> SupplementaryLexicon.EarlyAnswer? {
+        deviceLexicon.earlyAnswer(
+            for: word, context: context, homographs: frenchProfile.contextualHomographs,
+            isDictionaryWord: isDictionaryWord
+        )
+    }
+
+    func test_lexiconWordA_stillTakesTheAccent() {
+        XCTAssertEqual(earlyAnswer("a", "je vais a"), .contextual("\u{00E0}"))
+    }
+
+    func test_lexiconWordA_isKeptWhereItIsTheVerb() {
+        XCTAssertEqual(earlyAnswer("a", "il a"), .lexicon(.keep))
+    }
+
+    func test_lexiconWordTheDictionaryDoesNotKnow_isKeptBeforeTheRule() {
+        XCTAssertEqual(earlyAnswer("a", "je vais a", isDictionaryWord: false), .lexicon(.keep))
+    }
+
+    func test_shortcutStillReplacesFirst() {
+        XCTAssertEqual(earlyAnswer("qqc", "je vais qqc"), .lexicon(.replace(with: "quelque chose")))
+    }
+
+    func test_nameIsStillKept() {
+        XCTAssertEqual(earlyAnswer("Zofiak", "je vais voir Zofiak", isDictionaryWord: false), .lexicon(.keep))
+    }
+
+    func test_withoutALexiconEntry_theRuleAnswersAlone() {
+        XCTAssertEqual(
+            SupplementaryLexicon.empty.earlyAnswer(
+                for: "a", context: "je vais a", homographs: frenchProfile.contextualHomographs,
+                isDictionaryWord: true
+            ),
+            .contextual("\u{00E0}")
+        )
+        XCTAssertNil(
+            SupplementaryLexicon.empty.earlyAnswer(
+                for: "a", context: "il a", homographs: frenchProfile.contextualHomographs,
+                isDictionaryWord: true
+            )
+        )
+    }
+
+    func test_otherLanguages_keepTheLexiconAsBefore() {
+        XCTAssertEqual(
+            deviceLexicon.earlyAnswer(
+                for: "a", context: "i have a", homographs: englishProfile.contextualHomographs,
+                isDictionaryWord: true
+            ),
+            .lexicon(.keep)
+        )
+    }
 }

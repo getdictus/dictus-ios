@@ -77,3 +77,43 @@ public struct SupplementaryLexicon: Equatable {
         return .keep
     }
 }
+
+extension SupplementaryLexicon {
+    /// What `spellCheck` answers before any dictionary rule when it can read the
+    /// sentence: the user's lexicon (#873) or a contextual homograph (#501).
+    public enum EarlyAnswer: Equatable {
+        case lexicon(Decision)
+        /// The spelling a contextual homograph chose, e.g. `à` for `a`.
+        case contextual(String)
+    }
+
+    /// In this order:
+    /// 1. A shortcut, or a contact's casing, replaces the word.
+    /// 2. A lexicon word the dictionary does not know, a name, is kept as typed.
+    /// 3. A contextual homograph takes the spelling the sentence calls for.
+    /// 4. Any other lexicon word is kept.
+    ///
+    /// WHY step 3 comes before step 4: on a real iPhone the lexicon holds `a` and
+    /// `ma`, from contacts and text replacements. A keep there would freeze those
+    /// dictionary words in every sentence, and it protects nothing the rule could
+    /// break: the rule only ever swaps one dictionary word for another.
+    public func earlyAnswer(
+        for word: String,
+        context: String,
+        homographs: [ContextualHomograph],
+        isDictionaryWord: @autoclosure () -> Bool
+    ) -> EarlyAnswer? {
+        let lexiconDecision = decision(for: word, isDictionaryWord: isDictionaryWord())
+        switch lexiconDecision {
+        case .replace?:
+            return lexiconDecision.map(EarlyAnswer.lexicon)
+        case .keep? where !isDictionaryWord():
+            return .lexicon(.keep)
+        case .keep?, nil:
+            if let spelling = homographs.lazy.compactMap({ $0.accentedForm(of: word, context: context) }).first {
+                return .contextual(spelling)
+            }
+            return lexiconDecision.map(EarlyAnswer.lexicon)
+        }
+    }
+}

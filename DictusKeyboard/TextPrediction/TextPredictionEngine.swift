@@ -76,6 +76,18 @@ class TextPredictionEngine {
         return lexicon.decision(for: word, isDictionaryWord: aospTrieEngine.wordExists(word.lowercased()))
     }
 
+    /// The lexicon's verdict or a contextual homograph's spelling for `word`, in the
+    /// order `SupplementaryLexicon.earlyAnswer` documents, or nil when neither applies.
+    private func earlyAnswer(for word: String, context: String) -> SupplementaryLexicon.EarlyAnswer? {
+        lexiconLock.lock()
+        let lexicon = supplementaryLexicon
+        lexiconLock.unlock()
+        return lexicon.earlyAnswer(
+            for: word, context: context, homographs: profile?.contextualHomographs ?? [],
+            isDictionaryWord: aospTrieEngine.wordExists(word.lowercased())
+        )
+    }
+
     /// Turns a lexicon verdict into a `spellCheck` result: nil keeps the word.
     private func lexiconResult(
         _ decision: SupplementaryLexicon.Decision,
@@ -503,7 +515,24 @@ class TextPredictionEngine {
     ) -> (correction: String, alternatives: [String])? {
         // Lexicon verdicts (#873) return before the bigram rerank, which could
         // otherwise swap a replacement phrase or a kept name for a neighbour.
-        if let decision = lexiconDecision(for: word) {
+        // With the sentence known, `a` or `à` (#501) is decided here as well: a
+        // contact or a replacement holding the word `a` must not freeze it.
+        if let context {
+            switch earlyAnswer(for: word, context: context) {
+            case .lexicon(let decision)?:
+                return lexiconResult(decision, for: word)
+            case .contextual(let spelling)?:
+                #if DEBUG
+                AutocorrectDebugLog.autocorrectDecision(
+                    original: word, corrected: spelling,
+                    branch: "contextual-homograph", prevWord: previousWord
+                )
+                #endif
+                return (spelling, [])
+            case nil:
+                break
+            }
+        } else if let decision = lexiconDecision(for: word) {
             return lexiconResult(decision, for: word)
         }
 
@@ -521,18 +550,6 @@ class TextPredictionEngine {
             )
             #endif
             return override
-        }
-
-        // `a` or `à` (#501): both are words, so nothing below can choose between them.
-        if let context, let accented = profile?.contextualHomographs.lazy
-            .compactMap({ $0.accentedForm(of: word, context: context) }).first {
-            #if DEBUG
-            AutocorrectDebugLog.autocorrectDecision(
-                original: word, corrected: accented,
-                branch: "contextual-homograph", prevWord: previousWord
-            )
-            #endif
-            return (accented, [])
         }
 
         let result = spellCheck(word, isAtSentenceStart: isAtSentenceStart)
