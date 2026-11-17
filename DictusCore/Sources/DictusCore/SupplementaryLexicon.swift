@@ -18,6 +18,22 @@ public struct SupplementaryLexicon: Equatable {
         /// Insert this text instead of the typed word, through the autocorrect
         /// commit path (undo chip included).
         case replace(with: String)
+
+        /// Whether this verdict returns before the previous-word rules
+        /// (`LanguageProfile.contextOverrides`, #500).
+        ///
+        /// A shortcut always does, as Apple expands it whatever precedes it. A kept
+        /// word does when the dictionary does not know it: that is a name, and
+        /// "il Zofiak" stays as typed. A kept word the dictionary knows yields: on
+        /// device the lexicon holds words like "ma", from a contact or a
+        /// replacement, and "il ma" must still become "il m'a". When no rule
+        /// applies, the caller keeps the word, as before.
+        public func outranksContextRules(isDictionaryWord: Bool) -> Bool {
+            switch self {
+            case .replace: return true
+            case .keep: return !isDictionaryWord
+            }
+        }
     }
 
     public static let empty = SupplementaryLexicon(entries: [])
