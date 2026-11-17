@@ -81,3 +81,33 @@ in a Rappels title. The field read `Je vais à elle a `, and the keyboard logged
 <KBD> APPLIED orig="a" → "à" prev="vais"
 <KBD> AUTOCORRECT-SKIP word="a" reason=already-valid
 ```
+
+## Device test KO: the iPhone's lexicon
+
+Pierre's device test (iPhone 15 Pro Max, batch `06d24536`) failed: `je vais a paris`
+stayed `a`, and the log showed `AUTOCORRECT-SKIP word="a" reason=lexicon` after
+`NOTE lexicon loaded: 10 shortcuts, 1575 words`. The iPhone hands the keyboard its
+contacts and text replacements (#873), that lexicon held the word `a`, and
+`spellCheck` returned the lexicon's keep before the rule ran. A fresh simulator has
+no lexicon, which is why the bench and the real-keyboard check above both passed.
+
+The order is now `SupplementaryLexicon.earlyAnswer`:
+
+1. A shortcut, or a contact's casing, replaces the word.
+2. A lexicon word the dictionary does not know, a name, is kept.
+3. The contextual rule decides.
+4. Any other lexicon word is kept.
+
+The rule only ever swaps one dictionary word for another (`a` for `à`), so a keep on
+a dictionary word protected nothing it could break.
+
+`run.sh --lexicon a,ma` now loads those words as the lexicon. Bench, `fr`, at `920db323`:
+
+| | wrong words | sentence 5 |
+|---|---:|---|
+| No lexicon | 8 | `… dévaler à jeudi matin` |
+| Lexicon `a,ma`, new order ([report](bench-after-lexicon.md)) | 8 | `… dévaler à jeudi matin` |
+| Lexicon `a,ma`, the old order put back ([report](bench-old-order-lexicon.md)) | 9 | `… dévaler a jeudi matin` |
+
+The old order reproduces the device failure; the new one gives the same 40 sentences
+as the run without a lexicon.
