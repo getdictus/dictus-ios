@@ -28,6 +28,8 @@ class TextPredictionEngine {
     private var frequencyDict = FrequencyDictionary()
     private let aospTrieEngine = AOSPTrieEngine()
     private var language: String = "fr"
+    /// The layout the dictionaries were last loaded for. See `setLanguage`.
+    private var loadedLayout: LayoutType?
 
     /// The active language's data profile, or nil if `language` is not a registered
     /// `SupportedLanguage`. Used to gate language-specific pipeline stages by
@@ -56,7 +58,18 @@ class TextPredictionEngine {
     /// WHY reload on language change:
     /// We only keep one language's frequency data in memory at a time
     /// to stay within the keyboard extension's ~50MB memory budget.
+    ///
+    /// WHY nothing happens when neither the language nor the layout changed (#555):
+    /// `viewWillAppear` calls this on every keyboard appearance, and every load
+    /// parses a whole frequency file whose freed pages the heap then re-dirties:
+    /// 20 appearances without a keystroke took the extension from 31.8 to 36.7 MB
+    /// on the simulator. With this guard and the lighter parse in
+    /// `FrequencyDictionary` it stays at 32.0 MB; either one alone left it at 37.4.
+    /// The layout is part of the key because the trie's substitution costs are
+    /// built for the layout active at load time.
     func setLanguage(_ lang: String) {
+        let layout = LayoutType.active
+        guard lang != language || layout != loadedLayout else { return }
         language = lang
         loadDictionaries(for: lang)
     }
@@ -105,6 +118,7 @@ class TextPredictionEngine {
         if !available.contains(where: { $0.hasPrefix(lang) }) {
             print("[TextPredictionEngine] Warning: '\(lang)' not in available languages: \(available)")
         }
+        loadedLayout = LayoutType.active
         frequencyDict.load(language: lang)
         aospTrieEngine.load(language: lang) { [weak self] _ in
             // The user dictionary's one-shot prune (#287). This is the first
@@ -123,13 +137,12 @@ class TextPredictionEngine {
     /// WHY there are several triggers and no privileged one (#287). Two triggers
     /// exist because neither is sufficient alone: the load completion is the only
     /// moment a cold session can ask the dictionary anything, and it is
-    /// systematically starved once a session is warm — `viewWillAppear` issues a
-    /// load on every keyboard appearance, each tearing the mmap down
-    /// synchronously on the main thread before the previous completion, posted
-    /// with `DispatchQueue.main.async`, gets to run. That starvation is why the
-    /// prune never once ran on device. `viewWillAppear` therefore also attempts
-    /// it *before* asking for the next load, while the previous dictionary is
-    /// still mounted.
+    /// rare once a session is warm — a load only happens on a language or layout
+    /// change since #555, and before that `viewWillAppear` issued one on every
+    /// appearance, tearing the mmap down before the previous completion ran. That
+    /// starvation is why the prune never once ran on device. `viewWillAppear`
+    /// therefore also attempts it before calling `setLanguage`, while the
+    /// dictionary is mounted.
     ///
     /// Neither is trusted, and that is the point. `UserDictionaryPruneGate` holds
     /// the one precondition — the mounted dictionary is the active language's —
