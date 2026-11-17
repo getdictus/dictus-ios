@@ -280,7 +280,7 @@ let register = readLines("\(benchDir)/register.tsv").dropFirst().map { $0.compon
 
 // The engine starts loading French as soon as it exists. A `setLanguage` issued before
 // that load lands overlaps it: in an English-only run the French load then reported
-// the English trie's word count (40000; the French file holds 39622).
+// the English trie's word count (40000; the French file holds 39627).
 waitUntilLoaded("initial")
 
 for code in langs {
