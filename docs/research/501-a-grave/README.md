@@ -111,3 +111,26 @@ a dictionary word protected nothing it could break.
 
 The old order reproduces the device failure; the new one gives the same 40 sentences
 as the run without a lexicon.
+
+## Merged with #970 (previous-word overrides)
+
+#970 (`il ma` → `il m'a`) and this PR both rewrote the lexicon early return of
+`spellCheck`. The merge orders them in one place, `SupplementaryLexicon.earlyAnswer`:
+shortcut or contact casing, kept name, the `a`/`à` homograph, the previous-word
+override, kept dictionary word.
+
+Bench (2026-11-18, iPhone 17 simulator, iOS 26.5), the merge against each PR alone.
+#971 alone is `b29cb5ae`, #970 alone is `20a6eb66`.
+
+| | #971 alone | #970 alone | merged | merged, `--lexicon a,ma` |
+|---|---:|---:|---:|---:|
+| fr wrong words (of 152) | 8 | 9 | **8** | 8 |
+| en wrong words (of 157) | 9 | 9 | **9** | 9 |
+| fr / en broken | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 |
+| fr / en miscorrected | 4 / 4 | 4 / 4 | 4 / 4 | 4 / 4 |
+| Register (#500), 15 cases, same final as #970 | | | 15 of 15 | 15 of 15 |
+
+The merged French and English texts equal #971 alone; against #970 alone, the one
+change is sentence 5's `à`. The register includes `il ma` → `m'a` with and without
+`ma` in the lexicon, and both `voczux` cases, which end `bocaux` exactly as on #970
+alone: that miscorrection stays #114's. Full report: [`bench-merged-970.md`](bench-merged-970.md).
