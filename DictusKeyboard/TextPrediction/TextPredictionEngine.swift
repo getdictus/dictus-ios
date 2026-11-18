@@ -87,14 +87,16 @@ class TextPredictionEngine {
         return lexicon.decision(for: word, isDictionaryWord: aospTrieEngine.wordExists(word.lowercased()))
     }
 
-    /// The lexicon's verdict or a contextual homograph's spelling for `word`, in the
-    /// order `SupplementaryLexicon.earlyAnswer` documents, or nil when neither applies.
-    private func earlyAnswer(for word: String, context: String) -> SupplementaryLexicon.EarlyAnswer? {
+    /// The lexicon's verdict or a context rule's spelling for `word`, in the order
+    /// `SupplementaryLexicon.earlyAnswer` documents, or nil when none applies.
+    private func earlyAnswer(
+        for word: String, previousWord: String?, context: String?
+    ) -> SupplementaryLexicon.EarlyAnswer? {
         lexiconLock.lock()
         let lexicon = supplementaryLexicon
         lexiconLock.unlock()
         return lexicon.earlyAnswer(
-            for: word, context: context, homographs: profile?.contextualHomographs ?? [],
+            for: word, previousWord: previousWord, context: context, profile: profile,
             isDictionaryWord: aospTrieEngine.wordExists(word.lowercased())
         )
     }
@@ -546,25 +548,28 @@ class TextPredictionEngine {
     ) -> (correction: String, alternatives: [String])? {
         // Lexicon verdicts (#873) return before the bigram rerank, which could
         // otherwise swap a replacement phrase or a kept name for a neighbour.
-        // With the sentence known, `a` or `à` (#501) is decided here as well: a
-        // contact or a replacement holding the word `a` must not freeze it.
-        if let context {
-            switch earlyAnswer(for: word, context: context) {
-            case .lexicon(let decision)?:
-                return lexiconResult(decision, for: word)
-            case .contextual(let spelling)?:
-                #if DEBUG
-                AutocorrectDebugLog.autocorrectDecision(
-                    original: word, corrected: spelling,
-                    branch: "contextual-homograph", prevWord: previousWord
-                )
-                #endif
-                return (spelling, [])
-            case nil:
-                break
-            }
-        } else if let decision = lexiconDecision(for: word) {
+        // The lexicon and both context rules, in the order `earlyAnswer` documents.
+        switch earlyAnswer(for: word, previousWord: previousWord, context: context) {
+        case .lexicon(let decision)?:
             return lexiconResult(decision, for: word)
+        case .homograph(let spelling)?:
+            #if DEBUG
+            AutocorrectDebugLog.autocorrectDecision(
+                original: word, corrected: spelling,
+                branch: "contextual-homograph", prevWord: previousWord
+            )
+            #endif
+            return (spelling, [])
+        case .contextOverride(let corrected)?:
+            #if DEBUG
+            AutocorrectDebugLog.autocorrectDecision(
+                original: word, corrected: corrected,
+                branch: "context-override", prevWord: previousWord
+            )
+            #endif
+            return (corrected, [])
+        case nil:
+            break
         }
 
         // Language overrides are authoritative — return before the bigram

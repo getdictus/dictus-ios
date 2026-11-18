@@ -125,65 +125,82 @@ final class FrenchAGraveTests: XCTestCase {
 
     // MARK: - The user's lexicon (#873), as on a real iPhone
 
-    /// What the iPhone of the device test held (#501 review): `a` as a lexicon word,
-    /// from a contact or a text replacement, next to a name and a shortcut.
+    /// What the iPhones of the device tests held (#501, #500): `a` and `ma` as lexicon
+    /// words, from contacts or text replacements, next to a name and a shortcut.
     private let deviceLexicon = SupplementaryLexicon(entries: [
         (userInput: "a", documentText: "a"),
+        (userInput: "ma", documentText: "ma"),
         (userInput: "Zofiak", documentText: "Zofiak"),
         (userInput: "qqc", documentText: "quelque chose")
     ])
 
-    private func earlyAnswer(_ word: String, _ context: String, isDictionaryWord: Bool = true)
-        -> SupplementaryLexicon.EarlyAnswer? {
-        deviceLexicon.earlyAnswer(
-            for: word, context: context, homographs: frenchProfile.contextualHomographs,
+    /// `earlyAnswer` as the keyboard calls it on space: the previous word and the
+    /// text before the cursor both come from `context`.
+    private func earlyAnswer(
+        _ word: String, _ context: String, isDictionaryWord: Bool = true,
+        lexicon: SupplementaryLexicon? = nil, profile: LanguageProfile = frenchProfile
+    ) -> SupplementaryLexicon.EarlyAnswer? {
+        let words = context.split(separator: " ").map(String.init)
+        return (lexicon ?? deviceLexicon).earlyAnswer(
+            for: word, previousWord: words.dropLast().last, context: context, profile: profile,
             isDictionaryWord: isDictionaryWord
         )
     }
 
     func test_lexiconWordA_stillTakesTheAccent() {
-        XCTAssertEqual(earlyAnswer("a", "je vais a"), .contextual("\u{00E0}"))
+        XCTAssertEqual(earlyAnswer("a", "je vais a"), .homograph("\u{00E0}"))
     }
 
     func test_lexiconWordA_isKeptWhereItIsTheVerb() {
         XCTAssertEqual(earlyAnswer("a", "il a"), .lexicon(.keep))
     }
 
+    /// Both context rules fire with `a` and `ma` in the lexicon, each on its own word.
+    func test_lexiconWithAAndMa_bothContextRulesFire() {
+        XCTAssertEqual(earlyAnswer("a", "je vais a"), .homograph("\u{00E0}"))
+        XCTAssertEqual(earlyAnswer("ma", "il ma"), .contextOverride("m'a"))
+        XCTAssertEqual(earlyAnswer("ma", "c'est ma"), .lexicon(.keep))
+    }
+
+    /// `A` and `Ma` as contact names: the lowercase dictionary words typed in a
+    /// sentence still take both rules, and the names do not recase them.
+    func test_contactNamesAAndMa_doNotBlockTheRules() {
+        let contacts = SupplementaryLexicon(entries: [
+            (userInput: "A", documentText: "A"),
+            (userInput: "Ma", documentText: "Ma")
+        ])
+        XCTAssertEqual(earlyAnswer("a", "je vais a", lexicon: contacts), .homograph("\u{00E0}"))
+        XCTAssertEqual(earlyAnswer("ma", "il ma", lexicon: contacts), .contextOverride("m'a"))
+        XCTAssertEqual(earlyAnswer("a", "il a", lexicon: contacts), .lexicon(.keep))
+        XCTAssertEqual(earlyAnswer("ma", "c'est ma", lexicon: contacts), .lexicon(.keep))
+    }
+
     func test_lexiconWordTheDictionaryDoesNotKnow_isKeptBeforeTheRule() {
         XCTAssertEqual(earlyAnswer("a", "je vais a", isDictionaryWord: false), .lexicon(.keep))
     }
 
+    /// A contact the dictionary does not know is kept before both context rules. `ma`
+    /// is a dictionary word, so it stands here for a name the trie lacks: told it is
+    /// unknown, the kept word wins over the `il ma` override it would otherwise take.
+    func test_keptNameOutranksBothContextRules() {
+        let contact = SupplementaryLexicon(entries: [(userInput: "Ma", documentText: "Ma")])
+        XCTAssertEqual(earlyAnswer("Ma", "il Ma", isDictionaryWord: false, lexicon: contact), .lexicon(.keep))
+        XCTAssertEqual(earlyAnswer("Zofiak", "il Zofiak", isDictionaryWord: false), .lexicon(.keep))
+    }
+
     func test_shortcutStillReplacesFirst() {
         XCTAssertEqual(earlyAnswer("qqc", "je vais qqc"), .lexicon(.replace(with: "quelque chose")))
+        let shortcutMa = SupplementaryLexicon(entries: [(userInput: "ma", documentText: "maman")])
+        XCTAssertEqual(earlyAnswer("ma", "il ma", lexicon: shortcutMa), .lexicon(.replace(with: "maman")))
     }
 
-    func test_nameIsStillKept() {
-        XCTAssertEqual(earlyAnswer("Zofiak", "je vais voir Zofiak", isDictionaryWord: false), .lexicon(.keep))
-    }
-
-    func test_withoutALexiconEntry_theRuleAnswersAlone() {
-        XCTAssertEqual(
-            SupplementaryLexicon.empty.earlyAnswer(
-                for: "a", context: "je vais a", homographs: frenchProfile.contextualHomographs,
-                isDictionaryWord: true
-            ),
-            .contextual("\u{00E0}")
-        )
-        XCTAssertNil(
-            SupplementaryLexicon.empty.earlyAnswer(
-                for: "a", context: "il a", homographs: frenchProfile.contextualHomographs,
-                isDictionaryWord: true
-            )
-        )
+    func test_withoutALexiconEntry_theRulesAnswerAlone() {
+        XCTAssertEqual(earlyAnswer("a", "je vais a", lexicon: .empty), .homograph("\u{00E0}"))
+        XCTAssertEqual(earlyAnswer("ma", "il ma", lexicon: .empty), .contextOverride("m'a"))
+        XCTAssertNil(earlyAnswer("a", "il a", lexicon: .empty))
     }
 
     func test_otherLanguages_keepTheLexiconAsBefore() {
-        XCTAssertEqual(
-            deviceLexicon.earlyAnswer(
-                for: "a", context: "i have a", homographs: englishProfile.contextualHomographs,
-                isDictionaryWord: true
-            ),
-            .lexicon(.keep)
-        )
+        XCTAssertEqual(earlyAnswer("a", "i have a", profile: englishProfile), .lexicon(.keep))
     }
 }
