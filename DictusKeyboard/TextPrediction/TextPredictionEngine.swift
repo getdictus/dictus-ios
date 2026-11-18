@@ -28,6 +28,8 @@ class TextPredictionEngine {
     private var frequencyDict = FrequencyDictionary()
     private let aospTrieEngine = AOSPTrieEngine()
     private var language: String = "fr"
+    /// The layout the dictionaries were last loaded for. See `setLanguage`.
+    private var loadedLayout: LayoutType?
 
     /// The active language's data profile, or nil if `language` is not a registered
     /// `SupportedLanguage`. Used to gate language-specific pipeline stages by
@@ -56,7 +58,16 @@ class TextPredictionEngine {
     /// WHY reload on language change:
     /// We only keep one language's frequency data in memory at a time
     /// to stay within the keyboard extension's ~50MB memory budget.
+    ///
+    /// WHY nothing happens when neither the language nor the layout changed (#555):
+    /// `viewWillAppear` calls this on every keyboard appearance. Each load parses
+    /// and sorts a whole frequency file on the main thread and remounts the trie
+    /// and n-grams, and before this guard every appearance paid for it with data
+    /// that had not changed. The layout is part of the key because the trie's
+    /// substitution costs are built for the layout active at load time.
     func setLanguage(_ lang: String) {
+        let layout = LayoutType.active
+        guard lang != language || layout != loadedLayout else { return }
         language = lang
         loadDictionaries(for: lang)
     }
@@ -105,6 +116,7 @@ class TextPredictionEngine {
         if !available.contains(where: { $0.hasPrefix(lang) }) {
             print("[TextPredictionEngine] Warning: '\(lang)' not in available languages: \(available)")
         }
+        loadedLayout = LayoutType.active
         frequencyDict.load(language: lang)
         aospTrieEngine.load(language: lang) { [weak self] _ in
             // The user dictionary's one-shot prune (#287). This is the first
@@ -123,13 +135,12 @@ class TextPredictionEngine {
     /// WHY there are several triggers and no privileged one (#287). Two triggers
     /// exist because neither is sufficient alone: the load completion is the only
     /// moment a cold session can ask the dictionary anything, and it is
-    /// systematically starved once a session is warm — `viewWillAppear` issues a
-    /// load on every keyboard appearance, each tearing the mmap down
-    /// synchronously on the main thread before the previous completion, posted
-    /// with `DispatchQueue.main.async`, gets to run. That starvation is why the
-    /// prune never once ran on device. `viewWillAppear` therefore also attempts
-    /// it *before* asking for the next load, while the previous dictionary is
-    /// still mounted.
+    /// rare once a session is warm — a load only happens on a language or layout
+    /// change since #555, and before that `viewWillAppear` issued one on every
+    /// appearance, tearing the mmap down before the previous completion ran. That
+    /// starvation is why the prune never once ran on device. `viewWillAppear`
+    /// therefore also attempts it before calling `setLanguage`, while the
+    /// dictionary is mounted.
     ///
     /// Neither is trusted, and that is the point. `UserDictionaryPruneGate` holds
     /// the one precondition — the mounted dictionary is the active language's —
@@ -381,6 +392,26 @@ class TextPredictionEngine {
             return nil
         }
 
+        // A learned word one edit away (#498). Runs after the dictionary and
+        // proper-noun guards, so it only ever rewrites a word that is neither a
+        // dictionary word nor a likely name, and before the fuzzy passes, which
+        // would otherwise pick a dictionary word for a word the user taught.
+        if let learned = LearnedWordCorrection.target(
+            for: wordToCheck,
+            learnedWords: UserDictionary.shared.allLearnedWords,
+            dictionaryKnows: aospTrieEngine.wordExists
+        ) {
+            let full = (apostrophePrefix ?? "") + learned
+            let isCapitalized = word.first?.isUppercase == true
+            let corrected = isCapitalized ? full.capitalized : full
+            #if DEBUG
+            AutocorrectDebugLog.autocorrectDecision(
+                original: word, corrected: corrected, branch: "learned", prevWord: nil
+            )
+            #endif
+            return (corrected, [])
+        }
+
         // Word splitting + single-word correction comparison.
         //
         // Strategy (informed by real user feedback + debug log analysis):
@@ -523,6 +554,13 @@ class TextPredictionEngine {
 
         // If no previous word context or n-grams not loaded, return standard result
         guard let prev = previousWord, !prev.isEmpty, aospTrieEngine.ngramsLoaded else {
+            return result
+        }
+
+        // A learned word has no bigrams, so the rerank below would trade it for
+        // any n-gram prediction one edit away (#498).
+        if let correction = result?.correction,
+           UserDictionary.shared.isLearned(String(correction.lowercased().split(separator: "'").last ?? "")) {
             return result
         }
 

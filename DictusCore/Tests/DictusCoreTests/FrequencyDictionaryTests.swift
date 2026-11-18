@@ -78,4 +78,32 @@ final class FrequencyDictionaryTests: XCTestCase {
             ["les", "lesparre", "lesquiller"]
         )
     }
+
+    // MARK: - The shipped files (#555)
+
+    /// `load(from:)` parses with `JSONSerialization` since #555. On every shipped
+    /// file it must keep what the `JSONDecoder` version kept: each word whose count
+    /// is above the 10 000th, with its count. Words tied at the cut were already a
+    /// per-process draw, so they are not pinned.
+    func testShippedFilesKeepEveryWordAboveTheCut() throws {
+        let resources = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()   // DictusCoreTests/
+            .deletingLastPathComponent()   // Tests/
+            .deletingLastPathComponent()   // DictusCore/
+            .deletingLastPathComponent()   // repo root
+            .appendingPathComponent("DictusKeyboard/Resources")
+        for language in ["fr", "en", "es", "de"] {
+            let data = try Data(contentsOf: resources.appendingPathComponent("\(language)_frequency.json"))
+            let reference = try JSONDecoder().decode([String: Int].self, from: data)
+            let cut = reference.values.sorted(by: >)[9_999]
+            var dict = FrequencyDictionary()
+            dict.load(from: data)
+            for (word, count) in reference where count > cut {
+                XCTAssertEqual(dict.frequencyCount(of: word), count, "\(language): \(word)")
+            }
+            for (word, count) in reference where count < cut {
+                XCTAssertEqual(dict.frequencyCount(of: word), 0, "\(language): \(word)")
+            }
+        }
+    }
 }
