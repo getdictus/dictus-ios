@@ -381,6 +381,26 @@ class TextPredictionEngine {
             return nil
         }
 
+        // A learned word one edit away (#498). Runs after the dictionary and
+        // proper-noun guards, so it only ever rewrites a word that is neither a
+        // dictionary word nor a likely name, and before the fuzzy passes, which
+        // would otherwise pick a dictionary word for a word the user taught.
+        if let learned = LearnedWordCorrection.target(
+            for: wordToCheck,
+            learnedWords: UserDictionary.shared.allLearnedWords,
+            dictionaryKnows: aospTrieEngine.wordExists
+        ) {
+            let full = (apostrophePrefix ?? "") + learned
+            let isCapitalized = word.first?.isUppercase == true
+            let corrected = isCapitalized ? full.capitalized : full
+            #if DEBUG
+            AutocorrectDebugLog.autocorrectDecision(
+                original: word, corrected: corrected, branch: "learned", prevWord: nil
+            )
+            #endif
+            return (corrected, [])
+        }
+
         // Word splitting + single-word correction comparison.
         //
         // Strategy (informed by real user feedback + debug log analysis):
@@ -523,6 +543,13 @@ class TextPredictionEngine {
 
         // If no previous word context or n-grams not loaded, return standard result
         guard let prev = previousWord, !prev.isEmpty, aospTrieEngine.ngramsLoaded else {
+            return result
+        }
+
+        // A learned word has no bigrams, so the rerank below would trade it for
+        // any n-gram prediction one edit away (#498).
+        if let correction = result?.correction,
+           UserDictionary.shared.isLearned(String(correction.lowercased().split(separator: "'").last ?? "")) {
             return result
         }
 

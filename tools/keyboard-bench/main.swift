@@ -157,6 +157,24 @@ func load(_ lang: SupportedLanguage) {
     waitUntilLoaded(lang.rawValue)
 }
 
+/// Puts the learned words of `corpus/<code>.words` in the user dictionary, or empties it
+/// when the file does not exist, so every run starts from the state it names (#498).
+/// One row per word: the word, then how many times it has been used. `learn` is called
+/// that many times, which is how the keyboard's own count reaches it.
+func seedLearnedWords(_ path: String) {
+    UserDictionary.shared.resetAll()
+    guard FileManager.default.fileExists(atPath: path) else { return }
+    for line in readLines(path) {
+        let f = line.components(separatedBy: "\t")
+        guard f.count == 2, let uses = Int(f[1]), uses > 0 else { fatalError("bad learned row: \(line)") }
+        // A word the trie knows is never learned by the keyboard (#287), and the
+        // load-time prune would remove it. Seeding one would measure a state no
+        // device can reach.
+        guard engine.isUnknownToDictionary(f[0]) else { fatalError("\(f[0]) is in the dictionary") }
+        for _ in 0..<uses { UserDictionary.shared.learn(f[0]) }
+    }
+}
+
 func microseconds(_ work: () -> Void) -> Int {
     let start = DispatchTime.now().uptimeNanoseconds
     work()
@@ -277,8 +295,11 @@ var textsOut = ["lang\tsentence\tintended\tfinal"]
 waitUntilLoaded("initial")
 
 for code in langs {
-    guard let lang = SupportedLanguage(rawValue: code) else { fatalError("unknown language \(code)") }
+    // "fr-learned" is the French keyboard on the fr-learned corpus and its learned words.
+    let langCode = code.components(separatedBy: "-")[0]
+    guard let lang = SupportedLanguage(rawValue: langCode) else { fatalError("unknown language \(code)") }
     load(lang)
+    seedLearnedWords("\(benchDir)/corpus/\(code).words")
     guard let page = KeyboardLayouts.current(needsGlobe: false).currentDeviceLayout?.normal else {
         fatalError("no letter page for \(code)")
     }
@@ -299,6 +320,9 @@ for code in langs {
     }
     FileHandle.standardError.write(Data("\(code): \(sentences.count) sentences replayed\n".utf8))
 }
+
+// The user dictionary is the simulator's App Group store: leave it as empty as it was found.
+UserDictionary.shared.resetAll()
 
 for (name, rows) in [("taps.tsv", tapsOut), ("commits.tsv", commitsOut), ("texts.tsv", textsOut)] {
     do {
