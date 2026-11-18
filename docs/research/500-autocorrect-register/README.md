@@ -8,7 +8,7 @@ The nine cases filed on #500 up to 2026-11-01, replayed by the keyboard bench
 |---|---|
 | `before.md` | develop at `2e280b7f`, with the register replay of `d6863e62` (the bench only) |
 | `before-lexicon.md` | `a46d9eb0` (both fixes), with the lexicon cases of `7ac5981b`: the device failure reproduced |
-| `after.md` | `57665d0a`, the branch with the lexicon ordering fixed |
+| `after.md` | `364cb79f`: the lexicon ordering fixed, develop merged in (#969, #976), the `voczux` case added |
 
 ## Before and after
 
@@ -16,12 +16,15 @@ The nine cases filed on #500 up to 2026-11-01, replayed by the keyboard bench
 |---|---:|---:|
 | Register, the nine filed cases | 0 of 9 | **3 of 9** |
 | Register, with the four lexicon cases | 6 of 13 (`a46d9eb0`) | **7 of 13** |
+| Register, with the two `voczux` cases (2026-11-18) | | 7 of 15 |
 | fr bench: broken / miscorrected / missed | 0 / 4 / 5 | 0 / 4 / 5 |
 | en bench: broken / miscorrected / missed | 0 / 4 / 3 | 0 / 4 / 3 |
 | fr bench: wrong words in the final text | 9 of 152 | 9 of 152 |
 | en bench: wrong words in the final text | 9 of 157 | 9 of 157 |
 
 Every row of the touch runs is the same before and after; only the register moves.
+After develop was merged in (`e85f7217`), the touch runs of the branch and of develop
+`13c134a1` are identical, for `fr,en` and for #969's `fr-learned,en-learned`.
 Before the fixes, the replay reproduces all nine outcomes as they were reported.
 
 ## The device test that failed, and the lexicon cases
@@ -59,9 +62,11 @@ four come out right after the fix; only the first was wrong before.
 | `troubz` (comment as tu) | trouvé | trouve | Both forms are trie candidates; neither has a bigram after `tu`, and the trigram after `as tu` predicts `as`, `es`, `ne`, `veux`... never `trouvé`. Choosing the participle needs the auxiliary two words back. | n-grams, #114 |
 | `arruves` (bien) | arrivés | arrives | `arrivés` is the trie's first alternative and the more frequent form (35334 against 33700), but the accent costs distance, and `bien` has no bigram for either. | n-grams / scoring, #114 |
 | `dais` (ce que tu as) | fait | dais | `dais` is a word (a canopy), so the valid-word guard keeps it. `fait` is the second prediction after `as`, but at edit distance 2. Replacing a valid word two edits away is the `fais` → `vais` failure the guard exists for. | scoring, #114 |
+| `voczux` (les; quand on saisit) | vocaux | bocaux | Device test of 2026-11-18, both sentences. `vocaux` is one AZERTY neighbour away (`z` for `a`), `bocaux` two (`b` for `v`, `z` for `a`), but the trie ranks on frequency, 22416 against 12957, and neither has a bigram after `les` or `saisit`. | scoring / sentence context, #114 |
 | `mok` | moi | m'ok | Contraction expansion runs before the trie and accepts any dictionary word after an elision letter, `ok` included. The trie alone writes `moi`. | contraction expansion, new issue |
 
-So of the nine: 3 fixed here, 2 n-gram coverage, 3 scoring, 1 a contraction rule.
+So of the nine filed on the issue: 3 fixed here, 2 n-gram coverage, 3 scoring, 1 a
+contraction rule. The two `voczux` cases from the device test add one more to #114.
 None is a context signal the engine has and ignores: the previous word already
 reranks corrections (`spellCheck(_:previousWord:)`), and where it failed above, the
 data it reads holds nothing for the pair.

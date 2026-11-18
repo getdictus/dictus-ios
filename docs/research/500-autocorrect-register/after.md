@@ -1,6 +1,6 @@
-# Keyboard measurement: Dictus (replay, 402x216 pt grid)
+# Keyboard measurement: Dictus (replay, 402x216 pt grid, hit test: plain)
 
-commit: `57665d0afd4563ca4e55fd7ddb116f3fd52fcd1d`
+commit: `364cb79fb5c2787afbbd2b9cda0ab14e8140b994`
 
 ## Final text
 
@@ -24,10 +24,10 @@ The suggestion work a letter triggers and the autocorrect a space triggers, run 
 
 | lang | key | taps | p50 | p95 | max |
 |---|---|---:|---:|---:|---:|
-| fr | letter | 669 | 0.11 | 0.55 | 40.23 |
-| fr | space | 152 | 0.09 | 0.47 | 2.66 |
-| en | letter | 626 | 1.00 | 1.88 | 91.94 |
-| en | space | 156 | 0.06 | 0.64 | 0.93 |
+| fr | letter | 669 | 0.11 | 0.50 | 15.84 |
+| fr | space | 152 | 0.09 | 0.39 | 2.06 |
+| en | letter | 626 | 0.96 | 1.83 | 52.65 |
+| en | space | 156 | 0.05 | 0.62 | 0.72 |
 
 ## Autocorrect, per word the space bar committed
 
@@ -62,7 +62,7 @@ Wrong autocorrections are the two bold columns. A stray space splits one intende
 
 ## Register of real cases (#500)
 
-7 of 13 come out as the person meant. Each case is committed by the space bar in a field holding the text typed before it (`register.tsv`).
+7 of 15 come out as the person meant. Each case is committed by the space bar in a field holding the text typed before it (`register.tsv`).
 
 | lang | before | typed | expected | reported | lexicon | final | |
 |---|---|---|---|---|---|---|---|
@@ -79,4 +79,6 @@ Wrong autocorrections are the two bold columns. A stray space splits one intende
 | fr | il | zofiak | Zofiak | - | Zofiak | Zofiak | right |
 | fr | une | pierre | pierre | - | Pierre | pierre | right |
 | fr | je veux | qqc | quelque chose | - | qqc=quelque chose | quelque chose | right |
+| fr | le a ne marche pas les | voczux | vocaux | bocaux | - | bocaux | wrong |
+| fr | quand on saisit | voczux | vocaux | bocaux | - | bocaux | wrong |
 
