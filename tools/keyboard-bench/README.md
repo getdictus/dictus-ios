@@ -14,11 +14,15 @@ file says what each piece is.
 | `corpus/fr.txt`, `corpus/en.txt` | 20 everyday sentences per language, the text the typist means. Lowercase, no punctuation. |
 | `register.tsv` | Real autocorrect cases reported on #500: the text before the word, the word as typed, what was meant. Committed by the same space-bar path as the runs. |
 | `make_runs.py` | Turns the corpus into touch runs, with a fixed seed. Rerunning it rewrites the same files byte for byte. |
+| `corpus/<lang>-learned.txt`, `corpus/<lang>-learned.words` | 8 sentences per language around words the user taught the keyboard, and the learned words the replay seeds before typing them, with their usage counts (#498). |
 | `runs/fr.tsv`, `runs/en.tsv` | One row per tap: the key aimed at, where the finger lands relative to its centre (in key units), and when. Committed. |
 | `run.sh` + `main.swift` + `DeviceContext.swift` | The in-process replay: compiles the shipping layout and engine sources, replays the runs on a simulator with `simctl spawn`, and prints the report. |
 | `sim_replay.py` | Types the runs on a real keyboard in a simulator, Apple's or Dictus, through `axe`, and reads the text back. |
 | `probe_boundaries.py` | Sweeps taps across each boundary of the Dictus top row on the real keyboard and prints where a tap types nothing. |
 | `score.py` | The report, for every source: a replay directory, a simulator run, or text pasted from a device. |
+| `corpus-rare/fr.txt`, `corpus-rare/en.txt` | 20 sentences per language around words the dictionary lacks or ranks low (#949): what a language model must not break. |
+| `KeyTargetModel.swift` | The #949 key-target model: picks each letter from the touch point and the letter the word needs next, from the shipped trie. `run.sh --hit model` uses it instead of the plain hit test. |
+| `key_targets.sh` + `compare_hits.py` | The #949 spike in one command: draws held-out runs, replays them through both hit tests, and compares them tap by tap. Results: [`docs/research/949-key-targets/`](../../docs/research/949-key-targets/README.md). |
 
 ## Run
 

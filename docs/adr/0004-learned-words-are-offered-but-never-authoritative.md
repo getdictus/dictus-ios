@@ -1,12 +1,12 @@
 # 0004 — Learned words are offered but never authoritative
 
 - **Date:** 2026-08-13
-- **Status:** Accepted
+- **Status:** Accepted; amended 2026-11-17 by #498, which makes a learned word an autocorrect target (L3) under the rule below
 - **Context:** Issue #346, decided in the grilling session of 2026-08-13. Implements decision 5 of the #287 session of 2026-08-11, which established the L1/L2/L3 vocabulary. Depends on #287 block A (PR #347), which is what makes the learned set small enough to be worth offering.
 
 ## Decision
 
-A learned word is **offered** in the suggestion bar (L1) and **immune** to autocorrect (L2). It is never an **autocorrect target** (L3): the keyboard does not rewrite another word into it. L3 stays with #114.
+A learned word is **offered** in the suggestion bar (L1) and **immune** to autocorrect (L2). It was never an **autocorrect target** (L3) until #498, which grants L3 under the narrow rule in "Amendment (#498)" below, and only through that rule.
 
 The offering is implemented by reading `UserDictionary` at query time and merging its prefix matches into `.completions`, in a pure function in DictusCore called from `TextPredictionEngine.suggestions(for:)`. At most one learned word appears, in the first slot, tie-broken by the `lastUsed` timestamp shipped in #305.
 
@@ -30,3 +30,17 @@ This is the load-bearing fact of the whole decision, and it is the thing to re-c
 - **A fully typed learned word leaves the bar empty** until space is pressed. There is nothing longer to complete, and echoing the word back costs a slot for a tap that changes nothing. Predictions after the space are unaffected.
 - **Autocorrect disabled still offers previously learned words.** #287 decision 8 blocks *learning* in that configuration because nothing vets a new word there; an existing entry was vetted when it was learned, and the bar imposes nothing.
 - **Casing is reconstructed from the typed prefix**, not stored. `UserDictionary` lowercases its keys, and the same rule already governs the accent path in `spellCheck`.
+
+## Amendment (#498): a learned word is an autocorrect target, by a separate rule
+
+Typed with a typo, a learned word used to be corrected toward a dictionary word (`dictuq` → `rictus`), the opposite of what learning it was for. #498 makes it a target. It does not compete in the trie's ranking: the trie's frequencies are log-normalized and a learned word only has a usage count, the same reason the offering above takes a reserved slot instead of a rank. It wins by a rule of its own, `LearnedWordCorrection` in DictusCore, called from `TextPredictionEngine.spellCheck`:
+
+1. **The typed word is not in the dictionary.** A correctly typed dictionary word is never rewritten into a learned one. `spellCheck` asks after its dictionary check, and the rule checks again.
+2. **It is after the accent, contraction and proper-noun steps, before the split pass and the trie.** The exact transformations keep priority, a capitalized unknown word mid-sentence stays a likely name (#199), and the fuzzy passes no longer get to pick a dictionary word for a word the user taught.
+3. **One edit away, at least three letters typed.** The same floor the bigram path uses: a shorter word has too many neighbours.
+4. **Used at least twice.** What stops a mistyped word that got learned from becoming a target. A single refusal learns a word at one use, and that word is often the typo itself (#872). It stays immune (L2) but is a target only once the user types it again. A word learned by repetition reaches two uses as it is learned.
+5. **Between learned words, more uses wins**, then the word itself, so the answer never depends on hash order.
+6. **The bigram rerank keeps it.** A learned word has no bigrams, so `spellCheck(_:previousWord:)` returns it before the rerank, as it does for the language overrides.
+
+On space, slot 1 of the corrections row previews it like any other correction, so the user sees it before it is applied and can refuse it the usual way. Measured with the keyboard bench (#954): no change on the `fr` and `en` runs, and the `fr-learned` / `en-learned` runs correct the four mistyped learned words they contain toward the learned word, with no correctly typed word broken. The PR for #498 carries the table.
+

@@ -1,0 +1,8 @@
+je teste dictus avec le nouveau modèle parakeet
+le build testflight est parti ce matin
+on a migré le cluster kubernetes hier soir
+demande à chatgpt de relire le rapport
+le projet xcode ne compile plus depuis lundi
+merci pour ton retour sur dictus
+tu peux relancer le pipeline sur gitlab
+je dîne ce soir avec gwendoline et maelys

@@ -15,7 +15,7 @@
 - `models.retry`: Retry a failed download, or delete a partial one.
 - `models.languages`: ⓘ shows the languages a model supports.
 - `models.preparation`: A full-screen overlay while a model is prepared for on-device acceleration.
-- `models.device-gating`: Models too heavy for the device are refused (memory, chip).
+- `models.device-gating`: Models too heavy for the device are refused (memory, chip). On a pre-A14 iPhone or iPad Parakeet v3 is the only selectable model and the recommended one; every other row, Tiny and Base included, reads « Non compatible avec cet iPhone/iPad » (#963).
 
 ## How to get to it (user POV)
 
@@ -60,4 +60,5 @@ The smallest model that downloads and transcribes is **Small (quantifié)**, `op
 - A download is real network traffic (217 MB to 1.5 GB). Do it only when the task needs a model.
 - **Not drivable in the simulator:** the `>= 6 GB` Turbo gate and `insufficientMemory` (the simulator reports the Mac's RAM), compile times and Neural Engine behaviour (Mac silicon), the Core ML cache surviving an install.
 - Identifier-based gating (A12/A13, and Turbo on A14 since #660) does render on a device created with that device type (`docs/agents/simulator.md` §1). Measured 2026-10-24: on `iPhone-12-Pro` (`model=iPhone13,3 ramGB=24`) the Turbo card reads « Non compatible avec cet iPhone »; on `iPhone-13-Pro` (`iPhone14,2`) it is enabled. Measured again 2026-11-06 on `iPhone-12` (`iPhone13,2`) with #804 reduced to the picker gate (`8107ac84`): same refusal, and a tap on the greyed card opens its languages sheet and logs no download (captures in `docs/agents/evidence/660/` on #804's branch).
+- Pre-A14 migration (#963): an installed Tiny or Base is greyed in the Downloaded section too, unless it is the active model, which stays usable until Parakeet is downloaded and becomes active by itself; a greyed installed model stays deletable from its « … » menu. Captured on `iPad-Pro--11-inch-` (`iPad8,1`) with `dictus.downloadedModels` and `dictus.activeModel` written into the App Group plist: `docs/agents/evidence/963/`. Parakeet runs on the CPU there; its load and speed are device-only.
 - An A14 user who already has Turbo installed keeps it (#660 blocks new downloads only, no migration): the Downloaded section builds its cards without an incompatibility reason, so an installed Turbo stays enabled, selectable and deletable there, and nothing switches or deletes it. Only the Available card is greyed. The Downloaded half is not drivable on an A14 simulator: the gate refuses the download that would put Turbo's files there. It is read from the code (`ModelManagerView`, Downloaded section), not measured.
