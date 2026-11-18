@@ -162,6 +162,24 @@ let lexiconWords = (ProcessInfo.processInfo.environment["BENCH_LEXICON"] ?? "")
     .split(separator: ",").map(String.init)
 engine.setSupplementaryLexicon(SupplementaryLexicon(entries: lexiconWords.map { (userInput: $0, documentText: $0) }))
 
+/// Puts the learned words of `corpus/<code>.words` in the user dictionary, or empties it
+/// when the file does not exist, so every run starts from the state it names (#498).
+/// One row per word: the word, then how many times it has been used. `learn` is called
+/// that many times, which is how the keyboard's own count reaches it.
+func seedLearnedWords(_ path: String) {
+    UserDictionary.shared.resetAll()
+    guard FileManager.default.fileExists(atPath: path) else { return }
+    for line in readLines(path) {
+        let f = line.components(separatedBy: "\t")
+        guard f.count == 2, let uses = Int(f[1]), uses > 0 else { fatalError("bad learned row: \(line)") }
+        // A word the trie knows is never learned by the keyboard (#287), and the
+        // load-time prune would remove it. Seeding one would measure a state no
+        // device can reach.
+        guard engine.isUnknownToDictionary(f[0]) else { fatalError("\(f[0]) is in the dictionary") }
+        for _ in 0..<uses { UserDictionary.shared.learn(f[0]) }
+    }
+}
+
 func microseconds(_ work: () -> Void) -> Int {
     let start = DispatchTime.now().uptimeNanoseconds
     work()
@@ -176,11 +194,24 @@ struct Commit {
     let final: String
 }
 
-/// Types one sentence: every tap goes through the grid, every letter triggers the
-/// suggestion work `SuggestionState.updateAsync` does, every space the autocorrect
-/// `DictusKeyboardBridge.autocorrectBeforeCursor` does.
-func replay(_ taps: [Tap], cells: [Cell], width: CGFloat, height: CGFloat,
-            tapRow: (Tap, String, CGPoint, Int) -> Void) -> (text: String, commits: [Commit]) {
+/// Picks the cell a tap types, from the point, today's answer (the cell under the
+/// point), the word being typed and the word before it (#949). Also returns the trie
+/// nodes the pick visited.
+typealias Picker = (CGPoint, Cell?, String, String?) -> (Cell?, Int)
+
+/// What the pick of one tap did: the key the plain hit test gives, the time the pick
+/// took in nanoseconds, and the trie nodes it visited (#949).
+struct PickCost {
+    let plain: String
+    let ns: Int
+    let visited: Int
+}
+
+/// Types one sentence: every tap goes through the grid (or the picker), every letter
+/// triggers the suggestion work `SuggestionState.updateAsync` does, every space the
+/// autocorrect `DictusKeyboardBridge.autocorrectBeforeCursor` does.
+func replay(_ taps: [Tap], cells: [Cell], width: CGFloat, height: CGFloat, picker: Picker?,
+            tapRow: (Tap, String, CGPoint, Int, PickCost) -> Void) -> (text: String, commits: [Commit]) {
     let field = Field()
     let memory = AutocorrectRejectionMemory()
     let mirror = MirrorSyncState()
@@ -191,7 +222,24 @@ func replay(_ taps: [Tap], cells: [Cell], width: CGFloat, height: CGFloat,
     for tap in taps {
         let aim = target(of: tap.key, in: cells)
         let point = CGPoint(x: aim.frame.midX + tap.dx * aim.unitWidth, y: aim.frame.midY + tap.dy * aim.frame.height)
-        let hit = hitTest(point, cells: cells, width: width, height: height)
+        // The word being typed and the one before it. The keyboard tracks these as it
+        // types; the replay reads them off the field, outside the timed pick.
+        let current = field.text.split(separator: " ", omittingEmptySubsequences: false).last.map(String.init) ?? ""
+        let ws = words(field.text)
+        let previous = current.isEmpty ? ws.last : ws.dropLast().last
+        // After an apostrophe (`l'`, `d'`) a new word starts.
+        let word = current.split(separator: "'", omittingEmptySubsequences: false).last.map(String.init) ?? ""
+
+        let start = DispatchTime.now().uptimeNanoseconds
+        let plain = hitTest(point, cells: cells, width: width, height: height)
+        var hit = plain
+        var visited = 0
+        // A touch outside the grid never reaches the keyboard view: no model sees it.
+        if let picker = picker, CGRect(x: 0, y: 0, width: width, height: height).contains(point) {
+            (hit, visited) = picker(point, plain, word, previous)
+        }
+        let pickCost = PickCost(plain: label(plain), ns: Int(DispatchTime.now().uptimeNanoseconds - start),
+                                visited: visited)
         let resolved = label(hit)
         if tap.key != "space", tokenWords.last != wordIndex { tokenWords.append(wordIndex) }
 
@@ -260,7 +308,7 @@ func replay(_ taps: [Tap], cells: [Cell], width: CGFloat, height: CGFloat,
             break
         }
         if tap.key == "space" { wordIndex += 1 }
-        tapRow(tap, resolved, point, cost)
+        tapRow(tap, resolved, point, cost, pickCost)
     }
     return (field.text.trimmingCharacters(in: .whitespaces), commits)
 }
@@ -277,7 +325,16 @@ let outDir = args[3]
 let w = CGFloat(width)
 let h = CGFloat(height)
 
-var tapsOut = ["lang\tsentence\ttap\tintended\tresolved\tx\ty\tengine_us"]
+// #949 spike: the runs to replay and the hit test to replay them through. run.sh sets
+// these; unset, the bench replays its committed runs through today's hit test.
+let env = ProcessInfo.processInfo.environment
+let corpusDir = env["KB_CORPUS"] ?? "\(benchDir)/corpus"
+let runsDir = env["KB_RUNS"] ?? "\(benchDir)/runs"
+let hitMode = env["KB_HIT"] ?? "plain"
+guard ["plain", "model"].contains(hitMode) else { fatalError("KB_HIT must be plain or model") }
+let modelParameters = ModelParameters(env["KB_MODEL"] ?? "")
+
+var tapsOut = ["lang\tsentence\ttap\tintended\tresolved\tx\ty\tengine_us\tplain\thit_ns\tvisited"]
 var commitsOut = ["lang\tsentence\tintended\ttyped\tfinal"]
 var textsOut = ["lang\tsentence\tintended\tfinal"]
 
@@ -287,19 +344,49 @@ var textsOut = ["lang\tsentence\tintended\tfinal"]
 waitUntilLoaded("initial")
 
 for code in langs {
-    guard let lang = SupportedLanguage(rawValue: code) else { fatalError("unknown language \(code)") }
+    // "fr-learned" is the French keyboard on the fr-learned corpus and its learned words.
+    let langCode = code.components(separatedBy: "-")[0]
+    guard let lang = SupportedLanguage(rawValue: langCode) else { fatalError("unknown language \(code)") }
     load(lang)
+    seedLearnedWords("\(benchDir)/corpus/\(code).words")
     guard let page = KeyboardLayouts.current(needsGlobe: false).currentDeviceLayout?.normal else {
         fatalError("no letter page for \(code)")
     }
     let cells = grid(page, width: w, height: h)
-    let sentences = readLines("\(benchDir)/corpus/\(code).txt")
-    let run = readRun("\(benchDir)/runs/\(code).tsv")
+    let sentences = readLines("\(corpusDir)/\(code).txt")
+    let run = readRun("\(runsDir)/\(code).tsv")
 
-    for (s, intended) in sentences.enumerated() {
+    var model: KeyTargetModel?
+    if hitMode == "model" {
+        // Bundle.main is the directory run.sh copied the shipped dictionaries into.
+        guard let trie = PrefixMass(path: "\(Bundle.main.bundlePath)/\(code)_spellcheck.dict") else {
+            fatalError("cannot read \(code)_spellcheck.dict")
+        }
+        // The engine keeps its n-grams private: the spike opens the same file a second time.
+        var ngrams: AOSPTrieBridge?
+        if modelParameters.ngram {
+            let bridge = AOSPTrieBridge()
+            guard bridge.loadNgrams(atPath: "\(Bundle.main.bundlePath)/\(code)_ngrams.dict") else {
+                fatalError("cannot read \(code)_ngrams.dict")
+            }
+            ngrams = bridge
+        }
+        model = KeyTargetModel(parameters: modelParameters, trie: trie, ngrams: ngrams)
+    }
+    let picker: Picker? = model.map { m in
+        { (m.pick($0, plain: $1, cells: cells, word: $2, previous: $3), m.visited) }
+    }
+
+    var order: [Int] = []
+    for tap in run where order.last != tap.sentence { order.append(tap.sentence) }
+    for s in order {
+        // A run of several passes keeps numbering its sentences: sentence s is corpus line s modulo its length.
+        let intended = sentences[s % sentences.count]
         let intendedWords = intended.components(separatedBy: " ")
-        let (text, commits) = replay(run.filter { $0.sentence == s }, cells: cells, width: w, height: h) { tap, resolved, p, us in
-            tapsOut.append("\(code)\t\(s)\t\(tap.index)\t\(tap.key)\t\(resolved)\t\(String(format: "%.2f", p.x))\t\(String(format: "%.2f", p.y))\t\(us)")
+        let (text, commits) = replay(run.filter { $0.sentence == s }, cells: cells, width: w, height: h,
+                                     picker: picker) { tap, resolved, p, us, pick in
+            tapsOut.append("\(code)\t\(s)\t\(tap.index)\t\(tap.key)\t\(resolved)\t\(String(format: "%.2f", p.x))\t"
+                           + "\(String(format: "%.2f", p.y))\t\(us)\t\(pick.plain)\t\(pick.ns)\t\(pick.visited)")
         }
         for c in commits {
             let meant = c.intendedWords.map { intendedWords[$0] }.joined(separator: " ")
@@ -307,8 +394,11 @@ for code in langs {
         }
         textsOut.append("\(code)\t\(s)\t\(intended)\t\(text)")
     }
-    FileHandle.standardError.write(Data("\(code): \(sentences.count) sentences replayed\n".utf8))
+    FileHandle.standardError.write(Data("\(code): \(order.count) sentences replayed, hit test \(hitMode)\n".utf8))
 }
+
+// The user dictionary is the simulator's App Group store: leave it as empty as it was found.
+UserDictionary.shared.resetAll()
 
 for (name, rows) in [("taps.tsv", tapsOut), ("commits.tsv", commitsOut), ("texts.tsv", textsOut)] {
     do {

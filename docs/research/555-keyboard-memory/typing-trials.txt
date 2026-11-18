@@ -1,0 +1,4 @@
+base: rest 37.3 (peak 37.4) | after fr 40.5 (peak 49.2) | after en + 30 s 42.7 (peak 52.7) | pid 24099
+after: rest 37.0 (peak 37.1) | after fr 39.5 (peak 41.3) | after en + 30 s 42.1 (peak 46.8) | pid 33314
+base: rest 37.2 (peak 37.5) | after fr 39.4 (peak 48.6) | after en + 30 s 42.5 (peak 52.2) | pid 38353
+after: rest 37.0 (peak 37.1) | after fr 40.2 (peak 40.8) | after en + 30 s 42.0 (peak 46.7) | pid 44490
