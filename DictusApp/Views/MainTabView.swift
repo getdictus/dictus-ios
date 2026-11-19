@@ -63,8 +63,8 @@ struct MainTabView: View {
     /// on stops mattering.
     @State private var showsPaywall = false
 
-    /// The release notes What's new shows in place of the tabs (#685, #974), nil when it is
-    /// not on screen. Set once per version, by `presentWhatsNewIfDue`.
+    /// The release notes What's new shows in a sheet over the tabs (#974), nil when it is not
+    /// on screen. Set once per version, by `presentWhatsNewIfDue`.
     @State private var whatsNewNotes: ReleaseNotes?
 
     /// Whether a URL opened this activation, which defers What's new to the next one
@@ -179,12 +179,23 @@ struct MainTabView: View {
         return true
     }
 
-    /// What's new is done: the tabs come back, and their `onAppear` raises the trial
-    /// announcement in its existing-user form (#593, #685).
-    ///
-    /// No animation, by the brief of #974.
+    /// Continue: the sheet goes down, and its dismissal raises what waited behind it.
     private func finishWhatsNew() {
         whatsNewNotes = nil
+    }
+
+    /// What's new's sheet is down (Continue, or dragged away): the trial announcement in its
+    /// existing-user form (#593, #685) may come up now, as it waited for it.
+    private func whatsNewDismissed() {
+        trialCoordinator.evaluate(canPresent: mayRaiseTrialScreens)
+    }
+
+    /// Whether What's new's sheet is up, written back when the user drags it down.
+    private var showsWhatsNew: Binding<Bool> {
+        Binding(
+            get: { whatsNewNotes != nil },
+            set: { if !$0 { whatsNewNotes = nil } }
+        )
     }
 
     /// The voice note sheet's presentation, read from and written back to the
@@ -214,10 +225,6 @@ struct MainTabView: View {
                 // The overlay has its own animation state and bilingual logic -- keeping it
                 // in a separate file follows "one file = one responsibility".
                 SwipeBackOverlayView(isPreparingMicrophone: coordinator.isRecoveringAudioSession)
-            } else if let whatsNewNotes {
-                // What's new after an update (#974), in place of the tabs. Below the two
-                // branches above: a dictation from the keyboard still takes the screen.
-                WhatsNewView(notes: whatsNewNotes, onFinish: finishWhatsNew)
             } else {
                 // Main tab navigation (normal launch path)
                 TabView(selection: $selectedTab) {
@@ -283,6 +290,18 @@ struct MainTabView: View {
                     isPresented: $trialCoordinator.showsEndOfTrialPaywall,
                     trialEnd: trialCoordinator.endOfTrialPaywall
                 )
+                // What's new after an update (#974), over the tabs at half height. On a
+                // background view because the TabView already carries the trial's sheet and
+                // the Home stack the voice note's: one sheet per view is what SwiftUI
+                // honours. Only here, with the tabs: a dictation from the keyboard, the
+                // cold-start overlay or a preparation screen still takes the screen first.
+                .background {
+                    Color.clear.sheet(isPresented: showsWhatsNew, onDismiss: whatsNewDismissed) {
+                        if let whatsNewNotes {
+                            WhatsNewView(notes: whatsNewNotes, onFinish: finishWhatsNew)
+                        }
+                    }
+                }
                 .onAppear {
                     trialCoordinator.evaluate(canPresent: mayRaiseTrialScreens)
                 }
@@ -312,7 +331,7 @@ struct MainTabView: View {
         .paywallCover(isPresented: $showsPaywall)
         // The preparation screen and the cold-start overlay replace the tab bar without
         // being sheets; the voice note stack waits for them to go.
-        // What's new replaces it too (#685).
+        // What's new's sheet would sit on the same tabs (#974).
         .onAppear { voiceNotes.mainScreenBlocked = preparation != nil || isColdStartMode || whatsNewNotes != nil }
         .onChange(of: preparation != nil || isColdStartMode || whatsNewNotes != nil) { _, blocked in
             voiceNotes.mainScreenBlocked = blocked
@@ -322,7 +341,7 @@ struct MainTabView: View {
             // was drawn before the URL was known, it has not been recorded yet (it is, once
             // the app is active), so it steps aside and stays due for the next activation.
             // If it was already on screen and recorded, it steps aside all the same: the
-            // voice note sheet hangs off the tab bar, which What's new replaces.
+            // screen the URL asks for cannot come up over its sheet.
             activationOpenedByURL = true
             if whatsNewNotes != nil {
                 whatsNewNotes = nil

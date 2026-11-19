@@ -527,12 +527,12 @@ struct SettingsView: View {
                         showPolishDebug = true
                     }
 
-                // The running version's release notes, the ones shown once after the
-                // update (#974). Absent on a version without notes.
+                // Every change of the running version, the list App Store Connect gets;
+                // the sheet after the update shows only its highlights (#974). Absent on a
+                // version without notes.
                 if let releaseNotes {
                     NavigationLink("What's new") {
-                        ReleaseNotesContent(notes: releaseNotes)
-                            .navigationBarTitleDisplayMode(.inline)
+                        ReleaseNotesListView(notes: releaseNotes)
                     }
                     .accessibilityIdentifier("settings.whatsNew")
                 }
