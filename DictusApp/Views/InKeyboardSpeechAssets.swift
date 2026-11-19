@@ -43,13 +43,15 @@ enum InKeyboardSpeechAssets {
             return
         }
         let before = await AssetInventory.status(forModules: [module])
-        log("status", "module=\(name) status=\(before)")
+        let installed = await DictationTranscriber.installedLocales.map(\.identifier).sorted()
+        log("status", "module=\(name) status=\(before) dictationInstalled=\(installed) reserved=\(await AssetInventory.reservedLocales.map(\.identifier))")
         guard before != .installed else { return }
         do {
             // The app has to hold a reservation on the locale before iOS installs its
             // assets ("not subscribed to assistant.<locale>" otherwise, measured on the
             // simulator).
-            _ = try await AssetInventory.reserve(locale: locale)
+            let reserved = try await AssetInventory.reserve(locale: locale)
+            log("reserve", "locale=\(locale.identifier) reserved=\(reserved) max=\(AssetInventory.maximumReservedLocales)")
             if let request = try await AssetInventory.assetInstallationRequest(supporting: [module]) {
                 try await request.downloadAndInstall()
             }

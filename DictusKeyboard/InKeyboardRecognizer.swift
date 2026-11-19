@@ -50,8 +50,15 @@ enum InKeyboardRecognizerError: LocalizedError {
 @MainActor
 enum InKeyboardRecognizerFactory {
     static func make() -> InKeyboardRecognizer? {
+        #if DEBUG && targetEnvironment(simulator)
+        // No iOS Simulator runtime ships a speech model (measured 2026-11-19 on 26.5 and
+        // 27.2: `SpeechTranscriber.isAvailable == false`, no installed locale, and the
+        // asset download refused). See `SimulatorHostRecognizer`.
+        return SimulatorHostRecognizer()
+        #else
         if #available(iOS 26.0, *) { return AppleSpeechRecognizer() }
         return nil
+        #endif
     }
 }
 
@@ -79,7 +86,30 @@ final class AppleSpeechRecognizer: InKeyboardRecognizer {
 
     func isReadyOnDevice(languageCode: String) async -> Bool {
         guard let module = await Self.module(for: languageCode) else { return false }
-        return await AssetInventory.status(forModules: [module.speechModule]) == .installed
+        return await Self.isInstalled(module)
+    }
+
+    /// Installed per `AssetInventory`, or present in the module's `installedLocales`.
+    ///
+    /// WHY both: `AssetInventory.status` answers for the calling bundle's reservation, and
+    /// the keyboard is a different bundle from the app that reserved the locale. Measured
+    /// on macOS 26 (2026-11-19) from a process with no reservation: `status` said
+    /// `supported` while `installedLocales` listed `fr_FR`, and `SpeechAnalyzer`
+    /// transcribed a French file in 150 ms. Both answers are about models on this device;
+    /// neither downloads anything.
+    private static func isInstalled(_ module: Module) async -> Bool {
+        let status = await AssetInventory.status(forModules: [module.speechModule])
+        let installed: [Locale]
+        switch module {
+        case .speech: installed = await SpeechTranscriber.installedLocales
+        case .dictation: installed = await DictationTranscriber.installedLocales
+        }
+        let listed = installed.contains { $0.identifier(.bcp47) == module.locale.identifier(.bcp47) }
+        InKeyboardDictation.log(
+            "assetCheck",
+            "module=\(module.name) locale=\(module.locale.identifier) status=\(status) inInstalledLocales=\(listed)"
+        )
+        return status == .installed || listed
     }
 
     func transcribe(_ recording: InKeyboardRecording, languageCode: String) async throws -> String {
@@ -87,7 +117,7 @@ final class AppleSpeechRecognizer: InKeyboardRecognizer {
             throw InKeyboardRecognizerError.localeNotInstalled(languageCode)
         }
         // Checked again at the moment of use: the route decision may be a few seconds old.
-        guard await AssetInventory.status(forModules: [module.speechModule]) == .installed else {
+        guard await Self.isInstalled(module) else {
             throw InKeyboardRecognizerError.localeNotInstalled(languageCode)
         }
 
@@ -123,6 +153,20 @@ final class AppleSpeechRecognizer: InKeyboardRecognizer {
             switch self {
             case .speech(let transcriber): return transcriber
             case .dictation(let transcriber): return transcriber
+            }
+        }
+
+        var locale: Locale {
+            switch self {
+            case .speech(let transcriber): return transcriber.selectedLocales.first ?? Locale.current
+            case .dictation(let transcriber): return transcriber.selectedLocales.first ?? Locale.current
+            }
+        }
+
+        var name: String {
+            switch self {
+            case .speech: return "speechtranscriber"
+            case .dictation: return "dictationtranscriber"
             }
         }
     }
@@ -165,3 +209,51 @@ final class AppleSpeechRecognizer: InKeyboardRecognizer {
         try file.write(from: buffer)
     }
 }
+
+#if DEBUG && targetEnvironment(simulator)
+/// Simulator-only test harness, compiled out of every device and Release build.
+///
+/// The simulator cannot run `SpeechAnalyzer` (no model, no download), so this recognizer
+/// hands the finished WAV to a helper on the Mac running the simulator, which transcribes
+/// it with the same `SpeechAnalyzer` + `SpeechTranscriber` code on the Mac's own on-device
+/// model and answers with the text. It exists to show the rest of the path (capture in the
+/// keyboard, the recognizer seam, insertion into the host app) on a machine where the
+/// recognizer cannot run; it is not a design for devices, where the connection does not
+/// exist. The helper only listens on 127.0.0.1.
+@MainActor
+final class SimulatorHostRecognizer: InKeyboardRecognizer {
+    let engineName = "simulator-host-speechanalyzer"
+    private let base = URL(string: "http://127.0.0.1:47811")
+
+    func isReadyOnDevice(languageCode: String) async -> Bool {
+        guard let url = base?.appendingPathComponent("health") else { return false }
+        var request = URLRequest(url: url, timeoutInterval: 0.4)
+        request.httpMethod = "GET"
+        let ok = (try? await URLSession.shared.data(for: request)).map { ($0.1 as? HTTPURLResponse)?.statusCode == 200 } ?? false
+        InKeyboardDictation.log("assetCheck", "module=simulator-host reachable=\(ok)")
+        return ok
+    }
+
+    func transcribe(_ recording: InKeyboardRecording, languageCode: String) async throws -> String {
+        guard let url = base?.appendingPathComponent("transcribe") else { throw InKeyboardRecognizerError.unavailable }
+        var request = URLRequest(url: url, timeoutInterval: 30)
+        request.httpMethod = "POST"
+        request.setValue(languageCode, forHTTPHeaderField: "X-Dictus-Language")
+        let (data, _) = try await URLSession.shared.upload(for: request, from: Self.wav(recording))
+        let text = (String(bytes: data, encoding: .utf8) ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !text.isEmpty else { throw InKeyboardRecognizerError.empty }
+        return text
+    }
+
+    /// A 44-byte RIFF header in front of the 16 kHz mono Int16 samples.
+    private static func wav(_ recording: InKeyboardRecording) -> Data {
+        func le32(_ value: Int) -> Data { withUnsafeBytes(of: UInt32(value).littleEndian) { Data($0) } }
+        func le16(_ value: Int) -> Data { withUnsafeBytes(of: UInt16(value).littleEndian) { Data($0) } }
+        let rate = Int(InKeyboardRecording.sampleRate)
+        var data = Data("RIFF".utf8) + le32(36 + recording.pcm16.count) + Data("WAVEfmt ".utf8)
+        data += le32(16) + le16(1) + le16(1) + le32(rate) + le32(rate * 2) + le16(2) + le16(16)
+        data += Data("data".utf8) + le32(recording.pcm16.count) + recording.pcm16
+        return data
+    }
+}
+#endif

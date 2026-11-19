@@ -714,8 +714,7 @@ class KeyboardState: ObservableObject {
         // so there is nothing left to adopt.
         // Spike: a dictation running in this process owns the status; the App Group's
         // `idle` describes the app, which is not involved.
-        if MainActor.assumeIsolated({ InKeyboardDictation.shared.isActive }) { return }
-        if reconcileIfOrphaned(source: "keyboard-refresh") { return }
+        if MainActor.assumeIsolated({ InKeyboardDictation.shared.isActive }) || reconcileIfOrphaned(source: "keyboard-refresh") { return }
 
         if let rawStatus = defaults.string(forKey: SharedKeys.dictationStatus),
            let status = DictationStatus(rawValue: rawStatus) {
@@ -1491,13 +1490,11 @@ class KeyboardState: ObservableObject {
             return
         }
 
-        // Spike: check the on-device speech model and load the capture web view while
-        // the app is given its 500 ms, so the fallback below can choose without waiting.
-        MainActor.assumeIsolated { InKeyboardDictation.shared.prepare(for: self) }
-
         // Try background recording first — if app is alive, it will handle this
         // notification and start recording without coming to the foreground.
-        DarwinNotificationCenter.post(DarwinNotificationName.startRecording)
+        // Spike: the same call also checks the on-device speech model and loads the
+        // capture web view while the app is given its 500 ms (see InKeyboardDictation).
+        postStartRecordingPreparingInKeyboardDictation()
 
         // Fallback: if app didn't respond (not running), open URL to launch it.
         // We check after 500ms whether status progressed past .requested.

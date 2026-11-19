@@ -58,6 +58,11 @@ final class InKeyboardDictation {
                 Self.log("localeCheck", "engine=\(recognizer.engineName) lang=\(code) installed=\(installed)")
             }
         }
+        if capture != nil, !isActive {
+            // The web view is already loaded from an earlier dictation: the idle cost of
+            // keeping it, read before this tap records anything.
+            Self.log("memory", "phase=idle-with-webview \(MemoryTrace.reading())")
+        }
         loadCaptureIfNeeded(into: state.controller?.view)
     }
 
@@ -226,10 +231,6 @@ final class InKeyboardDictation {
         let capture = InKeyboardWebCapture()
         capture.onLoaded = {
             Self.log("memory", "phase=webview-loaded \(MemoryTrace.reading())")
-            // WebKit's processes keep settling after the load; read again once they have.
-            DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
-                Self.log("memory", "phase=idle-with-webview \(MemoryTrace.reading())")
-            }
         }
         capture.attach(to: view)
         self.capture = capture
@@ -313,6 +314,13 @@ private struct MemoryTrace {
 // MARK: - The fallback hook
 
 extension KeyboardState {
+
+    /// The Darwin start post, preceded by the spike's preparation so the asset check and
+    /// the web view load run during the app's 500 ms.
+    func postStartRecordingPreparingInKeyboardDictation() {
+        MainActor.assumeIsolated { InKeyboardDictation.shared.prepare(for: self) }
+        DarwinNotificationCenter.post(DarwinNotificationName.startRecording)
+    }
 
     /// Called when the 500 ms wait ends with the app silent. Returns true when the
     /// keyboard took the dictation itself, false to carry on with today's URL fallback.
