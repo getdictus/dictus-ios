@@ -1,0 +1,32 @@
+Novedades de la 2.0.2
+
+## Highlights
+
+Escríbenos desde la app
+Ajustes > Acerca de > Enviar comentarios.
+
+Direcciones y enlaces intactos
+El teclado ya no corrige correos ni enlaces.
+
+Se acabaron los finales inventados
+Con Whisper, el dictado termina en tus últimas palabras.
+
+## All changes
+
+Escríbenos desde la app
+Ajustes > Acerca de > Enviar comentarios, con el registro de depuración si quieres.
+
+Direcciones tal como las escribes
+El teclado ya no corrige direcciones de correo ni direcciones web.
+
+Se acabaron las palabras inventadas
+Con Whisper, los dictados ya no terminan con «Gracias» ni con palabras que no dijiste.
+
+Dictado en iPhone antiguos
+iPhone XS, XR, 11, SE (2.ª generación) y iPads anteriores al A14 vuelven a dictar desde el teclado, con Parakeet.
+
+Un micrófono que te avisa
+Si el micrófono tarda en arrancar, Dictus te pide que te quedes en la app.
+
+Historial borrado de verdad
+«Borrar historial» elimina todo el texto dictado. Las copias temporales se borran a los 7 días.

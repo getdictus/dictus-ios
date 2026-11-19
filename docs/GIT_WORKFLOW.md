@@ -96,15 +96,17 @@ The script:
 ```
 1. My Apps → Dictus → the X.Y.Z App Store version (create it on first launch).
 2. Build section → select build N (already uploaded from TestFlight). No rebuild.
-3. First submission only: complete the listing — screenshots (6.9" + 6.5"),
+3. What's New: `scripts/release-notes.sh X.Y.Z --apply` sends `ReleaseNotes/X.Y.Z/`, the
+   text the app shows after the update (docs/release-notes.md).
+4. First submission only: complete the listing — screenshots (6.9" + 6.5"),
    description, keywords, support URL, privacy policy URL, category, age rating,
    price/availability, and the App Privacy questionnaire ("Data Not Collected",
    Dictus is offline).
-4. App Review Information → Notes: explain the keyboard needs Full Access for the
+5. App Review Information → Notes: explain the keyboard needs Full Access for the
    MICROPHONE (on-device dictation, no keystroke logging/transmission) and how to
    enable the keyboard. This is the #1 review risk for keyboard extensions.
-5. Export compliance: ITSAppUsesNonExemptEncryption is set in Info.plist → no prompt.
-6. Submit for Review (24–48h typical).
+6. Export compliance: ITSAppUsesNonExemptEncryption is set in Info.plist → no prompt.
+7. Submit for Review (24–48h typical).
 ```
 
 ### Doing it by hand (if not using the script)

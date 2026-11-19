@@ -105,9 +105,9 @@ public enum SharedKeys {
     /// this run, so the pick opens empty instead of reloading it.
     /// Read and written only through `SmartModePick`.
     public static let onboardingSmartModePickCommitted = "dictus.onboardingSmartModePickCommitted"
-    /// The app version this install is up to date with (#685), as a marketing version
-    /// string ("2.0.0"). It gates What's new: an install that completed onboarding and is
-    /// behind `WhatsNew.edition` sees it once. Absent on every install from before 2.0.0,
+    /// The app version this install is up to date with (#685, #974), as a marketing version
+    /// string ("2.0.2"). It gates What's new: an install that completed onboarding and is
+    /// behind the running version sees its release notes once. Absent on every install from before 2.0.0,
     /// which is how an existing user is told apart on the first launch that has the key.
     /// Read and written only through `WhatsNew`.
     public static let lastVersionSeen = "dictus.lastVersionSeen"
