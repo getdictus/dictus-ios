@@ -20,21 +20,26 @@ struct WhatsNewView: View {
     /// Whether this presentation has recorded What's new as seen.
     @State private var isRecorded = false
 
+    /// Whether the sheet is short: the medium detent on an iPhone SE is about 330 pt, where
+    /// the logo goes beside the title and the text is a size smaller, so the three highlights
+    /// fit above Continue without dragging.
+    @State private var isCompact = false
+
     @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
         ScrollView {
             VStack(spacing: 0) {
-                ReleaseNotesHeader(title: notes.title)
-                VStack(alignment: .leading, spacing: 18) {
-                    ForEach(notes.highlights, id: \.title) { ReleaseNoteRow(item: $0) }
+                ReleaseNotesHeader(title: notes.title, isCompact: isCompact)
+                VStack(alignment: .leading, spacing: isCompact ? 10 : 18) {
+                    ForEach(notes.highlights, id: \.title) { ReleaseNoteRow(item: $0, isCompact: isCompact) }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.top, 22)
+                .padding(.top, isCompact ? 14 : 22)
             }
-            .padding(.horizontal, 28)
-            .padding(.top, 28)
-            .padding(.bottom, 16)
+            .padding(.horizontal, isCompact ? 24 : 28)
+            .padding(.top, isCompact ? 22 : 28)
+            .padding(.bottom, isCompact ? 8 : 16)
         }
         .scrollBounceBehavior(.basedOnSize)
         .safeAreaInset(edge: .bottom, spacing: 0) {
@@ -49,6 +54,7 @@ struct WhatsNewView: View {
             .padding(.top, 8)
             .padding(.bottom, OnboardingMetrics.buttonBottomPadding)
         }
+        .onGeometryChange(for: Bool.self) { $0.size.height < 420 } action: { isCompact = $0 }
         .accessibilityIdentifier("whatsNew.notes")
         .presentationDetents([.medium, .large])
         .presentationDragIndicator(.visible)
@@ -100,16 +106,18 @@ struct ReleaseNotesListView: View {
     }
 }
 
-/// The Dictus logo over the version's title, centred.
+/// The Dictus logo over the version's title, centred; beside it in a short sheet.
 private struct ReleaseNotesHeader: View {
     let title: String
+    var isCompact = false
 
     var body: some View {
-        VStack(spacing: 14) {
-            DictusLogo(height: 34)
+        let layout = isCompact ? AnyLayout(HStackLayout(spacing: 12)) : AnyLayout(VStackLayout(spacing: 14))
+        layout {
+            DictusLogo(height: isCompact ? 24 : 34)
                 .accessibilityHidden(true)
             Text(verbatim: title)
-                .font(.dmSans(.bold, size: 26, relativeTo: .title))
+                .font(.dmSans(.bold, size: isCompact ? 22 : 26, relativeTo: .title))
                 .multilineTextAlignment(.center)
                 .fixedSize(horizontal: false, vertical: true)
                 .accessibilityAddTraits(.isHeader)
@@ -120,14 +128,15 @@ private struct ReleaseNotesHeader: View {
 /// One change: a bold title, one sentence under it.
 private struct ReleaseNoteRow: View {
     let item: ReleaseNotes.Item
+    var isCompact = false
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 3) {
+        VStack(alignment: .leading, spacing: isCompact ? 1 : 3) {
             Text(verbatim: item.title)
-                .font(.dmSans(.semiBold, size: 17, relativeTo: .headline))
+                .font(.dmSans(.semiBold, size: isCompact ? 16 : 17, relativeTo: .headline))
                 .foregroundStyle(.primary)
             Text(verbatim: item.text)
-                .font(.dmSans(.regular, size: 15, relativeTo: .subheadline))
+                .font(.dmSans(.regular, size: isCompact ? 14 : 15, relativeTo: .subheadline))
                 .foregroundStyle(.secondary)
         }
         .fixedSize(horizontal: false, vertical: true)
