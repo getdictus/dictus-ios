@@ -46,25 +46,25 @@ struct FeedbackView: View {
                             }
                             .disabled(!composer.canSend)
                             .accessibilityIdentifier("feedback.send")
+                            // WHY a question rather than the toggle on by default: the log leaves
+                            // the device only by an explicit choice (#939 security review), and a
+                            // bug report without it can rarely be acted on (#981).
+                            .confirmationDialog("Attach the debug log?", isPresented: $asksAboutLog, titleVisibility: .visible) {
+                                Button("Attach") { Task { await composer.sendAttachingLog() } }
+                                    .accessibilityIdentifier("feedback.logQuestion.attach")
+                                Button("Send without") { Task { await composer.send() } }
+                                    .accessibilityIdentifier("feedback.logQuestion.sendWithout")
+                                Button("See what will be sent") { showsLogFromQuestion = true }
+                                    .accessibilityIdentifier("feedback.logQuestion.seeLog")
+                                Button("Cancel", role: .cancel) {}
+                            } message: {
+                                Text("Without the log, most bugs cannot be diagnosed.")
+                            }
                         }
                     }
                 }
             }
             .navigationDestination(isPresented: $showsLogFromQuestion) { logPreview }
-            // WHY a question rather than the toggle on by default: the log leaves
-            // the device only by an explicit choice (#939 security review), and a
-            // bug report without it can rarely be acted on (#981).
-            .confirmationDialog("Attach the debug log?", isPresented: $asksAboutLog, titleVisibility: .visible) {
-                Button("Attach") { Task { await composer.sendAttachingLog() } }
-                    .accessibilityIdentifier("feedback.logQuestion.attach")
-                Button("Send without") { Task { await composer.send() } }
-                    .accessibilityIdentifier("feedback.logQuestion.sendWithout")
-                Button("See what will be sent") { showsLogFromQuestion = true }
-                    .accessibilityIdentifier("feedback.logQuestion.seeLog")
-                Button("Cancel", role: .cancel) {}
-            } message: {
-                Text("Without the log, most bugs cannot be diagnosed.")
-            }
         }
         .task { await composer.sheetDidAppear() }
         .onDisappear {
