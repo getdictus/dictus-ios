@@ -1,0 +1,37 @@
+typo	correct	category	source
+dont	don't	missing-apostrophe	TOEFL-Spell
+doesnt	doesn't	missing-apostrophe	TOEFL-Spell
+thats	that's	missing-apostrophe	TOEFL-Spell
+didnt	didn't	missing-apostrophe	TOEFL-Spell
+im	I'm	missing-apostrophe	rule
+ive	I've	missing-apostrophe	rule
+cant	can't	missing-apostrophe	rule
+youre	you're	missing-apostrophe	rule
+theyre	they're	missing-apostrophe	rule
+isnt	isn't	missing-apostrophe	rule
+its	it's	missing-apostrophe-real-word	rule
+ill	I'll	missing-apostrophe-real-word	rule
+thier	their	transposition	TOEFL-Spell
+poeple	people	transposition	TOEFL-Spell
+becuase	because	transposition	TOEFL-Spell
+beleive	believe	transposition	TOEFL-Spell
+becasue	because	transposition	TOEFL-Spell
+teh	the	transposition	TOEFL-Spell
+alot	a lot	missing-space	TOEFL-Spell
+everytime	every time	missing-space	TOEFL-Spell
+atleast	at least	missing-space	TOEFL-Spell
+ofcourse	of course	missing-space	TOEFL-Spell
+belive	believe	omitted-letter	TOEFL-Spell
+peole	people	omitted-letter	TOEFL-Spell
+wll	will	omitted-letter	TOEFL-Spell
+shoud	should	omitted-letter	TOEFL-Spell
+somthing	something	omitted-letter	TOEFL-Spell
+realy	really	omitted-double-letter	TOEFL-Spell
+beeing	being	doubled-letter	TOEFL-Spell
+untill	until	doubled-letter	TOEFL-Spell
+thay	they	substitution	TOEFL-Spell
+definately	definitely	substitution	TOEFL-Spell
+recieve	receive	transposition	TOEFL-Spell
+tommorow	tomorrow	misplaced-double-letter	Wikipedia-en
+adn	and	transposition	Wikipedia-en
+wtih	with	transposition	Wikipedia-en

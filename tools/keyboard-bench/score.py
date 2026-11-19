@@ -7,7 +7,8 @@ source, so a Dictus replay, an Apple run and a device run are counted the same w
 
   texts.tsv    lang, sentence, intended, final       every source has this
   taps.tsv     one row per tap: intended and resolved key, engine time
-  commits.tsv  one row per space-bar commit: intended word(s), typed, final
+  commits.tsv  one row per space-bar commit: intended word(s), typed, final, and the
+               word typed next with the next-word predictions shown after the space
 
 Only a replay knows its taps and commits. For any other source, the report holds the
 text section alone.
@@ -167,6 +168,29 @@ def commit_section(rows):
     return out
 
 
+def prediction_section(rows):
+    """Next-word prediction: after each space, is the word typed next among the bar's words?"""
+    out = ["## Next-word prediction, after each space", "",
+           "| lang | spaces with a next word | next word first | next word in the bar (top 3) | bar empty |",
+           "|---|---:|---:|---:|---:|"]
+    by_lang = defaultdict(list)
+    for r in rows:
+        if r.get("next"):
+            by_lang[r["lang"]].append(r)
+    for lang, rs in by_lang.items():
+        first = top = empty = 0
+        for r in rs:
+            bar = [w.lower() for w in r["predicted"].split(",") if w] if r["predicted"] else []
+            first += bool(bar) and bar[0] == r["next"].lower()
+            top += r["next"].lower() in bar[:3]
+            empty += not bar
+        out.append(f"| {lang} | {len(rs)} | {first} ({pct(first, len(rs))}) | {top} ({pct(top, len(rs))}) | "
+                   f"{empty} ({pct(empty, len(rs))}) |")
+    out += ["", "The bar is what `predictNextWords` returns after the space, from the text the field holds then "
+            "(autocorrections included). A hit saves the typist the whole next word.", ""]
+    return out
+
+
 def typed_rows(specs):
     """texts.tsv rows from pasted device output: lang:file, one sentence per line."""
     bench = os.path.dirname(os.path.abspath(__file__))
@@ -209,6 +233,8 @@ def main():
     commits = read(os.path.join(args.dir, "commits.tsv"))
     if commits:
         lines += commit_section(commits)
+        if "next" in commits[0]:
+            lines += prediction_section(commits)
     print("\n".join(lines))
 
 
