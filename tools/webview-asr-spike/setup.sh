@@ -25,7 +25,8 @@ if [ ! -f .deps/sherpa-onnx/build-wasm-simd-web/install/bin/wasm/web/sherpa-onnx
   (cd .deps/sherpa-onnx && source ../emsdk/emsdk_env.sh >/dev/null && ./build-wasm-simd-web.sh)
 fi
 
-for m in sherpa-onnx-nemo-parakeet-tdt-0.6b-v3-int8 sherpa-onnx-nemo-fast-conformer-transducer-en-de-es-fr-14288-int8; do
+for m in sherpa-onnx-nemo-parakeet-tdt-0.6b-v3-int8 sherpa-onnx-nemo-fast-conformer-transducer-en-de-es-fr-14288-int8 \
+         sherpa-onnx-nemo-fast-conformer-transducer-be-de-en-es-fr-hr-it-pl-ru-uk-20k-int8; do
   if [ ! -d ".deps/models/$m" ]; then
     curl -sSL -o ".deps/dl/$m.tar.bz2" "$REL/$m.tar.bz2"
     tar xjf ".deps/dl/$m.tar.bz2" -C .deps/models
@@ -37,6 +38,7 @@ cp "$V"/fr-0[1-4]-*.wav "$V/fr-long-01-workday-sync-fix.wav" .deps/clips/
 printf "file '%s'\n" "$V/fr-01-spoken-punctuation.wav" "$V/fr-02-appointment-numbers.wav" \
   "$V/fr-03-shopping.wav" "$V/fr-04-question-mark.wav" > .deps/concat.txt
 ffmpeg -loglevel error -y -f concat -safe 0 -i .deps/concat.txt -c pcm_s16le .deps/clips/fr-concat-4short.wav
+ffmpeg -loglevel error -y -i "$V/fr-long-01-workday-sync-fix.wav" -t 15 -c pcm_s16le .deps/clips/fr-long-first15s.wav
 ffmpeg -loglevel error -y -i "$V/fr-long-01-workday-sync-fix.wav" -t 60 -c pcm_s16le .deps/clips/fr-long-first60s.wav
 
 scripts/stage-web.sh

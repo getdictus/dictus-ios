@@ -4,7 +4,7 @@ import UIKit
 /// hidden WKWebView (WebKit's WebContent process), then types the text with
 /// textDocumentProxy. Every step is logged with this process's memory.
 final class KeyboardViewController: UIInputViewController {
-    private static let models = ["parakeet-v3", "fastconformer-14288"]
+    private static let models = ["parakeet-v3", "fastconformer-14288", "fastconformer-20k"]
 
     private var host: AsrWebHost?
     private let status = UILabel()

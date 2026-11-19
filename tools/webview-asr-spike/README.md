@@ -10,8 +10,10 @@ it never replaces Dictus on the phone.
 > transcribe with Parakeet compiled to WebAssembly, in WebKit's WebContent
 > process, outside the keyboard's ~68 MB ceiling (#555)?
 
-Status 2026-11-19: phases 0 and 1 done (desk check, Mac, simulator). The device
-build is ready but **not installed**. Every figure below comes from a Mac or a
+**Verdict and final numbers: [REPORT.md](REPORT.md)** (2026-11-20). The phase 1
+section below is the first run; REPORT.md supersedes it (fresh launch per
+model, an exact 15 s cut, a third model). The device build is ready but **not
+installed**. Every figure below comes from a Mac or a
 simulator unless it says otherwise; none of them is an iPhone measurement.
 
 ## How it works
@@ -257,7 +259,8 @@ About 40 minutes. The phone stays plugged into a charger only for steps 1–3.
 6. **Cold start, twice:** swipe the host app away, reopen it, show the keyboard,
    and note the time until "Ready". Tap **report** to capture it.
 7. Note the battery % after the ten. Tap **report** in Notes and keep that note.
-8. Tap the model name to switch to **fastconformer-14288**. Repeat the 5 / 15 /
+8. Tap the model name to switch to **fastconformer-14288** (tap again for
+   **fastconformer-20k**). Repeat the 5 / 15 /
    60 s dictations in Notes, then **report**.
 9. Send me the Notes text from every **report**, plus anything that vanished,
    froze or showed "WebContent terminated". If the cable is handy, also run the

@@ -33,6 +33,7 @@ def main():
     refs = {os.path.basename(c["file"])[:-4]: c["text"] for c in manifest["clips"]}
     refs["fr-concat-4short"] = " ".join(refs[s] for s in SHORTS)
     refs["fr-long-first60s"] = refs["fr-long-01-workday-sync-fix"]
+    refs["fr-long-first15s"] = refs["fr-long-01-workday-sync-fix"]
     native = {}
     for line in open(NATIVE_TSV, encoding="utf-8"):
         f = line.rstrip("\n").split("\t")
@@ -57,7 +58,7 @@ def main():
                 key = clip[:-4]
                 ms = statistics.median(r["decodeMs"] for r in runs)
                 text = runs[-1]["text"]
-                prefix = key == "fr-long-first60s"
+                prefix = key.startswith("fr-long-first")
                 w = wer(refs[key], text, prefix)
                 n = f"{wer(refs[key], native[key]):.1%}" if key in native else "n/a"
                 print(f"| {key} | {runs[0]['audioSec']:.1f} | {ms:.0f} | {ms / 1000 / runs[0]['audioSec']:.2f} "

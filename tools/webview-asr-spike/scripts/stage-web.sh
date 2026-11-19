@@ -11,7 +11,8 @@ cp .deps/sherpa-onnx/wasm/asr/sherpa-onnx-asr.js web/
 # not symlinks (a folder reference copies a symlink as a symlink), so staging
 # costs no disk space. `ln -f` makes a rerun a no-op.
 for pair in parakeet-v3:sherpa-onnx-nemo-parakeet-tdt-0.6b-v3-int8 \
-            fastconformer-14288:sherpa-onnx-nemo-fast-conformer-transducer-en-de-es-fr-14288-int8; do
+            fastconformer-14288:sherpa-onnx-nemo-fast-conformer-transducer-en-de-es-fr-14288-int8 \
+            fastconformer-20k:sherpa-onnx-nemo-fast-conformer-transducer-be-de-en-es-fr-hr-it-pl-ru-uk-20k-int8; do
   name=${pair%%:*}
   src=.deps/models/${pair#*:}
   mkdir -p ".deps/bundle/models/$name"

@@ -16,7 +16,7 @@ struct SpikeApp: App {
 final class BenchRunner: ObservableObject {
     static let clips = [
         "fr-01-spoken-punctuation.wav", "fr-02-appointment-numbers.wav", "fr-03-shopping.wav",
-        "fr-04-question-mark.wav", "fr-concat-4short.wav", "fr-long-first60s.wav",
+        "fr-04-question-mark.wav", "fr-long-first15s.wav", "fr-concat-4short.wav", "fr-long-first60s.wav",
         "fr-long-01-workday-sync-fix.wav",
     ]
 
@@ -47,8 +47,11 @@ final class BenchRunner: ObservableObject {
         write(["type": "benchStart", "models": models, "repeats": repeats, "device": UIDevice.current.model,
                "system": UIDevice.current.systemVersion])
         try? "running\n".write(to: docs.appendingPathComponent("phase.txt"), atomically: true, encoding: .utf8)
-        if host.isReady { next() } else { pendingAction = { [weak self] in self?.next() } }
-        host.call("spikeProbeWasmMemory()")
+        let start = { [weak self] in
+            self?.host?.call("spikeProbeWasmMemory()")
+            self?.next()
+        }
+        if host.isReady { start() } else { pendingAction = start }
     }
 
     private func next() {
@@ -89,6 +92,8 @@ final class BenchRunner: ObservableObject {
         case "benchDone":
             if !queue.isEmpty { queue.removeFirst() }
             next()
+        case "error" where event["where"] as? String == "evaluateJavaScript":
+            break
         case "error", "webContentTerminated":
             if running {
                 if !queue.isEmpty { queue.removeFirst() }
@@ -151,8 +156,8 @@ struct ContentView: View {
                         .accessibilityIdentifier("spike.testField")
                 }
                 Section("3. In-app bench (same page, same wasm)") {
-                    Button(runner.running ? "Running…" : "Run bench: parakeet-v3 + fastconformer") {
-                        runner.run(models: ["parakeet-v3", "fastconformer-14288"])
+                    Button(runner.running ? "Running…" : "Run bench: parakeet-v3 + 2 fastconformers") {
+                        runner.run(models: ["parakeet-v3", "fastconformer-14288", "fastconformer-20k"])
                     }
                     .disabled(runner.running)
                     .accessibilityIdentifier("spike.runBench")
