@@ -14,7 +14,8 @@ Only a replay knows its taps and commits. For any other source, the report holds
 text section alone.
 
 Comparison is case-insensitive (auto-capitalisation is not under test) and
-accent-sensitive ("tres" for "très" is a wrong word).
+accent-sensitive ("tres" for "très" is a wrong word). The typographic apostrophe
+Apple's keyboard writes (’) counts as the straight one ('): "don’t" is "don't".
 
 A device run has no files of its own: what was typed is pasted into one text file per
 language, one sentence per line in corpus order, and passed with --typed.
@@ -49,6 +50,11 @@ def distance(a, b):
     return prev[-1]
 
 
+def norm(text):
+    """Lowercase, with Apple's typographic apostrophe made straight."""
+    return text.lower().replace("\u2019", "'")
+
+
 def fold(word):
     return "".join(c for c in unicodedata.normalize("NFD", word) if not unicodedata.combining(c))
 
@@ -74,13 +80,13 @@ def text_section(rows):
     for lang, rs in by_lang.items():
         words = wrong = chars = char_errors = folded_errors = glued = 0
         for r in rs:
-            meant = r["intended"].lower().split()
-            got = r["final"].lower().split()
+            meant = norm(r["intended"]).split()
+            got = norm(r["final"]).split()
             words += len(meant)
             wrong += distance(meant, got)
             chars += len(r["intended"])
-            char_errors += distance(r["intended"].lower(), r["final"].lower())
-            folded_errors += distance(fold(r["intended"].lower()), fold(r["final"].lower()))
+            char_errors += distance(norm(r["intended"]), norm(r["final"]))
+            folded_errors += distance(fold(norm(r["intended"])), fold(norm(r["final"])))
             pairs = {fold(a + b) for a, b in zip(meant, meant[1:])}
             glued += sum(1 for g in got if fold(g) in pairs)
         out.append(f"| {lang} | {len(rs)} | {words} | {wrong} | {pct(wrong, words)} | "
@@ -133,7 +139,7 @@ def commit_section(rows):
     for lang, rs in by_lang.items():
         c = Counter()
         for r in rs:
-            meant, typed, final = r["intended"].lower(), r["typed"].lower(), r["final"].lower()
+            meant, typed, final = norm(r["intended"]), norm(r["typed"]), norm(r["final"])
             if " " in meant:
                 c["glued"] += 1
                 if final == meant:
