@@ -99,6 +99,15 @@ PROPER_NOUNS = [
 ]
 
 
+# --- Words reported missing in the field, below the top-40K cut ---
+# Each keeps its own Lexique count, so it ranks where the corpus puts it. Before
+# this list, "vocaux" was corrected to "bocaux" and "stylé" to "style" (#500).
+FIELD_REPORTED_WORDS = [
+    "vocaux",
+    "stylé", "stylée", "stylés", "stylées",
+]
+
+
 def download_lexique():
     """Download Lexique 3.83 TSV if not already present."""
     if os.path.exists(TSV_FILE):
@@ -217,6 +226,14 @@ def main():
             freq_dict[word] = 50
             added_proper += 1
     print(f"[INFO] Added {added_proper} proper nouns")
+
+    # Add field-reported words at their Lexique count
+    added_field = 0
+    for word in FIELD_REPORTED_WORDS:
+        if word not in freq_dict:
+            freq_dict[word] = max(1, int(word_freq.get(word, 0) * 100))
+            added_field += 1
+    print(f"[INFO] Added {added_field} field-reported words")
 
     # Output
     output_path = os.path.abspath(OUTPUT)

@@ -8,6 +8,7 @@ source, so a Dictus replay, an Apple run and a device run are counted the same w
   texts.tsv    lang, sentence, intended, final       every source has this
   taps.tsv     one row per tap: intended and resolved key, engine time
   commits.tsv  one row per space-bar commit: intended word(s), typed, final
+  register.tsv one row per real case of register.tsv (#500): typed, expected, final
 
 Only a replay knows its taps and commits. For any other source, the report holds the
 text section alone.
@@ -167,6 +168,21 @@ def commit_section(rows):
     return out
 
 
+def register_section(rows):
+    # Exact comparison: a case records its characters, capitals included ("Zofiak").
+    right = sum(r["final"] == r["expected"] for r in rows)
+    out = ["## Register of real cases (#500)", "",
+           f"{right} of {len(rows)} come out as the person meant. Each case is committed by the space bar "
+           "in a field holding the text typed before it (`register.tsv`).", "",
+           "| lang | before | typed | expected | reported | lexicon | final | |", "|---|---|---|---|---|---|---|---|"]
+    for r in rows:
+        mark = "right" if r["final"] == r["expected"] else "wrong"
+        out.append(f"| {r['lang']} | {r['before'].strip() or '-'} | {r['typed']} | {r['expected']} | "
+                   f"{r['reported']} | {r.get('lexicon') or '-'} | {r['final']} | {mark} |")
+    out.append("")
+    return out
+
+
 def typed_rows(specs):
     """texts.tsv rows from pasted device output: lang:file, one sentence per line."""
     bench = os.path.dirname(os.path.abspath(__file__))
@@ -209,6 +225,9 @@ def main():
     commits = read(os.path.join(args.dir, "commits.tsv"))
     if commits:
         lines += commit_section(commits)
+    register = read(os.path.join(args.dir, "register.tsv"))
+    if register:
+        lines += register_section(register)
     print("\n".join(lines))
 
 

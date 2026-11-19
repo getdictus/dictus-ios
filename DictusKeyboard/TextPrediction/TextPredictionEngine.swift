@@ -530,8 +530,30 @@ class TextPredictionEngine {
     ) -> (correction: String, alternatives: [String])? {
         // Lexicon verdicts (#873) return before the bigram rerank, which could
         // otherwise swap a replacement phrase or a kept name for a neighbour.
-        if let decision = lexiconDecision(for: word) {
-            return lexiconResult(decision, for: word)
+        // Shortcuts and kept names return here; a kept dictionary word waits
+        // for the context overrides below (`outranksContextRules`).
+        let lexicon = lexiconDecision(for: word)
+        if let lexicon,
+           lexicon.outranksContextRules(isDictionaryWord: aospTrieEngine.wordExists(word.lowercased())) {
+            return lexiconResult(lexicon, for: word)
+        }
+
+        // Context overrides (#500): a valid word that is never valid after this
+        // previous word, "il ma" → "il m'a". The valid-word guard would keep it.
+        if let prev = previousWord, let profile,
+           let corrected = applyContextOverride(profile: profile, previousWord: prev, word: word) {
+            #if DEBUG
+            AutocorrectDebugLog.autocorrectDecision(
+                original: word, corrected: corrected,
+                branch: "context-override", prevWord: prev
+            )
+            #endif
+            return (corrected, [])
+        }
+
+        // No rule applied: the lexicon keeps its word.
+        if let lexicon {
+            return lexiconResult(lexicon, for: word)
         }
 
         // Language overrides are authoritative — return before the bigram

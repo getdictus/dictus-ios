@@ -111,4 +111,23 @@ final class SupplementaryLexiconTests: XCTestCase {
         ])
         XCTAssertEqual(duplicates.decision(for: "zofiak", isDictionaryWord: false), .replace(with: "Zofiak"))
     }
+
+    // MARK: - Against the previous-word rules (#500)
+
+    func testShortcutOutranksContextRules() {
+        XCTAssertTrue(SupplementaryLexicon.Decision.replace(with: "quelque chose").outranksContextRules(isDictionaryWord: true))
+        XCTAssertTrue(SupplementaryLexicon.Decision.replace(with: "Zofiak").outranksContextRules(isDictionaryWord: false))
+    }
+
+    func testKeptNameOutranksContextRules() {
+        XCTAssertTrue(SupplementaryLexicon.Decision.keep.outranksContextRules(isDictionaryWord: false))
+    }
+
+    func testKeptDictionaryWordYieldsToContextRules() {
+        // Device test of PR #970: the lexicon held "ma", so "il ma" stayed "il ma".
+        let withMa = SupplementaryLexicon(entries: [(userInput: "ma", documentText: "ma")])
+        let decision = withMa.decision(for: "ma", isDictionaryWord: true)
+        XCTAssertEqual(decision, .keep)
+        XCTAssertEqual(decision?.outranksContextRules(isDictionaryWord: true), false)
+    }
 }
