@@ -493,6 +493,23 @@
         }
       }
     },
+    "Dictation in the keyboard failed. Try again." : {
+      "comment" : "Keyboard toolbar message when a dictation recorded and transcribed inside the keyboard (Experiments setting) produced no text.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dictation in the keyboard failed. Try again."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La dictée dans le clavier a échoué. Réessayez."
+          }
+        }
+      }
+    },
     "Dictation interrupted. Your text is in the Dictus app." : {
       "comment" : "Persistent keyboard toolbar banner after a dictation whose text could not be inserted (for example after a call). Tapping it opens Dictus on that text (#860).",
       "localizations" : {

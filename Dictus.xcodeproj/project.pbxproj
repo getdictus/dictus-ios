@@ -79,6 +79,9 @@
 		AA361008 /* KeyboardPolishStage.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA361007 /* KeyboardPolishStage.swift */; };
 		AA963002 /* KeyboardState+DictationSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA963001 /* KeyboardState+DictationSupport.swift */; };
 		AA361010 /* KeyboardSmartModeFan.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA361009 /* KeyboardSmartModeFan.swift */; };
+		AA0F0002 /* InKeyboardDictation.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0F0001 /* InKeyboardDictation.swift */; };
+		AA0F0004 /* InKeyboardRecognizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0F0003 /* InKeyboardRecognizer.swift */; };
+		AA0F0006 /* InKeyboardWebCapture.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0F0005 /* InKeyboardWebCapture.swift */; };
 		AA637002 /* KeyboardVoiceNotes.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA637001 /* KeyboardVoiceNotes.swift */; };
 		AA423004 /* SmartModeDisplayName.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA423003 /* SmartModeDisplayName.swift */; };
 		AA423002 /* SmartModeDisplayName.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA423001 /* SmartModeDisplayName.swift */; };
@@ -137,6 +140,7 @@
 		AA070602 /* AppleIntelligenceChecklistScript.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA170602 /* AppleIntelligenceChecklistScript.swift */; };
 		AA0000A4 /* ModelDownloadPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000A4 /* ModelDownloadPage.swift */; };
 		AA0000A5 /* GlobeKeyTutorialPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000A5 /* GlobeKeyTutorialPage.swift */; };
+		AA0F0008 /* InKeyboardSpeechAssets.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0F0007 /* InKeyboardSpeechAssets.swift */; };
 		AA0000A6 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000A6 /* SettingsView.swift */; };
 		AA0000A7 /* LicensesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000A7 /* LicensesView.swift */; };
 		AA0000A8 /* DebugLogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000A8 /* DebugLogView.swift */; };
@@ -338,6 +342,9 @@
 		AA361007 /* KeyboardPolishStage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardPolishStage.swift; sourceTree = "<group>"; };
 		AA963001 /* KeyboardState+DictationSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "KeyboardState+DictationSupport.swift"; sourceTree = "<group>"; };
 		AA361009 /* KeyboardSmartModeFan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardSmartModeFan.swift; sourceTree = "<group>"; };
+		AA0F0001 /* InKeyboardDictation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InKeyboardDictation.swift; sourceTree = "<group>"; };
+		AA0F0003 /* InKeyboardRecognizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InKeyboardRecognizer.swift; sourceTree = "<group>"; };
+		AA0F0005 /* InKeyboardWebCapture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InKeyboardWebCapture.swift; sourceTree = "<group>"; };
 		AA637001 /* KeyboardVoiceNotes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardVoiceNotes.swift; sourceTree = "<group>"; };
 		AA423003 /* SmartModeDisplayName.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmartModeDisplayName.swift; sourceTree = "<group>"; };
 		AA423001 /* SmartModeDisplayName.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmartModeDisplayName.swift; sourceTree = "<group>"; };
@@ -404,6 +411,7 @@
 		AA170602 /* AppleIntelligenceChecklistScript.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleIntelligenceChecklistScript.swift; sourceTree = "<group>"; };
 		AA1000A4 /* ModelDownloadPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelDownloadPage.swift; sourceTree = "<group>"; };
 		AA1000A5 /* GlobeKeyTutorialPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobeKeyTutorialPage.swift; sourceTree = "<group>"; };
+		AA0F0007 /* InKeyboardSpeechAssets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InKeyboardSpeechAssets.swift; sourceTree = "<group>"; };
 		AA1000A6 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		AA1000A7 /* LicensesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LicensesView.swift; sourceTree = "<group>"; };
 		AA1000A8 /* DebugLogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugLogView.swift; sourceTree = "<group>"; };
@@ -662,6 +670,9 @@
 				AA963001 /* KeyboardState+DictationSupport.swift */,
 				AA361009 /* KeyboardSmartModeFan.swift */,
 				AA637001 /* KeyboardVoiceNotes.swift */,
+				AA0F0001 /* InKeyboardDictation.swift */,
+				AA0F0003 /* InKeyboardRecognizer.swift */,
+				AA0F0005 /* InKeyboardWebCapture.swift */,
 				AA423001 /* SmartModeDisplayName.swift */,
 				AA361005 /* TextProxyIdentity.h */,
 				AA023005 /* HostArbiterActivation.h */,
@@ -784,6 +795,7 @@
 				AA100071 /* TestDictationView.swift */,
 				AA100092 /* DiagnosticDetailView.swift */,
 				AA1000A6 /* SettingsView.swift */,
+				AA0F0007 /* InKeyboardSpeechAssets.swift */,
 				AA1000A7 /* LicensesView.swift */,
 				AA1000A8 /* DebugLogView.swift */,
 				B565F0A2 /* FeedbackView.swift */,
@@ -1486,6 +1498,7 @@
 				AA0000A5 /* GlobeKeyTutorialPage.swift in Sources */,
 				AA0000A9 /* OnboardingSuccessView.swift in Sources */,
 				AA0000A6 /* SettingsView.swift in Sources */,
+				AA0F0008 /* InKeyboardSpeechAssets.swift in Sources */,
 				AA0000A7 /* LicensesView.swift in Sources */,
 				AA0000A8 /* DebugLogView.swift in Sources */,
 				B565F0A1 /* FeedbackView.swift in Sources */,
@@ -1551,6 +1564,9 @@
 				AA963002 /* KeyboardState+DictationSupport.swift in Sources */,
 				AA361010 /* KeyboardSmartModeFan.swift in Sources */,
 				AA637002 /* KeyboardVoiceNotes.swift in Sources */,
+				AA0F0002 /* InKeyboardDictation.swift in Sources */,
+				AA0F0004 /* InKeyboardRecognizer.swift in Sources */,
+				AA0F0006 /* InKeyboardWebCapture.swift in Sources */,
 				AA423002 /* SmartModeDisplayName.swift in Sources */,
 				AA361002 /* TextProxyIdentity.m in Sources */,
 				AA023004 /* HostArbiterActivation.m in Sources */,

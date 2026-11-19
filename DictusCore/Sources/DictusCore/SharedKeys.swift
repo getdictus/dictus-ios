@@ -414,6 +414,12 @@ public enum SharedKeys {
     /// `DictationTally`.
     public static let dictationTally = "dictus.dictationTally"
 
+    // MARK: - Experiments
+    /// Bool, default false: "Experiments > Dictate in the keyboard" (spike). When the app
+    /// is cold, the keyboard records and transcribes by itself instead of opening the
+    /// app. See `InKeyboardDictationRoute`.
+    public static let inKeyboardDictationEnabled = "dictus.experiments.inKeyboardDictation"
+
     // MARK: - Retired keys
     /// The #357 probe's arming flag, removed with the probe in #361. Kept as a
     /// literal, and only here, so DictusApp can delete it from the App Group on
