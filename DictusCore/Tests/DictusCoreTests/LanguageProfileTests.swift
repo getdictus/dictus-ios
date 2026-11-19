@@ -94,6 +94,8 @@ final class LanguageProfileTests: XCTestCase {
         // rare-but-real dictionary words ("lai" poem, "lest" ballast).
         "lai": "l'ai",
         "lest": "l'est",
+        // Added for #501: "jusqu'" only elides before "à".
+        "jusqu'a": "jusqu'\u{00E0}",
     ]
 
     private static let legacyEnglishOverrides: [String: String] = [

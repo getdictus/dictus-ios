@@ -18,6 +18,22 @@ public struct SupplementaryLexicon: Equatable {
         /// Insert this text instead of the typed word, through the autocorrect
         /// commit path (undo chip included).
         case replace(with: String)
+
+        /// Whether this verdict returns before the previous-word rules
+        /// (`LanguageProfile.contextOverrides`, #500).
+        ///
+        /// A shortcut always does, as Apple expands it whatever precedes it. A kept
+        /// word does when the dictionary does not know it: that is a name, and
+        /// "il Zofiak" stays as typed. A kept word the dictionary knows yields: on
+        /// device the lexicon holds words like "ma", from a contact or a
+        /// replacement, and "il ma" must still become "il m'a". When no rule
+        /// applies, the caller keeps the word, as before.
+        public func outranksContextRules(isDictionaryWord: Bool) -> Bool {
+            switch self {
+            case .replace: return true
+            case .keep: return !isDictionaryWord
+            }
+        }
     }
 
     public static let empty = SupplementaryLexicon(entries: [])
@@ -75,5 +91,56 @@ public struct SupplementaryLexicon: Equatable {
             return .replace(with: casing)
         }
         return .keep
+    }
+}
+
+extension SupplementaryLexicon {
+    /// What `spellCheck` answers before any dictionary rule: the user's lexicon
+    /// (#873) or one of the two context rules.
+    public enum EarlyAnswer: Equatable {
+        case lexicon(Decision)
+        /// A contextual homograph's spelling, from the text before the cursor (#501):
+        /// `je vais a` -> `à`.
+        case homograph(String)
+        /// A previous-word override (#500): `il ma` -> `m'a`.
+        case contextOverride(String)
+    }
+
+    /// The one path that orders the lexicon and the context rules:
+    /// 1. A shortcut, or a contact's casing, replaces the word.
+    /// 2. A lexicon word the dictionary does not know, a name, is kept as typed.
+    ///    (1 and 2 are `Decision.outranksContextRules`.)
+    /// 3. A contextual homograph reads the sentence in `context` (`a` or `à`).
+    /// 4. A previous-word override reads `previousWord` (`il ma` -> `il m'a`).
+    /// 5. Any other lexicon word is kept.
+    ///
+    /// WHY 3 and 4 come before 5: on a real iPhone the lexicon holds dictionary
+    /// words like `a` and `ma`, from contacts and text replacements. A keep there
+    /// would freeze them in every sentence, and it protects nothing the rules could
+    /// break: both only ever swap a dictionary word for another spelling.
+    ///
+    /// 3 before 4 only fixes the order: the homographs fire on `a`, the overrides
+    /// on `ma`/`ta`, so no word reaches both.
+    public func earlyAnswer(
+        for word: String,
+        previousWord: String?,
+        context: String?,
+        profile: LanguageProfile?,
+        isDictionaryWord: @autoclosure () -> Bool
+    ) -> EarlyAnswer? {
+        let lexiconDecision = decision(for: word, isDictionaryWord: isDictionaryWord())
+        if let lexiconDecision, lexiconDecision.outranksContextRules(isDictionaryWord: isDictionaryWord()) {
+            return .lexicon(lexiconDecision)
+        }
+        if let context, let profile,
+           let spelling = profile.contextualHomographs.lazy
+               .compactMap({ $0.accentedForm(of: word, context: context) }).first {
+            return .homograph(spelling)
+        }
+        if let previousWord, let profile,
+           let corrected = applyContextOverride(profile: profile, previousWord: previousWord, word: word) {
+            return .contextOverride(corrected)
+        }
+        return lexiconDecision.map(EarlyAnswer.lexicon)
     }
 }

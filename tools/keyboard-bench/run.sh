@@ -10,7 +10,10 @@
 #   tools/keyboard-bench/run.sh --udid <booted simulator UDID> [--out <dir>]
 #       [--langs fr,en] [--width 402] [--height 216]
 #       [--corpus <dir>] [--runs <dir>] [--hit plain|model] [--model <spec>] [--no-build]
+#       [--lexicon a,ma]
 #
+# --lexicon loads those words as contacts / text replacements (#873), the way an iPhone
+# hands its lexicon to the keyboard. The default is none, as on a fresh simulator.
 # --width and --height are the key grid in points. The defaults are an iPhone 17
 # held upright: 402 pt wide, and the 216 pt KeyboardHeightProvider gives a 6.3" screen.
 # Writes taps.tsv, commits.tsv and texts.tsv to <dir>; prints the report on stdout.
@@ -32,6 +35,7 @@ RUNS="$ROOT/tools/keyboard-bench/runs"
 HIT="plain"
 MODEL=""
 BUILD_BENCH=1
+LEXICON=""
 while [[ $# -gt 0 ]]; do
     case "$1" in
         --udid) UDID="$2"; shift 2 ;;
@@ -44,6 +48,7 @@ while [[ $# -gt 0 ]]; do
         --hit) HIT="$2"; shift 2 ;;
         --model) MODEL="$2"; shift 2 ;;
         --no-build) BUILD_BENCH=0; shift ;;
+        --lexicon) LEXICON="$2"; shift 2 ;;
         *) echo "unknown argument: $1" >&2; exit 2 ;;
     esac
 done
@@ -106,6 +111,7 @@ echo "== replay on $UDID" >&2
 # The engine prints its load messages on stdout; they belong with the build log, not the report.
 SIMCTL_CHILD_SWIFT_DETERMINISTIC_HASHING=1 \
 SIMCTL_CHILD_KB_CORPUS="$CORPUS" SIMCTL_CHILD_KB_RUNS="$RUNS" SIMCTL_CHILD_KB_HIT="$HIT" SIMCTL_CHILD_KB_MODEL="$MODEL" \
+SIMCTL_CHILD_BENCH_LEXICON="$LEXICON" \
     xcrun simctl spawn "$UDID" "$BIN/keyboard-bench" "$BENCH" "$LANGS" "$OUT" "$WIDTH" "$HEIGHT" \
     2> >(grep -v "Lexicon creation for" >&2) >&2
 

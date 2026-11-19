@@ -87,6 +87,20 @@ class TextPredictionEngine {
         return lexicon.decision(for: word, isDictionaryWord: aospTrieEngine.wordExists(word.lowercased()))
     }
 
+    /// The lexicon's verdict or a context rule's spelling for `word`, in the order
+    /// `SupplementaryLexicon.earlyAnswer` documents, or nil when none applies.
+    private func earlyAnswer(
+        for word: String, previousWord: String?, context: String?
+    ) -> SupplementaryLexicon.EarlyAnswer? {
+        lexiconLock.lock()
+        let lexicon = supplementaryLexicon
+        lexiconLock.unlock()
+        return lexicon.earlyAnswer(
+            for: word, previousWord: previousWord, context: context, profile: profile,
+            isDictionaryWord: aospTrieEngine.wordExists(word.lowercased())
+        )
+    }
+
     /// Turns a lexicon verdict into a `spellCheck` result: nil keeps the word.
     private func lexiconResult(
         _ decision: SupplementaryLexicon.Decision,
@@ -523,15 +537,39 @@ class TextPredictionEngine {
     /// Strategy 2 is the key insight: instead of asking "what are the corrections for sui?"
     /// and hoping "suis" appears, we ask "what does the n-gram model predict after je?"
     /// and check if any prediction (like "suis") is close to what was typed ("sui").
+    ///
+    /// `context` is the text before the cursor, ending with `word`. It lets a word
+    /// with two correct spellings take the one the sentence calls for (#501).
     func spellCheck(
         _ word: String,
         previousWord: String?,
-        isAtSentenceStart: Bool = true
+        isAtSentenceStart: Bool = true,
+        context: String? = nil
     ) -> (correction: String, alternatives: [String])? {
         // Lexicon verdicts (#873) return before the bigram rerank, which could
         // otherwise swap a replacement phrase or a kept name for a neighbour.
-        if let decision = lexiconDecision(for: word) {
+        // The lexicon and both context rules, in the order `earlyAnswer` documents.
+        switch earlyAnswer(for: word, previousWord: previousWord, context: context) {
+        case .lexicon(let decision)?:
             return lexiconResult(decision, for: word)
+        case .homograph(let spelling)?:
+            #if DEBUG
+            AutocorrectDebugLog.autocorrectDecision(
+                original: word, corrected: spelling,
+                branch: "contextual-homograph", prevWord: previousWord
+            )
+            #endif
+            return (spelling, [])
+        case .contextOverride(let corrected)?:
+            #if DEBUG
+            AutocorrectDebugLog.autocorrectDecision(
+                original: word, corrected: corrected,
+                branch: "context-override", prevWord: previousWord
+            )
+            #endif
+            return (corrected, [])
+        case nil:
+            break
         }
 
         // Language overrides are authoritative — return before the bigram

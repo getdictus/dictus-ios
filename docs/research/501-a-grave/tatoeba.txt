@@ -1,0 +1,50 @@
+corpus: 730700 Tatoeba sentences, 2026-11-17
+| written | occurrences | typed `a` became `à` |
+|---|---:|---:|
+| `a` (verb) | 64601 | 45 (0.07%) |
+| `à` (preposition) | 93468 | 34539 (36.95%) |
+wrong: Je n'ai rien a dire à ce sujet.
+wrong: Il est allé a Tokyo pour affaires.
+wrong: L'arbre sur le tronc duquel nos initiales étaient gravées a été abattu.
+wrong: Le congrès médical s'est tenu a Kyoto.
+wrong: L'économie des pays d'Asie de l'est a été bouleversée par la hausse des prix de l'énergie.
+wrong: Il va a l'école.
+wrong: Ils sont allés a Saint Paul.
+wrong: Elles sont allées a Saint Paul.
+wrong: Je me suis levé a 7h du matin.
+wrong: T'épouser a été la plus grosse erreur de ma vie.
+wrong: La voiture que je vous ai louée a un problème.
+wrong: Chabha s’est mariée a Tawrirt.
+wrong: Je ne pense pas qu'il soit homosexuel, il est marié est a trois enfants.
+wrong: Tout ce qui est en train de se passer a été prédit par Muḥend-u-Yahya dans « Tixurdas n Saεid Weḥsen », si ce n'est plus. J'en mets ma main sur le feu.
+wrong: Si ce n'est plus, tout ce qui est en train de se passer a été prédit par Muḥend-u-Yahya dans "Tixurdas n Saεid Weḥsen". J'en mets ma main sur le feu.
+wrong: Nassim n'arrive pas a convaincre son père de le laisser partir au Panama.
+wrong: Ils chantent a cappella.
+wrong: Il contribue a colporté la rumeur.
+wrong: Elles chantent a cappella.
+wrong: Je penserai a toi.
+wrong: L'exaltation d'avoir réussi à s'échapper a été de courte durée : Tom s'est réveillé sous le faisceau d'une torche de policier.
+wrong: La fille dont la jambe est cassée a eu un accident.
+wrong: Un jour, on appela Kateb Yacine, notre grand écrivain, et dramaturge en l'occurrence, pour y recevoir un prix. Pendant qu'il montait sur la scène, il trébucha et « certains » se mirent à rire. Il se retourna et leur dit : « La Fontaine a fait rire les animaux et aujourd'hui, c'est vous que j'ai fait rire ! » Cette histoire est très vraisemblable et intemporelle, même si elle est a été forcément colportée de bouche à oreille. Kateb Yacine était un grand artiste humble et on disait qu'il buvait de façon immodérée ; opposant irréductible, il était surtout connu pour ses frasques.
+wrong: Un jour, on appela Kateb Yacine, notre grand écrivain, et dramaturge en l'occurrence, pour recevoir un prix. Pendant qu'il montait sur la scène, il trébucha et « certains » se mirent à rire. Il se retourna et leur dit : « La Fontaine a fait rire les animaux et aujourd'hui, c'est vous que j'ai fait rire ! » Cette histoire est très vraisemblable et intemporelle, même si elle est a été forcément colportée de bouche à oreille. Kateb Yacine était un grand artiste humble et on disait qu'il buvait de façon immodérée ; opposant irréductible, il était surtout connu pour ses frasques.
+wrong: David a commencé a faire pression sur Amanda.
+wrong: Le bruit de pas a cessé.
+wrong: Vous vous êtes envolées a Ait Smail.
+wrong: Hâte-toi d'aller a Iger Awen.
+wrong: Elle va a Tichy.
+wrong: S'endormir immédiatement a été difficile.
+wrong: Il commençait a pleuvoir, il a pris le parapluie et il est sorti.
+wrong: Comment on peut y'aller a la vieille ville?
+wrong: La cinquième Republique est arrivée a bout de souffle, en france, il faut passer a la sixième!
+wrong: On est retourné a Tawrirt n Yiɣil.
+wrong: Faites attention a vous.
+wrong: On courrait a Dergina.
+wrong: Max a imposé a ses enfants de se laver les mains avant de se mettre à table.
+wrong: Max s'est inscrit a la salle de musculation.
+wrong: Max n'arrive pas a joindre Marie par téléphone.
+wrong: J'ai repondu a ses questions, mais je n'ai founi aucune information.
+wrong: J'ai a décidé de supprimer les fichiers inutiles de mon ordinateur.
+wrong: L'informaticien n'arrive pas a résoudre le problème.
+wrong: Va a funcionar.
+wrong: Le créateur est a vu ma misère ainsi que ma souffrance.
+wrong: Ils partiront a Reims.

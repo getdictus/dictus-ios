@@ -962,7 +962,7 @@ final class DictusKeyboardBridge: NSObject,
 
         let proposal = autocorrectRuns
             ? state.performSpellCheck(
-                freshWord, previousWord: previousWord, isAtSentenceStart: atSentenceStart
+                freshWord, previousWord: previousWord, isAtSentenceStart: atSentenceStart, context: context
             )?.correction
             : nil
 
