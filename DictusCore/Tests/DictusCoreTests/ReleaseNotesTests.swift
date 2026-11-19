@@ -16,24 +16,36 @@ final class ReleaseNotesTests: XCTestCase {
 
     // MARK: - Parsing
 
-    func testTheFirstBlockIsTheTitleAndEachOtherBlockIsOneChange() throws {
-        let text = "What's new in 2.0.2\n\nat\nAddresses\nNo more autocorrect.\n\n\nmic.fill\nMicrophone\nIt tells you.\n"
+    private static func file(highlights: [String], changes: [String]) -> String {
+        (["What's new in 2.0.2", "## Highlights"] + highlights + ["## All changes"] + changes)
+            .joined(separator: "\n\n") + "\n"
+    }
+
+    func testTheHighlightsAndTheFullListAreReadApart() throws {
+        let text = Self.file(highlights: ["Feedback\nSend it from Settings."],
+                             changes: ["Feedback\nSend it from Settings, log attached.", "Addresses\nKept as typed."])
         let notes = try XCTUnwrap(ReleaseNotes(text: text))
         XCTAssertEqual(notes.title, "What's new in 2.0.2")
-        XCTAssertEqual(notes.items, [
-            .init(symbol: "at", title: "Addresses", text: "No more autocorrect."),
-            .init(symbol: "mic.fill", title: "Microphone", text: "It tells you.")
+        XCTAssertEqual(notes.highlights, [.init(title: "Feedback", text: "Send it from Settings.")])
+        XCTAssertEqual(notes.changes, [
+            .init(title: "Feedback", text: "Send it from Settings, log attached."),
+            .init(title: "Addresses", text: "Kept as typed.")
         ])
     }
 
     func testAMalformedFileIsNoNotes() {
+        let change = "Addresses\nKept as typed."
         XCTAssertNil(ReleaseNotes(text: ""))
-        // No change.
-        XCTAssertNil(ReleaseNotes(text: "What's new in 2.0.2\n"))
-        // A change without its symbol.
-        XCTAssertNil(ReleaseNotes(text: "What's new in 2.0.2\n\nAddresses\nNo more autocorrect.\n"))
-        // The title and the first change run together.
-        XCTAssertNil(ReleaseNotes(text: "What's new in 2.0.2\nat\nAddresses\nNo more autocorrect.\n"))
+        // No highlight, or more than three.
+        XCTAssertNil(ReleaseNotes(text: Self.file(highlights: [], changes: [change])))
+        XCTAssertNil(ReleaseNotes(text: Self.file(highlights: Array(repeating: change, count: 4), changes: [change])))
+        // No change for App Store Connect.
+        XCTAssertNil(ReleaseNotes(text: Self.file(highlights: [change], changes: [])))
+        // A change without its sentence, or with a third line (the old symbol format).
+        XCTAssertNil(ReleaseNotes(text: Self.file(highlights: ["Addresses"], changes: [change])))
+        XCTAssertNil(ReleaseNotes(text: Self.file(highlights: [change], changes: ["at\n" + change])))
+        // No section headings.
+        XCTAssertNil(ReleaseNotes(text: "What's new in 2.0.2\n\n" + change + "\n"))
     }
 
     func testEachLanguageReadsItsFileAndTheRestReadEnglish() {
@@ -55,29 +67,30 @@ final class ReleaseNotesTests: XCTestCase {
     func testTwoPointZeroPointTwoReadsInFrench() throws {
         let notes = try XCTUnwrap(ReleaseNotes.load(version: "2.0.2", language: "fr", from: Self.repositoryFolder))
         XCTAssertEqual(notes.title, "Nouveautés de la 2.0.2")
-        XCTAssertEqual(notes.items.count, 6)
-        XCTAssertEqual(notes.items.first?.title, "Écrivez-nous depuis l'app")
+        XCTAssertEqual(notes.highlights.map(\.title),
+                       ["Écrivez-nous depuis l'app", "Adresses et liens intacts", "Fini les fins inventées"])
+        XCTAssertEqual(notes.changes.count, 6)
     }
 
-    /// Every version folder is complete and fits both places it is shown: four languages, three
-    /// to six changes with the same symbols in the same order, and App Store Connect's 4,000
-    /// characters (the store text, `scripts/release-notes.sh`, is shorter than the file).
-    func testEveryVersionHasFourMatchingLanguagesOfThreeToSixChanges() throws {
+    /// Every version folder is complete and fits both places it is shown: four languages with
+    /// the same number of highlights (at most three, the sheet) and of changes, and App Store
+    /// Connect's 4,000 characters (the store text, `scripts/release-notes.sh`, is shorter than
+    /// the file).
+    func testEveryVersionHasFourMatchingLanguages() throws {
         let versions = try FileManager.default.contentsOfDirectory(atPath: Self.repositoryFolder.path)
             .filter { !$0.hasPrefix(".") }
         XCTAssertFalse(versions.isEmpty)
         for version in versions {
-            var symbols: [String]?
+            var counts: [Int]?
             for locale in ReleaseNotes.locales {
                 let file = Self.repositoryFolder.appendingPathComponent("\(version)/\(locale).txt")
                 let text = try String(contentsOf: file, encoding: .utf8)
                 let notes = try XCTUnwrap(ReleaseNotes(text: text), "\(version)/\(locale)")
-                XCTAssertTrue((3...6).contains(notes.items.count), "\(version)/\(locale): \(notes.items.count) changes")
                 XCTAssertTrue(notes.title.contains(version), "\(version)/\(locale): title names the version")
                 XCTAssertLessThanOrEqual(text.count, 4000, "\(version)/\(locale)")
-                let theseSymbols = notes.items.map(\.symbol)
-                XCTAssertEqual(theseSymbols, symbols ?? theseSymbols, "\(version)/\(locale): symbols differ from fr")
-                symbols = symbols ?? theseSymbols
+                let theseCounts = [notes.highlights.count, notes.changes.count]
+                XCTAssertEqual(theseCounts, counts ?? theseCounts, "\(version)/\(locale): counts differ from fr")
+                counts = counts ?? theseCounts
             }
         }
     }

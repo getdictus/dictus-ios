@@ -1,16 +1,16 @@
 #!/bin/sh
 # release-notes.sh — App Store Connect "What's New" from ReleaseNotes/<version>/ (#974).
 #
-# ReleaseNotes/<version>/<locale>.txt is the one source for a version's notes: the app shows
-# the same file once after the update and from Settings (a symbol, a title and a sentence per
-# change). This script turns it into the store's plain text and sends that to the App Store
-# version's localizations, so the store and the app say the same words:
+# ReleaseNotes/<version>/<locale>.txt is the one source for a version's notes. The app's sheet
+# shows its "## Highlights" (at most three, picked by Pierre); App Store Connect gets its
+# "## All changes", which this script turns into the store's plain text and sends to the App
+# Store version's localizations:
 #
 #   Nouveautés de la 2.0.2
 #   • Écrivez-nous depuis l'app : Réglages > À propos > Envoyer un retour…
 #
-# The title line, then one `• <title><sep><sentence>` line per change; <sep> is " : " in
-# French and ": " elsewhere. The symbol lines are the app's only.
+# The title line, then one `• <title><sep><sentence>` line per change of "## All changes";
+# <sep> is " : " in French and ": " elsewhere. The highlights stay in the app.
 #
 #   ASC locale   file
 #   fr-FR        fr.txt
@@ -45,12 +45,15 @@ for FILE in fr en de es; do
   [ -s "$DIR/$FILE.txt" ] || { echo "error: $DIR/$FILE.txt is missing or empty." >&2; exit 1; }
 done
 
-# The store text of one file: blocks separated by blank lines, the first one the title, every
-# other one "symbol / title / sentence" (the format ReleaseNotes.swift reads).
+# The store text of one file: blocks separated by blank lines, the first one the title, then
+# "## Highlights" and "## All changes" with one "title / sentence" block per change (the
+# format ReleaseNotes.swift reads). Only "## All changes" is printed.
 store_text() {
   awk -v sep="$2" 'BEGIN { RS = ""; FS = "\n" }
     NR == 1 { print $1; next }
-    { print "• " $2 sep $3 }' "$1"
+    $1 == "## All changes" { inChanges = 1; next }
+    $1 ~ /^## / { inChanges = 0; next }
+    inChanges { print "• " $1 sep $2 }' "$1"
 }
 
 for PAIR in fr-FR:fr en-US:en en-GB:en de-DE:de es-ES:es; do
