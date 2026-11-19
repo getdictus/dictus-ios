@@ -1,0 +1,7 @@
+.deps/
+build/
+WebViewAsrSpike.xcodeproj/
+# Build outputs staged by scripts/stage-web.sh
+web/sherpa-onnx-wasm-web.js
+web/sherpa-onnx-wasm-web.wasm
+web/sherpa-onnx-asr.js

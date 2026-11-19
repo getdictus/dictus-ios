@@ -1,0 +1,75 @@
+# tools/webview-asr-spike/project.yml — THROWAWAY spike, xcodegen input.
+#
+# A project of its own, with its own bundle ids and App Group, so that nothing
+# in Dictus.xcodeproj, DictusCore or CI references it and installing it never
+# replaces Dictus on the phone. Regenerate with `xcodegen` from this directory
+# after ./setup.sh (the wasm, models and clips it bundles live in .deps/).
+#
+# No App Group is signed in. `xcodebuild -allowProvisioningUpdates` answered
+# "No Accounts" and the only profile that fits a new bundle id is the team
+# wildcard one, which cannot carry an App Group (same wall as tools/ane-harness,
+# #268). Nothing needs one: the models ship inside the keyboard's bundle, and
+# SpikeLog falls back to each process's own Documents. App/App.entitlements and
+# Keyboard/Keyboard.entitlements are kept for a build from an Xcode signed in
+# to the team: add `CODE_SIGN_ENTITLEMENTS` back to both targets.
+name: WebViewAsrSpike
+options:
+  bundleIdPrefix: com.pivi.dictus.spike
+  deploymentTarget:
+    iOS: "26.0"
+  createIntermediateGroups: true
+
+settings:
+  base:
+    DEVELOPMENT_TEAM: 9B8B36C2FA
+    CODE_SIGN_STYLE: Automatic
+    SWIFT_VERSION: "5.0"
+    SWIFT_STRICT_CONCURRENCY: minimal
+    TARGETED_DEVICE_FAMILY: "1"
+    ENABLE_USER_SCRIPT_SANDBOXING: NO
+    GENERATE_INFOPLIST_FILE: NO
+
+targets:
+  SpikeApp:
+    type: application
+    platform: iOS
+    sources:
+      - path: App
+        excludes: [Info.plist, App.entitlements]
+      - path: Shared
+      # Folder references: copied whole, under these names, into Resources.
+      - path: web
+        type: folder
+        buildPhase: resources
+      - path: .deps/clips
+        type: folder
+        buildPhase: resources
+    dependencies:
+      - target: SpikeKeyboard
+    settings:
+      base:
+        PRODUCT_NAME: SpikeApp
+        PRODUCT_BUNDLE_IDENTIFIER: com.pivi.dictus.spike
+        INFOPLIST_FILE: App/Info.plist
+
+  SpikeKeyboard:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: Keyboard
+        excludes: [Info.plist, Keyboard.entitlements]
+      - path: Shared
+      - path: web
+        type: folder
+        buildPhase: resources
+      # The ONNX models ship inside the keyboard: it reads them without an
+      # App Group copy and without Full Access; the app reads them from here.
+      - path: .deps/bundle/models
+        type: folder
+        buildPhase: resources
+    settings:
+      base:
+        PRODUCT_NAME: SpikeKeyboard
+        PRODUCT_BUNDLE_IDENTIFIER: com.pivi.dictus.spike.keyboard
+        INFOPLIST_FILE: Keyboard/Info.plist
+        APPLICATION_EXTENSION_API_ONLY: YES

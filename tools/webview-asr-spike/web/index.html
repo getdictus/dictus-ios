@@ -1,0 +1,16 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>webview-asr-spike</title>
+</head>
+<body>
+<pre id="log" style="font: 11px ui-monospace, monospace; white-space: pre-wrap;"></pre>
+<!-- Emscripten glue for sherpa-onnx (built by wasm/build.sh), then the
+     sherpa-onnx JS wrapper, then the spike's own code. -->
+<script src="sherpa-onnx-wasm-web.js"></script>
+<script src="sherpa-onnx-asr.js"></script>
+<script src="spike.js"></script>
+</body>
+</html>
