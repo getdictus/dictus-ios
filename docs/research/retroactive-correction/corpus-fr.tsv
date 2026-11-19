@@ -1,0 +1,12 @@
+# Retroactive-correction probes, French: the next word decides the previous one.
+case	sentence	target	expected
+elision	il ma dit non	1	m'a
+elision	ces bon pour moi	0	c'est
+elision	sa va bien	0	ça
+homograph	ou est la gare	0	où
+homograph	il et parti	1	est
+homograph	ils son partis	1	sont
+homograph	il ce lave	1	se
+homograph	je suis la ce soir	2	là
+homograph	je vais a paris	2	à
+homograph	on a gagne	1	a

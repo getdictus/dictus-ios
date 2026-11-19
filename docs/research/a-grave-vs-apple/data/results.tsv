@@ -1,0 +1,125 @@
+s	case	sentence	token	expected	apple_final	apple_when	apple_bar	dictus_develop	dictus_971
+0	start	à demain	0	à	à	space	«А» | a	a	a
+1	start	à bientôt	0	à	à	space	«А» | a	a	a
+2	start	à plus tard	0	à	à	space	«А» | a	a	a
+3	start	à tout à l'heure	0	à	à	space	«А» | a	a	a
+3	start	à tout à l'heure	2	à	à	space	«а» | au	a	a
+4	start	à vendredi alors	0	à	à	space	«А» | a	a	a
+5	start	à ce soir chez toi	0	à	à	space	«А» | a	a	a
+6	start	à mon avis c'est trop cher	0	à	à	space	«А» | a	a	a
+7	start	à quelle heure tu arrives	0	à	à	space	«А» | ah	a	a
+8	cap-start	à deux on ira plus vite	0	à	à	space	«А» | ah	a	a
+9	cap-start	à midi je mange avec paul	0	à	à	space	«А» | ah	a	a
+10	cap-start	à la maison tout va bien	0	à	à	space	«А» | ah	a	a
+11	cap-start	à table les enfants	0	à	à	space	«А» | ah	a	a
+12	cap-start	à part ça tout va bien	0	à	à	space	«А» | ah	a	a
+13	cap-start	à partir de lundi je travaille	0	à	à	space	«А» | ah	a	a
+14	noun-a	le problème a été réglé	2	a	a	none	«а» | avec | aujourd'hui	a	a
+15	noun-a	ma voiture a calé ce matin	2	a	a	none	«а» | au | avec	a	a
+16	noun-a	le chien a aboyé toute la nuit	2	a	a	none	«а» | aime | aboie	a	a
+17	noun-a	mon frère a appelé hier	2	a	a	none	«а» | aîné | aime	a	a
+18	noun-a	la réunion a commencé sans moi	2	a	a	none	«а» | avec | aura	a	a
+19	noun-a	le train a du retard	2	a	a	none	«а» | arrive | arrivera	a	a
+20	noun-a	le médecin a dit de rester au lit	2	a	a	none	«а» | avait | au	a	a
+21	noun-a	la boulangerie a fermé plus tôt	2	a	a	space+retro	«а» | au	a	a
+22	noun-a	mon téléphone a encore planté	2	a	a	none	«а» | avait | aussi	a	a
+23	noun-a	le colis a bien été livré	2	a	a	none	«а» | arrive | arrivera	a	a
+24	noun-à	une machine à laver	2	à	à	space	«а» | avec	a	a
+25	noun-à	un sac à dos	2	à	à	space	«а» | avec	a	a
+26	noun-à	une brosse à dents	2	à	à	space	«а» | avec	a	a
+27	noun-à	la salle à manger	2	à	à	space	«а» | au	a	a
+28	noun-à	un verre à vin	2	à	à	space	iverre a» | verre à | verré au	a	a
+29	noun-à	une cuillère à soupe	2	à	à	space	«а» | avec	a	a
+30	noun-à	un fer à repasser	2	à	a	none	«а» | avant | avec	a	a
+31	noun-à	j'ai un cours à midi	3	à	à	space	«а» | avec	a	a
+32	noun-à	il reste du travail à faire	4	à	à	space	«а» | au	a	a
+33	extra-a	on a une maison à vendre	1	a	a	none	«а» | arrive | avait	a	a
+33	noun-à	on a une maison à vendre	4	à	à	space	«а» | avec	a	a
+34	adj-à	c'est facile à faire	2	à	à	space	«а» | avec	a	à
+35	adj-à	je suis prêt à partir	3	à	à	space	«а» | avec	a	à
+36	adj-à	c'est difficile à dire	2	à	à	space	«а» | avec	a	à
+37	adj-à	c'est bon à savoir	2	à	à	space	«а» | alors	a	à
+38	adj-à	elle est la première à arriver	4	à	à	space	«а» | au	a	a
+39	verb-à	je pense à toi	2	à	à	space	«а» | aussi	a	à
+40	verb-à	jouer à deux mains	1	à	à	space	«а» | avec	a	a
+41	verb-à	il faut penser à tout	3	à	à	space	«а» | aux	a	a
+42	verb-à	j'ai du mal à dormir	3	à	à	space	«а» | avec	a	à
+43	verb-à	je commence à comprendre	2	à	à	space	«а» | avec	a	à
+44	verb-à	elle apprend à nager	2	à	à	space	«а» | aussi	a	à
+45	verb-à	on arrive à la gare	2	à	à	space	«а» | au	a	à
+46	verb-à	je vais à paris demain	2	à	à	space	«а» | aller	a	à
+47	verb-à	il habite à lyon	2	à	à	space	«а» | au	a	à
+48	verb-à	j'ai parlé à ta mère	2	à	à	space	«а» | avec	a	à
+49	verb-à	tu as répondu à son message	3	à	à	space	«а» | au	a	à
+50	verb-à	je joue à la console	2	à	à	space	«а» | au	a	à
+51	extra-a	elle a réussi à le convaincre	1	a	a	none	«а» | aime | avait	a	a
+51	verb-à	elle a réussi à le convaincre	3	à	à	space	«а» | avoir	a	à
+52	verb-à	je t'invite à dîner	2	à	à	space	«а» | au	a	à
+53	verb-à	on s'est mis à courir	3	à	à	space	«а» | au	a	à
+54	phrase	je rentre à pied	2	à	à	space	«а» | avec	a	à
+55	phrase	il habite à côté	2	à	à	space	«а» | au	a	à
+56	phrase	c'est à cause de la pluie	1	à	à	space	«а» | aussi	a	à
+57	phrase	j'ai à peine dormi	1	à	à	space	«а» | acheté	a	à
+58	phrase	on passe à travers le parc	2	à	à	space	«а» | au	a	à
+59	phrase	je viens à vélo	2	à	à	space	«а» | avec	a	à
+60	phrase	il est arrivé à l'heure	3	à	à	space	«а» | au	a	à
+61	phrase	c'est à peu près fini	1	à	à	space	«а» | aussi	a	à
+62	phrase	j'ai lu le livre à moitié	4	à	à	space	«а» | avec	a	a
+63	phrase	on se voit à la fin du cours	3	à	à	space	«а» | au	a	à
+64	phrase	je serai là à huit heures	3	à	à	space	«а» | avant	a	a
+65	phrase	on travaille à deux sur ce projet	2	à	à	space	«а» | avec	a	à
+66	il-a	il a faim	1	a	a	none	«а» | avait | aime	a	a
+67	il-a	elle a froid	1	a	a	none	«а» | aime | avait	a	a
+68	il-a	il a beaucoup mangé	1	a	a	none	«а» | avait | aime	a	a
+69	il-a	elle a déjà fini	1	a	a	none	«а» | aime | avait	a	a
+70	il-a	il a toujours raison	1	a	a	none	«а» | avait | aime	a	a
+71	il-a	on a gagné le match	1	a	a	none	«а» | arrive | avait	a	a
+72	il-a	il a dit oui	1	a	a	none	«а» | avait | aime	a	a
+73	il-a	elle a vingt ans	1	a	a	none	«а» | aime | avait	a	a
+74	il-a	il a bien dormi	1	a	a	none	«а» | avait | aime	a	a
+75	il-a	elle a une voiture rouge	1	a	a	none	«а» | aime | avait	a	a
+76	il-a	il a peur du noir	1	a	a	none	«а» | avait | aime	a	a
+77	il-a	on a cours demain	1	a	a	none	«а» | arrive | avait	a	a
+78	pronoun-a	tout le monde a compris	3	a	a	none	«а» | aime | au	a	a
+79	pronoun-a	ça a marché du premier coup	1	a	a	none	«а» | aurait | arrive	a	a
+80	pronoun-a	cela a pris trois heures	1	a	a	none	«а» | aurait | arrive	a	a
+81	pronoun-a	chacun a son avis	1	a	a	none	«а» | aura | apporte	a	a
+82	pronoun-a	personne n'a répondu	1	n'a	n'a	none	кn'a» | n'aime | n'avait	n'a	n'a
+83	relative	ce que tu as fait a marché	5	a	a	space+retro	«а» | à | aujourd'hui	a	a
+84	relative	ce qu'il a dit a choqué tout le monde	2	a	a	none	«а» | avait | aime	a	a
+84	relative	ce qu'il a dit a choqué tout le monde	4	a	a	space+retro	«а» | au	a	a
+85	relative	le livre que je lis a trois cents pages	5	a	a	none	«а» | aujourd'hui | actuellement	a	a
+86	relative	la maison où j'habite a un grand jardin	4	a	a	space+retro	«а» | à | actuellement	a	a
+87	relative	l'homme qui parle a raison	3	a	a	space+retro	«а» | avec	a	a
+88	relative	la fille dont je parle a déménagé	5	a	a	none	«а» | au | avec	a	a
+89	name	marie a appelé ce matin	1	a	a	none	kmarie a» | marié au	a	a
+90	name	paul a raison	1	a	a	none	«а» | aime | appelle	a	a
+91	name	julie a fini son travail	1	a	a	none	«а» | aime | avait	a	a
+92	name	pierre a faim	1	a	a	none	«а» | avait	a	a
+93	name	j'ai écrit à marie	2	à	à	space	«а» | au	a	à
+94	name	je vais chez thomas à midi	4	à	à	space	«а» | avec	a	a
+95	elision	il m'a dit non	1	m'a	m'a	none	«m'a» | m'avait | m'aime	m'a	m'a
+96	elision	elle l'a vu hier	1	l'a	l'a	none	«l'as | l'avait | l'aime	l'a	l'a
+97	elision	je sais qu'il a tort	3	a	a	none	«а» | aime | avait	a	a
+98	elision	jusqu'à demain	0	jusqu'à	jusqu'à	space	«Jusqu'a» | ę,nbsn! | ne,nbsn!	jusqu'a	jusqu'à
+99	elision	c'est à toi de jouer	1	à	à	space	«а» | aussi	a	à
+100	elision	il n'a pas le temps	1	n'a	n'a	none	кn'a» | n'avait | n'aime	n'a	n'a
+101	elision	il n'y a qu'à demander	2	a	a	none	«а» | avait | aura	a	a
+101	elision	il n'y a qu'à demander	3	qu'à	qu'à	space	«qu'a» | qu'à | qu'avec	qu'a	qu'a
+102	elision	je l'ai donné à julie	3	à	à	space	«а» | au	a	à
+103	elision	il m'a appris à nager	1	m'a	m'a	none	«m'a» | m'avait | m'aime	m'a	m'a
+103	elision	il m'a appris à nager	3	à	à	space	«а» | aussi	a	à
+104	y-a	il y a du monde	2	a	a	none	«а» | avait | aura	a	a
+105	y-a	y a pas de souci	1	a	a	none	«а» | avait | a-t-il	a	a
+106	y-a	il n'y a rien à manger	2	a	a	none	«а» | avait | aura	a	a
+106	y-a	il n'y a rien à manger	4	à	à	space	«а» | au	a	à
+107	y-a	il y a deux jours	2	a	a	none	«а» | avait | aura	a	a
+108	y-a	y a quelqu'un	1	a	a	none	«а» | avait | a-t-il	a	a
+109	question	à qui tu parles	0	à	à	space	«А» | ah	a	a
+110	question	à quoi tu penses	0	à	à	space	«А» | ah	a	a
+111	question	qui a appelé	1	a	a	none	«а» | aime | avait	a	a
+112	question	il a quel âge	1	a	a	none	«а» | avait | aime	a	a
+113	question	tu penses à quoi	2	à	à	space	«а» | arriver	a	à
+114	question	qui a fait ça	1	a	a	none	«а» | aime | avait	a	a
+115	question	tu vas à la plage	2	à	à	space	«а» | au	a	à
+116	question	tu as pensé à prendre le pain	3	à	à	space	«а» | au	a	à
