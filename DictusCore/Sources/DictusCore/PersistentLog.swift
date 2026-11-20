@@ -332,6 +332,46 @@ public enum PersistentLog {
         return String(line[line.index(after: line.startIndex)..<closeBracket])
     }
 
+    #if DEBUG
+    // MARK: - Typing journal (#1001)
+
+    /// Whether this process has already dropped the lines older than `retentionPeriod`.
+    /// Read and written on `writeQueue` only.
+    private static var prunedForJournal = false
+
+    /// Appends the text `make` builds, in order with every other line. `make` runs on
+    /// the write queue, so the keystroke that produced the events does not format them.
+    ///
+    /// The first append of a process also drops the lines older than 7 days, so a
+    /// journal left running is purged on the device, not only on export.
+    static func appendDebugText(_ make: @escaping @Sendable () -> String) {
+        guard let url = fileURL else { return }
+        writeQueue.async {
+            if !prunedForJournal {
+                prunedForJournal = true
+                pruneOldEntries(url: url, cutoffDate: Date().addingTimeInterval(-retentionPeriod))
+            }
+            var text = takePendingRepeatLine() ?? ""
+            text += make()
+            resetCollapseState()
+            coordinatedAppend(text, to: url)
+            coordinatedTrim(url: url)
+        }
+    }
+
+    /// Rewrites the file without the lines `isRemoved` matches. Runs on the write
+    /// queue, so no line logged before the call survives it.
+    static func removeLines(where isRemoved: @escaping (Substring) -> Bool) {
+        guard let url = fileURL else { return }
+        writeQueue.sync {
+            let kept = coordinatedRead(from: url)
+                .split(separator: "\n", omittingEmptySubsequences: true)
+                .filter { !isRemoved($0) }
+            coordinatedWrite(kept.isEmpty ? "" : kept.joined(separator: "\n") + "\n", to: url)
+        }
+    }
+    #endif
+
     // MARK: - Legacy API (Deprecated)
 
     /// Legacy free-text log method. Use `log(_ event: LogEvent)` instead.
