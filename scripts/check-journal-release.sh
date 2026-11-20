@@ -33,8 +33,13 @@ for b in "${BINARIES[@]}"; do
     # A Debug build keeps its code in <binary>.debug.dylib beside a stub executable.
     files=("$b")
     [[ -f "$b.debug.dylib" ]] && files+=("$b.debug.dylib")
-    symbols=$(for f in "${files[@]}"; do xcrun nm -a "$f"; done | xcrun swift-demangle | grep -c -E "$SYMBOLS" || true)
-    strings=$(for f in "${files[@]}"; do strings -a "$f"; done | grep -c -E "$STRINGS" || true)
+    # Read first, counted after: a failing nm or strings must stop the check, not read as zero.
+    symtab=$(for f in "${files[@]}"; do xcrun nm -a "$f" || exit 1; done | xcrun swift-demangle) \
+        || { echo "nm failed on $name" >&2; exit 2; }
+    text=$(for f in "${files[@]}"; do strings -a "$f" || exit 1; done) || { echo "strings failed on $name" >&2; exit 2; }
+    [[ -n "$symtab" && -n "$text" ]] || { echo "nothing read from $name" >&2; exit 2; }
+    symbols=$(grep -c -E "$SYMBOLS" <<<"$symtab" || true)
+    strings=$(grep -c -E "$STRINGS" <<<"$text" || true)
     echo "$name (${#files[@]} file(s)): $symbols journal symbols, $strings journal strings"
     if [[ $EXPECT_PRESENT == 1 ]]; then
         [[ $symbols -gt 0 && $strings -gt 0 ]] || status=1

@@ -94,6 +94,14 @@ public final class TypingJournalRecorder: @unchecked Sendable {
     static let flushDelay: TimeInterval = 2
     /// Buffered events that trigger a write without waiting.
     static let maxBuffered = 64
+    /// How old an event must be before a write by size or by time may take it.
+    ///
+    /// WHY: the field gate learns about a field when its traits are read, which follows
+    /// a keystroke by milliseconds. A host can move the focus into a code field without
+    /// a read, so the first key typed there reaches the buffer before the gate sees the
+    /// field; held back this long, it is still in memory when the gate drops it. A
+    /// commit writes everything at once: the traits are read right before it.
+    static let settleDelay: TimeInterval = 0.5
     /// Commits a reaction can still point at.
     static let recentLimit = 16
 
@@ -317,21 +325,33 @@ public final class TypingJournalRecorder: @unchecked Sendable {
     private func append(_ event: TypingJournalEvent) {
         buffer.append(TypingJournalEntry(date: now(), event: event))
         if buffer.count >= Self.maxBuffered {
-            sendBuffer()
-        } else if !flushScheduled {
-            flushScheduled = true
-            flushQueue.asyncAfter(deadline: .now() + Self.flushDelay) { [weak self] in
-                self?.lock.withLock { self?.flushScheduled = false }
-                self?.flush()
+            sendBuffer(settledBefore: now().addingTimeInterval(-Self.settleDelay))
+        }
+        scheduleFlush()
+    }
+
+    /// Writes the settled events within `flushDelay`, and again until none is left.
+    private func scheduleFlush() {
+        guard !flushScheduled, !buffer.isEmpty else { return }
+        flushScheduled = true
+        flushQueue.asyncAfter(deadline: .now() + Self.flushDelay) { [weak self] in
+            guard let self = self else { return }
+            self.lock.withLock {
+                self.flushScheduled = false
+                self.sendBuffer(settledBefore: self.now().addingTimeInterval(-Self.settleDelay))
+                self.scheduleFlush()
             }
         }
     }
 
-    private func sendBuffer() {
-        guard !buffer.isEmpty else { return }
-        let batch = buffer
+    /// Hands the buffered events to the sink, all of them or only those logged before
+    /// `cutoff`, in order, on the serial queue.
+    private func sendBuffer(settledBefore cutoff: Date? = nil) {
+        let count = cutoff.map { cutoff in buffer.prefix { $0.date <= cutoff }.count } ?? buffer.count
+        guard count > 0 else { return }
+        let batch = Array(buffer.prefix(count))
         let sink = self.sink
-        buffer.removeAll()
+        buffer.removeFirst(count)
         flushQueue.async { sink(batch) }
     }
 

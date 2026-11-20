@@ -93,6 +93,31 @@ final class TypingJournalTests: XCTestCase {
                        ["k=a", "k=b"], "the taps written before the code field, and none typed in it")
     }
 
+    func testAWriteBySizeLeavesTheNewestTapsToTheGate() {
+        final class Clock: @unchecked Sendable { var now = Date(timeIntervalSince1970: 1000) }
+        let clock = Clock()
+        let collected = collected
+        let journal = TypingJournalRecorder(isToggleOn: { true }, now: { clock.now }, sink: { collected.add($0) })
+        journal.observeField(isSecureEntry: false, content: nil, document: "doc", keyboard: "fr-azerty")
+        // A burst far past the size limit, inside the settle delay: nothing may leave.
+        for i in 0..<(TypingJournalRecorder.maxBuffered + 10) {
+            journal.tap("a", dx: 0, dy: 0, time: Double(i) * 0.005, keyboard: "fr-azerty")
+        }
+        journal.waitUntilWritten()
+        XCTAssertEqual(collected.lines, [], "the burst may be the first keys of a code field")
+        journal.observeField(isSecureEntry: false, content: .password, document: "pw", keyboard: "fr-azerty")
+        XCTAssertEqual(written(journal), [])
+
+        // Settled events do leave by size.
+        journal.observeField(isSecureEntry: false, content: nil, document: "doc2", keyboard: "fr-azerty")
+        for i in 0..<TypingJournalRecorder.maxBuffered {
+            clock.now += 1
+            journal.tap("b", dx: 0, dy: 0, time: Double(i), keyboard: "fr-azerty")
+        }
+        journal.waitUntilWritten()
+        XCTAssertGreaterThan(collected.lines.filter { $0.hasPrefix("TJ TAP k=b") }.count, 0)
+    }
+
     func testOnlyEventsAfterTheLastClearAreWrittenAndOnlyWithTheToggleOn() {
         let before = TypingJournalEntry(date: Date(timeIntervalSince1970: 100), event: .field(keyboard: "fr-azerty"))
         let after = TypingJournalEntry(date: Date(timeIntervalSince1970: 200), event: .field(keyboard: "en-qwerty"))

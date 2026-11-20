@@ -353,8 +353,10 @@ public enum PersistentLog {
                 prunedForJournal = true
                 pruneOldEntries(url: url, cutoffDate: Date().addingTimeInterval(-retentionPeriod))
             }
+            let made = make()
+            guard !made.isEmpty else { return }
             var text = takePendingRepeatLine() ?? ""
-            text += make()
+            text += made
             resetCollapseState()
             coordinatedAppend(text, to: url)
             coordinatedTrim(url: url)

@@ -117,14 +117,17 @@ public enum TypingJournal {
         return formatter
     }()
 
+    /// The toggle and the time of the last Clear are read on the log's write queue, the
+    /// one Clear's rewrite runs on, so a batch is checked against a Clear made before it
+    /// reaches the file.
     private static let writeToLog: TypingJournalRecorder.Sink = { entries in
-        let kept = writable(
-            entries,
-            toggleOn: AppGroup.defaults.bool(forKey: SharedKeys.autocorrectDebugLogging),
-            clearedAt: AppGroup.defaults.double(forKey: clearedAtKey)
-        )
-        guard !kept.isEmpty else { return }
-        PersistentLog.appendDebugText { lines(for: kept, source: PersistentLog.source) }
+        PersistentLog.appendDebugText {
+            lines(for: writable(
+                entries,
+                toggleOn: AppGroup.defaults.bool(forKey: SharedKeys.autocorrectDebugLogging),
+                clearedAt: AppGroup.defaults.double(forKey: clearedAtKey)
+            ), source: PersistentLog.source)
+        }
     }
 }
 #endif
