@@ -232,14 +232,14 @@ final class AOSPTrieEngine {
         return expandContractions(profile: profile, word: word, provider: self)
     }
 
-    /// Try adding accents to an unaccented word and check if the result exists.
-    /// French: "deja" → "déjà", "apres" → "après", "tres" → "très".
-    /// Spanish: "espanol" → "español".
+    /// Whether a word typed without its accents gets them back, from the corpus counts
+    /// of its spellings and the previous word (#994).
+    /// French: "deja" → "déjà", "arrive" after "est" → "arrivé". Spanish: "manana" → "mañana".
     ///
-    /// Returns nil for languages whose `LanguageProfile.accentMap` is empty (English).
-    func accentExpansion(_ word: String) -> String? {
-        guard let profile = currentProfile else { return nil }
-        return expandAccents(profile: profile, word: word, provider: self)
+    /// Keeps the typed word for languages whose `LanguageProfile.accentMap` is empty (English).
+    func accentRestoration(_ word: String, previousWord: String?) -> AccentRestoration.Decision {
+        guard let profile = currentProfile else { return .keepTyped }
+        return restoreAccents(profile: profile, word: word, previousWord: previousWord, provider: self)
     }
 
     // MARK: - N-gram prediction
@@ -312,7 +312,7 @@ final class AOSPTrieEngine {
 
 // MARK: - FrequencyProvider conformance
 //
-// Lets DictusCore autocorrect helpers (`expandAccents`, `expandContractions`)
+// Lets DictusCore autocorrect helpers (`restoreAccents`, `expandContractions`)
 // query the trie via the protocol without importing the bridge. `wordExists(_:)`
 // is already defined on the class and matches the protocol signature.
 extension AOSPTrieEngine: FrequencyProvider {

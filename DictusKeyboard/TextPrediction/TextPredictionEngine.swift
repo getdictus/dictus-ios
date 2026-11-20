@@ -360,37 +360,36 @@ class TextPredictionEngine {
             return nil  // User-learned word: no correction needed
         }
 
-        // Accent expansion runs BEFORE wordExists check.
-        // "tres" may exist in the trie as a low-frequency word, but "très" is far
-        // more common. The accent expansion uses frequency comparison to decide.
+        // Accent restoration runs BEFORE wordExists check.
+        // "arrive" is a word, but after "est" it is "arrivé"; "manana" is in the trie
+        // as a rare word, but "mañana" is 275 times as frequent (#994).
         // "deja" → "déjà", "apres" → "après", "tres" → "très"
         // The apostrophe prefix must be reassembled: wordToCheck is only the
         // part after the apostrophe, so "J'etais" checks "etais" → "étais" and
         // the correction is "j'" + "étais", not bare "étais".
-        if let accented = aospTrieEngine.accentExpansion(wordToCheck) {
-            let isCapitalized = word.first?.isUppercase == true
-            let display = { (spelling: String) -> String in
-                let full = (apostrophePrefix ?? "") + spelling
-                return isCapitalized ? full.capitalized : full
-            }
-            // Two accented spellings of the same letters, equally likely (#993):
-            // `reserve` is `réserve` or `réservé`. Keep what was typed, offer both.
-            if let spellings = CorrectionRanking.ambiguousAccentSpellings(
-                typed: wordToCheck,
-                candidates: rankedCandidates(for: wordToCheck, previousWord: previousWord)
-            ) {
-                #if DEBUG
-                AutocorrectDebugLog.autocorrectSkipped(word: word, reason: "ambiguous-accent")
-                #endif
-                return CheckedWord(.suggest(spellings.map(display)))
-            }
+        let isCapitalized = word.first?.isUppercase == true
+        let display = { (spelling: String) -> String in
+            let full = (apostrophePrefix ?? "") + spelling
+            return isCapitalized ? full.capitalized : full
+        }
+        switch aospTrieEngine.accentRestoration(wordToCheck, previousWord: previousWord) {
+        case .restore(let accented):
             let corrected = display(accented)
             #if DEBUG
             AutocorrectDebugLog.autocorrectDecision(
-                original: word, corrected: corrected, branch: "accent", prevWord: nil
+                original: word, corrected: corrected, branch: "accent", prevWord: previousWord
             )
             #endif
             return CheckedWord(correction: corrected, alternatives: [])
+        case .ambiguous(let spellings):
+            // Two accented spellings, equally likely (#993): `reserve` is `réserve` or
+            // `réservé`. Keep what was typed, offer both.
+            #if DEBUG
+            AutocorrectDebugLog.autocorrectSkipped(word: word, reason: "ambiguous-accent")
+            #endif
+            return CheckedWord(.suggest(spellings.map(display)))
+        case .keepTyped:
+            break
         }
 
         // Valid word guard: if the word exists in the trie dictionary, it's correct.
