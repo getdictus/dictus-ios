@@ -160,6 +160,26 @@ struct ProTrialAnnouncementView: View {
     /// ones the keyboard fan and the onboarding already say.
     @ViewBuilder
     private var smartModeNote: some View {
+        if !runsSmartModes {
+            // The definitive reasons (#922): this iPhone gets the trial but never
+            // Smart Modes, and the row says so in the paywall's words. Checked before
+            // the engine state, which only speaks to a capable iPhone.
+            Label {
+                Text("iPhone with Apple Intelligence")
+            } icon: {
+                Image(systemName: "iphone")
+            }
+            .font(.dictusCaption)
+            .foregroundColor(.secondary)
+            .fixedSize(horizontal: false, vertical: true)
+        } else {
+            capableSmartModeNote
+        }
+    }
+
+    /// The note for a capable iPhone whose Apple Intelligence is not ready yet.
+    @ViewBuilder
+    private var capableSmartModeNote: some View {
         switch PolishAvailability.state {
         case .appleIntelligenceNotEnabled:
             Text("Turn on Apple Intelligence in iOS Settings to use Smart Modes.")
@@ -176,18 +196,7 @@ struct ProTrialAnnouncementView: View {
                 .foregroundColor(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
         default:
-            // The definitive reasons (#922): this iPhone gets the trial but never
-            // Smart Modes, and the row says so in the paywall's words.
-            if !runsSmartModes {
-                Label {
-                    Text("iPhone with Apple Intelligence")
-                } icon: {
-                    Image(systemName: "iphone")
-                }
-                .font(.dictusCaption)
-                .foregroundColor(.secondary)
-                .fixedSize(horizontal: false, vertical: true)
-            }
+            EmptyView()
         }
     }
 
