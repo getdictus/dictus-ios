@@ -395,6 +395,7 @@ private struct SceneToolbar: View {
             recoveredTranscriptionPending: false,
             offersDictationUndo: offersUndo,
             hasSuggestions: false,
+            offersPaste: false,
             dictationUnavailable: false,
             polishUnavailable: false,
             armedModeName: armed?.localizedDisplayName,
