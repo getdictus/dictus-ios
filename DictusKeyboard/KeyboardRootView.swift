@@ -69,6 +69,10 @@ struct KeyboardRootView: View {
     /// changes the pasteboard. Not while suggestions show: the offer cannot win the
     /// slot then, so the pasteboard round trip would buy nothing.
     @State private var offersPaste = false
+
+    /// When the offered copy's window ends. Keys the expiry task, so a newer copy
+    /// replacing an offered one re-arms it.
+    @State private var pasteOfferExpiry: Date?
     private let clipboardOffer = ClipboardPasteOffer()
 
     /// The panel's Pro entry as the App Group says it is now.
@@ -427,14 +431,17 @@ struct KeyboardRootView: View {
         // Fires on every keystroke, so it reads the change count alone and goes on
         // to the full check only when the clipboard has moved.
         .onReceive(NotificationCenter.default.publisher(for: .dictusHostDocumentDidChange)) { _ in
-            guard suggestionState.suggestions.isEmpty,
+            // Owner only: the sighting it records is shared through the App Group, and a
+            // hidden controller recording it first would make the visible one skip.
+            guard state.activeControllerID == controllerID, state.isKeyboardVisible,
+                  suggestionState.suggestions.isEmpty,
                   state.controller?.hasFullAccess == true,
                   UIPasteboard.general.changeCount != clipboardOffer.lastSeenChangeCount else { return }
             refreshPasteOffer()
         }
         // Takes Paste down when its window runs out, on a keyboard nobody touches.
-        .task(id: offersPaste) {
-            guard offersPaste, let expiry = clipboardOffer.expiry() else { return }
+        .task(id: pasteOfferExpiry) {
+            guard let expiry = pasteOfferExpiry else { return }
             let remaining = max(expiry.timeIntervalSinceNow, 0) + 0.5
             try? await Task.sleep(nanoseconds: UInt64(remaining * 1_000_000_000))
             guard !Task.isCancelled else { return }
@@ -550,6 +557,7 @@ struct KeyboardRootView: View {
             hasFullAccess: state.controller?.hasFullAccess ?? false,
             pasteboard: Self.pasteboardSnapshot()
         )
+        pasteOfferExpiry = offersPaste ? clipboardOffer.expiry() : nil
     }
 
     private static func pasteboardSnapshot() -> PasteboardSnapshot {
@@ -569,11 +577,17 @@ struct KeyboardRootView: View {
     /// mirror arming are `insertVoiceNote`'s, for the same reasons.
     private func pasteClipboard(_ providers: [NSItemProvider]) {
         let changeCount = UIPasteboard.general.changeCount
+        let documentAtTap = state.controller.flatMap {
+            DictusTextProxyIdentity.documentIdentifier(of: $0.textDocumentProxy)
+        }
         Task { @MainActor in
             let text = await Self.insertableText(from: providers)
+            // The load is asynchronous: if focus moved to another field meanwhile, the
+            // text is not for it. The offer stays, so the user can paste again.
             guard let text, !text.isEmpty,
                   state.activeControllerID == controllerID, state.isKeyboardVisible,
-                  let proxy = state.controller?.textDocumentProxy else {
+                  let proxy = state.controller?.textDocumentProxy,
+                  DictusTextProxyIdentity.documentIdentifier(of: proxy) == documentAtTap else {
                 refreshPasteOffer()
                 return
             }
