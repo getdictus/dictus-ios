@@ -70,6 +70,11 @@ class SuggestionState: ObservableObject {
     /// a background queue and cannot read UITextDocumentProxy themselves.
     var hostPolicy: HostFieldPolicy = .allowed
 
+    /// Decides `hostPolicy` across the readings of one field, so a host that turns
+    /// autocorrection off after an @ mention does not turn Dictus's off (#1004).
+    /// Main thread only, like the proxy it reads.
+    private var hostPolicyTracker = HostFieldPolicyTracker()
+
     /// Shared engine — heavy resources (frequency dict, trie) are process-wide singletons
     /// to avoid the per-controller leak documented in #134.
     private let engine = TextPredictionEngine.shared
@@ -89,6 +94,20 @@ class SuggestionState: ObservableObject {
     /// Without coalescing, rapid typing queues 6-10 suggestion computations per second,
     /// all running to completion. With coalescing, only the latest keystroke runs.
     private var currentSuggestionWork: DispatchWorkItem?
+
+    /// The host field's policy for the proxy's current traits (#200, #1004).
+    /// Returns it without storing it: callers compare it to `hostPolicy` first.
+    ///
+    /// - Parameter fieldFocused: the keyboard is appearing, so this reading is the
+    ///   field's focus reading.
+    func readHostPolicy(from proxy: UITextDocumentProxy, fieldFocused: Bool = false) -> HostFieldPolicy {
+        if fieldFocused { hostPolicyTracker.fieldFocused() }
+        return hostPolicyTracker.policy(
+            for: HostInputTraits.traits(for: proxy),
+            document: DictusTextProxyIdentity.documentIdentifier(of: proxy)?.uuidString,
+            text: (proxy.documentContextBeforeInput ?? "") + (proxy.documentContextAfterInput ?? "")
+        )
+    }
 
     /// Whether autocorrect is enabled (reads from App Group shared preferences).
     var autocorrectEnabled: Bool {
@@ -112,7 +131,7 @@ class SuggestionState: ObservableObject {
     /// completions but space applies a different correction, that's confusing.
     func update(proxy: UITextDocumentProxy) {
         // Host field traits gate (#200): search/URL/email fields get no suggestions.
-        hostPolicy = HostInputTraits.policy(for: proxy)
+        hostPolicy = readHostPolicy(from: proxy)
         guard hostPolicy.suggestionsAllowed else {
             clear()
             return

@@ -11,14 +11,15 @@ import DictusCore
 
 enum HostInputTraits {
 
-    /// Reads the proxy's traits and evaluates the field policy.
+    /// Reads the proxy's traits. The policy is decided from successive readings by
+    /// `HostFieldPolicyTracker` (#1004), which `SuggestionState` owns.
     ///
     /// NOTE: traits are only accurate once the host connection exists
     /// (viewWillAppear onward) — same caveat as needsInputModeSwitchKey.
     /// UITextInputTraits members are optional ObjC requirements, hence the
     /// optional chaining with permissive defaults (missing trait = normal field).
-    static func policy(for proxy: UITextDocumentProxy) -> HostFieldPolicy {
-        HostFieldPolicy.evaluate(
+    static func traits(for proxy: UITextDocumentProxy) -> HostFieldTraits {
+        HostFieldTraits(
             keyboard: keyboardKind(proxy.keyboardType),
             content: contentKind(proxy.textContentType),
             autocorrectionDisabled: proxy.autocorrectionType == .no,
