@@ -1,5 +1,6 @@
 // DictusKeyboard/Views/ToolbarView.swift
 import SwiftUI
+import UniformTypeIdentifiers
 import DictusCore
 
 /// Toolbar displayed above the keyboard with app shortcut and AnimatedMicButton.
@@ -63,6 +64,13 @@ struct ToolbarView: View {
     var suggestions: [String] = []
     var suggestionMode: SuggestionMode = .idle
     var onSuggestionTap: ((Int) -> Void)?
+
+    /// Whether a recent copy is waiting to be pasted (#634). The policy is
+    /// `ClipboardPasteOffer`'s; this is only the answer.
+    var offersPaste: Bool = false
+
+    /// Receives what the user chose to paste, after the tap on the system Paste control.
+    var onPaste: (([NSItemProvider]) -> Void)?
 
     /// Whether the last dictation insertion can still be undone (#266).
     /// Transient by construction: it is set for a few seconds after an insertion
@@ -293,6 +301,7 @@ struct ToolbarView: View {
             recoveredTranscriptionPending: showsRecoveredTranscription,
             offersDictationUndo: showsDictationUndo,
             hasSuggestions: !suggestions.isEmpty,
+            offersPaste: offersPaste,
             dictationUnavailable: !supportsDictation,
             polishUnavailable: showsPolishUnavailable,
             armedModeName: armedSmartMode?.localizedDisplayName,
@@ -320,6 +329,9 @@ struct ToolbarView: View {
                 mode: suggestionMode,
                 onTap: { index in onSuggestionTap?(index) }
             )
+        case .paste:
+            pasteButton
+            Spacer()
         case .dictationUnavailable:
             dictationUnavailableNotice
         case .polishUnavailable:
@@ -335,6 +347,22 @@ struct ToolbarView: View {
         case .empty:
             Spacer()
         }
+    }
+
+    /// The system Paste control (#634), which is `UIPasteControl` under SwiftUI.
+    ///
+    /// WHY the system control and not a Dictus-drawn button: a tap on it is the user's
+    /// own paste, so iOS hands over the item without the "Allow Paste" banner a plain
+    /// `UIPasteboard` read can raise. It also brings its own localized title. The price
+    /// is that iOS owns its look; only tint, shape and label style are ours.
+    private var pasteButton: some View {
+        PasteButton(supportedContentTypes: [.plainText, .url]) { providers in
+            onPaste?(providers)
+        }
+        .labelStyle(.titleAndIcon)
+        .buttonBorderShape(.capsule)
+        .tint(.dictusAccent)
+        .accessibilityIdentifier("keyboard.paste")
     }
 
     /// WHY not red (#313, decided 2026-08-25): red is the recording overlay's colour in
