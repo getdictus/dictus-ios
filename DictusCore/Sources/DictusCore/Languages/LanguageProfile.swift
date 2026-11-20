@@ -56,6 +56,17 @@ public struct LanguageProfile: Sendable {
     /// Empty for languages without length-changing collapses.
     public let collapseRules: [(from: String, to: String)]
 
+    /// Known misspellings, lowercase, with their correct form: the entries
+    /// `tools/misspellings/` removed from the word list (`teh` → `the`). Read
+    /// with `overrides`, and kept apart from it because it is generated from a
+    /// public list rather than curated. See `KnownMisspellings.swift`.
+    public let misspellings: [String: String]
+
+    /// Contractions typed without their apostrophe that are also words on their
+    /// own (`ill` for `I'll`), corrected only where the words before call for
+    /// the contraction. See `ContextualContraction`.
+    public let contextualContractions: [ContextualContraction]
+
     public init(
         code: String,
         displayName: String,
@@ -66,7 +77,9 @@ public struct LanguageProfile: Sendable {
         overrides: [String: String],
         accentMap: [Character: [Character]],
         contractionPrefixes: [String],
-        collapseRules: [(from: String, to: String)] = []
+        collapseRules: [(from: String, to: String)] = [],
+        misspellings: [String: String] = [:],
+        contextualContractions: [ContextualContraction] = []
     ) {
         self.code = code
         self.displayName = displayName
@@ -78,6 +91,8 @@ public struct LanguageProfile: Sendable {
         self.accentMap = accentMap
         self.contractionPrefixes = contractionPrefixes
         self.collapseRules = collapseRules
+        self.misspellings = misspellings
+        self.contextualContractions = contextualContractions
     }
 }
 

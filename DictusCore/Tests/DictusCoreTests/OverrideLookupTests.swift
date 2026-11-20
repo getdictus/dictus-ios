@@ -93,6 +93,33 @@ final class OverrideLookupTests: XCTestCase {
         XCTAssertNil(applyOverride(profile: englishProfile, word: "ill"))
     }
 
+    // MARK: - Known misspellings (#995)
+
+    func test_english_listedMisspellingsCorrectToTheirTarget() {
+        // Left to the trie, these became ten, relieve, deprive and asn.
+        XCTAssertEqual(applyOverride(profile: englishProfile, word: "teh"), "the")
+        XCTAssertEqual(applyOverride(profile: englishProfile, word: "recieve"), "receive")
+        XCTAssertEqual(applyOverride(profile: englishProfile, word: "beleive"), "believe")
+        XCTAssertEqual(applyOverride(profile: englishProfile, word: "adn"), "and")
+        XCTAssertEqual(applyOverride(profile: englishProfile, word: "Definately"), "Definitely")
+    }
+
+    func test_english_listedRealWordsAreNotCorrected() {
+        // Named by the source list, kept because they are words.
+        XCTAssertNil(applyOverride(profile: englishProfile, word: "thru"))
+        XCTAssertNil(applyOverride(profile: englishProfile, word: "loosing"))
+    }
+
+    func test_spanish_listedMisspellingsCorrectToTheirTarget() {
+        XCTAssertEqual(applyOverride(profile: spanishProfile, word: "desici\u{00F3}n"), "decisi\u{00F3}n")
+        XCTAssertEqual(applyOverride(profile: spanishProfile, word: "llendo"), "yendo")
+    }
+
+    func test_spanish_missingAccentIsNotAMisspelling() {
+        // The accent rule's case (#994), not this list's.
+        XCTAssertNil(applyOverride(profile: spanishProfile, word: "tambien"))
+    }
+
     // MARK: - Spanish overrides (empty per ADR 0001)
 
     func test_spanish_anyWordReturnsNilBecauseOverridesEmpty() {
