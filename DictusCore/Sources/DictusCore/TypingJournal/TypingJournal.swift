@@ -91,7 +91,7 @@ public enum TypingJournal {
     /// WHY whole seconds: `PersistentLog.pruneOldEntries` keeps a line whose timestamp
     /// it cannot parse, and it parses without fractional seconds. A finer stamp would
     /// make every journal line outlive the 7 days. The taps carry their own intervals.
-    static func lines(for entries: [TypingJournalEntry], source: String) -> String {
+    public static func lines(for entries: [TypingJournalEntry], source: String) -> String {
         entries.map { "[\(timestampFormatter.string(from: $0.date))] DEBUG   [keyboard] <\(source)> \($0.event.line)\n" }
             .joined()
     }
