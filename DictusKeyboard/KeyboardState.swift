@@ -714,7 +714,7 @@ class KeyboardState: ObservableObject {
         // so there is nothing left to adopt.
         // Spike: a dictation running in this process owns the status; the App Group's
         // `idle` describes the app, which is not involved.
-        if MainActor.assumeIsolated({ InKeyboardDictation.shared.isActive }) || reconcileIfOrphaned(source: "keyboard-refresh") { return }
+        if MainActor.assumeIsolated({ InKeyboardDictation.shared.ownsKeyboardStatus }) || reconcileIfOrphaned(source: "keyboard-refresh") { return }
 
         if let rawStatus = defaults.string(forKey: SharedKeys.dictationStatus),
            let status = DictationStatus(rawValue: rawStatus) {

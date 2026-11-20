@@ -415,7 +415,8 @@ public enum SharedKeys {
     public static let dictationTally = "dictus.dictationTally"
 
     // MARK: - Experiments
-    /// Bool, default false: "Experiments > Dictate in the keyboard" (spike). When the app
+    /// Bool, absent = `InKeyboardDictationRoute.defaultEnabled` (on for the spike):
+    /// "Experiments > Dictate in the keyboard". When the app
     /// is cold, the keyboard records and transcribes by itself instead of opening the
     /// app. See `InKeyboardDictationRoute`.
     public static let inKeyboardDictationEnabled = "dictus.experiments.inKeyboardDictation"

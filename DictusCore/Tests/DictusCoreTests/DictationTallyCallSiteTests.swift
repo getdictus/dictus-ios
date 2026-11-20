@@ -13,6 +13,7 @@ import XCTest
 final class DictationTallyCallSiteTests: XCTestCase {
 
     private static let coordinatorPath = "DictusApp/DictationCoordinator.swift"
+    private static let inKeyboardPath = "DictusKeyboard/InKeyboardDictation.swift"
     private static let voiceNotesPath = "DictusApp/VoiceNotes/VoiceNoteProcessor.swift"
     private static let tallyPath = "DictusCore/Sources/DictusCore/Stats/DictationTally.swift"
     private static let recordCall = "DictationTally.record("
@@ -70,7 +71,9 @@ final class DictationTallyCallSiteTests: XCTestCase {
     }
 
     /// Nothing else in the app targets writes the tally: the coordinator's one call is
-    /// the only way in, so only dictations count.
+    /// the only way in, so only dictations count. Spike: an in-keyboard dictation (the
+    /// app cold, `InKeyboardDictation`) never reaches the coordinator, so it is the
+    /// second dictation writer and cannot double-count one the app saw.
     func testTheCoordinatorIsTheOnlyWriter() throws {
         let root = repoRoot()
         var writers: [String] = []
@@ -84,7 +87,7 @@ final class DictationTallyCallSiteTests: XCTestCase {
                 }
             }
         }
-        XCTAssertEqual(writers, [Self.coordinatorPath])
+        XCTAssertEqual(writers.sorted(), [Self.coordinatorPath, Self.inKeyboardPath].sorted())
     }
 
     // MARK: - The entry the coordinator calls
@@ -120,5 +123,17 @@ final class DictationTallyCallSiteTests: XCTestCase {
             .deletingLastPathComponent()  // Tests
             .deletingLastPathComponent()  // DictusCore
             .deletingLastPathComponent()  // repo root
+    }
+}
+
+extension DictationTallyCallSiteTests {
+    /// Spike: the in-keyboard writer counts every user too (#726), with no Pro gate.
+    func testTheInKeyboardWriterReadsNoGate() throws {
+        let lines = try codeLines(at: Self.inKeyboardPath)
+        let call = try XCTUnwrap(lines.firstIndex { $0.contains(Self.recordCall) })
+        let window = lines[max(0, call - 3)...call].joined(separator: "\n")
+        for gate in Self.gates {
+            XCTAssertFalse(window.contains(gate), "in-keyboard counting is gated on \(gate)")
+        }
     }
 }

@@ -23,10 +23,16 @@ final class InKeyboardDictation {
     /// Recording or transcribing here, in this process.
     private(set) var isActive = false
 
+    /// Whether this process owns the dictation status: recording, transcribing, or its
+    /// transcript being polished by `KeyboardPolishCoordinator` on this path. While true,
+    /// `KeyboardState.refreshFromDefaults` must not adopt the App Group's `idle`, which
+    /// describes an app that is not involved.
+    var ownsKeyboardStatus: Bool {
+        isActive || KeyboardPolishCoordinator.shared.isPolishingInKeyboardTail
+    }
+
     /// Hard cap on one recording. 120 s of 16 kHz Int16 is 3.75 MB, held in this process.
     private static let maximumSeconds: Double = 120
-    /// Bars the overlay draws, matching what DictusApp writes.
-    private static let waveformBarCount = 30
 
     private lazy var recognizer: InKeyboardRecognizer? = InKeyboardRecognizerFactory.make()
     private var capture: InKeyboardWebCapture?
@@ -34,6 +40,14 @@ final class InKeyboardDictation {
     private var recording = InKeyboardRecording()
     private var startedAt: Date?
     private var tick: Timer?
+    /// The overlay's 5 Hz clock, the cadence DictusApp publishes at (`WaveformFeed`).
+    private var waveformClock: Timer?
+    private var waveform = WaveformFeed()
+    /// How the WebView's chunks arrived over the last second, logged by `everySecond`:
+    /// the irregularity the 5 Hz clock absorbs.
+    private var chunkArrivals = ChunkArrivalTrace()
+    /// Samples memory while the tail (vocabulary, polish, Smart Mode) runs here.
+    private var tailMemoryClock: Timer?
     private var transcription: Task<Void, Never>?
     private var memory = MemoryTrace()
     private weak var state: KeyboardState?
@@ -98,12 +112,17 @@ final class InKeyboardDictation {
         state.dictationStatus = .recording
         state.waveformEnergy = []
         state.recordingElapsed = 0
+        waveform = WaveformFeed()
+        chunkArrivals = ChunkArrivalTrace()
 
         if let view = state.controller?.view { capture.attach(to: view) }
         capture.onEvent = { [weak self] event in self?.handle(event) }
         capture.start(testAudioBase64: Self.debugTestAudioBase64())
         tick = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
             MainActor.assumeIsolated { self?.everySecond() }
+        }
+        waveformClock = Timer.scheduledTimer(withTimeInterval: WaveformFeed.publishInterval, repeats: true) { [weak self] _ in
+            MainActor.assumeIsolated { self?.publishWaveform() }
         }
         Self.log("start", "engine=\(recognizer?.engineName ?? "none") lang=\(Self.languageCode()) \(MemoryTrace.reading())")
     }
@@ -138,7 +157,8 @@ final class InKeyboardDictation {
             Self.log("captureStarted", "latencyMs=\(latency) contextRate=\(Int(rate)) device=\(device) \(MemoryTrace.reading())")
         case .samples(let data, let rms):
             recording.pcm16.append(data)
-            pushWaveform(rms: rms)
+            waveform.append(pcm16: data)
+            chunkArrivals.note(samples: data.count / 2, rms: rms)
             if recording.seconds >= Self.maximumSeconds { finishRecording(reason: "max-duration") }
         case .interrupted(let reason):
             Self.log("captureInterrupted", "reason=\(reason)")
@@ -148,19 +168,18 @@ final class InKeyboardDictation {
         }
     }
 
-    private func pushWaveform(rms: Float) {
-        guard let state else { return }
-        // Same 0...1 range the app's bars use; speech RMS sits around 0.02–0.2.
-        let level = min(1, max(0, (20 * log10(max(rms, 0.000_1)) + 50) / 40))
-        var bars = state.waveformEnergy
-        bars.append(level)
-        if bars.count > Self.waveformBarCount { bars.removeFirst(bars.count - Self.waveformBarCount) }
-        state.waveformEnergy = bars
-        state.recordingElapsed = recording.seconds
+    /// Publish on the app's clock, never on a chunk's arrival. `KeyboardWaveformDriver`
+    /// eases toward each published array frame by frame, so the motion now depends on
+    /// the audio and the 5 Hz clock, as it does for a recording in DictusApp.
+    private func publishWaveform() {
+        guard let state, isActive else { return }
+        state.waveformEnergy = waveform.snapshot()
+        state.recordingElapsed = Double(waveform.sampleCount) / InKeyboardRecording.sampleRate
     }
 
     private func everySecond() {
         memory.sample()
+        Self.log("captureCadence", chunkArrivals.drain())
         // iOS rebuilds keyboard controllers mid-dictation (#281). Keep the web view in
         // whichever view is on screen, or WebKit throttles the capture.
         if let view = state?.controller?.view { capture?.attach(to: view) }
@@ -182,22 +201,80 @@ final class InKeyboardDictation {
         state.dictationStatus = .transcribing
         HapticFeedback.recordingStopped()
         let code = Self.languageCode()
+        // The per-dictation snapshot DictusApp takes at the same moment (#226, #79):
+        // language policy and armed Smart Mode, read once so a change on the toolbar
+        // during transcription cannot make the polish disagree with the transcript.
+        let policy = TranscriptionLanguagePolicy.snapshot()
+        let smartMode = SmartModeStore.resolveArmedMode()
         let begun = Date()
         transcription = Task { [weak self] in
             do {
-                let text = try await recognizer.transcribe(finished, languageCode: code)
+                let text = try await recognizer.transcribe(finished, languageCode: code, contextualStrings: Self.vocabularyTerms())
                 guard let self, !Task.isCancelled else { return }
                 Self.log(
                     "transcribed",
                     "engine=\(recognizer.engineName) ms=\(Int(Date().timeIntervalSince(begun) * 1000)) chars=\(text.count) \(MemoryTrace.reading())"
                 )
-                self.isActive = false
                 self.transcription = nil
-                // The one insertion funnel: undo, haptics and the idle reset come with it.
-                self.state?.insertDictation(text)
+                self.runTail(engineText: text, policy: policy, smartMode: smartMode, seconds: finished.seconds)
             } catch {
                 guard let self, !Task.isCancelled else { return }
                 self.fail("transcription: \(error.localizedDescription)")
+            }
+        }
+    }
+
+    /// What DictusApp does between a transcript and its hand-off, done here
+    /// (`DictationCoordinator`, `handOffToKeyboard`), then the keyboard's own tail.
+    ///
+    /// 1. Custom vocabulary (#80) on the engine text: `DictationTranscript.corrected`.
+    /// 2. The words-dictated tally (#726).
+    /// 3. A History entry from the corrected raw, durable before any generation (#70,
+    ///    #361), updated in place with the final text by the coordinator.
+    /// 4. `KeyboardPolishCoordinator`: verbal punctuation, polish or the armed Smart Mode
+    ///    with Apple Foundation Models, the guardrail, the trailing separator and the
+    ///    insertion, exactly as for a transcript the app hands over.
+    private func runTail(engineText: String, policy: TranscriptionLanguagePolicy,
+                         smartMode: SmartModeResolution, seconds: Double) {
+        let transcript = DictationTranscript.corrected(engineText)
+        DictationTally.record(transcript.text, audioDuration: seconds)
+        let historyID = TranscriptionHistoryStore.shared.append(TranscriptionRecord(
+            text: transcript.text, policy: policy, duration: seconds
+        ))?.id
+        Self.log(
+            "tail",
+            "vocabularyChanged=\(transcript.engineRaw != nil) mode=\(smartMode.mode?.id ?? "normal") skipped=\(smartMode.skipped?.modeIdentifier ?? "none") history=\(historyID != nil) \(MemoryTrace.reading())"
+        )
+        isActive = false
+        startTailMemoryClock()
+        KeyboardPolishCoordinator.shared.handleInKeyboard(
+            transcript: transcript,
+            policy: policy,
+            smartMode: smartMode,
+            recordingDuration: seconds,
+            historyID: historyID
+        )
+    }
+
+    /// Memory while polish or a Smart Mode runs in this process, every 500 ms until the
+    /// coordinator lets go.
+    private func startTailMemoryClock() {
+        tailMemoryClock?.invalidate()
+        var peakKB = 0
+        var minimumAvailableKB = Int.max
+        var samples = 0
+        tailMemoryClock = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { [weak self] timer in
+            MainActor.assumeIsolated {
+                let footprint = MemoryFootprint.residentKB()
+                let available = MemoryTrace.availableKB()
+                peakKB = max(peakKB, footprint)
+                minimumAvailableKB = min(minimumAvailableKB, available)
+                samples += 1
+                Self.log("memory", "phase=tail t=\(samples * 500)ms footprintKB=\(footprint) availableKB=\(available)")
+                guard !KeyboardPolishCoordinator.shared.isPolishingInKeyboardTail else { return }
+                Self.log("memory", "phase=tail-done peakFootprintKB=\(peakKB) minAvailableKB=\(minimumAvailableKB) samples=\(samples)")
+                timer.invalidate()
+                self?.tailMemoryClock = nil
             }
         }
     }
@@ -221,6 +298,8 @@ final class InKeyboardDictation {
     private func endTicking() {
         tick?.invalidate()
         tick = nil
+        waveformClock?.invalidate()
+        waveformClock = nil
     }
 
     // MARK: - Web view
@@ -248,6 +327,13 @@ final class InKeyboardDictation {
     private static func languageCode() -> String {
         let keyboard = SupportedLanguage.active.rawValue
         return TranscriptionLanguageMode.active.resolvedLanguageCode(keyboardLanguageCode: keyboard) ?? keyboard
+    }
+
+    /// The Pro vocabulary's enabled terms, the strings offered to the recognizer. Empty
+    /// without the entitlement, as `CustomVocabulary.corrected` treats it.
+    private static func vocabularyTerms() -> [String] {
+        guard VocabularyAvailability.isEntitled else { return [] }
+        return VocabularyStore.loadEntries().filter(\.isEnabled).map(\.term)
     }
 
     /// Debug builds only: a WAV at the App Group root replaces the microphone, for a
@@ -333,5 +419,28 @@ extension KeyboardState {
             dictation.start(for: self)
             return true
         }
+    }
+}
+
+/// How the WebView delivered its chunks during the last second: count, samples, and the
+/// longest silence between two of them. Bursts show up as a high `maxGapMs` with the
+/// same sample total.
+private struct ChunkArrivalTrace {
+    private var chunks = 0
+    private var samples = 0
+    private var last: Date?
+    private var maxGap: TimeInterval = 0
+
+    mutating func note(samples count: Int, rms: Float) {
+        let now = Date()
+        if let last { maxGap = max(maxGap, now.timeIntervalSince(last)) }
+        last = now
+        chunks += 1
+        samples += count
+    }
+
+    mutating func drain() -> String {
+        defer { chunks = 0; samples = 0; maxGap = 0 }
+        return "chunks=\(chunks) samples=\(samples) maxGapMs=\(Int(maxGap * 1000))"
     }
 }

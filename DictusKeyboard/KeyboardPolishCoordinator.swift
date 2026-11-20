@@ -1,5 +1,7 @@
 // DictusKeyboard/KeyboardPolishCoordinator.swift
 import Foundation
+import FoundationModels
+import os
 import UIKit
 import DictusCore
 
@@ -67,6 +69,16 @@ final class KeyboardPolishCoordinator {
     /// not insert a raw whose polish is still coming — that would type it twice.
     var isPolishing: Bool { activePolish != nil }
 
+    /// Spike: the dictation being polished was recorded and transcribed in this process
+    /// (`InKeyboardDictation`), not handed over by DictusApp.
+    private var activeIsInKeyboardTail = false
+    /// Spike: the History entry `InKeyboardDictation` created from the raw, updated in
+    /// place with what was typed — the job `polishHandoffFinished` does in the app.
+    private var inKeyboardHistoryID: UUID?
+
+    /// Spike: a transcript from `InKeyboardDictation` is being polished here.
+    var isPolishingInKeyboardTail: Bool { activePolish != nil && activeIsInKeyboardTail }
+
     private init() {
         self.service = PolishService(sink: AppendOnlyPolishEventSink()) {
             // The #315 notice describes this process's gate since #361. Written to the
@@ -100,6 +112,8 @@ final class KeyboardPolishCoordinator {
             documentIdentifier: KeyboardState.shared.currentDocumentIdentifier
         )
         PendingDictationChannel.store(pending)
+        activeIsInKeyboardTail = false
+        inKeyboardHistoryID = nil
         handoffToken = defaults.string(forKey: SharedKeys.handoffToken)
         defaults.removeObject(forKey: SharedKeys.lastTranscriptionPolicy)
         defaults.removeObject(forKey: SharedKeys.lastTranscriptionEngineRaw)
@@ -114,6 +128,42 @@ final class KeyboardPolishCoordinator {
         activePolish = pending
         hasConcludedDisplay = false
         // `handoffToken` was read above, from the key this hand-off wrote.
+        startStageWatchdog(for: pending)
+        Task { await run(pending) }
+    }
+
+    /// Spike: the same tail for a transcript this process produced itself, with no app.
+    ///
+    /// Everything DictusApp writes beside the raw for `handle(raw:)` — the vocabulary
+    /// result, the policy snapshot, the Smart Mode resolution, the duration — arrives
+    /// here as arguments instead of through the App Group. From the claim on, the run is
+    /// the same code: `PendingDictation` written first, `PolishService` with the same
+    /// engine, guardrail and Smart Mode, the same document check and insertion funnel.
+    /// No hand-off token: there is no app waiting for `polishDidFinish`.
+    func handleInKeyboard(transcript: DictationTranscript,
+                          policy: TranscriptionLanguagePolicy,
+                          smartMode: SmartModeResolution,
+                          recordingDuration: TimeInterval,
+                          historyID: UUID?) {
+        let pending = PendingDictation(
+            raw: transcript.text,
+            engineRaw: transcript.engineRaw,
+            policy: policy,
+            smartMode: smartMode.mode,
+            skippedSmartMode: smartMode.skipped,
+            recordingDuration: recordingDuration,
+            documentIdentifier: KeyboardState.shared.currentDocumentIdentifier
+        )
+        PendingDictationChannel.store(pending)
+        handoffToken = nil
+        activeIsInKeyboardTail = true
+        inKeyboardHistoryID = historyID
+        PersistentLog.log(.polishHandoff(step: "claimed", outcome: "in-keyboard", chars: transcript.text.count))
+        memoryProbeSequence &+= 1
+        probeMemory("claimed")
+
+        activePolish = pending
+        hasConcludedDisplay = false
         startStageWatchdog(for: pending)
         Task { await run(pending) }
     }
@@ -243,6 +293,7 @@ final class KeyboardPolishCoordinator {
 
     private func run(_ pending: PendingDictation) async {
         probeMemory("beforePolish")
+        let polishStartedAt = Date()
         let outcome = await service.polish(
             raw: pending.raw,
             languagePolicy: pending.policy,
@@ -257,6 +308,14 @@ final class KeyboardPolishCoordinator {
         )
 
         probeMemory("afterPolish")
+        // Study: one line per run — the mode, Apple Foundation Models' availability as
+        // this process sees it, and the whole polish/Smart Mode latency.
+        PersistentLog.log(.diagnosticProbe(
+            component: "PolishRun",
+            instanceID: "\(memoryProbeSequence)",
+            action: "finished",
+            details: "mode=\(pending.smartMode?.id ?? "normal") inKeyboard=\(activeIsInKeyboardTail) fm=\(Self.foundationModelsAvailability()) ms=\(Int(Date().timeIntervalSince(polishStartedAt) * 1000)) produced=\(outcome.text != nil) failure=\(outcome.smartModeFailure.map { "\($0.outcome)" } ?? "none")"
+        ))
 
         // A newer dictation claimed the slot while this generation was in flight
         // (decision 15). It owns the pending record, the stage and the app's
@@ -590,7 +649,7 @@ final class KeyboardPolishCoordinator {
             component: "PolishMemory",
             instanceID: "\(memoryProbeSequence)",
             action: stage,
-            details: "mb=\(MemoryFootprint.residentMB())"
+            details: "mb=\(MemoryFootprint.residentMB()) footprintKB=\(MemoryFootprint.residentKB()) availableKB=\(os_proc_available_memory() / 1024) inKeyboard=\(activeIsInKeyboardTail)"
         ))
     }
 
@@ -734,6 +793,12 @@ final class KeyboardPolishCoordinator {
             ending = .nothing
         }
         PolishedTextChannel.record(ending)
+        // Spike: the History entry an in-keyboard dictation created from its raw gets the
+        // text that was produced, as `polishHandoffFinished` does for an app hand-off.
+        if let historyID = inKeyboardHistoryID, let reported {
+            TranscriptionHistoryStore.shared.updateText(id: historyID, to: reported)
+            inKeyboardHistoryID = nil
+        }
         // A refusal leaves the text waiting in DictusApp, and the banner says so (#860):
         // the user is usually still in the app they were typing in, and nothing else
         // tells them where the dictation went.
@@ -812,5 +877,16 @@ private extension PendingDictation {
     /// minute resurrection #357 Q4 measured.
     var ageMs: Int {
         Int((Date().timeIntervalSince1970 - claimedAt) * 1000)
+    }
+}
+
+extension KeyboardPolishCoordinator {
+    /// `SystemLanguageModel.default.availability`, as text for the log.
+    static func foundationModelsAvailability() -> String {
+        guard #available(iOS 26.0, *) else { return "unsupported-os" }
+        switch SystemLanguageModel.default.availability {
+        case .available: return "available"
+        case .unavailable(let reason): return "unavailable(\(reason))"
+        }
     }
 }

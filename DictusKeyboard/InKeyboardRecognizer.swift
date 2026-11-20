@@ -29,7 +29,9 @@ protocol InKeyboardRecognizer: AnyObject {
     func isReadyOnDevice(languageCode: String) async -> Bool
 
     /// Transcribe a finished recording. Throws when nothing usable came back.
-    func transcribe(_ recording: InKeyboardRecording, languageCode: String) async throws -> String
+    /// `contextualStrings` are the user's Pro vocabulary terms, offered to the engine as
+    /// recognition hints (empty when the user has none or is not entitled).
+    func transcribe(_ recording: InKeyboardRecording, languageCode: String, contextualStrings: [String]) async throws -> String
 }
 
 enum InKeyboardRecognizerError: LocalizedError {
@@ -85,8 +87,58 @@ final class AppleSpeechRecognizer: InKeyboardRecognizer {
     }
 
     func isReadyOnDevice(languageCode: String) async -> Bool {
-        guard let module = await Self.module(for: languageCode) else { return false }
-        return await Self.isInstalled(module)
+        guard let module = await Self.module(for: languageCode) else {
+            InKeyboardDictation.log("assetCheck", "lang=\(languageCode) supported=false speechTranscriberAvailable=\(SpeechTranscriber.isAvailable)")
+            return false
+        }
+        if await Self.isInstalled(module) { return true }
+        Self.provisionFromKeyboard(module)
+        return false
+    }
+
+    /// The keyboard reserves the locale and asks iOS for the model itself, so a keyboard
+    /// whose app was never opened since install does not depend on the app having done it.
+    ///
+    /// This tap still opens the app (the model is not there yet); the next one finds it
+    /// once iOS has installed it. Reservations are per bundle, which is the point: the
+    /// app's reservation of the same locale does not count for this one. Every step and
+    /// its answer goes to the log, because whether an extension may reserve and download
+    /// at all is what the device run has to tell.
+    private static var provisioning: Set<String> = []
+
+    private static func provisionFromKeyboard(_ module: Module) {
+        let locale = module.locale
+        guard !provisioning.contains(locale.identifier) else {
+            InKeyboardDictation.log("reserve", "locale=\(locale.identifier) skipped=already-in-flight")
+            return
+        }
+        provisioning.insert(locale.identifier)
+        Task {
+            defer { provisioning.remove(locale.identifier) }
+            let reservedBefore = await AssetInventory.reservedLocales.map(\.identifier)
+            InKeyboardDictation.log(
+                "reserve",
+                "locale=\(locale.identifier) reservedBefore=\(reservedBefore) max=\(AssetInventory.maximumReservedLocales)"
+            )
+            do {
+                let reserved = try await AssetInventory.reserve(locale: locale)
+                InKeyboardDictation.log("reserve", "locale=\(locale.identifier) result=\(reserved)")
+            } catch {
+                InKeyboardDictation.log("reserve", "locale=\(locale.identifier) error=\(error.localizedDescription)")
+            }
+            do {
+                guard let request = try await AssetInventory.assetInstallationRequest(supporting: [module.speechModule]) else {
+                    InKeyboardDictation.log("assetInstall", "locale=\(locale.identifier) request=none")
+                    return
+                }
+                InKeyboardDictation.log("assetInstall", "locale=\(locale.identifier) step=downloading")
+                try await request.downloadAndInstall()
+                let after = await AssetInventory.status(forModules: [module.speechModule])
+                InKeyboardDictation.log("assetInstall", "locale=\(locale.identifier) step=done status=\(after)")
+            } catch {
+                InKeyboardDictation.log("assetInstall", "locale=\(locale.identifier) error=\(error.localizedDescription)")
+            }
+        }
     }
 
     /// Installed per `AssetInventory`, or present in the module's `installedLocales`.
@@ -105,14 +157,15 @@ final class AppleSpeechRecognizer: InKeyboardRecognizer {
         case .dictation: installed = await DictationTranscriber.installedLocales
         }
         let listed = installed.contains { $0.identifier(.bcp47) == module.locale.identifier(.bcp47) }
+        let reserved = await AssetInventory.reservedLocales.contains { $0.identifier(.bcp47) == module.locale.identifier(.bcp47) }
         InKeyboardDictation.log(
             "assetCheck",
-            "module=\(module.name) locale=\(module.locale.identifier) status=\(status) inInstalledLocales=\(listed)"
+            "module=\(module.name) locale=\(module.locale.identifier) status=\(status) inInstalledLocales=\(listed) reservedByKeyboard=\(reserved)"
         )
         return status == .installed || listed
     }
 
-    func transcribe(_ recording: InKeyboardRecording, languageCode: String) async throws -> String {
+    func transcribe(_ recording: InKeyboardRecording, languageCode: String, contextualStrings: [String]) async throws -> String {
         guard let module = await Self.module(for: languageCode) else {
             throw InKeyboardRecognizerError.localeNotInstalled(languageCode)
         }
@@ -131,6 +184,7 @@ final class AppleSpeechRecognizer: InKeyboardRecognizer {
             options: SpeechAnalyzer.Options(priority: .userInitiated, modelRetention: .whileInUse)
         )
         let file = try AVAudioFile(forReading: url)
+        await Self.offer(contextualStrings, to: analyzer, module: module)
         try await analyzer.start(inputAudioFile: file, finishAfterFile: true)
 
         var transcript = AttributedString()
@@ -143,6 +197,26 @@ final class AppleSpeechRecognizer: InKeyboardRecognizer {
         let text = String(transcript.characters).trimmingCharacters(in: .whitespacesAndNewlines)
         guard !text.isEmpty else { throw InKeyboardRecognizerError.empty }
         return text
+    }
+
+    /// Study (#80 follow-up): the vocabulary as `AnalysisContext.contextualStrings`.
+    /// `setContext` is on `SpeechAnalyzer`, not on the module, so both transcribers get
+    /// it. Whether it is *accepted* is logged here; whether it *changes* anything is read
+    /// by comparing transcripts. Measured on macOS 26 (2026-11-20) with "Dictus" as the
+    /// only string: accepted by both modules, and neither changed "dicttu" / "dictée".
+    private static func offer(_ strings: [String], to analyzer: SpeechAnalyzer, module: Module) async {
+        guard !strings.isEmpty else {
+            InKeyboardDictation.log("contextualStrings", "module=\(module.name) terms=0 offered=false")
+            return
+        }
+        let context = AnalysisContext()
+        context.contextualStrings[.general] = strings
+        do {
+            try await analyzer.setContext(context)
+            InKeyboardDictation.log("contextualStrings", "module=\(module.name) terms=\(strings.count) accepted=true")
+        } catch {
+            InKeyboardDictation.log("contextualStrings", "module=\(module.name) terms=\(strings.count) accepted=false error=\(error.localizedDescription)")
+        }
     }
 
     private enum Module {
@@ -234,12 +308,18 @@ final class SimulatorHostRecognizer: InKeyboardRecognizer {
         return ok
     }
 
-    func transcribe(_ recording: InKeyboardRecording, languageCode: String) async throws -> String {
+    func transcribe(_ recording: InKeyboardRecording, languageCode: String, contextualStrings: [String]) async throws -> String {
         guard let url = base?.appendingPathComponent("transcribe") else { throw InKeyboardRecognizerError.unavailable }
         var request = URLRequest(url: url, timeoutInterval: 30)
         request.httpMethod = "POST"
         request.setValue(languageCode, forHTTPHeaderField: "X-Dictus-Language")
-        let (data, _) = try await URLSession.shared.upload(for: request, from: Self.wav(recording))
+        request.setValue(
+            contextualStrings.joined(separator: "|").addingPercentEncoding(withAllowedCharacters: .alphanumerics) ?? "",
+            forHTTPHeaderField: "X-Dictus-Context"
+        )
+        let (data, response) = try await URLSession.shared.upload(for: request, from: Self.wav(recording))
+        let note = (response as? HTTPURLResponse)?.value(forHTTPHeaderField: "X-Dictus-Context-Note") ?? "none"
+        InKeyboardDictation.log("contextualStrings", "module=simulator-host terms=\(contextualStrings.count) host=\(note)")
         let text = (String(bytes: data, encoding: .utf8) ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
         guard !text.isEmpty else { throw InKeyboardRecognizerError.empty }
         return text

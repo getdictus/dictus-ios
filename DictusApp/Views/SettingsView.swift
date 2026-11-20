@@ -94,9 +94,9 @@ struct SettingsView: View {
     #endif
 
     /// Spike: when the app is cold, the keyboard dictates by itself instead of opening
-    /// the app. Off by default. Read by `InKeyboardDictationRoute` in the keyboard.
+    /// the app. On by default in this spike build. Read by `InKeyboardDictationRoute`.
     @AppStorage(SharedKeys.inKeyboardDictationEnabled, store: UserDefaults(suiteName: AppGroup.identifier))
-    private var inKeyboardDictationEnabled = false
+    private var inKeyboardDictationEnabled = InKeyboardDictationRoute.defaultEnabled
 
     /// The keyboard language the pickers below operate on.
     private var keyboardLanguage: SupportedLanguage {

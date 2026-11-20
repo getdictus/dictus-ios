@@ -49,9 +49,16 @@ public enum InKeyboardDictationRoute: String, Equatable, Sendable {
         return .inKeyboard
     }
 
-    /// The setting, read from the App Group. Off unless the user turned it on.
+    /// Whether the setting is on when the user never touched it. On for this spike build:
+    /// the test is to install and dictate without ever opening the app, so the keyboard
+    /// cannot wait for a toggle only the app shows.
+    public static let defaultEnabled = true
+
+    /// The setting, read from the App Group. An absent key reads as `defaultEnabled`;
+    /// the toggle writes an explicit value either way.
     public static func isSettingEnabled(in defaults: UserDefaults) -> Bool {
-        defaults.bool(forKey: SharedKeys.inKeyboardDictationEnabled)
+        guard defaults.object(forKey: SharedKeys.inKeyboardDictationEnabled) != nil else { return defaultEnabled }
+        return defaults.bool(forKey: SharedKeys.inKeyboardDictationEnabled)
     }
 
     /// The full locale to ask the speech model for, from a bare dictation language.

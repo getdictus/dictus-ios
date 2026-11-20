@@ -115,11 +115,14 @@ final class InKeyboardDictationRouteTests: XCTestCase {
 
     // MARK: - Inputs
 
-    func testSettingIsOffByDefault() {
-        XCTAssertFalse(InKeyboardDictationRoute.isSettingEnabled(in: defaults))
+    func testSettingIsOnByDefaultForTheSpike() {
+        XCTAssertTrue(InKeyboardDictationRoute.defaultEnabled)
+        XCTAssertTrue(InKeyboardDictationRoute.isSettingEnabled(in: defaults))
     }
 
     func testSettingReadsTheAppGroupKey() {
+        defaults.set(false, forKey: SharedKeys.inKeyboardDictationEnabled)
+        XCTAssertFalse(InKeyboardDictationRoute.isSettingEnabled(in: defaults))
         defaults.set(true, forKey: SharedKeys.inKeyboardDictationEnabled)
         XCTAssertTrue(InKeyboardDictationRoute.isSettingEnabled(in: defaults))
     }
