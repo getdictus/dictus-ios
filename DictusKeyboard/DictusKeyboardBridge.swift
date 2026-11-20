@@ -960,6 +960,13 @@ final class DictusKeyboardBridge: NSObject,
             wordWasEvaluated = false
         }
 
+        #if DEBUG
+        // Everything the decision logs between here and the return is the word's (#1001).
+        var journalFinal = freshWord
+        beginJournalWord(freshWord, previous: previousWord, committedBy: key, bar: state)
+        defer { TypingJournal.endWord(final: journalFinal, autocorrectRan: autocorrectRuns) }
+        #endif
+
         let proposal = autocorrectRuns
             ? state.performSpellCheck(
                 freshWord, previousWord: previousWord, isAtSentenceStart: atSentenceStart
@@ -993,6 +1000,9 @@ final class DictusKeyboardBridge: NSObject,
             ) {
             case .applied:
                 memory.correctionApplied(prefix: prefix, corrected: correction)
+                #if DEBUG
+                journalFinal = correction
+                #endif
                 return true
 
             case .refused(let reason):
@@ -1109,62 +1119,6 @@ final class DictusKeyboardBridge: NSObject,
         return String(context.suffix(30))
     }
 
-    // MARK: - Refused corrections (#872)
-
-    /// The refusal memory, pointed at the document being edited.
-    var rejectionMemory: AutocorrectRejectionMemory? {
-        guard let memory = suggestionState?.rejectionMemory else { return nil }
-        let document = controller.flatMap {
-            DictusTextProxyIdentity.documentIdentifier(of: $0.textDocumentProxy)?.uuidString
-        }
-        memory.enter(document: document)
-        return memory
-    }
-
-    /// The host changed the text. When it left the document empty, as Messages does
-    /// on sending without changing the documentIdentifier, nothing remembered is at
-    /// any position any more. `hasText` answers for the whole document, so a caret
-    /// at the start of a non-empty field does not count.
-    func hostTextChanged() {
-        guard let proxy = controller?.textDocumentProxy, !proxy.hasText else { return }
-        rejectionMemory?.documentEmptied()
-    }
-
-    /// Learns a word restored by Undo once the user moves on past it unchanged.
-    /// Called before anything is inserted after a word boundary.
-    private func learnWordMovedPast() {
-        guard let state = suggestionState, let memory = rejectionMemory,
-              let word = memory.movingOn(context: controller?.textDocumentProxy.documentContextBeforeInput)
-        else { return }
-        // Same gate as every other learning site: autocorrect ran, and the mirror
-        // can be trusted (#287 decision 8, #530).
-        guard state.autocorrectEnabled, state.hostPolicy.autocorrectAllowed, !mirrorSync.isSuspect
-        else { return }
-        UserDictionary.shared.learn(word)
-    }
-
-    /// Takes a backspace into a correction Dictus made as the user refusing it.
-    private func noteDeletion(before: String?, after: String?) {
-        guard let corrected = rejectionMemory?.textDeleted(before: before, after: after) else { return }
-        #if DEBUG
-        AutocorrectDebugLog.autocorrectRefused(corrected: corrected, by: "backspace")
-        #endif
-    }
-
-    /// The space closes the undo window of the correction before it, except the
-    /// space typed right after the punctuation mark that made a correction (#872):
-    /// `cuisinr,` + space keeps `cuisine`'s undo chip until the next space.
-    private func closeUndoWindowAtSpace() {
-        guard let undo = suggestionState?.pendingUndo else { return }
-        if !undo.insertedSpace,
-           let context = controller?.textDocumentProxy.documentContextBeforeInput,
-           let mark = context.last, AutocorrectTrigger.commitsWord(String(mark)),
-           context.dropLast().hasSuffix(undo.correctedWord) {
-            return
-        }
-        suggestionState?.pendingUndo = nil
-    }
-
     // MARK: - Auto-full-stop
 
     /// Replaces double-space with ". " (period + space).
@@ -1261,6 +1215,65 @@ final class DictusKeyboardBridge: NSObject,
     }
 }
 
+// MARK: - Refused corrections (#872)
+
+extension DictusKeyboardBridge {
+
+    /// The refusal memory, pointed at the document being edited.
+    var rejectionMemory: AutocorrectRejectionMemory? {
+        guard let memory = suggestionState?.rejectionMemory else { return nil }
+        let document = controller.flatMap {
+            DictusTextProxyIdentity.documentIdentifier(of: $0.textDocumentProxy)?.uuidString
+        }
+        memory.enter(document: document)
+        return memory
+    }
+
+    /// The host changed the text. When it left the document empty, as Messages does
+    /// on sending without changing the documentIdentifier, nothing remembered is at
+    /// any position any more. `hasText` answers for the whole document, so a caret
+    /// at the start of a non-empty field does not count.
+    func hostTextChanged() {
+        guard let proxy = controller?.textDocumentProxy, !proxy.hasText else { return }
+        rejectionMemory?.documentEmptied()
+    }
+
+    /// Learns a word restored by Undo once the user moves on past it unchanged.
+    /// Called before anything is inserted after a word boundary.
+    private func learnWordMovedPast() {
+        guard let state = suggestionState, let memory = rejectionMemory,
+              let word = memory.movingOn(context: controller?.textDocumentProxy.documentContextBeforeInput)
+        else { return }
+        // Same gate as every other learning site: autocorrect ran, and the mirror
+        // can be trusted (#287 decision 8, #530).
+        guard state.autocorrectEnabled, state.hostPolicy.autocorrectAllowed, !mirrorSync.isSuspect
+        else { return }
+        UserDictionary.shared.learn(word)
+    }
+
+    /// Takes a backspace into a correction Dictus made as the user refusing it.
+    private func noteDeletion(before: String?, after: String?) {
+        guard let corrected = rejectionMemory?.textDeleted(before: before, after: after) else { return }
+        #if DEBUG
+        AutocorrectDebugLog.autocorrectRefused(corrected: corrected, by: "backspace")
+        #endif
+    }
+
+    /// The space closes the undo window of the correction before it, except the
+    /// space typed right after the punctuation mark that made a correction (#872):
+    /// `cuisinr,` + space keeps `cuisine`'s undo chip until the next space.
+    private func closeUndoWindowAtSpace() {
+        guard let undo = suggestionState?.pendingUndo else { return }
+        if !undo.insertedSpace,
+           let context = controller?.textDocumentProxy.documentContextBeforeInput,
+           let mark = context.last, AutocorrectTrigger.commitsWord(String(mark)),
+           context.dropLast().hasSuffix(undo.correctedWord) {
+            return
+        }
+        suggestionState?.pendingUndo = nil
+    }
+}
+
 // MARK: - Addresses (#919)
 
 extension DictusKeyboardBridge {
@@ -1292,3 +1305,18 @@ extension DictusKeyboardBridge {
         suggestionState?.pendingUndo = nil
     }
 }
+
+#if DEBUG
+// MARK: - Typing journal (#1001)
+
+extension DictusKeyboardBridge {
+    /// Opens the journal's record of the word being committed, with the bar as it
+    /// stands before the commit clears it.
+    func beginJournalWord(_ word: String, previous: String?, committedBy key: String, bar state: SuggestionState) {
+        TypingJournal.beginWord(
+            typed: word, previous: previous, committedBy: key,
+            bar: TypingJournalBar(mode: "\(state.mode)", words: state.suggestions)
+        )
+    }
+}
+#endif

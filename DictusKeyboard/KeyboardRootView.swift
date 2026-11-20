@@ -525,6 +525,14 @@ struct KeyboardRootView: View {
         guard index < suggestionState.suggestions.count else { return }
         let suggestion = suggestionState.suggestions[index]
         guard let proxy = state.controller?.textDocumentProxy else { return }
+        #if DEBUG
+        TypingJournal.barTapped(
+            slot: index,
+            bar: TypingJournalBar(mode: "\(suggestionState.mode)", words: suggestionState.suggestions),
+            typed: suggestionState.currentWord,
+            commits: !(suggestionState.mode == .undoAvailable && index == 0)
+        )
+        #endif
 
         // Prediction mode: insert word + trailing space, bypass autocorrect, chain predictions.
         if suggestionState.mode == .predictions {
