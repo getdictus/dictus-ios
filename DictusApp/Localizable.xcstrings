@@ -3939,6 +3939,29 @@
         }
       }
     },
+    "Dictus Pro is unlocked, free, starting today." : {
+      "comment" : "Trial announcement subtitle on an iPhone without Apple Intelligence (#922), where not everything in Pro can run.",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dictus Pro ist ab heute kostenlos freigeschaltet."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dictus Pro está desbloqueado gratis desde hoy."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dictus Pro est débloqué gratuitement, dès aujourd’hui."
+          }
+        }
+      }
+    },
     "Dictus Pro Lifetime" : {
       "comment" : "Dictus Pro hub: the plan a lifetime owner holds (#216). No date, nothing renews.",
       "localizations" : {
@@ -4442,6 +4465,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Idée"
+          }
+        }
+      }
+    },
+    "iPhone with Apple Intelligence" : {
+      "comment" : "Label on the Smart Modes line of the paywall, the Pro hub and the trial announcement, on an iPhone that cannot run them (#922). Replaces the iPhone model list.",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iPhone mit Apple Intelligence"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iPhone con Apple Intelligence"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iPhone avec Apple Intelligence"
           }
         }
       }
@@ -10532,29 +10578,6 @@
         }
       }
     },
-    "Requires Apple Intelligence (iPhone 15 Pro or later, iOS 26)" : {
-      "comment" : "Paywall notice on a feature card the current device cannot run.",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Erfordert Apple Intelligence (iPhone 15 Pro oder neuer, iOS 26)"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Requiere Apple Intelligence (iPhone 15 Pro o posterior, iOS 26)"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nécessite Apple Intelligence (iPhone 15 Pro ou plus récent, iOS 26)"
-          }
-        }
-      }
-    },
     "Reset learned words" : {
       "localizations" : {
         "de" : {
@@ -11623,6 +11646,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "S’abonner pour %@"
+          }
+        }
+      }
+    },
+    "Subscribe to keep History, Vocabulary and voice messages, with no interruption." : {
+      "comment" : "Home banner subtitle in the last two days of the free trial, on an iPhone without Apple Intelligence (#922).",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abonniere, um Verlauf, Vokabular und Sprachnachrichten ohne Unterbrechung zu behalten."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suscríbete para mantener el historial, el vocabulario y los mensajes de voz sin interrupción."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abonnez-vous pour garder l’historique, le vocabulaire et les messages vocaux, sans interruption."
           }
         }
       }
@@ -12970,6 +13016,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Pour vous entendre pendant la dictée. Le son est transcrit sur votre iPhone et n’en sort jamais."
+          }
+        }
+      }
+    },
+    "To keep History, Vocabulary and voice messages afterwards, you will need a Dictus Pro subscription." : {
+      "comment" : "Trial announcement disclosure on an iPhone without Apple Intelligence (#922): what it takes to keep Pro after the trial. Deliberately names no price.",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Um Verlauf, Vokabular und Sprachnachrichten danach zu behalten, brauchst du ein Dictus Pro-Abo."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Para conservar después el historial, el vocabulario y los mensajes de voz, necesitarás una suscripción a Dictus Pro."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pour garder ensuite l’historique, le vocabulaire et les messages vocaux, il faudra un abonnement Dictus Pro."
           }
         }
       }
