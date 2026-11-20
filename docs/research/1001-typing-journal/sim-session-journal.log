@@ -1,0 +1,53 @@
+[2026-11-20T15:50:42Z] DEBUG   [keyboard] <KBD> TJ FIELD kb=fr-azerty
+[2026-11-20T15:51:31Z] DEBUG   [keyboard] <KBD> TJ FIELD kb=fr-azerty
+[2026-11-20T15:51:59Z] DEBUG   [keyboard] <KBD> TJ TAP k=j dx=-0.0096 dy=+0.2963 dt=- kb=fr-azerty
+[2026-11-20T15:52:00Z] DEBUG   [keyboard] <KBD> TJ TAP k=e dx=-0.0096 dy=+0.3333 dt=1016 kb=fr-azerty
+[2026-11-20T15:52:03Z] DEBUG   [keyboard] <KBD> TJ TAP k=space dx=+0.2342 dy=+0.2778 dt=2363 kb=fr-azerty
+[2026-11-20T15:52:03Z] DEBUG   [keyboard] <KBD> TJ WORD #1 typed="Je" prev=nil final="Je" outcome=kept by=space bar=idle[] previews=2
+[2026-11-20T15:52:03Z] DEBUG   [keyboard] <KBD> TJ WHY #1 AUTOCORRECT-SKIP word="Je" reason=already-valid
+[2026-11-20T15:52:05Z] DEBUG   [keyboard] <KBD> TJ TAP k=s dx=-0.0096 dy=+0.2963 dt=2390 kb=fr-azerty
+[2026-11-20T15:52:06Z] DEBUG   [keyboard] <KBD> TJ TAP k=u dx=-0.0096 dy=+0.3333 dt=1001 kb=fr-azerty
+[2026-11-20T15:52:07Z] DEBUG   [keyboard] <KBD> TJ TAP k=i dx=+0.0154 dy=+0.3333 dt=991 kb=fr-azerty
+[2026-11-20T15:52:08Z] DEBUG   [keyboard] <KBD> TJ TAP k=s dx=-0.0096 dy=+0.2963 dt=1014 kb=fr-azerty
+[2026-11-20T15:52:10Z] DEBUG   [keyboard] <KBD> TJ TAP k=space dx=+0.2342 dy=+0.2778 dt=2318 kb=fr-azerty
+[2026-11-20T15:52:10Z] DEBUG   [keyboard] <KBD> TJ WORD #2 typed="suis" prev="Je" final="suis" outcome=kept by=space bar=idle[] previews=4
+[2026-11-20T15:52:10Z] DEBUG   [keyboard] <KBD> TJ WHY #2 AUTOCORRECT-SKIP word="suis" reason=already-valid
+[2026-11-20T15:52:13Z] DEBUG   [keyboard] <KBD> TJ TAP k=t dx=-0.0012 dy=+0.3333 dt=2450 kb=fr-azerty
+[2026-11-20T15:52:14Z] DEBUG   [keyboard] <KBD> TJ TAP k=r dx=+0.0071 dy=+0.3333 dt=1013 kb=fr-azerty
+[2026-11-20T15:52:15Z] DEBUG   [keyboard] <KBD> TJ TAP k=e dx=-0.0096 dy=+0.3333 dt=1000 kb=fr-azerty
+[2026-11-20T15:52:16Z] DEBUG   [keyboard] <KBD> TJ TAP k=s dx=-0.0096 dy=+0.2963 dt=1002 kb=fr-azerty
+[2026-11-20T15:52:18Z] DEBUG   [keyboard] <KBD> TJ TAP k=space dx=+0.2342 dy=+0.2778 dt=2345 kb=fr-azerty
+[2026-11-20T15:52:18Z] DEBUG   [keyboard] <KBD> TJ WORD #3 typed="tres" prev="suis" final="très" outcome=autocorrected by=space branch=language-override bar=corrections["tres","très"] previews=6
+[2026-11-20T15:52:18Z] DEBUG   [keyboard] <KBD> TJ WHY #3 AUTOCORRECT branch=language-override orig="tres" corr="très" prev="suis"
+[2026-11-20T15:52:18Z] DEBUG   [keyboard] <KBD> TJ WHY #3 AUTOCORRECT-APPLY-BEFORE word="tres" corr="très" prev="suis" ctx="Je suis tres"
+[2026-11-20T15:52:18Z] DEBUG   [keyboard] <KBD> TJ WHY #3 MIRROR-PROBE seq=21 ev=autocorrect-deleted off=0 mir="Je suis " mlen=8 pred="Je suis " plen=8
+[2026-11-20T15:52:18Z] DEBUG   [keyboard] <KBD> TJ WHY #3 AUTOCORRECT-APPLY-AFTER-DELETE ctx="Je suis "
+[2026-11-20T15:52:18Z] DEBUG   [keyboard] <KBD> TJ WHY #3 MIRROR-PROBE seq=22 ev=autocorrect-applied off=0 mir="Je suis très " mlen=13 pred="Je suis très " plen=13
+[2026-11-20T15:52:18Z] DEBUG   [keyboard] <KBD> TJ WHY #3 AUTOCORRECT-APPLY-AFTER-INSERT ctx="Je suis très "
+[2026-11-20T15:52:18Z] DEBUG   [keyboard] <KBD> TJ WHY #3 APPLIED orig="tres" → "très" prev="suis"
+[2026-11-20T15:52:21Z] DEBUG   [keyboard] <KBD> TJ TAP k=c dx=+0.0154 dy=+0.3148 dt=2411 kb=fr-azerty
+[2026-11-20T15:52:22Z] DEBUG   [keyboard] <KBD> TJ TAP k=o dx=+0.0071 dy=+0.3333 dt=1010 kb=fr-azerty
+[2026-11-20T15:52:23Z] DEBUG   [keyboard] <KBD> TJ TAP k=n dx=+0.0071 dy=+0.3148 dt=1006 kb=fr-azerty
+[2026-11-20T15:52:24Z] DEBUG   [keyboard] <KBD> TJ TAP k=t dx=-0.0012 dy=+0.3333 dt=1009 kb=fr-azerty
+[2026-11-20T15:52:25Z] DEBUG   [keyboard] <KBD> TJ TAP k=n dx=+0.0071 dy=+0.3148 dt=1000 kb=fr-azerty
+[2026-11-20T15:52:26Z] DEBUG   [keyboard] <KBD> TJ TAP k=e dx=-0.0096 dy=+0.3333 dt=992 kb=fr-azerty
+[2026-11-20T15:52:27Z] DEBUG   [keyboard] <KBD> TJ TAP k=t dx=-0.0012 dy=+0.3333 dt=1009 kb=fr-azerty
+[2026-11-20T15:52:29Z] DEBUG   [keyboard] <KBD> TJ TAP k=space dx=+0.2342 dy=+0.2778 dt=2330 kb=fr-azerty
+[2026-11-20T15:52:29Z] DEBUG   [keyboard] <KBD> TJ WORD #4 typed="contnet" prev="très" final="content" outcome=autocorrected by=space branch=trie bar=undoAvailable["tres"] previews=12
+[2026-11-20T15:52:29Z] DEBUG   [keyboard] <KBD> TJ WHY #4 TRIE-CANDIDATES word="contnet" winner="content" ranked=["content"(cost=0.70 freq=40339 ctx=0), "contente"(cost=1.70 freq=36801 ctx=0), "contenu"(cost=1.50 freq=30103 ctx=0), "cornet"(cost=1.40 freq=24906 ctx=0), "contents"(cost=1.70 freq=31029 ctx=0)]
+[2026-11-20T15:52:29Z] DEBUG   [keyboard] <KBD> TJ WHY #4 AUTOCORRECT branch=trie orig="contnet" corr="content" prev="très"
+[2026-11-20T15:52:29Z] DEBUG   [keyboard] <KBD> TJ WHY #4 AUTOCORRECT-APPLY-BEFORE word="contnet" corr="content" prev="très" ctx="Je suis très contnet"
+[2026-11-20T15:52:29Z] DEBUG   [keyboard] <KBD> TJ WHY #4 MIRROR-PROBE seq=30 ev=autocorrect-deleted off=0 mir="Je suis très " mlen=13 pred="Je suis très " plen=13
+[2026-11-20T15:52:29Z] DEBUG   [keyboard] <KBD> TJ WHY #4 AUTOCORRECT-APPLY-AFTER-DELETE ctx="Je suis très "
+[2026-11-20T15:52:29Z] DEBUG   [keyboard] <KBD> TJ WHY #4 MIRROR-PROBE seq=31 ev=autocorrect-applied off=0 mir="Je suis très content " mlen=21 pred="Je suis très content " plen=21
+[2026-11-20T15:52:29Z] DEBUG   [keyboard] <KBD> TJ WHY #4 AUTOCORRECT-APPLY-AFTER-INSERT ctx="Je suis très content "
+[2026-11-20T15:52:29Z] DEBUG   [keyboard] <KBD> TJ WHY #4 APPLIED orig="contnet" → "content" prev="très"
+[2026-11-20T15:52:30Z] DEBUG   [keyboard] <KBD> TJ TAP k=backspace dx=+0.0231 dy=+0.3148 dt=1247 kb=fr-azerty
+[2026-11-20T15:52:31Z] DEBUG   [keyboard] <KBD> TJ TAP k=backspace dx=+0.0231 dy=+0.3148 dt=952 kb=fr-azerty
+[2026-11-20T15:52:31Z] DEBUG   [keyboard] <KBD> TJ REACT #4 deleted taps=2
+[2026-11-20T15:52:31Z] DEBUG   [keyboard] <KBD> TJ REACT #4 undo by=backspace
+[2026-11-20T15:52:34Z] DEBUG   [keyboard] <KBD> TJ TAP k=t dx=-0.0012 dy=+0.3333 dt=2436 kb=fr-azerty
+[2026-11-20T15:52:36Z] DEBUG   [keyboard] <KBD> TJ TAP k=space dx=+0.2342 dy=+0.2778 dt=2324 kb=fr-azerty
+[2026-11-20T15:52:36Z] DEBUG   [keyboard] <KBD> TJ WORD #5 typed="content" prev="très" final="content" outcome=kept by=space bar=idle[] previews=1
+[2026-11-20T15:52:36Z] DEBUG   [keyboard] <KBD> TJ WHY #5 AUTOCORRECT-SKIP word="content" reason=already-valid
+[2026-11-20T15:52:58Z] DEBUG   [keyboard] <KBD> TJ FIELD kb=fr-azerty
