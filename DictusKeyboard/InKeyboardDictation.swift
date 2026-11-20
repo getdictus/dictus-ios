@@ -43,6 +43,9 @@ final class InKeyboardDictation {
     /// The overlay's 5 Hz clock, the cadence DictusApp publishes at (`WaveformFeed`).
     private var waveformClock: Timer?
     private var waveform = WaveformFeed()
+    /// Debug builds only: draw the waveform the way build ee238f03 did (one bar per
+    /// WebView message), to film it beside the fix on the same input.
+    private var legacyWaveform = false
     /// How the WebView's chunks arrived over the last second, logged by `everySecond`:
     /// the irregularity the 5 Hz clock absorbs.
     private var chunkArrivals = ChunkArrivalTrace()
@@ -80,6 +83,17 @@ final class InKeyboardDictation {
         loadCaptureIfNeeded(into: state.controller?.view)
     }
 
+    /// Whether this process could dictate a cold tap by itself: setting on, iOS 26+,
+    /// an engine, and no known "model missing" answer for the current language.
+    var mayTakeColdTap: Bool {
+        guard InKeyboardDictationRoute.isSettingEnabled(in: AppGroup.defaults),
+              Self.systemMajorVersion >= InKeyboardDictationRoute.minimumSystemMajorVersion,
+              recognizer != nil else { return false }
+        let code = Self.languageCode()
+        if let answer = localeAnswer, answer.code == code { return answer.installed }
+        return true
+    }
+
     /// The route for a tap whose wait has just ended.
     func route(appAnswered: Bool) -> InKeyboardDictationRoute {
         let code = Self.languageCode()
@@ -114,6 +128,7 @@ final class InKeyboardDictation {
         state.recordingElapsed = 0
         waveform = WaveformFeed()
         chunkArrivals = ChunkArrivalTrace()
+        legacyWaveform = Self.debugMarkerExists("in-keyboard-waveform-legacy")
 
         if let view = state.controller?.view { capture.attach(to: view) }
         capture.onEvent = { [weak self] event in self?.handle(event) }
@@ -159,6 +174,7 @@ final class InKeyboardDictation {
             recording.pcm16.append(data)
             waveform.append(pcm16: data)
             chunkArrivals.note(samples: data.count / 2, rms: rms)
+            if legacyWaveform { publishLegacyBar(rms: rms) }
             if recording.seconds >= Self.maximumSeconds { finishRecording(reason: "max-duration") }
         case .interrupted(let reason):
             Self.log("captureInterrupted", "reason=\(reason)")
@@ -172,9 +188,20 @@ final class InKeyboardDictation {
     /// eases toward each published array frame by frame, so the motion now depends on
     /// the audio and the 5 Hz clock, as it does for a recording in DictusApp.
     private func publishWaveform() {
-        guard let state, isActive else { return }
+        guard let state, isActive, !legacyWaveform else { return }
         state.waveformEnergy = waveform.snapshot()
         state.recordingElapsed = Double(waveform.sampleCount) / InKeyboardRecording.sampleRate
+    }
+
+    /// The pre-fix behaviour, kept only behind the Debug marker for the comparison video.
+    private func publishLegacyBar(rms: Float) {
+        guard let state else { return }
+        let level = min(1, max(0, (20 * log10(max(rms, 0.000_1)) + 50) / 40))
+        var bars = state.waveformEnergy
+        bars.append(level)
+        if bars.count > WaveformFeed.barCount { bars.removeFirst(bars.count - WaveformFeed.barCount) }
+        state.waveformEnergy = bars
+        state.recordingElapsed = recording.seconds
     }
 
     private func everySecond() {
@@ -336,6 +363,16 @@ final class InKeyboardDictation {
         return VocabularyStore.loadEntries().filter(\.isEnabled).map(\.term)
     }
 
+    /// Debug builds only: whether a marker file sits at the App Group root.
+    private static func debugMarkerExists(_ name: String) -> Bool {
+        #if DEBUG
+        guard let url = AppGroup.containerURL?.appendingPathComponent(name) else { return false }
+        return FileManager.default.fileExists(atPath: url.path)
+        #else
+        return false
+        #endif
+    }
+
     /// Debug builds only: a WAV at the App Group root replaces the microphone, for a
     /// simulator whose microphone cannot be fed. Release builds never look.
     private static func debugTestAudioBase64() -> String? {
@@ -400,6 +437,19 @@ private struct MemoryTrace {
 // MARK: - The fallback hook
 
 extension KeyboardState {
+
+    /// The model-preparation hand-off (#262, #542), skipped when the in-keyboard path
+    /// could take this tap: it does not use the Dictus model, so a cold Core ML cache —
+    /// the state every development install leaves behind — must not send a cold-start
+    /// tap to the app before the keyboard has had its chance. The 500 ms fallback still
+    /// runs the real `preparationDeferral()` when the keyboard does not take the tap.
+    func preparationDeferralUnlessKeyboardTakesOver() -> String? {
+        guard let deferral = preparationDeferral() else { return nil }
+        let mayTakeOver = MainActor.assumeIsolated { InKeyboardDictation.shared.mayTakeColdTap }
+        guard mayTakeOver else { return deferral }
+        InKeyboardDictation.log("preparationDeferralSkipped", "deferral=\(deferral)")
+        return nil
+    }
 
     /// The Darwin start post, preceded by the spike's preparation so the asset check and
     /// the web view load run during the app's 500 ms.

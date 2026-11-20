@@ -241,9 +241,13 @@ final class InKeyboardWebCapture: NSObject {
         lastHeartbeat = performance.now();
         watchdog = startWatchdog(interrupted);
         post({ type: 'started', sampleRate: decoded.sampleRate, device: 'test-audio-file' });
-        // Real time: one 100 ms chunk every 100 ms, then silence until stopped.
-        const chunk = targetRate / 10;
-        let offset = 0;
+        // Real time, cut like a 4096-frame ScriptProcessor buffer at 48 kHz (1365
+        // samples every ~85 ms), then silence until stopped. Delivered in bursts of one
+        // to four chunks, the way WebKit hands messages over on a device, from a fixed
+        // pseudo-random sequence so two runs see the same arrival pattern.
+        const chunk = 1365, period = chunk / targetRate * 1000;
+        let offset = 0, queue = [], seed = 7;
+        const random = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
         timer = setInterval(() => {
           const out = new Int16Array(chunk);
           let energy = 0;
@@ -253,8 +257,9 @@ final class InKeyboardWebCapture: NSObject {
             out[i] = Math.max(-1, Math.min(1, s)) * 32767;
           }
           offset += chunk;
-          emit(out, Math.sqrt(energy / chunk));
-        }, 100);
+          queue.push([out, Math.sqrt(energy / chunk)]);
+          if (queue.length >= 4 || random() < 0.35) { queue.forEach(([o, r]) => emit(o, r)); queue = []; }
+        }, period);
       } catch (error) {
         if (stopping) return;
         cleanup();

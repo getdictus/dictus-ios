@@ -1465,7 +1465,7 @@ class KeyboardState: ObservableObject {
         // Core ML cache is cold, which is the case that used to record into a wait the
         // dictation could not survive. `intent=prepare` returns from `handleIncomingURL`
         // before any auto-return code, so the user stays in DictusApp and reads the screen.
-        if let deferral = preparationDeferral() {
+        if let deferral = preparationDeferralUnlessKeyboardTakesOver() {
             PersistentLog.log(.keyboardMicTapped)
             deferRecordingForModelPreparation(
                 reason: "keyboard opened Dictus for model preparation (\(deferral))"
@@ -1482,7 +1482,7 @@ class KeyboardState: ObservableObject {
         // The model can begin loading after the first check while this tap is
         // being handed to DictusApp. Re-check immediately before posting the
         // recording request so a model swap cannot race into a recording.
-        if let deferral = preparationDeferral() {
+        if let deferral = preparationDeferralUnlessKeyboardTakesOver() {
             forceResetToIdle()
             deferRecordingForModelPreparation(
                 reason: "model became unready before Darwin handoff (\(deferral))"
