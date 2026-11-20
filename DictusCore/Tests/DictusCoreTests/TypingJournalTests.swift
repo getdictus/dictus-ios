@@ -83,10 +83,29 @@ final class TypingJournalTests: XCTestCase {
     func testAPasswordFieldStopsARecordingInProgress() {
         let journal = recording()
         type("ab", on: journal)
+        journal.flush()
+        // The first key of a code field the host moved to without a trait read.
+        type("1", on: journal, from: 5)
         journal.observeField(isSecureEntry: false, content: .oneTimeCode, document: "otp", keyboard: "fr-azerty")
-        type("123456", on: journal)
+        type("23456", on: journal, from: 6)
 
-        XCTAssertEqual(written(journal).filter { $0.hasPrefix("TJ TAP") }.count, 2, "only the taps before the code field")
+        XCTAssertEqual(written(journal).filter { $0.hasPrefix("TJ TAP") }.map { $0.components(separatedBy: " ")[2] },
+                       ["k=a", "k=b"], "the taps written before the code field, and none typed in it")
+    }
+
+    func testOnlyEventsAfterTheLastClearAreWrittenAndOnlyWithTheToggleOn() {
+        let before = TypingJournalEntry(date: Date(timeIntervalSince1970: 100), event: .field(keyboard: "fr-azerty"))
+        let after = TypingJournalEntry(date: Date(timeIntervalSince1970: 200), event: .field(keyboard: "en-qwerty"))
+        XCTAssertEqual(TypingJournal.writable([before, after], toggleOn: true, clearedAt: 150), [after])
+        XCTAssertEqual(TypingJournal.writable([before, after], toggleOn: true, clearedAt: 0), [before, after])
+        XCTAssertEqual(TypingJournal.writable([before, after], toggleOn: false, clearedAt: 0), [])
+    }
+
+    func testADebugLineQuotingSeveralLinesStaysOnOne() {
+        let body = "AUTOCORRECT-APPLY-BEFORE word=\"helo\" corr=\"hello\" prev=nil ctx=\"Dear Ann,\nhelo\""
+        XCTAssertEqual(TypingJournalEvent.passthrough(body).line,
+                       "AUTOCORRECT-APPLY-BEFORE word=\"helo\" corr=\"hello\" prev=nil ctx=\"Dear Ann,\\nhelo\"")
+        XCTAssertFalse(TypingJournalEvent.why(id: 1, line: body).line.contains("\n"))
     }
 
     func testNothingIsRecordedWithTheToggleOff() {

@@ -67,10 +67,25 @@ public enum TypingJournal {
     /// AutocorrectDebugLog's. The diagnostic lines, which hold none, stay.
     ///
     /// The batches already handed out are let through first, so none lands after the wipe.
+    /// Clear runs in the app, while the keyboard's process may still hold events in
+    /// memory: the time of the Clear goes in the App Group, and the keyboard drops every
+    /// event older than it when it writes (`writable`).
     public static func clear() {
+        AppGroup.defaults.set(Date().timeIntervalSince1970, forKey: clearedAtKey)
         recorder.clear()
         recorder.waitUntilWritten()
         PersistentLog.removeLines(where: isTypedTextLine)
+    }
+
+    /// When Clear typing journal was last used. Debug builds only, like the journal; a
+    /// stray value in a Release install is never read.
+    static let clearedAtKey = "dictus.typingJournalClearedAt"
+
+    /// The entries of a batch that may still be written: none once the toggle is off,
+    /// none from before the last Clear.
+    static func writable(_ entries: [TypingJournalEntry], toggleOn: Bool, clearedAt: TimeInterval) -> [TypingJournalEntry] {
+        guard toggleOn else { return [] }
+        return entries.filter { $0.date.timeIntervalSince1970 > clearedAt }
     }
 
     /// Blocks until every batch handed out so far has been passed on. For tools.
@@ -103,7 +118,13 @@ public enum TypingJournal {
     }()
 
     private static let writeToLog: TypingJournalRecorder.Sink = { entries in
-        PersistentLog.appendDebugText { lines(for: entries, source: PersistentLog.source) }
+        let kept = writable(
+            entries,
+            toggleOn: AppGroup.defaults.bool(forKey: SharedKeys.autocorrectDebugLogging),
+            clearedAt: AppGroup.defaults.double(forKey: clearedAtKey)
+        )
+        guard !kept.isEmpty else { return }
+        PersistentLog.appendDebugText { lines(for: kept, source: PersistentLog.source) }
     }
 }
 #endif

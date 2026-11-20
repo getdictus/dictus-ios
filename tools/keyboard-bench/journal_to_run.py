@@ -48,6 +48,8 @@ class Sentence:
         self.words = []
         self.unreplayable = 0
         self.elapsed = 0.0
+        # A return ends the sentence, but the word it commits is logged after its tap.
+        self.ended = False
 
 
 def parse(lines):
@@ -70,7 +72,7 @@ def parse(lines):
         if m := TAP.search(line):
             key, dx, dy, dt, kb = m.groups()
             lang = kb.split("-")[0]
-            if current is None or current.lang != lang:
+            if current is None or current.lang != lang or current.ended:
                 close()
                 current = Sentence(lang)
             current.elapsed += 0 if dt == "-" else float(dt)
@@ -86,7 +88,7 @@ def parse(lines):
                     symbols = False
                 continue
             if key == "return":
-                close()
+                current.ended = True
                 continue
             if len(key) != 1 and key not in REPLAYABLE_EXTRA:
                 skipped[f"key {key}"] += 1

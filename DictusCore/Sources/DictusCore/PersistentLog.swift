@@ -347,7 +347,9 @@ public enum PersistentLog {
     static func appendDebugText(_ make: @escaping @Sendable () -> String) {
         guard let url = fileURL else { return }
         writeQueue.async {
-            if !prunedForJournal {
+            // Marked done only once the file could be read: before the first unlock after
+            // a boot the App Group refuses it, and the next append tries again.
+            if !prunedForJournal, FileManager.default.isReadableFile(atPath: url.path) {
                 prunedForJournal = true
                 pruneOldEntries(url: url, cutoffDate: Date().addingTimeInterval(-retentionPeriod))
             }
@@ -360,14 +362,19 @@ public enum PersistentLog {
     }
 
     /// Rewrites the file without the lines `isRemoved` matches. Runs on the write
-    /// queue, so no line logged before the call survives it.
+    /// queue, so no line logged before the call survives it, and reads and writes in
+    /// one coordinated pass, so the keyboard's process cannot append in between.
     static func removeLines(where isRemoved: @escaping (Substring) -> Bool) {
         guard let url = fileURL else { return }
         writeQueue.sync {
-            let kept = coordinatedRead(from: url)
-                .split(separator: "\n", omittingEmptySubsequences: true)
-                .filter { !isRemoved($0) }
-            coordinatedWrite(kept.isEmpty ? "" : kept.joined(separator: "\n") + "\n", to: url)
+            let coordinator = NSFileCoordinator()
+            var error: NSError?
+            coordinator.coordinate(writingItemAt: url, options: .forReplacing, error: &error) { coordURL in
+                guard let content = try? String(contentsOf: coordURL, encoding: .utf8) else { return }
+                let kept = content.split(separator: "\n", omittingEmptySubsequences: true).filter { !isRemoved($0) }
+                try? (kept.isEmpty ? "" : kept.joined(separator: "\n") + "\n")
+                    .write(to: coordURL, atomically: true, encoding: .utf8)
+            }
         }
     }
     #endif

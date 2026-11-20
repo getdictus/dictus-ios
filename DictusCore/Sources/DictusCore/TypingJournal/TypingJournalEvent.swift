@@ -138,7 +138,7 @@ public enum TypingJournalEvent: Equatable, Sendable {
             parts.append("previews=\(word.previews)")
             return parts.joined(separator: " ")
         case .why(let id, let line):
-            return "TJ WHY #\(id) \(line)"
+            return "TJ WHY #\(id) \(Self.oneLine(line))"
         case .barTap(let id, let slot, let bar):
             let word = bar.words.indices.contains(slot) ? Self.quote(bar.words[slot]) : "nil"
             let target = id.map { "#\($0) " } ?? ""
@@ -151,13 +151,20 @@ public enum TypingJournalEvent: Equatable, Sendable {
             case .learned(let word): return "TJ REACT \(target) learned word=\(Self.quote(word))"
             }
         case .passthrough(let body):
-            return body
+            return Self.oneLine(body)
         }
     }
 
     /// A signed offset with four decimals, as in the bench's run files: `+0.0554`, `-0.4726`.
     static func offset(_ value: Double) -> String {
         String(format: "%+.4f", value)
+    }
+
+    /// A debug line quotes the document's tail, which in a multi-line field holds
+    /// newlines. Kept on one line, every part of it carries the prefix Clear and the
+    /// 7-day prune read.
+    static func oneLine(_ body: String) -> String {
+        body.replacingOccurrences(of: "\r", with: "\\r").replacingOccurrences(of: "\n", with: "\\n")
     }
 
     /// A quoted word, its own quotes and backslashes escaped so a parser reads it back whole.

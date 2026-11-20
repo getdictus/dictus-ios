@@ -28,6 +28,7 @@ SESSION = [
     f'{PREFIX}TJ WHY #1 AUTOCORRECT branch=accent orig="tres" corr="très" prev=nil',
     tap("b"), tap("backspace"), tap("shift"), tap("123"), tap("1"), tap("space"), tap("o"),
     tap("return"),
+    f'{PREFIX}TJ WORD #2 typed="o" prev="Très" final="o" outcome=kept by=return previews=0',
     tap("a", dt="900"), tap("accent"),
     f'{PREFIX}TJ BARTAP #2 slot=1 word="à" bar=candidates["a","à"]',
     f"{PREFIX}TJ REPEAT k=backspace",
@@ -59,7 +60,8 @@ class JournalToRunTests(unittest.TestCase):
 
     def test_corpus_lines_hold_the_device_words_one_per_space(self):
         sentences, _ = journal_to_run.parse(SESSION)
-        self.assertEqual([journal_to_run.corpus_line(s) for s in sentences], ["très -", "à", "-"])
+        self.assertEqual([journal_to_run.corpus_line(s) for s in sentences], ["très o", "à", "-"],
+                         "the word a return commits stays in its sentence")
 
     def test_written_run_reads_like_the_committed_runs(self):
         sentences, _ = journal_to_run.parse(SESSION)
@@ -74,7 +76,7 @@ class JournalToRunTests(unittest.TestCase):
                                     "sentence\ttap\tkey\tdx\tdy\tt_ms",
                                     "0\t0\tt\t0.1000\t-0.2000\t0"])
         self.assertEqual(rows[-2:], ["1\t0\ta\t0.1000\t-0.2000\t0", "1\t1\taccent\t0.1000\t-0.2000\t150"])
-        self.assertEqual(corpus, ["très -", "à"])
+        self.assertEqual(corpus, ["très o", "à"])
 
     def test_quotes_in_words_are_unescaped(self):
         lines = [f"{PREFIX}TJ FIELD kb=en-qwerty", tap("i", dt="-", kb="en-qwerty"),

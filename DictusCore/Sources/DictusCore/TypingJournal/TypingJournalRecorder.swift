@@ -138,11 +138,13 @@ public final class TypingJournalRecorder: @unchecked Sendable {
     /// in the app takes effect at the next read, which every committed word triggers.
     public func observeField(isSecureEntry: Bool, content: TypingJournalFieldGate.Content?,
                              document: String?, keyboard: String) {
-        var flushNow = false
         lock.withLock {
             enabled = isToggleOn()
             if TypingJournalFieldGate.skipReason(isSecureEntry: isSecureEntry, content: content) != nil {
-                flushNow = field.isRecording
+                // Dropped, not written: a host can move the focus into a code or password
+                // field without a trait read, and the first key typed there is already in
+                // the buffer when the gate learns where it is.
+                buffer.removeAll()
                 field = .skipped
                 resetWordState()
                 return
@@ -157,7 +159,6 @@ public final class TypingJournalRecorder: @unchecked Sendable {
             field = next
             if enabled { append(.field(keyboard: keyboard)) }
         }
-        if flushNow { flush() }
     }
 
     // MARK: - Keys
