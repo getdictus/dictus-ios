@@ -349,19 +349,22 @@ struct ToolbarView: View {
         }
     }
 
-    /// The system Paste control (#634), which is `UIPasteControl` under SwiftUI.
+    /// The system Paste control (#634), `UIPasteControl`.
     ///
     /// WHY the system control and not a Dictus-drawn button: a tap on it is the user's
     /// own paste, so iOS hands over the item without the "Allow Paste" banner a plain
     /// `UIPasteboard` read can raise. It also brings its own localized title. The price
-    /// is that iOS owns its look; only tint, shape and label style are ours.
+    /// is that iOS owns its look; only colours, shape, label style and size are ours.
+    ///
+    /// WHY UIKit's control and not SwiftUI's `PasteButton` (#634 device feedback): the
+    /// pill has to be exactly as tall as the ☰ beside it, `iconDiameter`, and
+    /// `PasteButton` cannot be sized. It stays at 34 pt under `.frame(height:)` and
+    /// under `.controlSize(.large)` alike (measured on the simulator), 2 pt short of
+    /// the ☰'s capsule. `UIPasteControl` fills the height it is given.
     private var pasteButton: some View {
-        PasteButton(supportedContentTypes: [.plainText, .url]) { providers in
+        ToolbarPasteControl(height: iconDiameter) { providers in
             onPaste?(providers)
         }
-        .labelStyle(.titleAndIcon)
-        .buttonBorderShape(.capsule)
-        .tint(.dictusAccent)
         .accessibilityIdentifier("keyboard.paste")
     }
 
@@ -1087,5 +1090,58 @@ struct ToolbarView: View {
             "Pro · \(daysLeft) days left",
             comment: "Keyboard panel pill in the last two days of the free Dictus Pro trial. The number is the days left, 1 or 2."
         )
+    }
+}
+
+/// `UIPasteControl` at a height the bar chooses, for `ToolbarView.pasteButton` (#634).
+///
+/// Lives here rather than in its own file because it has no other caller and a new
+/// file would mean editing `project.pbxproj`.
+private struct ToolbarPasteControl: UIViewRepresentable {
+    /// The pill's height. The width stays the control's own, which fits its title.
+    let height: CGFloat
+    let onPaste: ([NSItemProvider]) -> Void
+
+    func makeCoordinator() -> PasteTarget {
+        PasteTarget(onPaste: onPaste)
+    }
+
+    func makeUIView(context: Context) -> UIPasteControl {
+        let configuration = UIPasteControl.Configuration()
+        configuration.displayMode = .iconAndLabel
+        configuration.cornerStyle = .capsule
+        configuration.baseBackgroundColor = UIColor(Color.dictusAccent)
+        configuration.baseForegroundColor = .white
+        let control = UIPasteControl(configuration: configuration)
+        // `target` is weak; SwiftUI keeps the coordinator alive as long as the view.
+        control.target = context.coordinator
+        return control
+    }
+
+    func updateUIView(_ uiView: UIPasteControl, context: Context) {
+        context.coordinator.onPaste = onPaste
+    }
+
+    func sizeThatFits(_ proposal: ProposedViewSize, uiView: UIPasteControl, context: Context) -> CGSize? {
+        let natural = uiView.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize)
+        return CGSize(width: natural.width, height: height)
+    }
+
+    /// What the control pastes into. Text and URLs, the types `ClipboardPasteOffer`
+    /// offers Paste for.
+    final class PasteTarget: UIResponder {
+        var onPaste: ([NSItemProvider]) -> Void
+
+        init(onPaste: @escaping ([NSItemProvider]) -> Void) {
+            self.onPaste = onPaste
+            super.init()
+            pasteConfiguration = UIPasteConfiguration(
+                acceptableTypeIdentifiers: [UTType.plainText.identifier, UTType.url.identifier]
+            )
+        }
+
+        override func paste(itemProviders: [NSItemProvider]) {
+            onPaste(itemProviders)
+        }
     }
 }
