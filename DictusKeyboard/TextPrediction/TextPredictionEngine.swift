@@ -642,6 +642,20 @@ class TextPredictionEngine {
             #endif
             return applied(override)
         }
+        // A contraction that is also a word (`ill` for `I'll`, #995) needs the
+        // previous word, which only this entry point has.
+        if let profile = profile,
+           let contraction = contextualContraction(
+               profile: profile, word: word, previousWord: previousWord, isAtSentenceStart: isAtSentenceStart
+           ) {
+            #if DEBUG
+            AutocorrectDebugLog.autocorrectDecision(
+                original: word, corrected: contraction,
+                branch: "contextual-contraction", prevWord: previousWord
+            )
+            #endif
+            return .autocorrect(contraction, alternatives: [])
+        }
 
         let checked = checkWord(word, isAtSentenceStart: isAtSentenceStart, previousWord: previousWord)
         let result = checked?.proposal.autocorrection
