@@ -44,16 +44,25 @@ public struct CorrectionCandidate: Equatable, Sendable {
 ///   `midi` (0.40), not the far more frequent `lui` (1.40) that the bigram favours.
 ///   The window is anchored on that winner, not on the cheapest candidate: a rare
 ///   cheap word (`if` for German `ic`) must not shut `wenn ich` out.
-/// - **Keep the typed word when two readings are equally good.** When the runner-up
-///   costs about the same to reach (within `ambiguousCost`) and scores within
-///   `ambiguousScore`, nothing says which one was meant: `reùion` is `région` or
-///   `réunion`, `irning` is `irving` or `inning`. Replacing would be a coin toss, so the
-///   word stays as typed. A runner-up that is much cheaper or much dearer to reach does
-///   not make the choice ambiguous: `bookes` gives `booked` (0.40) over `books` (1.00).
+/// - **Close readings are settled, not kept** (#997 device test). The close readings
+///   are the candidates that cost about the same to reach as the best one (within
+///   `ambiguousCost`) and score within `ambiguousScore` of it. A typed word that is not a
+///   dictionary word is a typo, and Apple's keyboard corrects `sats` to `sais` on the
+///   device although `sans` is as close, so the close reading most often seen after the previous word
+///   wins, then the most frequent one: `zrreve` gives `arrive` over `arrête`. The typed
+///   word is kept, and the readings only offered, in two cases:
+///   - three readings or more, once accents are dropped: `irning` is `irving`,
+///     `inning` or `ironing`, and picking one is a guess against two others;
+///   - the pick does not score `plausibleScore`: `decalee` is `déclaré` at -0.01, a
+///     long way to reach for a rare word, which says the typed word is no worse a
+///     reading than it. A typed word scores 0, as it has no frequency and costs nothing.
+///   A runner-up that is much cheaper or much dearer to reach is not a close reading:
+///   `bookes` gives `booked` (0.40) over `books` (1.00).
 /// - **Total order.** Ties fall to the cheaper candidate, then to the word itself.
 ///
 /// The constants were fitted on the #954 bench runs (fr, en, en-typos) and checked on
-/// the runs they were not fitted on. `docs/keyboard-measurement.md` says how to rerun
+/// the runs they were not fitted on. `plausibleScore` and `maxCloseReadings` were set on
+/// the words those runs keep and on the typos of the #997 device test. `docs/keyboard-measurement.md` says how to rerun
 /// them.
 public enum CorrectionRanking {
 
@@ -68,6 +77,11 @@ public enum CorrectionRanking {
     public static let ambiguousCost = 0.25
     /// Two such candidates closer than this in score are equally likely.
     public static let ambiguousScore = 0.12
+    /// How much a pick among close readings must score to replace the typed word,
+    /// which scores 0.
+    public static let plausibleScore = 0.15
+    /// More close readings than this, accents dropped, and none is picked.
+    public static let maxCloseReadings = 2
 
     public struct Decision: Equatable, Sendable {
         /// The word to write instead of the typed one, or nil to keep what was typed.
@@ -87,29 +101,56 @@ public enum CorrectionRanking {
     }
 
     public static func decide(_ candidates: [CorrectionCandidate]) -> Decision {
-        let withoutContext = sorted(candidates.map { ($0, priorScore($0)) })
-        guard let anchor = withoutContext.first?.candidate else {
-            return Decision(replacement: nil, ranked: [])
-        }
+        let scored = scoredWithContext(candidates)
+        guard !scored.isEmpty else { return Decision(replacement: nil, ranked: []) }
 
-        let scored = sorted(withoutContext.map { candidate, score in
+        let ranked = scored.map(\.candidate.word)
+        let close = closeReadings(scored)
+        guard close.count > 1 else { return Decision(replacement: ranked[0], ranked: ranked) }
+
+        let readings = Set(close.map { folded($0.candidate.word) })
+        guard readings.count <= maxCloseReadings,
+              let pick = close.min(by: isBetterPick),
+              pick.score >= plausibleScore
+        else { return Decision(replacement: nil, ranked: ranked) }
+        return Decision(replacement: pick.candidate.word, ranked: ranked)
+    }
+
+    /// The best candidate and every other one as easy to reach and about as likely.
+    private static func closeReadings(_ scored: [Scored]) -> [Scored] {
+        guard let best = scored.first else { return [] }
+        return scored.filter {
+            abs($0.candidate.cost - best.candidate.cost) <= ambiguousCost && best.score - $0.score < ambiguousScore
+        }
+    }
+
+    /// Between close readings: the one seen after the previous word, then the more
+    /// frequent, then the cheaper, then the word itself.
+    private static func isBetterPick(_ lhs: Scored, _ rhs: Scored) -> Bool {
+        let l = lhs.candidate, r = rhs.candidate
+        if l.context != r.context { return l.context > r.context }
+        if l.frequency != r.frequency { return l.frequency > r.frequency }
+        if l.cost != r.cost { return l.cost < r.cost }
+        return l.word < r.word
+    }
+
+    private static func folded(_ word: String) -> String {
+        word.folding(options: .diacriticInsensitive, locale: nil)
+    }
+
+    private typealias Scored = (candidate: CorrectionCandidate, score: Double)
+
+    /// Every candidate with its score, best first, context added where it may lift.
+    private static func scoredWithContext(_ candidates: [CorrectionCandidate]) -> [Scored] {
+        let withoutContext = sorted(candidates.map { ($0, priorScore($0)) })
+        guard let anchor = withoutContext.first?.candidate else { return [] }
+        return sorted(withoutContext.map { candidate, score in
             guard candidate.context > 0, candidate.cost <= anchor.cost + contextWindow else {
                 return (candidate, score)
             }
             return (candidate, score + contextWeight * Double(candidate.context) / 65535)
         })
-
-        let ranked = scored.map(\.candidate.word)
-        if scored.count > 1 {
-            let best = scored[0], runnerUp = scored[1]
-            let ambiguous = abs(best.candidate.cost - runnerUp.candidate.cost) <= ambiguousCost
-                && best.score - runnerUp.score < ambiguousScore
-            if ambiguous { return Decision(replacement: nil, ranked: ranked) }
-        }
-        return Decision(replacement: ranked[0], ranked: ranked)
     }
-
-    private typealias Scored = (candidate: CorrectionCandidate, score: Double)
 
     private static func priorScore(_ candidate: CorrectionCandidate) -> Double {
         Double(candidate.frequency) / 65535 - costWeight * candidate.cost
@@ -124,22 +165,21 @@ public enum CorrectionRanking {
     }
 
     /// The accented spellings to suggest when the accent pass should leave `typed`
-    /// alone, because two of them are equally likely: `reserve` is `réserve` or
-    /// `réservé`, and picking one is the same coin toss as in `decide`. nil when one
-    /// spelling is clearly the more likely, and the accent pass may write it.
+    /// alone, because two of them are close readings: `reserve` is `réserve` or
+    /// `réservé`. Unlike in `decide`, neither is picked by frequency: the letters typed
+    /// are right for both, and the accent meant is a matter of grammar (`avons réservé`)
+    /// that the n-gram data does not hold. nil when one spelling is clearly the more
+    /// likely, and the accent pass may write it.
     ///
     /// - Parameters:
     ///   - typed: the word as typed, lowercased, without any apostrophe prefix.
     ///   - candidates: the trie's candidates for it. Only those spelled with the same
     ///     letters once accents are dropped take part.
     public static func ambiguousAccentSpellings(typed: String, candidates: [CorrectionCandidate]) -> [String]? {
-        let letters = typed.folding(options: .diacriticInsensitive, locale: nil)
-        let spellings = candidates.filter {
-            $0.word != typed && $0.word.folding(options: .diacriticInsensitive, locale: nil) == letters
-        }
-        guard spellings.count > 1 else { return nil }
-        let decision = decide(spellings)
-        return decision.replacement == nil ? Array(decision.ranked.prefix(2)) : nil
+        let letters = folded(typed)
+        let spellings = candidates.filter { $0.word != typed && folded($0.word) == letters }
+        let close = closeReadings(scoredWithContext(spellings))
+        return close.count > 1 ? close.prefix(2).map(\.candidate.word) : nil
     }
 }
 
