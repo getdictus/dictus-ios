@@ -318,4 +318,5 @@ final class AOSPTrieEngine {
 extension AOSPTrieEngine: FrequencyProvider {
     var isReady: Bool { isLoaded }
     func frequency(of word: String) -> UInt16 { wordFrequency(word) }
+    var frequencyScale: FrequencyScale { .logNormalized(maxCount: UInt32(clamping: bridge.maxFrequency())) }
 }

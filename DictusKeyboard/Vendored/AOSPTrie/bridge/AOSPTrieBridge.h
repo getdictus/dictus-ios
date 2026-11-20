@@ -51,6 +51,10 @@ NS_ASSUME_NONNULL_BEGIN
 /// Word count from the loaded dictionary header.
 - (NSUInteger)wordCount;
 
+/// The corpus count of the most frequent word, from the loaded dictionary header: the
+/// anchor of the log scale every stored frequency is on (`tools/dict_builder.py`).
+- (NSUInteger)maxFrequency;
+
 /// Install the proximity cost table for the active keyboard layout.
 ///
 /// The table is computed by DictusCore's `KeyboardProximity`, which owns the key geometry
