@@ -271,18 +271,25 @@ class TextPredictionEngine {
         _ word: String,
         isAtSentenceStart: Bool = true
     ) -> (correction: String, alternatives: [String])? {
-        guard let checked = checkWord(word, isAtSentenceStart: isAtSentenceStart, previousWord: nil) else {
-            return nil
-        }
-        return (checked.correction, checked.alternatives)
+        checkWord(word, isAtSentenceStart: isAtSentenceStart, previousWord: nil)?.proposal.autocorrection
     }
 
-    /// A correction `checkWord` proposes, and whether the trie pass already ranked it
-    /// against the previous word, in which case the bigram rerank must leave it alone.
+    /// What `checkWord` proposes, and whether it was already decided with the previous
+    /// word, in which case the bigram rerank must leave it alone. A suggestion (#993)
+    /// always counts as decided: the rerank would turn it into a correction.
     private struct CheckedWord {
-        let correction: String
-        let alternatives: [String]
-        var rankedInContext = false
+        let proposal: CorrectionProposal
+        let rankedInContext: Bool
+
+        init(correction: String, alternatives: [String], rankedInContext: Bool = false) {
+            proposal = .autocorrect(correction, alternatives: alternatives)
+            self.rankedInContext = rankedInContext
+        }
+
+        init(_ proposal: CorrectionProposal) {
+            self.proposal = proposal
+            rankedInContext = true
+        }
     }
 
     /// The body of `spellCheck(_:isAtSentenceStart:)`. `previousWord` is only read by
@@ -361,20 +368,23 @@ class TextPredictionEngine {
         // part after the apostrophe, so "J'etais" checks "etais" → "étais" and
         // the correction is "j'" + "étais", not bare "étais".
         if let accented = aospTrieEngine.accentExpansion(wordToCheck) {
+            let isCapitalized = word.first?.isUppercase == true
+            let display = { (spelling: String) -> String in
+                let full = (apostrophePrefix ?? "") + spelling
+                return isCapitalized ? full.capitalized : full
+            }
             // Two accented spellings of the same letters, equally likely (#993):
-            // `reserve` is `réserve` or `réservé`. Keep what was typed.
-            if CorrectionRanking.accentSpellingIsAmbiguous(
+            // `reserve` is `réserve` or `réservé`. Keep what was typed, offer both.
+            if let spellings = CorrectionRanking.ambiguousAccentSpellings(
                 typed: wordToCheck,
                 candidates: rankedCandidates(for: wordToCheck, previousWord: previousWord)
             ) {
                 #if DEBUG
                 AutocorrectDebugLog.autocorrectSkipped(word: word, reason: "ambiguous-accent")
                 #endif
-                return nil
+                return CheckedWord(.suggest(spellings.map(display)))
             }
-            let full = (apostrophePrefix ?? "") + accented
-            let isCapitalized = word.first?.isUppercase == true
-            let corrected = isCapitalized ? full.capitalized : full
+            let corrected = display(accented)
             #if DEBUG
             AutocorrectDebugLog.autocorrectDecision(
                 original: word, corrected: corrected, branch: "accent", prevWord: nil
@@ -529,29 +539,27 @@ class TextPredictionEngine {
         #if DEBUG
         AutocorrectDebugLog.trieCandidates(word: word, candidates: candidates, decision: decision)
         #endif
-        guard let replacement = decision.replacement else {
+        let isCapitalized = word.first?.isUppercase == true
+        guard let proposal = decision.proposal?.mapWords({ candidate in
+            let full = (apostrophePrefix ?? "") + candidate
+            return isCapitalized ? full.capitalized : full
+        }) else {
             #if DEBUG
-            AutocorrectDebugLog.autocorrectSkipped(
-                word: word, reason: decision.ranked.isEmpty ? "no-trie-candidate" : "ambiguous-candidates"
-            )
+            AutocorrectDebugLog.autocorrectSkipped(word: word, reason: "no-trie-candidate")
             #endif
             return nil
         }
-        let isCapitalized = word.first?.isUppercase == true
-        let display = { (candidate: String) -> String in
-            let full = (apostrophePrefix ?? "") + candidate
-            return isCapitalized ? full.capitalized : full
-        }
         #if DEBUG
-        AutocorrectDebugLog.autocorrectDecision(
-            original: word, corrected: display(replacement), branch: "trie", prevWord: previousWord
-        )
+        if let correction = proposal.autocorrection?.correction {
+            AutocorrectDebugLog.autocorrectDecision(
+                original: word, corrected: correction, branch: "trie", prevWord: previousWord
+            )
+        } else {
+            AutocorrectDebugLog.autocorrectSkipped(word: word, reason: "ambiguous-candidates")
+        }
         #endif
-        return CheckedWord(
-            correction: display(replacement),
-            alternatives: decision.ranked.filter { $0 != replacement }.prefix(2).map(display),
-            rankedInContext: true
-        )
+        // A trie result is ranked with the previous word already, a suggestion included.
+        return CheckedWord(proposal)
     }
 
     /// The trie's candidates for `word` (lowercased, no apostrophe prefix), each with
@@ -597,10 +605,26 @@ class TextPredictionEngine {
         previousWord: String?,
         isAtSentenceStart: Bool = true
     ) -> (correction: String, alternatives: [String])? {
+        correctionProposal(for: word, previousWord: previousWord, isAtSentenceStart: isAtSentenceStart)?
+            .autocorrection
+    }
+
+    /// What `spellCheck(_:previousWord:isAtSentenceStart:)` decides, plus the
+    /// suggestions it offers when it keeps the typed word (#993). The suggestion bar
+    /// reads this; the space bar reads `spellCheck`, so a suggestion is never applied.
+    func correctionProposal(
+        for word: String,
+        previousWord: String?,
+        isAtSentenceStart: Bool = true
+    ) -> CorrectionProposal? {
+        let applied = { (result: (correction: String, alternatives: [String])?) -> CorrectionProposal? in
+            result.map { .autocorrect($0.correction, alternatives: $0.alternatives) }
+        }
+
         // Lexicon verdicts (#873) return before the bigram rerank, which could
         // otherwise swap a replacement phrase or a kept name for a neighbour.
         if let decision = lexiconDecision(for: word) {
-            return lexiconResult(decision, for: word)
+            return applied(lexiconResult(decision, for: word))
         }
 
         // Language overrides are authoritative — return before the bigram
@@ -616,24 +640,24 @@ class TextPredictionEngine {
                 branch: "language-override", prevWord: previousWord
             )
             #endif
-            return override
+            return applied(override)
         }
 
         let checked = checkWord(word, isAtSentenceStart: isAtSentenceStart, previousWord: previousWord)
-        let result = checked.map { (correction: $0.correction, alternatives: $0.alternatives) }
+        let result = checked?.proposal.autocorrection
 
         // If no previous word context or n-grams not loaded, return standard result.
         // A trie correction was already ranked with the previous word.
         guard let prev = previousWord, !prev.isEmpty, aospTrieEngine.ngramsLoaded,
               checked?.rankedInContext != true else {
-            return result
+            return checked?.proposal
         }
 
         // A learned word has no bigrams, so the rerank below would trade it for
         // any n-gram prediction one edit away (#498).
         if let correction = result?.correction,
            UserDictionary.shared.isLearned(String(correction.lowercased().split(separator: "'").last ?? "")) {
-            return result
+            return applied(result)
         }
 
         let lowered = word.lowercased()
@@ -708,7 +732,7 @@ class TextPredictionEngine {
                     "bigram-rerank skipped (no evidence) for \"\(word)\" prev=\"\(prev)\", keeping \"\(result.correction)\""
                 )
                 #endif
-                return result
+                return applied(result)
             }
 
             // CRITICAL: the rerank must not pick a candidate that's FARTHER from
@@ -762,7 +786,7 @@ class TextPredictionEngine {
                 )
             }
             #endif
-            return (newCorrection, Array(newAlternatives.prefix(2)))
+            return .autocorrect(newCorrection, alternatives: Array(newAlternatives.prefix(2)))
         }
 
         // Word is valid (spellCheck returned nil) — do not override with n-gram

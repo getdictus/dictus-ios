@@ -61,8 +61,8 @@ public enum CorrectionRanking {
     public static let costWeight = 0.35
     /// How much a full-scale bigram score adds to a candidate's score.
     public static let contextWeight = 0.5
-    /// How much dearer than the cheapest candidate a candidate may be and still be
-    /// lifted by context.
+    /// How much dearer than the winner without context a candidate may be and still
+    /// be lifted by context.
     public static let contextWindow = 0.5
     /// Two candidates closer than this in cost are equally easy to have mistyped.
     public static let ambiguousCost = 0.25
@@ -74,6 +74,16 @@ public enum CorrectionRanking {
         public let replacement: String?
         /// Every candidate, best first.
         public let ranked: [String]
+
+        /// What the bar and the space bar get from this decision: the replacement, or,
+        /// when the typed word is kept, the best two candidates as suggestions only.
+        /// nil when there is no candidate at all.
+        public var proposal: CorrectionProposal? {
+            if let replacement {
+                return .autocorrect(replacement, alternatives: Array(ranked.filter { $0 != replacement }.prefix(2)))
+            }
+            return ranked.isEmpty ? nil : .suggest(Array(ranked.prefix(2)))
+        }
     }
 
     public static func decide(_ candidates: [CorrectionCandidate]) -> Decision {
@@ -113,19 +123,57 @@ public enum CorrectionRanking {
         }
     }
 
-    /// Whether the accent pass should leave `typed` alone because two accented
-    /// spellings of its letters are equally likely: `reserve` is `réserve` or
-    /// `réservé`, and picking one is the same coin toss as in `decide`.
+    /// The accented spellings to suggest when the accent pass should leave `typed`
+    /// alone, because two of them are equally likely: `reserve` is `réserve` or
+    /// `réservé`, and picking one is the same coin toss as in `decide`. nil when one
+    /// spelling is clearly the more likely, and the accent pass may write it.
     ///
     /// - Parameters:
     ///   - typed: the word as typed, lowercased, without any apostrophe prefix.
     ///   - candidates: the trie's candidates for it. Only those spelled with the same
     ///     letters once accents are dropped take part.
-    public static func accentSpellingIsAmbiguous(typed: String, candidates: [CorrectionCandidate]) -> Bool {
+    public static func ambiguousAccentSpellings(typed: String, candidates: [CorrectionCandidate]) -> [String]? {
         let letters = typed.folding(options: .diacriticInsensitive, locale: nil)
         let spellings = candidates.filter {
             $0.word != typed && $0.word.folding(options: .diacriticInsensitive, locale: nil) == letters
         }
-        return spellings.count > 1 && decide(spellings).replacement == nil
+        guard spellings.count > 1 else { return nil }
+        let decision = decide(spellings)
+        return decision.replacement == nil ? Array(decision.ranked.prefix(2)) : nil
+    }
+}
+
+/// What the corrector proposes for the word being typed (#993).
+public enum CorrectionProposal: Equatable, Sendable {
+    /// Written in place of the typed word on space, and shown in the bar's bold slot.
+    case autocorrect(String, alternatives: [String])
+    /// Shown in the bar for a tap, never written on space: the corrector keeps the
+    /// typed word because no candidate is sure enough, as Apple's keyboard does.
+    case suggest([String])
+
+    /// The correction the space bar applies, or nil for a suggestion.
+    public var autocorrection: (correction: String, alternatives: [String])? {
+        guard case let .autocorrect(correction, alternatives) = self else { return nil }
+        return (correction, alternatives)
+    }
+
+    /// The same proposal with every word passed through `transform`, the casing and
+    /// apostrophe prefix the caller restores.
+    public func mapWords(_ transform: (String) -> String) -> CorrectionProposal {
+        switch self {
+        case let .autocorrect(correction, alternatives):
+            return .autocorrect(transform(correction), alternatives: alternatives.map(transform))
+        case let .suggest(words):
+            return .suggest(words.map(transform))
+        }
+    }
+
+    /// The bar row for a suggestion: the typed word first, which keeps it on a tap,
+    /// then up to two candidates. No slot is the one space applies. nil for an
+    /// autocorrection, whose row `LearnedWordCompletions.correctionsRow` builds.
+    public func suggestionRow(typedWord: String) -> [String]? {
+        guard case let .suggest(words) = self else { return nil }
+        let offered = words.filter { $0 != typedWord }.prefix(2)
+        return offered.isEmpty ? nil : [typedWord] + offered
     }
 }

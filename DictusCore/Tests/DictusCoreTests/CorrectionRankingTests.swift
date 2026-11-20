@@ -124,23 +124,57 @@ final class CorrectionRankingTests: XCTestCase {
 
     func testTwoEquallyLikelyAccentSpellingsAreAmbiguous() {
         // `nous avons reserve`: `réserve` or `réservé`.
-        XCTAssertTrue(CorrectionRanking.accentSpellingIsAmbiguous(typed: "reserve", candidates: [
+        XCTAssertEqual(CorrectionRanking.ambiguousAccentSpellings(typed: "reserve", candidates: [
             candidate("réserve", 0.15, 33_835), candidate("réservé", 0.30, 31_794),
             candidate("réserves", 1.15, 29_642), candidate("préserve", 1.15, 24_437)
-        ]))
+        ]), ["réserve", "réservé"], "Both spellings are offered, neither is written")
     }
 
     func testAClearlyMoreFrequentAccentSpellingIsNotAmbiguous() {
         // `pres`: `près` is far more frequent than `prés`.
-        XCTAssertFalse(CorrectionRanking.accentSpellingIsAmbiguous(typed: "pres", candidates: [
+        XCTAssertNil(CorrectionRanking.ambiguousAccentSpellings(typed: "pres", candidates: [
             candidate("près", 0.15, 43_000), candidate("prés", 0.15, 32_000), candidate("pris", 1.00, 46_000)
         ]))
     }
 
     func testASingleAccentSpellingIsNotAmbiguous() {
         // `tres`: other candidates do not share its letters.
-        XCTAssertFalse(CorrectionRanking.accentSpellingIsAmbiguous(typed: "tres", candidates: [
+        XCTAssertNil(CorrectionRanking.ambiguousAccentSpellings(typed: "tres", candidates: [
             candidate("très", 0.15, 52_000), candidate("tes", 1.00, 47_000), candidate("près", 1.15, 43_000)
         ]))
+    }
+
+    // MARK: - A kept word is still suggested
+
+    func testAKeptWordIsSuggestedButNotApplied() {
+        // `la reùion`: kept as typed, as Apple's keyboard does, with both readings in
+        // the bar for a tap.
+        let proposal = CorrectionRanking.decide([
+            candidate("région", 1.15, 35_201), candidate("réunion", 1.30, 36_517), candidate("recoin", 1.70, 23_593)
+        ]).proposal
+        XCTAssertEqual(proposal, .suggest(["région", "réunion"]))
+        XCTAssertNil(proposal?.autocorrection, "Nothing is written on space")
+        XCTAssertEqual(proposal?.suggestionRow(typedWord: "reùion"), ["reùion", "région", "réunion"],
+                       "The typed word comes first and keeps it; the candidates follow")
+    }
+
+    func testASureCorrectionIsAppliedAndHasNoSuggestionRow() {
+        let proposal = CorrectionRanking.decide([
+            candidate("still", 0.40, 52_000), candidate("atoll", 0.40, 37_000), candidate("till", 1.00, 45_000)
+        ]).proposal
+        XCTAssertEqual(proposal, .autocorrect("still", alternatives: ["atoll", "till"]))
+        XCTAssertEqual(proposal?.autocorrection?.correction, "still")
+        XCTAssertNil(proposal?.suggestionRow(typedWord: "atill"), "Its row is the corrections row, bold slot included")
+    }
+
+    func testNoCandidateProposesNothing() {
+        XCTAssertNil(CorrectionRanking.decide([]).proposal)
+    }
+
+    func testCasingIsRestoredOnEveryWord() {
+        XCTAssertEqual(CorrectionProposal.suggest(["région", "réunion"]).mapWords { $0.capitalized },
+                       .suggest(["Région", "Réunion"]))
+        XCTAssertEqual(CorrectionProposal.autocorrect("being", alternatives: ["bering"]).mapWords { $0.capitalized },
+                       .autocorrect("Being", alternatives: ["Bering"]))
     }
 }
