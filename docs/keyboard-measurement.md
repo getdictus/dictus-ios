@@ -164,7 +164,10 @@ xcrun xctrace export --input build/keyboard-bench/device.trace \
 - **A third of a point.** `--grid-top` is read off pixels, a third of a point each. A
   replay tap that close to a row boundary can land in the other row on the real
   keyboard: one English tap at 53.99 pt in a 54 pt row typed `k` for `i`.
-- **Ties.** Some corrections are ties broken in hash order, which a device redraws on
-  every keyboard launch. The replay pins the seed; unset `SWIFT_DETERMINISTIC_HASHING`
-  in `run.sh` to see which words flip.
+- **Ties.** Until #993, some corrections were ties broken in hash order, which a device
+  redraws on every keyboard launch. They are now broken by cost, then by word: four
+  unseeded replays gave byte-identical commits
+  ([`research/993-autocorrect-confidence/`](research/993-autocorrect-confidence/README.md)).
+  The replay still pins the seed; unset `SWIFT_DETERMINISTIC_HASHING` in `run.sh` to
+  check that nothing flips.
 - **Simulator timing is not device timing**, and is only comparable on the same Mac.
