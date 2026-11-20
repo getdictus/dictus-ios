@@ -63,9 +63,12 @@ cheaper than `ich`. It is now anchored on the winner without context.
 | es-typos | 2 → 1 | 0 → 0 | 2 → 3 |
 | de-typos | 1 → 0 | 0 → 0 | 22 → 23 |
 
-The German loss is `montg`: `montag` (cost 1.00) and `monte` (0.83) score 0.065 apart,
-inside the ambiguity band, so the word is kept as typed. Narrowing the band to fix it
-would let `irning` become `irving` again (0.097 apart).
+The German loss is `montg` (meant `montag`), now kept as typed. Its runner-up `monte`
+costs 0.83 to reach against 1.00 for `montag`, within 0.25, and scores 0.065 below it,
+inside the 0.12 band, so the two read as equally likely. Correcting it would take a
+band under 0.065, and `irning` (`irving` 0.097 ahead of `inning`) would then be
+corrected to `irving` again, one of the 11 the issue is about. Since the kept word's
+candidates are in the bar (below), `montag` is one tap away.
 
 ## Determinism
 
@@ -86,6 +89,19 @@ Four replays of fr, en and en-typos **without** the fixed hash seed:
 
 Letters stay within 10 %. Space p95 rises by about 0.06 ms: it now ranks ten
 candidates with one bigram lookup each, instead of taking the first of five.
+
+## A kept word is still suggested
+
+When the typed word is kept, the bar still offers the candidates, as Apple's keyboard
+does, without a bold slot and without applying anything on space: the bar reads
+`TextPredictionEngine.correctionProposal`, the space bar reads `spellCheck`, which only
+returns `.autocorrect`. Rerun on the commit that adds this: the `commits.tsv` of all nine
+runs (fr, en, en-typos and the six held-out) are byte-identical to the previous commit,
+so every number above stands.
+
+`dictus-sim-kept-word-suggestions.png`: the Dictus keyboard on the simulator, French,
+`nous avons reserve` typed. The bar shows `"reserve" | réserve | réservé`, none in
+bold. A space then left `Nous avons reserve ` in the field.
 
 ## On the real keyboard
 
