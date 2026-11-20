@@ -145,4 +145,42 @@ final class InKeyboardDictationRouteTests: XCTestCase {
         XCTAssertEqual(InKeyboardDictationRoute.speechLocaleIdentifier(languageCode: "de", deviceLocaleIdentifier: "fr_FR"), "de-DE")
         XCTAssertEqual(InKeyboardDictationRoute.speechLocaleIdentifier(languageCode: "zz", deviceLocaleIdentifier: "fr_FR"), "zz")
     }
+
+    // MARK: - Locales reserved ahead of the first cold tap
+
+    func testReservesTheKeyboardLanguageInFollowMode() {
+        XCTAssertEqual(
+            InKeyboardDictationRoute.speechLocalesToReserve(
+                transcriptionMode: .followKeyboard, keyboardLanguageCode: "fr", deviceLocaleIdentifier: "fr_FR"
+            ),
+            ["fr-FR"]
+        )
+    }
+
+    func testReservesTheExplicitLanguageFirstThenTheKeyboardOne() {
+        XCTAssertEqual(
+            InKeyboardDictationRoute.speechLocalesToReserve(
+                transcriptionMode: .explicit(.english), keyboardLanguageCode: "fr", deviceLocaleIdentifier: "fr_FR"
+            ),
+            ["en-US", "fr-FR"]
+        )
+    }
+
+    func testAutoDetectReservesTheKeyboardLanguage() {
+        XCTAssertEqual(
+            InKeyboardDictationRoute.speechLocalesToReserve(
+                transcriptionMode: .autoDetect, keyboardLanguageCode: "de", deviceLocaleIdentifier: "en_GB"
+            ),
+            ["de-DE"]
+        )
+    }
+
+    func testDeviceRegionWinsForItsOwnLanguage() {
+        XCTAssertEqual(
+            InKeyboardDictationRoute.speechLocalesToReserve(
+                transcriptionMode: .followKeyboard, keyboardLanguageCode: "fr", deviceLocaleIdentifier: "fr_CA"
+            ),
+            ["fr-CA"]
+        )
+    }
 }

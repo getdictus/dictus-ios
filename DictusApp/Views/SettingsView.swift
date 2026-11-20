@@ -526,8 +526,11 @@ struct SettingsView: View {
             Section {
                 Toggle("Dictate in the keyboard", isOn: $inKeyboardDictationEnabled)
                     .onChange(of: inKeyboardDictationEnabled) { _, enabled in
-                        if enabled { InKeyboardSpeechAssets.prepareForDictationLanguage() }
+                        if enabled { InKeyboardSpeechAssets.prepareForDictationLanguage(reason: "setting") }
                     }
+                NavigationLink("How dictation works") {
+                    InKeyboardDictationInfoView()
+                }
             } header: {
                 Text("Experiments")
             }

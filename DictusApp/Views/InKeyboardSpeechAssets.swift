@@ -11,21 +11,50 @@ import Speech
 /// missing. This is a model download from Apple; transcription itself never leaves the
 /// device.
 enum InKeyboardSpeechAssets {
-    static func prepareForDictationLanguage() {
+    /// Reserve and install the speech model(s) the keyboard will use, so its first cold
+    /// tap does not fall back to the app. Called at each launch, when onboarding confirms
+    /// the language, and when the setting is turned on. Nothing happens with the setting
+    /// off or before iOS 26.
+    static func prepareForDictationLanguage(reason: String = "setting") {
         guard #available(iOS 26.0, *) else { return }
-        let keyboard = SupportedLanguage.active.rawValue
-        let code = TranscriptionLanguageMode.active.resolvedLanguageCode(keyboardLanguageCode: keyboard) ?? keyboard
-        Task.detached(priority: .utility) { await install(languageCode: code) }
+        guard InKeyboardDictationRoute.isSettingEnabled(in: AppGroup.defaults) else {
+            log("skipped", "reason=\(reason) setting=off")
+            return
+        }
+        let locales = InKeyboardDictationRoute.speechLocalesToReserve(
+            transcriptionMode: TranscriptionLanguageMode.active,
+            keyboardLanguageCode: SupportedLanguage.active.rawValue,
+            deviceLocaleIdentifier: Locale.current.identifier
+        )
+        log("prepare", "reason=\(reason) locales=\(locales)")
+        Task.detached(priority: .utility) {
+            for locale in locales { await install(languageCode: locale) }
+        }
+    }
+
+    /// The app's side of `DictationSessionClaim`, for the keyboard's Darwin start post.
+    /// False: the keyboard took this session after its 500 ms window, so the app must not
+    /// record it too.
+    static func appMayStartKeyboardSession() -> Bool {
+        let directory = DictationSessionClaim.defaultDirectory
+        let mayStart = DictationSessionClaim.appMayStart(defaults: AppGroup.defaults, directory: directory)
+        let session = AppGroup.defaults.string(forKey: SharedKeys.dictationSessionRequest) ?? "none"
+        log("sessionClaim", "session=\(session) side=app mayStart=\(mayStart)")
+        return mayStart
+    }
+
+    /// Old session claims, once per launch.
+    static func pruneSessionClaims() {
+        guard let directory = DictationSessionClaim.defaultDirectory else { return }
+        DictationSessionClaim.prune(in: directory)
     }
 
     /// The same module choice as the keyboard's `AppleSpeechRecognizer`:
     /// `SpeechTranscriber` where available, `DictationTranscriber` otherwise.
     @available(iOS 26.0, *)
     private static func install(languageCode: String) async {
-        let requested = Locale(identifier: InKeyboardDictationRoute.speechLocaleIdentifier(
-            languageCode: languageCode,
-            deviceLocaleIdentifier: Locale.current.identifier
-        ))
+        // Already a regional identifier (`speechLocalesToReserve`), e.g. "fr-FR".
+        let requested = Locale(identifier: languageCode)
         let module: any SpeechModule
         let locale: Locale
         let name: String

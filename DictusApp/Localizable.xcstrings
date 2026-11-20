@@ -4042,6 +4042,17 @@
         }
       }
     },
+    "Dictus transcribes with the model you chose in Models, such as Parakeet or Whisper." : {
+      "comment" : "Settings > Experiments > How dictation works (spike #992): what happens when the app is open. \"Models\" is the tab name.",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dictus transcrit avec le modèle choisi dans Modèles, comme Parakeet ou Whisper."
+          }
+        }
+      }
+    },
     "Dictus uses it to reach the Dictus app." : {
       "comment" : "Full Access explainer sheet, first point, bold lead (#704).",
       "localizations" : {
@@ -4422,6 +4433,17 @@
         }
       }
     },
+    "How dictation works" : {
+      "comment" : "Link and title of the screen that explains which engine dictates when the app is closed or open (spike #992).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comment fonctionne la dictée"
+          }
+        }
+      }
+    },
     "I'll be there in ten minutes." : {
       "comment" : "Onboarding Smart Modes scene: the short sentence dictated in the drawn keyboard, shown as dictated, then translated by the → EN or → FR Smart Mode. Natural spoken message (#679).",
       "localizations" : {
@@ -4633,6 +4655,17 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "In both cases" : {
+      "comment" : "Settings > Experiments > How dictation works (spike #992): section header.",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dans les deux cas"
           }
         }
       }
@@ -5073,6 +5106,17 @@
         }
       }
     },
+    "Only with the app" : {
+      "comment" : "Settings > Experiments > How dictation works (spike #992): section header.",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uniquement avec l’app"
+          }
+        }
+      }
+    },
     "Other" : {
       "comment" : "Feedback form (#565).",
       "localizations" : {
@@ -5207,6 +5251,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Partager à la place"
+          }
+        }
+      }
+    },
+    "The Dynamic Island and the Lock Screen activity only appear when the app is open." : {
+      "comment" : "Settings > Experiments > How dictation works (spike #992): what needs the app.",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La Dynamic Island et l’activité sur l’écran verrouillé n’apparaissent que lorsque l’app est ouverte."
+          }
+        }
+      }
+    },
+    "The keyboard dictates by itself with Apple's dictation, on your iPhone. Nothing leaves your iPhone." : {
+      "comment" : "Settings > Experiments > How dictation works (spike #992): what happens when the app is closed.",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le clavier dicte seul avec la dictée d’Apple, sur votre iPhone. Rien ne quitte votre iPhone."
           }
         }
       }
@@ -5441,6 +5507,28 @@
         }
       }
     },
+    "When the Dictus app is closed" : {
+      "comment" : "Settings > Experiments > How dictation works (spike #992): section header.",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quand l’app Dictus est fermée"
+          }
+        }
+      }
+    },
+    "When the Dictus app is open" : {
+      "comment" : "Settings > Experiments > How dictation works (spike #992): section header.",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quand l’app Dictus est ouverte"
+          }
+        }
+      }
+    },
     "Your idea" : {
       "comment" : "Feedback form (#565).",
       "localizations" : {
@@ -5506,6 +5594,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Votre nom"
+          }
+        }
+      }
+    },
+    "Your vocabulary, Polish transcription and Smart Modes apply to your text." : {
+      "comment" : "Settings > Experiments > How dictation works (spike #992): what works whichever engine runs. \"Polish transcription\" is the Settings toggle's name.",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Votre vocabulaire, Polir la transcription et les modes intelligents s’appliquent à votre texte."
           }
         }
       }

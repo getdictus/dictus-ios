@@ -420,6 +420,10 @@ public enum SharedKeys {
     /// is cold, the keyboard records and transcribes by itself instead of opening the
     /// app. See `InKeyboardDictationRoute`.
     public static let inKeyboardDictationEnabled = "dictus.experiments.inKeyboardDictation"
+    /// String: the session id of the keyboard's latest start request, written just before
+    /// the Darwin `startRecording` post so the app can claim that session. See
+    /// `DictationSessionClaim`.
+    public static let dictationSessionRequest = "dictus.dictationSessionRequest"
 
     // MARK: - Retired keys
     /// The #357 probe's arming flag, removed with the probe in #361. Kept as a

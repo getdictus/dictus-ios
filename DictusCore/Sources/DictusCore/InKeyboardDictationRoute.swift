@@ -78,6 +78,23 @@ public enum InKeyboardDictationRoute: String, Equatable, Sendable {
         return "\(languageCode)-\(region)"
     }
 
+    /// The speech locales the app reserves and installs ahead of the keyboard's first
+    /// cold tap, in priority order: the dictation language, then the keyboard language
+    /// when it differs (the toolbar switches it, and in follow mode the dictation follows).
+    /// Auto-detect has no single language, so it reserves the keyboard's.
+    public static func speechLocalesToReserve(transcriptionMode: TranscriptionLanguageMode,
+                                              keyboardLanguageCode: String,
+                                              deviceLocaleIdentifier: String) -> [String] {
+        let dictation = transcriptionMode.resolvedLanguageCode(keyboardLanguageCode: keyboardLanguageCode)
+            ?? keyboardLanguageCode
+        var result: [String] = []
+        for code in [dictation, keyboardLanguageCode] {
+            let identifier = speechLocaleIdentifier(languageCode: code, deviceLocaleIdentifier: deviceLocaleIdentifier)
+            if !result.contains(identifier) { result.append(identifier) }
+        }
+        return result
+    }
+
     /// The major component of `UIDevice.current.systemVersion` ("26.5" → 26).
     /// An unreadable string gives 0, which routes to the fallback.
     public static func majorVersion(of systemVersion: String) -> Int {

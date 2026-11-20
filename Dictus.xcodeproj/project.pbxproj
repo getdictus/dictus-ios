@@ -141,6 +141,7 @@
 		AA0000A4 /* ModelDownloadPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000A4 /* ModelDownloadPage.swift */; };
 		AA0000A5 /* GlobeKeyTutorialPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000A5 /* GlobeKeyTutorialPage.swift */; };
 		AA0F0008 /* InKeyboardSpeechAssets.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0F0007 /* InKeyboardSpeechAssets.swift */; };
+		AA0F000A /* InKeyboardDictationInfoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0F0009 /* InKeyboardDictationInfoView.swift */; };
 		AA0000A6 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000A6 /* SettingsView.swift */; };
 		AA0000A7 /* LicensesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000A7 /* LicensesView.swift */; };
 		AA0000A8 /* DebugLogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000A8 /* DebugLogView.swift */; };
@@ -412,6 +413,7 @@
 		AA1000A4 /* ModelDownloadPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelDownloadPage.swift; sourceTree = "<group>"; };
 		AA1000A5 /* GlobeKeyTutorialPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobeKeyTutorialPage.swift; sourceTree = "<group>"; };
 		AA0F0007 /* InKeyboardSpeechAssets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InKeyboardSpeechAssets.swift; sourceTree = "<group>"; };
+		AA0F0009 /* InKeyboardDictationInfoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InKeyboardDictationInfoView.swift; sourceTree = "<group>"; };
 		AA1000A6 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		AA1000A7 /* LicensesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LicensesView.swift; sourceTree = "<group>"; };
 		AA1000A8 /* DebugLogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugLogView.swift; sourceTree = "<group>"; };
@@ -795,6 +797,7 @@
 				AA100071 /* TestDictationView.swift */,
 				AA100092 /* DiagnosticDetailView.swift */,
 				AA1000A6 /* SettingsView.swift */,
+				AA0F0009 /* InKeyboardDictationInfoView.swift */,
 				AA0F0007 /* InKeyboardSpeechAssets.swift */,
 				AA1000A7 /* LicensesView.swift */,
 				AA1000A8 /* DebugLogView.swift */,
@@ -1498,6 +1501,7 @@
 				AA0000A5 /* GlobeKeyTutorialPage.swift in Sources */,
 				AA0000A9 /* OnboardingSuccessView.swift in Sources */,
 				AA0000A6 /* SettingsView.swift in Sources */,
+				AA0F000A /* InKeyboardDictationInfoView.swift in Sources */,
 				AA0F0008 /* InKeyboardSpeechAssets.swift in Sources */,
 				AA0000A7 /* LicensesView.swift in Sources */,
 				AA0000A8 /* DebugLogView.swift in Sources */,

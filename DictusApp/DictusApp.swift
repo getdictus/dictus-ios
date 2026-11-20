@@ -336,6 +336,12 @@ struct DictusApp: App {
         // only process that owns hygiene over shared state.
         SharedKeys.clearRetiredKeys()
 
+        // Spike (#992): the Apple speech model the keyboard dictates with when the app is
+        // closed, reserved and installed at every launch so its first cold tap stays in
+        // the keyboard; and the per-session claims the keyboard and the app take.
+        InKeyboardSpeechAssets.prepareForDictationLanguage(reason: "launch")
+        InKeyboardSpeechAssets.pruneSessionClaims()
+
         // Read n-gram diagnostic written by keyboard extension
         if let ngramDiag = AppGroup.defaults.string(forKey: "ngramDiagnostic") {
             DictusLogger.app.info("ngramDiagnostic: \(ngramDiag, privacy: .public)")

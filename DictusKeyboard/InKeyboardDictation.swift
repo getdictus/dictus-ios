@@ -455,6 +455,10 @@ extension KeyboardState {
     /// the web view load run during the app's 500 ms.
     func postStartRecordingPreparingInKeyboardDictation() {
         MainActor.assumeIsolated { InKeyboardDictation.shared.prepare(for: self) }
+        // The session the app must claim before it records (`DictationSessionClaim`).
+        // Written before the post, so the app's handler always finds it.
+        AppGroup.defaults.set(activeSessionID, forKey: SharedKeys.dictationSessionRequest)
+        AppGroup.defaults.synchronize()
         DarwinNotificationCenter.post(DarwinNotificationName.startRecording)
     }
 
@@ -465,9 +469,27 @@ extension KeyboardState {
             let dictation = InKeyboardDictation.shared
             let route = dictation.route(appAnswered: dictationStatus != .requested)
             InKeyboardDictation.log("route", "route=\(route.rawValue) elapsedMs=\(elapsedMs)")
-            guard route == .inKeyboard else { return false }
-            dictation.start(for: self)
-            return true
+            // One owner per session: an app that answers just after the window has
+            // claimed it, or will find it claimed (`DictationSessionClaim`).
+            let claims = DictationSessionClaim.defaultDirectory
+            if route == .inKeyboard {
+                if let sessionID = activeSessionID, let claims {
+                    let owner = DictationSessionClaim.claim(sessionID, as: .keyboard, in: claims)
+                    InKeyboardDictation.log("sessionClaim", "session=\(sessionID) side=keyboard owner=\(owner?.rawValue ?? "unwritable")")
+                    // The app got there first and records: no second recording, no URL.
+                    if owner == .app { return true }
+                }
+                dictation.start(for: self)
+                return true
+            }
+            // Today's URL fallback, except when the app answered late and already owns
+            // the session: opening it again would only bring it forward mid-recording.
+            if let sessionID = activeSessionID, let claims,
+               DictationSessionClaim.current(sessionID, in: claims) == .app {
+                InKeyboardDictation.log("sessionClaim", "session=\(sessionID) side=keyboard owner=app skipped=urlFallback")
+                return true
+            }
+            return false
         }
     }
 }
