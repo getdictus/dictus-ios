@@ -406,8 +406,10 @@ private struct MemoryTrace {
     private var minimumAvailableKB = Int.max
     private var samples = 0
 
+    /// `liveKB` is what malloc still has allocated (#992): a leak raises it, freed pages the
+    /// allocator keeps raise only `footprintKB`.
     static func reading() -> String {
-        "footprintKB=\(MemoryFootprint.residentKB()) availableKB=\(availableKB())"
+        "footprintKB=\(MemoryFootprint.residentKB()) liveKB=\(MemoryFootprint.liveHeapKB()) availableKB=\(availableKB())"
     }
 
     static func availableKB() -> Int {
