@@ -52,5 +52,29 @@ public let frenchProfile = LanguageProfile(
         "l'", "d'", "c'", "j'", "n'", "s'", "m'", "t'",
         // 2-character prefix (qu')
         "qu'"
-    ]
+    ],
+    // `il est arrive` → `arrivé`, `il arrive` stays (#994). The auxiliaries être and
+    // avoir in their simple tenses, and the adverbs that sit between an auxiliary and
+    // its participle (`sont déjà couchés`, `était presque déchargé`). French puts these
+    // adverbs after a conjugated verb, so before one they announce a participle.
+    // Excluded: `été`, also the noun (`l'été arrive`), and `tout`, also a pronoun
+    // (`tout arrive`).
+    participleContext: ParticipleContext(
+        triggers: [
+            "suis", "es", "est", "sommes", "\u{00EA}tes", "sont",
+            "\u{00E9}tais", "\u{00E9}tait", "\u{00E9}tions", "\u{00E9}tiez", "\u{00E9}taient",
+            "serai", "seras", "sera", "serons", "serez", "seront",
+            "serais", "serait", "serions", "seriez", "seraient",
+            "sois", "soit", "soyons", "soyez", "soient", "\u{00EA}tre", "\u{00E9}tant",
+            "ai", "as", "a", "avons", "avez", "ont",
+            "avais", "avait", "avions", "aviez", "avaient",
+            "aurai", "auras", "aura", "aurons", "aurez", "auront",
+            "aurais", "aurait", "aurions", "auriez", "auraient",
+            "aie", "aies", "ait", "ayons", "ayez", "aient", "eu", "avoir", "ayant",
+            "d\u{00E9}j\u{00E0}", "presque", "bien", "pas", "jamais", "encore", "toujours",
+            "plus", "rien", "vraiment", "trop", "tr\u{00E8}s", "souvent", "tellement",
+            "compl\u{00E8}tement"
+        ],
+        endings: ["\u{00E9}", "\u{00E9}e", "\u{00E9}s", "\u{00E9}es"]  // é, ée, és, ées
+    )
 )
