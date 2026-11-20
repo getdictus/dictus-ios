@@ -17,6 +17,13 @@ final class TypingJournalTests: XCTestCase {
         var lines: [String] { lock.withLock { entries.map(\.event.line) } }
     }
 
+    /// Everything `journal` has recorded, once written.
+    private func written(_ journal: TypingJournalRecorder) -> [String] {
+        journal.flush()
+        journal.waitUntilWritten()
+        return collected.lines
+    }
+
     private var collected = Collected()
 
     override func setUp() {
@@ -68,10 +75,9 @@ final class TypingJournalTests: XCTestCase {
         journal.endWord(final: "secret", autocorrectRan: true)
         journal.barTapped(slot: 1, bar: TypingJournalBar(mode: "predictions", words: ["a", "b"]), typed: "", commits: true)
         journal.repeatDelete()
-        journal.flush()
 
         XCTAssertFalse(journal.isRecording)
-        XCTAssertEqual(collected.lines, [], "a secure field writes nothing, debug lines included")
+        XCTAssertEqual(written(journal), [], "a secure field writes nothing, debug lines included")
     }
 
     func testAPasswordFieldStopsARecordingInProgress() {
@@ -79,16 +85,14 @@ final class TypingJournalTests: XCTestCase {
         type("ab", on: journal)
         journal.observeField(isSecureEntry: false, content: .oneTimeCode, document: "otp", keyboard: "fr-azerty")
         type("123456", on: journal)
-        journal.flush()
 
-        XCTAssertEqual(collected.lines.filter { $0.hasPrefix("TJ TAP") }.count, 2, "only the taps before the code field")
+        XCTAssertEqual(written(journal).filter { $0.hasPrefix("TJ TAP") }.count, 2, "only the taps before the code field")
     }
 
     func testNothingIsRecordedWithTheToggleOff() {
         let journal = recording(toggle: false)
         type("bonjour", on: journal)
-        journal.flush()
-        XCTAssertEqual(collected.lines, [])
+        XCTAssertEqual(written(journal), [])
         XCTAssertFalse(journal.absorb("AUTOCORRECT branch=trie orig=\"a\" corr=\"b\" prev=nil"),
                        "the toggle turned on since the last trait read: AutocorrectDebugLog writes the line itself")
     }
@@ -161,7 +165,7 @@ final class TypingJournalTests: XCTestCase {
         XCTAssertTrue(journal.absorb("AUTOCORRECT branch=accent orig=\"tres\" corr=\"très\" prev=\"je\""))
         journal.endWord(final: "très", autocorrectRan: true)
 
-        XCTAssertEqual(collected.lines, [
+        XCTAssertEqual(written(journal), [
             "TJ FIELD kb=fr-azerty",
             "TJ TAP k=t dx=+0.1000 dy=-0.2000 dt=- kb=fr-azerty",
             "TJ TAP k=r dx=+0.1000 dy=-0.2000 dt=150 kb=fr-azerty",
@@ -180,12 +184,23 @@ final class TypingJournalTests: XCTestCase {
         type("a", on: journal)
         XCTAssertTrue(journal.absorb("MIRROR-SUSPECT surplus=+1 before=3 after=4", onMainThread: false))
         type("b", on: journal, from: 1)
-        journal.flush()
-        XCTAssertEqual(Array(collected.lines.dropFirst()), [
+        XCTAssertEqual(Array(written(journal).dropFirst()), [
             "TJ TAP k=a dx=+0.1000 dy=-0.2000 dt=- kb=fr-azerty",
             "MIRROR-SUSPECT surplus=+1 before=3 after=4",
             "TJ TAP k=b dx=+0.1000 dy=-0.2000 dt=1000 kb=fr-azerty",
         ])
+    }
+
+    func testALongSessionIsWrittenInOrder() {
+        let journal = recording()
+        let keys = (0..<150).map { String(UnicodeScalar(UInt8(97 + $0 % 26))) }
+        for (i, key) in keys.enumerated() {
+            journal.tap(key, dx: 0, dy: 0, time: Double(i), keyboard: "fr-azerty")
+            if i == 70 { journal.flush() }
+        }
+        let taps = written(journal).filter { $0.hasPrefix("TJ TAP") }
+        XCTAssertEqual(taps.map { $0.components(separatedBy: " ")[2] }, keys.map { "k=\($0)" },
+                       "batches sent by size and by flush land in tap order")
     }
 
     func testOutcomes() {
@@ -197,7 +212,7 @@ final class TypingJournalTests: XCTestCase {
                               bar: TypingJournalBar(mode: bar, words: []))
             for why in whys { _ = journal.absorb(why) }
             journal.endWord(final: final, autocorrectRan: ran)
-            return collected.lines.first { $0.hasPrefix("TJ WORD") }?
+            return written(journal).first { $0.hasPrefix("TJ WORD") }?
                 .components(separatedBy: " ").first { $0.hasPrefix("outcome=") } ?? "none"
         }
         XCTAssertEqual(outcome(final: "hello"), "outcome=autocorrected")
@@ -214,7 +229,7 @@ final class TypingJournalTests: XCTestCase {
         _ = journal.absorb("AUTOCORRECT branch=contextual-contraction orig=\"ill\" corr=\"I'll\" prev=\"tomorrow\"")
         _ = journal.absorb("AUTOCORRECT branch=trie orig=\"ill\" corr=\"I'll\" prev=\"tomorrow\"")
         journal.endWord(final: "I'll", autocorrectRan: true)
-        XCTAssertTrue(collected.lines.contains { $0.contains(" branch=contextual-contraction,trie ") })
+        XCTAssertTrue(written(journal).contains { $0.contains(" branch=contextual-contraction,trie ") })
     }
 
     // MARK: - Reactions
@@ -228,8 +243,7 @@ final class TypingJournalTests: XCTestCase {
         XCTAssertTrue(journal.absorb("UNDO orig=\"tres\" rejected=\"très\""))
         XCTAssertTrue(journal.absorb("REFUSED corrected=\"très\" by=undo"))
         XCTAssertTrue(journal.absorb("REFUSED corrected=\"très\" by=backspace"))
-        journal.flush()
-        XCTAssertEqual(collected.lines.filter { $0.hasPrefix("TJ REACT") },
+        XCTAssertEqual(written(journal).filter { $0.hasPrefix("TJ REACT") },
                        ["TJ REACT #1 undo by=chip", "TJ REACT #1 undo by=backspace"])
     }
 
@@ -238,8 +252,7 @@ final class TypingJournalTests: XCTestCase {
         journal.beginWord(typed: "Dictus", previous: nil, committedBy: " ", bar: nil)
         journal.endWord(final: "Dictus", autocorrectRan: true)
         XCTAssertTrue(journal.absorb("USERDICT-LEARN word=\"dictus\" count=2 learnedCount=1"))
-        journal.flush()
-        XCTAssertEqual(Array(collected.lines.suffix(2)), [
+        XCTAssertEqual(Array(written(journal).suffix(2)), [
             "TJ REACT #1 learned word=\"dictus\"",
             "USERDICT-LEARN word=\"dictus\" count=2 learnedCount=1",
         ])
@@ -252,8 +265,7 @@ final class TypingJournalTests: XCTestCase {
         type("x", on: journal, from: 5)
         // x, then the space, then a letter of "hello".
         for i in 0..<3 { journal.tap("backspace", dx: 0, dy: 0, time: 6 + Double(i) * 0.1, keyboard: "fr-azerty") }
-        journal.flush()
-        XCTAssertEqual(collected.lines.filter { $0.hasPrefix("TJ REACT") }, ["TJ REACT #1 deleted taps=4"])
+        XCTAssertEqual(written(journal).filter { $0.hasPrefix("TJ REACT") }, ["TJ REACT #1 deleted taps=4"])
     }
 
     func testABackspaceLongAfterTheCommitIsNotAReaction() {
@@ -262,8 +274,7 @@ final class TypingJournalTests: XCTestCase {
         journal.endWord(final: "hello", autocorrectRan: true)
         type("abcdefgh", on: journal, from: 5)
         for _ in 0..<10 { journal.repeatDelete() }
-        journal.flush()
-        XCTAssertEqual(collected.lines.filter { $0.hasPrefix("TJ REACT") }, [])
+        XCTAssertEqual(written(journal).filter { $0.hasPrefix("TJ REACT") }, [])
     }
 
     func testABarTapIsACommitWithTheBarItTookItsWordFrom() {
@@ -271,7 +282,7 @@ final class TypingJournalTests: XCTestCase {
         let bar = TypingJournalBar(mode: "candidates", words: ["helo", "hello", "help"])
         journal.barTapped(slot: 1, bar: bar, typed: "helo", commits: true)
         journal.barTapped(slot: 0, bar: TypingJournalBar(mode: "undoAvailable", words: ["helo"]), typed: "", commits: false)
-        XCTAssertEqual(Array(collected.lines.dropFirst()), [
+        XCTAssertEqual(Array(written(journal).dropFirst()), [
             "TJ BARTAP #1 slot=1 word=\"hello\" bar=candidates[\"helo\",\"hello\",\"help\"]",
             "TJ BARTAP slot=0 word=\"helo\" bar=undoAvailable[\"helo\"]",
         ])
@@ -282,8 +293,7 @@ final class TypingJournalTests: XCTestCase {
         journal.observeField(isSecureEntry: false, content: nil, document: "doc", keyboard: "fr-azerty")
         journal.observeField(isSecureEntry: false, content: nil, document: "other", keyboard: "fr-azerty")
         journal.observeField(isSecureEntry: false, content: nil, document: "other", keyboard: "en-qwerty")
-        journal.flush()
-        XCTAssertEqual(collected.lines, ["TJ FIELD kb=fr-azerty", "TJ FIELD kb=fr-azerty", "TJ FIELD kb=en-qwerty"])
+        XCTAssertEqual(written(journal), ["TJ FIELD kb=fr-azerty", "TJ FIELD kb=fr-azerty", "TJ FIELD kb=en-qwerty"])
     }
 
     // MARK: - The log file

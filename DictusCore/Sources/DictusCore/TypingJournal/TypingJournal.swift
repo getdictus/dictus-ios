@@ -65,9 +65,17 @@ public enum TypingJournal {
 
     /// Deletes every line that holds typed text from the log file: the journal's and
     /// AutocorrectDebugLog's. The diagnostic lines, which hold none, stay.
+    ///
+    /// The batches already handed out are let through first, so none lands after the wipe.
     public static func clear() {
         recorder.clear()
+        recorder.waitUntilWritten()
         PersistentLog.removeLines(where: isTypedTextLine)
+    }
+
+    /// Blocks until every batch handed out so far has been passed on. For tools.
+    public static func waitUntilWritten() {
+        recorder.waitUntilWritten()
     }
 
     /// The prefix AutocorrectDebugLog and the journal write before every body. No

@@ -288,14 +288,17 @@ public final class TypingJournalRecorder: @unchecked Sendable {
     // MARK: - Writing
 
     /// Hands every buffered event to the sink.
+    ///
+    /// WHY every batch goes through one serial queue, dispatched under the lock: a batch
+    /// written from the caller's thread could overtake one already queued, and the
+    /// file would hold the lines out of order.
     public func flush() {
-        let batch: [TypingJournalEntry] = lock.withLock {
-            defer { buffer.removeAll() }
-            return buffer
-        }
-        guard !batch.isEmpty else { return }
-        let sink = lock.withLock { self.sink }
-        sink(batch)
+        lock.withLock { sendBuffer() }
+    }
+
+    /// Blocks until every batch handed out so far has reached the sink.
+    public func waitUntilWritten() {
+        flushQueue.sync {}
     }
 
     /// Forgets everything not yet written and every commit a reaction could point at.
@@ -313,10 +316,7 @@ public final class TypingJournalRecorder: @unchecked Sendable {
     private func append(_ event: TypingJournalEvent) {
         buffer.append(TypingJournalEntry(date: now(), event: event))
         if buffer.count >= Self.maxBuffered {
-            let batch = buffer
-            buffer.removeAll()
-            let sink = self.sink
-            flushQueue.async { sink(batch) }
+            sendBuffer()
         } else if !flushScheduled {
             flushScheduled = true
             flushQueue.asyncAfter(deadline: .now() + Self.flushDelay) { [weak self] in
@@ -324,6 +324,14 @@ public final class TypingJournalRecorder: @unchecked Sendable {
                 self?.flush()
             }
         }
+    }
+
+    private func sendBuffer() {
+        guard !buffer.isEmpty else { return }
+        let batch = buffer
+        let sink = self.sink
+        buffer.removeAll()
+        flushQueue.async { sink(batch) }
     }
 
     private func takeID() -> Int {
