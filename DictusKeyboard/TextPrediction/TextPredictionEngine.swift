@@ -271,12 +271,33 @@ class TextPredictionEngine {
         _ word: String,
         isAtSentenceStart: Bool = true
     ) -> (correction: String, alternatives: [String])? {
+        guard let checked = checkWord(word, isAtSentenceStart: isAtSentenceStart, previousWord: nil) else {
+            return nil
+        }
+        return (checked.correction, checked.alternatives)
+    }
+
+    /// A correction `checkWord` proposes, and whether the trie pass already ranked it
+    /// against the previous word, in which case the bigram rerank must leave it alone.
+    private struct CheckedWord {
+        let correction: String
+        let alternatives: [String]
+        var rankedInContext = false
+    }
+
+    /// The body of `spellCheck(_:isAtSentenceStart:)`. `previousWord` is only read by
+    /// the trie pass and the accent pass, which rank their candidates with it (#993).
+    private func checkWord(
+        _ word: String,
+        isAtSentenceStart: Bool,
+        previousWord: String?
+    ) -> CheckedWord? {
         guard !word.isEmpty else { return nil }
 
         // The user's own contacts and text replacements (#873) outrank every
         // dictionary rule below, the language overrides included.
         if let decision = lexiconDecision(for: word) {
-            return lexiconResult(decision, for: word)
+            return lexiconResult(decision, for: word).map { CheckedWord(correction: $0.correction, alternatives: $0.alternatives) }
         }
 
         // Language-specific overrides bypass everything — e.g., "ca" is never valid French.
@@ -289,7 +310,7 @@ class TextPredictionEngine {
                 branch: "language-override", prevWord: nil
             )
             #endif
-            return result
+            return CheckedWord(correction: result.correction, alternatives: result.alternatives)
         }
 
         // Apostrophe prefix fix: when the user types an apostrophe after an
@@ -309,7 +330,7 @@ class TextPredictionEngine {
                 original: word, corrected: corrected, branch: "apostrophe-prefix", prevWord: nil
             )
             #endif
-            return (corrected, [])
+            return CheckedWord(correction: corrected, alternatives: [])
         }
 
         // Two-pass lookup: user dictionary first (learned words are always "correct").
@@ -340,6 +361,17 @@ class TextPredictionEngine {
         // part after the apostrophe, so "J'etais" checks "etais" → "étais" and
         // the correction is "j'" + "étais", not bare "étais".
         if let accented = aospTrieEngine.accentExpansion(wordToCheck) {
+            // Two accented spellings of the same letters, equally likely (#993):
+            // `reserve` is `réserve` or `réservé`. Keep what was typed.
+            if CorrectionRanking.accentSpellingIsAmbiguous(
+                typed: wordToCheck,
+                candidates: rankedCandidates(for: wordToCheck, previousWord: previousWord)
+            ) {
+                #if DEBUG
+                AutocorrectDebugLog.autocorrectSkipped(word: word, reason: "ambiguous-accent")
+                #endif
+                return nil
+            }
             let full = (apostrophePrefix ?? "") + accented
             let isCapitalized = word.first?.isUppercase == true
             let corrected = isCapitalized ? full.capitalized : full
@@ -348,7 +380,7 @@ class TextPredictionEngine {
                 original: word, corrected: corrected, branch: "accent", prevWord: nil
             )
             #endif
-            return (corrected, [])
+            return CheckedWord(correction: corrected, alternatives: [])
         }
 
         // Valid word guard: if the word exists in the trie dictionary, it's correct.
@@ -374,7 +406,7 @@ class TextPredictionEngine {
                 original: word, corrected: corrected, branch: "contraction", prevWord: nil
             )
             #endif
-            return (corrected, [])
+            return CheckedWord(correction: corrected, alternatives: [])
         }
 
         // Proper-noun guard (#199): only unknown words reach this point.
@@ -409,7 +441,7 @@ class TextPredictionEngine {
                 original: word, corrected: corrected, branch: "learned", prevWord: nil
             )
             #endif
-            return (corrected, [])
+            return CheckedWord(correction: corrected, alternatives: [])
         }
 
         // Word splitting + single-word correction comparison.
@@ -471,33 +503,70 @@ class TextPredictionEngine {
                     prevWord: nil
                 )
                 #endif
-                return (result, [])
+                return CheckedWord(correction: result, alternatives: [])
             }
             #if DEBUG
             AutocorrectDebugLog.note("split \"\(split)\" rejected (ED comparison favored single-word)")
             #endif
         }
 
-        // Pass 5: trie spell check (proximity-weighted, accent-aware)
-        let trieResult = aospTrieEngine.spellCheck(word)
+        // Pass 5: the trie's candidates, ranked with the previous word (#993).
+        return trieCorrection(of: word, wordToCheck: wordToCheck, apostrophePrefix: apostrophePrefix,
+                              previousWord: previousWord)
+    }
+
+    /// The trie pass of `checkWord`. `CorrectionRanking` keeps the typed word when two
+    /// candidates are equally good, rather than letting whichever the trie listed
+    /// first win (#993).
+    private func trieCorrection(
+        of word: String,
+        wordToCheck: String,
+        apostrophePrefix: String?,
+        previousWord: String?
+    ) -> CheckedWord? {
+        let candidates = rankedCandidates(for: wordToCheck, previousWord: previousWord)
+        let decision = CorrectionRanking.decide(candidates)
         #if DEBUG
-        if let r = trieResult {
-            let corrFreq = aospTrieEngine.wordFrequency(r.correction.lowercased())
-            let altsWithFreq = r.alternatives.map { alt in
-                (alt, aospTrieEngine.wordFrequency(alt.lowercased()))
-            }
-            AutocorrectDebugLog.trieCandidates(
-                word: word, correction: r.correction,
-                correctionFreq: corrFreq, alternatives: altsWithFreq
-            )
-            AutocorrectDebugLog.autocorrectDecision(
-                original: word, corrected: r.correction, branch: "trie", prevWord: nil
-            )
-        } else {
-            AutocorrectDebugLog.autocorrectSkipped(word: word, reason: "no-trie-candidate")
-        }
+        AutocorrectDebugLog.trieCandidates(word: word, candidates: candidates, decision: decision)
         #endif
-        return trieResult
+        guard let replacement = decision.replacement else {
+            #if DEBUG
+            AutocorrectDebugLog.autocorrectSkipped(
+                word: word, reason: decision.ranked.isEmpty ? "no-trie-candidate" : "ambiguous-candidates"
+            )
+            #endif
+            return nil
+        }
+        let isCapitalized = word.first?.isUppercase == true
+        let display = { (candidate: String) -> String in
+            let full = (apostrophePrefix ?? "") + candidate
+            return isCapitalized ? full.capitalized : full
+        }
+        #if DEBUG
+        AutocorrectDebugLog.autocorrectDecision(
+            original: word, corrected: display(replacement), branch: "trie", prevWord: previousWord
+        )
+        #endif
+        return CheckedWord(
+            correction: display(replacement),
+            alternatives: decision.ranked.filter { $0 != replacement }.prefix(2).map(display),
+            rankedInContext: true
+        )
+    }
+
+    /// The trie's candidates for `word` (lowercased, no apostrophe prefix), each with
+    /// its bigram score after `previousWord` when the n-gram data is loaded.
+    private func rankedCandidates(for word: String, previousWord: String?) -> [CorrectionCandidate] {
+        let candidates = aospTrieEngine.correctionCandidates(for: word)
+        guard let previous = previousWord?.lowercased(), !previous.isEmpty, aospTrieEngine.ngramsLoaded else {
+            return candidates
+        }
+        return candidates.map {
+            CorrectionCandidate(
+                word: $0.word, cost: $0.cost, frequency: $0.frequency,
+                context: aospTrieEngine.bigramScore(for: $0.word, after: previous)
+            )
+        }
     }
 
     /// Predict next words based on context (1-2 previous words).
@@ -550,10 +619,13 @@ class TextPredictionEngine {
             return override
         }
 
-        let result = spellCheck(word, isAtSentenceStart: isAtSentenceStart)
+        let checked = checkWord(word, isAtSentenceStart: isAtSentenceStart, previousWord: previousWord)
+        let result = checked.map { (correction: $0.correction, alternatives: $0.alternatives) }
 
-        // If no previous word context or n-grams not loaded, return standard result
-        guard let prev = previousWord, !prev.isEmpty, aospTrieEngine.ngramsLoaded else {
+        // If no previous word context or n-grams not loaded, return standard result.
+        // A trie correction was already ranked with the previous word.
+        guard let prev = previousWord, !prev.isEmpty, aospTrieEngine.ngramsLoaded,
+              checked?.rankedInContext != true else {
             return result
         }
 
@@ -674,7 +746,9 @@ class TextPredictionEngine {
             // fall back to full set.
             let candidates = eligible.isEmpty ? candidateSet : eligible
 
-            let reranked = candidates.sorted { $0.value > $1.value }
+            // Ties go to the word itself, so the answer never depends on the
+            // `Dictionary`'s hash order (#993: `meef` was `meer` or `meet` by process).
+            let reranked = candidates.sorted { $0.value != $1.value ? $0.value > $1.value : $0.key < $1.key }
             let newCorrection = reranked[0].key
             let newAlternatives = reranked.dropFirst().map { $0.key }
             #if DEBUG

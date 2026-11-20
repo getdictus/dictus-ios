@@ -194,6 +194,18 @@ final class AOSPTrieEngine {
         return (fullCorrection, Array(alts))
     }
 
+    /// The dictionary words within two weighted edits of `word`, best scored first,
+    /// each with its cost and frequency, for `CorrectionRanking` to choose from (#993).
+    /// `word` is lowercased and has no apostrophe prefix. Ten rather than the five
+    /// `spellCheck` reads: the word that was meant can sit sixth, as `morning` does for
+    /// `irning`, and it has to be there for context to lift it.
+    func correctionCandidates(for word: String, maxResults: Int = 10) -> [CorrectionCandidate] {
+        guard bridge.isLoaded(), !word.isEmpty else { return [] }
+        return bridge.candidates(forWord: word, maxEditDistance: 2.0, maxResults: UInt(maxResults))
+            .filter { $0.word != word }
+            .map { CorrectionCandidate(word: $0.word, cost: Double($0.cost), frequency: $0.frequency) }
+    }
+
     /// Whether a dictionary is loaded and ready for lookups.
     var isLoaded: Bool { bridge.isLoaded() }
 
