@@ -35,6 +35,10 @@ import DictusCore
 /// (CC BY 3.0, which asks for the attribution), and the word lists that filter them,
 /// SCOWL for English (its notice asks to travel with the output) and Grammalecte's French
 /// dictionary (MPL 2.0, whose notice and source location travel with a derived file).
+///
+/// The bilingual check (#1015) reuses Hex's approach too, not its code: the second
+/// language's fallback, the tie-break by the last words and the partner check. Hex's
+/// entry says where Dictus follows it.
 struct LicensesView: View {
     var body: some View {
         ScrollView {
@@ -93,7 +97,7 @@ struct LicensesView: View {
                     name: "Hex",
                     author: "Christopher Langton",
                     url: "https://github.com/anomalyco/hex",
-                    license: mitLicense(copyright: "Copyright (c) 2026 Christopher Langton")
+                    license: Self.hexNotice + "\n\n" + mitLicense(copyright: "Copyright (c) 2026 Christopher Langton")
                 )
 
                 licenseBlock(
@@ -145,6 +149,14 @@ struct LicensesView: View {
         (https://creativecommons.org/licenses/by/3.0/). Word and word-pair counts are \
         summed over 1980-2019 and kept only for words in the word lists below; the \
         English model is Hex's, the French one Dictus's, built with Hex's script.
+        """
+
+    private static let hexNotice = """
+        The keyboard's spatial autocorrect (its decoder, model format and model build \
+        script) is ported from Hex. Its bilingual autocorrect follows Hex's: the second \
+        language fixes a typo only it can fix, the last words typed choose between two \
+        fixes, a word of the other language typed after words of that language stays, and \
+        a second language whose dictionary accepts any word is left out.
         """
 
     private static let grammalecteNotice = """
