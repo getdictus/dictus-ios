@@ -363,10 +363,12 @@ if let pairArg = env["KB_PAIR"] {
     guard codes.count == 2, let pair = KeyboardLanguagePair(primary: codes[0], secondary: codes[1]) else {
         fatalError("KB_PAIR \(pairArg) is not a pair the keyboard offers")
     }
-    if let probe = env["KB_PROBE"] {
-        probePair(pair, probe)
-    } else {
-        replayPair(pair, runs: langs, corpusDir: corpusDir, runsDir: runsDir, outDir: outDir, width: w, height: h)
+    restoringKeyboardPreferences {
+        if let probe = env["KB_PROBE"] {
+            probePair(pair, probe)
+        } else {
+            replayPair(pair, runs: langs, corpusDir: corpusDir, runsDir: runsDir, outDir: outDir, width: w, height: h)
+        }
     }
     exit(0)
 }

@@ -88,6 +88,15 @@ final class DetectingCorrector: Corrector {
     }
 }
 
+/// Runs `body`, then puts back the active language and the layouts it set in the
+/// simulator's App Group, so a later monolingual replay types on the layouts it always did.
+func restoringKeyboardPreferences(_ body: () -> Void) {
+    let keys = [SharedKeys.language, SharedKeys.keyboardLayoutsByLanguage, SharedKeys.keyboardLayout]
+    let saved = keys.map { AppGroup.defaults.object(forKey: $0) }
+    body()
+    for (key, value) in zip(keys, saved) { AppGroup.defaults.set(value, forKey: key) }
+}
+
 /// Both engines and both tries for the pair, loaded for `layout`. Fresh for every layout:
 /// the trie's substitution costs are built for the layout active when it loads.
 func loadPair(_ pair: KeyboardLanguagePair, layout: LayoutType)
@@ -139,10 +148,6 @@ func probePair(_ pair: KeyboardLanguagePair, _ items: String) {
 /// `e` per word), or, for a corpus named after a language of the pair, that language.
 func replayPair(_ pair: KeyboardLanguagePair, runs: [String], corpusDir: String, runsDir: String, outDir: String,
                 width: CGFloat, height: CGFloat) {
-    // The replay sets the active language and both layouts in the simulator's App Group:
-    // put them back, so a later monolingual replay types on the layouts it always did.
-    let savedLanguage = AppGroup.defaults.object(forKey: SharedKeys.language)
-    let savedLayouts = AppGroup.defaults.object(forKey: SharedKeys.keyboardLayoutsByLanguage)
     UserDictionary.shared.resetAll()
 
     var rowsOut = ["run\tpolicy\tsentence\tgold\tdecided\tmeant\ttyped\tfinal"]
@@ -198,8 +203,6 @@ func replayPair(_ pair: KeyboardLanguagePair, runs: [String], corpusDir: String,
     }
 
     UserDictionary.shared.resetAll()
-    AppGroup.defaults.set(savedLanguage, forKey: SharedKeys.language)
-    AppGroup.defaults.set(savedLayouts, forKey: SharedKeys.keyboardLayoutsByLanguage)
     for (file, rows) in [("pair.tsv", rowsOut), ("pair-cost.tsv", costOut)] {
         do {
             try (rows.joined(separator: "\n") + "\n").write(toFile: "\(outDir)/\(file)", atomically: true, encoding: .utf8)
