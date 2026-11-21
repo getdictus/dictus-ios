@@ -32,6 +32,10 @@ final class InKeyboardWebCapture: NSObject {
         /// The page stopped capturing on its own (track ended, heartbeat lost, interruption).
         case interrupted(String)
         case failed(String)
+        /// Page-side timings of one start, in ms from the page's `startCapture`.
+        case timing(getUserMediaMs: Double, contextMs: Double, firstSampleMs: Double)
+        /// The page has stopped every track and closed its AudioContext.
+        case stopped
     }
 
     var onEvent: ((Event) -> Void)?
@@ -134,6 +138,11 @@ final class InKeyboardWebCapture: NSObject {
             if wasCapturing { onEvent?(.interrupted(reason)) }
         case "failed":
             fail(message["reason"] as? String ?? "unknown")
+        case "timing":
+            func number(_ key: String) -> Double { (message[key] as? NSNumber)?.doubleValue ?? -1 }
+            onEvent?(.timing(getUserMediaMs: number("gumMs"), contextMs: number("contextMs"), firstSampleMs: number("firstSampleMs")))
+        case "stopped":
+            onEvent?(.stopped)
         default:
             break
         }
@@ -165,9 +174,9 @@ final class InKeyboardWebCapture: NSObject {
     }, 500);
 
     window.startCapture = async () => {
-      let stopping = false, stream, context, source, processor, sink, watchdog;
+      let stopping = false, stream, context, source, processor, sink, watchdog, firstSent = false;
       const audioSession = navigator.audioSession;
-      const previousType = audioSession ? audioSession.type : 'auto';
+      const t0 = performance.now();
       const cleanup = () => {
         if (stopping) return;
         stopping = true;
@@ -177,22 +186,36 @@ final class InKeyboardWebCapture: NSObject {
         if (sink) sink.disconnect();
         if (stream) stream.getTracks().forEach(t => t.stop());
         if (context) context.close().catch(() => {});
-        try { if (audioSession) audioSession.type = previousType; } catch (_) {}
+        // Back to 'auto': with no capture and no audio left, WebKit drops its
+        // PlayAndRecord category (MediaSessionManagerCocoa). It deactivates without
+        // notifying others, which is why the keyboard does that part itself.
+        try { if (audioSession) audioSession.type = 'auto'; } catch (_) {}
+        post({ type: 'stopped' });
       };
       const interrupted = reason => { if (!stopping) { cleanup(); post({ type: 'interrupted', reason }); } };
       stopCapture = cleanup;
       try {
-        try { if (audioSession) audioSession.type = 'play-and-record'; } catch (_) {}
+        // No `audioSession.type = 'play-and-record'` any more: WebKit forces PlayAndRecord
+        // for any capture whatever the type says, so setting it only changed what was
+        // restored afterwards.
+        //
+        // The AudioContext is created at the same time as getUserMedia rather than after
+        // it: the two used to run one after the other, and both are on the path from the
+        // tap to the first sample. Still created at capture and never earlier, because a
+        // running AudioContext is an audio client WebKit has to configure a session for.
+        context = new AudioContext({ latencyHint: 'interactive' });
+        const contextReady = context.resume().then(() => performance.now() - t0);
         stream = await navigator.mediaDevices.getUserMedia({
           audio: { channelCount: 1, echoCancellation: true, noiseSuppression: true, autoGainControl: true }
         });
+        const gumMs = performance.now() - t0;
         if (stopping) { stream.getTracks().forEach(t => t.stop()); return; }
         const track = stream.getAudioTracks()[0];
         track.onended = () => interrupted('track-ended');
-        // Created at capture, never earlier: an AudioContext can take audio focus.
-        context = new AudioContext({ latencyHint: 'interactive' });
-        await context.resume();
-        processor = context.createScriptProcessor(4096, 1, 1);
+        const contextMs = await contextReady;
+        // 1024 frames (≈ 21 ms at 48 kHz) instead of 4096 (≈ 85 ms): the first callback,
+        // and so the first sample the keyboard receives, comes four times sooner.
+        processor = context.createScriptProcessor(1024, 1, 1);
         sink = context.createGain();
         sink.gain.value = 0;
         processor.connect(sink);
@@ -219,6 +242,7 @@ final class InKeyboardWebCapture: NSObject {
             }
           }
           if (written > 0) emit(output.subarray(0, written), Math.sqrt(energy / input.length));
+          if (!firstSent) { firstSent = true; post({ type: 'timing', gumMs, contextMs, firstSampleMs: performance.now() - t0 }); }
         };
         post({ type: 'started', sampleRate: context.sampleRate, device: track.label || 'unknown' });
       } catch (error) {
@@ -230,7 +254,7 @@ final class InKeyboardWebCapture: NSObject {
 
     window.startTestAudio = async base64 => {
       let stopping = false, timer, watchdog;
-      const cleanup = () => { if (stopping) return; stopping = true; clearInterval(timer); clearInterval(watchdog); };
+      const cleanup = () => { if (stopping) return; stopping = true; clearInterval(timer); clearInterval(watchdog); post({ type: 'stopped' }); };
       const interrupted = reason => { if (!stopping) { cleanup(); post({ type: 'interrupted', reason }); } };
       stopCapture = cleanup;
       try {
@@ -241,6 +265,8 @@ final class InKeyboardWebCapture: NSObject {
         lastHeartbeat = performance.now();
         watchdog = startWatchdog(interrupted);
         post({ type: 'started', sampleRate: decoded.sampleRate, device: 'test-audio-file' });
+        const t0 = performance.now();
+        let firstSent = false;
         // Real time, cut like a 4096-frame ScriptProcessor buffer at 48 kHz (1365
         // samples every ~85 ms), then silence until stopped. Delivered in bursts of one
         // to four chunks, the way WebKit hands messages over on a device, from a fixed
@@ -258,6 +284,7 @@ final class InKeyboardWebCapture: NSObject {
           }
           offset += chunk;
           queue.push([out, Math.sqrt(energy / chunk)]);
+          if (!firstSent) { firstSent = true; post({ type: 'timing', gumMs: 0, contextMs: 0, firstSampleMs: performance.now() - t0 }); }
           if (queue.length >= 4 || random() < 0.35) { queue.forEach(([o, r]) => emit(o, r)); queue = []; }
         }, period);
       } catch (error) {

@@ -43,6 +43,15 @@ enum InKeyboardSpeechAssets {
         return mayStart
     }
 
+    /// Answer the keyboard's `inKeyboardPing` while this process runs, so a keyboard that
+    /// appears knows the app will answer its start post and does not open its own
+    /// microphone at the tap (#992 round 4). Registered once, at launch.
+    static func startAnsweringKeyboardPings() {
+        DarwinNotificationCenter.addObserver(for: DarwinNotificationName.inKeyboardPing) {
+            DarwinNotificationCenter.post(DarwinNotificationName.inKeyboardPong)
+        }
+    }
+
     /// Old session claims, once per launch.
     static func pruneSessionClaims() {
         guard let directory = DictationSessionClaim.defaultDirectory else { return }

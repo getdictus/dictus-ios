@@ -612,6 +612,8 @@ class KeyboardViewController: UIInputViewController {
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
+        // Spike (#992 round 4): load the in-keyboard capture page off the tap's path.
+        MainActor.assumeIsolated { InKeyboardDictation.shared.prewarm(in: view) }
 
         // #23. `viewWillAppear` harvests at 0 ms, and on the first appearance of a fresh
         // extension process the arbiter's client state does not exist until roughly
