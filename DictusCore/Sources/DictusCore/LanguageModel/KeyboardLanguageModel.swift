@@ -40,15 +40,12 @@ public final class KeyboardLanguageModel: @unchecked Sendable {
 
     private final class Job {
         let request: Request
-        /// What a next-word request accepts as a word; not part of the request's identity.
-        let isWord: (String) -> Bool
         let done = DispatchGroup()
         /// Written once, before `done` is left; read only after it.
         var answer: Answer?
 
-        init(request: Request, isWord: @escaping (String) -> Bool) {
+        init(request: Request) {
             self.request = request
-            self.isWord = isWord
             done.enter()
         }
 
@@ -120,15 +117,13 @@ public final class KeyboardLanguageModel: @unchecked Sendable {
 
     /// `LanguageModelScoring.logProbabilities`, or nil without a model or past the budget.
     public func logProbabilities(of readings: [String], after context: String) -> [Double]? {
-        guard case let .scores(scores)? = ask(.score(readings: readings, context: context), isWord: { _ in true })
-        else { return nil }
+        guard case let .scores(scores)? = ask(.score(readings: readings, context: context)) else { return nil }
         return scores
     }
 
     /// `LanguageModelScoring.nextWords`, or nil without a model or past the budget.
-    public func nextWords(after context: String, limit: Int,
-                          isWord: @escaping (String) -> Bool = { _ in true }) -> [String]? {
-        guard case let .words(words)? = ask(.nextWords(context: context, limit: limit), isWord: isWord) else { return nil }
+    public func nextWords(after context: String, limit: Int) -> [String]? {
+        guard case let .words(words)? = ask(.nextWords(context: context, limit: limit)) else { return nil }
         return words
     }
 
@@ -141,7 +136,7 @@ public final class KeyboardLanguageModel: @unchecked Sendable {
         return taken
     }
 
-    private func ask(_ request: Request, isWord: @escaping (String) -> Bool) -> Answer? {
+    private func ask(_ request: Request) -> Answer? {
         lock.lock()
         guard loaded else { lock.unlock(); return nil }
         if let answer = cache[request] { lock.unlock(); return answer }
@@ -149,7 +144,7 @@ public final class KeyboardLanguageModel: @unchecked Sendable {
         if let same = [running, pending].compactMap({ $0 }).first(where: { $0.request == request }) {
             job = same
         } else {
-            job = Job(request: request, isWord: isWord)
+            job = Job(request: request)
             pending?.finish(nil)
             pending = job
             if !draining {
@@ -200,7 +195,7 @@ public final class KeyboardLanguageModel: @unchecked Sendable {
         case let .score(readings, context):
             return .scores(model.logProbabilities(of: readings, after: context))
         case let .nextWords(context, limit):
-            return .words(model.nextWords(after: context, limit: limit, isWord: job.isWord))
+            return .words(model.nextWords(after: context, limit: limit))
         }
     }
 

@@ -61,6 +61,8 @@ class TextPredictionEngine {
     /// How many of the trie's candidates the model scores. Each reading of more than one
     /// token costs a pass over the model's output layer (#996).
     static let languageModelCandidates = 5
+    /// How many of the model's likeliest next tokens the bar looks through for words.
+    static let languageModelNextWords = 24
 
     private init() {
         loadDictionaries(for: language)
@@ -637,14 +639,14 @@ class TextPredictionEngine {
     func predictNextWords(after words: [String], textBefore: String? = nil) -> [String] {
         let predictions = aospTrieEngine.predictNextWords(after: words)
         let ngram = predictions.isEmpty ? frequencyDict.topWords(count: 3) : predictions
-        let trie = aospTrieEngine
         guard let textBefore, let (model, _) = currentLanguageModel(),
-              let modelled = model.nextWords(after: textBefore, limit: 3, isWord: { word in
-                  let lowered = word.lowercased()
-                  return trie.wordExists(lowered) || UserDictionary.shared.isLearned(lowered)
-              }) else { return ngram }
+              let modelled = model.nextWords(after: textBefore, limit: Self.languageModelNextWords) else { return ngram }
+        let known = modelled.filter {
+            let lowered = $0.lowercased()
+            return aospTrieEngine.wordExists(lowered) || UserDictionary.shared.isLearned(lowered)
+        }
         var seen = Set<String>()
-        return (modelled + ngram).filter { seen.insert($0.lowercased()).inserted }.prefix(3).map { $0 }
+        return (known.prefix(3) + ngram).filter { seen.insert($0.lowercased()).inserted }.prefix(3).map { $0 }
     }
 
     /// Turns the language model on with `model`, or off with nil (#996).

@@ -69,9 +69,9 @@ final class LanguageModelRerankTests: XCTestCase {
             return readings.map { -Double($0.count) }
         }
 
-        func nextWords(after context: String, limit: Int, isWord: (String) -> Bool) -> [String] {
+        func nextWords(after context: String, limit: Int) -> [String] {
             Thread.sleep(forTimeInterval: delay)
-            return Array(["la", "le", "les", "un"].filter(isWord).prefix(limit))
+            return Array(["la", "le", "les", "un"].prefix(limit))
         }
     }
 

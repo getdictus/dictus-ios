@@ -52,8 +52,9 @@ final class LlamaLanguageModel: LanguageModelScoring {
     /// Logit rows per decode. Each costs the vocabulary's size in floats (600 KB for Qwen),
     /// and llama.cpp keeps the largest output buffer it was ever asked for.
     private static let maxOutputs = 16
-    /// The most likely word-starting tokens a next-word request looks through.
-    private static let nextWordCandidates = 24
+    /// The context's last tokens the model reads. llama.cpp aborts on a batch larger
+    /// than `n_batch` (512), and 200 characters of emoji or stacked accents can be more.
+    private static let maxContextTokens = 128
 
     private let model: OpaquePointer
     private let context: OpaquePointer
@@ -128,8 +129,11 @@ final class LlamaLanguageModel: LanguageModelScoring {
     func logProbabilities(of readings: [String], after text: String) -> [Double]? {
         guard !readings.isEmpty else { return [] }
         let (base, separator) = Self.split(text)
-        let contextTokens = tokenize(base)
-        let full = readings.map { tokenize(base + separator + $0) }
+        let wholeContext = tokenize(base)
+        // The same leading tokens go from the context and every reading, so they still line up.
+        let dropped = max(0, wholeContext.count - Self.maxContextTokens)
+        let contextTokens = Array(wholeContext.dropFirst(dropped))
+        let full = readings.map { Array(tokenize(base + separator + $0).dropFirst(dropped)) }
         // The readings share the context's tokens up to where the first of them differs.
         let shared = full.map { Self.commonPrefix(contextTokens, $0) }.min() ?? 0
         guard shared >= 1, full.allSatisfy({ $0.count > shared }), evaluate(Array(contextTokens[0..<shared])) else {
@@ -178,9 +182,9 @@ final class LlamaLanguageModel: LanguageModelScoring {
         return scores
     }
 
-    func nextWords(after text: String, limit: Int, isWord: (String) -> Bool) -> [String] {
+    func nextWords(after text: String, limit: Int) -> [String] {
         let (base, separator) = Self.split(text)
-        let tokens = tokenize(base)
+        let tokens = Array(tokenize(base).suffix(Self.maxContextTokens))
         guard !tokens.isEmpty, evaluate(tokens) else { return [] }
         let starts = separator.isEmpty ? startsWordAtLineStart : startsWordAfterSpace
         // WHY whole-word tokens only: extending a token into a word costs one pass over the
@@ -188,12 +192,11 @@ final class LlamaLanguageModel: LanguageModelScoring {
         // words are one token in these vocabularies, and the logits after the context are
         // already there.
         var words: [String] = []
-        for token in Self.best(cachedLogits, count: Self.nextWordCandidates, where: { starts[$0] }) {
+        for token in Self.best(cachedLogits, count: limit, where: { starts[$0] }) {
             // A token holding half of a multi-byte letter is not a word.
             guard let word = String(bytes: pieces[Int(token)], encoding: .utf8)?.trimmingCharacters(in: .whitespaces),
-                  !words.contains(word), isWord(word) else { continue }
+                  !word.isEmpty, !words.contains(word) else { continue }
             words.append(word)
-            if words.count == limit { break }
         }
         return words
     }
@@ -218,7 +221,11 @@ final class LlamaLanguageModel: LanguageModelScoring {
         if common == tokens.count, cached.count == tokens.count, !cachedLogits.isEmpty { return true }
         // The last token is fed again when the cache already holds it: its logits are needed.
         if common == tokens.count { common -= 1 }
-        llama_memory_seq_rm(memory, 0, llama_pos(common), -1)
+        // A model whose cache cannot drop a tail (sliding window, recurrent) starts over.
+        if !llama_memory_seq_rm(memory, 0, llama_pos(common), -1) {
+            llama_memory_seq_rm(memory, 0, -1, -1)
+            common = 0
+        }
         cached = Array(tokens[0..<common])
         cachedLogits = []
         let fresh = tokens[common...].enumerated().map { offset, token in

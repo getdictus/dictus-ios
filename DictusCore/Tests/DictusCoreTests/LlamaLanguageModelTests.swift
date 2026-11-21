@@ -40,10 +40,17 @@ final class LlamaLanguageModelTests: XCTestCase {
 
     func testNextWordsAreWholeWords() throws {
         let model = try model()
-        let words = model.nextWords(after: "Thank you so much for ", limit: 3) { _ in true }
+        let words = model.nextWords(after: "Thank you so much for ", limit: 3)
         XCTAssertEqual(words.count, 3)
         XCTAssertTrue(words.allSatisfy { !$0.contains(" ") && !$0.isEmpty })
-        let onlyYour = model.nextWords(after: "Thank you so much for ", limit: 3) { $0 == "your" }
-        XCTAssertEqual(onlyYour, ["your"])
+        XCTAssertTrue(words.contains("your"), "\(words)")
+    }
+
+    func testAContextLongerThanABatchIsCut() throws {
+        let model = try model()
+        // 300 family emoji: about 7500 bytes, far more tokens than llama.cpp takes in one batch.
+        let emoji = String(repeating: "\u{1F468}\u{200D}\u{1F469}\u{200D}\u{1F467}", count: 300)
+        XCTAssertNotNil(model.logProbabilities(of: ["la", "le"], after: emoji + " Je vois "))
+        XCTAssertFalse(model.nextWords(after: emoji + " Je vois ", limit: 3).isEmpty)
     }
 }

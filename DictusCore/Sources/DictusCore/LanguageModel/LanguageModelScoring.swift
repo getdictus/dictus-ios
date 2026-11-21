@@ -12,9 +12,10 @@ public protocol LanguageModelScoring: AnyObject {
     /// - Parameter context: the text before the word, as the document holds it.
     func logProbabilities(of readings: [String], after context: String) -> [Double]?
 
-    /// Up to `limit` words the model expects after `context`, best first, each one
-    /// `isWord` accepts.
-    func nextWords(after context: String, limit: Int, isWord: (String) -> Bool) -> [String]
+    /// The words the model's `limit` likeliest next tokens start, best first. The caller
+    /// keeps the ones its dictionary knows: the model does not read the dictionary, which
+    /// another thread may be swapping.
+    func nextWords(after context: String, limit: Int) -> [String]
 }
 
 /// The text a language model may read: the current paragraph before the cursor, at most
