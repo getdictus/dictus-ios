@@ -362,6 +362,9 @@ public enum AutocorrectDebugLog {
     // MARK: - Writing
 
     private static func write(_ body: String) {
+        // While the typing journal records, it takes every line, in order with the
+        // taps, and drops the bar's per-keystroke checks (#1001).
+        if TypingJournal.absorb(body) { return }
         let timestamp = isoFormatter.string(from: Date())
         let src = PersistentLog.source
         let line = "[\(timestamp)] DEBUG   [keyboard] <\(src)> \(body)\n"
