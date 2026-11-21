@@ -1,4 +1,4 @@
-commit: d86d5a99dfb6734dee72777790186666277e29c8
+commit: 6541e79c3bf4c9423f73198636e810e9b8d62738
 [AOSPTrieEngine] N-grams fr: loaded (5903 KiB)
 [AOSPTrieEngine] Loaded fr_spellcheck.dict (39622 words)
 [AOSPTrieEngine] N-grams fr: loaded (5903 KiB)
@@ -28,20 +28,20 @@ loaded es: layout=qwerty
 
 | lang | category | cases | split correct | wrong correction (replaced / wrong split) | nothing | kept (legit) | false split | false replacement |
 |---|---|---|---|---|---|---|---|---|
-| fr | observed | 8 | 5 (62%) | 1 (12%): 1 / 0 | 2 (25%) | | | |
-| fr | missed-space | 150 | 40 (27%) | 55 (37%): 49 / 6 | 55 (37%) | | | |
-| fr | neighbour-key | 75 | 55 (73%) | 12 (16%): 10 / 2 | 8 (11%) | | | |
+| fr | observed | 8 | 5 (62%) | 2 (25%): 2 / 0 | 1 (12%) | | | |
+| fr | missed-space | 150 | 40 (27%) | 57 (38%): 51 / 6 | 53 (35%) | | | |
+| fr | neighbour-key | 75 | 55 (73%) | 11 (15%): 9 / 2 | 9 (12%) | | | |
 | fr | legit-compound | 50 | | | | 50 (100%) | 0 (0%) | 0 (0%) |
-| fr | legit-rare | 50 | | | | 24 (48%) | 0 (0%) | 26 (52%) |
+| fr | legit-rare | 50 | | | | 27 (54%) | 0 (0%) | 23 (46%) |
 | en | missed-space | 50 | 21 (42%) | 17 (34%): 13 / 4 | 12 (24%) | | | |
 | en | neighbour-key | 25 | 23 (92%) | 0 (0%): 0 / 0 | 2 (8%) | | | |
 | en | legit-compound | 20 | | | | 20 (100%) | 0 (0%) | 0 (0%) |
-| en | legit-rare | 20 | | | | 8 (40%) | 3 (15%) | 9 (45%) |
-| de | missed-space | 50 | 15 (30%) | 19 (38%): 14 / 5 | 16 (32%) | | | |
+| en | legit-rare | 20 | | | | 7 (35%) | 3 (15%) | 10 (50%) |
+| de | missed-space | 50 | 15 (30%) | 18 (36%): 13 / 5 | 17 (34%) | | | |
 | de | neighbour-key | 25 | 22 (88%) | 3 (12%): 1 / 2 | 0 (0%) | | | |
 | de | legit-compound | 20 | | | | 20 (100%) | 0 (0%) | 0 (0%) |
-| de | legit-rare | 20 | | | | 8 (40%) | 2 (10%) | 10 (50%) |
-| es | missed-space | 50 | 14 (28%) | 20 (40%): 15 / 5 | 16 (32%) | | | |
+| de | legit-rare | 20 | | | | 7 (35%) | 2 (10%) | 11 (55%) |
+| es | missed-space | 50 | 14 (28%) | 22 (44%): 17 / 5 | 14 (28%) | | | |
 | es | neighbour-key | 25 | 16 (64%) | 4 (16%): 3 / 1 | 5 (20%) | | | |
 | es | legit-compound | 20 | | | | 20 (100%) | 0 (0%) | 0 (0%) |
 | es | legit-rare | 20 | | | | 5 (25%) | 4 (20%) | 11 (55%) |
@@ -50,20 +50,20 @@ loaded es: layout=qwerty
 
 | lang | category | cases | split correct | wrong correction (replaced / wrong split) | nothing | kept (legit) | false split | false replacement |
 |---|---|---|---|---|---|---|---|---|
-| fr | observed | 8 | 5 (62%) | 1 (12%): 1 / 0 | 2 (25%) | | | |
-| fr | missed-space | 150 | 40 (27%) | 55 (37%): 49 / 6 | 55 (37%) | | | |
-| fr | neighbour-key | 75 | 55 (73%) | 12 (16%): 10 / 2 | 8 (11%) | | | |
+| fr | observed | 8 | 5 (62%) | 2 (25%): 2 / 0 | 1 (12%) | | | |
+| fr | missed-space | 150 | 40 (27%) | 57 (38%): 51 / 6 | 53 (35%) | | | |
+| fr | neighbour-key | 75 | 55 (73%) | 11 (15%): 9 / 2 | 9 (12%) | | | |
 | fr | legit-compound | 50 | | | | 50 (100%) | 0 (0%) | 0 (0%) |
-| fr | legit-rare | 50 | | | | 24 (48%) | 0 (0%) | 26 (52%) |
+| fr | legit-rare | 50 | | | | 27 (54%) | 0 (0%) | 23 (46%) |
 | en | missed-space | 50 | 21 (42%) | 17 (34%): 13 / 4 | 12 (24%) | | | |
 | en | neighbour-key | 25 | 23 (92%) | 0 (0%): 0 / 0 | 2 (8%) | | | |
 | en | legit-compound | 20 | | | | 20 (100%) | 0 (0%) | 0 (0%) |
-| en | legit-rare | 20 | | | | 8 (40%) | 3 (15%) | 9 (45%) |
-| de | missed-space | 50 | 15 (30%) | 19 (38%): 14 / 5 | 16 (32%) | | | |
+| en | legit-rare | 20 | | | | 7 (35%) | 3 (15%) | 10 (50%) |
+| de | missed-space | 50 | 15 (30%) | 18 (36%): 13 / 5 | 17 (34%) | | | |
 | de | neighbour-key | 25 | 22 (88%) | 3 (12%): 1 / 2 | 0 (0%) | | | |
 | de | legit-compound | 20 | | | | 20 (100%) | 0 (0%) | 0 (0%) |
-| de | legit-rare | 20 | | | | 8 (40%) | 2 (10%) | 10 (50%) |
-| es | missed-space | 50 | 14 (28%) | 20 (40%): 15 / 5 | 16 (32%) | | | |
+| de | legit-rare | 20 | | | | 7 (35%) | 2 (10%) | 11 (55%) |
+| es | missed-space | 50 | 14 (28%) | 22 (44%): 17 / 5 | 14 (28%) | | | |
 | es | neighbour-key | 25 | 16 (64%) | 4 (16%): 3 / 1 | 5 (20%) | | | |
 | es | legit-compound | 20 | | | | 20 (100%) | 0 (0%) | 0 (0%) |
 | es | legit-rare | 20 | | | | 5 (25%) | 4 (20%) | 11 (55%) |
@@ -77,9 +77,9 @@ loaded es: layout=qwerty
 | fr | neighbour-key | 20 | 0 | 1 | 0 | 19 | part-too-short 16, part-not-in-dictionary 3, correction-preferred 1 |
 | en | missed-space | 29 | 21 | 0 | 0 | 8 | no-bigram:left-word-followers-full 21, part-too-short 8 |
 | en | neighbour-key | 2 | 0 | 0 | 0 | 2 | part-too-short 2 |
-| de | missed-space | 35 | 26 | 0 | 0 | 9 | no-bigram:left-word-followers-full 24, part-too-short 6, other:another-split-won 2, no-bigram:left-word-has-room 2, part-not-in-dictionary 1 |
-| de | neighbour-key | 3 | 0 | 0 | 0 | 3 | other:another-split-won 1, part-too-short 1, part-not-in-dictionary 1 |
-| es | missed-space | 36 | 17 | 0 | 0 | 19 | no-bigram:left-word-followers-full 16, part-too-short 16, part-not-in-dictionary 2, other:another-split-won 1, no-bigram:left-word-has-room 1 |
+| de | missed-space | 35 | 26 | 0 | 0 | 9 | no-bigram:left-word-followers-full 24, part-too-short 6, no-bigram:left-word-has-room 2, other:another-split-won 2, part-not-in-dictionary 1 |
+| de | neighbour-key | 3 | 0 | 0 | 0 | 3 | other:another-split-won 1, part-not-in-dictionary 1, part-too-short 1 |
+| es | missed-space | 36 | 17 | 0 | 0 | 19 | part-too-short 16, no-bigram:left-word-followers-full 16, part-not-in-dictionary 2, other:another-split-won 1, no-bigram:left-word-has-room 1 |
 | es | neighbour-key | 9 | 0 | 0 | 0 | 9 | part-too-short 7, other:another-split-won 1, part-not-in-dictionary 1 |
 
 ## Bigram coverage of the expected pairs (glued cases)
@@ -99,7 +99,7 @@ loaded es: layout=qwerty
 ## Every case that did not come out right (mid-sentence)
 
 id	typed	expected	result	outcome	cause
-fr-observed-004	cavient	ça vient	-	nothing	other:needs-more-than-a-space
+fr-observed-004	cavient	ça vient	devient	replaced	other:needs-more-than-a-space
 fr-observed-005	motsuivant	mot suivant	poursuivant	replaced	no-bigram:left-word-followers-full
 fr-observed-008	surtoutdune	surtout d'une	-	nothing	other:needs-more-than-a-space
 fr-missed-space-001	decette	de cette	recette	replaced	part-too-short
@@ -159,8 +159,8 @@ fr-missed-space-076	àprendre	à prendre	prendre	replaced	part-too-short
 fr-missed-space-079	voixsuave	voix suave	-	nothing	no-bigram:left-word-followers-full
 fr-missed-space-080	danston	dans ton	caneton	replaced	no-bigram:left-word-followers-full
 fr-missed-space-081	sureux	sur eux	heureux	replaced	no-bigram:left-word-followers-full
-fr-missed-space-082	plusde	plus de	-	nothing	part-too-short
-fr-missed-space-083	estde	est de	-	nothing	part-too-short
+fr-missed-space-082	plusde	plus de	pousse	replaced	part-too-short
+fr-missed-space-083	estde	est de	être	replaced	part-too-short
 fr-missed-space-084	mâchédes	mâché des	-	nothing	no-bigram:left-word-has-room
 fr-missed-space-085	proprefils	propre fils	-	nothing	no-bigram:left-word-followers-full
 fr-missed-space-086	avonsde	avons de	avons	replaced	part-too-short
@@ -181,8 +181,8 @@ fr-missed-space-105	prêtsà	prêts à	prêts	replaced	part-too-short
 fr-missed-space-106	samémoire	sa mémoire	mémoire	replaced	part-too-short
 fr-missed-space-108	tempsde	temps de	temps	replaced	part-too-short
 fr-missed-space-109	estdans	est dans	dedans	replaced	no-bigram:left-word-followers-full
-fr-missed-space-110	jeparle	je parle	reparle	replaced	no-bigram:left-word-followers-full
-fr-missed-space-112	cachéça	caché ça	cachez	replaced	no-bigram:left-word-followers-full
+fr-missed-space-110	jeparle	je parle	-	nothing	no-bigram:left-word-followers-full
+fr-missed-space-112	cachéça	caché ça	-	nothing	no-bigram:left-word-followers-full
 fr-missed-space-113	hurlenttoujours	hurlent toujours	hurle toujours	wrong-split	no-bigram:left-word-has-room
 fr-missed-space-114	soufflaitdans	soufflait dans	-	nothing	no-bigram:left-word-has-room
 fr-missed-space-121	enterminale	en terminale	-	nothing	no-bigram:left-word-followers-full
@@ -195,8 +195,8 @@ fr-missed-space-127	rarementà	rarement à	rarement	replaced	part-too-short
 fr-missed-space-128	villefurent	ville furent	-	nothing	no-bigram:left-word-followers-full
 fr-missed-space-131	contentde	content de	conte de	wrong-split	part-too-short
 fr-missed-space-132	partirde	partir de	partirez	replaced	part-too-short
-fr-missed-space-133	toutà	tout à	-	nothing	part-too-short
-fr-missed-space-134	poupéeà	poupée à	-	nothing	part-too-short
+fr-missed-space-133	toutà	tout à	tout	replaced	part-too-short
+fr-missed-space-134	poupéeà	poupée à	poupée	replaced	part-too-short
 fr-missed-space-135	moinsde	moins de	moi de	wrong-split	part-too-short
 fr-missed-space-136	douleurlorsque	douleur lorsque	-	nothing	no-bigram:left-word-followers-full
 fr-missed-space-137	agirà	agir à	agira	replaced	part-too-short
@@ -212,7 +212,7 @@ fr-missed-space-147	hontequand	honte quand	-	nothing	no-bigram:left-word-followe
 fr-missed-space-148	unehistoire	une histoire	-	nothing	no-bigram:left-word-followers-full
 fr-missed-space-149	pasdire	pas dire	-	nothing	no-bigram:left-word-followers-full
 fr-missed-space-150	étaitinterdit	était interdit	-	nothing	no-bigram:left-word-followers-full
-fr-neighbour-key-001	unnde	un de	unité	replaced	part-too-short
+fr-neighbour-key-001	unnde	un de	-	nothing	part-too-short
 fr-neighbour-key-004	debvotre	de votre	renvoyer	replaced	part-too-short
 fr-neighbour-key-005	demandenà	demande à	-	nothing	part-too-short
 fr-neighbour-key-009	anfélicité	a félicité	félicité	replaced	part-too-short
@@ -221,7 +221,7 @@ fr-neighbour-key-019	ancouvert	a couvert	-	nothing	part-too-short
 fr-neighbour-key-021	lanrue	la rue	langue	replaced	correction-preferred
 fr-neighbour-key-022	êtrebpréservés	être préservés	être préservée	wrong-split	part-not-in-dictionary
 fr-neighbour-key-024	contrariezbpas	contrariez pas	-	nothing	part-not-in-dictionary
-fr-neighbour-key-036	debserre	de serre	desserre	replaced	part-too-short
+fr-neighbour-key-036	debserre	de serre	-	nothing	part-too-short
 fr-neighbour-key-038	absentbà	absent à	-	nothing	part-too-short
 fr-neighbour-key-041	parlernà	parler à	parlera	replaced	part-too-short
 fr-neighbour-key-053	jamaisnà	jamais à	jamais	replaced	part-too-short
@@ -231,7 +231,7 @@ fr-neighbour-key-061	denmerveilleux	de merveilleux	-	nothing	part-too-short
 fr-neighbour-key-062	donnébde	donné de	-	nothing	part-too-short
 fr-neighbour-key-064	sontbhabitées	sont habitées	sont habites	wrong-split	part-not-in-dictionary
 fr-neighbour-key-068	abquelques	a quelques	quelques	replaced	part-too-short
-fr-neighbour-key-069	pasnde	pas de	-	nothing	part-too-short
+fr-neighbour-key-069	pasnde	pas de	passe	replaced	part-too-short
 fr-legit-rare-001	agenouillés	agenouillés	agenouillée	false-replacement	single-word-correction
 fr-legit-rare-002	sainfoin	sainfoin	saindoux	false-replacement	single-word-correction
 fr-legit-rare-005	plateformes	plateformes	plateforme	false-replacement	single-word-correction
@@ -242,7 +242,6 @@ fr-legit-rare-012	corrigée	corrigée	corriger	false-replacement	single-word-cor
 fr-legit-rare-013	mendiait	mendiait	mendiant	false-replacement	single-word-correction
 fr-legit-rare-015	basketball	basketball	baseball	false-replacement	single-word-correction
 fr-legit-rare-016	copierez	copierez	coopérez	false-replacement	single-word-correction
-fr-legit-rare-017	attrapées	attrapées	attrapée	false-replacement	single-word-correction
 fr-legit-rare-018	optiques	optiques	optique	false-replacement	single-word-correction
 fr-legit-rare-019	psychanalystes	psychanalystes	psychanalyste	false-replacement	single-word-correction
 fr-legit-rare-021	renommés	renommés	renommée	false-replacement	single-word-correction
@@ -252,9 +251,7 @@ fr-legit-rare-025	décapités	décapités	décapitée	false-replacement	single-w
 fr-legit-rare-027	fureteur	fureteur	directeur	false-replacement	single-word-correction
 fr-legit-rare-028	exportateur	exportateur	explorateur	false-replacement	single-word-correction
 fr-legit-rare-029	dégourdi	dégourdi	dégourdir	false-replacement	single-word-correction
-fr-legit-rare-030	ripaille	ripaille	paille	false-replacement	single-word-correction
 fr-legit-rare-033	dévastatrices	dévastatrices	dévastatrice	false-replacement	single-word-correction
-fr-legit-rare-034	entendeur	entendeur	entendent	false-replacement	single-word-correction
 fr-legit-rare-044	réutilisation	réutilisation	utilisation	false-replacement	single-word-correction
 fr-legit-rare-047	intoxications	intoxications	intoxication	false-replacement	single-word-correction
 fr-legit-rare-050	attirants	attirants	attirante	false-replacement	single-word-correction
@@ -294,6 +291,7 @@ en-legit-rare-003	artemisinin	artemisinin	arte simon	false-split	split-pass
 en-legit-rare-004	coolness	coolness	cool ess	false-split	split-pass
 en-legit-rare-005	sleeplessness	sleeplessness	sleepless ess	false-split	split-pass
 en-legit-rare-006	uncovers	uncovers	uncover	false-replacement	single-word-correction
+en-legit-rare-007	exorcise	exorcise	exercise	false-replacement	single-word-correction
 en-legit-rare-008	squirmed	squirmed	squires	false-replacement	single-word-correction
 en-legit-rare-010	consoled	consoled	consoles	false-replacement	single-word-correction
 en-legit-rare-013	worshippers	worshippers	worshipped	false-replacement	single-word-correction
@@ -305,7 +303,7 @@ de-missed-space-001	alleinesein	alleine sein	alleinsein	replaced	no-bigram:left-
 de-missed-space-002	aufhörenzu	aufhören zu	aufhören	replaced	part-too-short
 de-missed-space-003	weißnicht	weiß nicht	weiß ich	wrong-split	other:another-split-won
 de-missed-space-005	wenigerhäufig	weniger häufig	-	nothing	no-bigram:left-word-followers-full
-de-missed-space-006	gingins	ging ins	higgins	replaced	no-bigram:left-word-followers-full
+de-missed-space-006	gingins	ging ins	-	nothing	no-bigram:left-word-followers-full
 de-missed-space-007	nichtden	nicht den	nichten	replaced	no-bigram:left-word-followers-full
 de-missed-space-008	kennenkeine	kennen keine	kenne keine	wrong-split	no-bigram:left-word-followers-full
 de-missed-space-010	dasaussah	das aussah	-	nothing	no-bigram:left-word-followers-full
@@ -341,6 +339,7 @@ de-neighbour-key-022	führtenzu	führte zu	führten	replaced	part-too-short
 de-neighbour-key-024	frommanxiety	from anxiety	from society	wrong-split	part-not-in-dictionary
 de-legit-rare-003	ausdenkt	ausdenkt	auskennt	false-replacement	single-word-correction
 de-legit-rare-004	informierter	informierter	informierte	false-replacement	single-word-correction
+de-legit-rare-006	entgegnen	entgegnen	entfernen	false-replacement	single-word-correction
 de-legit-rare-007	etlichen	etlichen	etliche	false-replacement	single-word-correction
 de-legit-rare-008	merklich	merklich	wirklich	false-replacement	single-word-correction
 de-legit-rare-009	literarischen	literarischen	literarische	false-replacement	single-word-correction
@@ -356,13 +355,13 @@ es-missed-space-004	simbolizanla	simbolizan la	simboliza la	wrong-split	part-not
 es-missed-space-005	miausencia	mi ausencia	ausencia	replaced	no-bigram:left-word-followers-full
 es-missed-space-006	penséisde	penséis de	penséis	replaced	part-too-short
 es-missed-space-007	altransporte	al transporte	transporte	replaced	part-too-short
-es-missed-space-008	dehaber	de haber	haber	replaced	part-too-short
+es-missed-space-008	dehaber	de haber	-	nothing	part-too-short
 es-missed-space-009	nobaja	no baja	-	nothing	part-too-short
-es-missed-space-011	queno	que no	-	nothing	part-too-short
+es-missed-space-011	queno	que no	bueno	replaced	part-too-short
 es-missed-space-012	fuerobado	fue robado	-	nothing	no-bigram:left-word-followers-full
 es-missed-space-014	trazamosla	trazamos la	traza isla	wrong-split	part-not-in-dictionary
-es-missed-space-017	quecasi	que casi	-	nothing	no-bigram:left-word-followers-full
-es-missed-space-019	aoler	a oler	-	nothing	part-too-short
+es-missed-space-017	quecasi	que casi	quedado	replaced	no-bigram:left-word-followers-full
+es-missed-space-019	aoler	a oler	oler	replaced	part-too-short
 es-missed-space-020	eseentonces	ese entonces	-	nothing	no-bigram:left-word-followers-full
 es-missed-space-021	consejosabio	consejo sabio	-	nothing	no-bigram:left-word-followers-full
 es-missed-space-022	todassean	todas sean	-	nothing	no-bigram:left-word-followers-full

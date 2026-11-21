@@ -1,6 +1,6 @@
 # Keyboard measurement: Dictus (replay, 402x216 pt grid, hit test: plain)
 
-commit: `d86d5a99dfb6734dee72777790186666277e29c8`
+commit: `6541e79c3bf4c9423f73198636e810e9b8d62738`
 
 ## Final text
 
@@ -9,7 +9,7 @@ commit: `d86d5a99dfb6734dee72777790186666277e29c8`
 | fr | 20 | 152 | 3 | 2.0% | 0.7% | 0.1% | 0 |
 | en | 20 | 157 | 7 | 4.5% | 1.4% | 1.4% | 0 |
 | en-typos | 20 | 129 | 14 | 10.9% | 3.2% | 3.2% | 0 |
-| es | 20 | 141 | 15 | 10.6% | 2.3% | 1.6% | 0 |
+| es | 20 | 141 | 15 | 10.6% | 2.3% | 1.5% | 0 |
 | de | 20 | 141 | 8 | 5.7% | 1.1% | 1.1% | 0 |
 
 Word errors are a word-level edit distance against the intended sentence; a glued word is a final token that is two consecutive intended words without the space. Ignoring accents leaves the errors that are not a missing accent: with no autocorrect at work, they are the keyboard's wrong keys.
@@ -30,16 +30,16 @@ The suggestion work a letter triggers and the autocorrect a space triggers, run 
 
 | lang | key | taps | p50 | p95 | max |
 |---|---|---:|---:|---:|---:|
-| fr | letter | 669 | 0.12 | 0.56 | 17.20 |
-| fr | space | 152 | 0.10 | 0.55 | 2.29 |
-| en | letter | 626 | 1.14 | 2.10 | 240.99 |
-| en | space | 156 | 0.07 | 0.75 | 1.57 |
-| en-typos | letter | 491 | 1.65 | 4.18 | 8.46 |
-| en-typos | space | 129 | 0.10 | 1.03 | 6.05 |
-| es | letter | 605 | 0.13 | 1.21 | 26.51 |
-| es | space | 141 | 0.11 | 1.29 | 3.63 |
-| de | letter | 630 | 0.10 | 0.73 | 19.85 |
-| de | space | 142 | 0.08 | 0.70 | 1.69 |
+| fr | letter | 669 | 0.11 | 0.53 | 37.07 |
+| fr | space | 152 | 0.10 | 0.50 | 2.06 |
+| en | letter | 626 | 0.91 | 1.77 | 67.11 |
+| en | space | 156 | 0.05 | 0.68 | 1.56 |
+| en-typos | letter | 491 | 0.88 | 1.88 | 6.73 |
+| en-typos | space | 129 | 0.05 | 0.69 | 2.32 |
+| es | letter | 605 | 0.10 | 0.70 | 40.36 |
+| es | space | 141 | 0.09 | 0.62 | 6.36 |
+| de | letter | 630 | 0.10 | 0.71 | 25.93 |
+| de | space | 142 | 0.09 | 0.67 | 1.63 |
 
 ## Autocorrect, per word the space bar committed
 
@@ -48,8 +48,8 @@ The suggestion work a letter triggers and the autocorrect a space triggers, run 
 | fr | 152 | 121 | 28 | **0** | 3 | 2 | **0** | 0 | 0 |
 | en | 153 | 135 | 13 | **0** | 4 | 0 | **1** | 2 | 1 |
 | en-typos | 129 | 92 | 23 | **0** | 13 | 0 | **1** | 0 | 0 |
-| es | 140 | 99 | 29 | **0** | 10 | 5 | **2** | 1 | 0 |
-| de | 142 | 118 | 16 | **0** | 8 | 0 | **0** | 0 | 0 |
+| es | 140 | 99 | 29 | **0** | 9 | 5 | **3** | 1 | 0 |
+| de | 142 | 118 | 16 | **0** | 7 | 0 | **1** | 0 | 0 |
 
 Wrong autocorrections are the two bold columns. A stray space splits one intended word over two commits; those halves count as typed wrong.
 
@@ -57,7 +57,7 @@ Wrong autocorrections are the two bold columns. A stray space splits one intende
 
 | lang | outcome | intended | typed | final |
 |---|---|---|---|---|
-| de | missed | bestellt | vestellt | vestellt |
+| de | miscorrected | bestellt | vestellt | gestellt |
 | de | missed | wann | Wa | Wa |
 | de | missed | wann | n | n |
 | de | missed | für | fr | fr |
@@ -87,6 +87,7 @@ Wrong autocorrections are the two bold columns. A stray space splits one intende
 | en-typos | missed | it's | Its | Its |
 | es | miscorrected | minutos | deinutos | dei unos |
 | es | miscorrected | médico | mexico | méxico |
+| es | miscorrected | está | ests | esta |
 | es | missed | mañana | ma | ma |
 | es | missed | mañana | ana | ana |
 | es | missed | está | esta | esta |
@@ -95,7 +96,6 @@ Wrong autocorrections are the two bold columns. A stray space splits one intende
 | es | missed | qué | que | que |
 | es | missed | venir | venid | venid |
 | es | missed | qué | Que | Que |
-| es | missed | está | ests | ests |
 | es | missed | de | fe | fe |
 | es | glued | tengo que | Tengoque | Enfoque |
 | fr | missed | réunion | reùion | reùion |
