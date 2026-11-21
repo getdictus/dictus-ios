@@ -98,6 +98,38 @@ final class DetectingCorrector: Corrector {
     }
 }
 
+/// #1015's bilingual check, as the keyboard runs it: `BilingualKeyboard` from
+/// DictusKeyboard/TextPrediction/BilingualAutocorrect.swift, on both engines. The window,
+/// the keep rule, Hex's partner fallback and lean, and both engines on the same taps.
+final class CheckingCorrector: Corrector {
+    let keyboard: BilingualKeyboard
+
+    init(pair: KeyboardLanguagePair, engines: [SupportedLanguage: TextPredictionEngine]) {
+        keyboard = BilingualKeyboard(pair: pair, engines: engines)
+        // KB_TRACE=1 prints each word's language and rule on stderr.
+        if ProcessInfo.processInfo.environment["KB_TRACE"] == "1" {
+            keyboard.onCommit = { word, language, decision in
+                let written = decision.proposal?.autocorrection?.correction ?? word
+                FileHandle.standardError.write(Data(
+                    "TRACE \(language.rawValue) \(decision.rule.rawValue) \(word) -> \(written)\n".utf8))
+            }
+        }
+    }
+
+    var language: SupportedLanguage { keyboard.language }
+    var typingEngine: TextPredictionEngine { keyboard.typingEngine }
+
+    func proposal(for word: String, previous: String?, isAtSentenceStart: Bool,
+                  spatial: SpatialCorrection.Input?, context: String) -> CorrectionProposal? {
+        keyboard.commit(word, previousWord: previous, isAtSentenceStart: isAtSentenceStart, spatial: spatial,
+                        context: context)
+    }
+
+    func preview(_ partial: String, previous: String?, isAtSentenceStart: Bool, context: String) {
+        _ = keyboard.preview(partial, previousWord: previous, isAtSentenceStart: isAtSentenceStart, context: context)
+    }
+}
+
 /// Runs `body`, then puts back the active language and the layouts it set in the
 /// simulator's App Group, so a later monolingual replay types on the layouts it always did.
 func restoringKeyboardPreferences(_ body: () -> Void) {
@@ -185,7 +217,8 @@ func replayPair(_ pair: KeyboardLanguagePair, runs: [String], corpusDir: String,
                 guard let engine = engines[language] else { fatalError("no engine for \(language)") }
                 return SingleEngine(engine, language: language)
             })
-        } + [("detect", { DetectingCorrector(pair: pair, engines: engines, evidence: evidence) })]
+        } + [("detect", { DetectingCorrector(pair: pair, engines: engines, evidence: evidence) }),
+             ("check", { CheckingCorrector(pair: pair, engines: engines) })]
         for (policy, makeCorrector) in policies {
             // One corrector per run: the window carries over from sentence to sentence,
             // as in a conversation, and starts the run in the primary language.
@@ -194,7 +227,7 @@ func replayPair(_ pair: KeyboardLanguagePair, runs: [String], corpusDir: String,
                 let line = s % sentences.count
                 let intendedWords = sentences[line].components(separatedBy: " ")
                 let (_, commits) = replay(run.filter { $0.sentence == s }, cells: cells, width: width, height: height,
-                                          picker: nil, journal: nil, spatial: false,
+                                          picker: nil, journal: nil, spatial: spatialOn,
                                           corrector: corrector) { _, resolved, _, us, _, _ in
                     switch resolved {
                     case "space": costOut.append("\(label)\t\(policy)\tspace\t\(us)")

@@ -11,7 +11,7 @@
 #       [--langs fr,en] [--width 402] [--height 216]
 #       [--corpus <dir>] [--runs <dir>] [--hit plain|model] [--model <spec>] [--no-build]
 #       [--debug] [--journal] [--spatial] [--spatial-tune <k=v,...>] [--layout azerty|qwerty|qwertz]
-#       [--pair fr,en [--probe <word,previous|word,...>]]
+#       [--pair fr,en [--probe <word,previous|word,...>]] [--bilingual]
 #
 # --width and --height are the key grid in points. The defaults are an iPhone 17
 # held upright: 402 pt wide, and the 216 pt KeyboardHeightProvider gives a 6.3" screen.
@@ -36,9 +36,13 @@
 # #1009: --pair replays a bilingual keyboard (primary,secondary): every run under the
 # primary alone, the secondary alone, and language detection. --langs then takes corpus
 # names with an optional layout (`en:qwerty`; default the primary's), and defaults to
-# fr, en:qwerty, en, mixed and mixed-heldout. Writes pair.tsv and pair-cost.tsv and
+# fr, en:qwerty, en, mixed, mixed-heldout and mixed-heldout-2. Writes pair.tsv and pair-cost.tsv and
 # prints score_pair.py's report. --probe prints what both dictionaries answer for single
 # words instead of replaying.
+#
+# #1015: --pair also replays the bilingual check (policy `check`), and with --spatial
+# every policy reads the taps. --bilingual types the monolingual runs on the bilingual
+# check, the run's language primary and the other of French and English its partner.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
@@ -59,6 +63,7 @@ SPATIAL_TUNE=""
 LAYOUT=""
 PAIR=""
 PROBE=""
+BILINGUAL=0
 while [[ $# -gt 0 ]]; do
     case "$1" in
         --udid) UDID="$2"; shift 2 ;;
@@ -78,12 +83,13 @@ while [[ $# -gt 0 ]]; do
         --spatial-tune) SPATIAL_TUNE="$2"; shift 2 ;;
         --pair) PAIR="$2"; shift 2 ;;
         --probe) PROBE="$2"; shift 2 ;;
+        --bilingual) BILINGUAL=1; shift ;;
         *) echo "unknown argument: $1" >&2; exit 2 ;;
     esac
 done
 [[ -n "$UDID" ]] || { echo "--udid is required" >&2; exit 2; }
 if [[ -z "$LANGS" ]]; then
-    if [[ -n "$PAIR" ]]; then LANGS="fr,en:qwerty,en,mixed,mixed-heldout"; else LANGS="fr,en"; fi
+    if [[ -n "$PAIR" ]]; then LANGS="fr,en:qwerty,en,mixed,mixed-heldout,mixed-heldout-2"; else LANGS="fr,en"; fi
 fi
 xcrun simctl list devices booted | grep -q "$UDID" || { echo "simulator $UDID is not booted" >&2; exit 1; }
 
@@ -122,6 +128,8 @@ if [[ $BUILD_BENCH == 1 ]]; then
         "$ROOT/DictusKeyboard/TextPrediction/TextPredictionEngine.swift" \
         "$ROOT/DictusKeyboard/TextPrediction/AOSPTrieEngine.swift" \
         "$ROOT/DictusKeyboard/TextPrediction/SpatialAutocorrect.swift" \
+        "$ROOT/DictusKeyboard/TextPrediction/BilingualAutocorrect.swift" \
+        "$ROOT/DictusKeyboard/TextPrediction/TrieLanguageEvidence.swift" \
         "$ROOT/DictusKeyboard/KeyboardLayouts.swift" \
         "$ROOT/DictusKeyboard/Vendored/Models/KeyDefinition.swift" \
         "$ROOT/DictusKeyboard/Vendored/Models/KeyboardDefinition.swift" \
@@ -151,7 +159,7 @@ echo "== replay on $UDID" >&2
 if [[ -n "$PAIR" ]]; then
     export SIMCTL_CHILD_SWIFT_DETERMINISTIC_HASHING=1 SIMCTL_CHILD_KB_CORPUS="$CORPUS" SIMCTL_CHILD_KB_RUNS="$RUNS" \
         SIMCTL_CHILD_KB_PAIR="$PAIR" SIMCTL_CHILD_KB_SPATIAL="$SPATIAL" SIMCTL_CHILD_KB_LAYOUT="$LAYOUT" \
-        SIMCTL_CHILD_KB_SPATIAL_TUNE="$SPATIAL_TUNE"
+        SIMCTL_CHILD_KB_SPATIAL_TUNE="$SPATIAL_TUNE" SIMCTL_CHILD_KB_TRACE="${KB_TRACE:-0}"
     if [[ -n "$PROBE" ]]; then
         # The probe's table is the output: only the engine's messages start with "[".
         SIMCTL_CHILD_KB_PROBE="$PROBE" xcrun simctl spawn "$UDID" "$BIN/keyboard-bench" "$BENCH" "$LANGS" "$OUT" \
@@ -165,9 +173,10 @@ if [[ -n "$PAIR" ]]; then
 fi
 SIMCTL_CHILD_SWIFT_DETERMINISTIC_HASHING=1 SIMCTL_CHILD_KB_JOURNAL="$JOURNAL" \
 SIMCTL_CHILD_KB_SPATIAL="$SPATIAL" SIMCTL_CHILD_KB_LAYOUT="$LAYOUT" SIMCTL_CHILD_KB_SPATIAL_TUNE="$SPATIAL_TUNE" \
+SIMCTL_CHILD_KB_BILINGUAL="$BILINGUAL" SIMCTL_CHILD_KB_TRACE="${KB_TRACE:-0}" \
 SIMCTL_CHILD_KB_CORPUS="$CORPUS" SIMCTL_CHILD_KB_RUNS="$RUNS" SIMCTL_CHILD_KB_HIT="$HIT" SIMCTL_CHILD_KB_MODEL="$MODEL" \
     xcrun simctl spawn "$UDID" "$BIN/keyboard-bench" "$BENCH" "$LANGS" "$OUT" "$WIDTH" "$HEIGHT" \
     2> >(grep -v "Lexicon creation for" >&2) >&2
 
 python3 -I "$BENCH/score.py" --commit "$(git -C "$ROOT" rev-parse HEAD)" \
-    --keyboard "Dictus (replay, ${WIDTH}x${HEIGHT} pt grid, hit test: $HIT${MODEL:+ $MODEL}$([[ $SPATIAL == 1 ]] && echo ", spatial decoder${SPATIAL_TUNE:+ $SPATIAL_TUNE}" || true)$([[ $DEBUG == 1 ]] && echo ", DEBUG, journal $([[ $JOURNAL == 1 ]] && echo on || echo off)" || true))" --dir "$OUT"
+    --keyboard "Dictus (replay, ${WIDTH}x${HEIGHT} pt grid, hit test: $HIT${MODEL:+ $MODEL}$([[ $SPATIAL == 1 ]] && echo ", spatial decoder${SPATIAL_TUNE:+ $SPATIAL_TUNE}" || true)$([[ $BILINGUAL == 1 ]] && echo ", bilingual check" || true)$([[ $DEBUG == 1 ]] && echo ", DEBUG, journal $([[ $JOURNAL == 1 ]] && echo on || echo off)" || true))" --dir "$OUT"

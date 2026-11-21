@@ -241,6 +241,15 @@ protocol Corrector: AnyObject {
     /// `context` is the document before the space.
     func proposal(for word: String, previous: String?, isAtSentenceStart: Bool,
                   spatial: SpatialCorrection.Input?, context: String) -> CorrectionProposal?
+    /// The correction preview a letter runs (`SuggestionState.updateAsync`).
+    func preview(_ partial: String, previous: String?, isAtSentenceStart: Bool, context: String)
+}
+
+extension Corrector {
+    /// The bench's preview since #954: the engine's spell check of the partial word.
+    func preview(_ partial: String, previous: String?, isAtSentenceStart: Bool, context: String) {
+        _ = typingEngine.spellCheck(partial, previousWord: previous, isAtSentenceStart: isAtSentenceStart)
+    }
 }
 
 /// The keyboard as it ships: one engine for everything.
@@ -353,8 +362,9 @@ func replay(_ taps: [Tap], cells: [Cell], width: CGFloat, height: CGFloat, picke
                 guard let (_, partial) = AutocorrectRejectionMemory.wordAtCursor(context: context) else { return }
                 let previous = words(context).dropLast().last
                 if memory.previewsCorrection(context: context) {
-                    _ = engine.spellCheck(partial, previousWord: previous,
-                                          isAtSentenceStart: ProperNounGuard.isAtSentenceStart(context: context, word: partial))
+                    corrector.preview(partial, previous: previous,
+                                      isAtSentenceStart: ProperNounGuard.isAtSentenceStart(context: context, word: partial),
+                                      context: context)
                 }
                 _ = engine.suggestions(for: partial)
             }
@@ -438,6 +448,8 @@ let journal = Journal.start(toggle: env["KB_JOURNAL"] == "1")
 // #1011: the spatial decoder, as its Debug switch turns it on in the keyboard. KB_SPATIAL_TUNE
 // changes Hex's parameters for a sweep: `validMargin=inf,accentMargin=7`.
 let spatialOn = env["KB_SPATIAL"] == "1"
+// #1015: the bilingual check on the monolingual runs, as its Debug switch turns it on.
+let bilingualOn = env["KB_BILINGUAL"] == "1"
 if let tune = env["KB_SPATIAL_TUNE"], !tune.isEmpty {
     let pairs = tune.components(separatedBy: ",").map { $0.components(separatedBy: "=") }
     SpatialAutocorrect.tuning = { p in
@@ -526,7 +538,18 @@ for code in langs {
         { (m.pick($0, plain: $1, cells: cells, word: $2, previous: $3), m.visited) }
     }
 
-    let corrector = SingleEngine(engine, language: lang)
+    // #1015: KB_BILINGUAL=1 types the run on the bilingual check, the run's language
+    // primary and the other of French and English its partner, as the keyboard's Debug
+    // switch does. The partner loads after `load`, for the layout the run types on.
+    let corrector: Corrector
+    if bilingualOn, let secondary = KeyboardLanguagePair.secondaries(for: lang).first,
+       let pair = KeyboardLanguagePair(primary: lang, secondary: secondary) {
+        let partner = TextPredictionEngine(language: secondary.rawValue)
+        waitUntilLoaded(partner, "partner \(secondary.rawValue)")
+        corrector = CheckingCorrector(pair: pair, engines: [lang: engine, secondary: partner])
+    } else {
+        corrector = SingleEngine(engine, language: lang)
+    }
     var order: [Int] = []
     for tap in run where order.last != tap.sentence { order.append(tap.sentence) }
     for s in order {
