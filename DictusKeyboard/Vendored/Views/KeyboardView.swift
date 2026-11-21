@@ -269,6 +269,32 @@ final internal class GiellaKeyboardView: UIView,
         }
     }
 
+    /// What the return key draws for the focused field (#1023). Set by the bridge each time
+    /// it reads the host's traits; every page's return cell is built from it.
+    private(set) var returnKeyAppearance: ReturnKeyAppearance = .standard
+
+    /// Redraws the return key for the field's `returnKeyType` and its off state.
+    ///
+    /// The cell is reconfigured in place, for the reason `updateAccentKeyLabel` gives:
+    /// `reloadItems` runs a layout pass that makes iOS re-measure the keyboard height. And
+    /// only on a change, because the bridge calls this after every keystroke.
+    func updateReturnKey(_ appearance: ReturnKeyAppearance) {
+        guard appearance != returnKeyAppearance else { return }
+        returnKeyAppearance = appearance
+        for section in 0..<currentPage.count {
+            for row in 0..<currentPage[section].count {
+                let key = currentPage[section][row]
+                guard case .returnkey = key.type else { continue }
+                let indexPath = IndexPath(row: row, section: section)
+                guard let cell = collectionView.cellForItem(at: indexPath) as? KeyCell else { continue }
+                let isPressed = activeKey?.indexPath == indexPath
+                cell.configure(page: page, key: key, theme: theme, traits: traitCollection,
+                               returnKey: appearance)
+                cell.keyView?.active = isPressed
+            }
+        }
+    }
+
     func remove() {
         delegate = nil
         removeFromSuperview()
@@ -1149,7 +1175,8 @@ final internal class GiellaKeyboardView: UIView,
             key = KeyDefinition(type: .input(key: accentKeyLabel, alternate: nil))
         }
 
-        cell.configure(page: page, key: key, theme: theme, traits: self.traitCollection)
+        cell.configure(page: page, key: key, theme: theme, traits: self.traitCollection,
+                       returnKey: returnKeyAppearance)
 
         if let swipeKeyView = cell.keyView, swipeKeyView.isSwipeKey {
             swipeKeyView.percentageAlternative = 0.0
@@ -1186,7 +1213,8 @@ final internal class GiellaKeyboardView: UIView,
             contentView.fill(superview: self)
         }
 
-        func configure(page: KeyboardPage, key: KeyDefinition, theme: Theme, traits: UITraitCollection) {
+        func configure(page: KeyboardPage, key: KeyDefinition, theme: Theme, traits: UITraitCollection,
+                       returnKey: ReturnKeyAppearance = .standard) {
             contentView.subviews.forEach { view in
                 view.removeFromSuperview()
             }
@@ -1199,10 +1227,15 @@ final internal class GiellaKeyboardView: UIView,
                 contentView.addSubview(emptyview)
                 emptyview.fill(superview: contentView)
             } else {
-                let keyView = KeyView(page: page, key: key, theme: theme, traits: traits)
+                let keyView = KeyView(page: page, key: key, theme: theme, traits: traits, returnKey: returnKey)
                 if let accessibilityLabel = key.accessibilityLabel(for: page) {
                     keyView.isAccessibilityElement = true
                     keyView.accessibilityLabel = accessibilityLabel
+                } else if case .returnkey = key.type {
+                    // The key's name for its type, since the glyph has no words (#1023).
+                    keyView.isAccessibilityElement = true
+                    keyView.accessibilityLabel = returnKey.style.label(in: KeyView.labelLanguage)
+                    keyView.accessibilityTraits = returnKey.isEnabled ? .keyboardKey : [.keyboardKey, .notEnabled]
                 }
                 keyView.translatesAutoresizingMaskIntoConstraints = false
                 contentView.addSubview(keyView)

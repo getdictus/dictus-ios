@@ -14,6 +14,7 @@
 - `keyboard.reopen-letters`: the keyboard always opens on the letters, even when it was hidden on 123 or `#+=` (#889; Android uses the same ID, #291).
 - `keyboard.transcription-language`: Transcription language: « Suivre la langue du clavier » or fixed.
 - `keyboard.open-app`: The panel's gear opens Dictus.
+- `keyboard.return-key-type`: the return key follows the field's `returnKeyType`, as Apple's keyboard draws it (#1023): blue → in Safari's address bar (Go), blue magnifier in a search field, blue ↑ for Send, ✓ for Done, › for Next and Continue, plain ↵ elsewhere. Greyed, and a tap does nothing, while the field is empty and the host sets `enablesReturnKeyAutomatically` (Safari's address bar does). The words (« accéder », « rechercher »…) are VoiceOver labels in the iPhone's language.
 
 ## How to get to it (user POV)
 
@@ -39,7 +40,11 @@ Reopen on letters (#889): `kbd abc` (123 page), then hide the keyboard with Safa
 
 App side: `.claude/skills/verify-dictus-ios/scripts/drive.sh tab Réglages`, `axe swipe --start-x 201 --start-y 600 --end-x 201 --end-y 350 --duration 0.4 --udid <udid>` (at rest the row sits under the floating tab bar, and a tap there switches to Modèles), then `.claude/skills/verify-dictus-ios/scripts/drive.sh tap-label "Disposition, AZERTY"`.
 
+Return key type (#1023): `drive.sh tap-id TabBarItemTitle` in Safari, select the Dictus keyboard, screenshot: the return key (bottom right) is grey with a faint →. Type one letter by coordinate: it turns blue with a white →. A field with the default type (Rappels, a new reminder's title) shows the plain grey ↵. The glyphs are drawn inside the keyboard's remote view, so `describe-ui` does not list them: the screenshot is the evidence.
+
 ## Gotchas
+
+- `keyboard.return-key-type` in third-party apps (WhatsApp, Telegram, Google search, a bank's form) is checked on the iPhone: the simulator has only Apple's apps. Messages uses the default type and sends from its own button, so its return key stays ↵ with Apple's keyboard too.
 
 - `keyboard.reopen-letters` cannot be told apart from the old behaviour in the simulator: there, iOS creates a new `KeyboardViewController` for every appearance (new `instanceID` at each `registeredAppearance`, measured on iOS 26.5 for a Safari hide/show and a Home round trip, #889), and a new controller starts on the letters anyway. The kept-controller case, where the page used to survive, is checked on the iPhone.
 - Panel rows are inside the keyboard: tap them by coordinate from the screenshot (`kbd.panel`), then check the log (`presentAreaMode`).
