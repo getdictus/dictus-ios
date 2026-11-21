@@ -58,7 +58,7 @@ final class TranslationTargetStoreTests: XCTestCase {
         let order = TranslationTargetStore.pickerOrder(locale: french)
 
         XCTAssertEqual(order.recent.map(\.code), ["ru", "pt"])
-        XCTAssertEqual(order.others.count, 20)
+        XCTAssertEqual(order.others.count, 19)
         XCTAssertFalse(order.others.contains { ["ru", "pt"].contains($0.code) }, "a recent is listed twice")
         XCTAssertFalse((order.recent + order.others).contains { $0.builtIn != nil },
                        "a built-in is offered although it is already a row")
@@ -94,10 +94,14 @@ final class TranslationTargetStoreTests: XCTestCase {
     }
 
     /// A downgrade or a corrupted value costs that one entry, and is not rewritten.
+    /// `ms` is the real case: an earlier build of this branch offered Malay, and a
+    /// device that chose it reads it here as a code this build does not know.
     func testAnUnknownOrBuiltInCodeOnDiskIsSkippedNotRewritten() {
-        defaults.set(["klingon", "pt", "en", "zh"], forKey: SharedKeys.translationTargetsChosen)
+        defaults.set(["klingon", "ms", "pt", "en", "zh"], forKey: SharedKeys.translationTargetsChosen)
         XCTAssertEqual(TranslationTargetStore.chosen.map(\.code), ["pt"])
-        XCTAssertEqual(defaults.stringArray(forKey: SharedKeys.translationTargetsChosen), ["klingon", "pt", "en", "zh"])
+        XCTAssertEqual(SmartModeCatalogue.addedTranslateModes.map(\.id), ["translate.pt"])
+        XCTAssertEqual(defaults.stringArray(forKey: SharedKeys.translationTargetsChosen),
+                       ["klingon", "ms", "pt", "en", "zh"])
     }
 
     // MARK: - The modes it adds

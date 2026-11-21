@@ -55,7 +55,7 @@ enum SmartModeTranslatePrompt {
     /// comment on `examples(target:)` is the reason, and an Italian prompt
     /// demonstrating Spanish output would be that defect shipped on purpose. Whether
     /// the instructions alone hold up is a measurement owed on the harness, which is
-    /// why the 22 new targets ride the framework first and this prompt second.
+    /// why the 21 new targets ride the framework first and this prompt second.
     ///
     /// A target with no Apple FM fallback (`hasModelFallback == false`) still gets a
     /// prompt, because a `SmartMode` carries one — `TranslateRoutingPolishEngine`

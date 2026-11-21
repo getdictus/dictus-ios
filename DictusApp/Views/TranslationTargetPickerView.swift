@@ -18,7 +18,7 @@ import DictusCore
 ///
 /// Every language name comes from `Locale` in the UI language (`TranslationTarget.localizedName`),
 /// so French reads "portugais" and English "Portuguese" with no entry per language, and
-/// a later UI locale gets all 22 for free. The catalog only carries this screen's chrome.
+/// a later UI locale gets all 21 for free. The catalog only carries this screen's chrome.
 struct TranslationTargetPickerView: View {
 
     /// Called with the target the user chose, after it is recorded.

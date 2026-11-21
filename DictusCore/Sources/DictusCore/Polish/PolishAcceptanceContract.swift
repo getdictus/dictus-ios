@@ -24,7 +24,7 @@ public enum PolishOutputLanguage: Equatable, Sendable, Codable {
     /// forgetting to translate.
     ///
     /// A `TranslationTarget` rather than a `SupportedLanguage` since #622, which
-    /// opened Translate to the 26 languages Apple's Translation framework writes. The
+    /// opened Translate to 25 of the languages Apple's Translation framework writes. The
     /// stored value is the target's `code`, so the four that existed before encode as
     /// they always did (`"de"` is still `"de"`) and no snapshot written by an older
     /// build reads differently.

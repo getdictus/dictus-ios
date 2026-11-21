@@ -1,5 +1,5 @@
 // DictusCore/Tests/DictusCoreTests/Polish/TranslationTargetTests.swift
-// The 26 Translate targets, their codes, their modes and their prompts (issue #622).
+// The 25 Translate targets, their codes, their modes and their prompts (issue #622).
 import XCTest
 import CryptoKit
 @testable import DictusCore
@@ -14,25 +14,41 @@ final class TranslationTargetTests: XCTestCase {
 
     // MARK: - The list
 
-    func testTheListIsTheTwentySixLanguagesTheBriefMeasured() {
+    func testTheListIsTheTwentyFiveLanguagesTheBriefMeasuredLessMalay() {
         XCTAssertEqual(
             Set(TranslationTarget.all.map(\.code)),
-            ["ar", "da", "de", "en", "es", "fi", "fr", "he", "hi", "id", "it", "ja", "ko", "ms", "nb",
+            ["ar", "da", "de", "en", "es", "fi", "fr", "he", "hi", "id", "it", "ja", "ko", "nb",
              "nl", "pl", "pt", "ru", "sv", "th", "tr", "uk", "vi", "zh-Hans", "zh-Hant"]
         )
-        XCTAssertEqual(TranslationTarget.all.count, 26, "a code appears twice")
-        XCTAssertEqual(TranslationTarget.additional.count, 22)
+        XCTAssertEqual(TranslationTarget.all.count, 25, "a code appears twice")
+        XCTAssertEqual(TranslationTarget.additional.count, 21)
         XCTAssertEqual(TranslationTarget.builtIns.map(\.code), ["fr", "en", "es", "de"])
     }
 
-    /// Apple's Apple Intelligence list for the 27.0 releases has 16 languages; the ten
-    /// framework targets outside it are the ones with no fallback.
-    func testExactlyTheTenTargetsOutsideAppleFMHaveNoFallback() {
+    /// Apple's Apple Intelligence list for the 27.0 releases has 16 languages; the nine
+    /// targets outside it are the ones with no fallback.
+    func testExactlyTheNineTargetsOutsideAppleFMHaveNoFallback() {
         XCTAssertEqual(
             Set(TranslationTarget.all.filter { !$0.hasModelFallback }.map(\.code)),
-            ["ar", "fi", "he", "hi", "id", "ms", "pl", "ru", "th", "uk"]
+            ["ar", "fi", "he", "hi", "id", "pl", "ru", "th", "uk"]
         )
         XCTAssertEqual(TranslationTarget.all.filter(\.hasModelFallback).count, 16)
+    }
+
+    /// Malay left the targets on the maintainer's decision of 2026-11-21. The framework
+    /// writes it, and writes it differently from Indonesian (`minit`/`menit`,
+    /// `kerana`/`karena`, `boleh`/`bisa`, six French sentences each, macOS 27.0); it is
+    /// `NLLanguageRecognizer` that read all twelve outputs as `id` at 1.000. The output-
+    /// language check therefore cannot tell a Malay answer from an Indonesian one, and a
+    /// target ships only with a measured pass on that check. Indonesian stays: it reads
+    /// as itself.
+    func testMalayIsNotATargetBecauseTheLanguageCheckReadsItAsIndonesian() {
+        XCTAssertNil(TranslationTarget(code: "ms"))
+        XCTAssertFalse(TranslationTarget.all.contains { $0.code == "ms" })
+        XCTAssertNil(SmartModeCatalogue.translateTarget(ofIdentifier: "translate.ms"))
+        XCTAssertNil(SmartModeCatalogue.mode(withIdentifier: "translate.ms"))
+        XCTAssertFalse(PolishGuardrail.matches(read: "id", expected: "ms"), "the ms→id exception is gone")
+        XCTAssertNotNil(TranslationTarget(code: "id"))
     }
 
     func testOnlyTheFourDictationLanguagesAreBuiltIn() {

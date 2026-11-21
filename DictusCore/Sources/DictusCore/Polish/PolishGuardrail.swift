@@ -300,24 +300,8 @@ public enum PolishGuardrail {
     /// affected, and the cost of the exception is bounded by the same four: a Swedish
     /// output on a Danish dictation is accepted, and nobody has measured that
     /// happening.
-    ///
-    /// ### And one more, in one direction only: Malay read as Indonesian (#622)
-    ///
-    /// Measured 2026-11-21 on macOS 27.0: Apple's Translation framework, `.highFidelity`,
-    /// translated four French sentences into Malay — `Saya terlambat, saya akan tiba
-    /// dalam lima belas minit.` and three others, 20 to 114 characters — and
-    /// `NLLanguageRecognizer` read **all four as `id` at 1.000**. The two languages share
-    /// most of their written vocabulary and the recogniser does not separate them on
-    /// short text. With the exact code alone, every Malay translation would be refused
-    /// and the user would get the "translation unavailable" notice on every dictation.
-    ///
-    /// So an output expected as `ms` is also accepted when it reads as `id`. Not the
-    /// reverse: Indonesian translations read as `id` (4/4 in the same run), so an
-    /// Indonesian target keeps its exact check, and the hole this opens is bounded to
-    /// one language pair on one target.
     static func matches(read: String, expected: String) -> Bool {
         if read == expected { return true }
-        if expected == "ms", read == "id" { return true }
         return continentalScandinavian.contains(read) && continentalScandinavian.contains(expected)
     }
 

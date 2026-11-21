@@ -43,8 +43,6 @@ final class TranslationTargetGuardrailTests: XCTestCase {
          "今夜その文書を送ります。もしよければ、明日の朝また話しましょう。"),
         ("ko", "늦었어요, 15분 후에 도착할게요.",
          "오늘 저녁에 문서를 보내줄게, 원하면 내일 아침에 다시 얘기하자."),
-        ("ms", "Saya terlambat, saya akan tiba dalam lima belas minit.",
-         "Saya akan menghantar dokumen itu kepada anda malam ini, kita boleh membincangkannya lagi esok pagi jika anda mahu."),
         ("nb", "Jeg er forsinket, jeg kommer om femten minutter.",
          "Jeg sender deg dokumentet i kveld, vi snakkes om det i morgen tidlig hvis du vil."),
         ("nl", "Ik ben te laat, ik kom over vijftien minuten aan.",
@@ -123,15 +121,6 @@ final class TranslationTargetGuardrailTests: XCTestCase {
         let spanishText = "Te envío el documento esta noche, lo hablamos mañana por la mañana si quieres."
         XCTAssertFalse(PolishGuardrail.detectedLanguageMatches(polished: portugueseText, translationTarget: .spanish))
         XCTAssertFalse(PolishGuardrail.detectedLanguageMatches(polished: spanishText, translationTarget: portuguese))
-    }
-
-    /// The one exception #622 adds, and its direction. The framework's Malay reads as
-    /// `id` at 1.000 on all four measured sentences, so `ms` accepts `id`; Indonesian
-    /// is not widened.
-    func testMalayAcceptsAnIndonesianReadingAndOnlyMalayDoes() {
-        XCTAssertTrue(PolishGuardrail.matches(read: "id", expected: "ms"))
-        XCTAssertFalse(PolishGuardrail.matches(read: "ms", expected: "id"))
-        XCTAssertFalse(PolishGuardrail.matches(read: "id", expected: "fr"))
     }
 
     /// Norwegian is stored as `nb`; the Scandinavian set is what lets a Bokmål sentence

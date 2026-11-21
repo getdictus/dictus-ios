@@ -129,7 +129,7 @@ final class TranslationTargetRoutingTests: XCTestCase {
 
     func testEveryDeclineOnANoFallbackTargetThrowsTranslationUnavailableAndNeverCallsAppleFM() async throws {
         let noFallback = TranslationTarget.all.filter { !$0.hasModelFallback }
-        XCTAssertEqual(noFallback.count, 10)
+        XCTAssertEqual(noFallback.count, 9)
         for target in noFallback {
             for (name, source, configure) in declines() + [("sameLanguage", target.code, { _ in })] {
                 let inner = InnerEngine(), framework = ScriptedFramework()

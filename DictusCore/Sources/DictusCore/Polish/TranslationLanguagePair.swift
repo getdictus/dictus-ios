@@ -10,7 +10,7 @@ import Translation
 ///
 /// The source is a language code rather than a `SupportedLanguage` because a dictation
 /// can be in any language Parakeet or Whisper transcribes, not only the four Dictus has
-/// keyboards for. The target is a `TranslationTarget`: one of the 26 languages the
+/// keyboards for. The target is a `TranslationTarget`: one of the 25 languages the
 /// framework writes since #622, of which the four dictation languages are a part.
 public struct TranslationLanguagePair: Hashable, Sendable {
     public let source: String

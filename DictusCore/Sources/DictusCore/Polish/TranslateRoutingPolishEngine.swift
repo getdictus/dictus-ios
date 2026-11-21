@@ -43,11 +43,10 @@ import Translation
 /// source, and a raw transcript inserted under "Translate" is the failure #79 names
 /// worst.
 ///
-/// ### Ten targets have no fallback, and say so (#622)
+/// ### Nine targets have no fallback, and say so (#622)
 ///
-/// Apple FM writes 16 languages; the framework writes 26. For the ten it does not
-/// (`TranslationTarget.hasModelFallback == false`: ar, fi, he, hi, id, ms, pl, ru, th,
-/// uk), every decline above throws `TranslationUnavailable` instead of calling a model
+/// Apple FM writes 16 languages; Translate offers 25. For the nine it does not
+/// (`TranslationTarget.hasModelFallback == false`: ar, fi, he, hi, id, pl, ru, th, uk), every decline above throws `TranslationUnavailable` instead of calling a model
 /// that cannot write the language. The pipeline reads that as a failed mode, the
 /// mode's floor is `insertNothing`, and the surfaces show a sentence naming the cause
 /// (`PolishFailureReason.translationUnavailable`). The source text is never inserted:

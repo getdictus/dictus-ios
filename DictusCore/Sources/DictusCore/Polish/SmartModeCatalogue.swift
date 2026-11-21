@@ -511,7 +511,7 @@ public enum SmartModeCatalogue {
     /// through "Other language…" are not built-ins: they are the user's part, like the
     /// pinned list, and come after them in `all` (`addedTranslateModes`). Keeping this
     /// list fixed is what keeps every consumer that sizes itself on it — the Apple FM
-    /// session cache, the onboarding's cards, the polish harness — from growing by 22.
+    /// session cache, the onboarding's cards, the polish harness — from growing by 21.
     public static let builtIns: [SmartMode] =
         [structured, notes, message, summary] + TranslationTarget.builtIns.map { translate(to: $0) }
 
