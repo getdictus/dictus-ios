@@ -72,21 +72,115 @@ final class CorrectionRankingTests: XCTestCase {
         ]), "ich")
     }
 
-    // MARK: - Ambiguity keeps the typed word
+    // MARK: - Close readings are settled (#997 device test)
 
-    func testTwoEquallyGoodReadingsKeepTheTypedWord() {
-        // `la reùion`: `région` or `réunion`, nothing says which.
+    // The lists below are the trie's top ten, read off the shipped dictionaries with the
+    // previous word the device journal recorded. The n-gram data has no pair for any of
+    // them (`est arrivé`, `suis arrivé`, `les sais`, `passai que` all score 0).
+
+    func testAnAccentVariantOfTheSameReadingIsCorrected() {
+        // `est zrrive` and `suis arribe`: `arrive` and `arrivé` are one reading.
+        // Without context the more frequent spelling is written; `arrivé` is offered.
+        for typed in ["zrrive", "arribe"] {
+            let decision = CorrectionRanking.decide([
+                candidate("arrive", 0.40, 46_814), candidate("arrivé", 0.55, 42_907),
+                candidate("arriva", 1.20, 33_054), candidate("arriver", 1.40, 42_504),
+                candidate("arrivée", 1.40, 37_712), candidate("arrives", 1.40, 33_700),
+                candidate("arrivez", 1.40, 29_504), candidate("arrivés", 1.55, 35_334),
+                typed == "zrrive" ? candidate("servie", 1.5123, 25_343) : candidate("arrose", 1.40, 25_202),
+                candidate("atroce", 1.60, 30_337)
+            ])
+            XCTAssertEqual(decision.replacement, "arrive", typed)
+            XCTAssertEqual(decision.proposal?.autocorrection?.alternatives.first, "arrivé", typed)
+        }
+    }
+
+    func testTwoCloseReadingsGoToTheMoreFrequent() {
+        // `zrreve`: `arrête` scores 0.003 above `arrive`, which is the more frequent.
+        XCTAssertEqual(replacement([
+            candidate("arrête", 1.3562, 45_984), candidate("arrive", 1.40, 46_814),
+            candidate("arrivé", 1.55, 42_907), candidate("arrêté", 1.5062, 38_872),
+            candidate("trêve", 1.55, 29_434), candidate("erreur", 1.80, 39_674),
+            candidate("grève", 1.7903, 32_706), candidate("errer", 1.80, 26_024),
+            candidate("serve", 1.8123, 27_622), candidate("artère", 1.8044, 24_859)
+        ]), "arrive")
+        // `les sats`: `sais` or `sans`, one key away each.
+        XCTAssertEqual(replacement([
+            candidate("sais", 1.00, 53_558), candidate("sans", 1.00, 52_050),
+            candidate("rats", 0.8062, 33_454), candidate("date", 0.90, 35_206),
+            candidate("sage", 0.9123, 35_143), candidate("sacs", 0.9434, 34_881),
+            candidate("dans", 1.40, 58_363), candidate("bats", 1.00, 30_589),
+            candidate("sers", 1.20, 35_631), candidate("gars", 1.40, 44_012)
+        ]), "sais")
+        // `passai qur`: `sur` and `que` are one neighbouring key away each and as
+        // frequent. The device wanted `que`, which nothing in the data tells apart:
+        // the typed word is corrected, to `sur`, and `que` is the first alternative.
+        let qur = CorrectionRanking.decide([
+            candidate("sur", 0.40, 55_999), candidate("que", 0.40, 55_817),
+            candidate("sûr", 0.55, 48_865), candidate("qui", 1.00, 58_631),
+            candidate("air", 0.8123, 47_869), candidate("dur", 0.80, 41_552),
+            candidate("mur", 1.00, 40_213), candidate("sud", 0.90, 34_480),
+            candidate("pur", 1.00, 35_507), candidate("sir", 0.80, 29_477)
+        ])
+        XCTAssertEqual(qur.replacement, "sur")
+        XCTAssertEqual(qur.proposal?.autocorrection?.alternatives.first, "que")
+    }
+
+    func testContextPicksBetweenCloseReadingsBeforeFrequency() {
+        XCTAssertEqual(replacement([
+            candidate("sais", 1.00, 53_558), candidate("sans", 1.00, 52_050, context: 1_000)
+        ]), "sans")
+    }
+
+    func testAWordOneKeyFromASingleReadingIsCorrected() {
+        // `Disxord` in French: the dictionary has `discord`, one key away.
+        XCTAssertEqual(replacement([
+            candidate("discord", 0.40, 17_303), candidate("discorde", 1.40, 22_279),
+            candidate("discours", 1.80, 37_027), candidate("dissous", 1.8472, 21_283)
+        ]), "discord")
+    }
+
+    // MARK: - The typed word is kept when no reading stands out
+
+    func testThreeCloseReadingsKeepTheTypedWord() {
+        // `thursday irning`: `irving`, `inning` or `ironing`; `morning` was meant.
+        XCTAssertNil(replacement([
+            candidate("irving", 0.80, 41_799), candidate("inning", 1.00, 40_002),
+            candidate("ironing", 1.00, 39_855), candidate("urging", 1.1211, 39_702),
+            candidate("owning", 1.20, 40_663), candidate("morning", 1.40, 48_864),
+            candidate("turning", 1.40, 45_536), candidate("burning", 1.40, 45_489),
+            candidate("corning", 1.40, 39_286), candidate("signing", 1.6403, 43_935)
+        ]))
+    }
+
+    func testAnImplausiblePickKeepsTheTypedWord() {
+        // `est decalee` (meant `décalée`): `déclaré` would be picked, at -0.01.
+        XCTAssertNil(replacement([
+            candidate("déclare", 1.25, 31_256), candidate("dévaler", 0.95, 18_820),
+            candidate("déclaré", 1.40, 31_713), candidate("dealer", 1.40, 28_317),
+            candidate("déceler", 1.35, 24_155), candidate("décalé", 1.30, 16_448),
+            candidate("escales", 1.4123, 17_869), candidate("défaire", 1.6375, 28_656),
+            candidate("dévale", 1.55, 21_747), candidate("décampe", 1.55, 21_521)
+        ]))
+        // `la reùion`: `réunion` would be picked, at 0.10, against `région`.
         let decision = CorrectionRanking.decide([
             candidate("région", 1.15, 35_201), candidate("réunion", 1.30, 36_517), candidate("recoin", 1.70, 23_593)
         ])
         XCTAssertNil(decision.replacement)
         XCTAssertEqual(Array(decision.ranked.prefix(2)), ["région", "réunion"],
                        "The candidates stay ranked for whoever wants to offer them")
-        // `thursday irning`: the n-gram data has no `thursday morning`.
-        XCTAssertNil(replacement([
-            candidate("irving", 0.80, 41_799), candidate("inning", 1.00, 40_002),
-            candidate("ironing", 1.00, 39_855), candidate("morning", 1.40, 48_864)
-        ]))
+    }
+
+    func testAnEnglishTypoFarFromEveryWordIsKept() {
+        // `Disxord` in English, whose dictionary has no `discord`: `discard` is a
+        // missing letter away and scores 0.12. Not written, offered.
+        let decision = CorrectionRanking.decide([
+            candidate("discard", 1.40, 39_806), candidate("discogs", 1.4403, 37_041),
+            candidate("diadora", 1.6472, 36_361), candidate("discos", 1.80, 37_179),
+            candidate("distort", 1.8062, 36_923)
+        ])
+        XCTAssertNil(decision.replacement)
+        XCTAssertEqual(decision.proposal, .suggest(["discard", "discogs"]))
     }
 
     func testNoCandidateKeepsTheTypedWord() {
