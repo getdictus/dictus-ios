@@ -12,9 +12,12 @@ file says what each piece is.
 | File | What it is |
 |---|---|
 | `corpus/fr.txt`, `corpus/en.txt` | 20 everyday sentences per language, the text the typist means. Lowercase, no punctuation. |
-| `make_runs.py` | Turns the corpus into touch runs, with a fixed seed. Rerunning it rewrites the same files byte for byte. |
+| `corpus/es.txt`, `corpus/de.txt` | The same for Spanish and German: 20 sentences each from [Tatoeba](https://tatoeba.org) (CC BY 2.0 FR), written by self-declared native speakers. Sources and checks: [`docs/research/multilingual-autocorrect/corpus.md`](../../docs/research/multilingual-autocorrect/corpus.md). |
+| `corpus/<lang>-typos.txt`, `corpus/<lang>-typos.keys` | Typo runs for en, es, de: 20 Tatoeba sentences each (`.txt`, what the typist means) and what a typist who makes the language's frequent real mistakes types (`.keys`). |
+| `make_typos.py` | Writes the `.keys` files from the `.txt` files and the typo pairs of `docs/research/multilingual-autocorrect/typos-<lang>.tsv`. Deterministic. |
+| `make_runs.py` | Turns the corpus into touch runs, with a fixed seed. Rerunning it rewrites the same files byte for byte. A typo run's taps land on the key centres. |
 | `corpus/<lang>-learned.txt`, `corpus/<lang>-learned.words` | 8 sentences per language around words the user taught the keyboard, and the learned words the replay seeds before typing them, with their usage counts (#498). |
-| `runs/fr.tsv`, `runs/en.tsv` | One row per tap: the key aimed at, where the finger lands relative to its centre (in key units), and when. Committed. |
+| `runs/<lang>.tsv` | One row per tap: the key aimed at, where the finger lands relative to its centre (in key units), and when. Committed for fr, en, es, de, the learned runs and the typo runs. |
 | `run.sh` + `main.swift` + `DeviceContext.swift` | The in-process replay: compiles the shipping layout and engine sources, replays the runs on a simulator with `simctl spawn`, and prints the report. |
 | `sim_replay.py` | Types the runs on a real keyboard in a simulator, Apple's or Dictus, through `axe`, and reads the text back. |
 | `probe_boundaries.py` | Sweeps taps across each boundary of the Dictus top row on the real keyboard and prints where a tap types nothing. |
@@ -55,6 +58,23 @@ For each tap, `main.swift`:
    next-word prediction, and times it.
 
 Everything in steps 2 to 4 is the shipping code, compiled from the repository.
+
+Step 4 also records the next-word predictions the bar would show after the space, and
+the report scores them against the word the typist types next.
+
+## Languages
+
+`run.sh --langs fr,en,es,de` replays the four languages on their default layouts:
+AZERTY, QWERTY, QWERTY (the same page as English, no `ñ` key) and QWERTZ (with `ü`,
+`ö`, `ä`, no `ß`). The typist types no accent or tilde, types the umlauts the QWERTZ
+page has, and types `ss` for `ß`. `--langs en-typos,es-typos,de-typos` replays the typo
+runs. The QWERTZ grid, whose first two rows hold 11 keys, has not been checked against
+the real keyboard the way the French grid was.
+
+Apple's keyboard autocorrects only in English on the simulator: the iOS 26.5, 27.0 and
+27.2 simulator runtimes ship English language data (`RequiredAssets_en.bundle`, 97 MB)
+and empty bundles for Spanish, German and French (4 KB each). For those three,
+`sim_replay.py --keyboard apple` measures Apple's key choice only.
 
 ## Repeatability
 

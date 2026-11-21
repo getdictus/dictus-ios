@@ -1,0 +1,380 @@
+lang	sentence	intended	typed	final	next	predicted
+en-typos	0	i	I	I	can't	was,'m,do
+en-typos	0	can't	cant	can't	believe	believe,do,help
+en-typos	0	believe	beleive	beleive	you're	the,of,and
+en-typos	0	you're	youre	you're	really	right,not,welcome
+en-typos	0	really	really	really	in	sorry,do,don't
+en-typos	0	in	in	in	love	the,a,this
+en-typos	0	love	love	love	with	with,you,to
+en-typos	0	with	with	with	me	their,them,its
+en-typos	0	me	me	me		and,a,with
+en-typos	1	that's	Thats	That's	because	it,not,all
+en-typos	1	because	becuase	becuase	they	the,of,and
+en-typos	1	they	they	they	don't	were,are,had
+en-typos	1	don't	dont	don't	care	have,know,want
+en-typos	1	care	care	care		if,about,what
+en-typos	2	i'll	Ill	Ill	go	and,of,will
+en-typos	2	go	go	go	and	to,on,back
+en-typos	2	and	adn	adn	get	the,of,and
+en-typos	2	get	get	get	the	a,the,to
+en-typos	2	the	the	the	book	first,other,world
+en-typos	2	book	book	book	tomorrow	of,is,and
+en-typos	2	tomorrow	tomorrow	tomorrow		night,morning,and
+en-typos	3	people	Poeple	Purple	should	and,heart,dragon
+en-typos	3	should	should	should	do	be,not,have
+en-typos	3	do	do	do	their	not,you,with
+en-typos	3	their	their	their	best	lives,way,children
+en-typos	3	best	best	best		of,to,and
+en-typos	4	it's	Its	Its	something	own,way,first
+en-typos	4	something	somthing	something	i'm	that,to,else
+en-typos	4	i'm	im	i'm	proud	not,sorry,so
+en-typos	4	proud	proud	proud	of	of,to,that
+en-typos	4	of	of	of		a,these,an
+en-typos	5	i	I	I	didn't	was,'m,do
+en-typos	5	didn't	didnt	didn't	receive	know,want,have
+en-typos	5	receive	recieve	recieve	your	the,of,and
+en-typos	5	your	your	your	letter	own,life,father
+en-typos	5	letter	letter	letter	until	to,from,of
+en-typos	5	until	until	until	today	the,he,i
+en-typos	5	today	today	today		's,is,the
+en-typos	6	being	Beeing	Bering	a	the,of,and
+en-typos	6	a	a	a	prince	few,little,new
+en-typos	6	prince	prince	prince	isn't	who,of,or
+en-typos	6	isn't	isnt	isn't	easy	it,that,right
+en-typos	6	easy	easy	easy		to,easy,now
+en-typos	7	david	David	David	doesn't	cameron,miscavige,letterman
+en-typos	7	doesn't	doesnt	doesn't	have	matter,make,work
+en-typos	7	have	have	have	a	been,not,no
+en-typos	7	a	a	a	will	good,lot,few
+en-typos	7	will	wll	all		the,of,that
+en-typos	8	they're	Theyre	They're	definitely	coming,here,not
+en-typos	8	definitely	definately	definately	up	the,of,and
+en-typos	8	up	up	up	to	to,the,and
+en-typos	8	to	to	to	something	the,a,do
+en-typos	8	something	something	something		to,about,of
+en-typos	9	i've	Ive	I've	got	got,been,had
+en-typos	9	got	got	got	to	a,to,the
+en-typos	9	to	to	to	do	be,a,her
+en-typos	9	do	do	do	it	with,so,it
+en-typos	9	it	it	it		was,'s,would
+en-typos	10	sorry	Sorry	Sorry	i'm	about,sir,i'm
+en-typos	10	i'm	im	i'm	late	late,sorry,here
+en-typos	10	late	late	late	for	for,s,additions
+en-typos	10	for	for	for	the	example,this,her
+en-typos	10	the	teh	teh	meeting	masterer,pwnerer,balls
+en-typos	10	meeting	meeting	meeting		you,with,of
+en-typos	11	i'll	Ill	Ill	give	and,of,will
+en-typos	11	give	give	give	you	you,me,the
+en-typos	11	you	you	you	a	a,can,'re
+en-typos	11	a	a	a	call	small,very,large
+en-typos	11	call	call	call	when	the,from,to
+en-typos	11	when	when	when	i	the,he,i
+en-typos	11	i	i	i	get	was,'m,do
+en-typos	11	get	get	get	home	it,to,a
+en-typos	11	home	home	home		in,and,to
+en-typos	12	if	If	If	you	you,the,he
+en-typos	12	you	you	you	don't	are,do,'re
+en-typos	12	don't	dont	don't	hurry	have,know,want
+en-typos	12	hurry	hurry	hurry	you'll	up,hurry,it
+en-typos	12	you'll	youll	you'll	miss	see,be,excuse
+en-typos	12	miss	miss	miss	the	you,me,him
+en-typos	12	the	the	the	train	same,first,other
+en-typos	12	train	train	train		was,to,and
+en-typos	13	we	We	We	don't	have,can,are
+en-typos	13	don't	dont	don't	have	have,know,want
+en-typos	13	have	have	have	any	to,a,been
+en-typos	13	any	any	any	more	idea,time,one
+en-typos	13	more	more	more	bread	than,likely,important
+en-typos	13	bread	bread	bread		and,to,of
+en-typos	14	i'm	Im	I'm	sorry	not,sorry,so
+en-typos	14	sorry	sorry	sorry	i	i,but,to
+en-typos	14	i	i	i	can't	'm,do,can
+en-typos	14	can't	cant	can't	stay	believe,do,help
+en-typos	14	stay	stay	stay	long	in,here,with
+en-typos	14	long	long	long		as,time,and
+en-typos	15	i'll	Ill	Ill	drop	and,of,will
+en-typos	15	drop	drop	drop	you	it,your,the
+en-typos	15	you	you	you	off	can,'re,are
+en-typos	15	off	off	off	at	his,and,her
+en-typos	15	at	at	at	the	her,him,his
+en-typos	15	the	the	the	station	same,end,time
+en-typos	15	station	station	station		and,was,to
+en-typos	16	in	In	In	any	the,a,this
+en-typos	16	any	any	any	case	case,way,form
+en-typos	16	case	case	case	i'll	the,it,i
+en-typos	16	i'll	ill	ill	call	and,of,will
+en-typos	16	call	call	call	you	the,you,me
+en-typos	16	you	you	you	tomorrow	can,'re,are
+en-typos	16	tomorrow	tommorow	tomorrow		night,morning,and
+en-typos	17	i'm	Im	I'm	afraid	not,sorry,so
+en-typos	17	afraid	afraid	afraid	we're	i,of,that
+en-typos	17	we're	were	were	going	not,the,in
+en-typos	17	going	going	going	to	to,anywhere,down
+en-typos	17	to	to	to	be	be,do,have
+en-typos	17	be	be	be	late	a,the,in
+en-typos	17	late	late	late	for	for,s,additions
+en-typos	17	for	for	for	school	example,this,her
+en-typos	17	school	school	school		of,and,in
+en-typos	18	i'm	Im	I'm	sorry	not,sorry,so
+en-typos	18	sorry	sorry	sorry	i	i,but,to
+en-typos	18	i	i	i	didn't	'm,do,can
+en-typos	18	didn't	didnt	didn't	mean	know,want,have
+en-typos	18	mean	mean	mean	it	to,it,that
+en-typos	18	it	it	it		's,to,has
+en-typos	19	it's	Its	Its	time	own,way,first
+en-typos	19	time	time	time	for	to,of,and
+en-typos	19	for	for	for	us	example,each,her
+en-typos	19	us	us	us	to	to,and,in
+en-typos	19	to	to	to	go	her,his,me
+en-typos	19	go	go	go	home	to,back,on
+en-typos	19	home	home	home		and,to,with
+es-typos	0	él	El	El	es	que,mundo,tiempo
+es-typos	0	es	es	es	tres	que,una,decir
+es-typos	0	tres	tres	tres	años	años,días,meses
+es-typos	0	años	anos	anos	más	de,sem,no
+es-typos	0	más	mas	mas	joven	o,de,que
+es-typos	0	joven	joven	joven	que	y,de,que
+es-typos	0	que	qe	de	mi	su,que,una
+es-typos	0	mi	mi	mi	papá	vida,padre,madre
+es-typos	0	papá	papa	papa		francisco,benedicto,juan
+es-typos	1	no	No	No	sé	se,es,me
+es-typos	1	sé	se	se	dónde	puede,había,ha
+es-typos	1	dónde	donde	donde	está	se,la,el
+es-typos	1	está	esta	esta	mi	vez,noche,es
+es-typos	1	mi	mi	mi	mamá	padre,madre,vida
+es-typos	1	mamá	mama	mama		y,en,ashu
+es-typos	2	quiero	Queiro	Quebró	saber	en,la,el
+es-typos	2	saber	saber	saber	por	que,qué,si
+es-typos	2	por	por	por	qué	la,el,qué
+es-typos	2	qué	que	que	es	me,había,lo
+es-typos	2	es	es	es	así	el,la,un
+es-typos	2	así	asi	asi		es,que,como
+es-typos	3	será	Sera	Sera	un	de,el,la
+es-typos	3	un	un	un	día	poco,hombre,momento
+es-typos	3	día	dia	dia	difícil	de,y,a
+es-typos	3	difícil	dificil	dificil	para	distinguir,de,universalidad
+es-typos	3	para	para	para	mí	que,la,el
+es-typos	3	mí	mi	mi		padre,madre,vida
+es-typos	4	mi	Mi	Mi	familia	padre,madre,vida
+es-typos	4	familia	famila	familia	también	de,y,que
+es-typos	4	también	tambien	tambien	vive	se,una,a
+es-typos	4	vive	vive	vive	aquí	en,aquí,el
+es-typos	4	aquí	aqui	aqui		vamos,tienes,se
+es-typos	5	yo	Yo	Yo	voy	no,me,también
+es-typos	5	voy	voy	voy	ahí	a,para,contigo
+es-typos	5	ahí	ahi	ahi	cada	esta,la,se
+es-typos	5	cada	cada	cada	año	vez,uno,una
+es-typos	5	año	ano	ano		de,o,se
+es-typos	6	sí	Si	Si	un	no,se,el
+es-typos	6	un	un	un	café	poco,momento,buen
+es-typos	6	café	cafe	cafe	por	y,bar,en
+es-typos	6	por	por	por	favor	la,el,qué
+es-typos	6	favor	favor	favor		edítalo,no,en
+es-typos	7	cómo	Como	Como	están	si,un,el
+es-typos	7	están	estan	estan	mamá	en,los,enojados
+es-typos	7	mamá	mama	mama	y	y,en,ashu
+es-typos	7	y	y	y	papá	la,el,de
+es-typos	7	papá	papa	papa		francisco,benedicto,juan
+es-typos	8	esa	Esa	Esa	película	noche,es,misma
+es-typos	8	película	pelicula	pelicula	es	de,que,no
+es-typos	8	es	es	es	para	el,la,un
+es-typos	8	para	para	para	niños	el,su,poder
+es-typos	8	niños	ninos	ninos		de,que,no
+es-typos	9	nunca	Nunca	Nunca	había	se,había,me
+es-typos	9	había	habia	habia	visto	de,que,no
+es-typos	9	visto	visto	visto	un	en,a,eso
+es-typos	9	un	un	un	accidente	poco,hombre,momento
+es-typos	9	accidente	accidente	accidente	tan	de,en,aéreo
+es-typos	9	tan	tan	tan	terrible	solo,sólo,pronto
+es-typos	9	terrible	terible	terrible		de,que,y
+es-typos	10	se	Se	Se	fue	había,ha,le
+es-typos	10	fue	fue	fue	después	a,la,un
+es-typos	10	después	despues	despues	de	de,del,se
+es-typos	10	de	de	de	mí	la,los,las
+es-typos	10	mí	mi	mi		vida,padre,madre
+es-typos	11	voy	Voy	Voy	a	a,para,contigo
+es-typos	11	a	a	a	usar	hacer,los,su
+es-typos	11	usar	usar	usar	tu	el,la,en
+es-typos	11	tu	tu	tu	teléfono	vida,padre,madre
+es-typos	11	teléfono	telefono	telefono		de,que,no
+es-typos	12	no	No	No	sé	se,es,me
+es-typos	12	sé	se	se	lo	puede,había,ha
+es-typos	12	lo	lo	lo	que	había,que,mismo
+es-typos	12	que	que	que	es	se,le,no
+es-typos	12	es	es	es		el,la,un
+es-typos	13	no	No	No	sé	se,es,me
+es-typos	13	sé	se	se	si	puede,había,ha
+es-typos	13	si	si	si	él	no,se,el
+es-typos	13	él	el	el	sabe	que,mundo,mismo
+es-typos	13	sabe	sabe	sabe		que,qué,nada
+es-typos	14	me	Me	Me	podrías	ha,lo,dijo
+es-typos	14	podrías	podrias	podrias	llamar	de,que,no
+es-typos	14	llamar	llamar	llamar	más	a,al,la
+es-typos	14	más	mas	mas	tarde	o,de,que
+es-typos	14	tarde	tarde	tarde	por	en,se,y
+es-typos	14	por	por	por	favor	qué,su,un
+es-typos	14	favor	favor	favor		edítalo,no,en
+es-typos	15	a	A	A	qué	la,los,su
+es-typos	15	qué	que	que	hora	se,el,la
+es-typos	15	hora	hora	hora	sale	de,es,local
+es-typos	15	sale	sale	sale	el	de,a,del
+es-typos	15	el	el	el	primer	que,mundo,tiempo
+es-typos	15	primer	primer	primer	tren	día,ministro,tiempo
+es-typos	15	tren	tren	tren		de,y,en
+es-typos	16	lo	Lo	Lo	siento	que,mismo,más
+es-typos	16	siento	siento	siento	no	mucho,señor,tanto
+es-typos	16	no	no	no	está	se,es,me
+es-typos	16	está	esta	esta	en	vez,noche,es
+es-typos	16	en	en	en	casa	que,este,ese
+es-typos	16	casa	casa	casa		de,y,del
+es-typos	17	suelo	Suelo	Suelo	tomar	y,de,en
+es-typos	17	tomar	tomar	tomar	postre	algo,un,el
+es-typos	17	postre	postre	postre	después	y,de,típico
+es-typos	17	después	despues	despues	de	de,del,se
+es-typos	17	de	de	de	cenar	la,los,las
+es-typos	17	cenar	cenar	cenar		en,y,o
+es-typos	18	dónde	Donde	Donde	está	se,la,el
+es-typos	18	está	esta	esta	la	vez,noche,es
+es-typos	18	la	la	la	pasta	que,vida,cabeza
+es-typos	18	pasta	pasta	pasta	de	de,térmica,fresca
+es-typos	18	de	de	de	dientes	la,los,las
+es-typos	18	dientes	dientes	dientes		y,de,permanentes
+es-typos	19	vamos	Vamos	Vamos	a	a,vamos,chicos
+es-typos	19	a	a	a	esperar	los,su,las
+es-typos	19	esperar	esperar	esperar	aquí	a,que,un
+es-typos	19	aquí	aqui	aqui	hasta	vamos,tienes,se
+es-typos	19	hasta	hasta	hasta	que	que,el,la
+es-typos	19	que	que	que	él	se,el,la
+es-typos	19	él	el	el	vuelva	hombre,de,mundo
+es-typos	19	vuelva	vuelva	vuelva		a,usted,al
+de-typos	0	es	Es	Es	ist	ist,war,nicht
+de-typos	0	ist	ist	ist	schön	ein,nicht,eine
+de-typos	0	schön	schoen	schön	dass	dich,sie,und
+de-typos	0	dass	das	das	wir	ist,war,nicht
+de-typos	0	wir	wir	wir	mehr	haben,sind,müssen
+de-typos	0	mehr	mehr	mehr	zeit	als,zu,oder
+de-typos	0	zeit	zeit	zeit	miteinander	zu,der,des
+de-typos	0	miteinander	miteinander	miteinander	verbringen	verbunden,zu,in
+de-typos	0	verbringen	verbringen	verbringen	können	ohne,die,und
+de-typos	0	können	koennen	können		sie,wir,die
+de-typos	1	vielleicht	Vieleicht	Vieleicht	wäre	ich,sie,das
+de-typos	1	wäre	ware	wäre	das	es,er,ich
+de-typos	1	das	das	das	gut	ist,war,ganze
+de-typos	1	gut	gut	gut	für	wie,zu,und
+de-typos	1	für	fur	für	sie	ein,mich,ihn
+de-typos	1	sie	sie	sie		sich,mit,das
+de-typos	2	du	Du	Du	wirst	hast,bist,nicht
+de-typos	2	wirst	wirst	wirst	über	du,sehen,es
+de-typos	2	über	ueber	über	nacht	die,den,das
+de-typos	2	nacht	nacht	nacht	bleiben	in,im,stehen
+de-typos	2	bleiben	bleiben	bleiben	müssen	sie,hier,in
+de-typos	2	müssen	muessen	müssen		wir,die,sie
+de-typos	3	wenn	Wenn	Wenn	ich	sie,ich,er
+de-typos	3	ich	ic	ich	geld	mich,nicht,es
+de-typos	3	geld	geld	geld	hätte	zu,und,fühlte
+de-typos	3	hätte	hatte	hatte	würde	er,sie,sich
+de-typos	3	würde	wurde	wurde	ich	in,und,es
+de-typos	3	ich	ich	ich	es	habe,bin,mich
+de-typos	3	es	es	es	dir	nicht,mir,ist
+de-typos	3	dir	dir	dir	geben	die,keine,reden
+de-typos	3	geben	geben	geben		sie,und,die
+de-typos	4	je	Je	Je	später	nach,mehr,nachdem
+de-typos	4	später	spaeter	später	der	an,dann,in
+de-typos	4	der	der	der	abend	sich,welt,in
+de-typos	4	abend	abend	abend	desto	sir,noch,des
+de-typos	4	desto	desto	desto	schöner	mehr,größer,weniger
+de-typos	4	schöner	schoener	schöner	die	ist,götterfunken,und
+de-typos	4	die	die	die	leute	sich,in,beiden
+de-typos	4	leute	leute	leute		die,nicht,in
+de-typos	5	ich	Ich	Ich	weiß	habe,bin,mich
+de-typos	5	weiß	weiss	weiß	wie	nicht,es,dass
+de-typos	5	wie	wie	wie	du	ein,sie,ich
+de-typos	5	du	du	du	heißt	hast,nicht,mich
+de-typos	5	heißt	heisst	heißt		es,das,du
+de-typos	6	ich	Ich	Ich	möchte	habe,bin,mich
+de-typos	6	möchte	moechte	möchte	pilot	ich,nun,nicht
+de-typos	6	pilot	pilot	pilot	werden	der,und,die
+de-typos	6	werden	werden	werden	wenn	kann,können,die
+de-typos	6	wenn	wenn	wenn	ich	die,ich,du
+de-typos	6	ich	ich	ich	groß	mich,nicht,es
+de-typos	6	groß	gross	groß	bin	und,ist,wie
+de-typos	6	bin	bin	bin		ich,nicht,ein
+de-typos	7	er	Er	Er	ging	sich,die,war
+de-typos	7	ging	ging	ging	über	es,er,in
+de-typos	7	über	uber	über	die	die,den,das
+de-typos	7	die	die	die	straße	schulter,lippen,sich
+de-typos	7	straße	strasse	straße		von,und,um
+de-typos	8	mein	Mein	Mein	handy	vater,herz,leben
+de-typos	8	handy	handy	handy	hat	klingelt,und,mit
+de-typos	8	hat	hat	hat	kein	sich,er,die
+de-typos	8	kein	kein	kein	netz	wort,wunder,mensch
+de-typos	8	netz	netz	netz		zu,von,und
+de-typos	9	ich	Ich	Ich	kam	habe,bin,mich
+de-typos	9	kam	kam	kam	zu	es,er,der
+de-typos	9	zu	zu	zu	spät	den,sein,können
+de-typos	9	spät	spat	spät	an	ist,kommen,kommt
+de-typos	9	an	an	an		der,den,die
+de-typos	10	um	Um	Um	vier	die,den,eine
+de-typos	10	vier	vier	vier	uhr	gängen,jahre,gruppen
+de-typos	10	uhr	uhr	uhr	können	ortszeit,mesz,ist
+de-typos	10	können	koennen	können	wir	sie,wir,die
+de-typos	10	wir	wir	wir	nach	uns,die,haben
+de-typos	10	nach	nach	nach	hause	hause,unten,wie
+de-typos	10	hause	hause	hause	gehen	zu,zurück,zurückkam
+de-typos	10	gehen	gehen	gehen		und,wir,sie
+de-typos	11	müssen	Mussen	Müssen	wir	wir,die,sie
+de-typos	11	wir	wir	wir	heute	uns,haben,die
+de-typos	11	heute	heute	heute	zu	noch,abend,ist
+de-typos	11	zu	zu	zu	hause	sein,können,tun
+de-typos	11	hause	hause	hause	bleiben	zu,mit,ist
+de-typos	11	bleiben	bleiben	bleiben		sie,hier,in
+de-typos	12	ich	Ich	Ich	werde	habe,bin,mich
+de-typos	12	werde	werde	werde	ein	mich,es,ich
+de-typos	12	ein	ein	ein	bisschen	paar,wenig,bisschen
+de-typos	12	bisschen	bisschen	bisschen	später	mehr,mit,zu
+de-typos	12	später	spaeter	später	ankommen	an,dann,in
+de-typos	12	ankommen	ankommen	ankommen		in,und,wie
+de-typos	13	ich	Ich	Ich	weiß	habe,bin,mich
+de-typos	13	weiß	weiss	weiß	dass	nicht,es,dass
+de-typos	13	dass	dass	dass	du	sich,ein,eine
+de-typos	13	du	du	du	es	dich,mich,es
+de-typos	13	es	es	es	schaffen	ist,war,sich
+de-typos	13	schaffen	schaffen	schaffen	kannst	das,es,sie
+de-typos	13	kannst	kannst	kannst		du,gehen,mich
+de-typos	14	ich	Ich	Ich	glaube	habe,bin,mich
+de-typos	14	glaube	glaube	glaube	dass	nicht,dass,an
+de-typos	14	dass	dass	dass	du	er,das,du
+de-typos	14	du	du	du	recht	dich,mich,es
+de-typos	14	recht	recht	recht	hast	auf,und,zu
+de-typos	14	hast	hast	hast		du,recht,es
+de-typos	15	man	Man	Man	sagt	sich,die,kann
+de-typos	15	sagt	sagt	sagt	dass	auch,dass,die
+de-typos	15	dass	dass	dass	meine	ich,das,du
+de-typos	15	meine	meine	meine	schwester	mutter,frau,hand
+de-typos	15	schwester	schwester	schwester	schön	nach,des,mit
+de-typos	15	schön	schon	schon	ist	in,wieder,die
+de-typos	15	ist	ist	ist		die,es,das
+de-typos	16	es	Es	Es	ist	ist,war,nicht
+de-typos	16	ist	ist	ist	gut	ein,nicht,eine
+de-typos	16	gut	gut	gut	für	wie,und,für
+de-typos	16	für	fuer	für	uns	ein,mich,ihn
+de-typos	16	uns	uns	uns		zu,auf,mit
+de-typos	17	ich	Ich	Ich	kann	habe,bin,mich
+de-typos	17	kann	kann	kann	über	nicht,es,mich
+de-typos	17	über	uber	über	den	dem,ihre,der
+de-typos	17	den	den	den	fluss	kopf,rücken,weg
+de-typos	17	fluss	fluss	fluss	schwimmen	der,in,und
+de-typos	17	schwimmen	schwimmen	schwimmen		shit,im,und
+de-typos	18	es	Es	Es	ist	ist,war,nicht
+de-typos	18	ist	ist	ist	an	ein,nicht,eine
+de-typos	18	an	an	an	der	und,seine,seiner
+de-typos	18	der	der	der	zeit	wand,tür,universität
+de-typos	18	zeit	zeit	zeit		der,von,des
+de-typos	19	ich	Ich	Ich	habe	habe,bin,mich
+de-typos	19	habe	habe	habe	keine	mich,es,sie
+de-typos	19	keine	keine	keine	zeit	rolle,antwort,andere
+de-typos	19	zeit	zeit	zeit	und	der,und,des
+de-typos	19	und	udn	in	auch	dem,der,das
+de-typos	19	auch	auch	auch	kein	die,nicht,in
+de-typos	19	kein	kein	kein	geld	wort,mensch,problem
+de-typos	19	geld	geld	geld		zu,und,fühlte
