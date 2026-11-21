@@ -20,7 +20,12 @@ public struct SupplementaryLexicon: Equatable {
         case replace(with: String)
     }
 
+    /// No contact and no replacement. `CuratedNames` still decide their words,
+    /// so the keyboard protects them before the lexicon request returns.
     public static let empty = SupplementaryLexicon(entries: [])
+
+    /// The shortest lowercase word that takes a lexicon casing (#1006).
+    public static let shortestRecasedWord = 3
 
     /// Lowercased shortcut -> phrase, for entries whose shortcut differs from
     /// the phrase (`qqc` -> "quelque chose").
@@ -60,9 +65,13 @@ public struct SupplementaryLexicon: Equatable {
     /// - A shortcut is replaced by its phrase, even when it is a dictionary
     ///   word, as Apple does. A shortcut typed with a leading capital (sentence
     ///   autocap) capitalizes the phrase: `Qqc` -> "Quelque chose".
+    /// - A curated app or brand name (`CuratedNames`) comes next, so its
+    ///   casing wins over a contact's: `iphone` -> "iPhone", not "Iphone".
     /// - A lexicon word is kept. Typed all lowercase, it takes the lexicon
     ///   casing (`zofiak` -> "Zofiak"), unless the dictionary knows it: a
-    ///   contact named "Pierre" must leave "une pierre" alone.
+    ///   contact named "Pierre" must leave "une pierre" alone, and unless it has
+    ///   two letters or fewer: an all-caps `ST` entry turned the `st` of a mistyped
+    ///   `ce st` into "ST" (#1006). Such a word is still kept.
     public func decision(for word: String, isDictionaryWord: @autoclosure () -> Bool) -> Decision? {
         guard !word.isEmpty else { return nil }
         let key = word.lowercased()
@@ -70,8 +79,9 @@ public struct SupplementaryLexicon: Equatable {
             let capitalize = word.first?.isUppercase == true
             return .replace(with: capitalize ? phrase.prefix(1).uppercased() + phrase.dropFirst() : phrase)
         }
+        if let curated = CuratedNames.decision(for: word) { return curated }
         guard let casing = words[key] else { return nil }
-        if word == key, casing != word, !isDictionaryWord() {
+        if word == key, casing != word, word.count >= Self.shortestRecasedWord, !isDictionaryWord() {
             return .replace(with: casing)
         }
         return .keep

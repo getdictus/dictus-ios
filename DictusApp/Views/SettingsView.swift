@@ -166,6 +166,10 @@ struct SettingsView: View {
     /// closed sheet keeps what the user typed.
     @State private var showFeedback = false
 
+    /// The running version's release notes (#974), read once: the bundle does not change
+    /// while the app runs.
+    @State private var releaseNotes = ReleaseNotes.current()
+
     /// Drives the Dictus Pro hub's cover, opened by the one Dictus Pro row (#216).
     @State private var showPaywall = false
 
@@ -522,6 +526,16 @@ struct SettingsView: View {
                     .onTapGesture(count: 5) {
                         showPolishDebug = true
                     }
+
+                // Every change of the running version, the list App Store Connect gets;
+                // the sheet after the update shows only its highlights (#974). Absent on a
+                // version without notes.
+                if let releaseNotes {
+                    NavigationLink("What's new") {
+                        ReleaseNotesListView(notes: releaseNotes)
+                    }
+                    .accessibilityIdentifier("settings.whatsNew")
+                }
 
                 Button {
                     showFeedback = true

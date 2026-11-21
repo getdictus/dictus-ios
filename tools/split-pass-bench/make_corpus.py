@@ -33,7 +33,7 @@ import re
 
 LANGS = {"fr": "fra", "en": "eng", "de": "deu", "es": "spa"}
 
-# The spacebar neighbours TextPredictionEngine.trySplitWithSignal reads
+# The spacebar neighbours TextPredictionEngine.trySplit reads
 # (azertySpacebarNeighbors / qwertySpacebarNeighbors), minus ",": the comma key
 # commits the word before it (#872, AutocorrectTrigger.commitsWord) and
 # wordAtCursor splits on it, so "pas,mal" never reaches spellCheck as one word.

@@ -1,86 +1,69 @@
 // DictusApp/Onboarding/WhatsNewView.swift
-// What's new for existing users: the onboarding's four feature scenes (#685).
+// What's new: the running version's highlights in a sheet after an update, and every change
+// from Settings (#974).
 import SwiftUI
 import DictusCore
 
-/// What's new (#685, #649 decisions 11 and 12): shown once, at the first launch of 2.0.0, to
-/// an install that completed onboarding on an earlier version. It replays the onboarding's
-/// own pages, without the setup steps: the Smart Modes, voice notes, vocabulary and history
-/// scenes. How to stop Dictus is not part of it (Pierre, 2026-10-14): it is not new. Which
-/// pages, and who sees them, is `WhatsNew` in DictusCore.
+/// What's new after an update (#974): a sheet over the tabs, at half height (`.medium`, drag
+/// to `.large`), with the Dictus logo, the version's title, its highlights (at most three) and
+/// Continue. Who sees it, and when, is `WhatsNew` in DictusCore; the words are
+/// `ReleaseNotes/<version>/<locale>.txt`, whose full list App Store Connect gets.
 ///
-/// WHY THE ONBOARDING'S PAGES AND NOT COPIES: decision 12, one feature-scene component for
-/// the onboarding, What's new and the hub. The pages already carry the shell's Next and
-/// Skip, and the scenes follow the system appearance and language.
-///
-/// WHY MAINTABVIEW SHOWS IT IN PLACE OF THE TABS, NOT AS A COVER: the trial announcement
-/// comes right after it (decision 11), as a sheet on the tabs. With the tabs gone while
-/// What's new is up, the announcement cannot be raised over it, and the tabs' `onAppear`
-/// raises it once What's new is done. A cover would also have to wait for its own
-/// dismissal before the sheet could go up.
+/// WHY A SHEET AND THREE LINES (Pierre's device test, validated by Titus on 2026-11-19): a
+/// full screen of six rows read as a wall. Half a screen, three short highlights and the app
+/// behind it is what an update deserves; the full list stays one tap away in Settings.
 struct WhatsNewView: View {
-    /// `WhatsNew.steps(deviceCanRunSmartModes:)`, never empty.
-    let steps: [OnboardingStep]
-    /// The app's model manager, read by the scene pages' download pill.
-    @ObservedObject var modelManager: ModelManager
-    /// The active model, the one the pill would show downloading.
-    let modelIdentifier: String
-    /// What's new was left: Next on the last scene, or Skip on any.
+    let notes: ReleaseNotes
+    /// Continue was tapped. Dragging the sheet down ends it too, through the presenter.
     let onFinish: () -> Void
-
-    @State private var step: OnboardingStep
 
     /// Whether this presentation has recorded What's new as seen.
     @State private var isRecorded = false
 
+    /// Whether the sheet is short: the medium detent on an iPhone SE is about 330 pt, where
+    /// the logo goes beside the title and the text is a size smaller, so the three highlights
+    /// fit above Continue without dragging.
+    @State private var isCompact = false
+
     @Environment(\.scenePhase) private var scenePhase
 
-    init(steps: [OnboardingStep],
-         modelManager: ModelManager,
-         modelIdentifier: String,
-         onFinish: @escaping () -> Void) {
-        self.steps = steps
-        self.modelManager = modelManager
-        self.modelIdentifier = modelIdentifier
-        self.onFinish = onFinish
-        _step = State(initialValue: steps.first ?? .smartModesScene)
-    }
-
     var body: some View {
-        ZStack {
-            Color.dictusBackground
-                .ignoresSafeArea()
-
+        ScrollView {
             VStack(spacing: 0) {
-                topBar
-                    .padding(.top, OnboardingMetrics.topBarTopPadding)
-
-                Group {
-                    page
+                ReleaseNotesHeader(title: notes.title, isCompact: isCompact)
+                VStack(alignment: .leading, spacing: isCompact ? 10 : 18) {
+                    ForEach(notes.highlights, id: \.title) { ReleaseNoteRow(item: $0, isCompact: isCompact) }
                 }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                // WHY `geometryGroup` (Pierre's device test of PR #741): without it, the page
-                // coming in had its title and drawn phone, which a scene page lays out through
-                // `ViewThatFits` and a `GeometryReader`, drawn straight at their final place,
-                // while only its button slid in. The two pages overlapped for the length of
-                // the slide. Captured frame by frame on the simulator; the same pages slide
-                // whole in the onboarding's cover, so the onboarding is left as it is. The
-                // group resolves the page's geometry as one block, which the slide then moves.
-                .geometryGroup()
-                // A scene's Skip jumps the scenes, as in the onboarding (#649 decision 8),
-                // which here is the whole of What's new.
-                .environment(\.onboardingSkip, step.isInSceneSequence ? OnboardingSkipAction(perform: skip) : nil)
-                .transition(.asymmetric(insertion: .move(edge: .trailing), removal: .move(edge: .leading)))
-                .id(step)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.top, isCompact ? 14 : 22)
             }
+            .padding(.horizontal, isCompact ? 24 : 28)
+            .padding(.top, isCompact ? 22 : 28)
+            .padding(.bottom, isCompact ? 8 : 16)
         }
-        .animation(.easeInOut(duration: 0.3), value: step)
+        .scrollBounceBehavior(.basedOnSize)
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            OnboardingPrimaryButton(Text("Continue")) {
+                PersistentLog.log(.diagnosticProbe(
+                    component: "whatsNew", instanceID: "0", action: "finished", details: ""
+                ))
+                onFinish()
+            }
+            .accessibilityIdentifier("whatsNew.continue")
+            .padding(.horizontal, OnboardingMetrics.horizontalPadding)
+            .padding(.top, 8)
+            .padding(.bottom, OnboardingMetrics.buttonBottomPadding)
+        }
+        .onGeometryChange(for: Bool.self) { $0.size.height < 420 } action: { isCompact = $0 }
+        .accessibilityIdentifier("whatsNew.notes")
+        .presentationDetents([.medium, .large])
+        .presentationDragIndicator(.visible)
         .onAppear { recordSeenIfOnScreen() }
         .onChange(of: scenePhase) { _, _ in recordSeenIfOnScreen() }
     }
 
     /// Records What's new as seen once it is really in front of the user: on screen and the
-    /// app active. Then it is shown once even if the app is closed halfway through.
+    /// app active. Then it is shown once even if the app is closed right away.
     ///
     /// WHY NOT ON APPEAR ALONE (CodeRabbit on PR #741): a view appears in a launch the user
     /// does not see yet, and a URL opening the app is handled before it becomes active.
@@ -92,73 +75,71 @@ struct WhatsNewView: View {
         WhatsNew.recordSeen()
         PersistentLog.log(.diagnosticProbe(
             component: "whatsNew", instanceID: "0", action: "shown",
-            details: "steps=\(steps.map(\.rawValue).joined(separator: ","))"
+            details: "version=\(WhatsNew.runningVersion) highlights=\(notes.highlights.count)"
         ))
     }
+}
 
-    /// The onboarding's top row, without a back control: the progress bar over What's new's
-    /// own pages, between two empty slots so it sits where the onboarding's does.
-    private var topBar: some View {
-        HStack(spacing: 16) {
-            Color.clear
-                .frame(width: OnboardingMetrics.topBarHeight)
-            if steps.count > 1 {
-                OnboardingProgressBar(segmentCount: steps.count, current: steps.firstIndex(of: step) ?? 0)
-            } else {
-                Spacer()
+/// Settings › About › What's new: the logo, the title and every change of the running version,
+/// the list App Store Connect gets.
+struct ReleaseNotesListView: View {
+    let notes: ReleaseNotes
+
+    var body: some View {
+        ScrollView {
+            VStack(spacing: 0) {
+                ReleaseNotesHeader(title: notes.title)
+                VStack(alignment: .leading, spacing: 20) {
+                    ForEach(notes.changes, id: \.title) { ReleaseNoteRow(item: $0) }
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.top, 26)
             }
-            Color.clear
-                .frame(width: OnboardingMetrics.topBarHeight)
+            .padding(.horizontal, 28)
+            .padding(.vertical, 24)
+            .frame(maxWidth: 560)
+            .frame(maxWidth: .infinity)
         }
-        .frame(height: OnboardingMetrics.topBarHeight)
-        .padding(.horizontal, OnboardingMetrics.horizontalPadding)
+        .background(Color.dictusBackground.ignoresSafeArea())
+        .navigationBarTitleDisplayMode(.inline)
+        .accessibilityIdentifier("whatsNew.allChanges")
     }
+}
 
-    @ViewBuilder
-    private var page: some View {
-        switch step {
-        case .smartModesScene:
-            SmartModesScenePage(
-                eyebrow: Text("New in Dictus",
-                              comment: "What's new for existing users: small label above the title of its first page, the Smart Modes scene (#685)."),
-                modelManager: modelManager,
-                modelIdentifier: modelIdentifier,
-                onNext: advance
-            )
-        case .voiceNotesScene:
-            VoiceNotesScenePage(modelManager: modelManager, modelIdentifier: modelIdentifier, onNext: advance)
-        case .vocabularyScene:
-            VocabularyScenePage(modelManager: modelManager, modelIdentifier: modelIdentifier, onNext: advance)
-        case .historyScene:
-            HistoryScenePage(modelManager: modelManager, modelIdentifier: modelIdentifier, onNext: advance)
-        case .welcome, .language, .keyboardSetup, .appleIntelligence, .smartModePick, .modelPreparation,
-             .microphone, .firstDictation, .stopStandby, .completion:
-            // Never in `WhatsNew.steps`: the setup steps, and how to stop Dictus.
-            EmptyView()
+/// The Dictus logo over the version's title, centred; beside it in a short sheet.
+private struct ReleaseNotesHeader: View {
+    let title: String
+    var isCompact = false
+
+    var body: some View {
+        let layout = isCompact ? AnyLayout(HStackLayout(spacing: 12)) : AnyLayout(VStackLayout(spacing: 14))
+        layout {
+            DictusLogo(height: isCompact ? 24 : 34)
+                .accessibilityHidden(true)
+            Text(verbatim: title)
+                .font(.dmSans(.bold, size: isCompact ? 22 : 26, relativeTo: .title))
+                .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
+                .accessibilityAddTraits(.isHeader)
         }
     }
+}
 
-    private func advance() {
-        guard let next = WhatsNew.next(after: step, in: steps) else {
-            finish(action: "finished")
-            return
+/// One change: a bold title, one sentence under it.
+private struct ReleaseNoteRow: View {
+    let item: ReleaseNotes.Item
+    var isCompact = false
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: isCompact ? 1 : 3) {
+            Text(verbatim: item.title)
+                .font(.dmSans(.semiBold, size: isCompact ? 16 : 17, relativeTo: .headline))
+                .foregroundStyle(.primary)
+            Text(verbatim: item.text)
+                .font(.dmSans(.regular, size: isCompact ? 14 : 15, relativeTo: .subheadline))
+                .foregroundStyle(.secondary)
         }
-        // In an explicit animation, as `OnboardingView.show` does.
-        withAnimation {
-            step = next
-        }
-    }
-
-    /// Every page is a scene, so Skip leaves What's new, as it leaves the scene sequence in
-    /// the onboarding.
-    private func skip() {
-        finish(action: "skipped")
-    }
-
-    private func finish(action: String) {
-        PersistentLog.log(.diagnosticProbe(
-            component: "whatsNew", instanceID: "0", action: action, details: "last=\(step.rawValue)"
-        ))
-        onFinish()
+        .fixedSize(horizontal: false, vertical: true)
+        .accessibilityElement(children: .combine)
     }
 }

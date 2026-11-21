@@ -93,7 +93,10 @@ cat <<EOF
 📱 Now finish in App Store Connect (the manual part):
    1. My Apps → Dictus → (create / open) the $VERSION App Store version.
    2. Build section → select build $N (already uploaded from TestFlight).
-   3. Fill release notes / screenshots / metadata if not done.
+   3. What's New, from ReleaseNotes/$VERSION (the text the app shows after the update):
+        scripts/release-notes.sh $VERSION            # review
+        scripts/release-notes.sh $VERSION --apply    # send to the five store locales
+      Then screenshots / metadata if not done.
    4. Export compliance: ITSAppUsesNonExemptEncryption → already set in Info.plist.
    5. Submit for Review.
    6. Edit the GitHub Release notes ($VTAG) with the user-facing changelog.
