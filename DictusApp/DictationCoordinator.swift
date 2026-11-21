@@ -1564,7 +1564,8 @@ private extension DictationCoordinator {
             // No iOS 16 fallback to write: the app's floor is iOS 17, which is also
             // FluidAudio 0.15.7's, and the catalogue hides Nemotron below it (#558).
             try await ensureNemotronReady(modelName: modelName)
-        case .whisperKit:
+        case .whisperKit, .apple:
+            // `.apple` is unreachable here: no catalogue entry has that engine.
             try await ensureWhisperKitEngineReady(modelName: modelName)
         }
     }

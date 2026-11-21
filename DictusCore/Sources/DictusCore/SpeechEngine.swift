@@ -26,6 +26,11 @@ public enum SpeechEngine: String, Codable, Sendable {
     case whisperKit = "WK"
     case parakeet = "PK"
     case nemotron = "NM"
+    /// Apple's on-device recognizer (`SpeechTranscriber`, iOS 26+), chosen on the Models
+    /// screen. Never a catalogue model: Dictus downloads nothing for it, the model is
+    /// Apple's asset. Forced to the chosen dictation language, like Whisper and Nemotron.
+    /// See `SpeechEngineChoice`.
+    case apple = "AP"
 
     /// Human-readable name for UI display.
     public var displayName: String {
@@ -33,6 +38,7 @@ public enum SpeechEngine: String, Codable, Sendable {
         case .whisperKit: return "WhisperKit"
         case .parakeet: return "Parakeet"
         case .nemotron: return "Nemotron"
+        case .apple: return "Apple"
         }
     }
 }

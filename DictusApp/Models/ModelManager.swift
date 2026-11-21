@@ -442,7 +442,7 @@ class ModelManager: ObservableObject {
         switch model.engine {
         case .parakeet, .nemotron:
             return !FluidAudioDownloadRoute(engine: model.engine).missingEntries().isEmpty
-        case .whisperKit:
+        case .whisperKit, .apple:
             return false
         }
     }
@@ -636,7 +636,7 @@ class ModelManager: ObservableObject {
             try await downloadFluidAudioModel(identifier, engine: .parakeet, cancellationToken: cancellationToken)
         case .nemotron:
             try await downloadFluidAudioModel(identifier, engine: .nemotron, cancellationToken: cancellationToken)
-        case .whisperKit, nil:
+        case .whisperKit, .apple, nil:
             try await downloadWhisperKitModel(identifier, cancellationToken: cancellationToken)
         }
     }
@@ -1373,7 +1373,7 @@ class ModelManager: ObservableObject {
         switch engine {
         case .parakeet, .nemotron:
             try FluidAudioDownloadRoute(engine: engine).removeCachedFiles()
-        case .whisperKit:
+        case .whisperKit, .apple:
             break
         }
 
@@ -1434,7 +1434,7 @@ class ModelManager: ObservableObject {
             try? FluidAudioDownloadRoute(engine: .parakeet).removeCachedFiles()
         case .nemotron:
             try? FluidAudioDownloadRoute(engine: .nemotron).removeCachedFiles()
-        case .whisperKit, nil:
+        case .whisperKit, .apple, nil:
             break
         }
 
@@ -1571,7 +1571,7 @@ extension ModelManager {
             return FluidAudioDownloadRoute(engine: .parakeet).missingEntries().isEmpty
         case .nemotron:
             return FluidAudioDownloadRoute(engine: .nemotron).missingEntries().isEmpty
-        case .whisperKit, nil:
+        case .whisperKit, .apple, nil:
             return WhisperModelRepository.hasCompleteDownload(identifier)
         }
     }
