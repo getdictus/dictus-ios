@@ -60,6 +60,9 @@ struct ModelManagerView: View {
     /// rule and the memory of a preparation it refused; see `ModelPreparationGate`.
     @State private var preparationGate = ModelPreparationGate()
 
+    /// The "Apple (on-device)" card: availability for the chosen language, and an install.
+    @StateObject private var appleEngine = AppleEngineCardModel()
+
     // MARK: - Device snapshot
 
     /// Read once and reused by the Available section (issue #369).
@@ -137,6 +140,11 @@ struct ModelManagerView: View {
         return nil
     }
 
+    /// Apple's engine is picked and ready, so it dictates instead of the active model.
+    private var isAppleEngineInUse: Bool {
+        modelManager.speechEngineChoice == .apple && appleEngine.displayed.isReady
+    }
+
     /// Whether a given model can be deleted (not active, not the last one).
     private func canDelete(_ model: ModelInfo) -> Bool {
         let state = modelManager.modelStates[model.identifier] ?? .notDownloaded
@@ -190,7 +198,8 @@ struct ModelManagerView: View {
                             onDeletePartialRequest: {
                                 partialModelToDelete = model
                                 showPartialDeleteAlert = true
-                            }
+                            },
+                            isSupersededByApple: isAppleEngineInUse
                         )
                         .swipeActions(edge: .trailing, allowsFullSwipe: false) {
                             if canDelete(model) {
@@ -209,6 +218,23 @@ struct ModelManagerView: View {
                         .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
                     }
                 }
+            }
+
+            // MARK: - Apple engine
+            // Its own section: an engine to pick, not a download, so it is neither
+            // "Downloaded" nor "Available".
+            Section {
+                Text("Apple", comment: "Models screen: inline header of the section holding the Apple engine card.")
+                    .font(.dictusSubheading)
+                    .foregroundStyle(.secondary)
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
+                    .listRowInsets(EdgeInsets(top: 12, leading: 16, bottom: 0, trailing: 16))
+
+                AppleEngineCardView(modelManager: modelManager, model: appleEngine)
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
+                    .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
             }
 
             // MARK: - Available section
@@ -260,6 +286,10 @@ struct ModelManagerView: View {
                         icon: "character.bubble",
                         text: "Nemotron: transcription engine developed by NVIDIA that transcribes in the language chosen in Settings. Nemotron 3.5 ASR model."
                     )
+                    engineParagraph(
+                        icon: "iphone",
+                        text: "Apple: speech recognition built into iOS 26, on the device, in the dictation language chosen in Settings. iOS installs its model."
+                    )
                 }
                 .listRowBackground(Color.clear)
                 .listRowSeparator(.hidden)
@@ -278,6 +308,10 @@ struct ModelManagerView: View {
         // UserDefaults so the model shows as downloaded and active.
         .onAppear {
             modelManager.loadState()
+        }
+        // Read again on every visit: the transcription language is set on another tab.
+        .task {
+            await appleEngine.refresh()
         }
         // Delete confirmation alert
         .alert("Delete model?", isPresented: $showDeleteAlert, presenting: modelToDelete) { model in

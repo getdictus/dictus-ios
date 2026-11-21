@@ -1561,6 +1561,28 @@
         }
       }
     },
+    "Apple" : {
+      "comment" : "Models screen: inline header of the section holding the Apple engine card.",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple"
+          }
+        }
+      }
+    },
+    "Apple (on-device)" : {
+      "comment" : "Models screen: name of Apple's speech recognition as an engine the user can pick.",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple (sur l'appareil)"
+          }
+        }
+      }
+    },
     "Apple Intelligence & Siri" : {
       "comment" : "Onboarding Apple Intelligence step (#683). Name of the Settings row on iOS 26 (the root row, and the title of its page), as iOS writes it. On iOS 27 the row is called Siri.",
       "localizations" : {
@@ -1785,6 +1807,38 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Apple télécharge ensuite son modèle, parfois longtemps. Dictus revérifie à votre retour."
+          }
+        }
+      }
+    },
+    "Apple's model could not be installed. Tap to try again." : {
+      "comment" : "Apple engine card: iOS failed to install Apple's speech model.",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le modèle d'Apple n'a pas pu être installé. Touchez pour réessayer."
+          }
+        }
+      }
+    },
+    "Apple's speech recognition, built into iOS. Dictus downloads nothing." : {
+      "comment" : "Models screen: description of the Apple engine card.",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La reconnaissance vocale d'Apple, intégrée à iOS. Dictus ne télécharge rien."
+          }
+        }
+      }
+    },
+    "Apple: speech recognition built into iOS 26, on the device, in the dictation language chosen in Settings. iOS installs its model." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple : reconnaissance vocale intégrée à iOS 26, sur l'appareil, dans la langue de dictée choisie dans les Réglages. iOS installe son modèle."
           }
         }
       }
@@ -4440,6 +4494,61 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Comment fonctionne la dictée"
+          }
+        }
+      }
+    },
+    "Needs a transcription language, not automatic detection." : {
+      "comment" : "Greyed Apple engine card: the transcription language is set to automatic detection.",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nécessite une langue de transcription, pas la détection automatique."
+          }
+        }
+      }
+    },
+    "No download in Dictus" : {
+      "comment" : "Apple engine card: where the size of a downloadable model is shown.",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucun téléchargement dans Dictus"
+          }
+        }
+      }
+    },
+    "Not available for this dictation language." : {
+      "comment" : "Greyed Apple engine card: Apple's recognizer does not support the chosen dictation language.",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Indisponible pour cette langue de dictée."
+          }
+        }
+      }
+    },
+    "Preparing…" : {
+      "comment" : "Apple engine card: iOS is installing Apple's speech model after the user picked it.",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Préparation…"
+          }
+        }
+      }
+    },
+    "Requires iOS 26 or later." : {
+      "comment" : "Greyed Apple engine card: the iPhone runs an iOS older than 26.",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nécessite iOS 26 ou une version ultérieure."
           }
         }
       }
