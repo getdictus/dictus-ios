@@ -10,7 +10,7 @@
 #   tools/keyboard-bench/run.sh --udid <booted simulator UDID> [--out <dir>]
 #       [--langs fr,en] [--width 402] [--height 216]
 #       [--corpus <dir>] [--runs <dir>] [--hit plain|model] [--model <spec>] [--no-build]
-#       [--debug] [--journal]
+#       [--debug] [--journal] [--lm <model.gguf>] [--lm-weights <w,w,...>] [--lm-budget-ms <ms>]
 #
 # --width and --height are the key grid in points. The defaults are an iPhone 17
 # held upright: 402 pt wide, and the 216 pt KeyboardHeightProvider gives a 6.3" screen.
@@ -26,6 +26,12 @@
 # --journal turns the toggle on and writes the journal of the replay to <dir>/journal.log.
 # The two give the journal's cost (taps.tsv's journal_ns) and show that it changes
 # nothing the keyboard types (commits.tsv and texts.tsv identical).
+#
+# #996: --lm turns the keyboard's language model on with a GGUF file, which needs
+# llama.cpp (tools/keyboard-lm/build-llama.sh). The bench then replays once per weight of
+# --lm-weights (default: the engine's) into <dir>/w<weight>/ and prints one report per
+# weight. --lm-budget-ms is how long a caller waits for the model; unset, it waits for
+# every answer, and taps.tsv's lm_ms column holds the model's time.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
@@ -41,6 +47,9 @@ MODEL=""
 BUILD_BENCH=1
 DEBUG=0
 JOURNAL=0
+LM=""
+LM_WEIGHTS=""
+LM_BUDGET_MS=""
 while [[ $# -gt 0 ]]; do
     case "$1" in
         --udid) UDID="$2"; shift 2 ;;
@@ -55,6 +64,9 @@ while [[ $# -gt 0 ]]; do
         --no-build) BUILD_BENCH=0; shift ;;
         --debug) DEBUG=1; shift ;;
         --journal) DEBUG=1; JOURNAL=1; shift ;;
+        --lm) LM="$(cd "$(dirname "$2")" && pwd)/$(basename "$2")"; shift 2 ;;
+        --lm-weights) LM_WEIGHTS="$2"; shift 2 ;;
+        --lm-budget-ms) LM_BUDGET_MS="$2"; shift 2 ;;
         *) echo "unknown argument: $1" >&2; exit 2 ;;
     esac
 done
@@ -63,9 +75,20 @@ xcrun simctl list devices booted | grep -q "$UDID" || { echo "simulator $UDID is
 
 BENCH="$ROOT/tools/keyboard-bench"
 # A DEBUG bench has its own build directory, so the two never reuse each other's binary.
-BUILD="$ROOT/build/keyboard-bench$([[ $DEBUG == 1 ]] && echo -debug || true)"
+BUILD="$ROOT/build/keyboard-bench$([[ $DEBUG == 1 ]] && echo -debug || true)$([[ -n $LM ]] && echo -lm || true)"
 DEFINES=()
 [[ $DEBUG == 1 ]] && DEFINES=(-D DEBUG)
+# With --lm, DictusCore is compiled against llama.cpp's simulator slice, as Xcode compiles
+# it once build-llama.sh has run, and the bench links the library.
+LLAMA_FLAGS=()
+LLAMA_LINK=()
+if [[ -n $LM ]]; then
+    SLICE="$ROOT/DictusCore/LocalLlama/llama.xcframework/ios-arm64_x86_64-simulator"
+    [[ -f $SLICE/libllama.a ]] || { echo "no llama.cpp: run tools/keyboard-lm/build-llama.sh" >&2; exit 1; }
+    [[ -f $LM ]] || { echo "no model file $LM" >&2; exit 1; }
+    LLAMA_FLAGS=(-I "$SLICE/Headers/llama")
+    LLAMA_LINK=(-I "$SLICE/Headers/llama" "$SLICE/libllama.a" -framework Accelerate)
+fi
 BIN="$BUILD/bin"
 SDK="$(xcrun --sdk iphonesimulator --show-sdk-path)"
 TARGET="arm64-apple-ios17.0-simulator"
@@ -77,7 +100,8 @@ OUT="$(cd "$OUT" && pwd)"
 if [[ $BUILD_BENCH == 1 ]]; then
     # Release settings of the DictusKeyboard target: Swift 5 mode, -O, no DEBUG, C++ gnu++20.
     echo "== DictusCore" >&2
-    xcrun swiftc -target "$TARGET" -sdk "$SDK" -swift-version 5 -O ${DEFINES[@]+"${DEFINES[@]}"} -parse-as-library \
+    xcrun swiftc -target "$TARGET" -sdk "$SDK" -swift-version 5 -O ${DEFINES[@]+"${DEFINES[@]}"} \
+        ${LLAMA_FLAGS[@]+"${LLAMA_FLAGS[@]}"} -parse-as-library \
         -module-name DictusCore -emit-module -emit-module-path "$BUILD/DictusCore.swiftmodule" \
         -emit-library -static -o "$BUILD/libDictusCore.a" \
         $(find "$ROOT/DictusCore/Sources/DictusCore" -name '*.swift' | sort) 2>"$BUILD/dictuscore.log" \
@@ -91,7 +115,7 @@ if [[ $BUILD_BENCH == 1 ]]; then
 
     echo "== bench" >&2
     xcrun swiftc -target "$TARGET" -sdk "$SDK" -swift-version 5 -O ${DEFINES[@]+"${DEFINES[@]}"} \
-        -I "$BUILD" -L "$BUILD" -lDictusCore -lc++ \
+        -I "$BUILD" -L "$BUILD" -lDictusCore -lc++ ${LLAMA_LINK[@]+"${LLAMA_LINK[@]}"} \
         -import-objc-header "$AOSP/bridge/AOSPTrieBridge.h" \
         "$ROOT/DictusKeyboard/TextPrediction/TextPredictionEngine.swift" \
         "$ROOT/DictusKeyboard/TextPrediction/AOSPTrieEngine.swift" \
@@ -120,9 +144,18 @@ fi
 echo "== replay on $UDID" >&2
 # The engine prints its load messages on stdout; they belong with the build log, not the report.
 SIMCTL_CHILD_SWIFT_DETERMINISTIC_HASHING=1 SIMCTL_CHILD_KB_JOURNAL="$JOURNAL" \
+SIMCTL_CHILD_KB_LM="$LM" SIMCTL_CHILD_KB_LM_WEIGHTS="$LM_WEIGHTS" SIMCTL_CHILD_KB_LM_BUDGET_MS="$LM_BUDGET_MS" \
 SIMCTL_CHILD_KB_CORPUS="$CORPUS" SIMCTL_CHILD_KB_RUNS="$RUNS" SIMCTL_CHILD_KB_HIT="$HIT" SIMCTL_CHILD_KB_MODEL="$MODEL" \
     xcrun simctl spawn "$UDID" "$BIN/keyboard-bench" "$BENCH" "$LANGS" "$OUT" "$WIDTH" "$HEIGHT" \
     2> >(grep -v "Lexicon creation for" >&2) >&2
 
-python3 -I "$BENCH/score.py" --commit "$(git -C "$ROOT" rev-parse HEAD)" \
-    --keyboard "Dictus (replay, ${WIDTH}x${HEIGHT} pt grid, hit test: $HIT${MODEL:+ $MODEL}$([[ $DEBUG == 1 ]] && echo ", DEBUG, journal $([[ $JOURNAL == 1 ]] && echo on || echo off)" || true))" --dir "$OUT"
+KEYBOARD="Dictus (replay, ${WIDTH}x${HEIGHT} pt grid, hit test: $HIT${MODEL:+ $MODEL}$([[ $DEBUG == 1 ]] && echo ", DEBUG, journal $([[ $JOURNAL == 1 ]] && echo on || echo off)" || true)"
+if [[ -z $LM ]] || [[ ${LM_WEIGHTS//[^,]/} == "" ]]; then
+    python3 -I "$BENCH/score.py" --commit "$(git -C "$ROOT" rev-parse HEAD)" \
+        --keyboard "$KEYBOARD${LM:+, language model $(basename "$LM")${LM_WEIGHTS:+ w=$LM_WEIGHTS}})" --dir "$OUT"
+else
+    for DIR in "$OUT"/w*/; do
+        python3 -I "$BENCH/score.py" --commit "$(git -C "$ROOT" rev-parse HEAD)" \
+            --keyboard "$KEYBOARD, language model $(basename "$LM") $(basename "$DIR"))" --dir "$DIR"
+    done
+fi

@@ -1,5 +1,13 @@
 // swift-tools-version: 5.9
+import Foundation
 import PackageDescription
+
+// llama.cpp, for the keyboard's local language model (#996), when
+// tools/keyboard-lm/build-llama.sh has copied it here. The folder is gitignored, so CI and
+// every checkout that did not run the script build DictusCore without it, exactly as
+// before, and the model code compiles out (`#if canImport(llama)`).
+let llamaPath = "LocalLlama/llama.xcframework"
+let hasLlama = FileManager.default.fileExists(atPath: Context.packageDirectory + "/" + llamaPath)
 
 let package = Package(
     name: "DictusCore",
@@ -9,7 +17,7 @@ let package = Package(
         .executable(name: "polish-harness", targets: ["polish-harness"])
     ],
     targets: [
-        .target(name: "DictusCore", path: "Sources/DictusCore"),
+        .target(name: "DictusCore", dependencies: hasLlama ? ["llama"] : [], path: "Sources/DictusCore"),
         // The #570 / #581 fidelity scorers: proposition recall, person and stance,
         // order, and speaker-state fabrication. Deterministic and model-free.
         //
@@ -41,5 +49,5 @@ let package = Package(
             path: "Tests/DictusCoreTests",
             resources: [.copy("Fixtures")]
         )
-    ]
+    ] + (hasLlama ? [.binaryTarget(name: "llama", path: llamaPath)] : [])
 )

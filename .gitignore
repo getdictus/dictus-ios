@@ -21,6 +21,8 @@ DerivedData/
 *.moved-aside
 
 # Swift Package Manager
+# llama.cpp for the keyboard's language model, built by tools/keyboard-lm/build-llama.sh (#996)
+DictusCore/LocalLlama/
 .build/
 Packages/
 Package.resolved
