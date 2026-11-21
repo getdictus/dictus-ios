@@ -56,10 +56,12 @@ public struct SpatialDecoder {
 
         public init() {}
 
-        /// Hex's settings per language: English leans more on the word before.
+        /// Hex's settings per language: English leans more on the word before, and Spanish's
+        /// many short words make a letter read as a space too cheap a split.
         public static func tuned(for language: String) -> Parameters {
             var p = Parameters()
             if language == "en" { p.lmWeight = 1.5 }
+            if language == "es" { p.spaceTapCost = .infinity }
             return p
         }
     }
@@ -131,7 +133,7 @@ public struct SpatialDecoder {
         literalCost += parameters.lmWeight * literalLM
 
         var readings: [Reading] = []
-        for (word, spatial) in search(costs, range: 0..<costs.count, limit: 5, maxEdits: parameters.maxEdits)
+        for (word, spatial) in search(model, costs, range: 0..<costs.count, limit: 5, maxEdits: parameters.maxEdits)
         where word != literalIndex {
             readings.append(Reading(text: model.word(word), cost: spatial + parameters.lmWeight * lmCost(word, after: prev)))
         }
@@ -209,9 +211,11 @@ public struct SpatialDecoder {
         var cost: Float
     }
 
-    /// The best words for `costs[range]`, as (word index, spatial cost including edits).
-    private func search(_ costs: [[Double]], range: Range<Int>, limit: Int, maxEdits: Int) -> [(Int, Double)] {
-        let words = model
+    /// The best words of `words` for `costs[range]`, as (word index, spatial cost
+    /// including edits).
+    private func search<Words: SpatialWordList>(
+        _ words: Words, _ costs: [[Double]], range: Range<Int>, limit: Int, maxEdits: Int
+    ) -> [(Int, Double)] {
         let n = range.count
         let maxDepth = n + maxEdits + 2
         var layers = [[State]](repeating: [], count: maxDepth + 2)
@@ -306,7 +310,7 @@ public struct SpatialDecoder {
         func pair(left: Range<Int>, right: Range<Int>, extra: Double, exact: Bool = false) {
             guard !left.isEmpty, !right.isEmpty else { return }
             func halves(_ range: Range<Int>) -> [(Int, Double)] {
-                guard exact else { return search(costs, range: range, limit: 3, maxEdits: 0) }
+                guard exact else { return search(model, costs, range: range, limit: 3, maxEdits: 0) }
                 guard let word = model.index(ofCodes: Array(letters[range])) else { return [] }
                 return [(word, range.reduce(0) { $0 + costs[$1][Int(letters[$1])] })]
             }
@@ -351,6 +355,28 @@ public struct SpatialDecoder {
         let toRow = (Double(tap.y) - Double(keys.bottomRowY)) / sy
         let likelierRow = max(0, 0.5 * (toBar * toBar - toRow * toRow))
         return parameters.spaceTapCost + parameters.spaceTapWeight * likelierRow
+    }
+
+    /// What `decide` would score `reading` at for these taps: its best alignment with the
+    /// taps (one edit at most, apostrophes free) plus the word-pair cost, in nats. Nil when
+    /// the model lacks the word or no alignment within the edits fits. Ported from Hex's
+    /// `replaces(with:)`, which asks the same question for adaptive touch.
+    public func cost(of reading: String, taps: [CGPoint], previous: String?, keys: Keys) -> Double? {
+        guard !taps.isEmpty, let codes = model.encode(reading), let index = model.index(ofCodes: codes) else { return nil }
+        let centres = codeCentres(keys)
+        let costs = taps.map { tapCosts($0, centres: centres, keys: keys) }
+        let prev = previous.flatMap { model.index(of: $0) }
+        guard let spatial = search(OneWord(codes: codes), costs, range: 0..<costs.count, limit: 1,
+                                   maxEdits: parameters.maxEdits).first?.1 else { return nil }
+        return spatial + parameters.lmWeight * lmCost(index, after: prev)
+    }
+
+    /// One word, searched as a word list.
+    private struct OneWord: SpatialWordList {
+        let codes: [UInt8]
+        var wordCount: Int { 1 }
+        func length(_ i: Int) -> Int { codes.count }
+        func byte(_ i: Int, _ depth: Int) -> Int { depth < codes.count ? Int(codes[depth]) : -1 }
     }
 
     /// A word that may stand alone in a split: two or more letters, or a common one-letter word.

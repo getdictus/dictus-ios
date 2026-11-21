@@ -412,6 +412,8 @@ if let tune = env["KB_SPATIAL_TUNE"], !tune.isEmpty {
             case "sigmaX": p.sigmaX = value
             case "sigmaY": p.sigmaY = value
             case "splits": p.splits = value != 0
+            case "spaceTapCost": p.spaceTapCost = value
+            case "spaceOmissionCost": p.spaceOmissionCost = value
             case "maxEdits": p.maxEdits = Int(value)
             default: fatalError("unknown KB_SPATIAL_TUNE parameter \(pair[0])")
             }
@@ -422,6 +424,13 @@ if let tune = env["KB_SPATIAL_TUNE"], !tune.isEmpty {
 var tapsOut = ["lang\tsentence\ttap\tintended\tresolved\tx\ty\tengine_us\tplain\thit_ns\tvisited\tjournal_ns"]
 var commitsOut = ["lang\tsentence\tintended\ttyped\tfinal"]
 var textsOut = ["lang\tsentence\tintended\tfinal"]
+
+// KB_LAYOUT writes the layouts into the App Group; they are put back at the end. Both keys:
+// `setLayout` mirrors the active language's layout into the legacy key, and the #272
+// migration freezes that one back into the per-language store when it is missing.
+let layoutsBefore = [SharedKeys.keyboardLayoutsByLanguage, SharedKeys.keyboardLayout].map {
+    ($0, AppGroup.defaults.object(forKey: $0))
+}
 
 // The engine starts loading French as soon as it exists. A `setLanguage` issued before
 // that load lands overlaps it: in an English-only run the French load then reported
@@ -488,6 +497,10 @@ for code in langs {
 
 // The user dictionary is the simulator's App Group store: leave it as empty as it was found.
 UserDictionary.shared.resetAll()
+// And the layouts as they were: a later replay without KB_LAYOUT types on its defaults.
+for (key, value) in layoutsBefore {
+    if let value { AppGroup.defaults.set(value, forKey: key) } else { AppGroup.defaults.removeObject(forKey: key) }
+}
 journal?.finish(writingTo: "\(outDir)/journal.log")
 
 for (name, rows) in [("taps.tsv", tapsOut), ("commits.tsv", commitsOut), ("texts.tsv", textsOut)] {

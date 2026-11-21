@@ -79,7 +79,7 @@ final class SpatialDecoderTests: XCTestCase {
         }
         return SpatialCorrection.correct(
             word, previousWord: previous, input: SpatialCorrection.Input(taps: taps, keys: keys),
-            with: try Self.decoder(language), known: (isKnown, isLearned)
+            with: try Self.decoder(language), facts: SpatialCorrection.Facts(isKnown: isKnown, isLearned: isLearned)
         )
     }
 
@@ -104,9 +104,52 @@ final class SpatialDecoderTests: XCTestCase {
         let keys = Self.keys(Self.qwerty)
         let result = SpatialCorrection.correct(
             "thinl", previousWord: "i", input: SpatialCorrection.Input(taps: Self.taps("thin", on: keys), keys: keys),
-            with: try Self.decoder("en"), known: (false, false)
+            with: try Self.decoder("en"), facts: SpatialCorrection.Facts(isKnown: false, isLearned: false)
         )
         XCTAssertNil(result)
+    }
+
+    func testATrieCorrectionTheDecoderCannotScoreStaysTheTries() throws {
+        let keys = Self.keys(Self.qwerty)
+        let taps = Self.taps("thinl", on: keys, offsets: [4: CGVector(dx: -0.45, dy: 0)])
+        let result = SpatialCorrection.correct(
+            "thinl", previousWord: "i", input: SpatialCorrection.Input(taps: taps, keys: keys), with: try Self.decoder("en"),
+            facts: SpatialCorrection.Facts(isKnown: false, isLearned: false, trieCorrection: "xylophone")
+        )
+        XCTAssertNil(result)
+    }
+
+    func testTheDecoderBeatsATrieCorrectionItScoresHigher() throws {
+        let keys = Self.keys(Self.qwerty)
+        let taps = Self.taps("thinl", on: keys, offsets: [4: CGVector(dx: -0.45, dy: 0)])
+        // "thin" drops the l tap, an edit; "think" reads it as the key it touches.
+        let result = SpatialCorrection.correct(
+            "thinl", previousWord: "i", input: SpatialCorrection.Input(taps: taps, keys: keys), with: try Self.decoder("en"),
+            facts: SpatialCorrection.Facts(isKnown: false, isLearned: false, trieCorrection: "thin")
+        )
+        XCTAssertEqual(result?.correction, "think")
+    }
+
+    func testAChangeOfAccentsAloneIsLeftToTheAccentRules() throws {
+        // "tres" reads best as "très", which only adds an accent: the accent rules of the
+        // trie (#1000) own that call, so the decoder leaves the word to them.
+        let keys = Self.keys(Self.azerty)
+        let decision = try Self.decoder("fr").decide(taps: Self.taps("tres", on: keys), typed: "tres", previous: "est",
+                                                     literalIsValid: false, keys: keys)
+        XCTAssertEqual(decision?.replacement, "très", "the decoder alone would add the accent")
+        XCTAssertNil(try Self.correct("tres", previous: "est", language: "fr", rows: Self.azerty))
+    }
+
+    func testAFrenchElisionIsReadWhole() throws {
+        // "j'ao": the i landed on the left edge of o. Google Books keeps "j'ai" as one
+        // word, so the token is read whole, its apostrophe put back for free.
+        let result = try Self.correct("J'ao", previous: nil, offsets: [3: CGVector(dx: -0.45, dy: 0)],
+                                      language: "fr", rows: Self.azerty)
+        XCTAssertEqual(result?.correction, "J'ai")
+    }
+
+    func testAMissedSpaceIsSplit() throws {
+        XCTAssertEqual(try Self.correct("inthe", previous: "was")?.correction, "in the")
     }
 
     // MARK: - Touch buffer

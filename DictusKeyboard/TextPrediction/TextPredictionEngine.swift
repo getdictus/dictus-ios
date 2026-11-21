@@ -685,21 +685,38 @@ class TextPredictionEngine {
         }
 
         // #1011: the taps, read by the spatial decoder. It comes after every authoritative
-        // branch above (lexicon, overrides, contractions) and before the trie, which only
-        // has the letters. When it keeps the word, the trie still gets its say.
-        if let spatial, let decoder = SpatialAutocorrect.decoder(for: language),
-           let read = SpatialCorrection.correct(
-               word, previousWord: previousWord, input: spatial, with: decoder,
-               known: (!isUnknownToDictionary(word), UserDictionary.shared.isLearned(word.lowercased()))
-           ) {
-            #if DEBUG
-            AutocorrectDebugLog.autocorrectDecision(
-                original: word, corrected: read.correction, branch: "spatial", prevWord: previousWord
-            )
-            #endif
-            return .autocorrect(read.correction, alternatives: read.alternatives)
-        }
+        // branch above (lexicon, overrides, contractions) and is weighed against the trie,
+        // which only has the letters. When it keeps the word, the trie decides.
+        let trie = trieProposal(for: word, previousWord: previousWord, isAtSentenceStart: isAtSentenceStart)
+        guard let spatial, let decoder = SpatialAutocorrect.decoder(for: language) else { return trie }
+        let trieCorrection = trie?.autocorrection?.correction
+        // The same word up to its accents: the accents are the trie's, whose French rules
+        // (#1000, #1008) know `suis arrivé` where the word-pair model may not.
+        let trieWord = trieCorrection.map { SpatialDecoder.withoutAccents($0.lowercased()) }
+        guard let read = SpatialCorrection.correct(
+                  word, previousWord: previousWord, input: spatial, with: decoder,
+                  facts: SpatialCorrection.Facts(
+                      isKnown: !isUnknownToDictionary(word),
+                      isLearned: UserDictionary.shared.isLearned(word.lowercased()),
+                      trieCorrection: trieCorrection
+                  )
+              ),
+              SpatialDecoder.withoutAccents(read.correction.lowercased()) != trieWord else { return trie }
+        #if DEBUG
+        AutocorrectDebugLog.autocorrectDecision(
+            original: word, corrected: read.correction, branch: "spatial", prevWord: previousWord
+        )
+        #endif
+        return .autocorrect(read.correction, alternatives: read.alternatives)
+    }
 
+    /// What the trie proposes for `word` from its letters: the spell check, then the
+    /// bigram rerank. The tail of `correctionProposal`, apart since #1011 so the spatial
+    /// decoder can be weighed against it.
+    private func trieProposal(for word: String, previousWord: String?, isAtSentenceStart: Bool) -> CorrectionProposal? {
+        let applied = { (result: (correction: String, alternatives: [String])?) -> CorrectionProposal? in
+            result.map { .autocorrect($0.correction, alternatives: $0.alternatives) }
+        }
         let checked = checkWord(word, isAtSentenceStart: isAtSentenceStart, previousWord: previousWord)
         let result = checked?.proposal.autocorrection
 

@@ -30,8 +30,8 @@
 # #1011: --spatial turns on the spatial decoder, as its Debug switch does in the keyboard:
 # the space bar reads each word's taps before the trie reads its letters. --spatial-tune
 # changes Hex's parameters for a sweep (`validMargin=inf`); see main.swift. --layout replays
-# every language on that layout (it stays set in the simulator's App Group), for a device
-# journal typed on another layout than the language's default.
+# every language on that layout, for a device journal typed on another layout than the
+# language's default; the bench puts the App Group's layouts back when it ends.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"

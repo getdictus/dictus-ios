@@ -155,7 +155,17 @@ public final class SpatialDecoderModel: @unchecked Sendable {
         }
         return length(lo) == bytes.count ? lo : nil
     }
+}
 
+/// A word list sorted by letter codes, searchable letter by letter: the model's, or one word.
+protocol SpatialWordList {
+    var wordCount: Int { get }
+    func length(_ i: Int) -> Int
+    /// The word's letter code at `depth`, or -1 past its end.
+    func byte(_ i: Int, _ depth: Int) -> Int
+}
+
+extension SpatialWordList {
     /// The words in `lo..<hi` (which share their first `depth` codes) whose next code is
     /// `target`. Words are sorted by their code bytes, so this is two binary searches.
     func narrow(_ lo: Int, _ hi: Int, depth: Int, byte target: Int) -> (Int, Int) {
@@ -172,3 +182,5 @@ public final class SpatialDecoderModel: @unchecked Sendable {
         return (a, c)
     }
 }
+
+extension SpatialDecoderModel: SpatialWordList {}

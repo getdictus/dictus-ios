@@ -16,6 +16,22 @@ public enum SpatialCorrection {
         }
     }
 
+    /// What the rest of the engine knows about the word.
+    public struct Facts: Equatable {
+        /// The word is a word already (the trie, the user's words): the margin is higher.
+        public var isKnown: Bool
+        /// The user taught the keyboard this word: the decoder is not asked (ADR 0004).
+        public var isLearned: Bool
+        /// The trie's correction from the letters, when it has one.
+        public var trieCorrection: String?
+
+        public init(isKnown: Bool, isLearned: Bool, trieCorrection: String? = nil) {
+            self.isKnown = isKnown
+            self.isLearned = isLearned
+            self.trieCorrection = trieCorrection
+        }
+    }
+
     public struct Result: Equatable {
         /// What replaces the word, in the document's case ("J'ai", "Je pense").
         public var correction: String
@@ -24,17 +40,21 @@ public enum SpatialCorrection {
     }
 
     /// The decoder's replacement for `word`, or nil to leave the word to the rest of the
-    /// engine. `taps` holds one point per character of `word`. `isKnown` says the word
-    /// is a word already (the trie or the user's words): it raises the margin, and for a
-    /// word the user taught the keyboard the decoder is not asked at all (ADR 0004).
+    /// engine. `input.taps` holds one point per character of `word`.
+    ///
+    /// When the trie corrects the word too, to another word, the decoder scores the trie's
+    /// correction on the same taps and keeps whichever costs less. A correction it cannot
+    /// score (more than one edit away, two words, a word its model lacks) stays the trie's:
+    /// on Pierre's device sessions the trie was right in most such cases ("sats" -> "sais",
+    /// "orzt" -> "est"), and the decoder's strength is where the trie keeps the word.
     public static func correct(
         _ word: String,
         previousWord: String?,
         input: Input,
         with decoder: SpatialDecoder,
-        known: (isKnown: Bool, isLearned: Bool)
+        facts: Facts
     ) -> Result? {
-        let (isKnown, isLearned) = known
+        let (isKnown, isLearned) = (facts.isKnown, facts.isLearned)
         guard !isLearned, input.taps.count == word.count else { return nil }
         let chars = Array(word)
         // A capital inside the word (an acronym, "iPhone") is not the decoder's to read.
@@ -61,7 +81,21 @@ public enum SpatialCorrection {
         guard let decision = decoder.decide(
             taps: kept.map { input.taps[$0] }, typed: String(kept.map { lowered[$0] }), literal: literal,
             previous: previous, literalIsValid: isKnown, keys: input.keys
-        ), let replacement = decision.replacement else { return nil }
+        ), let replacement = decision.replacement,
+        // A change of accents alone is the accent rules' to make (#1000, #1008), which know
+        // French grammar the word-pair model does not; and an accent typed with the accent
+        // key was meant ("sôt" is "sont", never "sot").
+        SpatialDecoder.withoutAccents(replacement) != SpatialDecoder.withoutAccents(literal) else { return nil }
+        let taps = kept.map { input.taps[$0] }
+
+        if let trie = facts.trieCorrection?.lowercased(), trie != clitic.lowercased() + replacement {
+            // The trie's word in the decoder's terms: what follows the same clitic.
+            guard trie.hasPrefix(clitic.lowercased()),
+                  let best = decision.readings.first?.cost,
+                  let rival = decoder.cost(of: String(trie.dropFirst(clitic.count)), taps: taps,
+                                           previous: previous, keys: input.keys),
+                  best < rival else { return nil }
+        }
 
         let capitalised = chars.first?.isUppercase == true
         func display(_ reading: String) -> String {
