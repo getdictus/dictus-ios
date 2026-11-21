@@ -26,7 +26,16 @@ final class TrieEvidence: LanguageEvidenceSource {
         trie.wordExists(word) ? scale.logFrequency(stored: trie.wordFrequency(word)) : nil
     }
 
-    func accentExpansion(_ word: String) -> String? { trie.accentExpansion(word) }
+    /// The accented spelling #994's restoration picks for a word typed without accents,
+    /// or the likelier of two when it only offers them. #1010 was written against the
+    /// trie's `accentExpansion`, which #994 replaced on develop.
+    func accentExpansion(_ word: String) -> String? {
+        switch trie.accentRestoration(word, previousWord: nil) {
+        case .keepTyped: return nil
+        case .restore(let accented): return accented
+        case .ambiguous(let spellings): return spellings.first
+        }
+    }
     func contractionExpansion(_ word: String) -> String? { trie.contractionExpansion(word) }
     func correction(of word: String) -> String? { trie.spellCheck(word)?.correction }
     func bigram(_ word: String, after previous: String) -> Double {
