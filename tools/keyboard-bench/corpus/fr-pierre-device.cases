@@ -17,12 +17,12 @@ sentence	typed	context_words	accepted	today	day	kind
 15	ckavier	0	clavier	clavier	2026-11-21	guard
 16	interessang	0	intéressant	intéressant	2026-11-21	guard
 17	desagrebale	0	désagréable	désagréable	2026-11-21	guard
-18	oji	0	oui		2026-11-20	device
-19	jusge	0	juste		2026-11-20	device
-20	ma'qje	0	manque		2026-11-20	device
-21	dizcitd	0	discord		2026-11-20	device
-22	we	1	we		2026-11-20	device
-23	honetre	0	honnête		2026-11-20	device
-24	donnequoi	0	donne quoi		2026-11-20	device
-25	sats	0	sais		2026-11-20	device
-26	qur	1	que		2026-11-20	device
+18	oji	0	oui	oui	2026-11-20	guard
+19	jusge	0	juste	juste	2026-11-20	guard
+20	ma'qje	0	manque	ma'que	2026-11-20	wrong
+21	dizcitd	0	discord	discute	2026-11-20	wrong
+22	we	1	we	de	2026-11-20	wrong
+23	honetre	0	honnête	monstre	2026-11-20	wrong
+24	donnequoi	0	donne quoi	donne quoi	2026-11-20	guard
+25	sats	0	sais	sais	2026-11-20	guard
+26	qur	1	que	sur	2026-11-20	wrong

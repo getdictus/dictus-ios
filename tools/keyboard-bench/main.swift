@@ -232,8 +232,11 @@ func replay(_ taps: [Tap], cells: [Cell], width: CGFloat, height: CGFloat, picke
             guard let (_, partial) = AutocorrectRejectionMemory.wordAtCursor(context: context) else { return }
             let previous = words(context).dropLast().last
             if memory.previewsCorrection(context: context) {
-                _ = engine.spellCheck(partial, previousWord: previous,
-                                      isAtSentenceStart: ProperNounGuard.isAtSentenceStart(context: context, word: partial))
+                _ = engine.correctionProposal(
+                    for: partial, previousWord: previous,
+                    isAtSentenceStart: ProperNounGuard.isAtSentenceStart(context: context, word: partial),
+                    textBefore: LanguageModelContext.text(before: partial, in: context, policy: .allowed)
+                )
             }
             _ = engine.suggestions(for: partial)
         }
@@ -308,7 +311,8 @@ func replay(_ taps: [Tap], cells: [Cell], width: CGFloat, height: CGFloat, picke
                 // know when corrections were only offered, as the keyboard's commit does.
                 let checked = engine.correctionProposal(
                     for: word, previousWord: previous,
-                    isAtSentenceStart: ProperNounGuard.isAtSentenceStart(context: field.text, word: word)
+                    isAtSentenceStart: ProperNounGuard.isAtSentenceStart(context: field.text, word: word),
+                    textBefore: LanguageModelContext.text(before: word, in: field.text, policy: .allowed)
                 )
                 let proposal = checked?.autocorrection?.correction
                 offered = checked?.suggestionRow(typedWord: word) != nil
@@ -322,7 +326,10 @@ func replay(_ taps: [Tap], cells: [Cell], width: CGFloat, height: CGFloat, picke
                     applied = true
                 }
                 if !applied { field.insertText(" ") }
-                predicted = engine.predictNextWords(after: Array(words(field.text).suffix(2)))
+                predicted = engine.predictNextWords(
+                    after: Array(words(field.text).suffix(2)),
+                    textBefore: LanguageModelContext.text(beforeCursor: field.text, policy: .allowed)
+                )
             }
             if !typed.isEmpty {
                 commits.append(Commit(intendedWords: tokenWords, typed: typed, final: final, predicted: predicted))
@@ -364,80 +371,110 @@ let modelParameters = ModelParameters(env["KB_MODEL"] ?? "")
 // toggle on with KB_JOURNAL=1 and off without; the default build has none.
 let journal = Journal.start(toggle: env["KB_JOURNAL"] == "1")
 
-var tapsOut = ["lang\tsentence\ttap\tintended\tresolved\tx\ty\tengine_us\tplain\thit_ns\tvisited\tjournal_ns"]
-var commitsOut = ["lang\tsentence\tintended\ttyped\tfinal\tnext\tpredicted"]
-var textsOut = ["lang\tsentence\tintended\tfinal"]
-
-// The engine starts loading French as soon as it exists. A `setLanguage` issued before
-// that load lands overlaps it: in an English-only run the French load then reported
-// the English trie's word count (40000; the French file holds 39622).
-waitUntilLoaded("initial")
-
-for code in langs {
-    // "fr-learned" is the French keyboard on the fr-learned corpus and its learned words.
-    let langCode = code.components(separatedBy: "-")[0]
-    guard let lang = SupportedLanguage(rawValue: langCode) else { fatalError("unknown language \(code)") }
-    load(lang)
-    seedLearnedWords("\(benchDir)/corpus/\(code).words")
-    guard let page = KeyboardLayouts.current(needsGlobe: false).currentDeviceLayout?.normal else {
-        fatalError("no letter page for \(code)")
-    }
-    let cells = grid(page, width: w, height: h)
-    let sentences = readLines("\(corpusDir)/\(code).txt")
-    let run = readRun("\(runsDir)/\(code).tsv")
-
-    var model: KeyTargetModel?
-    if hitMode == "model" {
-        // Bundle.main is the directory run.sh copied the shipped dictionaries into.
-        guard let trie = PrefixMass(path: "\(Bundle.main.bundlePath)/\(code)_spellcheck.dict") else {
-            fatalError("cannot read \(code)_spellcheck.dict")
-        }
-        // The engine keeps its n-grams private: the spike opens the same file a second time.
-        var ngrams: AOSPTrieBridge?
-        if modelParameters.ngram {
-            let bridge = AOSPTrieBridge()
-            guard bridge.loadNgrams(atPath: "\(Bundle.main.bundlePath)/\(code)_ngrams.dict") else {
-                fatalError("cannot read \(code)_ngrams.dict")
-            }
-            ngrams = bridge
-        }
-        model = KeyTargetModel(parameters: modelParameters, trie: trie, ngrams: ngrams)
-    }
-    let picker: Picker? = model.map { m in
-        { (m.pick($0, plain: $1, cells: cells, word: $2, previous: $3), m.visited) }
-    }
-
-    var order: [Int] = []
-    for tap in run where order.last != tap.sentence { order.append(tap.sentence) }
-    for s in order {
-        // A run of several passes keeps numbering its sentences: sentence s is corpus line s modulo its length.
-        let intended = sentences[s % sentences.count]
-        let intendedWords = intended.components(separatedBy: " ")
-        journal?.startSentence(keyboard: "\(langCode)-\(LayoutType.active.rawValue)", document: "\(code)-\(s)")
-        let (text, commits) = replay(run.filter { $0.sentence == s }, cells: cells, width: w, height: h,
-                                     picker: picker, journal: journal) { tap, resolved, p, us, pick, journalNs in
-            tapsOut.append("\(code)\t\(s)\t\(tap.index)\t\(tap.key)\t\(resolved)\t\(String(format: "%.2f", p.x))\t"
-                           + "\(String(format: "%.2f", p.y))\t\(us)\t\(pick.plain)\t\(pick.ns)\t\(pick.visited)\t\(journalNs)")
-        }
-        for c in commits {
-            let meant = c.intendedWords.map { intendedWords[$0] }.joined(separator: " ")
-            // The word the typist types next, which the prediction bar should offer.
-            let next = c.intendedWords.last.map { $0 + 1 < intendedWords.count ? intendedWords[$0 + 1] : "" } ?? ""
-            commitsOut.append("\(code)\t\(s)\t\(meant)\t\(c.typed)\t\(c.final)\t\(next)\t\(c.predicted.joined(separator: ","))")
-        }
-        textsOut.append("\(code)\t\(s)\t\(intended)\t\(text)")
-    }
-    FileHandle.standardError.write(Data("\(code): \(order.count) sentences replayed, hit test \(hitMode)\n".utf8))
+// #996: the keyboard's language model, a GGUF file (KB_LM), replayed once per weight of
+// KB_LM_WEIGHTS into <out>/w<weight>/. KB_LM_BUDGET_MS is the caller's wait; unset, every
+// answer is awaited, so the words measure the model and taps.tsv's lm_ms its time. The
+// answers are cached across weights: lm_ms is the model's time on the first weight only.
+let languageModel: KeyboardLanguageModel? = env["KB_LM"].flatMap { path in
+    guard !path.isEmpty else { return nil }
+    let budget = env["KB_LM_BUDGET_MS"].flatMap(Double.init).map { $0 / 1000 }
+    let model = KeyboardLanguageModel(budget: budget, cacheCapacity: 1_000_000, recordsTimings: true)
+    let start = DispatchTime.now().uptimeNanoseconds
+    model.load { LocalLanguageModel.open(path: path) }
+    model.waitForQueue()
+    guard model.isLoaded else { fatalError("cannot load \(path): is the bench built with --lm?") }
+    let ms = Double(DispatchTime.now().uptimeNanoseconds - start) / 1_000_000
+    FileHandle.standardError.write(Data("language model \(path) loaded in \(String(format: "%.0f", ms)) ms\n".utf8))
+    return model
 }
+let weights = languageModel == nil ? [0.0] : (env["KB_LM_WEIGHTS"] ?? "\(TextPredictionEngine.languageModelWeight)")
+    .components(separatedBy: ",").map { w -> Double in
+        guard let value = Double(w) else { fatalError("KB_LM_WEIGHTS: \(w) is not a number") }
+        return value
+    }
 
-// The user dictionary is the simulator's App Group store: leave it as empty as it was found.
-UserDictionary.shared.resetAll()
-journal?.finish(writingTo: "\(outDir)/journal.log")
+for weight in weights {
+    engine.setLanguageModel(languageModel, weight: weight)
+    let runDir = languageModel == nil || weights.count == 1 ? outDir : "\(outDir)/w\(weight)"
+    try? FileManager.default.createDirectory(atPath: runDir, withIntermediateDirectories: true)
 
-for (name, rows) in [("taps.tsv", tapsOut), ("commits.tsv", commitsOut), ("texts.tsv", textsOut)] {
-    do {
-        try (rows.joined(separator: "\n") + "\n").write(toFile: "\(outDir)/\(name)", atomically: true, encoding: .utf8)
-    } catch {
-        fatalError("cannot write \(outDir)/\(name): \(error)")
+    var tapsOut = ["lang\tsentence\ttap\tintended\tresolved\tx\ty\tengine_us\tplain\thit_ns\tvisited\tjournal_ns\tlm_ms"]
+    var commitsOut = ["lang\tsentence\tintended\ttyped\tfinal\tnext\tpredicted"]
+    var textsOut = ["lang\tsentence\tintended\tfinal"]
+
+    // The engine starts loading French as soon as it exists. A `setLanguage` issued before
+    // that load lands overlaps it: in an English-only run the French load then reported
+    // the English trie's word count (40000; the French file holds 39622).
+    waitUntilLoaded("initial")
+
+    for code in langs {
+        // "fr-learned" is the French keyboard on the fr-learned corpus and its learned words.
+        let langCode = code.components(separatedBy: "-")[0]
+        guard let lang = SupportedLanguage(rawValue: langCode) else { fatalError("unknown language \(code)") }
+        load(lang)
+        seedLearnedWords("\(benchDir)/corpus/\(code).words")
+        guard let page = KeyboardLayouts.current(needsGlobe: false).currentDeviceLayout?.normal else {
+            fatalError("no letter page for \(code)")
+        }
+        let cells = grid(page, width: w, height: h)
+        let sentences = readLines("\(corpusDir)/\(code).txt")
+        let run = readRun("\(runsDir)/\(code).tsv")
+
+        var model: KeyTargetModel?
+        if hitMode == "model" {
+            // Bundle.main is the directory run.sh copied the shipped dictionaries into.
+            guard let trie = PrefixMass(path: "\(Bundle.main.bundlePath)/\(code)_spellcheck.dict") else {
+                fatalError("cannot read \(code)_spellcheck.dict")
+            }
+            // The engine keeps its n-grams private: the spike opens the same file a second time.
+            var ngrams: AOSPTrieBridge?
+            if modelParameters.ngram {
+                let bridge = AOSPTrieBridge()
+                guard bridge.loadNgrams(atPath: "\(Bundle.main.bundlePath)/\(code)_ngrams.dict") else {
+                    fatalError("cannot read \(code)_ngrams.dict")
+                }
+                ngrams = bridge
+            }
+            model = KeyTargetModel(parameters: modelParameters, trie: trie, ngrams: ngrams)
+        }
+        let picker: Picker? = model.map { m in
+            { (m.pick($0, plain: $1, cells: cells, word: $2, previous: $3), m.visited) }
+        }
+
+        var order: [Int] = []
+        for tap in run where order.last != tap.sentence { order.append(tap.sentence) }
+        for s in order {
+            // A run of several passes keeps numbering its sentences: sentence s is corpus line s modulo its length.
+            let intended = sentences[s % sentences.count]
+            let intendedWords = intended.components(separatedBy: " ")
+            journal?.startSentence(keyboard: "\(langCode)-\(LayoutType.active.rawValue)", document: "\(code)-\(s)")
+            let (text, commits) = replay(run.filter { $0.sentence == s }, cells: cells, width: w, height: h,
+                                         picker: picker, journal: journal) { tap, resolved, p, us, pick, journalNs in
+                let lmMs = languageModel?.takeTimings().reduce(0) { $0 + $1.milliseconds } ?? 0
+                tapsOut.append("\(code)\t\(s)\t\(tap.index)\t\(tap.key)\t\(resolved)\t\(String(format: "%.2f", p.x))\t"
+                               + "\(String(format: "%.2f", p.y))\t\(us)\t\(pick.plain)\t\(pick.ns)\t\(pick.visited)\t\(journalNs)\t"
+                               + String(format: "%.2f", lmMs))
+            }
+            for c in commits {
+                let meant = c.intendedWords.map { intendedWords[$0] }.joined(separator: " ")
+                // The word the typist types next, which the prediction bar should offer.
+                let next = c.intendedWords.last.map { $0 + 1 < intendedWords.count ? intendedWords[$0 + 1] : "" } ?? ""
+                commitsOut.append("\(code)\t\(s)\t\(meant)\t\(c.typed)\t\(c.final)\t\(next)\t\(c.predicted.joined(separator: ","))")
+            }
+            textsOut.append("\(code)\t\(s)\t\(intended)\t\(text)")
+        }
+        FileHandle.standardError.write(Data("\(code): \(order.count) sentences replayed, hit test \(hitMode)\n".utf8))
+    }
+
+    // The user dictionary is the simulator's App Group store: leave it as empty as it was found.
+    UserDictionary.shared.resetAll()
+    journal?.finish(writingTo: "\(runDir)/journal.log")
+
+    for (name, rows) in [("taps.tsv", tapsOut), ("commits.tsv", commitsOut), ("texts.tsv", textsOut)] {
+        do {
+            try (rows.joined(separator: "\n") + "\n").write(toFile: "\(runDir)/\(name)", atomically: true, encoding: .utf8)
+        } catch {
+            fatalError("cannot write \(runDir)/\(name): \(error)")
+        }
     }
 }
