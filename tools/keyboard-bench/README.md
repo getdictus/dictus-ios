@@ -12,6 +12,7 @@ file says what each piece is.
 | File | What it is |
 |---|---|
 | `corpus/fr.txt`, `corpus/en.txt` | 20 everyday sentences per language, the text the typist means. Lowercase, no punctuation. |
+| `register.tsv` | Real autocorrect cases reported on #500: the text before the word, the word as typed, what was meant. Committed by the same space-bar path as the runs. |
 | `make_runs.py` | Turns the corpus into touch runs, with a fixed seed. Rerunning it rewrites the same files byte for byte. |
 | `corpus/<lang>-learned.txt`, `corpus/<lang>-learned.words` | 8 sentences per language around words the user taught the keyboard, and the learned words the replay seeds before typing them, with their usage counts (#498). |
 | `runs/fr.tsv`, `runs/en.tsv` | One row per tap: the key aimed at, where the finger lands relative to its centre (in key units), and when. Committed. |
@@ -32,8 +33,8 @@ xcrun simctl boot <udid>                    # headless; your own simulator
 tools/keyboard-bench/run.sh --udid <udid> > report.md
 ```
 
-About two minutes, most of it compiling DictusCore. Writes `taps.tsv`, `commits.tsv`
-and `texts.tsv` to `build/keyboard-bench/out/` and prints the report.
+About two minutes, most of it compiling DictusCore. Writes `taps.tsv`, `commits.tsv`,
+`texts.tsv` and `register.tsv` to `build/keyboard-bench/out/` and prints the report.
 
 ## What the replay runs
 

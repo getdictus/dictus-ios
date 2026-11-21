@@ -39,6 +39,15 @@ public let frenchProfile = LanguageProfile(
         "lai": "l'ai",                           // lai -> l'ai (je l'ai vu)
         "lest": "l'est"                         // lest -> l'est (il l'est)
     ],
+    // A possessive never follows a subject pronoun, so after one, "ma" and "ta"
+    // are a missed apostrophe (#500). "la" is left alone: "il la voit" is right.
+    contextOverrides: [
+        "il": ["ma": "m'a", "ta": "t'a"],
+        "elle": ["ma": "m'a", "ta": "t'a"],
+        "on": ["ma": "m'a", "ta": "t'a"],
+        "\u{00E7}a": ["ma": "m'a", "ta": "t'a"],   // ça ma plu -> ça m'a plu
+        "tu": ["ma": "m'as"]                      // tu ma dit -> tu m'as dit
+    ],
     accentMap: [
         "e": ["\u{00E9}", "\u{00E8}", "\u{00EA}", "\u{00EB}"],  // é, è, ê, ë
         "a": ["\u{00E0}", "\u{00E2}"],                          // à, â
