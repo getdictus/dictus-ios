@@ -274,6 +274,23 @@ final class TypingJournalTests: XCTestCase {
         XCTAssertEqual(outcome(whys: ["AUTOCORRECT-ABORT word=\"helo\" reason=boundary ctx=\"x\""]), "outcome=aborted")
     }
 
+    /// A fast space: the bar, updated off the main thread, still shows the completions
+    /// it computed for the previous keystroke ("arrib"), while the commit's decision for
+    /// "arribe" offered `arrive | arrivé` (#993). The outcome follows the decision; the
+    /// line keeps the bar as it was on screen.
+    func testOfferedComesFromTheDecisionWhenTheBarIsStillOnThePreviousKeystroke() {
+        let journal = recording()
+        let stale = TypingJournalBar(mode: "completions", words: ["arrib", "arriba", "arribes"])
+        journal.beginWord(typed: "arribe", previous: nil, committedBy: " ", bar: stale)
+        journal.endWord(final: "arribe", autocorrectRan: true, offered: true)
+        let line = written(journal).first { $0.hasPrefix("TJ WORD") }
+        XCTAssertEqual(
+            line,
+            "TJ WORD #1 typed=\"arribe\" prev=nil final=\"arribe\" outcome=offered by=space "
+                + "bar=completions[\"arrib\",\"arriba\",\"arribes\"] previews=0"
+        )
+    }
+
     func testEveryBranchOfTheDecisionIsKept() {
         let journal = recording()
         journal.beginWord(typed: "ill", previous: "tomorrow", committedBy: " ", bar: nil)
