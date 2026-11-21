@@ -152,7 +152,8 @@ struct LicensesView: View {
         "Classique" French dictionary of Grammalecte accepts (LibreOffice's fr_FR \
         dictionary, version 7.7). That dictionary is licensed under the Mozilla Public \
         License, version 2.0 (https://mozilla.org/MPL/2.0/). Its source form is \
-        available at https://github.com/LibreOffice/dictionaries/tree/master/fr_FR.
+        available at https://github.com/LibreOffice/dictionaries/tree/master/fr_FR. \
+        The model file fr.hextm, derived from it, is offered under the same licence.
         """
 
     private static let scowlNotice = """

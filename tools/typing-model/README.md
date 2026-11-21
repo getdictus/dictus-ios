@@ -21,9 +21,13 @@ MIT), described at the top of `build-typing-model.py`.
 - **French word list:** Grammalecte's "Classique" French dictionary, version 7.7, as
   LibreOffice ships it (`fr_FR/dictionaries/fr.dic` and `fr.aff`), under the
   [MPL 2.0](https://mozilla.org/MPL/2.0/). It only filters which Google Books words are
-  kept; the model holds none of its affix rules. The model is distributed with the MPL's
-  notice and where the dictionary's source form is
-  (<https://github.com/LibreOffice/dictionaries/tree/master/fr_FR>), in the Licences screen.
+  kept; the model holds none of its affix rules, but it does hold word forms the
+  dictionary generates. Read conservatively, that makes `fr.hextm` a file derived from
+  MPL-covered material, so `fr.hextm` itself is offered under the MPL 2.0, as Hex does
+  for its Spanish model (RLA-ES, MPL 1.1). The MPL is file-level: the rest of Dictus stays
+  MIT (MPL §3.3, Larger Work), and it allows App Store distribution. What it asks, and what
+  the Licences screen gives: the notice, the licence, and where the source form of the
+  dictionary is (<https://github.com/LibreOffice/dictionaries/tree/master/fr_FR>).
   Plus the elided clitics `c' d' j' l' m' n' s' t' qu' jusqu' lorsqu' puisqu' quoiqu'`,
   which Hunspell does not list on their own.
 
