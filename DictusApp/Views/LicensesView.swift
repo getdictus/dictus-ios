@@ -154,9 +154,9 @@ struct LicensesView: View {
     private static let hexNotice = """
         The keyboard's spatial autocorrect (its decoder, model format and model build \
         script) is ported from Hex. Its bilingual autocorrect follows Hex's: the second \
-        language fixes a typo only it can fix, the last words typed choose between two \
-        fixes, a word of the other language typed after words of that language stays, and \
-        a second language whose dictionary accepts any word is left out.
+        language fixes a typo only it can fix but never guesses a name, the last words typed \
+        choose between two fixes, a word of the other language typed after words of that \
+        language stays, and a second language whose dictionary accepts any word is left out.
         """
 
     private static let grammalecteNotice = """

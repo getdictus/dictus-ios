@@ -335,3 +335,37 @@ final class BilingualCheckOwnSpellingsTests: XCTestCase {
         XCTAssertEqual(decision.proposal?.autocorrection?.correction, "raté")
     }
 }
+
+/// What came from Hex's #2186 (dev `36197857`): the lean counts a word both languages have
+/// for the one that has it far more, and the other language's guess of a name is no fix.
+final class BilingualCheckHex2186Tests: XCTestCase {
+
+    /// The English trie has `le`, `projet` and `est` from books, 3.9 to 5.5 nats below
+    /// French: all three lean French.
+    func testAWordBothHaveCountsForTheOneThatHasItFarMore() {
+        XCTAssertEqual(LanguageLean.lean(before: "le projet est ", word: "x", active: french, other: english), -3)
+        XCTAssertEqual(LanguageLean.lean(before: "le projet est ", word: "x", active: english, other: french), 3)
+    }
+
+    /// `table` and `client` are as common in both: they still count for nothing.
+    func testAWordAsCommonInBothStillCountsForNothing() {
+        XCTAssertEqual(LanguageLean.lean(before: "table client ", word: "x", active: french, other: english), 0)
+    }
+
+    func testTheOtherLanguagesGuessOfANameIsNoFix() {
+        let decision = BilingualCheck.decide(
+            "ziri", before: "", active: english, other: french,
+            own: { _ in nil }, theirs: { .autocorrect("Zuri", alternatives: []) }
+        )
+        XCTAssertNil(decision.proposal)
+        XCTAssertEqual(decision.rule, .active)
+    }
+
+    func testACapitalTheTypistTypedIsNoNameGuess() {
+        let decision = BilingualCheck.decide(
+            "Teh", before: "", active: french, other: english,
+            own: { _ in nil }, theirs: { .autocorrect("The", alternatives: []) }
+        )
+        XCTAssertEqual(decision.proposal?.autocorrection?.correction, "The")
+    }
+}

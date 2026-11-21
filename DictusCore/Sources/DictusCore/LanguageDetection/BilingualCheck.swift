@@ -7,6 +7,9 @@
 // MIT, Copyright (c) 2026 Christopher Langton), and so does the rule that a word the
 // other language knows stays as typed, with its two-letter exception. For a correction
 // that only puts accents back, `BilingualKeepRule`, which compares frequencies, decides.
+// Hex #2186 (dev `36197857`) adds the rule that the other language's guess of a name is
+// never a fix, taken here, and the lean's count of the words both languages know
+// (`LanguageLean`).
 import Foundation
 
 /// The bilingual check (#1015): the window's language corrects the word, and the other
@@ -109,7 +112,7 @@ public enum BilingualCheck {
             // offers `déclare` for `decalee` (meant `décalée`), English would write `declare`.
             guard mayAskOther, !otherKnows, let theirProposal = theirs(),
                   let theirFix = theirProposal.autocorrection?.correction,
-                  !offers(ownProposal, theirFix) else {
+                  !offers(ownProposal, theirFix), !isNameGuess(theirFix, for: word) else {
                 return Decision(proposal: ownProposal, rule: .active)
             }
             return Decision(proposal: theirProposal, rule: .otherFixes)
@@ -130,7 +133,7 @@ public enum BilingualCheck {
         // The lean first: it reads tries only, the partner's correction is a second engine.
         guard mayAskOther, lean > 0, let theirProposal = theirs(),
               let theirFix = theirProposal.autocorrection?.correction,
-              theirFix.caseInsensitiveCompare(fix) != .orderedSame else {
+              theirFix.caseInsensitiveCompare(fix) != .orderedSame, !isNameGuess(theirFix, for: word) else {
             return Decision(proposal: ownProposal, rule: .active)
         }
         return Decision(proposal: theirProposal, rule: .otherByLean)
@@ -173,6 +176,14 @@ public enum BilingualCheck {
         guard let inActive = active.logFrequency(of: typed) else { return true }
         guard let inOther = other.logFrequency(of: typed) else { return true }
         return inOther > inActive
+    }
+
+    /// Whether the other language's fix is a name it guessed: a capital the typist did not
+    /// type. Hex #2186: "Ziri" became the partner's "Zuri". A name of the active language
+    /// is its own engine's to write (the lexicon, #873); the other one's is never a fix.
+    private static func isNameGuess(_ fix: String, for word: String) -> Bool {
+        guard let fixFirst = fix.first, let typedFirst = word.first else { return false }
+        return fixFirst.isUppercase && !typedFirst.isUppercase
     }
 
     /// Whether `proposal` offers `word` in the bar, accents and case aside.
