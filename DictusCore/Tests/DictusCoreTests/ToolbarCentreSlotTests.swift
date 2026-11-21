@@ -13,6 +13,7 @@ final class ToolbarCentreSlotTests: XCTestCase {
                          recoveredTranscriptionPending: Bool = false,
                          offersDictationUndo: Bool = false,
                          hasSuggestions: Bool = false,
+                         offersPaste: Bool = false,
                          dictationUnavailable: Bool = false,
                          polishUnavailable: Bool = false,
                          armedModeName: String? = nil,
@@ -25,6 +26,7 @@ final class ToolbarCentreSlotTests: XCTestCase {
             recoveredTranscriptionPending: recoveredTranscriptionPending,
             offersDictationUndo: offersDictationUndo,
             hasSuggestions: hasSuggestions,
+            offersPaste: offersPaste,
             dictationUnavailable: dictationUnavailable,
             polishUnavailable: polishUnavailable,
             armedModeName: armedModeName,
@@ -177,6 +179,30 @@ final class ToolbarCentreSlotTests: XCTestCase {
         XCTAssertFalse(ToolbarCentreSlot.armedMode("List").evictsHamburger)
         XCTAssertFalse(ToolbarCentreSlot.discoveryHint.evictsHamburger)
         XCTAssertFalse(ToolbarCentreSlot.empty.evictsHamburger)
+        XCTAssertFalse(ToolbarCentreSlot.paste.evictsHamburger)
+    }
+
+    // MARK: - Paste (#634)
+
+    /// Mid-word the user is typing, not pasting: the suggestions keep the slot.
+    func testSuggestionsOutrankPaste() {
+        XCTAssertEqual(resolve(hasSuggestions: true, offersPaste: true), .suggestions)
+    }
+
+    func testUndoOutranksPaste() {
+        XCTAssertEqual(resolve(offersDictationUndo: true, offersPaste: true), .dictationUndo)
+    }
+
+    /// Everything below the suggestions is a statement or a hint; Paste is the one
+    /// action, and it expires.
+    func testPasteOutranksEveryIdleOccupant() {
+        XCTAssertEqual(
+            resolve(
+                offersPaste: true, dictationUnavailable: true, polishUnavailable: true,
+                armedModeName: "List", offersPanelHint: true, offersDiscoveryHint: true
+            ),
+            .paste
+        )
     }
 
     // MARK: - Armed but not in force (#423)

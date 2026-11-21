@@ -14,6 +14,10 @@ first baseline is [`docs/research/954-keyboard-baseline/`](research/954-keyboard
 - **Corpus.** `tools/keyboard-bench/corpus/fr.txt` and `en.txt`: 20 everyday sentences
   each, written for this bench. Lowercase, no punctuation, no apostrophes, no digits.
   French keeps its accents: they are part of what autocorrect has to produce.
+  `es.txt` and `de.txt` (2026-11-19) hold 20 sentences each taken from Tatoeba, written
+  by native speakers and checked with LanguageTool and the macOS spelling checker
+  ([`research/multilingual-autocorrect/corpus.md`](research/multilingual-autocorrect/corpus.md)).
+  Spanish and German keep their accents, umlauts and `ß`.
 - **Touch runs.** `tools/keyboard-bench/runs/fr.tsv` and `en.tsv`: one row per tap.
   The typist types fast and plainly: lowercase, no accent typed (`tres` for `très`),
   one space after every word. Each tap aims at the centre of its key and lands off it
@@ -36,6 +40,15 @@ first baseline is [`docs/research/954-keyboard-baseline/`](research/954-keyboard
   `mixed` is the run the detection was designed on; `mixed-heldout` was written before
   any replay and is never tuned on.
 
+- **Typo runs.** `corpus/<lang>-typos.txt` and `.keys` for en, es, de: what the typist
+  means and what they type when they make the language's frequent real mistakes (no
+  apostrophe, no accent, umlauts as `ue` or `u`, plus one slip such as `teh` or `udn`
+  per sentence), from public typo corpora
+  ([`research/multilingual-autocorrect/typo-sources.md`](research/multilingual-autocorrect/typo-sources.md)).
+  `make_typos.py` writes the `.keys`; their taps land on the key centres, so these runs
+  measure what autocorrect does with the mistake alone. Pass
+  `--langs en-typos,es-typos,de-typos`.
+
 The touch model is chosen, not measured. It decides how many letters go wrong before
 any keyboard logic runs, so numbers are comparable between runs of the same files and
 not with typing studies. Changing it (`make_runs.py`) starts a new series.
@@ -47,7 +60,7 @@ not with typing studies. Changing it (`make_runs.py`) starts a new series.
 | Command | `run.sh` | `sim_replay.py` | typing by hand, then `score.py --typed` |
 | Takes | ~2 min | ~15 min per language and keyboard | ~10 min per language and keyboard |
 | Dictus | yes | yes | yes |
-| Apple | no | yes; English autocorrects, French does not (below) | yes |
+| Apple | no | yes; English autocorrects, French, Spanish and German do not (below) | yes |
 | Wrong letters | per tap | from the text | from the text |
 | Autocorrect outcomes | per word | from the text | from the text |
 | Missed spacebar | per tap, and glued words | glued words | glued words |
@@ -99,9 +112,24 @@ Taps keep the run's rhythm: `axe` sleeps between them for the run's own interval
 
 ### 3. Device
 
-What a device adds is the real finger and the real hardware. What it cannot give is
-the touch points: recording them needs code in the keyboard extension, which this
-protocol does not add.
+What a device adds is the real finger and the real hardware. A Release build gives no
+touch points. A Debug build records them in its typing journal (#1001), with the
+"Autocorrect debug logs" switch on (Settings, Developer): every tap with its key and
+its offset from the key centre, every committed word with its candidates, the bar, and
+what the user did next. Export the logs, then turn the session into a run and replay
+it before and after a change:
+
+```bash
+python3 -I tools/keyboard-bench/journal_to_run.py dictus-logs.txt build/keyboard-bench/session
+tools/keyboard-bench/run.sh --udid <udid> --langs fr-journal \
+    --corpus build/keyboard-bench/session/corpus --runs build/keyboard-bench/session/runs
+```
+
+A replayed session types every tap on the key it hit on the device: checked on the
+bench's own journal, 1604 of 1604 taps resolved to the same key and 306 of 307 words
+came out the same; the other one was capitalised, because the converter starts a new
+sentence at a return tap, as the device does. Taps on the symbols page, held-backspace
+repeats and words tapped in the bar do not replay; the converter counts them.
 
 **Accuracy.** For each keyboard (Apple's, then Dictus) and each language:
 
@@ -158,6 +186,11 @@ xcrun xctrace export --input build/keyboard-bench/device.trace \
   typed slowly, `tres prendrr ` stayed `Tres prendrr`, with Correction automatique on.
   Its English autocorrect does run. So the simulator gives Apple's French key choice,
   not its French autocorrect; a device run gives both.
+  Spanish and German behave the same (2026-11-19: `la estacion esta cerca y tegno que ir `
+  stayed as typed on Apple's Spanish keyboard). The cause is in the runtime: the iOS
+  26.5, 27.0 and 27.2 simulator runtimes hold English language data
+  (`System/Library/LinguisticData/RequiredAssets_en.bundle`, 97 MB) and empty bundles
+  for `es`, `de` and `fr` (4 KB each).
 - **The replay's grid has no dead bands; the real keyboard has some.** On the
   simulator, 4 of the 9 boundaries between top-row keys swallow a tap that lands within
   a 0.2 to 0.6 pt band, typing nothing (the a/z, e/r, y/u and i/o boundaries;
@@ -170,7 +203,10 @@ xcrun xctrace export --input build/keyboard-bench/device.trace \
 - **A third of a point.** `--grid-top` is read off pixels, a third of a point each. A
   replay tap that close to a row boundary can land in the other row on the real
   keyboard: one English tap at 53.99 pt in a 54 pt row typed `k` for `i`.
-- **Ties.** Some corrections are ties broken in hash order, which a device redraws on
-  every keyboard launch. The replay pins the seed; unset `SWIFT_DETERMINISTIC_HASHING`
-  in `run.sh` to see which words flip.
+- **Ties.** Until #993, some corrections were ties broken in hash order, which a device
+  redraws on every keyboard launch. They are now broken by cost, then by word: four
+  unseeded replays gave byte-identical commits
+  ([`research/993-autocorrect-confidence/`](research/993-autocorrect-confidence/README.md)).
+  The replay still pins the seed; unset `SWIFT_DETERMINISTIC_HASHING` in `run.sh` to
+  check that nothing flips.
 - **Simulator timing is not device timing**, and is only comparable on the same Mac.

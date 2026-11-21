@@ -10,6 +10,7 @@
 #   tools/keyboard-bench/run.sh --udid <booted simulator UDID> [--out <dir>]
 #       [--langs fr,en] [--width 402] [--height 216]
 #       [--corpus <dir>] [--runs <dir>] [--hit plain|model] [--model <spec>] [--no-build]
+#       [--debug] [--journal]
 #       [--pair fr,en [--probe <word,previous|word,...>]]
 #
 # --width and --height are the key grid in points. The defaults are an iPhone 17
@@ -20,6 +21,12 @@
 # picks each letter with tools/keyboard-bench/KeyTargetModel.swift instead of today's hit
 # test, --model sets its parameters (`sx=0.25,sy=0.25,core=0.25,w=1,floor=0.1,ngram=1,nw=1`),
 # and --no-build reuses the binary the previous run compiled.
+#
+# #1001: --debug compiles DictusCore, the engine and the bench with DEBUG, as a Debug
+# build of the keyboard is, so the typing journal exists; its toggle stays off.
+# --journal turns the toggle on and writes the journal of the replay to <dir>/journal.log.
+# The two give the journal's cost (taps.tsv's journal_ns) and show that it changes
+# nothing the keyboard types (commits.tsv and texts.tsv identical).
 #
 # #1009: --pair replays a bilingual keyboard (primary,secondary): every run under the
 # primary alone, the secondary alone, and language detection. --langs then takes corpus
@@ -40,6 +47,8 @@ RUNS="$ROOT/tools/keyboard-bench/runs"
 HIT="plain"
 MODEL=""
 BUILD_BENCH=1
+DEBUG=0
+JOURNAL=0
 PAIR=""
 PROBE=""
 while [[ $# -gt 0 ]]; do
@@ -54,6 +63,8 @@ while [[ $# -gt 0 ]]; do
         --hit) HIT="$2"; shift 2 ;;
         --model) MODEL="$2"; shift 2 ;;
         --no-build) BUILD_BENCH=0; shift ;;
+        --debug) DEBUG=1; shift ;;
+        --journal) DEBUG=1; JOURNAL=1; shift ;;
         --pair) PAIR="$2"; shift 2 ;;
         --probe) PROBE="$2"; shift 2 ;;
         *) echo "unknown argument: $1" >&2; exit 2 ;;
@@ -66,7 +77,10 @@ fi
 xcrun simctl list devices booted | grep -q "$UDID" || { echo "simulator $UDID is not booted" >&2; exit 1; }
 
 BENCH="$ROOT/tools/keyboard-bench"
-BUILD="$ROOT/build/keyboard-bench"
+# A DEBUG bench has its own build directory, so the two never reuse each other's binary.
+BUILD="$ROOT/build/keyboard-bench$([[ $DEBUG == 1 ]] && echo -debug || true)"
+DEFINES=()
+[[ $DEBUG == 1 ]] && DEFINES=(-D DEBUG)
 BIN="$BUILD/bin"
 SDK="$(xcrun --sdk iphonesimulator --show-sdk-path)"
 TARGET="arm64-apple-ios17.0-simulator"
@@ -78,7 +92,7 @@ OUT="$(cd "$OUT" && pwd)"
 if [[ $BUILD_BENCH == 1 ]]; then
     # Release settings of the DictusKeyboard target: Swift 5 mode, -O, no DEBUG, C++ gnu++20.
     echo "== DictusCore" >&2
-    xcrun swiftc -target "$TARGET" -sdk "$SDK" -swift-version 5 -O -parse-as-library \
+    xcrun swiftc -target "$TARGET" -sdk "$SDK" -swift-version 5 -O ${DEFINES[@]+"${DEFINES[@]}"} -parse-as-library \
         -module-name DictusCore -emit-module -emit-module-path "$BUILD/DictusCore.swiftmodule" \
         -emit-library -static -o "$BUILD/libDictusCore.a" \
         $(find "$ROOT/DictusCore/Sources/DictusCore" -name '*.swift' | sort) 2>"$BUILD/dictuscore.log" \
@@ -91,7 +105,7 @@ if [[ $BUILD_BENCH == 1 ]]; then
     done
 
     echo "== bench" >&2
-    xcrun swiftc -target "$TARGET" -sdk "$SDK" -swift-version 5 -O \
+    xcrun swiftc -target "$TARGET" -sdk "$SDK" -swift-version 5 -O ${DEFINES[@]+"${DEFINES[@]}"} \
         -I "$BUILD" -L "$BUILD" -lDictusCore -lc++ \
         -import-objc-header "$AOSP/bridge/AOSPTrieBridge.h" \
         "$ROOT/DictusKeyboard/TextPrediction/TextPredictionEngine.swift" \
@@ -102,6 +116,7 @@ if [[ $BUILD_BENCH == 1 ]]; then
         "$ROOT/DictusKeyboard/Vendored/Models/SystemKeys.swift" \
         "$BENCH/DeviceContext.swift" \
         "$BENCH/KeyTargetModel.swift" \
+        "$BENCH/Journal.swift" \
         "$BENCH/Bilingual.swift" \
         "$BENCH/main.swift" \
         "$BUILD"/obj/*.o -o "$BIN/keyboard-bench"
@@ -134,10 +149,10 @@ if [[ -n "$PAIR" ]]; then
     python3 -I "$BENCH/score_pair.py" --commit "$(git -C "$ROOT" rev-parse HEAD)" --pair "$PAIR" --dir "$OUT"
     exit 0
 fi
-SIMCTL_CHILD_SWIFT_DETERMINISTIC_HASHING=1 \
+SIMCTL_CHILD_SWIFT_DETERMINISTIC_HASHING=1 SIMCTL_CHILD_KB_JOURNAL="$JOURNAL" \
 SIMCTL_CHILD_KB_CORPUS="$CORPUS" SIMCTL_CHILD_KB_RUNS="$RUNS" SIMCTL_CHILD_KB_HIT="$HIT" SIMCTL_CHILD_KB_MODEL="$MODEL" \
     xcrun simctl spawn "$UDID" "$BIN/keyboard-bench" "$BENCH" "$LANGS" "$OUT" "$WIDTH" "$HEIGHT" \
     2> >(grep -v "Lexicon creation for" >&2) >&2
 
 python3 -I "$BENCH/score.py" --commit "$(git -C "$ROOT" rev-parse HEAD)" \
-    --keyboard "Dictus (replay, ${WIDTH}x${HEIGHT} pt grid, hit test: $HIT${MODEL:+ $MODEL})" --dir "$OUT"
+    --keyboard "Dictus (replay, ${WIDTH}x${HEIGHT} pt grid, hit test: $HIT${MODEL:+ $MODEL}$([[ $DEBUG == 1 ]] && echo ", DEBUG, journal $([[ $JOURNAL == 1 ]] && echo on || echo off)" || true))" --dir "$OUT"

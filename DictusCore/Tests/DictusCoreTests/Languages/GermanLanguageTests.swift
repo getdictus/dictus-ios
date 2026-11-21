@@ -74,81 +74,69 @@ final class GermanLanguageTests: XCTestCase {
         XCTAssertTrue(rules.contains(where: { $0 == ("ss", "\u{00DF}") }))
     }
 
-    func test_german_expandAccents_tuerCollapsesToTuer() {
+    func test_german_restoreAccents_tuerCollapsesToTuer() {
         // The motivating case: without the `ue → ü` rule, the trie's
         // edit-distance fallback returns `tier` (animal). With the rule,
         // `tuer` correctly collapses to `tür`.
         let provider = MockFrequencyProvider(frequencies: [
             "t\u{00FC}r": 30_000   // tür
         ])
-        XCTAssertEqual(
-            expandAccents(profile: germanProfile, word: "tuer", provider: provider),
-            "t\u{00FC}r"
+        XCTAssertEqual(restoreAccents(profile: germanProfile, word: "tuer", provider: provider), .restore("t\u{00FC}r")
         )
     }
 
-    func test_german_expandAccents_aeCollapsesForMaedchen() {
+    func test_german_restoreAccents_aeCollapsesForMaedchen() {
         let provider = MockFrequencyProvider(frequencies: [
             "m\u{00E4}dchen": 47_058   // mädchen
         ])
-        XCTAssertEqual(
-            expandAccents(profile: germanProfile, word: "maedchen", provider: provider),
-            "m\u{00E4}dchen"
+        XCTAssertEqual(restoreAccents(profile: germanProfile, word: "maedchen", provider: provider), .restore("m\u{00E4}dchen")
         )
     }
 
-    func test_german_expandAccents_oeCollapsesForKoennen() {
+    func test_german_restoreAccents_oeCollapsesForKoennen() {
         let provider = MockFrequencyProvider(frequencies: [
             "k\u{00F6}nnen": 60_000   // können
         ])
-        XCTAssertEqual(
-            expandAccents(profile: germanProfile, word: "koennen", provider: provider),
-            "k\u{00F6}nnen"
+        XCTAssertEqual(restoreAccents(profile: germanProfile, word: "koennen", provider: provider), .restore("k\u{00F6}nnen")
         )
     }
 
-    func test_german_expandAccents_ueDoesNotFalsePositiveOnBauer() {
+    func test_german_restoreAccents_ueDoesNotFalsePositiveOnBauer() {
         // `bauer` (farmer) contains `ue` but is itself a valid German word.
         // No `baür` exists, so no incorrect correction can fire.
         let provider = MockFrequencyProvider(frequencies: [
             "bauer": 5_000,   // valid German word
             // No "baür" entry — confirms the substitution candidate isn't real.
         ])
-        XCTAssertNil(expandAccents(profile: germanProfile, word: "bauer", provider: provider))
+        XCTAssertEqual(restoreAccents(profile: germanProfile, word: "bauer", provider: provider), .keepTyped)
     }
 
-    func test_german_expandAccents_uberCorrectsToUmlaut() {
+    func test_german_restoreAccents_uberCorrectsToUmlaut() {
         // "uber" not in dict → any matching accented variant wins.
         let provider = MockFrequencyProvider(frequencies: [
             "\u{00FC}ber": 60_000   // über
         ])
-        XCTAssertEqual(
-            expandAccents(profile: germanProfile, word: "uber", provider: provider),
-            "\u{00FC}ber"
+        XCTAssertEqual(restoreAccents(profile: germanProfile, word: "uber", provider: provider), .restore("\u{00FC}ber")
         )
     }
 
-    func test_german_expandAccents_schonCorrectsToUmlaut() {
+    func test_german_restoreAccents_schonCorrectsToUmlaut() {
         let provider = MockFrequencyProvider(frequencies: [
             "sch\u{00F6}n": 50_000   // schön
         ])
-        XCTAssertEqual(
-            expandAccents(profile: germanProfile, word: "schon", provider: provider),
-            "sch\u{00F6}n"
+        XCTAssertEqual(restoreAccents(profile: germanProfile, word: "schon", provider: provider), .restore("sch\u{00F6}n")
         )
     }
 
-    func test_german_expandAccents_madchenCorrectsToUmlaut() {
+    func test_german_restoreAccents_madchenCorrectsToUmlaut() {
         let provider = MockFrequencyProvider(frequencies: [
             "m\u{00E4}dchen": 25_000   // mädchen
         ])
-        XCTAssertEqual(
-            expandAccents(profile: germanProfile, word: "madchen", provider: provider),
-            "m\u{00E4}dchen"
+        XCTAssertEqual(restoreAccents(profile: germanProfile, word: "madchen", provider: provider), .restore("m\u{00E4}dchen")
         )
     }
 
-    func test_german_expandAccents_strasseCollapsesToEszett() {
+    func test_german_restoreAccents_strasseCollapsesToEszett() {
         // German `ss → ß` is implemented via collapseRules: the algorithm finds
         // each `ss` occurrence and tries the substitution. `strasse` has one
         // `ss` at position 4-5; substituting yields `straße`, which matches
@@ -156,64 +144,58 @@ final class GermanLanguageTests: XCTestCase {
         let provider = MockFrequencyProvider(frequencies: [
             "stra\u{00DF}e": 40_000   // straße
         ])
-        XCTAssertEqual(
-            expandAccents(profile: germanProfile, word: "strasse", provider: provider),
-            "stra\u{00DF}e"
+        XCTAssertEqual(restoreAccents(profile: germanProfile, word: "strasse", provider: provider), .restore("stra\u{00DF}e")
         )
     }
 
-    func test_german_expandAccents_weissCollapsesToWeiss() {
+    func test_german_restoreAccents_weissCollapsesToWeiss() {
         let provider = MockFrequencyProvider(frequencies: [
             "wei\u{00DF}": 60_000   // weiß
         ])
-        XCTAssertEqual(
-            expandAccents(profile: germanProfile, word: "weiss", provider: provider),
-            "wei\u{00DF}"
+        XCTAssertEqual(restoreAccents(profile: germanProfile, word: "weiss", provider: provider), .restore("wei\u{00DF}")
         )
     }
 
-    func test_german_expandAccents_grossCollapsesToGross() {
+    func test_german_restoreAccents_grossCollapsesToGross() {
         let provider = MockFrequencyProvider(frequencies: [
             "gro\u{00DF}": 50_000   // groß
         ])
-        XCTAssertEqual(
-            expandAccents(profile: germanProfile, word: "gross", provider: provider),
-            "gro\u{00DF}"
+        XCTAssertEqual(restoreAccents(profile: germanProfile, word: "gross", provider: provider), .restore("gro\u{00DF}")
         )
     }
 
-    func test_german_expandAccents_5xDominanceProtectsValidUnaccentedSsWord() {
+    func test_german_restoreAccents_typedWordOddsProtectValidUnaccentedSsWord() {
         // `muss` (1st/3rd-person singular of "müssen") is a valid German word
         // post-1996 spelling reform. The pre-reform `muß` may be in old corpora
-        // but `muss` dominates in modern text — the 5x rule keeps `muss` intact.
+        // but `muss` dominates in modern text, so `muss` stays.
         let provider = MockFrequencyProvider(frequencies: [
             "muss": 60_000,
-            "mu\u{00DF}": 9_000,   // muß (pre-reform), 0.15x — well below 5x threshold
+            "mu\u{00DF}": 9_000,   // muß (pre-reform), 0.15x
         ])
-        XCTAssertNil(expandAccents(profile: germanProfile, word: "muss", provider: provider),
-                     "5x dominance must protect modern `muss` against archaic `muß`.")
+        XCTAssertEqual(restoreAccents(profile: germanProfile, word: "muss", provider: provider), .keepTyped,
+                     "Modern `muss` must stay against archaic `muß`.")
     }
 
-    func test_german_expandAccents_returnsNilWhenCollapseTargetAbsent() {
+    func test_german_restoreAccents_returnsNilWhenCollapseTargetAbsent() {
         // No `weiß` in dict → `weiss` stays as-is.
         let provider = MockFrequencyProvider(frequencies: [:])
-        XCTAssertNil(expandAccents(profile: germanProfile, word: "weiss", provider: provider))
+        XCTAssertEqual(restoreAccents(profile: germanProfile, word: "weiss", provider: provider), .keepTyped)
     }
 
-    func test_german_expandAccents_5xDominanceProtectsValidUnaccentedWords() {
+    func test_german_restoreAccents_typedWordOddsProtectValidUnaccentedWords() {
         // If the unaccented form is itself in the dict and the umlaut form is only
-        // ~3x more common, the 5x rule keeps the input unchanged.
+        // ~3x more common, the input stays unchanged.
         let provider = MockFrequencyProvider(frequencies: [
             "schon": 10_000,                 // valid German word ("already")
             "sch\u{00F6}n": 30_000,          // schön ("beautiful") — only 3x
         ])
-        XCTAssertNil(expandAccents(profile: germanProfile, word: "schon", provider: provider),
-                     "5x dominance rule must protect 'schon' (already) when 'schön' is not 5x more frequent.")
+        XCTAssertEqual(restoreAccents(profile: germanProfile, word: "schon", provider: provider), .keepTyped,
+                     "'schon' (already) must stay when 'schön' is not 10x more frequent.")
     }
 
-    func test_german_expandAccents_returnsNilWhenNoMatch() {
+    func test_german_restoreAccents_returnsNilWhenNoMatch() {
         let provider = MockFrequencyProvider(frequencies: [:])
-        XCTAssertNil(expandAccents(profile: germanProfile, word: "uber", provider: provider))
+        XCTAssertEqual(restoreAccents(profile: germanProfile, word: "uber", provider: provider), .keepTyped)
     }
 
     // MARK: - Umlautersatz on the trie's real frequency scale (issue #326)
@@ -221,7 +203,7 @@ final class GermanLanguageTests: XCTestCase {
     /// Raw corpus counts taken verbatim from `DictusKeyboard/Resources/de_frequency.json`
     /// as it shipped before #326, plus the corpus maximum that anchors the
     /// normalization. The exact numbers matter: the whole point of these tests
-    /// is that the dominance rule behaves differently on raw counts than on the
+    /// is that a frequency rule behaves differently on raw counts than on the
     /// values the trie stores, and inventing round numbers hides that.
     private static let germanCorpusMaxFrequency = 5_890_279  // "ich"
     private static let germanUmlautersatzCorpusCounts: [String: Int] = [
@@ -233,8 +215,8 @@ final class GermanLanguageTests: XCTestCase {
     func test_logNormalizedProvider_reproducesTheFrequencyTheDeviceLogged() {
         // #321's device log printed `TRIE-CANDIDATES word="feur" winner="für"(freq=56787)`.
         // Recomputing 56787 from the raw corpus count of `für` is what identifies
-        // the scale the 5x dominance rule is actually comparing on: the trie
-        // stores `65535 * ln(1+freq) / ln(1+max)`, not the corpus count.
+        // the scale the trie stores: `65535 * ln(1+freq) / ln(1+max)`, not the
+        // corpus count.
         let provider = LogNormalizedFrequencyProvider(
             rawFrequencies: Self.germanUmlautersatzCorpusCounts,
             maxFrequency: Self.germanCorpusMaxFrequency
@@ -243,32 +225,37 @@ final class GermanLanguageTests: XCTestCase {
         XCTAssertEqual(provider.frequency(of: "fuer"), 27_617)
     }
 
-    func test_german_expandAccents_umlautersatzFails_whenTheAsciiFormIsInTheDictionary() {
-        // The pre-#326 device behaviour, reproduced. In raw corpus counts these
-        // pairs clear the 5x bar by three orders of magnitude (1033x, 1185x,
-        // 1338x). Stored, they are 2.06x, 2.57x and 2.38x — all under 5x, so
-        // `expandAccents` returns nil and the engine falls through to the
-        // valid-word guard, which logs `AUTOCORRECT-SKIP reason=already-valid`.
-        //
-        // This is why the fix is to curate these forms out of the dictionary
-        // rather than to reorder the guard: with the ASCII form present, no
-        // ordering change reaches a correction. Clearing 5x in stored space needs
-        // the target to be roughly the input raised to the fifth power, which
-        // nothing inside a 40K corpus reaches.
+    func test_logNormalizedScale_recoversTheCorpusCount() {
+        // #994: the stored values compress 1033x into 2.06x, but the log inverts. The
+        // count comes back within 0.03 %, so a ratio between two words is exact enough
+        // for `AccentRestoration`.
         let provider = LogNormalizedFrequencyProvider(
             rawFrequencies: Self.germanUmlautersatzCorpusCounts,
             maxFrequency: Self.germanCorpusMaxFrequency
         )
-        XCTAssertNil(expandAccents(profile: germanProfile, word: "fuer", provider: provider))
-        XCTAssertNil(expandAccents(profile: germanProfile, word: "schoen", provider: provider))
-        XCTAssertNil(expandAccents(profile: germanProfile, word: "koennen", provider: provider))
+        XCTAssertEqual(provider.corpusCount(of: "f\u{00FC}r"), 735_252, accuracy: 735_252 * 0.0003)
+        XCTAssertEqual(provider.corpusCount(of: "fuer"), 712, accuracy: 712 * 0.0003)
+        XCTAssertEqual(provider.corpusCount(of: "absent"), 0)
     }
 
-    func test_german_expandAccents_umlautersatzCorrects_whenTheAsciiFormIsCuratedOut() {
+    func test_german_restoreAccents_umlautersatzCorrects_whenTheAsciiFormIsInTheDictionary() {
+        // Before #994 the rule compared the stored values. In raw corpus counts these
+        // pairs are 1033x, 1185x and 1338x; stored, 2.06x, 2.57x and 2.38x, under the
+        // old 5x bar, so the ASCII form stayed. On the recovered counts they clear
+        // `AccentRestoration.typedWordOdds` with room to spare.
+        let provider = LogNormalizedFrequencyProvider(
+            rawFrequencies: Self.germanUmlautersatzCorpusCounts,
+            maxFrequency: Self.germanCorpusMaxFrequency
+        )
+        XCTAssertEqual(restoreAccents(profile: germanProfile, word: "fuer", provider: provider), .restore("f\u{00FC}r"))
+        XCTAssertEqual(restoreAccents(profile: germanProfile, word: "schoen", provider: provider), .restore("sch\u{00F6}n"))
+        XCTAssertEqual(restoreAccents(profile: germanProfile, word: "koennen", provider: provider), .restore("k\u{00F6}nnen"))
+    }
+
+    func test_german_restoreAccents_umlautersatzCorrects_whenTheAsciiFormIsCuratedOut() {
         // The post-#326 dictionary: `scripts/curate_de_dictionary.py` drops the
-        // transliterations, so `expandAccents` takes its `input frequency == 0`
-        // branch and returns the umlaut form without consulting the dominance
-        // rule at all. Same provider, same scale, same corpus counts for the
+        // transliterations, so `restoreAccents` has no typed word to weigh and
+        // returns the umlaut form. Same provider, same scale, same corpus counts for the
         // umlaut words — only the ASCII entries are gone.
         var counts = Self.germanUmlautersatzCorpusCounts
         for ascii in ["fuer", "schoen", "koennen"] {
@@ -278,9 +265,9 @@ final class GermanLanguageTests: XCTestCase {
             rawFrequencies: counts,
             maxFrequency: Self.germanCorpusMaxFrequency
         )
-        XCTAssertEqual(expandAccents(profile: germanProfile, word: "fuer", provider: provider), "f\u{00FC}r")
-        XCTAssertEqual(expandAccents(profile: germanProfile, word: "schoen", provider: provider), "sch\u{00F6}n")
-        XCTAssertEqual(expandAccents(profile: germanProfile, word: "koennen", provider: provider), "k\u{00F6}nnen")
+        XCTAssertEqual(restoreAccents(profile: germanProfile, word: "fuer", provider: provider), .restore("f\u{00FC}r"))
+        XCTAssertEqual(restoreAccents(profile: germanProfile, word: "schoen", provider: provider), .restore("sch\u{00F6}n"))
+        XCTAssertEqual(restoreAccents(profile: germanProfile, word: "koennen", provider: provider), .restore("k\u{00F6}nnen"))
     }
 
     // MARK: - The shipped German dictionary (issue #326)

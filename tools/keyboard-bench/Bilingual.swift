@@ -64,7 +64,7 @@ final class DetectingCorrector: Corrector {
     var language: SupportedLanguage { window.language }
     var typingEngine: TextPredictionEngine { engine(window.language) }
 
-    func proposal(for word: String, previous: String?, isAtSentenceStart: Bool) -> String? {
+    func proposal(for word: String, previous: String?, isAtSentenceStart: Bool) -> CorrectionProposal? {
         let pair = window.pair
         window.push(WordLanguageVote.vote(for: word, after: previous, primary: source(pair.primary),
                                           secondary: source(pair.secondary)))
@@ -74,7 +74,7 @@ final class DetectingCorrector: Corrector {
         else { return nil }
         let kept = BilingualKeepRule.keepsTyped(word, over: correction, active: source(active),
                                                 other: source(pair.other(than: active)))
-        return kept ? nil : correction
+        return kept ? nil : .autocorrect(correction, alternatives: [])
     }
 
     private func engine(_ language: SupportedLanguage) -> TextPredictionEngine {
@@ -184,7 +184,7 @@ func replayPair(_ pair: KeyboardLanguagePair, runs: [String], corpusDir: String,
                 let line = s % sentences.count
                 let intendedWords = sentences[line].components(separatedBy: " ")
                 let (_, commits) = replay(run.filter { $0.sentence == s }, cells: cells, width: width, height: height,
-                                          picker: nil, corrector: corrector) { _, resolved, _, us, _ in
+                                          picker: nil, journal: nil, corrector: corrector) { _, resolved, _, us, _, _ in
                     switch resolved {
                     case "space": costOut.append("\(label)\t\(policy)\tspace\t\(us)")
                     case "none", "backspace", "shift", "return", "123", "spacer", "other": break

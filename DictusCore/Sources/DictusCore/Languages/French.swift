@@ -52,5 +52,49 @@ public let frenchProfile = LanguageProfile(
         "l'", "d'", "c'", "j'", "n'", "s'", "m'", "t'",
         // 2-character prefix (qu')
         "qu'"
-    ]
+    ],
+    elisionRepair: ElisionRepair(
+        // AZERTY neighbours of the prefix that was meant. Valid prefixes are not keys.
+        prefixSlips: [
+            "v": "c", "x": "c",              // v'est, x'est → c'est
+            "f": "d",                        // f'un → d'un
+            "g": "j", "h": "j", "k": "j",    // g'ai, h'ai, k'ai → j'ai
+            "b": "n",                        // b'est → n'est
+            "y": "t", "r": "t", "u": "t",    // y'es, r'es, u'es → t'es
+            "q": "qu",                       // q'il → qu'il
+            "qy": "qu", "qi": "qu", "qj": "qu"  // the keys left of, right of and under `u`
+        ],
+        // The key left of the apostrophe on the AZERTY letter page: `qunil` → `qu'il`.
+        apostropheNeighbours: ["n"],
+        // Only the elisions a slip or a space is repaired into: the shapes also occur
+        // inside words and their typos.
+        elidedWords: [
+            "qu": ["il", "ils", "elle", "elles", "on", "un", "une"],
+            "c": ["est", "\u{00E9}tait"]  // est, était
+        ]
+    ),
+    // `il est arrive` → `arrivé`, `il arrive` stays (#994). The auxiliaries être and
+    // avoir in their simple tenses, and the adverbs that sit between an auxiliary and
+    // its participle (`sont déjà couchés`, `était presque déchargé`). French puts these
+    // adverbs after a conjugated verb, so before one they announce a participle.
+    // Excluded: `été`, also the noun (`l'été arrive`), and `tout`, also a pronoun
+    // (`tout arrive`).
+    participleContext: ParticipleContext(
+        triggers: [
+            "suis", "es", "est", "sommes", "\u{00EA}tes", "sont",
+            "\u{00E9}tais", "\u{00E9}tait", "\u{00E9}tions", "\u{00E9}tiez", "\u{00E9}taient",
+            "serai", "seras", "sera", "serons", "serez", "seront",
+            "serais", "serait", "serions", "seriez", "seraient",
+            "sois", "soit", "soyons", "soyez", "soient", "\u{00EA}tre", "\u{00E9}tant",
+            "ai", "as", "a", "avons", "avez", "ont",
+            "avais", "avait", "avions", "aviez", "avaient",
+            "aurai", "auras", "aura", "aurons", "aurez", "auront",
+            "aurais", "aurait", "aurions", "auriez", "auraient",
+            "aie", "aies", "ait", "ayons", "ayez", "aient", "eu", "avoir", "ayant",
+            "d\u{00E9}j\u{00E0}", "presque", "bien", "pas", "jamais", "encore", "toujours",
+            "plus", "rien", "vraiment", "trop", "tr\u{00E8}s", "souvent", "tellement",
+            "compl\u{00E8}tement"
+        ],
+        endings: ["\u{00E9}", "\u{00E9}e", "\u{00E9}s", "\u{00E9}es"]  // é, ée, és, ées
+    )
 )

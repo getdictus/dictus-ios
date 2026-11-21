@@ -10,6 +10,7 @@ import Foundation
 /// and assert that the algorithm picks the right candidate.
 final class MockFrequencyProvider: FrequencyProvider {
     var isReady: Bool = true
+    let frequencyScale = FrequencyScale.corpusCount
     var frequencies: [String: UInt16] = [:]
 
     init(isReady: Bool = true, frequencies: [String: UInt16] = [:]) {

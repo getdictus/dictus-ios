@@ -1,8 +1,7 @@
 // DictusCore/Tests/DictusCoreTests/AccentExpanderTests.swift
-// Algorithm-level regression tests for expandAccents.
-// Confirms the accent-expansion behavior previously inside
-// AOSPTrieEngine.accentExpansion is preserved when driven by a
-// LanguageProfile + FrequencyProvider — including the 5x dominance rule.
+// Algorithm-level regression tests for restoreAccents: which spellings it generates,
+// driven by a LanguageProfile + FrequencyProvider. The decision itself is pinned on
+// real corpus counts in AccentRestorationTests.
 import XCTest
 @testable import DictusCore
 
@@ -15,9 +14,7 @@ final class AccentExpanderTests: XCTestCase {
         let provider = MockFrequencyProvider(frequencies: [
             "tr\u{00E8}s": 50_000  // "très"
         ])
-        XCTAssertEqual(
-            expandAccents(profile: frenchProfile, word: "tres", provider: provider),
-            "tr\u{00E8}s"
+        XCTAssertEqual(restoreAccents(profile: frenchProfile, word: "tres", provider: provider), .restore("tr\u{00E8}s")
         )
     }
 
@@ -29,9 +26,7 @@ final class AccentExpanderTests: XCTestCase {
             "\u{00E2}pres": 200,        // âpres (rare)
             "apr\u{00E8}s": 60_000,     // après (common)
         ])
-        XCTAssertEqual(
-            expandAccents(profile: frenchProfile, word: "apres", provider: provider),
-            "apr\u{00E8}s"
+        XCTAssertEqual(restoreAccents(profile: frenchProfile, word: "apres", provider: provider), .restore("apr\u{00E8}s")
         )
     }
 
@@ -39,44 +34,38 @@ final class AccentExpanderTests: XCTestCase {
         let provider = MockFrequencyProvider(frequencies: [
             "d\u{00E9}j\u{00E0}": 60_000  // déjà
         ])
-        XCTAssertEqual(
-            expandAccents(profile: frenchProfile, word: "deja", provider: provider),
-            "d\u{00E9}j\u{00E0}"
+        XCTAssertEqual(restoreAccents(profile: frenchProfile, word: "deja", provider: provider), .restore("d\u{00E9}j\u{00E0}")
         )
     }
 
-    // MARK: - 5x dominance rule
+    // MARK: - Typed word odds
 
-    func test_french_publie_returnsNil_whenInputItselfIsValidAndNotDominated() {
+    func test_french_publie_keepsTyped_whenInputItselfIsValidAndNotDominated() {
         // "publie" is a valid French verb form (je publie). The accented "publié"
-        // exists too, but only ~3x more common. The 5x rule rejects.
+        // exists too, but only ~3x more common.
         let provider = MockFrequencyProvider(frequencies: [
             "publie": 10_000,
-            "publi\u{00E9}": 30_000,  // 3x dominance — below threshold
+            "publi\u{00E9}": 30_000,  // 3x — below `typedWordOdds`
         ])
-        XCTAssertNil(expandAccents(profile: frenchProfile, word: "publie", provider: provider))
+        XCTAssertEqual(restoreAccents(profile: frenchProfile, word: "publie", provider: provider), .keepTyped)
     }
 
-    func test_french_publie_correctsToPublie_when5xDominated() {
+    func test_french_publie_correctsToPublie_when10xDominated() {
         let provider = MockFrequencyProvider(frequencies: [
-            "publie": 10_000,
-            "publi\u{00E9}": 60_000,  // 6x dominance over 10_000 — above threshold
+            "publie": 1_000,
+            "publi\u{00E9}": 11_000,  // 11x over 1_000 — above `typedWordOdds`
         ])
-        XCTAssertEqual(
-            expandAccents(profile: frenchProfile, word: "publie", provider: provider),
-            "publi\u{00E9}"
+        XCTAssertEqual(restoreAccents(profile: frenchProfile, word: "publie", provider: provider), .restore("publi\u{00E9}")
         )
     }
 
-    func test_french_5xRule_skippedWhenInputAbsentFromDict() {
+    func test_french_typedWordOdds_skippedWhenInputAbsentFromDict() {
         // When the unaccented form is not in the dict at all, ANY matching
         // accented form wins — even at low frequency.
         let provider = MockFrequencyProvider(frequencies: [
             "rarewordwithaccent\u{00E9}": 5  // tiny frequency, but unaccented form is absent
         ])
-        XCTAssertEqual(
-            expandAccents(profile: frenchProfile, word: "rarewordwithaccente", provider: provider),
-            "rarewordwithaccent\u{00E9}"
+        XCTAssertEqual(restoreAccents(profile: frenchProfile, word: "rarewordwithaccente", provider: provider), .restore("rarewordwithaccent\u{00E9}")
         )
     }
 
@@ -86,47 +75,45 @@ final class AccentExpanderTests: XCTestCase {
         let provider = MockFrequencyProvider(frequencies: [
             "espa\u{00F1}ol": 60_000  // español
         ])
-        XCTAssertEqual(
-            expandAccents(profile: spanishProfile, word: "espanol", provider: provider),
-            "espa\u{00F1}ol"
+        XCTAssertEqual(restoreAccents(profile: spanishProfile, word: "espanol", provider: provider), .restore("espa\u{00F1}ol")
         )
     }
 
     // MARK: - English (empty accent map)
 
-    func test_english_returnsNil_becauseAccentMapEmpty() {
+    func test_english_keepsTyped_becauseAccentMapEmpty() {
         let provider = MockFrequencyProvider(frequencies: [
             "caf\u{00E9}": 60_000  // even if "café" is in dict
         ])
-        XCTAssertNil(expandAccents(profile: englishProfile, word: "cafe", provider: provider))
+        XCTAssertEqual(restoreAccents(profile: englishProfile, word: "cafe", provider: provider), .keepTyped)
     }
 
     // MARK: - Negative cases
 
-    func test_returnsNil_whenNoAccentablePositions() {
+    func test_keepsTyped_whenNoAccentablePositions() {
         // "xyz" has no characters in the French accent map.
         let provider = MockFrequencyProvider(frequencies: [:])
-        XCTAssertNil(expandAccents(profile: frenchProfile, word: "xyz", provider: provider))
+        XCTAssertEqual(restoreAccents(profile: frenchProfile, word: "xyz", provider: provider), .keepTyped)
     }
 
-    func test_returnsNil_whenNoVariantMatchesDict() {
+    func test_keepsTyped_whenNoVariantMatchesDict() {
         let provider = MockFrequencyProvider(frequencies: [:])
-        XCTAssertNil(expandAccents(profile: frenchProfile, word: "tres", provider: provider))
+        XCTAssertEqual(restoreAccents(profile: frenchProfile, word: "tres", provider: provider), .keepTyped)
     }
 
-    func test_returnsNil_forShortInput() {
+    func test_keepsTyped_forShortInput() {
         let provider = MockFrequencyProvider(frequencies: [
             "\u{00E0}": 1000
         ])
-        XCTAssertNil(expandAccents(profile: frenchProfile, word: "a", provider: provider))
+        XCTAssertEqual(restoreAccents(profile: frenchProfile, word: "a", provider: provider), .keepTyped)
     }
 
-    func test_returnsNil_whenProviderNotReady() {
+    func test_keepsTyped_whenProviderNotReady() {
         let provider = MockFrequencyProvider(
             isReady: false,
             frequencies: ["tr\u{00E8}s": 50_000]
         )
-        XCTAssertNil(expandAccents(profile: frenchProfile, word: "tres", provider: provider))
+        XCTAssertEqual(restoreAccents(profile: frenchProfile, word: "tres", provider: provider), .keepTyped)
     }
 
     // MARK: - Frequency-fallback behavior (freq=0 but wordExists)
@@ -139,9 +126,7 @@ final class AccentExpanderTests: XCTestCase {
         let provider = MockFrequencyProvider(frequencies: [
             "tr\u{00E8}s": 0  // present in dict (wordExists = true) but freq=0
         ])
-        XCTAssertEqual(
-            expandAccents(profile: frenchProfile, word: "tres", provider: provider),
-            "tr\u{00E8}s"
+        XCTAssertEqual(restoreAccents(profile: frenchProfile, word: "tres", provider: provider), .restore("tr\u{00E8}s")
         )
     }
 }
