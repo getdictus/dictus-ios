@@ -61,6 +61,10 @@ class ModelManager: ObservableObject {
     /// The currently selected model identifier for transcription.
     @Published var activeModel: String?
 
+    /// Whether the user dictates with the downloaded `activeModel` or with Apple's
+    /// on-device recognizer. `activeModel` keeps naming the downloaded model either way.
+    @Published private(set) var speechEngineChoice: SpeechEngineChoice = .downloadedModel
+
     /// Per-model download progress (0.0 to 1.0). Only populated during active downloads.
     @Published var downloadProgress: [String: Float] = [:]
 
@@ -260,6 +264,7 @@ class ModelManager: ObservableObject {
             downloadedModels = models
         }
         activeModel = defaults.string(forKey: SharedKeys.activeModel)
+        speechEngineChoice = SpeechEngineChoice.read(from: defaults)
 
         // Resync modelStates with loaded downloadedModels so models downloaded
         // by onboarding's separate ModelManager instance show as .ready here.
@@ -1330,6 +1335,9 @@ class ModelManager: ObservableObject {
         guard downloadedModels.contains(identifier) else { return }
 
         activeModel = identifier
+        // Picking a downloaded model is also leaving Apple's engine, if it was the choice.
+        speechEngineChoice = .downloadedModel
+        SpeechEngineChoice.write(.downloadedModel, to: defaults)
         persistState()
         PersistentLog.log(.modelSelected(name: identifier))
         // Trigger an eager load so the model is in RAM before the next mic tap.
@@ -1394,17 +1402,6 @@ class ModelManager: ObservableObject {
         PersistentLog.log(.modelDeleted(name: identifier, engine: engine.displayName))
     }
 
-    /// Checks if a model is the variant recommended for this device and the user's
-    /// language (#649), the same one the onboarding installed.
-    ///
-    /// WHY delegate to ModelInfo:
-    /// The recommendation logic is catalogue-level and belongs in the catalog layer
-    /// (ModelInfo), not the state manager. This instance method preserves the
-    /// call-site signature so views don't need to change.
-    func isRecommended(_ identifier: String) -> Bool {
-        ModelInfo.isRecommended(identifier)
-    }
-
     /// Cleans up a failed model's files and resets its state to not downloaded.
     /// Called from the error card's overflow menu ("Delete partial download",
     /// issue #235) when the user wants to free disk space instead of retrying.
@@ -1454,11 +1451,6 @@ class ModelManager: ObservableObject {
         persistState()
     }
 
-    /// Whether at least one model is downloaded and ready for transcription.
-    var isModelReady: Bool {
-        !downloadedModels.isEmpty && activeModel != nil
-    }
-
     // MARK: - Private
 
     /// How a compile the app had already given up on eventually ended, for the debug
@@ -1493,6 +1485,41 @@ class ModelManager: ObservableObject {
         // chooses it. The stricter definition is the one the flag has always claimed.
         defaults.set(isModelReady, forKey: SharedKeys.modelReady)
         defaults.synchronize()
+    }
+}
+
+// MARK: - Catalogue and readiness queries
+
+// Moved out of the class body unchanged: it sits at the `type_body_length` budget.
+extension ModelManager {
+    /// Checks if a model is the variant recommended for this device and the user's
+    /// language (#649), the same one the onboarding installed.
+    ///
+    /// WHY delegate to ModelInfo:
+    /// The recommendation logic is catalogue-level and belongs in the catalog layer
+    /// (ModelInfo), not the state manager. This instance method preserves the
+    /// call-site signature so views don't need to change.
+    func isRecommended(_ identifier: String) -> Bool {
+        ModelInfo.isRecommended(identifier)
+    }
+
+    /// Whether at least one model is downloaded and ready for transcription.
+    var isModelReady: Bool {
+        !downloadedModels.isEmpty && activeModel != nil
+    }
+}
+
+// MARK: - Apple's engine
+
+extension ModelManager {
+    /// Dictate with Apple's on-device recognizer. Called by the Apple card once its model
+    /// is installed for the chosen language. `activeModel` is kept, as the engine the app
+    /// falls back to whenever Apple cannot run.
+    func selectAppleEngine() {
+        speechEngineChoice = .apple
+        SpeechEngineChoice.write(.apple, to: AppGroup.defaults)
+        PersistentLog.log(.modelSelected(name: AppleSpeechEngineIdentity.identifier))
+        DictationCoordinator.shared.adoptAppleEngine()
     }
 }
 

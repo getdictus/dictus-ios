@@ -346,7 +346,8 @@ class DictationCoordinator: ObservableObject {
     /// invisible to the keyboard by construction.
     func transcribeVoiceNoteChunk(_ samples: [Float], languagePolicy: TranscriptionLanguagePolicy) async throws -> String {
         try await ensureEngineReady()
-        let text = try await transcriptionService.transcribe(audioSamples: samples, languagePolicy: languagePolicy)
+        let text = try await transcriptionService.transcribe(audioSamples: samples,
+                                                             languagePolicy: languagePolicyForLoadedEngine(languagePolicy))
         return DictationTranscript.corrected(text).text
     }
 
@@ -995,7 +996,7 @@ class DictationCoordinator: ObservableObject {
                 // another. The policy is also engine-aware: with Parakeet
                 // active the setting is Whisper-only-effective, so every mode
                 // resolves to the historical follow behavior.
-                let languagePolicy = TranscriptionLanguagePolicy.snapshot()
+                let languagePolicy = languagePolicyForLoadedEngine(TranscriptionLanguagePolicy.snapshot())
 
                 // The armed Smart Mode is part of the same per-dictation snapshot
                 // (#79), taken here for the reason #226 introduced the language one:
@@ -1550,6 +1551,15 @@ private extension DictationCoordinator {
     ///
     /// Falls back to the active model from App Group, then to "openai_whisper-small".
     func ensureEngineReady(preferredModel: String? = nil) async throws {
+        // Apple's on-device recognizer first, when the user picked it on the Models screen
+        // and it is ready for the chosen language right now; otherwise the downloaded model,
+        // as before the choice existed (`EffectiveSpeechEngine`). A preferred model is an
+        // explicit request for that model, so it never resolves to Apple.
+        if preferredModel == nil, case .apple(let code) = await AppleEngineAssets.effectiveEngine() {
+            installAppleEngine(languageCode: code)
+            return
+        }
+
         let modelName = preferredModel
             ?? defaults.string(forKey: SharedKeys.activeModel)
             ?? "openai_whisper-small"
@@ -1565,9 +1575,25 @@ private extension DictationCoordinator {
             // FluidAudio 0.15.7's, and the catalogue hides Nemotron below it (#558).
             try await ensureNemotronReady(modelName: modelName)
         case .whisperKit, .apple:
-            // `.apple` is unreachable here: no catalogue entry has that engine.
+            // `.apple` is unreachable here: no catalogue entry has that engine, and the
+            // Apple choice was resolved above, before any model name.
             try await ensureWhisperKitEngineReady(modelName: modelName)
         }
+    }
+
+    /// Make Apple's recognizer the engine `TranscriptionService` calls.
+    ///
+    /// No lock, no Neural Engine gate, no warm inference: nothing is compiled or loaded in
+    /// this process, the model runs in Apple's speech daemon. The downloaded model's engine
+    /// is released, as a switch to another model would release it, so its memory goes back.
+    func installAppleEngine(languageCode: String) {
+        guard currentModelName != AppleSpeechEngineIdentity.identifier else { return }
+        guard let recognizer = OnDeviceRecognizerFactory.make() else { return }
+        let engine = AppleSpeechEngine(recognizer: recognizer, languageCode: languageCode)
+        whisperKit = nil
+        currentModelName = AppleSpeechEngineIdentity.identifier
+        transcriptionService.prepare(engine: engine)
+        AppleEngineAssets.log("engineInstalled", "engine=\(engine.engineName) lang=\(languageCode)")
     }
 
     /// Initialize WhisperKit with the preferred model if not already loaded.
@@ -1882,6 +1908,36 @@ private extension DictationCoordinator {
             ))
             throw wrapped
         }
+    }
+}
+
+// MARK: - Apple's engine (Models screen)
+
+extension DictationCoordinator {
+    /// Load Apple's engine right after the user picks it, so the next dictation does not
+    /// have to. Unlike `preloadActiveModel` it leaves `modelLoadState` alone: there is no
+    /// model preparation to show, and a `.loading` state would put the downloaded model's
+    /// preparation screen over the Models screen for a load that is not happening.
+    func adoptAppleEngine() {
+        Task {
+            do {
+                try await ensureEngineReady()
+                AppleEngineAssets.log("adopted", "engine=\(self.currentModelName ?? "none")")
+            } catch {
+                AppleEngineAssets.log("adoptFailed", "error=\(DictationFailureMessage.diagnostic(for: error))")
+            }
+        }
+    }
+
+    /// The dictation's language policy with the engine that will actually transcribe it.
+    ///
+    /// `TranscriptionLanguagePolicy.snapshot()` names the engine of `activeModel`, which
+    /// stays the downloaded model when Apple is picked. Apple is told the chosen language
+    /// and is polished as a forced-language engine, so its dictations carry `.apple`.
+    func languagePolicyForLoadedEngine(_ policy: TranscriptionLanguagePolicy) -> TranscriptionLanguagePolicy {
+        guard currentModelName == AppleSpeechEngineIdentity.identifier else { return policy }
+        return TranscriptionLanguagePolicy(mode: policy.mode, keyboardLanguage: policy.keyboardLanguage,
+                                           engine: .apple, modelIdentifier: AppleSpeechEngineIdentity.identifier)
     }
 }
 
