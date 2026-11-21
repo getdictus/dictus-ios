@@ -16,6 +16,7 @@
 - `typing.accents`: Long-press a letter for its accents.
 - `typing.dead-keys`: Dead keys compose accented letters.
 - `typing.autocorrect-toggle`: « Correction automatique » switch in Réglages → Clavier.
+- `typing.spatial-autocorrect`: Debug builds only, off by default (#1011). With the App Group switch `debug.spatialAutocorrect` on, the space bar reads where the finger landed on each key of the word (Hex's noisy-channel decoder, models `fr.hextm` and `en.hextm`) before the trie reads its letters: `trouce` with the `c` tapped on the edge of `v` becomes `trouve`, `jusge` becomes `juste`, a missed space splits (`donnequoi` → `donne quoi`). It runs after the lexicon, the overrides and the contractions, never on a learned word, and leaves the word to the trie when it keeps it. The Debug log prints `AUTOCORRECT branch=spatial`. No row in Réglages yet (#992 owns SettingsView).
 - `typing.contacts-and-replacements`: Contact names and iOS text replacements (#873). A contact name or a phrase-only replacement is never corrected, a lowercase contact name takes its casing (`zofiak` → `Zofiak`), a shortcut is replaced by its phrase with the undo chip (`qqc` → `Quelque chose` at sentence start).
 
 ## How to get to it (user POV)
@@ -53,6 +54,8 @@ Measured 2026-10-30 (iPhone 17 Pro, iOS 27.0, build `fef07756`), keys tapped by 
 Measured 2026-11-13 (iPhone 17, iOS 26.5, builds `fd92aaa0` and `bbaa7b36`, #919), in the Notes field of a Rappels item (tap under the title, « Ajouter une note »), every key tapped on the Dictus keys: `contact helene.bethmont@gmail.com site https://github.com/x et www.getdictus.com puis bonjoru. ` gives `Contact gelée.bethmont@émail.com site héros://github.com/x et wax.getdictus.com puis bonjour. ` before the fix and the text as typed, `bonjour.` aside, after it. The after log carries `ADDRESS-REVERT orig="helene" undone="gelée"`, `ADDRESS-REVERT orig="https" undone="héros"` and `AUTOCORRECT-SKIP word=… reason=address` for every later segment. `drive.sh type` has no punctuation; the keys were tapped at these points (iPhone 17, `inputView` at y = 548): letters rows y = 610 / 665 / 719 on the 40.2 pt pitch of `drive.sh`, `123` / `ABC` (25, 772), space (210, 772); on the `123` page `-` (20, 664), `/` (60, 664), `:` (100, 664), `@` (340, 664), `.` (104, 718), delete (371, 718). The keyboard stays on `123` after a mark, and goes back to letters by itself after `. ` and space.
 
 ## Gotchas
+
+- `typing.spatial-autocorrect`: turn it on with `xcrun simctl spawn <udid> defaults write group.solutions.pivi.dictus debug.spatialAutocorrect -bool YES`, then make the keyboard reappear. `drive.sh type` taps the key centres, which tells the decoder nothing the letters do not: its measure is `tools/keyboard-bench/run.sh --spatial` (synthetic and device-journal taps) and, for real fingers, the iPhone (Physical test shortlist).
 
 - Safari's address bar turns suggestions off: typing there shows no suggestion bar. Test in Rappels. A slimmed iOS 26.5 device has no Notes app (`simctl launch com.apple.mobilenotes` fails), and on 2026-11-13 Messages opened a conversation without drawing its compose box.
 - Reset the user dictionary first (`typing.learned-words`): a learned word silently changes what autocorrect does.
