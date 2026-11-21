@@ -138,11 +138,13 @@ func wait(_ what: String, timeout: TimeInterval = 30, until condition: () -> Boo
     }
 }
 
-let engine = TextPredictionEngine.shared
+/// The keyboard's engine. Computed so that the bilingual replay, which holds an engine
+/// per language, never loads it.
+var engine: TextPredictionEngine { TextPredictionEngine.shared }
 
 /// Same readiness checks as tools/split-pass-bench: the trie and the n-grams load on
 /// a background queue and report on the main one.
-func waitUntilLoaded(_ what: String) {
+func waitUntilLoaded(_ engine: TextPredictionEngine, _ what: String) {
     wait("trie \(what)") { engine.isUnknownToDictionary("qzxqzxwq") }
     let fallback = engine.predictNextWords(after: ["qzxqzxwq"])
     wait("n-grams \(what)") {
@@ -154,7 +156,7 @@ func waitUntilLoaded(_ what: String) {
 func load(_ lang: SupportedLanguage) {
     SupportedLanguage.activate(lang)
     engine.setLanguage(lang.rawValue)
-    waitUntilLoaded(lang.rawValue)
+    waitUntilLoaded(engine, lang.rawValue)
 }
 
 /// Puts the learned words of `corpus/<code>.words` in the user dictionary, or empties it
@@ -183,10 +185,38 @@ func microseconds(_ work: () -> Void) -> Int {
 
 // MARK: - Replay
 
+/// What the keyboard asks while a word is typed, and what the space bar proposes. The
+/// keyboard has one engine; the bilingual replay (#1009) routes between two.
+protocol Corrector: AnyObject {
+    /// The language the last committed word was corrected in, and the next one is typed in.
+    var language: SupportedLanguage { get }
+    /// Serves the correction preview and the suggestions while a word is typed, and the
+    /// next-word prediction after a space.
+    var typingEngine: TextPredictionEngine { get }
+    /// The correction the space bar proposes for `word`, or nil to keep it.
+    func proposal(for word: String, previous: String?, isAtSentenceStart: Bool) -> String?
+}
+
+/// The keyboard as it ships: one engine for everything.
+final class SingleEngine: Corrector {
+    let language: SupportedLanguage
+    let typingEngine: TextPredictionEngine
+
+    init(_ engine: TextPredictionEngine, language: SupportedLanguage) {
+        typingEngine = engine
+        self.language = language
+    }
+
+    func proposal(for word: String, previous: String?, isAtSentenceStart: Bool) -> String? {
+        typingEngine.spellCheck(word, previousWord: previous, isAtSentenceStart: isAtSentenceStart)?.correction
+    }
+}
+
 struct Commit {
     let intendedWords: [Int]
     let typed: String
     let final: String
+    let language: SupportedLanguage
 }
 
 /// Picks the cell a tap types, from the point, today's answer (the cell under the
@@ -205,7 +235,7 @@ struct PickCost {
 /// Types one sentence: every tap goes through the grid (or the picker), every letter
 /// triggers the suggestion work `SuggestionState.updateAsync` does, every space the
 /// autocorrect `DictusKeyboardBridge.autocorrectBeforeCursor` does.
-func replay(_ taps: [Tap], cells: [Cell], width: CGFloat, height: CGFloat, picker: Picker?,
+func replay(_ taps: [Tap], cells: [Cell], width: CGFloat, height: CGFloat, picker: Picker?, corrector: Corrector,
             tapRow: (Tap, String, CGPoint, Int, PickCost) -> Void) -> (text: String, commits: [Commit]) {
     let field = Field()
     let memory = AutocorrectRejectionMemory()
@@ -254,6 +284,7 @@ func replay(_ taps: [Tap], cells: [Cell], width: CGFloat, height: CGFloat, picke
                 field.insertText(field.text.isEmpty ? k.uppercased() : k)
             }
             let context = field.text
+            let engine = corrector.typingEngine
             cost = microseconds {
                 guard let (_, partial) = AutocorrectRejectionMemory.wordAtCursor(context: context) else { return }
                 let previous = words(context).dropLast().last
@@ -275,8 +306,8 @@ func replay(_ taps: [Tap], cells: [Cell], width: CGFloat, height: CGFloat, picke
                 final = word
                 let ws = words(field.text)
                 let previous = ws.count >= 2 ? ws[ws.count - 2] : nil
-                let proposal = engine.spellCheck(word, previousWord: previous,
-                                                 isAtSentenceStart: ProperNounGuard.isAtSentenceStart(context: field.text, word: word))?.correction
+                let proposal = corrector.proposal(for: word, previous: previous,
+                                                  isAtSentenceStart: ProperNounGuard.isAtSentenceStart(context: field.text, word: word))
                 var applied = false
                 if memory.commit(prefix: prefix, word: word, proposedCorrection: proposal) == .correct,
                    let correction = proposal,
@@ -287,9 +318,11 @@ func replay(_ taps: [Tap], cells: [Cell], width: CGFloat, height: CGFloat, picke
                     applied = true
                 }
                 if !applied { field.insertText(" ") }
-                _ = engine.predictNextWords(after: Array(words(field.text).suffix(2)))
+                _ = corrector.typingEngine.predictNextWords(after: Array(words(field.text).suffix(2)))
             }
-            if !typed.isEmpty { commits.append(Commit(intendedWords: tokenWords, typed: typed, final: final)) }
+            if !typed.isEmpty {
+                commits.append(Commit(intendedWords: tokenWords, typed: typed, final: final, language: corrector.language))
+            }
             tokenWords = []
         case .backspace?:
             field.deleteBackward()
@@ -324,6 +357,22 @@ let hitMode = env["KB_HIT"] ?? "plain"
 guard ["plain", "model"].contains(hitMode) else { fatalError("KB_HIT must be plain or model") }
 let modelParameters = ModelParameters(env["KB_MODEL"] ?? "")
 
+// #1009: a bilingual keyboard instead of the shipping one. KB_PAIR is "primary,secondary".
+if let pairArg = env["KB_PAIR"] {
+    let codes = pairArg.components(separatedBy: ",").compactMap(SupportedLanguage.init(rawValue:))
+    guard codes.count == 2, let pair = KeyboardLanguagePair(primary: codes[0], secondary: codes[1]) else {
+        fatalError("KB_PAIR \(pairArg) is not a pair the keyboard offers")
+    }
+    restoringKeyboardPreferences {
+        if let probe = env["KB_PROBE"] {
+            probePair(pair, probe)
+        } else {
+            replayPair(pair, runs: langs, corpusDir: corpusDir, runsDir: runsDir, outDir: outDir, width: w, height: h)
+        }
+    }
+    exit(0)
+}
+
 var tapsOut = ["lang\tsentence\ttap\tintended\tresolved\tx\ty\tengine_us\tplain\thit_ns\tvisited"]
 var commitsOut = ["lang\tsentence\tintended\ttyped\tfinal"]
 var textsOut = ["lang\tsentence\tintended\tfinal"]
@@ -331,7 +380,7 @@ var textsOut = ["lang\tsentence\tintended\tfinal"]
 // The engine starts loading French as soon as it exists. A `setLanguage` issued before
 // that load lands overlaps it: in an English-only run the French load then reported
 // the English trie's word count (40000; the French file holds 39622).
-waitUntilLoaded("initial")
+waitUntilLoaded(engine, "initial")
 
 for code in langs {
     // "fr-learned" is the French keyboard on the fr-learned corpus and its learned words.
@@ -367,6 +416,7 @@ for code in langs {
         { (m.pick($0, plain: $1, cells: cells, word: $2, previous: $3), m.visited) }
     }
 
+    let corrector = SingleEngine(engine, language: lang)
     var order: [Int] = []
     for tap in run where order.last != tap.sentence { order.append(tap.sentence) }
     for s in order {
@@ -374,7 +424,7 @@ for code in langs {
         let intended = sentences[s % sentences.count]
         let intendedWords = intended.components(separatedBy: " ")
         let (text, commits) = replay(run.filter { $0.sentence == s }, cells: cells, width: w, height: h,
-                                     picker: picker) { tap, resolved, p, us, pick in
+                                     picker: picker, corrector: corrector) { tap, resolved, p, us, pick in
             tapsOut.append("\(code)\t\(s)\t\(tap.index)\t\(tap.key)\t\(resolved)\t\(String(format: "%.2f", p.x))\t"
                            + "\(String(format: "%.2f", p.y))\t\(us)\t\(pick.plain)\t\(pick.ns)\t\(pick.visited)")
         }
