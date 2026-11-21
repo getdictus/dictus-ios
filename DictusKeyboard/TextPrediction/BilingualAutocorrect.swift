@@ -25,7 +25,8 @@ enum BilingualAutocorrect {
 
     static var isOn: Bool {
         #if DEBUG
-        return AppGroup.defaults.bool(forKey: switchKey)
+        // LOCAL BATCH BUILD ONLY (never pushed): on unless the key was written NO.
+        return AppGroup.defaults.object(forKey: switchKey) as? Bool ?? true
         #else
         return false
         #endif

@@ -24,7 +24,8 @@ enum AdaptiveTouchSwitch {
     /// taps it keeps are the ones Adaptive touch learns from.
     static var isOn: Bool {
         #if DEBUG
-        return SpatialAutocorrect.isOn && AppGroup.defaults.bool(forKey: switchKey)
+        // LOCAL BATCH BUILD ONLY (never pushed): on unless the key was written NO.
+        return SpatialAutocorrect.isOn && (AppGroup.defaults.object(forKey: switchKey) as? Bool ?? true)
         #else
         return false
         #endif
