@@ -20,5 +20,6 @@ public let spanishProfile = LanguageProfile(
         "u": ["\u{00FA}", "\u{00FC}"],      // ú, ü
         "n": ["\u{00F1}"]                  // ñ
     ],
-    contractionPrefixes: []
+    contractionPrefixes: [],
+    misspellings: spanishMisspellings
 )

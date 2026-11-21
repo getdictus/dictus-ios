@@ -65,6 +65,17 @@ public struct LanguageProfile: Sendable {
     /// space (#1006). nil for languages without elision.
     public let elisionRepair: ElisionRepair?
 
+    /// Known misspellings, lowercase, with their correct form: the entries
+    /// `tools/misspellings/` removed from the word list (`teh` → `the`). Read
+    /// with `overrides`, and kept apart from it because it is generated from a
+    /// public list rather than curated. See `KnownMisspellings.swift`.
+    public let misspellings: [String: String]
+
+    /// Contractions typed without their apostrophe that are also words on their
+    /// own (`ill` for `I'll`), corrected only where the words before call for
+    /// the contraction. See `ContextualContraction`.
+    public let contextualContractions: [ContextualContraction]
+
     public init(
         code: String,
         displayName: String,
@@ -77,7 +88,9 @@ public struct LanguageProfile: Sendable {
         contractionPrefixes: [String],
         collapseRules: [(from: String, to: String)] = [],
         participleContext: ParticipleContext? = nil,
-        elisionRepair: ElisionRepair? = nil
+        elisionRepair: ElisionRepair? = nil,
+        misspellings: [String: String] = [:],
+        contextualContractions: [ContextualContraction] = []
     ) {
         self.code = code
         self.displayName = displayName
@@ -91,6 +104,8 @@ public struct LanguageProfile: Sendable {
         self.collapseRules = collapseRules
         self.participleContext = participleContext
         self.elisionRepair = elisionRepair
+        self.misspellings = misspellings
+        self.contextualContractions = contextualContractions
     }
 }
 
