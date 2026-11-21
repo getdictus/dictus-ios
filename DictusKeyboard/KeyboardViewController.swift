@@ -1269,6 +1269,7 @@ class KeyboardViewController: UIInputViewController {
         // The focused field may have changed (e.g. tapping another field in the
         // same app) — re-read its input traits (#200).
         bridge?.refreshHostPolicy()
+        NotificationCenter.default.post(name: .dictusHostDocumentDidChange, object: self)
     }
 
     override func selectionDidChange(_ textInput: UITextInput?) {
@@ -1288,6 +1289,9 @@ class KeyboardViewController: UIInputViewController {
         // Re-read the field's input traits so the autocorrect/suggestions policy
         // matches the newly-focused field (#200).
         bridge?.refreshHostPolicy()
+        // A copy in the host app changes neither, but the user selects before copying
+        // and taps back into the field after: the Paste offer re-reads here (#634).
+        NotificationCenter.default.post(name: .dictusHostDocumentDidChange, object: self)
     }
 
     // MARK: - Window Gesture Delay

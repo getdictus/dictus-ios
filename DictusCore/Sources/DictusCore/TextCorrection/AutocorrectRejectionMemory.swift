@@ -50,7 +50,8 @@ public final class AutocorrectRejectionMemory {
         case keepAndLearn
         /// Nothing proposed: keep the word. `countUsage` is false when this exact
         /// word at this exact position was already counted (#872 scenario 13:
-        /// erase the space after a word, type `.`, and the word is committed twice).
+        /// erase the space after a word, type `.`, and the word is committed twice),
+        /// and when the bar was offering corrections for it (#993).
         case keep(countUsage: Bool)
     }
 
@@ -208,10 +209,17 @@ public final class AutocorrectRejectionMemory {
     /// A proposal that only changes the casing is no proposal, unless
     /// `allowsCasingChange`: the contacts lexicon recases `zofiak` to "Zofiak"
     /// (#873), the trie never recases.
+    ///
+    /// `offersCorrections` is true when the corrector keeps the word but the bar was
+    /// offering corrections for it, a `CorrectionProposal.suggest` (#993). A space then
+    /// says nothing about the word, so it is not counted: `arribe` kept twice that way
+    /// was learned, and `areibe` then became `arribe`. Only tapping the typed word in
+    /// the bar (`typedWordKept`) or undoing a correction (`correctionUndone`) teaches it.
     public func commit(
         prefix: Substring,
         word: String,
         proposedCorrection: String?,
+        offersCorrections: Bool = false,
         countable: Bool = true,
         allowsCasingChange: Bool = false
     ) -> Decision {
@@ -230,6 +238,7 @@ public final class AutocorrectRejectionMemory {
 
         // The word stands on its own: nothing left to learn from a restore here.
         restoredByUndo[key] = nil
+        if offersCorrections { return .keep(countUsage: false) }
         let lowered = word.lowercased()
         if let last = lastCounted, last.key == key, last.word == lowered {
             return .keep(countUsage: false)

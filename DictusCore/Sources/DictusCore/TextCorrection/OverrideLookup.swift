@@ -19,9 +19,13 @@ import Foundation
 ///      `dont` as a word, we still correct it.
 ///   3. It's checked before the trie loads, so corrections are available
 ///      during keyboard cold start.
+///
+/// `profile.misspellings` is read the same way: a word removed from the word
+/// list as a known misspelling (`teh`) goes to its listed target (`the`), not to
+/// whatever the trie finds nearby (`ten`, #995).
 public func applyOverride(profile: LanguageProfile, word: String) -> String? {
     let lowered = word.lowercased()
-    guard let override = profile.overrides[lowered] else { return nil }
+    guard let override = profile.overrides[lowered] ?? profile.misspellings[lowered] else { return nil }
     let isCapitalized = word.first?.isUppercase == true
     return isCapitalized ? override.capitalized : override
 }
