@@ -115,4 +115,40 @@ final class InKeyboardDictationPoliciesTests: XCTestCase {
             }
         }
     }
+
+    // MARK: - The decided policy (Pierre, 2026-11-21)
+
+    func testTheShippedPolicyIsNewInstallsOnly() {
+        XCTAssertEqual(InKeyboardDictationDefault.policy, .newInstallsOnly)
+    }
+
+    /// New install under the shipped policy: the first launch (onboarding not done) turns
+    /// the setting on, and no question is asked.
+    func testShippedPolicyTurnsANewInstallOn() {
+        let resolution = InKeyboardDictationDefault.resolveAtLaunch(
+            policy: InKeyboardDictationDefault.policy, storedValue: nil,
+            onboardingCompleted: false, promptPending: false
+        )
+        XCTAssertEqual(resolution, .init(write: true, prompt: false))
+    }
+
+    /// Existing user under the shipped policy: off, and exactly one "Turn on / Later"
+    /// question until it is answered, then never again.
+    func testShippedPolicyAsksAnExistingUserOnceWithTheSettingOff() {
+        let policy = InKeyboardDictationDefault.policy
+        let first = InKeyboardDictationDefault.resolveAtLaunch(policy: policy, storedValue: nil,
+                                                               onboardingCompleted: true, promptPending: false)
+        XCTAssertEqual(first, .init(write: false, prompt: true))
+        defaults.set(false, forKey: SharedKeys.inKeyboardDictationEnabled)
+        XCTAssertFalse(InKeyboardDictationRoute.isSettingEnabled(in: defaults))
+
+        // "Later": the setting stays off, the question is answered.
+        let afterLater = InKeyboardDictationDefault.resolveAtLaunch(policy: policy, storedValue: false,
+                                                                    onboardingCompleted: true, promptPending: false)
+        XCTAssertEqual(afterLater, .init(write: nil, prompt: false))
+        // "Turn on": the setting is on, the question is answered.
+        let afterTurnOn = InKeyboardDictationDefault.resolveAtLaunch(policy: policy, storedValue: true,
+                                                                     onboardingCompleted: true, promptPending: false)
+        XCTAssertEqual(afterTurnOn, .init(write: nil, prompt: false))
+    }
 }

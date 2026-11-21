@@ -64,8 +64,14 @@ public enum InKeyboardDictationDefault {
         case newInstallsOnly
     }
 
-    /// Pierre decides (PR #992). Changing this one line switches the behaviour.
-    public static let policy: Policy = .onForEveryone
+    /// `.newInstallsOnly`, decided by Pierre on 2026-11-21 (PR #992).
+    ///
+    /// WHY: existing users chose Dictus for its own model. With the setting on, a tap with
+    /// the app closed gives Apple's dictation instead, with a different accuracy and the
+    /// microphone indicator coming from the keyboard. Asking them once ("Turn on" /
+    /// "Later") makes that change their choice and announces it; new users never knew the
+    /// app switch, so they start with it on. Changing this one line switches the behaviour.
+    public static let policy: Policy = .newInstallsOnly
 
     public struct LaunchResolution: Equatable, Sendable {
         /// The value to write to the setting now, or nil to leave it.
