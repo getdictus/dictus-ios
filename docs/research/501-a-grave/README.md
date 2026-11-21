@@ -2,6 +2,9 @@
 
 Taken 2026-11-17 on the branch `fix/501-french-a-grave`, iPhone 17 simulator, iOS 26.5.
 
+Re-measured on the new engine, with the sentence-start rule of #979, on 2026-11-21:
+[`takeover.md`](takeover.md).
+
 ## Keyboard bench (#954), before and after
 
 `tools/keyboard-bench/run.sh`, same 1607 taps. Before is develop at `2e280b7f`, after is
