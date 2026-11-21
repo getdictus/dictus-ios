@@ -1578,7 +1578,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Apple (sur l'appareil)"
+            "value" : "Apple (sur l’appareil)"
           }
         }
       }
@@ -1817,7 +1817,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Le modèle d'Apple n'a pas pu être installé. Touchez pour réessayer."
+            "value" : "Le modèle d’Apple n’a pas pu être installé. Touchez pour réessayer."
           }
         }
       }
@@ -1828,7 +1828,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "La reconnaissance vocale d'Apple, intégrée à iOS. Dictus ne télécharge rien."
+            "value" : "La reconnaissance vocale d’Apple, intégrée à iOS. Dictus ne télécharge rien."
           }
         }
       }
@@ -1838,7 +1838,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Apple : reconnaissance vocale intégrée à iOS 26, sur l'appareil, dans la langue de dictée choisie dans les Réglages. iOS installe son modèle."
+            "value" : "Apple : reconnaissance vocale intégrée à iOS 26, sur l’appareil, dans la langue de dictée choisie dans les Réglages. iOS installe son modèle."
           }
         }
       }
