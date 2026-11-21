@@ -128,7 +128,7 @@ final class InKeyboardDictationPoliciesTests: XCTestCase {
     // MARK: - Activation by the chosen dictation language (Pierre, 2026-11-21)
 
     private func eligibility(_ mode: TranscriptionLanguageMode, keyboard: String = "fr") -> InKeyboardLanguageEligibility {
-        InKeyboardLanguageEligibility.evaluate(mode: mode, keyboardLanguageCode: keyboard, supportedLocales: appleSupported)
+        InKeyboardLanguageEligibility.evaluate(mode: mode, keyboardLanguageCode: keyboard, speechTranscriberAvailable: true, supportedLocales: appleSupported)
     }
 
     func testCoveredLanguageKeepsTheSettingOn() {
@@ -138,7 +138,7 @@ final class InKeyboardDictationPoliciesTests: XCTestCase {
 
     func testUncoveredLanguageTurnsTheSettingOff() {
         let uncovered = InKeyboardLanguageEligibility.evaluate(mode: .followKeyboard, keyboardLanguageCode: "ru",
-                                                               supportedLocales: appleSupported)
+                                                               speechTranscriberAvailable: true, supportedLocales: appleSupported)
         XCTAssertEqual(uncovered, .notCovered("ru"))
         XCTAssertFalse(InKeyboardLanguageEligibility.isEffectivelyOn(userChoice: nil, eligibility: uncovered))
         XCTAssertFalse(InKeyboardLanguageEligibility.isEffectivelyOn(userChoice: true, eligibility: uncovered))
@@ -147,9 +147,9 @@ final class InKeyboardDictationPoliciesTests: XCTestCase {
     /// The user never touched the toggle: off while the language is not covered, back on
     /// when they return to a covered one.
     func testChangingToAnUncoveredLanguageTurnsItOffAndBackOnWhenCoveredAgain() {
-        let before = InKeyboardLanguageEligibility.evaluate(mode: .followKeyboard, keyboardLanguageCode: "fr", supportedLocales: appleSupported)
-        let during = InKeyboardLanguageEligibility.evaluate(mode: .followKeyboard, keyboardLanguageCode: "ru", supportedLocales: appleSupported)
-        let after = InKeyboardLanguageEligibility.evaluate(mode: .explicit(.german), keyboardLanguageCode: "ru", supportedLocales: appleSupported)
+        let before = InKeyboardLanguageEligibility.evaluate(mode: .followKeyboard, keyboardLanguageCode: "fr", speechTranscriberAvailable: true, supportedLocales: appleSupported)
+        let during = InKeyboardLanguageEligibility.evaluate(mode: .followKeyboard, keyboardLanguageCode: "ru", speechTranscriberAvailable: true, supportedLocales: appleSupported)
+        let after = InKeyboardLanguageEligibility.evaluate(mode: .explicit(.german), keyboardLanguageCode: "ru", speechTranscriberAvailable: true, supportedLocales: appleSupported)
         XCTAssertTrue(InKeyboardLanguageEligibility.isEffectivelyOn(userChoice: nil, eligibility: before))
         XCTAssertFalse(InKeyboardLanguageEligibility.isEffectivelyOn(userChoice: nil, eligibility: during))
         XCTAssertTrue(InKeyboardLanguageEligibility.isEffectivelyOn(userChoice: nil, eligibility: after))
@@ -169,6 +169,27 @@ final class InKeyboardDictationPoliciesTests: XCTestCase {
         XCTAssertTrue(eligibility(.followKeyboard).isCovered)
         XCTAssertEqual(InKeyboardDictationRoute.decide(settingEnabled: true, appAnswered: false, systemMajorVersion: 26,
                                                        localeInstalled: false), .openAppURL)
+    }
+
+    /// An iPhone or an iOS without `SpeechTranscriber` (Pierre, 2026-11-21): no fallback
+    /// to `DictationTranscriber`, so the setting is off in effect for every language, even
+    /// those `SpeechTranscriber` lists elsewhere and even with the user's choice on, and the
+    /// keyboard keeps today's path.
+    func testWithoutSpeechTranscriberTheSettingIsOffForEveryLanguage() {
+        for mode in [TranscriptionLanguageMode.followKeyboard, .explicit(.english), .autoDetect] {
+            for keyboard in ["fr", "en", "es", "de"] {
+                let unavailable = InKeyboardLanguageEligibility.evaluate(
+                    mode: mode, keyboardLanguageCode: keyboard,
+                    speechTranscriberAvailable: false, supportedLocales: appleSupported
+                )
+                XCTAssertEqual(unavailable, .speechTranscriberUnavailable)
+                XCTAssertFalse(InKeyboardLanguageEligibility.isEffectivelyOn(userChoice: true, eligibility: unavailable))
+                XCTAssertFalse(InKeyboardLanguageEligibility.isEffectivelyOn(userChoice: nil, eligibility: unavailable))
+            }
+        }
+        // No recognizer, so no installed locale: today's path.
+        XCTAssertEqual(InKeyboardDictationRoute.decide(settingEnabled: true, appAnswered: false, systemMajorVersion: 26,
+                                                       localeInstalled: nil), .openAppURL)
     }
 
     /// Automatic detection, whatever the spoken language declared in onboarding: no

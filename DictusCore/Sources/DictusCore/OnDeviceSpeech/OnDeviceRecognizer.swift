@@ -69,7 +69,10 @@ public enum OnDeviceRecognizerError: LocalizedError {
     }
 }
 
-/// Picks the engine for this OS. Nil before iOS 26, where the experiment never runs.
+/// Picks the engine for this device. Nil before iOS 26 and wherever Apple's
+/// `SpeechTranscriber` reports itself unavailable: there is no fallback to another Apple
+/// module (Pierre, 2026-11-21), so the keyboard and the share extension keep today's
+/// open-the-app path.
 @MainActor
 public enum OnDeviceRecognizerFactory {
     public static func make() -> OnDeviceRecognizer? {
@@ -79,7 +82,13 @@ public enum OnDeviceRecognizerFactory {
         // asset download refused). See `SimulatorHostRecognizer`.
         return SimulatorHostRecognizer()
         #else
-        if #available(iOS 26.0, *) { return AppleSpeechRecognizer() }
+        if #available(iOS 26.0, *) {
+            guard SpeechTranscriber.isAvailable else {
+                OnDeviceSpeechLog.log("engine", "speechTranscriberAvailable=false recognizer=none")
+                return nil
+            }
+            return AppleSpeechRecognizer()
+        }
         return nil
         #endif
     }
@@ -93,10 +102,10 @@ public enum OnDeviceRecognizerFactory {
 /// ever downloaded from the keyboard. The model runs in Apple's speech daemon, not in
 /// this process, which is why it fits beside the keyboard's ~68 MB ceiling (#555).
 ///
-/// `SpeechTranscriber` is the module asked for. Where it reports itself unavailable
-/// (`isAvailable == false`: older hardware, and the iOS Simulator, measured 2026-11-19 on
-/// iOS 26.5), the same analyzer runs `DictationTranscriber`, Apple's on-device module for
-/// devices without the new model. Same asset rule, same file input.
+/// `SpeechTranscriber` only. Where it reports itself unavailable (`isAvailable == false`:
+/// older hardware, and every iOS Simulator, measured 2026-11-19 on iOS 26.5) this class is
+/// never made (`OnDeviceRecognizerFactory`): Pierre decided on 2026-11-21 against falling
+/// back to `DictationTranscriber`; the setting is greyed in the app instead.
 ///
 /// The batch shape (record, then transcribe a file) follows anomalyco/hex's
 /// `KeyboardSpeech` (MIT License).
@@ -106,7 +115,7 @@ public final class AppleSpeechRecognizer: OnDeviceRecognizer {
     public init() {}
 
     public var engineName: String {
-        SpeechTranscriber.isAvailable ? "apple-speechtranscriber" : "apple-dictationtranscriber"
+        "apple-speechtranscriber"
     }
 
     public func isReadyOnDevice(languageCode: String) async -> Bool {
@@ -179,11 +188,7 @@ public final class AppleSpeechRecognizer: OnDeviceRecognizer {
     /// neither downloads anything.
     private static func isInstalled(_ module: Module) async -> Bool {
         let status = await AssetInventory.status(forModules: [module.speechModule])
-        let installed: [Locale]
-        switch module {
-        case .speech: installed = await SpeechTranscriber.installedLocales
-        case .dictation: installed = await DictationTranscriber.installedLocales
-        }
+        let installed = await SpeechTranscriber.installedLocales
         let listed = installed.contains { $0.identifier(.bcp47) == module.locale.identifier(.bcp47) }
         let reserved = await AssetInventory.reservedLocales.contains { $0.identifier(.bcp47) == module.locale.identifier(.bcp47) }
         OnDeviceSpeechLog.log(
@@ -216,12 +221,7 @@ public final class AppleSpeechRecognizer: OnDeviceRecognizer {
         try await analyzer.start(inputAudioFile: file, finishAfterFile: true)
 
         var transcript = AttributedString()
-        switch module {
-        case .speech(let transcriber):
-            for try await result in transcriber.results where result.isFinal { transcript += result.text }
-        case .dictation(let transcriber):
-            for try await result in transcriber.results where result.isFinal { transcript += result.text }
-        }
+        for try await result in module.transcriber.results where result.isFinal { transcript += result.text }
         let text = String(transcript.characters).trimmingCharacters(in: .whitespacesAndNewlines)
         guard !text.isEmpty else { throw OnDeviceRecognizerError.empty }
         return text
@@ -231,7 +231,7 @@ public final class AppleSpeechRecognizer: OnDeviceRecognizer {
     /// `setContext` is on `SpeechAnalyzer`, not on the module, so both transcribers get
     /// it. Whether it is *accepted* is logged here; whether it *changes* anything is read
     /// by comparing transcripts. Measured on macOS 26 (2026-11-20) with "Dictus" as the
-    /// only string: accepted by both modules, and neither changed "dicttu" / "dictée".
+    /// only string: accepted, and it did not change "dicttu" / "dictée".
     private static func offer(_ strings: [String], to analyzer: SpeechAnalyzer, module: Module) async {
         guard !strings.isEmpty else {
             OnDeviceSpeechLog.log("contextualStrings", "module=\(module.name) terms=0 offered=false")
@@ -247,30 +247,13 @@ public final class AppleSpeechRecognizer: OnDeviceRecognizer {
         }
     }
 
-    private enum Module {
-        case speech(SpeechTranscriber)
-        case dictation(DictationTranscriber)
+    /// The transcriber for one locale, with the names the log uses.
+    private struct Module {
+        let transcriber: SpeechTranscriber
+        let locale: Locale
 
-        var speechModule: any SpeechModule {
-            switch self {
-            case .speech(let transcriber): return transcriber
-            case .dictation(let transcriber): return transcriber
-            }
-        }
-
-        var locale: Locale {
-            switch self {
-            case .speech(let transcriber): return transcriber.selectedLocales.first ?? Locale.current
-            case .dictation(let transcriber): return transcriber.selectedLocales.first ?? Locale.current
-            }
-        }
-
-        var name: String {
-            switch self {
-            case .speech: return "speechtranscriber"
-            case .dictation: return "dictationtranscriber"
-            }
-        }
+        var speechModule: any SpeechModule { transcriber }
+        var name: String { "speechtranscriber" }
     }
 
     private static func module(for languageCode: String) async -> Module? {
@@ -278,12 +261,9 @@ public final class AppleSpeechRecognizer: OnDeviceRecognizer {
             languageCode: languageCode,
             deviceLocaleIdentifier: Locale.current.identifier
         ))
-        if SpeechTranscriber.isAvailable {
-            guard let locale = await SpeechTranscriber.supportedLocale(equivalentTo: requested) else { return nil }
-            return .speech(SpeechTranscriber(locale: locale, preset: .transcription))
-        }
-        guard let locale = await DictationTranscriber.supportedLocale(equivalentTo: requested) else { return nil }
-        return .dictation(DictationTranscriber(locale: locale, preset: .longDictation))
+        guard SpeechTranscriber.isAvailable,
+              let locale = await SpeechTranscriber.supportedLocale(equivalentTo: requested) else { return nil }
+        return Module(transcriber: SpeechTranscriber(locale: locale, preset: .transcription), locale: locale)
     }
 
     private static func writeWAV(_ recording: OnDeviceRecording, to url: URL) throws {

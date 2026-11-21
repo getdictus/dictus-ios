@@ -293,14 +293,8 @@ struct RecordingOverlay: View {
     /// and colour as the caption, on the same line, so the footer height never changes.
     private func caption(_ key: LocalizedStringKey) -> some View {
         HStack(spacing: 4) {
-            if onDeviceEngine, InKeyboardEngineIndicator.style == .icon {
-                Image(systemName: InKeyboardEngineIndicator.iconName)
-                    .imageScale(.small)
-                    .accessibilityLabel(Text(verbatim: InKeyboardEngineIndicator.label))
-            }
             Text(key)
-            if onDeviceEngine, InKeyboardEngineIndicator.style == .label {
-                // A product name, not translated.
+            if onDeviceEngine {
                 Text(verbatim: "· \(InKeyboardEngineIndicator.label)")
             }
         }

@@ -545,7 +545,12 @@ struct SettingsView: View {
                         if enabled { InKeyboardSpeechAssets.prepareForDictationLanguage(reason: "setting") }
                     }
                     .task(id: "\(language)|\(transcriptionLanguage)") {
-                        guard #available(iOS 26.0, *) else { return }
+                        guard #available(iOS 26.0, *) else {
+                            // No SpeechTranscriber before iOS 26 (Pierre, 2026-11-21).
+                            inKeyboardEligibility = .speechTranscriberUnavailable
+                            InKeyboardSpeechAssets.prepareForDictationLanguage(reason: "settings-language")
+                            return
+                        }
                         inKeyboardEligibility = await InKeyboardSpeechAssets.refreshLanguageEligibility(reason: "settings-language")
                     }
                 NavigationLink("How dictation works") {
