@@ -4542,6 +4542,17 @@
         }
       }
     },
+    "Not available on this iPhone or for this dictation language." : {
+      "comment" : "Greyed Apple engine card: Apple's SpeechTranscriber is not available on this iPhone.",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Indisponible sur cet iPhone ou pour cette langue de dictée."
+          }
+        }
+      }
+    },
     "Preparing…" : {
       "comment" : "Apple engine card: iOS is installing Apple's speech model after the user picked it.",
       "localizations" : {

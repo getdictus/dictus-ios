@@ -169,9 +169,8 @@ struct AppleEngineCardView: View {
             return String(localized: "Requires iOS 26 or later.",
                           comment: "Greyed Apple engine card: the iPhone runs an iOS older than 26.")
         case .speechTranscriberUnavailable:
-            // #992's line for the same case, reused as is (one string, one translation).
-            return String(localized: "Apple's dictation is not available on this iPhone, so the keyboard opens the app, as before.",
-                          comment: "How dictation works: shown when the iPhone or its iOS has no SpeechTranscriber, which greys out Dictate in the keyboard (#992).")
+            return String(localized: "Not available on this iPhone or for this dictation language.",
+                          comment: "Greyed Apple engine card: Apple's SpeechTranscriber is not available on this iPhone.")
         case .autoDetect:
             return String(localized: "Needs a transcription language, not automatic detection.",
                           comment: "Greyed Apple engine card: the transcription language is set to automatic detection.")
