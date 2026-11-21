@@ -22,6 +22,9 @@ file says what each piece is.
 | `corpus-rare/fr.txt`, `corpus-rare/en.txt` | 20 sentences per language around words the dictionary lacks or ranks low (#949): what a language model must not break. |
 | `KeyTargetModel.swift` | The #949 key-target model: picks each letter from the touch point and the letter the word needs next, from the shipped trie. `run.sh --hit model` uses it instead of the plain hit test. |
 | `key_targets.sh` + `compare_hits.py` | The #949 spike in one command: draws held-out runs, replays them through both hit tests, and compares them tap by tap. Results: [`docs/research/949-key-targets/`](../../docs/research/949-key-targets/README.md). |
+| `corpus/mixed.txt`, `corpus/mixed.lang`, `runs/mixed.tsv` | 20 sentences that mix French and English, the gold language of every word (`f` or `e`), and their touch run (#1009). The run the bilingual detection was designed on in #1007. |
+| `corpus/mixed-heldout.txt`, `corpus/mixed-heldout.lang`, `runs/mixed-heldout.tsv` | 20 more mixed sentences, written before the bilingual replay first ran. Nothing is ever tuned on them: a change judged on this run needs a new held-out run. |
+| `Bilingual.swift` + `score_pair.py` | The bilingual replay (`run.sh --pair fr,en`): the same taps through one engine per language and the DictusCore language detection, then its report. |
 
 ## Run
 
@@ -32,6 +35,35 @@ tools/keyboard-bench/run.sh --udid <udid> > report.md
 
 About two minutes, most of it compiling DictusCore. Writes `taps.tsv`, `commits.tsv`
 and `texts.tsv` to `build/keyboard-bench/out/` and prints the report.
+
+## Bilingual replay (#1009)
+
+```bash
+tools/keyboard-bench/run.sh --udid <udid> --pair fr,en > report.md
+```
+
+Replays `fr`, `en` on QWERTY, `en`, `mixed` and `mixed-heldout` (the layout is the
+primary's, AZERTY here, unless `--langs` gives one as `en:qwerty`). Each run goes through
+three keyboards on the same taps:
+
+- `mono-fr` and `mono-en`: today's keyboard set to one language, one engine.
+- `detect`: two engines, one per language, both loaded for the run's layout. At every
+  space, `WordLanguageVote` scores the word, `LanguageWindow` decides the language, that
+  language's engine corrects the word, and `BilingualKeepRule` may keep it as typed.
+  Letters ask the window's language only. The window carries over from one sentence to
+  the next and starts each run in the primary language.
+
+The keystroke work is the in-process replay's, through the same `replay`. The vote reads
+a second trie per language, mounted from the same files as the engine's, which keeps its
+own private. Writes `pair.tsv` (one row per committed word: gold and decided language,
+intended, typed, final) and `pair-cost.tsv`, and prints the report: wrong words per run
+and keyboard, the language decided per word, the words left wrong, and the time per
+keystroke.
+
+`--probe "word,previous|word"` prints what both dictionaries answer for single words
+(log-frequency, expansions, correction, bigram) and the vote, without replaying. The
+detection tests' dictionaries (`DictusCore/Tests/DictusCoreTests/LanguageDetectionStubs.swift`)
+were read off it.
 
 ## What the replay runs
 
