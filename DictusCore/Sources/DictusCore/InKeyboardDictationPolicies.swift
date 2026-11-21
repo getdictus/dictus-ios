@@ -69,6 +69,10 @@ public enum InKeyboardLanguageEligibility: Equatable, Sendable {
     case notCovered(String)
     /// Automatic detection: no single language to dictate in, so off in effect.
     case autoDetect
+    /// The iPhone or its iOS has no `SpeechTranscriber` (`isAvailable == false`, or before
+    /// iOS 26): off in effect whatever the language. No fallback to `DictationTranscriber`
+    /// (Pierre, 2026-11-21).
+    case speechTranscriberUnavailable
 
     public var isCovered: Bool {
         if case .covered = self { return true }
@@ -81,11 +85,18 @@ public enum InKeyboardLanguageEligibility: Equatable, Sendable {
         case .covered: return "covered"
         case .notCovered: return "notCovered"
         case .autoDetect: return "autoDetect"
+        case .speechTranscriberUnavailable: return "speechTranscriberUnavailable"
         }
     }
 
+    /// - Parameters:
+    ///   - speechTranscriberAvailable: `SpeechTranscriber.isAvailable` on iOS 26 and
+    ///     later, false before. Checked first: without it no language is covered.
+    ///   - supportedLocales: `SpeechTranscriber.supportedLocales`, BCP 47 identifiers.
     public static func evaluate(mode: TranscriptionLanguageMode, keyboardLanguageCode: String,
+                                speechTranscriberAvailable: Bool,
                                 supportedLocales: [String]) -> InKeyboardLanguageEligibility {
+        guard speechTranscriberAvailable else { return .speechTranscriberUnavailable }
         guard let code = InKeyboardDictationRoute.dictationLanguageCode(mode: mode, keyboardLanguageCode: keyboardLanguageCode)
         else { return .autoDetect }
         return InKeyboardDictationRoute.isLanguageCovered(code, bySupportedLocales: supportedLocales)

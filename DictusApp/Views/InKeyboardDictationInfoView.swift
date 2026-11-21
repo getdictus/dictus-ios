@@ -19,6 +19,10 @@ struct InKeyboardDictationInfoView: View {
                 Section {
                     Text("Your dictation language is not available for Apple's dictation, so the keyboard opens the app, as before.")
                 }
+            } else if eligibility == "speechTranscriberUnavailable" {
+                Section {
+                    Text("Apple's dictation is not available on this iPhone, so the keyboard opens the app, as before.")
+                }
             } else if eligibility == "autoDetect" {
                 Section {
                     Text("With automatic language detection, the keyboard opens the app, as before: Apple's dictation needs one language.")

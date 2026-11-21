@@ -4444,6 +4444,17 @@
         }
       }
     },
+    "Apple's dictation is not available on this iPhone, so the keyboard opens the app, as before." : {
+      "comment" : "How dictation works: shown when the iPhone or its iOS has no SpeechTranscriber, which greys out Dictate in the keyboard (#992).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La dictée d’Apple n’est pas disponible sur cet iPhone : le clavier ouvre l’app, comme avant."
+          }
+        }
+      }
+    },
     "Your dictation language is not available for Apple's dictation, so the keyboard opens the app, as before." : {
       "comment" : "How dictation works: shown when Apple's on-device dictation does not cover the chosen dictation language, which greys out Dictate in the keyboard (#992).",
       "localizations" : {

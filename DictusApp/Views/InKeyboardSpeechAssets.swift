@@ -16,7 +16,11 @@ enum InKeyboardSpeechAssets {
     /// the language, and when the setting is turned on. Nothing happens with the setting
     /// off or before iOS 26.
     static func prepareForDictationLanguage(reason: String = "setting") {
-        guard #available(iOS 26.0, *) else { return }
+        guard #available(iOS 26.0, *) else {
+            AppGroup.defaults.set(InKeyboardLanguageEligibility.speechTranscriberUnavailable.storedValue,
+                                  forKey: SharedKeys.inKeyboardLanguageEligibility)
+            return
+        }
         guard InKeyboardDictationRoute.isSettingEnabled(in: AppGroup.defaults) else {
             log("skipped", "reason=\(reason) setting=off")
             return
@@ -34,22 +38,23 @@ enum InKeyboardSpeechAssets {
     }
 
     /// Whether Apple covers the chosen dictation language, read from
-    /// `SpeechTranscriber.supportedLocales` (`DictationTranscriber`'s where the former is
-    /// unavailable), and stored in the App Group for the "How dictation works" line.
+    /// `SpeechTranscriber.supportedLocales`, and stored in the App Group for the "How
+    /// dictation works" line. Without `SpeechTranscriber` (`isAvailable == false`) nothing
+    /// is covered: no fallback to `DictationTranscriber` (Pierre, 2026-11-21).
     /// Activation follows the language the user chose, never the one they speak
     /// (Pierre, 2026-11-21). Called by Settings whenever either language changes.
     @available(iOS 26.0, *)
     static func refreshLanguageEligibility(reason: String) async -> InKeyboardLanguageEligibility {
-        let locales = SpeechTranscriber.isAvailable
-            ? await SpeechTranscriber.supportedLocales
-            : await DictationTranscriber.supportedLocales
+        let available = SpeechTranscriber.isAvailable
+        let locales = available ? await SpeechTranscriber.supportedLocales : []
         let eligibility = InKeyboardLanguageEligibility.evaluate(
             mode: TranscriptionLanguageMode.active,
             keyboardLanguageCode: SupportedLanguage.active.rawValue,
+            speechTranscriberAvailable: available,
             supportedLocales: locales.map { $0.identifier(.bcp47) }
         )
         AppGroup.defaults.set(eligibility.storedValue, forKey: SharedKeys.inKeyboardLanguageEligibility)
-        log("eligibility", "reason=\(reason) result=\(eligibility) supportedCount=\(locales.count) "
+        log("eligibility", "reason=\(reason) result=\(eligibility) speechTranscriberAvailable=\(available) supportedCount=\(locales.count) "
             + "userChoice=\(InKeyboardDictationRoute.isSettingEnabled(in: AppGroup.defaults))")
         return eligibility
     }
@@ -80,31 +85,25 @@ enum InKeyboardSpeechAssets {
         DictationSessionClaim.prune(in: directory)
     }
 
-    /// The same module choice as the keyboard's `AppleSpeechRecognizer`:
-    /// `SpeechTranscriber` where available, `DictationTranscriber` otherwise.
+    /// The same module as the keyboard's `AppleSpeechRecognizer`: `SpeechTranscriber`
+    /// only, and nothing where it is unavailable.
     @available(iOS 26.0, *)
     private static func install(languageCode: String) async {
         // Already a regional identifier (`speechLocalesToReserve`), e.g. "fr-FR".
         let requested = Locale(identifier: languageCode)
-        let module: any SpeechModule
-        let locale: Locale
-        let name: String
-        if SpeechTranscriber.isAvailable,
-           let supported = await SpeechTranscriber.supportedLocale(equivalentTo: requested) {
-            module = SpeechTranscriber(locale: supported, preset: .transcription)
-            locale = supported
-            name = "speechtranscriber-\(supported.identifier)"
-        } else if let supported = await DictationTranscriber.supportedLocale(equivalentTo: requested) {
-            module = DictationTranscriber(locale: supported, preset: .longDictation)
-            locale = supported
-            name = "dictationtranscriber-\(supported.identifier)"
-        } else {
-            log("unsupported", "lang=\(languageCode) speechTranscriberAvailable=\(SpeechTranscriber.isAvailable)")
+        guard SpeechTranscriber.isAvailable else {
+            log("unsupported", "lang=\(languageCode) speechTranscriberAvailable=false")
             return
         }
+        guard let locale = await SpeechTranscriber.supportedLocale(equivalentTo: requested) else {
+            log("unsupported", "lang=\(languageCode) speechTranscriberAvailable=true")
+            return
+        }
+        let module = SpeechTranscriber(locale: locale, preset: .transcription)
+        let name = "speechtranscriber-\(locale.identifier)"
         let before = await AssetInventory.status(forModules: [module])
-        let installed = await DictationTranscriber.installedLocales.map(\.identifier).sorted()
-        log("status", "module=\(name) status=\(before) dictationInstalled=\(installed) reserved=\(await AssetInventory.reservedLocales.map(\.identifier))")
+        let installed = await SpeechTranscriber.installedLocales.map(\.identifier).sorted()
+        log("status", "module=\(name) status=\(before) installedLocales=\(installed) reserved=\(await AssetInventory.reservedLocales.map(\.identifier))")
         guard before != .installed else { return }
         do {
             // The app has to hold a reservation on the locale before iOS installs its
