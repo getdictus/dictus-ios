@@ -546,7 +546,9 @@ struct KeyboardRootView: View {
             return
         }
 
-        if suggestionState.mode == .corrections {
+        // Candidates mode (#993) has the same row shape, minus the bold slot: slot 0
+        // keeps the typed word, the others replace it.
+        if suggestionState.mode == .corrections || suggestionState.mode == .candidates {
             if index == 0 {
                 keepTypedWord(proxy: proxy, rowWord: suggestion)
                 // #548: reported, but deliberately NOT treated as a settling boundary.

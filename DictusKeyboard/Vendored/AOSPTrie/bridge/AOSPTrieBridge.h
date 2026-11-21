@@ -13,6 +13,14 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic) float score;
 @end
 
+/// One correction candidate: a dictionary word, the weighted edit cost of reaching it
+/// from the typed word, and its stored (log-normalized) frequency.
+@interface AOSPTrieCandidate : NSObject
+@property (nonatomic, copy) NSString *word;
+@property (nonatomic) float cost;
+@property (nonatomic) uint16_t frequency;
+@end
+
 @interface AOSPTrieBridge : NSObject
 
 - (BOOL)loadDictionaryAtPath:(NSString *)path;
@@ -27,6 +35,12 @@ NS_ASSUME_NONNULL_BEGIN
 /// Unlike spellCheck, this does NOT return nil for correctly-spelled words.
 /// Used by n-gram context boosting to find alternatives for valid-but-rare words.
 - (NSArray<NSString *> *)nearbyWords:(NSString *)word maxEditDistance:(float)maxDist maxResults:(NSUInteger)maxResults;
+
+/// Dictionary words within `maxDist` weighted edits of `word`, best scored first, the
+/// word itself included when it is in the dictionary. Each word appears once.
+- (NSArray<AOSPTrieCandidate *> *)candidatesForWord:(NSString *)word
+                                    maxEditDistance:(float)maxDist
+                                         maxResults:(NSUInteger)maxResults;
 
 /// Check if word exists in dictionary.
 - (BOOL)wordExists:(NSString *)word;

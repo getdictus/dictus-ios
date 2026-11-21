@@ -15,6 +15,7 @@ enum SuggestionMode {
     case idle
     case completions
     case corrections
+    case candidates       // Typed word kept: candidates offered for a tap, none applied on space (#993)
     case predictions      // After space: showing n-gram predicted next words
     case undoAvailable    // After autocorrect: showing undo option for previous correction
 }
@@ -157,13 +158,14 @@ class SuggestionState: ObservableObject {
         let previousWord = extractPreviousWord(from: context, currentWord: partial)
 
         // Check spell correction first (mirrors what handleSpace will do)
-        if autocorrectEnabled,
-           rejectionMemory.previewsCorrection(context: context),
-           let result = engine.spellCheck(
-               partial,
-               previousWord: previousWord,
-               isAtSentenceStart: ProperNounGuard.isAtSentenceStart(context: context, word: partial)
-           ),
+        let proposal = autocorrectEnabled && rejectionMemory.previewsCorrection(context: context)
+            ? engine.correctionProposal(
+                for: partial,
+                previousWord: previousWord,
+                isAtSentenceStart: ProperNounGuard.isAtSentenceStart(context: context, word: partial)
+            )
+            : nil
+        if let result = proposal?.autocorrection,
            isVisibleCorrection(result.correction, of: partial) {
             // Standard mobile layout: [original | correction (bold) | alternative],
             // with a learned word claiming the third slot when it extends what
@@ -176,6 +178,13 @@ class SuggestionState: ObservableObject {
                 learnedWords: UserDictionary.shared.learnedWordsByLastUsed
             )
             mode = .corrections
+            return
+        }
+
+        // The corrector kept the typed word but has candidates (#993): offer them.
+        if let row = proposal?.suggestionRow(typedWord: partial) {
+            suggestions = row
+            mode = .candidates
             return
         }
 
@@ -257,16 +266,17 @@ class SuggestionState: ObservableObject {
             let previousWord = self.extractPreviousWord(from: context, currentWord: partial)
 
             // Check spell correction first (mirrors what handleSpace will do)
-            let spellResult: (correction: String, alternatives: [String])?
+            let proposal: CorrectionProposal?
             if self.autocorrectEnabled, previewsCorrection {
-                spellResult = self.engine.spellCheck(
-                    partial,
+                proposal = self.engine.correctionProposal(
+                    for: partial,
                     previousWord: previousWord,
                     isAtSentenceStart: ProperNounGuard.isAtSentenceStart(context: context, word: partial)
                 )
             } else {
-                spellResult = nil
+                proposal = nil
             }
+            let spellResult = proposal?.autocorrection
 
             // Compute completions as fallback
             let completions = self.engine.suggestions(for: partial)
@@ -303,6 +313,10 @@ class SuggestionState: ObservableObject {
                         learnedWords: learnedWords
                     )
                     self.mode = .corrections
+                } else if let row = proposal?.suggestionRow(typedWord: partial) {
+                    // Kept as typed, candidates offered for a tap (#993).
+                    self.suggestions = row
+                    self.mode = .candidates
                 } else if !completions.isEmpty {
                     self.suggestions = completions
                     self.mode = .completions
@@ -333,6 +347,18 @@ class SuggestionState: ObservableObject {
         isAtSentenceStart: Bool = true
     ) -> (correction: String, alternatives: [String])? {
         return engine.spellCheck(word, previousWord: previousWord, isAtSentenceStart: isAtSentenceStart)
+    }
+
+    /// What `performSpellCheck(_:previousWord:isAtSentenceStart:)` decides, plus the
+    /// corrections the bar offers when the typed word is kept (#993). The space bar
+    /// applies only its autocorrection; the learning site reads whether corrections
+    /// were offered.
+    func correctionProposal(
+        _ word: String,
+        previousWord: String?,
+        isAtSentenceStart: Bool
+    ) -> CorrectionProposal? {
+        engine.correctionProposal(for: word, previousWord: previousWord, isAtSentenceStart: isAtSentenceStart)
     }
 
     /// Reads the contacts + text replacements lexicon (#873) and hands it to the

@@ -960,14 +960,14 @@ final class DictusKeyboardBridge: NSObject,
             wordWasEvaluated = false
         }
 
-        let proposal = autocorrectRuns
-            ? state.performSpellCheck(
-                freshWord, previousWord: previousWord, isAtSentenceStart: atSentenceStart
-            )?.correction
+        let checked = autocorrectRuns
+            ? state.correctionProposal(freshWord, previousWord: previousWord, isAtSentenceStart: atSentenceStart)
             : nil
+        let proposal = checked?.autocorrection?.correction
 
         switch memory.commit(
             prefix: prefix, word: freshWord, proposedCorrection: proposal,
+            offersCorrections: checked?.suggestionRow(typedWord: freshWord) != nil,
             countable: wordWasEvaluated,
             allowsCasingChange: proposal != nil && state.isInSupplementaryLexicon(freshWord)
         ) {
@@ -1028,7 +1028,9 @@ final class DictusKeyboardBridge: NSObject,
             // correct it (user typed it as-is). Track usage — at the repetition
             // threshold, learn it. Skipped when autocorrect never ran (see
             // wordWasEvaluated above): those words were not vetted by the pipeline,
-            // and when this word was already counted at this place (#872).
+            // when this word was already counted at this place (#872), and when the
+            // bar was offering corrections for it (#993): keeping a word past
+            // `arrive | arrivé` says nothing, a tap on the typed word does.
             //
             // The dictionary check is the gate this site was missing (#287 decision 2).
             // Passive typing states nothing about intent, so the only word worth
