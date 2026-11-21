@@ -12,6 +12,7 @@ file says what each piece is.
 | File | What it is |
 |---|---|
 | `corpus/fr.txt`, `corpus/en.txt` | 20 everyday sentences per language, the text the typist means. Lowercase, no punctuation. |
+| `register.tsv` | Real autocorrect cases reported on #500: the text before the word, the word as typed, what was meant. Committed by the same space-bar path as the runs. |
 | `corpus/es.txt`, `corpus/de.txt` | The same for Spanish and German: 20 sentences each from [Tatoeba](https://tatoeba.org) (CC BY 2.0 FR), written by self-declared native speakers. Sources and checks: [`docs/research/multilingual-autocorrect/corpus.md`](../../docs/research/multilingual-autocorrect/corpus.md). |
 | `corpus/<lang>-typos.txt`, `corpus/<lang>-typos.keys` | Typo runs for en, es, de: 20 Tatoeba sentences each (`.txt`, what the typist means) and what a typist who makes the language's frequent real mistakes types (`.keys`). |
 | `make_typos.py` | Writes the `.keys` files from the `.txt` files and the typo pairs of `docs/research/multilingual-autocorrect/typos-<lang>.tsv`. Deterministic. |
@@ -39,8 +40,8 @@ xcrun simctl boot <udid>                    # headless; your own simulator
 tools/keyboard-bench/run.sh --udid <udid> > report.md
 ```
 
-About two minutes, most of it compiling DictusCore. Writes `taps.tsv`, `commits.tsv`
-and `texts.tsv` to `build/keyboard-bench/out/` and prints the report.
+About two minutes, most of it compiling DictusCore. Writes `taps.tsv`, `commits.tsv`,
+`texts.tsv` and `register.tsv` to `build/keyboard-bench/out/` and prints the report.
 
 ## Bilingual replay (#1009)
 

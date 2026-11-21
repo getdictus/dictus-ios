@@ -93,7 +93,8 @@ class SuggestionState: ObservableObject {
         if let bilingual = BilingualAutocorrect.current {
             return bilingual.preview(partial, previousWord: previousWord, isAtSentenceStart: atStart, context: context)
         }
-        return engine.correctionProposal(for: partial, previousWord: previousWord, isAtSentenceStart: atStart)
+        return engine.correctionProposal(for: partial, previousWord: previousWord, isAtSentenceStart: atStart,
+                                         context: context)
     }
 
     private init() {}
@@ -371,9 +372,12 @@ class SuggestionState: ObservableObject {
     func performSpellCheck(
         _ word: String,
         previousWord: String?,
-        isAtSentenceStart: Bool = true
+        isAtSentenceStart: Bool = true,
+        context: String
     ) -> (correction: String, alternatives: [String])? {
-        return engine.spellCheck(word, previousWord: previousWord, isAtSentenceStart: isAtSentenceStart)
+        return engine.spellCheck(
+            word, previousWord: previousWord, isAtSentenceStart: isAtSentenceStart, context: context
+        )
     }
 
     /// The elision the previous word and `word` make across a mistyped space (#1006).
@@ -401,7 +405,8 @@ class SuggestionState: ObservableObject {
                                     spatial: spatial, context: context)
         }
         return engine.correctionProposal(
-            for: word, previousWord: previousWord, isAtSentenceStart: isAtSentenceStart, spatial: spatial
+            for: word, previousWord: previousWord, isAtSentenceStart: isAtSentenceStart, spatial: spatial,
+            context: context
         )
     }
 
