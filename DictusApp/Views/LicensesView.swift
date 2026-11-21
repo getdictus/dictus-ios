@@ -35,6 +35,7 @@ import DictusCore
 /// (CC BY 3.0, which asks for the attribution), and the word lists that filter them,
 /// SCOWL for English (its notice asks to travel with the output) and Grammalecte's French
 /// dictionary (MPL 2.0, whose notice and source location travel with a derived file).
+/// Adaptive touch (#1014) is ported from Hex too: its entry names both.
 ///
 /// The bilingual check (#1015) reuses Hex's approach too, not its code: the second
 /// language's fallback, the tie-break by the last words and the partner check. Hex's
@@ -151,12 +152,14 @@ struct LicensesView: View {
         English model is Hex's, the French one Dictus's, built with Hex's script.
         """
 
+    /// What Dictus took from Hex, so the entry says which code the MIT notice covers (#1014).
     private static let hexNotice = """
-        The keyboard's spatial autocorrect (its decoder, model format and model build \
-        script) is ported from Hex. Its bilingual autocorrect follows Hex's: the second \
-        language fixes a typo only it can fix but never guesses a name, the last words typed \
-        choose between two fixes, a word of the other language typed after words of that \
-        language stays, and a second language whose dictionary accepts any word is left out.
+        The keyboard's spatial autocorrect decoder and its model format and build script \
+        (#1011), and Adaptive touch, which learns where you tap each key (#1014), are \
+        ported from Hex. Its bilingual autocorrect follows Hex's: the second language fixes \
+        a typo only it can fix but never guesses a name, the last words typed choose between \
+        two fixes, a word of the other language typed after words of that language stays, \
+        and a second language whose dictionary accepts any word is left out.
         """
 
     private static let grammalecteNotice = """

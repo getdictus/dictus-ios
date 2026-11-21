@@ -669,6 +669,8 @@ struct KeyboardRootView: View {
         if suggestionState.mode == .undoAvailable {
             if index == 0, let undo = suggestionState.pendingUndo {
                 performUndo(undo: undo, proxy: proxy)
+                // The user kept what they typed over the correction: strong evidence (#1014).
+                bridge?.noteAdaptiveUndo(original: undo.originalWord)
                 suggestionState.pendingUndo = nil
                 suggestionState.clear()
             } else {
@@ -681,6 +683,12 @@ struct KeyboardRootView: View {
         // Candidates mode (#993) has the same row shape, minus the bold slot: slot 0
         // keeps the typed word, the others replace it.
         if suggestionState.mode == .corrections || suggestionState.mode == .candidates {
+            // #1014: slot 0 keeps the typed word, over the correction space would apply in
+            // `.corrections`; another slot puts a suggestion in its place.
+            bridge?.noteAdaptivePick(
+                replacement: index == 0 ? suggestionState.currentWord : suggestion,
+                overCorrection: index == 0 && suggestionState.mode == .corrections
+            )
             if index == 0 {
                 keepTypedWord(proxy: proxy, rowWord: suggestion)
                 // #548: reported, but deliberately NOT treated as a settling boundary.
@@ -705,6 +713,13 @@ struct KeyboardRootView: View {
         }
 
         let addSpace = suggestionState.mode == .completions
+        // A completion ends the word (#1014); an accent pick only changes a vowel, and its
+        // word keeps going without a tap for that letter.
+        if addSpace {
+            bridge?.noteAdaptivePick(replacement: suggestion, overCorrection: false)
+        } else {
+            AdaptiveTouchSwitch.current?.forget()
+        }
         replaceCurrentWord(
             proxy: proxy,
             currentWord: suggestionState.currentWord,

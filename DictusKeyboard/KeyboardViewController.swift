@@ -561,6 +561,8 @@ class KeyboardViewController: UIInputViewController {
         // Search/URL/email fields disable autocorrect and suggestions. This is the
         // focus reading a mention cannot downgrade later (#1004).
         bridge?.refreshHostPolicy(fieldFocused: true)
+        // A new session for Adaptive touch's evidence (#1014).
+        bridge?.adaptiveTouchSessionBegan()
 
         // Re-sync the learned-words dictionary from the App Group (#222).
         // The singleton caches in memory per process; if the user reset the
@@ -745,6 +747,8 @@ class KeyboardViewController: UIInputViewController {
         // touchesEnded, and the repeat timer was cleared by nothing else (#390).
         giellaKeyboard?.cancelKeyRepeat(reason: "viewDidDisappear")
         stopMemoryTick()
+        // What Adaptive touch learned reaches its file before iOS may end the process (#1014).
+        AdaptiveTouchSwitch.save()
 
         // Restore system gesture recognizer delay (be a good citizen)
         restoreWindowGestureDelay()
@@ -1264,6 +1268,7 @@ class KeyboardViewController: UIInputViewController {
         bridge?.suggestionState?.pendingUndo = nil
         // A sent message empties the field under the same documentIdentifier (#872).
         bridge?.hostTextChanged()
+        bridge?.noteAdaptiveHostChange()
         // When text changes externally (paste, cursor move, autocorrect by host app),
         // recheck autocapitalization. This ensures shift state stays correct even when
         // the user moves the cursor to a different position in the text.
@@ -1287,6 +1292,8 @@ class KeyboardViewController: UIInputViewController {
         #endif
         // A caret the user moved is a caret the insertion is no longer behind (#266).
         KeyboardState.shared.revalidateDictationUndo()
+        // A caret the user moved: what Adaptive touch follows may be gone (#1014).
+        bridge?.noteAdaptiveHostChange()
         // Some hosts move focus between fields without emitting textDidChange.
         // Re-read the field's input traits so the autocorrect/suggestions policy
         // matches the newly-focused field (#200).

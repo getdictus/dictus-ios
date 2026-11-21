@@ -228,7 +228,7 @@ func replayPair(_ pair: KeyboardLanguagePair, runs: [String], corpusDir: String,
                 let intendedWords = sentences[line].components(separatedBy: " ")
                 let (_, commits) = replay(run.filter { $0.sentence == s }, cells: cells, width: width, height: height,
                                           picker: nil, journal: nil, spatial: spatialOn,
-                                          corrector: corrector) { _, resolved, _, us, _, _ in
+                                          corrector: corrector, adaptive: nil) { _, resolved, _, us, _, _, _ in
                     switch resolved {
                     case "space": costOut.append("\(label)\t\(policy)\tspace\t\(us)")
                     case "none", "backspace", "shift", "return", "123", "spacer", "other": break

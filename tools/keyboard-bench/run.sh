@@ -12,6 +12,7 @@
 #       [--corpus <dir>] [--runs <dir>] [--hit plain|model] [--model <spec>] [--no-build]
 #       [--debug] [--journal] [--spatial] [--spatial-tune <k=v,...>] [--layout azerty|qwerty|qwertz]
 #       [--pair fr,en [--probe <word,previous|word,...>]] [--bilingual]
+#       [--adaptive learn|frozen|monitor] [--adaptive-load <profile>] [--adaptive-save <profile>]
 #
 # --width and --height are the key grid in points. The defaults are an iPhone 17
 # held upright: 402 pt wide, and the 216 pt KeyboardHeightProvider gives a 6.3" screen.
@@ -43,6 +44,13 @@
 # #1015: --pair also replays the bilingual check (policy `check`), and with --spatial
 # every policy reads the taps. --bilingual types the monolingual runs on the bilingual
 # check, the run's language primary and the other of French and English its partner.
+#
+# #1014: --adaptive turns on Adaptive touch (with --spatial, as in the keyboard): `learn`
+# learns as the run types, `frozen` reads a profile and learns nothing, `monitor` reads it and
+# only watches how it fits. --adaptive-load starts from a profile another run saved with
+# --adaptive-save (learn on one device session, score on the other). Writes <dir>/adaptive.tsv:
+# what the profile holds per key, as offsets in keycaps (no text). --adaptive-tune changes
+# Hex's activation gate for a sweep (`activeTaps=100,activeSessions=1`).
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
@@ -64,6 +72,10 @@ LAYOUT=""
 PAIR=""
 PROBE=""
 BILINGUAL=0
+ADAPTIVE=""
+ADAPTIVE_LOAD=""
+ADAPTIVE_SAVE=""
+ADAPTIVE_TUNE=""
 while [[ $# -gt 0 ]]; do
     case "$1" in
         --udid) UDID="$2"; shift 2 ;;
@@ -84,6 +96,10 @@ while [[ $# -gt 0 ]]; do
         --pair) PAIR="$2"; shift 2 ;;
         --probe) PROBE="$2"; shift 2 ;;
         --bilingual) BILINGUAL=1; shift ;;
+        --adaptive) ADAPTIVE="$2"; shift 2 ;;
+        --adaptive-tune) ADAPTIVE_TUNE="$2"; shift 2 ;;
+        --adaptive-load) ADAPTIVE_LOAD="$(cd "$(dirname "$2")" && pwd)/$(basename "$2")"; shift 2 ;;
+        --adaptive-save) ADAPTIVE_SAVE="$(cd "$(dirname "$2")" && pwd)/$(basename "$2")"; shift 2 ;;
         *) echo "unknown argument: $1" >&2; exit 2 ;;
     esac
 done
@@ -172,6 +188,7 @@ if [[ -n "$PAIR" ]]; then
     exit 0
 fi
 SIMCTL_CHILD_SWIFT_DETERMINISTIC_HASHING=1 SIMCTL_CHILD_KB_JOURNAL="$JOURNAL" \
+SIMCTL_CHILD_KB_ADAPTIVE="$ADAPTIVE" SIMCTL_CHILD_KB_ADAPTIVE_TUNE="$ADAPTIVE_TUNE" SIMCTL_CHILD_KB_ADAPTIVE_LOAD="$ADAPTIVE_LOAD" SIMCTL_CHILD_KB_ADAPTIVE_SAVE="$ADAPTIVE_SAVE" \
 SIMCTL_CHILD_KB_SPATIAL="$SPATIAL" SIMCTL_CHILD_KB_LAYOUT="$LAYOUT" SIMCTL_CHILD_KB_SPATIAL_TUNE="$SPATIAL_TUNE" \
 SIMCTL_CHILD_KB_BILINGUAL="$BILINGUAL" SIMCTL_CHILD_KB_TRACE="${KB_TRACE:-0}" \
 SIMCTL_CHILD_KB_CORPUS="$CORPUS" SIMCTL_CHILD_KB_RUNS="$RUNS" SIMCTL_CHILD_KB_HIT="$HIT" SIMCTL_CHILD_KB_MODEL="$MODEL" \
@@ -179,4 +196,4 @@ SIMCTL_CHILD_KB_CORPUS="$CORPUS" SIMCTL_CHILD_KB_RUNS="$RUNS" SIMCTL_CHILD_KB_HI
     2> >(grep -v "Lexicon creation for" >&2) >&2
 
 python3 -I "$BENCH/score.py" --commit "$(git -C "$ROOT" rev-parse HEAD)" \
-    --keyboard "Dictus (replay, ${WIDTH}x${HEIGHT} pt grid, hit test: $HIT${MODEL:+ $MODEL}$([[ $SPATIAL == 1 ]] && echo ", spatial decoder${SPATIAL_TUNE:+ $SPATIAL_TUNE}" || true)$([[ $BILINGUAL == 1 ]] && echo ", bilingual check" || true)$([[ $DEBUG == 1 ]] && echo ", DEBUG, journal $([[ $JOURNAL == 1 ]] && echo on || echo off)" || true))" --dir "$OUT"
+    --keyboard "Dictus (replay, ${WIDTH}x${HEIGHT} pt grid, hit test: $HIT${MODEL:+ $MODEL}$([[ $SPATIAL == 1 ]] && echo ", spatial decoder${SPATIAL_TUNE:+ $SPATIAL_TUNE}" || true)$([[ $BILINGUAL == 1 ]] && echo ", bilingual check" || true)${ADAPTIVE:+, adaptive touch $ADAPTIVE${ADAPTIVE_TUNE:+ $ADAPTIVE_TUNE}}$([[ $DEBUG == 1 ]] && echo ", DEBUG, journal $([[ $JOURNAL == 1 ]] && echo on || echo off)" || true))" --dir "$OUT"

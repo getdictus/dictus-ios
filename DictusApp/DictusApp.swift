@@ -381,6 +381,7 @@ struct DictusApp: App {
         #if DEBUG
         Self.applyKeyboardDebugArgument("DictusDebugSpatialAutocorrect", key: "debug.spatialAutocorrect")
         Self.applyKeyboardDebugArgument("DictusDebugBilingualAutocorrect", key: "debug.bilingualAutocorrect")
+        Self.applyAdaptiveTouchArguments()
         #endif
     }
 
@@ -400,6 +401,23 @@ struct DictusApp: App {
     private static func applyKeyboardDebugArgument(_ argument: String, key: String) {
         guard ProcessInfo.processInfo.arguments.contains("-\(argument)") else { return }
         AppGroup.defaults.set(UserDefaults.standard.bool(forKey: argument), forKey: key)
+    }
+
+    /// `-DictusDebugAdaptiveTouch YES` (or `NO`) turns Adaptive touch on or off (#1014): the
+    /// keyboard learns where this user lands on each key, for the spatial decoder, which
+    /// must be on too. `-DictusDebugAdaptiveTouchReset YES` forgets what it learned, as
+    /// Reset learned words does. Same launch line and same reason as the decoder's switch.
+    private static func applyAdaptiveTouchArguments() {
+        let arguments = ProcessInfo.processInfo.arguments
+        let toggle = "DictusDebugAdaptiveTouch"
+        if arguments.contains("-\(toggle)") {
+            // The key is `AdaptiveTouchSwitch.switchKey` in DictusKeyboard, where it is read.
+            AppGroup.defaults.set(UserDefaults.standard.bool(forKey: toggle), forKey: "debug.adaptiveTouch")
+        }
+        let reset = "DictusDebugAdaptiveTouchReset"
+        if arguments.contains("-\(reset)"), UserDefaults.standard.bool(forKey: reset) {
+            AdaptiveTouchStore.requestReset()
+        }
     }
     #endif
 

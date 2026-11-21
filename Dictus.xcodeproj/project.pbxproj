@@ -209,6 +209,7 @@
 		SD1011A1 /* SpatialAutocorrect.swift in Sources */ = {isa = PBXBuildFile; fileRef = SD1011B1 /* SpatialAutocorrect.swift */; };
 		BC1015A1 /* BilingualAutocorrect.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC1015B1 /* BilingualAutocorrect.swift */; };
 		BC1015A2 /* TrieLanguageEvidence.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC1015B2 /* TrieLanguageEvidence.swift */; };
+		AT1014A1 /* AdaptiveTouchSwitch.swift in Sources */ = {isa = PBXBuildFile; fileRef = AT1014B1 /* AdaptiveTouchSwitch.swift */; };
 		SD1011A2 /* fr.hextm in Resources */ = {isa = PBXBuildFile; fileRef = SD1011B2 /* fr.hextm */; };
 		SD1011A3 /* en.hextm in Resources */ = {isa = PBXBuildFile; fileRef = SD1011B3 /* en.hextm */; };
 		EE0ES001 /* es_spellcheck.dict in Resources */ = {isa = PBXBuildFile; fileRef = EE1ES001 /* es_spellcheck.dict */; };
@@ -541,6 +542,7 @@
 		SD1011B1 /* SpatialAutocorrect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpatialAutocorrect.swift; sourceTree = "<group>"; };
 		BC1015B1 /* BilingualAutocorrect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BilingualAutocorrect.swift; sourceTree = "<group>"; };
 		BC1015B2 /* TrieLanguageEvidence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrieLanguageEvidence.swift; sourceTree = "<group>"; };
+		AT1014B1 /* AdaptiveTouchSwitch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdaptiveTouchSwitch.swift; sourceTree = "<group>"; };
 		SD1011B2 /* fr.hextm */ = {isa = PBXFileReference; lastKnownFileType = "compiled"; path = fr.hextm; sourceTree = "<group>"; };
 		SD1011B3 /* en.hextm */ = {isa = PBXFileReference; lastKnownFileType = "compiled"; path = en.hextm; sourceTree = "<group>"; };
 		EE1ES001 /* es_spellcheck.dict */ = {isa = PBXFileReference; lastKnownFileType = "compiled"; path = es_spellcheck.dict; sourceTree = "<group>"; };
@@ -943,6 +945,7 @@
 				SD1011B1 /* SpatialAutocorrect.swift */,
 				BC1015B1 /* BilingualAutocorrect.swift */,
 				BC1015B2 /* TrieLanguageEvidence.swift */,
+				AT1014B1 /* AdaptiveTouchSwitch.swift */,
 			);
 			path = TextPrediction;
 			sourceTree = "<group>";
@@ -1629,6 +1632,7 @@
 				SD1011A1 /* SpatialAutocorrect.swift in Sources */,
 				BC1015A1 /* BilingualAutocorrect.swift in Sources */,
 				BC1015A2 /* TrieLanguageEvidence.swift in Sources */,
+				AT1014A1 /* AdaptiveTouchSwitch.swift in Sources */,
 				AA0000D4 /* SuggestionBarView.swift in Sources */,
 				AA0000G0 /* KeyTapSignposter.swift in Sources */,
 				CC000030 /* KeyboardMetrics.swift in Sources */,

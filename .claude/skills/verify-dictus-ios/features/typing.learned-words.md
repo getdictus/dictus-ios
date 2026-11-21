@@ -8,7 +8,7 @@
 ## Sub-features
 
 - `learned-words.learn`: A word kept where the user refused a correction (one refusal is enough, #872), or an unknown word typed twice, is learned and no longer corrected.
-- `learned-words.reset`: « Reset learned words » in Réglages → Clavier.
+- `learned-words.reset`: « Reset learned words » in Réglages → Clavier. It also forgets what Adaptive touch learned (`typing.adaptive-touch`, #1014): the App Group file goes and a running keyboard drops its copy.
 
 ## How to get to it (user POV)
 

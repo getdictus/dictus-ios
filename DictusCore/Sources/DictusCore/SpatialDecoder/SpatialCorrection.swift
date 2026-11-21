@@ -8,11 +8,17 @@ public enum SpatialCorrection {
     /// The taps of one word and the keys they were made on.
     public struct Input: Equatable {
         public var taps: [CGPoint]
+        /// The centres the taps are read with: the stock keys, or Adaptive touch's personal
+        /// ones (#1014).
         public var keys: SpatialDecoder.Keys
+        /// With personal centres in `keys`, the stock ones: what space puts in must clear
+        /// these by the margin too (Hex's `decoderBaselineKeys`). Nil reads `keys` alone.
+        public var baseline: SpatialDecoder.Keys?
 
-        public init(taps: [CGPoint], keys: SpatialDecoder.Keys) {
+        public init(taps: [CGPoint], keys: SpatialDecoder.Keys, baseline: SpatialDecoder.Keys? = nil) {
             self.taps = taps
             self.keys = keys
+            self.baseline = baseline
         }
     }
 
@@ -78,20 +84,41 @@ public enum SpatialCorrection {
         guard kept.count >= 2 else { return nil }
         let literal = String(lowered[tapRange])
         let previous = clitic.isEmpty ? previousWord?.lowercased() : clitic.lowercased()
-        guard let decision = decoder.decide(
-            taps: kept.map { input.taps[$0] }, typed: String(kept.map { lowered[$0] }), literal: literal,
-            previous: previous, literalIsValid: isKnown, keys: input.keys
-        ), let replacement = decision.replacement,
+        let taps = kept.map { input.taps[$0] }
+        let typed = String(kept.map { lowered[$0] })
+        guard var decision = decoder.decide(
+            taps: taps, typed: typed, literal: literal, previous: previous, literalIsValid: isKnown, keys: input.keys
+        ) else { return nil }
+        if let baseline = input.baseline, let personal = decision.replacement {
+            // Adaptive touch (#1014), as Hex has it: the personal centres rank the readings,
+            // and never make a correction the keyboard wouldn't make without them. What space
+            // puts in is a reading the stock centres also clear by the margin, else their own
+            // decision.
+            func clears(_ reading: String) -> Bool? {
+                decoder.replaces(with: reading, taps: taps, typed: typed, literal: literal, previous: previous,
+                                 literalIsValid: isKnown, keys: baseline)
+            }
+            switch clears(personal) {
+            case true?:
+                break
+            case false?:
+                decision.replacement = decision.readings.lazy.map(\.text).first { $0 != personal && clears($0) == true }
+            case nil:
+                decision.replacement = decoder.decide(
+                    taps: taps, typed: typed, literal: literal, previous: previous, literalIsValid: isKnown, keys: baseline
+                )?.replacement
+            }
+        }
+        guard let replacement = decision.replacement,
         // A change of accents alone is the accent rules' to make (#1000, #1008), which know
         // French grammar the word-pair model does not; and an accent typed with the accent
         // key was meant ("sôt" is "sont", never "sot").
         SpatialDecoder.withoutAccents(replacement) != SpatialDecoder.withoutAccents(literal) else { return nil }
-        let taps = kept.map { input.taps[$0] }
 
         if let trie = facts.trieCorrection?.lowercased(), trie != clitic.lowercased() + replacement {
             // The trie's word in the decoder's terms: what follows the same clitic.
             guard trie.hasPrefix(clitic.lowercased()),
-                  let best = decision.readings.first?.cost,
+                  let best = decision.readings.first(where: { $0.text == replacement })?.cost,
                   let rival = decoder.cost(of: String(trie.dropFirst(clitic.count)), taps: taps,
                                            previous: previous, keys: input.keys),
                   best < rival else { return nil }
