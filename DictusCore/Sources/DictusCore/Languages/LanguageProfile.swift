@@ -81,6 +81,10 @@ public struct LanguageProfile: Sendable {
     /// own (`ill` for `I'll`), corrected only where the words before call for
     /// the contraction. See `ContextualContraction`.
     public let contextualContractions: [ContextualContraction]
+    /// Words with two correct spellings that the words before them choose
+    /// between, such as French `a` and `à` (#501). Empty for every other language,
+    /// so nothing of this kind fires outside French.
+    public let contextualHomographs: [ContextualHomograph]
 
     public init(
         code: String,
@@ -97,7 +101,8 @@ public struct LanguageProfile: Sendable {
         collapseRules: [(from: String, to: String)] = [],
         participleContext: ParticipleContext? = nil,
         misspellings: [String: String] = [:],
-        contextualContractions: [ContextualContraction] = []
+        contextualContractions: [ContextualContraction] = [],
+        contextualHomographs: [ContextualHomograph] = []
     ) {
         self.code = code
         self.displayName = displayName
@@ -114,6 +119,7 @@ public struct LanguageProfile: Sendable {
         self.participleContext = participleContext
         self.misspellings = misspellings
         self.contextualContractions = contextualContractions
+        self.contextualHomographs = contextualHomographs
     }
 }
 

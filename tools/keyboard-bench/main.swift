@@ -166,6 +166,12 @@ func load(_ lang: SupportedLanguage) {
     waitUntilLoaded(lang.rawValue)
 }
 
+// `run.sh --lexicon a,ma`: those words as the iPhone's contacts and text replacements.
+let lexiconWords = (ProcessInfo.processInfo.environment["BENCH_LEXICON"] ?? "")
+    .split(separator: ",").map(String.init)
+let benchLexicon = SupplementaryLexicon(entries: lexiconWords.map { (userInput: $0, documentText: $0) })
+engine.setSupplementaryLexicon(benchLexicon)
+
 /// Puts the learned words of `corpus/<code>.words` in the user dictionary, or empties it
 /// when the file does not exist, so every run starts from the state it names (#498).
 /// One row per word: the word, then how many times it has been used. `learn` is called
@@ -211,7 +217,8 @@ func commitWord(in field: Field, memory: AutocorrectRejectionMemory,
     let ws = words(field.text)
     let previous = ws.count >= 2 ? ws[ws.count - 2] : nil
     let proposal = engine.spellCheck(word, previousWord: previous,
-                                     isAtSentenceStart: ProperNounGuard.isAtSentenceStart(context: field.text, word: word))?.correction
+                                     isAtSentenceStart: ProperNounGuard.isAtSentenceStart(context: field.text, word: word),
+                                     context: field.text)?.correction
     var applied = false
     if memory.commit(prefix: prefix, word: word, proposedCorrection: proposal,
                      allowsCasingChange: proposal != nil && engine.lexiconDecision(for: word) != nil) == .correct,
@@ -299,7 +306,8 @@ func replay(_ taps: [Tap], cells: [Cell], width: CGFloat, height: CGFloat, picke
                 let previous = words(context).dropLast().last
                 if memory.previewsCorrection(context: context) {
                     _ = engine.spellCheck(partial, previousWord: previous,
-                                          isAtSentenceStart: ProperNounGuard.isAtSentenceStart(context: context, word: partial))
+                                          isAtSentenceStart: ProperNounGuard.isAtSentenceStart(context: context, word: partial),
+                                          context: context)
                 }
                 _ = engine.suggestions(for: partial)
             }
@@ -322,7 +330,8 @@ func replay(_ taps: [Tap], cells: [Cell], width: CGFloat, height: CGFloat, picke
                 // know when corrections were only offered, as the keyboard's commit does.
                 let checked = engine.correctionProposal(
                     for: word, previousWord: previous,
-                    isAtSentenceStart: ProperNounGuard.isAtSentenceStart(context: field.text, word: word)
+                    isAtSentenceStart: ProperNounGuard.isAtSentenceStart(context: field.text, word: word),
+                    context: field.text
                 )
                 let proposal = checked?.autocorrection?.correction
                 offered = checked?.suggestionRow(typedWord: word) != nil
@@ -452,7 +461,7 @@ for code in langs {
         let final = commitWord(in: field, memory: AutocorrectRejectionMemory(), mirror: MirrorSyncState())?.final ?? f[2]
         registerOut.append("\(code)\t\(f[1])\t\(f[2])\t\(f[3])\t\(f[4])\t\(f[6])\t\(final)")
     }
-    engine.setSupplementaryLexicon(.empty)
+    engine.setSupplementaryLexicon(benchLexicon)
     FileHandle.standardError.write(Data("\(code): \(order.count) sentences replayed, hit test \(hitMode)\n".utf8))
 }
 

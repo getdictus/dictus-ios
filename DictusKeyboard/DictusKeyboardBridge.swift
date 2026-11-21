@@ -983,7 +983,9 @@ final class DictusKeyboardBridge: NSObject,
         }
 
         let checked = autocorrectRuns
-            ? state.correctionProposal(freshWord, previousWord: previousWord, isAtSentenceStart: atSentenceStart)
+            ? state.correctionProposal(
+                freshWord, previousWord: previousWord, isAtSentenceStart: atSentenceStart, context: context
+            )
             : nil
         let proposal = checked?.autocorrection?.correction
         let offersCorrections = checked?.suggestionRow(typedWord: freshWord) != nil
