@@ -76,7 +76,6 @@ struct TranslationTargetPickerView: View {
                 }
             }
         }
-        .accessibilityIdentifier("translationTargetPicker")
     }
 
     private func row(_ target: TranslationTarget) -> some View {
