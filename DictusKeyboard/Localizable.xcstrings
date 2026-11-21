@@ -844,6 +844,23 @@
         }
       }
     },
+    "Microphone access is off for Dictus. Turn it on in Settings to dictate." : {
+      "comment" : "Keyboard toolbar line (#992): the microphone permission is refused, so neither the keyboard nor the app can record.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Microphone access is off for Dictus. Turn it on in Settings to dictate."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L’accès au micro est désactivé pour Dictus. Activez-le dans Réglages pour dicter."
+          }
+        }
+      }
+    },
     "No recent voice note" : {
       "comment" : "Keyboard voice note reader, opened by a long press on the menu button when no shared voice note is waiting (#639).",
       "localizations" : {
@@ -1590,6 +1607,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Symboles"
+          }
+        }
+      }
+    },
+    "The Dictus app was closed, so your iPhone dictated with Apple's dictation." : {
+      "comment" : "Keyboard toolbar line (#992): shown once, after the first dictation the keyboard ran itself with the app closed.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The Dictus app was closed, so your iPhone dictated with Apple's dictation."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L’app Dictus était fermée : votre iPhone a dicté avec la dictée d’Apple."
           }
         }
       }

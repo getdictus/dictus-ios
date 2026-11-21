@@ -52,6 +52,36 @@ enum InKeyboardSpeechAssets {
         }
     }
 
+    /// Apply `InKeyboardDictationDefault.policy` at launch: under `newInstallsOnly`, a new
+    /// install starts on and an existing user starts off with a one-time prompt pending.
+    /// Under `onForEveryone` nothing is written. A choice the user made is never touched.
+    static func applyDefaultPolicy() {
+        let defaults = AppGroup.defaults
+        let stored = defaults.object(forKey: SharedKeys.inKeyboardDictationEnabled) as? Bool
+        let resolution = InKeyboardDictationDefault.resolveAtLaunch(
+            policy: InKeyboardDictationDefault.policy,
+            storedValue: stored,
+            onboardingCompleted: defaults.bool(forKey: SharedKeys.hasCompletedOnboarding),
+            promptPending: defaults.bool(forKey: SharedKeys.inKeyboardDefaultPromptPending)
+        )
+        if let value = resolution.write { defaults.set(value, forKey: SharedKeys.inKeyboardDictationEnabled) }
+        defaults.set(resolution.prompt, forKey: SharedKeys.inKeyboardDefaultPromptPending)
+        log("defaultPolicy", "policy=\(InKeyboardDictationDefault.policy.rawValue) stored=\(stored.map(String.init) ?? "nil") write=\(resolution.write.map(String.init) ?? "nil") prompt=\(resolution.prompt)")
+    }
+
+    /// Whether the one-time prompt is owed (only ever under `newInstallsOnly`).
+    static var defaultPromptPending: Bool {
+        AppGroup.defaults.bool(forKey: SharedKeys.inKeyboardDefaultPromptPending)
+    }
+
+    /// The user answered the one-time prompt.
+    static func answerDefaultPrompt(turnOn: Bool) {
+        AppGroup.defaults.set(turnOn, forKey: SharedKeys.inKeyboardDictationEnabled)
+        AppGroup.defaults.set(false, forKey: SharedKeys.inKeyboardDefaultPromptPending)
+        log("defaultPrompt", "answer=\(turnOn ? "on" : "later")")
+        if turnOn { prepareForDictationLanguage(reason: "prompt") }
+    }
+
     /// Old session claims, once per launch.
     static func pruneSessionClaims() {
         guard let directory = DictationSessionClaim.defaultDirectory else { return }

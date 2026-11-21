@@ -10,22 +10,22 @@ struct InKeyboardDictationInfoView: View {
     var body: some View {
         List {
             Section {
-                Text("The keyboard dictates by itself with Apple's dictation, on your iPhone. Nothing leaves your iPhone.")
+                Text("The keyboard dictates by itself with Apple's dictation, on your iPhone. Your voice stays on your iPhone.")
             } header: {
                 Text("When the Dictus app is closed")
             }
             Section {
-                Text("Dictus transcribes with the model you chose in Models, such as Parakeet or Whisper.")
+                Text("Dictus uses the model you chose, such as Parakeet.")
             } header: {
                 Text("When the Dictus app is open")
             }
             Section {
-                Text("Your vocabulary, Polish transcription and Smart Modes apply to your text.")
+                Text("Your vocabulary, Polish transcription and Smart Modes work the same way.")
             } header: {
                 Text("In both cases")
             }
             Section {
-                Text("The Dynamic Island and the Lock Screen activity only appear when the app is open.")
+                Text("The Dynamic Island and the Lock Screen activity appear only when the app is open.")
             } header: {
                 Text("Only with the app")
             }

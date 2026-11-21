@@ -29,7 +29,7 @@ public enum VoiceNoteRoute: String, Equatable, Sendable {
         ) {
         case .appIsRecording: return .appTookIt
         case .inKeyboard: return .shareExtension
-        case .openAppURL: return .openApp
+        case .openAppURL, .microphoneDenied: return .openApp
         }
     }
 }

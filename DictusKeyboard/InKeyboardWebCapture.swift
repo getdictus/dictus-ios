@@ -152,9 +152,10 @@ final class InKeyboardWebCapture: NSObject {
     /// `getUserMedia` requires.
     private static let baseURL = URL(string: "https://keyboard.dictus.invalid/")
 
-    // The page. `startCapture` follows stephancill's capture loop; `startTestAudio` is the
-    // Debug-only simulator path, which feeds a decoded WAV through the same `emit`.
-    private static let page = """
+    // The page. `startCapture` follows stephancill's capture loop.
+    private static let page = pageStart + debugTestAudioScript + pageEnd
+
+    private static let pageStart = """
     <!doctype html><html><head><meta charset="utf-8"></head><body><script>
     const targetRate = \(Int(sampleRate));
     const post = m => window.webkit.messageHandlers.capture.postMessage(m);
@@ -252,6 +253,16 @@ final class InKeyboardWebCapture: NSObject {
       }
     };
 
+    """
+
+    private static let pageEnd = """
+    </script></body></html>
+    """
+
+    /// Debug builds only: the simulator path that streams a WAV through the same `emit`
+    /// (no microphone feeds a simulator). Release pages do not contain it.
+    #if DEBUG
+    private static let debugTestAudioScript = """
     window.startTestAudio = async base64 => {
       let stopping = false, timer, watchdog;
       const cleanup = () => { if (stopping) return; stopping = true; clearInterval(timer); clearInterval(watchdog); post({ type: 'stopped' }); };
@@ -293,8 +304,10 @@ final class InKeyboardWebCapture: NSObject {
         post({ type: 'failed', reason: (error && (error.name + ': ' + error.message)) || String(error) });
       }
     };
-    </script></body></html>
     """
+    #else
+    private static let debugTestAudioScript = ""
+    #endif
 }
 
 extension InKeyboardWebCapture: WKUIDelegate, WKNavigationDelegate {

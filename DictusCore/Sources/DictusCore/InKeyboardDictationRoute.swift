@@ -20,6 +20,18 @@ public enum InKeyboardDictationRoute: String, Equatable, Sendable {
     case inKeyboard
     /// Cold app, experiment off or unusable: open the app through the URL, as today.
     case openAppURL
+    /// Cold app, and the microphone is refused for Dictus: neither path can record, so
+    /// the keyboard says so in one line and opens nothing.
+    case microphoneDenied
+
+    /// The microphone permission as the keyboard reads it (DictusApp's, which WebKit's
+    /// capture is attributed to).
+    public enum MicrophonePermission: String, Sendable {
+        case granted
+        case denied
+        /// Never asked: only the app can show the system prompt, so the URL path goes.
+        case undetermined
+    }
 
     /// First iOS major version with `SpeechAnalyzer`, `SpeechTranscriber` and
     /// `AssetInventory`.
@@ -35,24 +47,34 @@ public enum InKeyboardDictationRoute: String, Equatable, Sendable {
     ///     language is installed, per `AssetInventory`. `nil` means the check has not
     ///     answered yet, which is treated as not installed: the fallback is always safe,
     ///     a dictation into a missing model is not.
+    ///   - hasFullAccess: the keyboard's Full Access. Without it the toolbar shows the
+    ///     Full Access bar instead of the mic, so this is defensive; it routes to today's
+    ///     path, which has its own handling.
+    ///   - microphone: the microphone permission.
     public static func decide(
         settingEnabled: Bool,
         appAnswered: Bool,
         systemMajorVersion: Int,
-        localeInstalled: Bool?
+        localeInstalled: Bool?,
+        hasFullAccess: Bool = true,
+        microphone: MicrophonePermission = .granted
     ) -> InKeyboardDictationRoute {
         if appAnswered { return .appIsRecording }
         guard settingEnabled,
               systemMajorVersion >= minimumSystemMajorVersion,
-              localeInstalled == true
+              localeInstalled == true,
+              hasFullAccess
         else { return .openAppURL }
-        return .inKeyboard
+        switch microphone {
+        case .granted: return .inKeyboard
+        case .undetermined: return .openAppURL
+        case .denied: return .microphoneDenied
+        }
     }
 
-    /// Whether the setting is on when the user never touched it. On for this spike build:
-    /// the test is to install and dictate without ever opening the app, so the keyboard
-    /// cannot wait for a toggle only the app shows.
-    public static let defaultEnabled = true
+    /// Whether the setting is on when the user never touched it, under the default policy
+    /// Pierre chooses (`InKeyboardDictationDefault.policy`).
+    public static var defaultEnabled: Bool { InKeyboardDictationDefault.policy == .onForEveryone }
 
     /// The setting, read from the App Group. An absent key reads as `defaultEnabled`;
     /// the toggle writes an explicit value either way.

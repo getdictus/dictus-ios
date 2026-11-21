@@ -44,9 +44,6 @@ final class InKeyboardDictation {
     /// The overlay's 5 Hz clock, the cadence DictusApp publishes at (`WaveformFeed`).
     private var waveformClock: Timer?
     private var waveform = WaveformFeed()
-    /// Debug builds only: draw the waveform the way build ee238f03 did (one bar per
-    /// WebView message), to film it beside the fix on the same input.
-    private var legacyWaveform = false
     /// How the WebView's chunks arrived over the last second, logged by `everySecond`:
     /// the irregularity the 5 Hz clock absorbs.
     private var chunkArrivals = ChunkArrivalTrace()
@@ -120,6 +117,7 @@ final class InKeyboardDictation {
               Self.systemMajorVersion >= InKeyboardDictationRoute.minimumSystemMajorVersion,
               recognizer != nil else { return }
         observePongsIfNeeded()
+        observeAudioSessionIfNeeded()
         DarwinNotificationCenter.post(DarwinNotificationName.inKeyboardPing)
         if capture == nil { Self.log("prewarm", "webview=loading") }
         loadCaptureIfNeeded(into: view)
@@ -133,6 +131,19 @@ final class InKeyboardDictation {
                 MainActor.assumeIsolated { InKeyboardDictation.shared.lastPong = Date() }
             }
         }
+    }
+
+    /// Called by `KeyboardPolishCoordinator` after an in-keyboard dictation was typed: the
+    /// first time, one line says why this text came from Apple's dictation.
+    func didInsertInKeyboardTail() {
+        guard InKeyboardFirstUse.shouldShow(in: AppGroup.defaults), let state else { return }
+        InKeyboardFirstUse.markShown(in: AppGroup.defaults)
+        Self.log("firstUse", "shown=true")
+        state.presentStatusMessage(
+            String(localized: "The Dictus app was closed, so your iPhone dictated with Apple's dictation."),
+            reason: "inKeyboardFirstUse",
+            timeoutReason: "inKeyboardFirstUse-timeout"
+        )
     }
 
     /// The route decision's verdict on a capture started at the tap.
@@ -155,10 +166,19 @@ final class InKeyboardDictation {
     var mayTakeColdTap: Bool {
         guard InKeyboardDictationRoute.isSettingEnabled(in: AppGroup.defaults),
               Self.systemMajorVersion >= InKeyboardDictationRoute.minimumSystemMajorVersion,
-              recognizer != nil else { return false }
+              recognizer != nil,
+              state?.controller?.hasFullAccess ?? true,
+              Self.microphonePermission == .granted else { return false }
         let code = Self.languageCode()
         if let answer = localeAnswer, answer.code == code { return answer.installed }
         return true
+    }
+
+    /// The setting would apply but the microphone is refused for Dictus.
+    var wouldRefuseForMicrophone: Bool {
+        InKeyboardDictationRoute.isSettingEnabled(in: AppGroup.defaults)
+            && Self.systemMajorVersion >= InKeyboardDictationRoute.minimumSystemMajorVersion
+            && Self.microphonePermission == .denied
     }
 
     /// The route for a tap whose wait has just ended.
@@ -169,7 +189,31 @@ final class InKeyboardDictation {
             settingEnabled: InKeyboardDictationRoute.isSettingEnabled(in: AppGroup.defaults),
             appAnswered: appAnswered,
             systemMajorVersion: Self.systemMajorVersion,
-            localeInstalled: installed
+            localeInstalled: installed,
+            hasFullAccess: state?.controller?.hasFullAccess ?? false,
+            microphone: Self.microphonePermission
+        )
+    }
+
+    /// DictusApp's microphone permission, which WebKit's capture is attributed to.
+    static var microphonePermission: InKeyboardDictationRoute.MicrophonePermission {
+        switch AVAudioApplication.shared.recordPermission {
+        case .granted: return .granted
+        case .denied: return .denied
+        default: return .undetermined
+        }
+    }
+
+    /// The one line the keyboard shows when the microphone is refused for Dictus: neither
+    /// the keyboard nor the app can record, so nothing else happens.
+    func refuseForMicrophone(reason: String) {
+        Self.log("microphoneDenied", "reason=\(reason)")
+        guard let state else { return }
+        state.forceResetToIdle()
+        state.presentStatusMessage(
+            String(localized: "Microphone access is off for Dictus. Turn it on in Settings to dictate."),
+            reason: "inKeyboardMicrophoneDenied",
+            timeoutReason: "inKeyboardMicrophoneDenied-timeout"
         )
     }
 
@@ -214,7 +258,6 @@ final class InKeyboardDictation {
         waveform = WaveformFeed()
         chunkArrivals = ChunkArrivalTrace()
         firstSampleLogged = false
-        legacyWaveform = Self.debugMarkerExists("in-keyboard-waveform-legacy")
         if let view = state?.controller?.view { capture.attach(to: view) }
         InKeyboardAudioSession.prepareForCapture()
         capture.onEvent = { [weak self] event in self?.handle(event) }
@@ -273,13 +316,23 @@ final class InKeyboardDictation {
             recording.pcm16.append(data)
             waveform.append(pcm16: data)
             chunkArrivals.note(samples: data.count / 2, rms: rms)
-            if legacyWaveform { publishLegacyBar(rms: rms) }
             if isActive, recording.seconds >= Self.maximumSeconds { finishRecording(reason: "max-duration") }
         case .interrupted(let reason):
             Self.log("captureInterrupted", "reason=\(reason) provisional=\(isProvisional)")
-            if isProvisional { dropEarlyCapture(reason: "interrupted") } else { finishRecording(reason: "interrupted") }
+            if isProvisional { dropEarlyCapture(reason: "interrupted") } else { applyInterruption(.captureEnded, reason: reason) }
         case .failed(let reason):
-            if isProvisional { dropEarlyCapture(reason: "failed: \(reason)") } else { fail("capture: \(reason)") }
+            if isProvisional {
+                dropEarlyCapture(reason: "failed: \(reason)")
+            } else if reason.contains("NotAllowedError") {
+                // WebKit refused the microphone: the permission was revoked since the tap.
+                capture?.stop()
+                endTicking()
+                isActive = false
+                recording = OnDeviceRecording()
+                refuseForMicrophone(reason: "capture-refused")
+            } else {
+                fail("capture: \(reason)")
+            }
         case .stopped:
             break
         }
@@ -289,20 +342,9 @@ final class InKeyboardDictation {
     /// eases toward each published array frame by frame, so the motion now depends on
     /// the audio and the 5 Hz clock, as it does for a recording in DictusApp.
     private func publishWaveform() {
-        guard let state, isActive, !legacyWaveform else { return }
+        guard let state, isActive else { return }
         state.waveformEnergy = waveform.snapshot()
         state.recordingElapsed = Double(waveform.sampleCount) / OnDeviceRecording.sampleRate
-    }
-
-    /// The pre-fix behaviour, kept only behind the Debug marker for the comparison video.
-    private func publishLegacyBar(rms: Float) {
-        guard let state else { return }
-        let level = min(1, max(0, (20 * log10(max(rms, 0.000_1)) + 50) / 40))
-        var bars = state.waveformEnergy
-        bars.append(level)
-        if bars.count > WaveformFeed.barCount { bars.removeFirst(bars.count - WaveformFeed.barCount) }
-        state.waveformEnergy = bars
-        state.recordingElapsed = recording.seconds
     }
 
     private func everySecond() {
@@ -407,6 +449,44 @@ final class InKeyboardDictation {
         }
     }
 
+    /// A call, Siri, or the page's capture ending: keep what was said (`InKeyboardInterruptionPolicy`).
+    private func applyInterruption(_ event: InKeyboardInterruptionPolicy.Event, reason: String) {
+        guard isActive, state?.dictationStatus == .recording else { return }
+        let action = InKeyboardInterruptionPolicy.action(for: event, recordedSeconds: recording.seconds)
+        Self.log("interruption", "event=\(event.rawValue) reason=\(reason) seconds=\(String(format: "%.1f", recording.seconds)) action=\(action.rawValue)")
+        switch action {
+        case .finishKeepingText:
+            finishRecording(reason: "interruption-\(event.rawValue)")
+        case .discard:
+            capture?.stop()
+            endTicking()
+            isActive = false
+            recording = OnDeviceRecording()
+            state?.forceResetToIdle()
+        case .continue:
+            break
+        }
+    }
+
+    /// The system's own audio events, observed once per process.
+    private var isObservingAudioSession = false
+
+    private func observeAudioSessionIfNeeded() {
+        guard !isObservingAudioSession else { return }
+        isObservingAudioSession = true
+        let center = NotificationCenter.default
+        center.addObserver(forName: AVAudioSession.interruptionNotification, object: nil, queue: .main) { note in
+            let raw = note.userInfo?[AVAudioSessionInterruptionTypeKey] as? UInt
+            guard raw.flatMap(AVAudioSession.InterruptionType.init(rawValue:)) == .began else { return }
+            MainActor.assumeIsolated { InKeyboardDictation.shared.applyInterruption(.interruptionBegan, reason: "audio-session") }
+        }
+        center.addObserver(forName: AVAudioSession.routeChangeNotification, object: nil, queue: .main) { note in
+            let raw = note.userInfo?[AVAudioSessionRouteChangeReasonKey] as? UInt
+            guard raw.flatMap(AVAudioSession.RouteChangeReason.init(rawValue:)) == .oldDeviceUnavailable else { return }
+            MainActor.assumeIsolated { InKeyboardDictation.shared.applyInterruption(.inputDeviceLost, reason: "route-change") }
+        }
+    }
+
     private func fail(_ reason: String) {
         capture?.stop()
         endTicking()
@@ -462,16 +542,6 @@ final class InKeyboardDictation {
     private static func vocabularyTerms() -> [String] {
         guard VocabularyAvailability.isEntitled else { return [] }
         return VocabularyStore.loadEntries().filter(\.isEnabled).map(\.term)
-    }
-
-    /// Debug builds only: whether a marker file sits at the App Group root.
-    private static func debugMarkerExists(_ name: String) -> Bool {
-        #if DEBUG
-        guard let url = AppGroup.containerURL?.appendingPathComponent(name) else { return false }
-        return FileManager.default.fileExists(atPath: url.path)
-        #else
-        return false
-        #endif
     }
 
     /// Debug builds only: a WAV at the App Group root replaces the microphone, for a
@@ -548,7 +618,11 @@ extension KeyboardState {
     /// runs the real `preparationDeferral()` when the keyboard does not take the tap.
     func preparationDeferralUnlessKeyboardTakesOver() -> String? {
         guard let deferral = preparationDeferral() else { return nil }
-        let mayTakeOver = MainActor.assumeIsolated { InKeyboardDictation.shared.mayTakeColdTap }
+        // Also skipped when the microphone is refused: the keyboard's decision then says
+        // so in one line, where opening the app for its model would hide the reason.
+        let mayTakeOver = MainActor.assumeIsolated {
+            InKeyboardDictation.shared.mayTakeColdTap || InKeyboardDictation.shared.wouldRefuseForMicrophone
+        }
         guard mayTakeOver else { return deferral }
         InKeyboardDictation.log("preparationDeferralSkipped", "deferral=\(deferral)")
         return nil
@@ -589,6 +663,10 @@ extension KeyboardState {
                 return true
             }
             dictation.resolveEarlyCapture(.drop)
+            if route == .microphoneDenied {
+                dictation.refuseForMicrophone(reason: "route")
+                return true
+            }
             // Today's URL fallback, except when the app answered late and already owns
             // the session: opening it again would only bring it forward mid-recording.
             if let sessionID = activeSessionID, let claims,

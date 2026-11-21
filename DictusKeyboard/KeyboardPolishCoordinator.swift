@@ -813,6 +813,7 @@ final class KeyboardPolishCoordinator {
             return
         }
         KeyboardState.shared.insertDictation(inserted)
+        if activeIsInKeyboardTail { InKeyboardDictation.shared.didInsertInKeyboardTail() }
         probeMemory("finishedInserted")
         probeMemoryAtRest()
     }

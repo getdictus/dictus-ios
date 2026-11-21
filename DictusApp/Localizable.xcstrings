@@ -3473,6 +3473,17 @@
         }
       }
     },
+    "Dictate with the app closed?" : {
+      "comment" : "One-time question in DictusApp after the update, only under the newInstallsOnly default policy (#992): title.",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dicter avec l’app fermée ?"
+          }
+        }
+      }
+    },
     "Dictate, get the translation" : {
       "comment" : "Onboarding Smart Mode pick, Translate group, when the spoken language is unknown (#677).",
       "localizations" : {
@@ -4042,17 +4053,6 @@
         }
       }
     },
-    "Dictus transcribes with the model you chose in Models, such as Parakeet or Whisper." : {
-      "comment" : "Settings > Experiments > How dictation works (spike #992): what happens when the app is open. \"Models\" is the tab name.",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dictus transcrit avec le modèle choisi dans Modèles, comme Parakeet ou Whisper."
-          }
-        }
-      }
-    },
     "Dictus uses it to reach the Dictus app." : {
       "comment" : "Full Access explainer sheet, first point, bold lead (#704).",
       "localizations" : {
@@ -4072,6 +4072,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Dictus s’en sert pour joindre l’app Dictus."
+          }
+        }
+      }
+    },
+    "Dictus uses the model you chose, such as Parakeet." : {
+      "comment" : "Settings > Experiments > How dictation works (#992): the app is open.",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dictus utilise le modèle que vous avez choisi, comme Parakeet."
           }
         }
       }
@@ -5255,24 +5266,24 @@
         }
       }
     },
-    "The Dynamic Island and the Lock Screen activity only appear when the app is open." : {
-      "comment" : "Settings > Experiments > How dictation works (spike #992): what needs the app.",
+    "The Dynamic Island and the Lock Screen activity appear only when the app is open." : {
+      "comment" : "Settings > Experiments > How dictation works (#992): what needs the app.",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "La Dynamic Island et l’activité sur l’écran verrouillé n’apparaissent que lorsque l’app est ouverte."
+            "value" : "La Dynamic Island et l’activité sur l’écran verrouillé n’apparaissent que si l’app est ouverte."
           }
         }
       }
     },
-    "The keyboard dictates by itself with Apple's dictation, on your iPhone. Nothing leaves your iPhone." : {
-      "comment" : "Settings > Experiments > How dictation works (spike #992): what happens when the app is closed.",
+    "The keyboard dictates by itself with Apple's dictation, on your iPhone. Your voice stays on your iPhone." : {
+      "comment" : "Settings > Experiments > How dictation works (#992): the app is closed.",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Le clavier dicte seul avec la dictée d’Apple, sur votre iPhone. Rien ne quitte votre iPhone."
+            "value" : "Le clavier dicte seul avec la dictée d’Apple, sur votre iPhone. Votre voix reste sur votre iPhone."
           }
         }
       }
@@ -5415,6 +5426,17 @@
         }
       }
     },
+    "Turn on" : {
+      "comment" : "One-time question in DictusApp after the update, only under the newInstallsOnly default policy (#992): button that turns the setting on.",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Activer"
+          }
+        }
+      }
+    },
     "Type" : {
       "comment" : "Feedback form (#565).",
       "localizations" : {
@@ -5518,6 +5540,17 @@
         }
       }
     },
+    "When the Dictus app is closed, the keyboard can dictate by itself with Apple's dictation, on your iPhone." : {
+      "comment" : "One-time question in DictusApp after the update, only under the newInstallsOnly default policy (#992): message.",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quand l’app Dictus est fermée, le clavier peut dicter seul avec la dictée d’Apple, sur votre iPhone."
+          }
+        }
+      }
+    },
     "When the Dictus app is open" : {
       "comment" : "Settings > Experiments > How dictation works (spike #992): section header.",
       "localizations" : {
@@ -5598,13 +5631,13 @@
         }
       }
     },
-    "Your vocabulary, Polish transcription and Smart Modes apply to your text." : {
-      "comment" : "Settings > Experiments > How dictation works (spike #992): what works whichever engine runs. \"Polish transcription\" is the Settings toggle's name.",
+    "Your vocabulary, Polish transcription and Smart Modes work the same way." : {
+      "comment" : "Settings > Experiments > How dictation works (#992): what works in both cases. \"Polish transcription\" is the Settings toggle's name.",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Votre vocabulaire, Polir la transcription et les modes intelligents s’appliquent à votre texte."
+            "value" : "Votre vocabulaire, Polir la transcription et les modes intelligents fonctionnent de la même façon."
           }
         }
       }
