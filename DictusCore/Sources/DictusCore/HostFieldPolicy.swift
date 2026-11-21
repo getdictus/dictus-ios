@@ -48,6 +48,11 @@ public struct HostFieldPolicy: Equatable {
 
     public let autocorrectAllowed: Bool
     public let suggestionsAllowed: Bool
+    /// Whether the user's iOS text replacements expand here (#1022). Wider than
+    /// `autocorrectAllowed`: Apple's keyboard expands a shortcut in any field that
+    /// does not hold a password, autocorrection on or off. False only for secure
+    /// entry and for a password content type.
+    public let textReplacementsAllowed: Bool
 
     /// Short machine-readable explanation for DEBUG logs
     /// (e.g. "autocorrectionType.no", "keyboardType.webSearch").
@@ -60,9 +65,15 @@ public struct HostFieldPolicy: Equatable {
         reason: "default"
     )
 
-    public init(autocorrectAllowed: Bool, suggestionsAllowed: Bool, reason: String) {
+    public init(
+        autocorrectAllowed: Bool,
+        suggestionsAllowed: Bool,
+        textReplacementsAllowed: Bool = true,
+        reason: String
+    ) {
         self.autocorrectAllowed = autocorrectAllowed
         self.suggestionsAllowed = suggestionsAllowed
+        self.textReplacementsAllowed = textReplacementsAllowed
         self.reason = reason
     }
 
@@ -80,7 +91,33 @@ public struct HostFieldPolicy: Equatable {
     ///    `.asciiCapable` stays enabled — many normal fields use it.
     /// 5. Host disabled spell checking only: keep completions/predictions but
     ///    never auto-apply a correction.
+    ///
+    /// Text replacements follow a rule of their own (#1022): every field allows
+    /// them except a secure one and a password one, whatever the order above says.
     public static func evaluate(
+        keyboard: KeyboardKind,
+        content: ContentKind,
+        autocorrectionDisabled: Bool,
+        spellCheckingDisabled: Bool,
+        isSecureEntry: Bool
+    ) -> HostFieldPolicy {
+        let rule = autocorrectRule(
+            keyboard: keyboard,
+            content: content,
+            autocorrectionDisabled: autocorrectionDisabled,
+            spellCheckingDisabled: spellCheckingDisabled,
+            isSecureEntry: isSecureEntry
+        )
+        return HostFieldPolicy(
+            autocorrectAllowed: rule.autocorrectAllowed,
+            suggestionsAllowed: rule.suggestionsAllowed,
+            textReplacementsAllowed: !isSecureEntry && content != .password,
+            reason: rule.reason
+        )
+    }
+
+    /// The autocorrect and suggestion half of `evaluate`, in the order it documents.
+    private static func autocorrectRule(
         keyboard: KeyboardKind,
         content: ContentKind,
         autocorrectionDisabled: Bool,
