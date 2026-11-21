@@ -105,3 +105,40 @@ space bar handles and the in-process replay cannot show.
   `dictus-sim-1006.mp4`: build `d1ababbc` (read from the keyboard's `DictusBuildInfo.plist`).
 - The first eight lines: build of `ab71ec37`, on #1000's earlier head. `La quille et le
   quiz` was typed there, before #997 started correcting `quiz`.
+
+## After merging the batch's other heads
+
+2026-11-21, same simulator and recipe. This branch now holds #1002 at `7a2d967f`, #997
+at `82ff08e5` and #999 at `c70ce2bf`. Neither tree below is pushed: both were rebuilt
+with local merges.
+
+- **before** (`batch-before.md`): #992's head `cc5ee518`, then #997, #1000, #999, #1002,
+  #998, #1005, in the merge order. #999 against #1000 and #1005 against #1002 conflict on
+  their own; they were resolved by keeping both sides (#1000's profile field before
+  #999's, #1005's trait reader with #1002's journal hook).
+- **after** (`batch-after.md`): that chain with this branch at `30c58a78` merged on top,
+  which `git merge-tree` reports clean.
+
+| run | broken | miscorrected | missed | fixed | glued, split back |
+|---|---|---|---|---|---|
+| fr | 0 → 0 | 0 → 0 | 3 → 3 | 28 → 28 | 0 → 0 |
+| en | 0 → 0 | 1 → 1 | 4 → 4 | 13 → 13 | 1 → 1 |
+| en-typos | 0 → 0 | 1 → 1 | 0 → 0 | 36 → 36 | 0 → 0 |
+| es | 0 → 0 | 3 → 3 | 9 → 9 | 29 → 29 | 0 → **1** |
+| de | 0 → 0 | 1 → 1 | 7 → 7 | 16 → 16 | 0 → 0 |
+
+One committed word of 719 differs, the same as before the batch: Spanish `Tengoque`,
+`Enfoque` → `Tengo que`. fr space p50 / p95: 0.10 / 0.44 → 0.10 / 0.42 ms.
+
+The accent after a correction, through `correctionProposal` on the after tree: `est
+zrrive` and `suis arribe` give `arrivé`, `il zrrive` gives `arrive`. The before tree
+gives `arrive` all three times.
+
+The typing journal (#1001) on the after tree, its own bench three ways (no journal,
+DEBUG with the toggle off, journal recording): `commits.tsv` and `texts.tsv`
+byte-identical, with the sha256 of #1001's proof (`11ef46a5…f7bc93`,
+`45e3dbfb…5afea`). The replay has no elision across a space, so the `elision-repair`
+journal line is covered by `TypingJournalTests`, not by this run.
+
+On the after tree too: `swift test` (3752 tests, 0 failures, 3 skipped) and the iOS
+Simulator build of `DictusApp`.
