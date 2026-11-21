@@ -376,10 +376,11 @@ final class KeyView: UIView {
     /// does this key, so that it looks like the keyboard it stands in for.
     static let returnActionColor = UIColor.systemBlue
 
-    /// The language of the return key's words: the iPhone's, as for the keyboard's other
-    /// VoiceOver labels, with English for a language Dictus does not have.
+    /// The language of the return key's words: the keyboard's, as on Apple's keyboard, whose
+    /// French layout says « accéder » and English one "go" whatever the iPhone's language
+    /// (measured on the iOS 26.5 simulator, #1023). The space bar's word follows it too.
     static var labelLanguage: SupportedLanguage {
-        SupportedLanguage.systemKeyboard(preferredLanguages: Locale.preferredLanguages)
+        SupportedLanguage.active
     }
 
     /// The colour the key returns to when no finger is on it.

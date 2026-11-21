@@ -14,7 +14,7 @@
 - `keyboard.reopen-letters`: the keyboard always opens on the letters, even when it was hidden on 123 or `#+=` (#889; Android uses the same ID, #291).
 - `keyboard.transcription-language`: Transcription language: « Suivre la langue du clavier » or fixed.
 - `keyboard.open-app`: The panel's gear opens Dictus.
-- `keyboard.return-key-type`: the return key follows the field's `returnKeyType`, as Apple's keyboard draws it (#1023): blue → in Safari's address bar (Go), blue magnifier in a search field, blue ↑ for Send, ✓ for Done, › for Next and Continue, plain ↵ elsewhere. Greyed, and a tap does nothing, while the field is empty and the host sets `enablesReturnKeyAutomatically` (Safari's address bar does). The words (« accéder », « rechercher »…) are VoiceOver labels in the iPhone's language.
+- `keyboard.return-key-type`: the return key follows the field's `returnKeyType`, as Apple's keyboard draws it (#1023): blue → in Safari's address bar (Go), blue magnifier in a search field, blue ↑ for Send, ✓ for Done, › for Next and Continue, plain ↵ elsewhere. Greyed, and a tap does nothing, while the field is empty and the host sets `enablesReturnKeyAutomatically` (Safari's address bar does). The words (« accéder », « rechercher »…) are VoiceOver labels in the keyboard's language, as on Apple's keyboard.
 
 ## How to get to it (user POV)
 

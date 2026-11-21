@@ -82,9 +82,10 @@ public struct ReturnKeyStyle: Equatable, Sendable {
 
     /// The key's name, for VoiceOver and wherever the key shows a word instead of a glyph.
     ///
-    /// Lower case like the key captions Apple's keyboard used before iOS 26 and like
-    /// `SupportedLanguage.returnName`, which the plain key reuses. French "accéder" is
-    /// Apple's own label for Go (read from the simulator's accessibility tree, iOS 26.5).
+    /// In the keyboard's language, as Apple's keyboard does, lower case like its labels and
+    /// like `SupportedLanguage.returnName`, which the plain key reuses. "accéder" and "go"
+    /// are Apple's own labels for Go on its French and English keyboards (read from the
+    /// simulator's accessibility tree, iOS 26.5).
     public func label(in language: SupportedLanguage) -> String {
         if role == .newline { return language.returnName }
         switch language {
