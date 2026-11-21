@@ -1,0 +1,39 @@
+======================================================================
+DictusKeyboard [66923]: 64-bit    Footprint: 43 MB (16384 bytes per page)
+======================================================================
+
+  Dirty      Clean  Reclaimable    Regions    Category
+    ---        ---          ---        ---    ---
+  21 MB        0 B      3408 KB          9    Malloc Small
+  10 MB      16 KB          0 B        944    __DATA
+6990 KB        0 B          0 B        973    __DATA_CONST
+1618 KB        0 B          0 B          1    page table
+1098 KB        0 B          0 B       1009    unused dyld shared cache area
+1008 KB        0 B          0 B          9    Dyld Private Memory
+ 576 KB        0 B          0 B         34    CoreAnimation
+ 496 KB        0 B          0 B          9    Malloc Metadata
+ 256 KB        0 B          0 B          4    Untagged
+ 192 KB        0 B          0 B          8    Stack
+ 176 KB        0 B          0 B          1    CoreUI Image Data
+ 176 KB        0 B          0 B          1    Malloc Tiny
+ 139 KB        0 B          0 B         14    __DATA_DIRTY
+ 100 KB        0 B          0 B          5    __TPRO_CONST
+  32 KB        0 B          0 B          3    CG Raster Data
+  32 KB        0 B          0 B          1    __AUTH_CONST
+  32 KB        0 B          0 B          1    Activity Tracing
+  32 KB        0 B          0 B          1    Malloc Nano
+  16 KB        0 B          0 B          1    Foundation
+  16 KB        0 B          0 B          1    ColorSync
+  16 KB        0 B          0 B          1    OS Alloc Once
+    0 B      14 MB          0 B         67    mapped file
+    0 B    5680 KB          0 B        986    __TEXT
+    0 B     112 KB          0 B         71    __LINKEDIT
+    0 B        0 B          0 B          1    __LLVM_COV
+    0 B        0 B          0 B          1    __FONT_DATA
+    ---        ---          ---        ---    ---
+  43 MB      19 MB      3408 KB       4158    TOTAL
+
+Auxiliary data:
+    phys_footprint: 43 MB
+    phys_footprint_peak: 45 MB
+

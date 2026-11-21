@@ -1,0 +1,6 @@
+1 mono: rest 31.8 (peak 32.9) | after fr 32.9 (peak 33.9) | after en 39.6 (peak 40.7) | after en + 30 s 39.5 (peak 40.7) | pid 18732
+2 bi: rest 31.8 (peak 32.9) | after fr 43.1 (peak 44.3) | after en 43.5 (peak 45.1) | after en + 30 s 43.6 (peak 45.1) | pid 27823
+3 mono: rest 31.6 (peak 32.5) | after fr 39.2 (peak 40.6) | after en 40.6 (peak 41.2) | after en + 30 s 39.6 (peak 41.2) | pid 36506
+4 bi: rest 31.8 (peak 32.9) | after fr 43.3 (peak 44.7) | after en 43.6 (peak 45.2) | after en + 30 s 43.5 (peak 45.2) | pid 46515
+5 mono: rest 32.0 (peak 33.0) | after fr 39.4 (peak 40.5) | after en 39.5 (peak 41.1) | after en + 30 s 40.6 (peak 41.1) | pid 57609
+6 bi: rest 31.9 (peak 33.0) | after fr 43.3 (peak 44.0) | after en 43.5 (peak 45.1) | after en + 30 s 43.5 (peak 45.1) | pid 66923
