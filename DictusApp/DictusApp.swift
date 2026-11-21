@@ -444,6 +444,9 @@ struct DictusApp: App {
                     switch phase {
                     case .active:
                         PersistentLog.log(.appDidBecomeActive)
+                        // #992: dictations the keyboard ran by itself while the app was
+                        // closed or suspended are in the file, not in this copy.
+                        TranscriptionHistoryStore.shared.reloadFromDisk()
                         catchUpOnProtectedData(trigger: "didBecomeActive")
                         // A purchase made outside the app while it was in the
                         // background unlocks Pro on return (#900).
