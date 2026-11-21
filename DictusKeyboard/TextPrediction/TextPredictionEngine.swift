@@ -101,6 +101,35 @@ class TextPredictionEngine {
         )
     }
 
+    /// Turns an early answer into the proposal `correctionProposal` returns: a
+    /// lexicon keep is nil, every other answer is applied at the space.
+    private func proposal(
+        for early: SupplementaryLexicon.EarlyAnswer, word: String, previousWord: String?
+    ) -> CorrectionProposal? {
+        switch early {
+        case .lexicon(let decision):
+            return lexiconResult(decision, for: word).map {
+                .autocorrect($0.correction, alternatives: $0.alternatives)
+            }
+        case .homograph(let spelling):
+            #if DEBUG
+            AutocorrectDebugLog.autocorrectDecision(
+                original: word, corrected: spelling,
+                branch: "contextual-homograph", prevWord: previousWord
+            )
+            #endif
+            return .autocorrect(spelling, alternatives: [])
+        case .contextOverride(let corrected):
+            #if DEBUG
+            AutocorrectDebugLog.autocorrectDecision(
+                original: word, corrected: corrected,
+                branch: "context-override", prevWord: previousWord
+            )
+            #endif
+            return .autocorrect(corrected, alternatives: [])
+        }
+    }
+
     /// Turns a lexicon verdict into a `spellCheck` result: nil keeps the word.
     private func lexiconResult(
         _ decision: SupplementaryLexicon.Decision,
@@ -666,27 +695,8 @@ class TextPredictionEngine {
         // Lexicon verdicts (#873) return before the bigram rerank, which could
         // otherwise swap a replacement phrase or a kept name for a neighbour.
         // The lexicon and both context rules, in the order `earlyAnswer` documents.
-        switch earlyAnswer(for: word, previousWord: previousWord, context: context) {
-        case .lexicon(let decision)?:
-            return applied(lexiconResult(decision, for: word))
-        case .homograph(let spelling)?:
-            #if DEBUG
-            AutocorrectDebugLog.autocorrectDecision(
-                original: word, corrected: spelling,
-                branch: "contextual-homograph", prevWord: previousWord
-            )
-            #endif
-            return .autocorrect(spelling, alternatives: [])
-        case .contextOverride(let corrected)?:
-            #if DEBUG
-            AutocorrectDebugLog.autocorrectDecision(
-                original: word, corrected: corrected,
-                branch: "context-override", prevWord: previousWord
-            )
-            #endif
-            return .autocorrect(corrected, alternatives: [])
-        case nil:
-            break
+        if let early = earlyAnswer(for: word, previousWord: previousWord, context: context) {
+            return proposal(for: early, word: word, previousWord: previousWord)
         }
 
         // Language overrides are authoritative — return before the bigram
