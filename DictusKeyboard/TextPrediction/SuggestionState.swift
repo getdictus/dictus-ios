@@ -80,6 +80,22 @@ class SuggestionState: ObservableObject {
     /// to avoid the per-controller leak documented in #134.
     private let engine = TextPredictionEngine.shared
 
+    /// The engine of the bar: the shared one, or on a bilingual keyboard (#1015) the
+    /// engine of the language window's language. Only that language is asked per letter.
+    private var typingEngine: TextPredictionEngine {
+        BilingualAutocorrect.current?.typingEngine ?? engine
+    }
+
+    /// The correction the bar previews for `partial`: what the space bar will do, in the
+    /// bar's language and, on a bilingual keyboard, with the other language's check.
+    private func previewProposal(_ partial: String, previousWord: String?, context: String) -> CorrectionProposal? {
+        let atStart = ProperNounGuard.isAtSentenceStart(context: context, word: partial)
+        if let bilingual = BilingualAutocorrect.current {
+            return bilingual.preview(partial, previousWord: previousWord, isAtSentenceStart: atStart, context: context)
+        }
+        return engine.correctionProposal(for: partial, previousWord: previousWord, isAtSentenceStart: atStart)
+    }
+
     private init() {}
 
     /// Serial background queue for suggestion computation.
@@ -167,7 +183,7 @@ class SuggestionState: ObservableObject {
         }
         if containsDigit {
             // Show completions only (no corrections) for numeric tokens
-            let completions = engine.suggestions(for: partial)
+            let completions = typingEngine.suggestions(for: partial)
             suggestions = completions.isEmpty ? [] : completions
             mode = completions.isEmpty ? .idle : .completions
             return
@@ -178,11 +194,7 @@ class SuggestionState: ObservableObject {
 
         // Check spell correction first (mirrors what handleSpace will do)
         let proposal = autocorrectEnabled && rejectionMemory.previewsCorrection(context: context)
-            ? engine.correctionProposal(
-                for: partial,
-                previousWord: previousWord,
-                isAtSentenceStart: ProperNounGuard.isAtSentenceStart(context: context, word: partial)
-            )
+            ? previewProposal(partial, previousWord: previousWord, context: context)
             : nil
         if let result = proposal?.autocorrection,
            isVisibleCorrection(result.correction, of: partial) {
@@ -208,7 +220,7 @@ class SuggestionState: ObservableObject {
         }
 
         // No correction — show word completions
-        let completions = engine.suggestions(for: partial)
+        let completions = typingEngine.suggestions(for: partial)
         if completions.isEmpty {
             suggestions = []
             mode = .idle
@@ -271,7 +283,7 @@ class SuggestionState: ObservableObject {
                 CharacterSet.decimalDigits.contains($0)
             }
             if containsDigit {
-                let completions = self.engine.suggestions(for: partial)
+                let completions = self.typingEngine.suggestions(for: partial)
                 DispatchQueue.main.async { [weak self] in
                     guard let self = self else { return }
                     self.currentWord = partial
@@ -287,18 +299,14 @@ class SuggestionState: ObservableObject {
             // Check spell correction first (mirrors what handleSpace will do)
             let proposal: CorrectionProposal?
             if self.autocorrectEnabled, previewsCorrection {
-                proposal = self.engine.correctionProposal(
-                    for: partial,
-                    previousWord: previousWord,
-                    isAtSentenceStart: ProperNounGuard.isAtSentenceStart(context: context, word: partial)
-                )
+                proposal = self.previewProposal(partial, previousWord: previousWord, context: context)
             } else {
                 proposal = nil
             }
             let spellResult = proposal?.autocorrection
 
             // Compute completions as fallback
-            let completions = self.engine.suggestions(for: partial)
+            let completions = self.typingEngine.suggestions(for: partial)
 
             // Snapshot the learned set here rather than in the main-thread block
             // below: it is the same background queue `suggestions(for:)` already
@@ -377,13 +385,22 @@ class SuggestionState: ObservableObject {
     /// corrections the bar offers when the typed word is kept (#993). The space bar
     /// applies only its autocorrection; the learning site reads whether corrections
     /// were offered.
+    ///
+    /// On a bilingual keyboard (#1015) this is the word's commit: it votes and moves the
+    /// language window, so call it once per committed word. `context` is the document
+    /// before the cursor, which the check reads the words before from.
     func correctionProposal(
         _ word: String,
         previousWord: String?,
         isAtSentenceStart: Bool,
-        spatial: SpatialCorrection.Input? = nil
+        spatial: SpatialCorrection.Input? = nil,
+        context: String = ""
     ) -> CorrectionProposal? {
-        engine.correctionProposal(
+        if let bilingual = BilingualAutocorrect.current {
+            return bilingual.commit(word, previousWord: previousWord, isAtSentenceStart: isAtSentenceStart,
+                                    spatial: spatial, context: context)
+        }
+        return engine.correctionProposal(
             for: word, previousWord: previousWord, isAtSentenceStart: isAtSentenceStart, spatial: spatial
         )
     }
@@ -401,6 +418,7 @@ class SuggestionState: ObservableObject {
             )
             #endif
             engine.setSupplementaryLexicon(supplementary)
+            BilingualAutocorrect.setSupplementaryLexicon(supplementary)
         }
     }
 
@@ -427,6 +445,7 @@ class SuggestionState: ObservableObject {
     /// Updates the prediction engine's language.
     func setLanguage(_ lang: String) {
         engine.setLanguage(lang)
+        BilingualAutocorrect.follow(primary: lang, engine: engine)
     }
 
     /// Whether the active language's dictionary does not know this word (#287).
@@ -475,7 +494,7 @@ class SuggestionState: ObservableObject {
                 return
             }
 
-            let predictions = self.engine.predictNextWords(after: words)
+            let predictions = self.typingEngine.predictNextWords(after: words)
             print("[SuggestionState] updatePredictions context=\(words) results=\(predictions)")
 
             DispatchQueue.main.async { [weak self] in

@@ -55,6 +55,19 @@ class TextPredictionEngine {
         loadDictionaries(for: language)
     }
 
+    /// The language this engine's dictionaries are for.
+    var languageCode: String { language }
+
+    /// This engine's trie, as the bilingual check questions it (#1015), or nil while it
+    /// is not loaded. Built on every call: it is two references and a number, and the
+    /// language and its frequency file change with `setLanguage`.
+    var languageEvidence: TrieLanguageEvidence? {
+        guard aospTrieEngine.isReady, let supported = SupportedLanguage(rawValue: language),
+              frequencyDict.topCount > 0 else { return nil }
+        return TrieLanguageEvidence(language: supported, trie: aospTrieEngine,
+                                    scale: TrieFrequencyScale(topCount: Double(frequencyDict.topCount)))
+    }
+
     /// Updates the active language for completions and spell-checking.
     /// Reloads the frequency dictionary for the new language.
     ///
@@ -635,11 +648,17 @@ class TextPredictionEngine {
     /// `spatial` is where the finger landed for each character of `word` (#1011). With
     /// it, the spatial decoder reads the taps before the trie reads the letters; without
     /// it, nothing changes.
+    ///
+    /// `otherLanguageKnowsWord`: on a bilingual keyboard (#1015), the other language has
+    /// the word as typed. The decoder then treats it as a known word, which it changes
+    /// only on its larger margin, as Hex does: without this, the English decoder read
+    /// French words typed right as typos (study of 2026-11-21, section 7).
     func correctionProposal(
         for word: String,
         previousWord: String?,
         isAtSentenceStart: Bool = true,
-        spatial: SpatialCorrection.Input? = nil
+        spatial: SpatialCorrection.Input? = nil,
+        otherLanguageKnowsWord: Bool = false
     ) -> CorrectionProposal? {
         let applied = { (result: (correction: String, alternatives: [String])?) -> CorrectionProposal? in
             result.map { .autocorrect($0.correction, alternatives: $0.alternatives) }
@@ -699,7 +718,7 @@ class TextPredictionEngine {
         guard let read = SpatialCorrection.correct(
                   word, previousWord: previousWord, input: spatial, with: decoder,
                   facts: SpatialCorrection.Facts(
-                      isKnown: !isUnknownToDictionary(word),
+                      isKnown: otherLanguageKnowsWord || !isUnknownToDictionary(word),
                       isLearned: UserDictionary.shared.isLearned(word.lowercased()),
                       trieCorrection: trieCorrection
                   )

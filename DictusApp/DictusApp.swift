@@ -372,23 +372,27 @@ struct DictusApp: App {
         }
         refreshOnboardingFlag()
         #if DEBUG
-        Self.applySpatialAutocorrectArgument()
+        Self.applyKeyboardDebugArgument("DictusDebugSpatialAutocorrect", key: "debug.spatialAutocorrect")
+        Self.applyKeyboardDebugArgument("DictusDebugBilingualAutocorrect", key: "debug.bilingualAutocorrect")
         #endif
     }
 
     #if DEBUG
-    /// `-DictusDebugSpatialAutocorrect YES` (or `NO`) on the launch line turns the keyboard's
-    /// spatial decoder on or off (#1011), for a device test of a Debug build:
+    /// `-<argument> YES` (or `NO`) on the launch line turns one of the keyboard's Debug
+    /// experiments on or off, for a device test of a Debug build:
     /// `xcrun devicectl device process launch --device <id> com.pivi.dictus -DictusDebugSpatialAutocorrect YES`.
     ///
-    /// WHY a launch argument: the switch has no row in the app's settings yet (#992 owns
-    /// SettingsView), and the keyboard, which reads it, gets no launch arguments. Written
+    /// - `DictusDebugSpatialAutocorrect`: the spatial decoder (#1011), key
+    ///   `SpatialAutocorrect.switchKey` in DictusKeyboard;
+    /// - `DictusDebugBilingualAutocorrect`: the bilingual check (#1015), key
+    ///   `BilingualAutocorrect.switchKey`.
+    ///
+    /// WHY a launch argument: the switches have no row in the app's settings yet (#992 owns
+    /// SettingsView), and the keyboard, which reads them, gets no launch arguments. Written
     /// here, with the launch's other App Group writes, once protected data is available.
-    private static func applySpatialAutocorrectArgument() {
-        let argument = "DictusDebugSpatialAutocorrect"
+    private static func applyKeyboardDebugArgument(_ argument: String, key: String) {
         guard ProcessInfo.processInfo.arguments.contains("-\(argument)") else { return }
-        // The key is `SpatialAutocorrect.switchKey` in DictusKeyboard, where it is read.
-        AppGroup.defaults.set(UserDefaults.standard.bool(forKey: argument), forKey: "debug.spatialAutocorrect")
+        AppGroup.defaults.set(UserDefaults.standard.bool(forKey: argument), forKey: key)
     }
     #endif
 
