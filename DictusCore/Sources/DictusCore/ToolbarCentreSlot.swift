@@ -1,5 +1,5 @@
 // DictusCore/Sources/DictusCore/ToolbarCentreSlot.swift
-// What the keyboard toolbar's centre slot shows, by priority (issues #79, #241, #266, #635, #639).
+// What the keyboard toolbar's centre slot shows, by priority (issues #79, #241, #266, #634, #635, #639).
 import Foundation
 
 /// The one occupant of the toolbar's centre slot.
@@ -33,6 +33,12 @@ import Foundation
 ///    only alternative to holding backspace on a two-minute dictation.
 /// 3. **Suggestions** — the keyboard's core job, and the reason the left slot yields
 ///    at all (`ToolbarView` needs the width for three legible slots).
+/// 3a. **Paste** (#634) — a recent copy the keyboard has not pasted yet, offered as
+///    one tap. Below the suggestions because the issue asks that it not replace
+///    typing suggestions: mid-word, the user is typing, not pasting. Above everything
+///    else because it is the only rung below that is an action with a deadline (the
+///    `ClipboardPasteOffer` freshness window), where the rest are statements and
+///    hints that will still be true after the offer is gone.
 /// 3b. **Dictation unavailable** (#635) — a pre-A14 device, where the keyboard cannot
 ///    dictate at all. It takes the idle bar's place for as long as the keyboard is
 ///    open, because it explains the greyed mic beside it; it yields only to the
@@ -83,6 +89,9 @@ public enum ToolbarCentreSlot: Equatable, Sendable {
     /// The autocorrect suggestion bar.
     case suggestions
 
+    /// The system Paste control (#634), for a recent copy not yet pasted.
+    case paste
+
     /// "Dictation unavailable on this device" (#635): a pre-A14 chip, where the mic
     /// beside it is disabled.
     case dictationUnavailable
@@ -118,7 +127,7 @@ public enum ToolbarCentreSlot: Equatable, Sendable {
     case empty
 
     // swiftlint:disable function_parameter_count
-    // Eleven parameters because there are ten competitors and one of them needs a
+    // Twelve parameters because there are eleven competitors and one of them needs a
     // second fact to pick between its two shapes (#423). A table with nine rows
     // needs nine inputs. Wrapping them in a struct would move the seven names
     // one line up and add a type whose only job is to be unpacked here; the
@@ -129,6 +138,8 @@ public enum ToolbarCentreSlot: Equatable, Sendable {
     /// What the slot resolves to.
     ///
     /// - Parameter isChoosingMode: whether the long-press fan is on screen.
+    /// - Parameter offersPaste: whether a recent copy is waiting to be pasted —
+    ///   `ClipboardPasteOffer.isOffered` (#634).
     /// - Parameter recoveredTranscriptionPending: whether a refused dictation's text is
     ///   waiting in DictusApp — `RecoveredTranscriptionChannel.current` (#860).
     /// - Parameter armedModeName: the armed mode's display name, or nil for Normal.
@@ -148,6 +159,7 @@ public enum ToolbarCentreSlot: Equatable, Sendable {
                                recoveredTranscriptionPending: Bool,
                                offersDictationUndo: Bool,
                                hasSuggestions: Bool,
+                               offersPaste: Bool,
                                dictationUnavailable: Bool,
                                polishUnavailable: Bool,
                                armedModeName: String?,
@@ -159,6 +171,7 @@ public enum ToolbarCentreSlot: Equatable, Sendable {
         if recoveredTranscriptionPending { return .recoveredTranscription }
         if offersDictationUndo { return .dictationUndo }
         if hasSuggestions { return .suggestions }
+        if offersPaste { return .paste }
         if dictationUnavailable { return offersPanelHint ? .panelHint : .dictationUnavailable }
         if polishUnavailable { return .polishUnavailable }
         if let armedModeName {
@@ -181,7 +194,7 @@ public enum ToolbarCentreSlot: Equatable, Sendable {
     public var evictsHamburger: Bool {
         switch self {
         case .error, .recoveredTranscription, .dictationUndo, .suggestions: return true
-        case .choosingMode, .dictationUnavailable, .polishUnavailable, .armedMode, .armedModeInactive,
+        case .choosingMode, .paste, .dictationUnavailable, .polishUnavailable, .armedMode, .armedModeInactive,
              .panelHint, .discoveryHint, .empty:
             return false
         }
