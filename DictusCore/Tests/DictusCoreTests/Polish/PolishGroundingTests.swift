@@ -339,10 +339,10 @@ final class PolishGroundingTests: XCTestCase {
 
     func testNotesAsksForGroundingAndTranslationDoesNot() {
         XCTAssertTrue(SmartModeCatalogue.notes.contract.requiresGroundedNames)
-        for language in SupportedLanguage.allCases {
+        for language in TranslationTarget.all {
             XCTAssertFalse(
                 SmartModeCatalogue.translate(to: language).contract.requiresGroundedNames,
-                "translation localises names, so the check is unsound for → \(language.rawValue)"
+                "translation localises names, so the check is unsound for → \(language.code)"
             )
         }
     }

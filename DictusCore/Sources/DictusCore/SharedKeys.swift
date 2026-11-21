@@ -273,6 +273,12 @@ public enum SharedKeys {
     /// from `SmartModeCatalogue.defaultPinnedIdentifiers`; an empty array is a real
     /// choice and is honoured.
     public static let smartModePinned = "dictus.smartModePinned"
+    /// [String]: `TranslationTarget.code`s the user added through "Other language…",
+    /// most recently chosen first (#622). Each one is a `translate.<code>` mode in the
+    /// catalogue, and the order is the picker's "recent" order. Absent or empty means
+    /// the four built-in Translate modes only. Read and written only through
+    /// `TranslationTargetStore`.
+    public static let translationTargetsChosen = "dictus.translationTargetsChosen"
     /// Bool: whether the user has ever completed the long-press fan gesture.
     ///
     /// The only thing it does is retire the discovery hint from the toolbar's centre

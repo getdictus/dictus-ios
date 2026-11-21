@@ -75,6 +75,12 @@ public struct PolishJob: Equatable, Sendable {
     ///
     /// The rule, stated once: **a task that names a fixed output language gets that
     /// language's typography; every other task follows the path it is running on.**
+    ///
+    /// The post-pass has rules for the four `SupportedLanguage`s only (#79), so a
+    /// translation into one of the 22 targets #622 added gets none: its output is the
+    /// framework's or the model's, untouched by a French or German spacing rule it
+    /// does not follow. The issue asked whether that is acceptable; it is the only
+    /// answer that cannot be wrong.
     public init(task: PolishTask,
                 promptLanguage: SupportedLanguage,
                 languageAgnosticPath: Bool,
@@ -82,8 +88,8 @@ public struct PolishJob: Equatable, Sendable {
                 transcriptLanguageCode: String? = nil) {
         let typography: SupportedLanguage?
         switch task.contract.outputLanguage {
-        case .fixed(let language):
-            typography = language
+        case .fixed(let target):
+            typography = target.builtIn
         case .polishTarget, .sameAsInput:
             typography = languageAgnosticPath ? nil : promptLanguage
         }
