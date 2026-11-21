@@ -147,5 +147,6 @@ let frenchAGrave = ContextualHomograph(
     clauseOpeners: [
         "que", "qui", "dont", "o\u{00F9}", "quoi", "qu'",
         "lequel", "laquelle", "lesquels", "lesquelles", "duquel", "desquels", "desquelles", "auquel", "auxquels"
-    ]
+    ],
+    accentedAtSentenceStart: true
 )

@@ -105,7 +105,35 @@ final class FrenchAGraveTests: XCTestCase {
         XCTAssertNil(rule.accentedForm(of: "A", context: "je vais A"))
         XCTAssertNil(rule.accentedForm(of: "as", context: "je vais as"))
         XCTAssertNil(rule.accentedForm(of: "a", context: "je vais a "))
-        XCTAssertNil(rule.accentedForm(of: "a", context: "a"))
+    }
+
+    // MARK: - Sentence start (#979)
+
+    func test_sentenceStart_isAccented() {
+        XCTAssertEqual(rule.accentedForm(of: "a", context: "a"), "\u{00E0}")
+        XCTAssertEqual(retyped("\u{00E0} demain"), "\u{00E0} demain")
+        XCTAssertEqual(retyped("\u{00E0} quoi tu penses"), "\u{00E0} quoi tu penses")
+        XCTAssertEqual(rule.accentedForm(of: "a", context: "Je rentre. a"), "\u{00E0}")
+        XCTAssertEqual(rule.accentedForm(of: "a", context: "Salut\na"), "\u{00E0}")
+    }
+
+    func test_sentenceStart_keepsTheKeyboardsCapital() {
+        // The keyboard capitalises the first word: `A` at the start becomes `À`.
+        XCTAssertEqual(rule.accentedForm(of: "A", context: "A"), "\u{00C0}")
+        XCTAssertEqual(rule.accentedForm(of: "A", context: "Bien vu ! A"), "\u{00C0}")
+    }
+
+    func test_clauseStartAfterAComma_isNotASentenceStart() {
+        XCTAssertNil(rule.accentedForm(of: "a", context: "ce qu'il dit, a"))
+        XCTAssertNil(rule.accentedForm(of: "A", context: "ce qu'il dit, A"))
+    }
+
+    func test_sentenceStart_isOffForAHomographWithoutTheFlag() {
+        let plain = ContextualHomograph(
+            typed: "a", accented: "\u{00E0}", typedAfter: [], accentedAfter: [],
+            accentedTwoAfter: [], clauseOpeners: []
+        )
+        XCTAssertNil(plain.accentedForm(of: "a", context: "a"))
     }
 
     func test_typographicApostropheMatchesTheStraightOne() {

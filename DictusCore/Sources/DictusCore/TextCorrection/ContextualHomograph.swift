@@ -35,6 +35,12 @@ public struct ContextualHomograph: Sendable {
     /// Opens a relative clause. Within the three words before the word right
     /// before, nothing is accented: in `ce que tu as fait a été`, `fait a` is a verb.
     public let clauseOpeners: Set<String>
+    /// The first word of a sentence takes the accented spelling (#979): `à demain`,
+    /// `À deux on ira plus vite`. In Tatoeba's French sentences a sentence starts
+    /// with `À` 4300 times and with a plain `A` 106 times, and all but about ten of
+    /// those 106 are `À` written without its accent; the rest are `A voté`,
+    /// `A demandé`, the letter (`A et B`) and initials (`E. T. A. Hoffmann`).
+    public let accentedAtSentenceStart: Bool
 
     public init(
         typed: String,
@@ -42,7 +48,8 @@ public struct ContextualHomograph: Sendable {
         typedAfter: Set<String>,
         accentedAfter: Set<String>,
         accentedTwoAfter: Set<String>,
-        clauseOpeners: Set<String>
+        clauseOpeners: Set<String>,
+        accentedAtSentenceStart: Bool = false
     ) {
         self.typed = typed
         self.accented = accented
@@ -50,6 +57,7 @@ public struct ContextualHomograph: Sendable {
         self.accentedAfter = accentedAfter
         self.accentedTwoAfter = accentedTwoAfter
         self.clauseOpeners = clauseOpeners
+        self.accentedAtSentenceStart = accentedAtSentenceStart
     }
 
     /// The accented spelling when the text before the cursor calls for it, else nil.
@@ -57,9 +65,18 @@ public struct ContextualHomograph: Sendable {
     /// `context` is the text before the cursor and ends with `word`, as the keyboard
     /// reads it when the word is committed or previewed.
     public func accentedForm(of word: String, context: String) -> String? {
-        guard word == typed, context.hasSuffix(word) else { return nil }
+        guard word.lowercased() == typed, context.hasSuffix(word) else { return nil }
         let words = Self.clauseWords(before: context.dropLast(word.count))
-        guard let previous = words.last else { return nil }
+        guard let previous = words.last else {
+            // Nothing before it in the clause: only the start of a sentence decides,
+            // not a comma (`ce qu'il dit, a choqué`). The keyboard capitalises the
+            // first word, so `A` is read as `a` here and keeps its capital.
+            guard accentedAtSentenceStart,
+                  ProperNounGuard.isAtSentenceStart(context: context, word: word) else { return nil }
+            return word == typed ? accented : accented.uppercased()
+        }
+        // Inside a sentence, a capital `A` is left as typed, as before.
+        guard word == typed else { return nil }
 
         // A capital inside a clause is a name, and a name can be the subject (`Marie a`).
         if words.count > 1, previous.first?.isUppercase == true { return nil }
