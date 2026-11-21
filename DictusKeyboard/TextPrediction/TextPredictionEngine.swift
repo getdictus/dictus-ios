@@ -551,7 +551,12 @@ class TextPredictionEngine {
         AutocorrectDebugLog.trieCandidates(word: word, candidates: candidates, decision: decision)
         #endif
         let isCapitalized = word.first?.isUppercase == true
-        guard let proposal = decision.proposal?.mapWords({ candidate in
+        // The corrected word gets the accents a typed one would (#1006): `est zrrive`
+        // is corrected to `arrive`, and after `est` that is `arrivé`.
+        let accented = decision.proposal.map {
+            CorrectedWordAccents.restored($0) { aospTrieEngine.accentRestoration($0, previousWord: previousWord) }
+        }
+        guard let proposal = accented?.mapWords({ candidate in
             let full = (apostrophePrefix ?? "") + candidate
             return isCapitalized ? full.capitalized : full
         }) else {
