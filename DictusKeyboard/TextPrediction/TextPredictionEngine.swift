@@ -48,7 +48,10 @@ class TextPredictionEngine {
     private var supplementaryLexicon = SupplementaryLexicon.empty
     private let lexiconLock = NSLock()
 
-    private init() {
+    /// Not private: the bilingual bench (`tools/keyboard-bench --pair`, #1009) holds one
+    /// engine per language. The keyboard itself only uses `shared`.
+    init(language: String = "fr") {
+        self.language = language
         loadDictionaries(for: language)
     }
 

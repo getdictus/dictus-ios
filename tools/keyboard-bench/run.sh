@@ -11,6 +11,7 @@
 #       [--langs fr,en] [--width 402] [--height 216]
 #       [--corpus <dir>] [--runs <dir>] [--hit plain|model] [--model <spec>] [--no-build]
 #       [--debug] [--journal] [--spatial] [--spatial-tune <k=v,...>] [--layout azerty|qwerty|qwertz]
+#       [--pair fr,en [--probe <word,previous|word,...>]]
 #
 # --width and --height are the key grid in points. The defaults are an iPhone 17
 # held upright: 402 pt wide, and the 216 pt KeyboardHeightProvider gives a 6.3" screen.
@@ -32,12 +33,18 @@
 # changes Hex's parameters for a sweep (`validMargin=inf`); see main.swift. --layout replays
 # every language on that layout, for a device journal typed on another layout than the
 # language's default; the bench puts the App Group's layouts back when it ends.
+# #1009: --pair replays a bilingual keyboard (primary,secondary): every run under the
+# primary alone, the secondary alone, and language detection. --langs then takes corpus
+# names with an optional layout (`en:qwerty`; default the primary's), and defaults to
+# fr, en:qwerty, en, mixed and mixed-heldout. Writes pair.tsv and pair-cost.tsv and
+# prints score_pair.py's report. --probe prints what both dictionaries answer for single
+# words instead of replaying.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 UDID=""
 OUT="$ROOT/build/keyboard-bench/out"
-LANGS="fr,en"
+LANGS=""
 WIDTH=402
 HEIGHT=216
 CORPUS="$ROOT/tools/keyboard-bench/corpus"
@@ -50,6 +57,8 @@ JOURNAL=0
 SPATIAL=0
 SPATIAL_TUNE=""
 LAYOUT=""
+PAIR=""
+PROBE=""
 while [[ $# -gt 0 ]]; do
     case "$1" in
         --udid) UDID="$2"; shift 2 ;;
@@ -67,10 +76,15 @@ while [[ $# -gt 0 ]]; do
         --spatial) SPATIAL=1; shift ;;
         --layout) LAYOUT="$2"; shift 2 ;;
         --spatial-tune) SPATIAL_TUNE="$2"; shift 2 ;;
+        --pair) PAIR="$2"; shift 2 ;;
+        --probe) PROBE="$2"; shift 2 ;;
         *) echo "unknown argument: $1" >&2; exit 2 ;;
     esac
 done
 [[ -n "$UDID" ]] || { echo "--udid is required" >&2; exit 2; }
+if [[ -z "$LANGS" ]]; then
+    if [[ -n "$PAIR" ]]; then LANGS="fr,en:qwerty,en,mixed,mixed-heldout"; else LANGS="fr,en"; fi
+fi
 xcrun simctl list devices booted | grep -q "$UDID" || { echo "simulator $UDID is not booted" >&2; exit 1; }
 
 BENCH="$ROOT/tools/keyboard-bench"
@@ -115,6 +129,7 @@ if [[ $BUILD_BENCH == 1 ]]; then
         "$BENCH/DeviceContext.swift" \
         "$BENCH/KeyTargetModel.swift" \
         "$BENCH/Journal.swift" \
+        "$BENCH/Bilingual.swift" \
         "$BENCH/main.swift" \
         "$BUILD"/obj/*.o -o "$BIN/keyboard-bench"
 
@@ -133,6 +148,21 @@ fi
 # the report is a change in the code. Drop the variable to see which words flip.
 echo "== replay on $UDID" >&2
 # The engine prints its load messages on stdout; they belong with the build log, not the report.
+if [[ -n "$PAIR" ]]; then
+    export SIMCTL_CHILD_SWIFT_DETERMINISTIC_HASHING=1 SIMCTL_CHILD_KB_CORPUS="$CORPUS" SIMCTL_CHILD_KB_RUNS="$RUNS" \
+        SIMCTL_CHILD_KB_PAIR="$PAIR" SIMCTL_CHILD_KB_SPATIAL="$SPATIAL" SIMCTL_CHILD_KB_LAYOUT="$LAYOUT" \
+        SIMCTL_CHILD_KB_SPATIAL_TUNE="$SPATIAL_TUNE"
+    if [[ -n "$PROBE" ]]; then
+        # The probe's table is the output: only the engine's messages start with "[".
+        SIMCTL_CHILD_KB_PROBE="$PROBE" xcrun simctl spawn "$UDID" "$BIN/keyboard-bench" "$BENCH" "$LANGS" "$OUT" \
+            "$WIDTH" "$HEIGHT" 2> >(grep -v "Lexicon creation for" >&2) | grep -v '^\['
+        exit 0
+    fi
+    xcrun simctl spawn "$UDID" "$BIN/keyboard-bench" "$BENCH" "$LANGS" "$OUT" "$WIDTH" "$HEIGHT" \
+        2> >(grep -v "Lexicon creation for" >&2) >&2
+    python3 -I "$BENCH/score_pair.py" --commit "$(git -C "$ROOT" rev-parse HEAD)" --pair "$PAIR" --dir "$OUT"
+    exit 0
+fi
 SIMCTL_CHILD_SWIFT_DETERMINISTIC_HASHING=1 SIMCTL_CHILD_KB_JOURNAL="$JOURNAL" \
 SIMCTL_CHILD_KB_SPATIAL="$SPATIAL" SIMCTL_CHILD_KB_LAYOUT="$LAYOUT" SIMCTL_CHILD_KB_SPATIAL_TUNE="$SPATIAL_TUNE" \
 SIMCTL_CHILD_KB_CORPUS="$CORPUS" SIMCTL_CHILD_KB_RUNS="$RUNS" SIMCTL_CHILD_KB_HIT="$HIT" SIMCTL_CHILD_KB_MODEL="$MODEL" \
