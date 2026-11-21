@@ -44,9 +44,10 @@ public struct CorrectionCandidate: Equatable, Sendable {
 ///   `midi` (0.40), not the far more frequent `lui` (1.40) that the bigram favours.
 ///   The window is anchored on that winner, not on the cheapest candidate: a rare
 ///   cheap word (`if` for German `ic`) must not shut `wenn ich` out.
-/// - **Close readings are settled, not kept** (#997 device test). The close readings
-///   are the candidates that cost about the same to reach as the best one (within
-///   `ambiguousCost`) and score within `ambiguousScore` of it. A typed word that is not a
+/// - **Close readings are settled, not kept** (#997 device test). When the runner-up
+///   costs about the same to reach as the best candidate (within `ambiguousCost`) and
+///   scores within `ambiguousScore` of it, the close readings are every candidate that
+///   does. A typed word that is not a
 ///   dictionary word is a typo, and Apple's keyboard corrects `sats` to `sais` on the
 ///   device although `sans` is as close, so the close reading most often seen after the previous word
 ///   wins, then the most frequent one: `zrreve` gives `arrive` over `arrête`. The typed
@@ -62,8 +63,8 @@ public struct CorrectionCandidate: Equatable, Sendable {
 ///
 /// The constants were fitted on the #954 bench runs (fr, en, en-typos) and checked on
 /// the runs they were not fitted on. `plausibleScore` and `maxCloseReadings` were set on
-/// the words those runs keep and on the typos of the #997 device test. `docs/keyboard-measurement.md` says how to rerun
-/// them.
+/// the words those runs keep and on the typos of the #997 device test.
+/// `docs/keyboard-measurement.md` says how to rerun them.
 public enum CorrectionRanking {
 
     /// What one unit of edit cost is worth in normalized frequency.
@@ -116,12 +117,19 @@ public enum CorrectionRanking {
         return Decision(replacement: pick.candidate.word, ranked: ranked)
     }
 
-    /// The best candidate and every other one as easy to reach and about as likely.
+    /// The best candidate and every other one as easy to reach and about as likely, when
+    /// the runner-up is one of them; empty otherwise. A clear winner stays a clear winner
+    /// however many rarer neighbours sit near the runner-up: `rins` gives `runs`, whose
+    /// runner-up `find` is a whole key further, although `rims`, `ribs` and `fins` are as
+    /// close as `runs` (#997 review).
     private static func closeReadings(_ scored: [Scored]) -> [Scored] {
-        guard let best = scored.first else { return [] }
-        return scored.filter {
-            abs($0.candidate.cost - best.candidate.cost) <= ambiguousCost && best.score - $0.score < ambiguousScore
-        }
+        guard scored.count > 1, isClose(scored[1], to: scored[0]) else { return [] }
+        return scored.filter { isClose($0, to: scored[0]) }
+    }
+
+    private static func isClose(_ candidate: Scored, to best: Scored) -> Bool {
+        abs(candidate.candidate.cost - best.candidate.cost) <= ambiguousCost
+            && best.score - candidate.score < ambiguousScore
     }
 
     /// Between close readings: the one seen after the previous word, then the more

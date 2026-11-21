@@ -112,44 +112,96 @@ change the same taps gave "meet" or "meer", depending on the launch.
 
 ## Device follow-up: close readings are corrected (2026-11-21)
 
+**What Pierre gains.** Five of the six device typos are now written as a word
+instead of being left as typed: `zrreve` → arrive, `sats` → sais, `zrrive` and
+`arribe` → arrive (`arrivé` was meant; it is second in the bar), `qur` → sur (`que`
+was meant; second in the bar). A typo kept while the bar offered corrections is no
+longer learned (`arribe` → learned → `areibe` became `arribe` on the device).
+
+**What he loses.** Two words of the held-out runs, typed wrong and left as typed
+before, are now written as the wrong word: Spanish `ests` → `esta` (meant `está`)
+and German `vestellt` → `gestellt` (meant `bestellt`). Nothing else moves on the
+nine runs: no word broken, no fixed word lost.
+
+**Recommendation: accept them.** Both are the rule doing what it says on a word the
+data cannot place, the same choice it makes for `sats` and `qur`. Two principled
+changes were tried and measured (below); neither avoids them without losing one of
+the device fixes.
+
+### The rule
+
 Pierre's device test of the PR (build `b85eeb31`, typing journal) found the
 ambiguity band too conservative: `zrrive` (after `est`), `zrreve`, `arribe`
 (after `suis`), `sats` (after `les`) and `qur` (after `passai`) were offered in
-the bar and left as typed, where Apple's keyboard corrects them. Two close
-readings are now settled by context, then frequency. The typed word is still kept
-when three or more readings are close once accents are dropped, or when the pick
-scores under 0.15. The accent pass keeps its tie rule.
+the bar and left as typed, where Apple's keyboard corrects them. When the runner-up
+is a close reading, the close readings are now settled by context, then frequency.
+The typed word is still kept when three or more readings are close once accents are
+dropped, or when the pick scores under 0.15. The accent pass keeps its tie rule.
+
+The band opens on the runner-up, as the ambiguity test did before the follow-up
+(`109e4062`). Opening it on any close candidate kept `rins` (en-learned, meant
+`runs`): `rims`, `ribs` and `fins` are as close as `runs`, but the runner-up is
+`find`, a key further, and e8a83934 corrected it.
 
 The trie's real top ten for each case, read with the bench's dictionaries, sit in
 `CorrectionRankingTests`. The n-gram data has no pair for any of them
 (`est arrivé`, `suis arrivé`, `les sais`, `passai que` all score 0), so frequency
-decides:
+decides. Scores below are cost / frequency / score, score = frequency / 65535 -
+0.35 × cost.
 
-| typed | before | after | the device wanted |
-|---|---|---|---|
-| `zrrive`, `arribe` | kept | arrive (`arrivé` second) | arrivé |
-| `zrreve` | kept | arrive | arrive |
-| `sats` | kept | sais | sais |
-| `qur` | kept | sur (`que` second) | que or qui |
-| `Disxord`, French | discord | discord | Discord |
-| `Disxord`, English | kept | kept (`discard` scores 0.12) | Discord, not in the English list |
+| typed | meant | e8a83934 | now | close readings |
+|---|---|---|---|---|
+| `zrrive`, `arribe` | arrivé | kept | arrive | arrive 0.40 / 46814 / 0.574, arrivé 0.55 / 42907 / 0.462 (one reading) |
+| `zrreve` | arrive | kept | arrive | arrête 1.356 / 45984 / 0.227, arrive 1.40 / 46814 / 0.224 |
+| `sats` | sais | kept | sais | sais 1.00 / 53558 / 0.467, sans 1.00 / 52050 / 0.444 |
+| `qur` | que or qui | kept | sur | sur 0.40 / 55999 / 0.714, que 0.40 / 55817 / 0.712 |
+| `Disxord`, French | Discord | discord | discord | discord 0.40 only |
+| `Disxord`, English | Discord | kept | kept | discard 1.40 / 39806 / 0.117, under 0.15 |
+| **`ests`** (es) | **está** | kept | **esta** (wrong) | esta 0.40 / 55117 / 0.701, este 0.50 / 54311 / 0.654; `está` 1.00 / 58451 / 0.542 is not close |
+| **`vestellt`** (de) | **bestellt** | kept | **gestellt** (wrong) | gestellt 0.405 / 37177 / 0.426, bestellt 0.400 / 35160 / 0.397 |
 
-Bench, `after-device-followup.md` (fr, en) and
-`after-device-followup-en-typos-es-de.md`, head `facfc8ed`:
+### Bench, nine runs, `109e4062` against `e8a83934`
 
-| run | miscorrected, #997 | miscorrected, now | broken | fixed |
-|---|---:|---:|---:|---:|
-| fr | 1 | 1 | 0 → 0 | 22 → 22 |
-| en | 1 | 1 | 0 → 0 | 13 → 13 |
-| en-typos | 1 | 1 | 0 → 0 | 23 → 23 |
-| es | 1 | **2** | 0 → 0 | 16 → 16 |
-| de | 0 | **1** | 0 → 0 | 16 → 16 |
+`after-device-followup.md` (fr, en) and `after-device-followup-other-runs.md` (the
+seven others, from the archive of `chore/keyboard-bench-multilingual`).
 
-Two words changed, both the rule doing what it says on a word the data cannot
-place: `ests` (meant `está`) becomes `esta` over `este`, and `vestellt` (meant
-`bestellt`) becomes `gestellt`, 0.005 dearer to reach and more frequent. That is
-the same choice as `sats` → `sais`. `irning`, `decalee`, `reùion` and `reserve` stay
-as typed.
+| run | miscorrected | broken | fixed | words that changed |
+|---|---:|---:|---:|---|
+| fr | 1 → 1 | 0 → 0 | 22 → 22 | none |
+| en | 1 → 1 | 0 → 0 | 13 → 13 | none |
+| en-typos | 1 → 1 | 0 → 0 | 23 → 23 | none |
+| es | 1 → **2** | 0 → 0 | 16 → 16 | `ests` → esta (meant está) |
+| de | 0 → **1** | 0 → 0 | 16 → 16 | `vestellt` → gestellt (meant bestellt) |
+| fr-learned | 2 → 2 | 0 → 0 | 5 → 5 | none |
+| en-learned | 0 → 0 | 0 → 0 | 4 → 4 | none |
+| es-typos | 1 → 1 | 0 → 0 | 3 → 3 | none |
+| de-typos | 0 → 0 | 0 → 0 | 23 → 23 | none |
+
+`irning`, `decalee`, `reùion`, `reserve` and `montg` stay as typed.
+
+### Two tries to avoid `ests` and `vestellt`, measured and dropped
+
+Both ran on the nine runs from a throwaway local commit on top of `109e4062`.
+
+1. **Prefer a single neighbouring-key slip over an insertion** between close readings
+   (cost under 1.0 before 1.0 or more). No word changed on the nine runs: in both
+   words, both readings are one neighbouring key away (`v`→`b` 0.400, `v`→`g` 0.405;
+   `s`→`a` 0.40, `s`→`e` 0.50). Nothing to gain.
+2. **Cheapest close reading first.** Fixes `vestellt` → bestellt (de: 1 → 0
+   miscorrected, 16 → 17 fixed), leaves `ests` → esta, and turns the device case
+   `zrreve` into `arrête` (1.356 against 1.40 for `arrive`). Trades a device fix for a
+   held-out word. Dropped.
+
+What fixing them would cost:
+
+- `vestellt` → bestellt: one device fix, `zrreve`, which becomes `arrête`. The two
+  readings differ by 0.005 in cost; only a cost-first pick tells them apart.
+- `ests` kept: it has the shape of `qur` (two one-key readings, both very frequent).
+  The only feature in the data that separates them is the cost gap, 0.10 for `ests`
+  against 0 for `qur` and `sats` and 0.044 for `zrreve`: a threshold set between 0.044
+  and 0.10 for one word. Not measured on the bench, not proposed.
+
+### Simulator and learning
 
 `dictus-sim-arribe-bar.png` and `dictus-sim-arribe-sats-after.png`: the Dictus
 keyboard on the simulator, French, the taps of `je suis arribe tu les sats `. Before

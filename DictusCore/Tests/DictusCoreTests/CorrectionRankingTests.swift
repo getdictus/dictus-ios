@@ -140,6 +140,18 @@ final class CorrectionRankingTests: XCTestCase {
         ]), "discord")
     }
 
+    func testAClearWinnerIsNotHeldBackByRarerNeighboursOfIt() {
+        // `rins` (en-learned bench): `rims`, `ribs` and `fins` are as easy to reach as
+        // `runs` and score within the band, but the runner-up is `find`, a key further.
+        XCTAssertEqual(replacement([
+            candidate("runs", 0.40, 46_873), candidate("find", 0.8123, 55_016),
+            candidate("rims", 0.40, 40_215), candidate("ribs", 0.40, 40_194),
+            candidate("fins", 0.4123, 39_320), candidate("tins", 0.40, 38_118),
+            candidate("wins", 0.80, 45_298), candidate("fine", 0.9123, 49_682),
+            candidate("tons", 0.80, 44_551), candidate("tina", 0.80, 42_091)
+        ]), "runs")
+    }
+
     // MARK: - The typed word is kept when no reading stands out
 
     func testThreeCloseReadingsKeepTheTypedWord() {
