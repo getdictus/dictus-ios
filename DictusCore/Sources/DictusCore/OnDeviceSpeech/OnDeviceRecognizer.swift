@@ -1,15 +1,18 @@
-// DictusKeyboard/InKeyboardRecognizer.swift
+// DictusCore/OnDeviceSpeech/OnDeviceRecognizer.swift
+// Moved from DictusKeyboard (#992): the keyboard and the share extension both transcribe
+// on the device with it, from one copy.
 import AVFAudio
 import Foundation
-import DictusCore
 import Speech
 
 /// A finished in-keyboard recording: 16 kHz mono Int16 little-endian PCM.
-struct InKeyboardRecording {
-    static let sampleRate: Double = 16_000
-    var pcm16 = Data()
+public struct OnDeviceRecording: Sendable {
+    public static let sampleRate: Double = 16_000
+    public var pcm16 = Data()
 
-    var seconds: Double { Double(pcm16.count / 2) / Self.sampleRate }
+    public init(pcm16: Data = Data()) { self.pcm16 = pcm16 }
+
+    public var seconds: Double { Double(pcm16.count / 2) / Self.sampleRate }
 }
 
 /// The speech-to-text engine behind in-keyboard dictation (spike).
@@ -20,7 +23,7 @@ struct InKeyboardRecording {
 /// same 16 kHz PCM and return the same string. The session that records and inserts
 /// does not care which one answers.
 @MainActor
-protocol InKeyboardRecognizer: AnyObject {
+public protocol OnDeviceRecognizer: AnyObject {
     /// Short name for the log.
     var engineName: String { get }
 
@@ -31,15 +34,15 @@ protocol InKeyboardRecognizer: AnyObject {
     /// Transcribe a finished recording. Throws when nothing usable came back.
     /// `contextualStrings` are the user's Pro vocabulary terms, offered to the engine as
     /// recognition hints (empty when the user has none or is not entitled).
-    func transcribe(_ recording: InKeyboardRecording, languageCode: String, contextualStrings: [String]) async throws -> String
+    func transcribe(_ recording: OnDeviceRecording, languageCode: String, contextualStrings: [String]) async throws -> String
 }
 
-enum InKeyboardRecognizerError: LocalizedError {
+public enum OnDeviceRecognizerError: LocalizedError {
     case unavailable
     case localeNotInstalled(String)
     case empty
 
-    var errorDescription: String? {
+    public var errorDescription: String? {
         switch self {
         case .unavailable: return "recognizer unavailable on this OS"
         case .localeNotInstalled(let code): return "on-device model not installed for \(code)"
@@ -50,8 +53,8 @@ enum InKeyboardRecognizerError: LocalizedError {
 
 /// Picks the engine for this OS. Nil before iOS 26, where the experiment never runs.
 @MainActor
-enum InKeyboardRecognizerFactory {
-    static func make() -> InKeyboardRecognizer? {
+public enum OnDeviceRecognizerFactory {
+    public static func make() -> OnDeviceRecognizer? {
         #if DEBUG && targetEnvironment(simulator)
         // No iOS Simulator runtime ships a speech model (measured 2026-11-19 on 26.5 and
         // 27.2: `SpeechTranscriber.isAvailable == false`, no installed locale, and the
@@ -81,18 +84,20 @@ enum InKeyboardRecognizerFactory {
 /// `KeyboardSpeech` (MIT License).
 @available(iOS 26.0, *)
 @MainActor
-final class AppleSpeechRecognizer: InKeyboardRecognizer {
-    var engineName: String {
+public final class AppleSpeechRecognizer: OnDeviceRecognizer {
+    public init() {}
+
+    public var engineName: String {
         SpeechTranscriber.isAvailable ? "apple-speechtranscriber" : "apple-dictationtranscriber"
     }
 
-    func isReadyOnDevice(languageCode: String) async -> Bool {
+    public func isReadyOnDevice(languageCode: String) async -> Bool {
         guard let module = await Self.module(for: languageCode) else {
-            InKeyboardDictation.log("assetCheck", "lang=\(languageCode) supported=false speechTranscriberAvailable=\(SpeechTranscriber.isAvailable)")
+            OnDeviceSpeechLog.log("assetCheck", "lang=\(languageCode) supported=false speechTranscriberAvailable=\(SpeechTranscriber.isAvailable)")
             return false
         }
         if await Self.isInstalled(module) { return true }
-        Self.provisionFromKeyboard(module)
+        Self.provisionLocally(module)
         return false
     }
 
@@ -106,37 +111,37 @@ final class AppleSpeechRecognizer: InKeyboardRecognizer {
     /// at all is what the device run has to tell.
     private static var provisioning: Set<String> = []
 
-    private static func provisionFromKeyboard(_ module: Module) {
+    private static func provisionLocally(_ module: Module) {
         let locale = module.locale
         guard !provisioning.contains(locale.identifier) else {
-            InKeyboardDictation.log("reserve", "locale=\(locale.identifier) skipped=already-in-flight")
+            OnDeviceSpeechLog.log("reserve", "locale=\(locale.identifier) skipped=already-in-flight")
             return
         }
         provisioning.insert(locale.identifier)
         Task {
             defer { provisioning.remove(locale.identifier) }
             let reservedBefore = await AssetInventory.reservedLocales.map(\.identifier)
-            InKeyboardDictation.log(
+            OnDeviceSpeechLog.log(
                 "reserve",
                 "locale=\(locale.identifier) reservedBefore=\(reservedBefore) max=\(AssetInventory.maximumReservedLocales)"
             )
             do {
                 let reserved = try await AssetInventory.reserve(locale: locale)
-                InKeyboardDictation.log("reserve", "locale=\(locale.identifier) result=\(reserved)")
+                OnDeviceSpeechLog.log("reserve", "locale=\(locale.identifier) result=\(reserved)")
             } catch {
-                InKeyboardDictation.log("reserve", "locale=\(locale.identifier) error=\(error.localizedDescription)")
+                OnDeviceSpeechLog.log("reserve", "locale=\(locale.identifier) error=\(error.localizedDescription)")
             }
             do {
                 guard let request = try await AssetInventory.assetInstallationRequest(supporting: [module.speechModule]) else {
-                    InKeyboardDictation.log("assetInstall", "locale=\(locale.identifier) request=none")
+                    OnDeviceSpeechLog.log("assetInstall", "locale=\(locale.identifier) request=none")
                     return
                 }
-                InKeyboardDictation.log("assetInstall", "locale=\(locale.identifier) step=downloading")
+                OnDeviceSpeechLog.log("assetInstall", "locale=\(locale.identifier) step=downloading")
                 try await request.downloadAndInstall()
                 let after = await AssetInventory.status(forModules: [module.speechModule])
-                InKeyboardDictation.log("assetInstall", "locale=\(locale.identifier) step=done status=\(after)")
+                OnDeviceSpeechLog.log("assetInstall", "locale=\(locale.identifier) step=done status=\(after)")
             } catch {
-                InKeyboardDictation.log("assetInstall", "locale=\(locale.identifier) error=\(error.localizedDescription)")
+                OnDeviceSpeechLog.log("assetInstall", "locale=\(locale.identifier) error=\(error.localizedDescription)")
             }
         }
     }
@@ -158,20 +163,20 @@ final class AppleSpeechRecognizer: InKeyboardRecognizer {
         }
         let listed = installed.contains { $0.identifier(.bcp47) == module.locale.identifier(.bcp47) }
         let reserved = await AssetInventory.reservedLocales.contains { $0.identifier(.bcp47) == module.locale.identifier(.bcp47) }
-        InKeyboardDictation.log(
+        OnDeviceSpeechLog.log(
             "assetCheck",
             "module=\(module.name) locale=\(module.locale.identifier) status=\(status) inInstalledLocales=\(listed) reservedByKeyboard=\(reserved)"
         )
         return status == .installed || listed
     }
 
-    func transcribe(_ recording: InKeyboardRecording, languageCode: String, contextualStrings: [String]) async throws -> String {
+    public func transcribe(_ recording: OnDeviceRecording, languageCode: String, contextualStrings: [String]) async throws -> String {
         guard let module = await Self.module(for: languageCode) else {
-            throw InKeyboardRecognizerError.localeNotInstalled(languageCode)
+            throw OnDeviceRecognizerError.localeNotInstalled(languageCode)
         }
         // Checked again at the moment of use: the route decision may be a few seconds old.
         guard await Self.isInstalled(module) else {
-            throw InKeyboardRecognizerError.localeNotInstalled(languageCode)
+            throw OnDeviceRecognizerError.localeNotInstalled(languageCode)
         }
 
         let url = FileManager.default.temporaryDirectory
@@ -195,7 +200,7 @@ final class AppleSpeechRecognizer: InKeyboardRecognizer {
             for try await result in transcriber.results where result.isFinal { transcript += result.text }
         }
         let text = String(transcript.characters).trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !text.isEmpty else { throw InKeyboardRecognizerError.empty }
+        guard !text.isEmpty else { throw OnDeviceRecognizerError.empty }
         return text
     }
 
@@ -206,16 +211,16 @@ final class AppleSpeechRecognizer: InKeyboardRecognizer {
     /// only string: accepted by both modules, and neither changed "dicttu" / "dictée".
     private static func offer(_ strings: [String], to analyzer: SpeechAnalyzer, module: Module) async {
         guard !strings.isEmpty else {
-            InKeyboardDictation.log("contextualStrings", "module=\(module.name) terms=0 offered=false")
+            OnDeviceSpeechLog.log("contextualStrings", "module=\(module.name) terms=0 offered=false")
             return
         }
         let context = AnalysisContext()
         context.contextualStrings[.general] = strings
         do {
             try await analyzer.setContext(context)
-            InKeyboardDictation.log("contextualStrings", "module=\(module.name) terms=\(strings.count) accepted=true")
+            OnDeviceSpeechLog.log("contextualStrings", "module=\(module.name) terms=\(strings.count) accepted=true")
         } catch {
-            InKeyboardDictation.log("contextualStrings", "module=\(module.name) terms=\(strings.count) accepted=false error=\(error.localizedDescription)")
+            OnDeviceSpeechLog.log("contextualStrings", "module=\(module.name) terms=\(strings.count) accepted=false error=\(error.localizedDescription)")
         }
     }
 
@@ -258,17 +263,17 @@ final class AppleSpeechRecognizer: InKeyboardRecognizer {
         return .dictation(DictationTranscriber(locale: locale, preset: .longDictation))
     }
 
-    private static func writeWAV(_ recording: InKeyboardRecording, to url: URL) throws {
+    private static func writeWAV(_ recording: OnDeviceRecording, to url: URL) throws {
         guard let format = AVAudioFormat(
             commonFormat: .pcmFormatInt16,
-            sampleRate: InKeyboardRecording.sampleRate,
+            sampleRate: OnDeviceRecording.sampleRate,
             channels: 1,
             interleaved: true
         ) else { throw CocoaError(.featureUnsupported) }
         let frames = recording.pcm16.count / 2
         guard frames > 0,
               let buffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: AVAudioFrameCount(frames))
-        else { throw InKeyboardRecognizerError.empty }
+        else { throw OnDeviceRecognizerError.empty }
         buffer.frameLength = AVAudioFrameCount(frames)
         recording.pcm16.withUnsafeBytes { raw in
             guard let source = raw.baseAddress, let target = buffer.int16ChannelData?[0] else { return }
@@ -295,21 +300,23 @@ final class AppleSpeechRecognizer: InKeyboardRecognizer {
 /// recognizer cannot run; it is not a design for devices, where the connection does not
 /// exist. The helper only listens on 127.0.0.1.
 @MainActor
-final class SimulatorHostRecognizer: InKeyboardRecognizer {
-    let engineName = "simulator-host-speechanalyzer"
+public final class SimulatorHostRecognizer: OnDeviceRecognizer {
+    public init() {}
+
+    public let engineName = "simulator-host-speechanalyzer"
     private let base = URL(string: "http://127.0.0.1:47811")
 
-    func isReadyOnDevice(languageCode: String) async -> Bool {
+    public func isReadyOnDevice(languageCode: String) async -> Bool {
         guard let url = base?.appendingPathComponent("health") else { return false }
         var request = URLRequest(url: url, timeoutInterval: 0.4)
         request.httpMethod = "GET"
         let ok = (try? await URLSession.shared.data(for: request)).map { ($0.1 as? HTTPURLResponse)?.statusCode == 200 } ?? false
-        InKeyboardDictation.log("assetCheck", "module=simulator-host reachable=\(ok)")
+        OnDeviceSpeechLog.log("assetCheck", "module=simulator-host reachable=\(ok)")
         return ok
     }
 
-    func transcribe(_ recording: InKeyboardRecording, languageCode: String, contextualStrings: [String]) async throws -> String {
-        guard let url = base?.appendingPathComponent("transcribe") else { throw InKeyboardRecognizerError.unavailable }
+    public func transcribe(_ recording: OnDeviceRecording, languageCode: String, contextualStrings: [String]) async throws -> String {
+        guard let url = base?.appendingPathComponent("transcribe") else { throw OnDeviceRecognizerError.unavailable }
         var request = URLRequest(url: url, timeoutInterval: 30)
         request.httpMethod = "POST"
         request.setValue(languageCode, forHTTPHeaderField: "X-Dictus-Language")
@@ -319,17 +326,17 @@ final class SimulatorHostRecognizer: InKeyboardRecognizer {
         )
         let (data, response) = try await URLSession.shared.upload(for: request, from: Self.wav(recording))
         let note = (response as? HTTPURLResponse)?.value(forHTTPHeaderField: "X-Dictus-Context-Note") ?? "none"
-        InKeyboardDictation.log("contextualStrings", "module=simulator-host terms=\(contextualStrings.count) host=\(note)")
+        OnDeviceSpeechLog.log("contextualStrings", "module=simulator-host terms=\(contextualStrings.count) host=\(note)")
         let text = (String(bytes: data, encoding: .utf8) ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !text.isEmpty else { throw InKeyboardRecognizerError.empty }
+        guard !text.isEmpty else { throw OnDeviceRecognizerError.empty }
         return text
     }
 
     /// A 44-byte RIFF header in front of the 16 kHz mono Int16 samples.
-    private static func wav(_ recording: InKeyboardRecording) -> Data {
+    private static func wav(_ recording: OnDeviceRecording) -> Data {
         func le32(_ value: Int) -> Data { withUnsafeBytes(of: UInt32(value).littleEndian) { Data($0) } }
         func le16(_ value: Int) -> Data { withUnsafeBytes(of: UInt16(value).littleEndian) { Data($0) } }
-        let rate = Int(InKeyboardRecording.sampleRate)
+        let rate = Int(OnDeviceRecording.sampleRate)
         var data = Data("RIFF".utf8) + le32(36 + recording.pcm16.count) + Data("WAVEfmt ".utf8)
         data += le32(16) + le16(1) + le16(1) + le32(rate) + le32(rate * 2) + le16(2) + le16(16)
         data += Data("data".utf8) + le32(recording.pcm16.count) + recording.pcm16
@@ -337,3 +344,14 @@ final class SimulatorHostRecognizer: InKeyboardRecognizer {
     }
 }
 #endif
+
+/// Where the on-device recognizer's lines go. The component is the process's own name in
+/// the log, so the keyboard keeps writing `InKeyboardDictation` lines as before and the
+/// share extension writes `VoiceNoteShare` ones.
+public enum OnDeviceSpeechLog {
+    nonisolated(unsafe) public static var component = "InKeyboardDictation"
+
+    public static func log(_ action: String, _ details: String) {
+        PersistentLog.log(.diagnosticProbe(component: component, instanceID: "shared", action: action, details: details))
+    }
+}

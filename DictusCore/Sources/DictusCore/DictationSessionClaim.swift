@@ -19,6 +19,9 @@ public enum DictationSessionClaim {
     public enum Owner: String, Sendable {
         case keyboard
         case app
+        /// The share extension transcribing a voice note itself (#992, voice notes
+        /// without the app). The session is the note's id.
+        case shareExtension
     }
 
     static let directoryName = "session-claims"
@@ -64,7 +67,8 @@ public enum DictationSessionClaim {
     public static func appMayStart(defaults: UserDefaults, directory: URL?) -> Bool {
         guard let sessionID = defaults.string(forKey: SharedKeys.dictationSessionRequest),
               let directory else { return true }
-        return claim(sessionID, as: .app, in: directory) != .keyboard
+        let owner = claim(sessionID, as: .app, in: directory)
+        return owner == nil || owner == .app
     }
 
     /// Remove claims older than `maximumAge`.

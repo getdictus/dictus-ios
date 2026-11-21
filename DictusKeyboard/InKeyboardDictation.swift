@@ -10,7 +10,7 @@ import UIKit
 /// `KeyboardState.startRecording` still posts its Darwin notification first and still
 /// waits 500 ms; a warm app answers and nothing here runs. Only when that wait ends
 /// unanswered does `InKeyboardDictationRoute` decide between today's URL fallback and
-/// this: record through a hidden web view, transcribe with an `InKeyboardRecognizer`,
+/// this: record through a hidden web view, transcribe with an `OnDeviceRecognizer`,
 /// insert through `KeyboardState.insertDictation`, the same funnel as an app result.
 ///
 /// The App Group is told nothing beyond `idle`: the app is not involved, and a
@@ -35,10 +35,10 @@ final class InKeyboardDictation {
     /// Hard cap on one recording. 120 s of 16 kHz Int16 is 3.75 MB, held in this process.
     private static let maximumSeconds: Double = 120
 
-    private lazy var recognizer: InKeyboardRecognizer? = InKeyboardRecognizerFactory.make()
+    private lazy var recognizer: OnDeviceRecognizer? = OnDeviceRecognizerFactory.make()
     private var capture: InKeyboardWebCapture?
     private var localeAnswer: (code: String, installed: Bool)?
-    private var recording = InKeyboardRecording()
+    private var recording = OnDeviceRecording()
     private var startedAt: Date?
     private var tick: Timer?
     /// The overlay's 5 Hz clock, the cadence DictusApp publishes at (`WaveformFeed`).
@@ -146,7 +146,7 @@ final class InKeyboardDictation {
         isProvisional = false
         capture?.stop()
         let dropped = recording.seconds
-        recording = InKeyboardRecording()
+        recording = OnDeviceRecording()
         Self.log("earlyCapture", "dropped reason=\(reason) bufferedMs=\(Int(dropped * 1000))")
     }
 
@@ -210,7 +210,7 @@ final class InKeyboardDictation {
     /// the route decision when nothing was started at the tap.
     private func beginCapture() {
         guard let capture else { return }
-        recording = InKeyboardRecording()
+        recording = OnDeviceRecording()
         waveform = WaveformFeed()
         chunkArrivals = ChunkArrivalTrace()
         firstSampleLogged = false
@@ -241,7 +241,7 @@ final class InKeyboardDictation {
         capture?.stop()
         endTicking()
         isActive = false
-        recording = InKeyboardRecording()
+        recording = OnDeviceRecording()
         Self.log("cancel", MemoryTrace.reading())
     }
 
@@ -291,7 +291,7 @@ final class InKeyboardDictation {
     private func publishWaveform() {
         guard let state, isActive, !legacyWaveform else { return }
         state.waveformEnergy = waveform.snapshot()
-        state.recordingElapsed = Double(waveform.sampleCount) / InKeyboardRecording.sampleRate
+        state.recordingElapsed = Double(waveform.sampleCount) / OnDeviceRecording.sampleRate
     }
 
     /// The pre-fix behaviour, kept only behind the Debug marker for the comparison video.
@@ -320,7 +320,7 @@ final class InKeyboardDictation {
         capture?.stop()
         endTicking()
         let finished = recording
-        recording = InKeyboardRecording()
+        recording = OnDeviceRecording()
         Self.log("recordingStopped", "reason=\(reason) seconds=\(String(format: "%.1f", finished.seconds)) \(memory.dictationSummary())")
         guard let recognizer, finished.seconds > 0.2 else {
             fail("recording too short (\(String(format: "%.2f", finished.seconds)) s)")
@@ -412,7 +412,7 @@ final class InKeyboardDictation {
         endTicking()
         isActive = false
         transcription = nil
-        recording = InKeyboardRecording()
+        recording = OnDeviceRecording()
         Self.log("failed", "reason=\(reason) \(MemoryTrace.reading())")
         guard let state else { return }
         state.forceResetToIdle()
