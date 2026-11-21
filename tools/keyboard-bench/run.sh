@@ -10,7 +10,7 @@
 #   tools/keyboard-bench/run.sh --udid <booted simulator UDID> [--out <dir>]
 #       [--langs fr,en] [--width 402] [--height 216]
 #       [--corpus <dir>] [--runs <dir>] [--hit plain|model] [--model <spec>] [--no-build]
-#       [--debug] [--journal]
+#       [--debug] [--journal] [--spatial] [--spatial-tune <k=v,...>] [--layout azerty|qwerty|qwertz]
 #
 # --width and --height are the key grid in points. The defaults are an iPhone 17
 # held upright: 402 pt wide, and the 216 pt KeyboardHeightProvider gives a 6.3" screen.
@@ -26,6 +26,12 @@
 # --journal turns the toggle on and writes the journal of the replay to <dir>/journal.log.
 # The two give the journal's cost (taps.tsv's journal_ns) and show that it changes
 # nothing the keyboard types (commits.tsv and texts.tsv identical).
+#
+# #1011: --spatial turns on the spatial decoder, as its Debug switch does in the keyboard:
+# the space bar reads each word's taps before the trie reads its letters. --spatial-tune
+# changes Hex's parameters for a sweep (`validMargin=inf`); see main.swift. --layout replays
+# every language on that layout (it stays set in the simulator's App Group), for a device
+# journal typed on another layout than the language's default.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
@@ -41,6 +47,9 @@ MODEL=""
 BUILD_BENCH=1
 DEBUG=0
 JOURNAL=0
+SPATIAL=0
+SPATIAL_TUNE=""
+LAYOUT=""
 while [[ $# -gt 0 ]]; do
     case "$1" in
         --udid) UDID="$2"; shift 2 ;;
@@ -55,6 +64,9 @@ while [[ $# -gt 0 ]]; do
         --no-build) BUILD_BENCH=0; shift ;;
         --debug) DEBUG=1; shift ;;
         --journal) DEBUG=1; JOURNAL=1; shift ;;
+        --spatial) SPATIAL=1; shift ;;
+        --layout) LAYOUT="$2"; shift 2 ;;
+        --spatial-tune) SPATIAL_TUNE="$2"; shift 2 ;;
         *) echo "unknown argument: $1" >&2; exit 2 ;;
     esac
 done
@@ -95,6 +107,7 @@ if [[ $BUILD_BENCH == 1 ]]; then
         -import-objc-header "$AOSP/bridge/AOSPTrieBridge.h" \
         "$ROOT/DictusKeyboard/TextPrediction/TextPredictionEngine.swift" \
         "$ROOT/DictusKeyboard/TextPrediction/AOSPTrieEngine.swift" \
+        "$ROOT/DictusKeyboard/TextPrediction/SpatialAutocorrect.swift" \
         "$ROOT/DictusKeyboard/KeyboardLayouts.swift" \
         "$ROOT/DictusKeyboard/Vendored/Models/KeyDefinition.swift" \
         "$ROOT/DictusKeyboard/Vendored/Models/KeyboardDefinition.swift" \
@@ -109,7 +122,8 @@ if [[ $BUILD_BENCH == 1 ]]; then
     # executable is the directory it sits in.
     cp "$ROOT"/DictusKeyboard/Resources/*_spellcheck.dict \
        "$ROOT"/DictusKeyboard/Resources/*_ngrams.dict \
-       "$ROOT"/DictusKeyboard/Resources/*_frequency.json "$BIN/"
+       "$ROOT"/DictusKeyboard/Resources/*_frequency.json \
+       "$ROOT"/DictusKeyboard/Resources/*.hextm "$BIN/"
 fi
 [[ -x "$BIN/keyboard-bench" ]] || { echo "no bench binary: run without --no-build first" >&2; exit 1; }
 
@@ -120,9 +134,10 @@ fi
 echo "== replay on $UDID" >&2
 # The engine prints its load messages on stdout; they belong with the build log, not the report.
 SIMCTL_CHILD_SWIFT_DETERMINISTIC_HASHING=1 SIMCTL_CHILD_KB_JOURNAL="$JOURNAL" \
+SIMCTL_CHILD_KB_SPATIAL="$SPATIAL" SIMCTL_CHILD_KB_LAYOUT="$LAYOUT" SIMCTL_CHILD_KB_SPATIAL_TUNE="$SPATIAL_TUNE" \
 SIMCTL_CHILD_KB_CORPUS="$CORPUS" SIMCTL_CHILD_KB_RUNS="$RUNS" SIMCTL_CHILD_KB_HIT="$HIT" SIMCTL_CHILD_KB_MODEL="$MODEL" \
     xcrun simctl spawn "$UDID" "$BIN/keyboard-bench" "$BENCH" "$LANGS" "$OUT" "$WIDTH" "$HEIGHT" \
     2> >(grep -v "Lexicon creation for" >&2) >&2
 
 python3 -I "$BENCH/score.py" --commit "$(git -C "$ROOT" rev-parse HEAD)" \
-    --keyboard "Dictus (replay, ${WIDTH}x${HEIGHT} pt grid, hit test: $HIT${MODEL:+ $MODEL}$([[ $DEBUG == 1 ]] && echo ", DEBUG, journal $([[ $JOURNAL == 1 ]] && echo on || echo off)" || true))" --dir "$OUT"
+    --keyboard "Dictus (replay, ${WIDTH}x${HEIGHT} pt grid, hit test: $HIT${MODEL:+ $MODEL}$([[ $SPATIAL == 1 ]] && echo ", spatial decoder${SPATIAL_TUNE:+ $SPATIAL_TUNE}" || true)$([[ $DEBUG == 1 ]] && echo ", DEBUG, journal $([[ $JOURNAL == 1 ]] && echo on || echo off)" || true))" --dir "$OUT"
