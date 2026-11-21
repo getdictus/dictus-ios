@@ -46,9 +46,11 @@ public enum AppleEngineAssetState: Equatable, Sendable {
 /// Whether "Apple (on-device)" can be picked, and in what state its card is.
 ///
 /// The whole rule, as a pure function so every combination is tested: iOS 26 or later
-/// (`SpeechAnalyzer`, `SpeechTranscriber` and `AssetInventory` start there), and the
-/// dictation language the user CHOSE listed in Apple's `supportedLocales` — the same
-/// language rule as in-keyboard dictation (#992), never one detected from speech.
+/// (`SpeechAnalyzer`, `SpeechTranscriber` and `AssetInventory` start there), Apple's
+/// `SpeechTranscriber` available on this iPhone (no fallback to `DictationTranscriber`,
+/// Pierre, 2026-11-21), and the dictation language the user CHOSE listed in its
+/// `supportedLocales` — the same rule as in-keyboard dictation (#992), never a language
+/// detected from speech.
 public enum AppleEngineAvailability: Equatable, Sendable {
     /// Greyed, with one explanation line.
     case unavailable(Reason)
@@ -60,6 +62,8 @@ public enum AppleEngineAvailability: Equatable, Sendable {
     public enum Reason: Equatable, Sendable {
         /// Older than iOS 26.
         case systemTooOld
+        /// iOS 26 or later, but `SpeechTranscriber.isAvailable` is false on this iPhone.
+        case speechTranscriberUnavailable
         /// "Transcription language: automatic detection": no single language to give
         /// Apple's recognizer, which takes one locale.
         case autoDetect
@@ -79,22 +83,20 @@ public enum AppleEngineAvailability: Equatable, Sendable {
 
     /// - Parameters:
     ///   - systemMajorVersion: the running iOS major version.
-    ///   - mode / keyboardLanguageCode: the transcription language setting and the
-    ///     keyboard language of the moment (`.followKeyboard` follows it).
-    ///   - supportedLocales: Apple's `supportedLocales` as BCP-47 identifiers ("fr-FR").
-    ///     Only the language subtag counts.
+    ///   - language: #992's reading of the chosen dictation language against Apple's
+    ///     `SpeechTranscriber` (`InKeyboardLanguageEligibility.evaluate`: is it available,
+    ///     is the language one, is it in `supportedLocales`). Taken whole, so the Models
+    ///     screen and in-keyboard dictation can never disagree about a language.
     ///   - assetState: the model for the resolved locale.
     public static func evaluate(systemMajorVersion: Int,
-                                mode: TranscriptionLanguageMode,
-                                keyboardLanguageCode: String,
-                                supportedLocales: [String],
+                                language: InKeyboardLanguageEligibility,
                                 assetState: AppleEngineAssetState) -> AppleEngineAvailability {
         guard systemMajorVersion >= InKeyboardDictationRoute.minimumSystemMajorVersion else {
             return .unavailable(.systemTooOld)
         }
-        switch InKeyboardLanguageEligibility.evaluate(mode: mode,
-                                                      keyboardLanguageCode: keyboardLanguageCode,
-                                                      supportedLocales: supportedLocales) {
+        switch language {
+        case .speechTranscriberUnavailable:
+            return .unavailable(.speechTranscriberUnavailable)
         case .autoDetect:
             return .unavailable(.autoDetect)
         case .notCovered(let code):

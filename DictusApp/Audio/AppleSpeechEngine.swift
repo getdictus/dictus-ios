@@ -94,26 +94,25 @@ enum AppleEngineAssets {
         let mode = TranscriptionLanguageMode.active
         let keyboard = SupportedLanguage.active.rawValue
         guard #available(iOS 26.0, *) else {
-            return AppleEngineAvailability.evaluate(systemMajorVersion: major, mode: mode, keyboardLanguageCode: keyboard,
-                                                    supportedLocales: [], assetState: .unknown)
+            return AppleEngineAvailability.evaluate(systemMajorVersion: major, language: .speechTranscriberUnavailable,
+                                                    assetState: .unknown)
         }
-        // The same list as in-keyboard dictation's eligibility (#992): `SpeechTranscriber`'s,
-        // or `DictationTranscriber`'s where the former reports itself unavailable (older
-        // hardware, and every iOS Simulator), which is the module the recognizer then runs.
-        let locales = SpeechTranscriber.isAvailable
-            ? await SpeechTranscriber.supportedLocales
-            : await DictationTranscriber.supportedLocales
+        // The same reading as in-keyboard dictation's eligibility (#992): `SpeechTranscriber`
+        // only. Where it reports itself unavailable (older hardware, every iOS Simulator)
+        // the card is greyed; no fallback to `DictationTranscriber` (Pierre, 2026-11-21).
+        let available = SpeechTranscriber.isAvailable
+        let locales = available ? await SpeechTranscriber.supportedLocales : []
         let identifiers = locales.map { $0.identifier(.bcp47) }
+        let language = InKeyboardLanguageEligibility.evaluate(mode: mode, keyboardLanguageCode: keyboard,
+                                                              speechTranscriberAvailable: available,
+                                                              supportedLocales: identifiers)
         var asset = AppleEngineAssetState.unknown
-        if let code = InKeyboardDictationRoute.dictationLanguageCode(mode: mode, keyboardLanguageCode: keyboard),
-           InKeyboardDictationRoute.isLanguageCovered(code, bySupportedLocales: identifiers),
-           let recognizer = OnDeviceRecognizerFactory.make() {
+        if case .covered(let code) = language, let recognizer = OnDeviceRecognizerFactory.make() {
             asset = await recognizer.hasModelInstalled(languageCode: code) ? .installed : .notInstalled
         }
-        let result = AppleEngineAvailability.evaluate(systemMajorVersion: major, mode: mode, keyboardLanguageCode: keyboard,
-                                                      supportedLocales: identifiers, assetState: asset)
+        let result = AppleEngineAvailability.evaluate(systemMajorVersion: major, language: language, assetState: asset)
         log("availability", "result=\(result) mode=\(mode.telemetryDescription) keyboard=\(keyboard) "
-            + "supportedCount=\(identifiers.count) speechTranscriberAvailable=\(SpeechTranscriber.isAvailable)")
+            + "supportedCount=\(identifiers.count) speechTranscriberAvailable=\(available)")
         return result
     }
 
@@ -133,18 +132,12 @@ enum AppleEngineAssets {
         guard #available(iOS 26.0, *) else { throw OnDeviceRecognizerError.unavailable }
         let requested = Locale(identifier: InKeyboardDictationRoute.speechLocaleIdentifier(
             languageCode: languageCode, deviceLocaleIdentifier: Locale.current.identifier))
-        let module: any SpeechModule
-        let locale: Locale
-        if SpeechTranscriber.isAvailable,
-           let supported = await SpeechTranscriber.supportedLocale(equivalentTo: requested) {
-            module = SpeechTranscriber(locale: supported, preset: .transcription)
-            locale = supported
-        } else if let supported = await DictationTranscriber.supportedLocale(equivalentTo: requested) {
-            module = DictationTranscriber(locale: supported, preset: .longDictation)
-            locale = supported
-        } else {
+        // `SpeechTranscriber` only, as everywhere (#992, Pierre 2026-11-21).
+        guard SpeechTranscriber.isAvailable else { throw OnDeviceRecognizerError.unavailable }
+        guard let locale = await SpeechTranscriber.supportedLocale(equivalentTo: requested) else {
             throw OnDeviceRecognizerError.localeNotInstalled(languageCode)
         }
+        let module = SpeechTranscriber(locale: locale, preset: .transcription)
         // iOS installs nothing for a locale the app holds no reservation on ("not
         // subscribed to assistant.<locale>", measured in #992).
         let reserved = try await AssetInventory.reserve(locale: locale)

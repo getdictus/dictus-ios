@@ -28,10 +28,13 @@ final class AppleSpeechEngineChoiceTests: XCTestCase {
     private func evaluate(ios: Int = 26,
                           mode: TranscriptionLanguageMode = .followKeyboard,
                           keyboard: String = "fr",
+                          speechTranscriber: Bool = true,
                           locales: [String]? = nil,
                           asset: AppleEngineAssetState = .installed) -> AppleEngineAvailability {
-        AppleEngineAvailability.evaluate(systemMajorVersion: ios, mode: mode, keyboardLanguageCode: keyboard,
-                                         supportedLocales: locales ?? supported, assetState: asset)
+        let language = InKeyboardLanguageEligibility.evaluate(mode: mode, keyboardLanguageCode: keyboard,
+                                                              speechTranscriberAvailable: speechTranscriber,
+                                                              supportedLocales: locales ?? supported)
+        return AppleEngineAvailability.evaluate(systemMajorVersion: ios, language: language, assetState: asset)
     }
 
     // MARK: - Availability: iOS version
@@ -52,6 +55,30 @@ final class AppleSpeechEngineChoiceTests: XCTestCase {
 
     func testAnUnreadableSystemVersionIsGreyed() {
         XCTAssertEqual(evaluate(ios: InKeyboardDictationRoute.majorVersion(of: "")), .unavailable(.systemTooOld))
+    }
+
+    // MARK: - Availability: SpeechTranscriber on this iPhone
+
+    /// iOS 26 without `SpeechTranscriber` (older hardware, every simulator): greyed, with
+    /// no fallback to `DictationTranscriber` (Pierre, 2026-11-21), whatever the language
+    /// and the asset.
+    func testWithoutSpeechTranscriberItIsGreyedWhateverTheLanguageAndAsset() {
+        for mode in [TranscriptionLanguageMode.followKeyboard, .explicit(.english), .autoDetect] {
+            for asset in [AppleEngineAssetState.unknown, .notInstalled, .installed] {
+                let availability = evaluate(mode: mode, speechTranscriber: false, asset: asset)
+                XCTAssertEqual(availability, .unavailable(.speechTranscriberUnavailable), "\(mode) \(asset)")
+                XCTAssertFalse(availability.isSelectable, "\(mode) \(asset)")
+            }
+        }
+    }
+
+    func testAnOlderSystemSaysSoBeforeSpeechTranscriber() {
+        XCTAssertEqual(evaluate(ios: 18, speechTranscriber: false), .unavailable(.systemTooOld))
+    }
+
+    func testPickedWithoutSpeechTranscriberDictatesWithTheDownloadedModel() {
+        XCTAssertEqual(EffectiveSpeechEngine.resolve(choice: .apple, availability: evaluate(speechTranscriber: false)),
+                       .downloadedModel)
     }
 
     // MARK: - Availability: language
@@ -95,7 +122,8 @@ final class AppleSpeechEngineChoiceTests: XCTestCase {
     }
 
     func testGreyedIsNeverSelectable() {
-        for reason in [AppleEngineAvailability.Reason.systemTooOld, .autoDetect, .languageNotCovered("fr")] {
+        for reason in [AppleEngineAvailability.Reason.systemTooOld, .speechTranscriberUnavailable,
+                       .autoDetect, .languageNotCovered("fr")] {
             XCTAssertFalse(AppleEngineAvailability.unavailable(reason).isSelectable)
         }
     }
