@@ -6,7 +6,7 @@ import Foundation
 public enum ProHomeCardContent: Equatable, Sendable {
 
     /// Nothing: the paywall is hidden, or the device can never run Smart Modes and
-    /// nothing is owned (#593 decision 2).
+    /// nothing is owned nor in its last days (#593 decision 2, as #922 left it).
     case hidden
 
     /// The sales card, as before #216.

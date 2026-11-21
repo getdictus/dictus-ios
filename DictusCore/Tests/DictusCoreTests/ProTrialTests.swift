@@ -142,40 +142,42 @@ final class ProTrialTests: XCTestCase {
                        "paywall hidden: the running trial grants nothing")
     }
 
-    // MARK: - Who gets a trial (decision 2)
+    // MARK: - Who gets a trial (#593, every iPhone since #922)
 
-    func testATrialStartsOnlyOnACapableDeviceForSomeoneWhoNeverHadOne() {
-        func mayStart(visible: Bool = true, capable: Bool = true, paid: Bool = false,
+    func testATrialStartsForSomeoneWhoNeverHadOne() {
+        func mayStart(visible: Bool = true, paid: Bool = false,
                       trial: ProTrialState = .neverStarted) -> Bool {
-            ProTrialPolicy.mayStart(paywallVisible: visible, deviceIsCapable: capable, isPaid: paid, trial: trial)
+            ProTrialPolicy.mayStart(paywallVisible: visible, isPaid: paid, trial: trial)
         }
         XCTAssertTrue(mayStart())
-        XCTAssertFalse(mayStart(capable: false), "deviceNotEligible / osTooOld: no trial, ever")
         XCTAssertFalse(mayStart(visible: false), "paywall hidden: nothing starts (#279)")
         XCTAssertFalse(mayStart(paid: true), "a subscriber has nothing to try")
         XCTAssertFalse(mayStart(trial: .running(endsAt: t0)), "no second trial")
         XCTAssertFalse(mayStart(trial: .expired(endedAt: t0)), "no second trial")
     }
 
-    /// The capability input is `isRecoverable` read as a capability question: the
-    /// definitive reasons refuse, Apple Intelligence switched off does not.
+    /// The capability `ProPromotion.entry` still reads is `isRecoverable` read as a
+    /// capability question: the three definitive reasons are not capable, Apple
+    /// Intelligence switched off is.
     func testCapabilityIsTheDefinitiveReasonsOnly() {
         XCTAssertFalse(SmartModeUnavailableReason.deviceNotEligible.isRecoverable)
         XCTAssertFalse(SmartModeUnavailableReason.osTooOld.isRecoverable)
-        XCTAssertTrue(SmartModeUnavailableReason.appleIntelligenceNotEnabled.isRecoverable,
-                      "a capable iPhone with Apple Intelligence off gets the trial")
+        XCTAssertFalse(SmartModeUnavailableReason.sdkMissing.isRecoverable)
+        XCTAssertTrue(SmartModeUnavailableReason.appleIntelligenceNotEnabled.isRecoverable)
     }
 
     func testTheAnnouncementWaitsForOnboarding() {
-        XCTAssertFalse(ProTrialPolicy.announcementDue(
-            onboardingCompleted: false, paywallVisible: true, deviceIsCapable: true, isPaid: false, trial: .neverStarted
-        ))
-        XCTAssertTrue(ProTrialPolicy.announcementDue(
-            onboardingCompleted: true, paywallVisible: true, deviceIsCapable: true, isPaid: false, trial: .neverStarted
-        ))
-        XCTAssertFalse(ProTrialPolicy.announcementDue(
-            onboardingCompleted: true, paywallVisible: true, deviceIsCapable: false, isPaid: false, trial: .neverStarted
-        ))
+        func due(onboarded: Bool = true, visible: Bool = true, paid: Bool = false,
+                 trial: ProTrialState = .neverStarted) -> Bool {
+            ProTrialPolicy.announcementDue(onboardingCompleted: onboarded, paywallVisible: visible,
+                                           isPaid: paid, trial: trial)
+        }
+        XCTAssertFalse(due(onboarded: false))
+        XCTAssertTrue(due())
+        XCTAssertFalse(due(visible: false), "#279")
+        XCTAssertFalse(due(paid: true), "a subscriber is never announced a trial")
+        XCTAssertFalse(due(trial: .running(endsAt: t0)), "announced once: the dismissal records the trial")
+        XCTAssertFalse(due(trial: .expired(endedAt: t0)), "a trial already used is never announced again")
     }
 
     func testTheEndOfTrialPaywallIsDueOnceAfterExpiryForNonSubscribers() {
@@ -216,7 +218,14 @@ final class ProTrialTests: XCTestCase {
         }
         XCTAssertEqual(entry(), .upgrade)
         XCTAssertEqual(entry(visible: false), .hidden, "#236")
-        XCTAssertEqual(entry(capable: false), .hidden, "decision 2: no promotion on a device that can never run Smart Modes")
+        XCTAssertEqual(entry(capable: false), .hidden, "the ordinary entry sells AI reformulation: not on a device without it")
+        XCTAssertEqual(entry(capable: false, entitled: true, trial: running), .hidden, "no nag during the trial")
+        XCTAssertEqual(entry(capable: false, entitled: true, trial: running,
+                             now: endsAt.addingTimeInterval(-1.5 * 86_400)),
+                       .trialEnding(daysLeft: 2), "#922: the trial's end is announced on every device")
+        XCTAssertEqual(entry(capable: false, paid: true, entitled: true, trial: running,
+                             now: endsAt.addingTimeInterval(-60)), .hidden)
+        XCTAssertEqual(entry(capable: false, trial: .expired(endedAt: endsAt), now: endsAt), .hidden)
         XCTAssertEqual(entry(paid: true, entitled: true), .hidden)
         XCTAssertEqual(entry(entitled: true, trial: running), .hidden, "no nag during the trial")
         XCTAssertEqual(entry(entitled: true, trial: running, now: endsAt.addingTimeInterval(-1.5 * 86_400)),
@@ -369,20 +378,130 @@ final class ProTrialTests: XCTestCase {
         XCTAssertFalse(manager.endOfTrialPaywallDue)
     }
 
+    // MARK: - iPhones without Apple Intelligence (#922)
+
+    /// The engine states behind `SmartModeAvailability.deviceIsCapable == false`, each
+    /// turned into the capability the live environment would hand the manager.
+    private static let nonCapableStates: [PolishAvailabilityState] = [.deviceNotEligible, .osTooOld, .sdkMissing]
+
+    /// Each of the three definitive reasons gets the whole trial: announced once after
+    /// onboarding, started, badged, reminded in its last two days, and ended with its
+    /// paywall. Smart Modes are not part of this: their own availability does not read
+    /// the trial.
     @MainActor
-    func testAnIneligibleDeviceNeverStartsATrialAndIsNeverPromotedTo() {
-        let clock = TestClock(t0)
-        let keychain = InMemoryKeychain()
-        let (manager, _) = makeManager(capable: false, clock: clock, keychain: keychain)
-        XCTAssertFalse(manager.mayStartTrial)
-        XCTAssertFalse(manager.startTrialIfEligible())
-        XCTAssertNil(keychain.record)
-        XCTAssertFalse(manager.isProActive)
-        XCTAssertEqual(manager.promotionEntry, .hidden)
-        XCTAssertFalse(manager.endOfTrialPaywallDue)
-        // Still purchasable: a purchase is honoured like anywhere else.
-        manager.setProActive(true)
-        XCTAssertTrue(manager.isProActive)
+    func testEveryDeviceWithoutAppleIntelligenceGetsTheTrialAnnouncedOnce() {
+        for state in Self.nonCapableStates {
+            let capable = SmartModeAvailability.isCapable(engineState: state)
+            XCTAssertFalse(capable, "\(state) is a device that can never run Smart Modes")
+            let clock = TestClock(t0)
+            let keychain = InMemoryKeychain()
+            let (manager, defaults) = makeManager(capable: capable, clock: clock, keychain: keychain)
+
+            XCTAssertTrue(manager.mayStartTrial, "\(state)")
+            XCTAssertFalse(manager.trialAnnouncementDue(onboardingCompleted: false), "\(state): after onboarding")
+            XCTAssertTrue(manager.trialAnnouncementDue(onboardingCompleted: true), "\(state)")
+
+            XCTAssertTrue(manager.startTrialIfEligible(), "\(state)")
+            XCTAssertNotNil(keychain.record, "\(state): recorded, so a reinstall cannot start another")
+            XCTAssertTrue(manager.isProActive, "\(state)")
+            XCTAssertFalse(manager.trialAnnouncementDue(onboardingCompleted: true), "\(state): never twice")
+            XCTAssertEqual(manager.trialBadgeDaysLeft, 14, "\(state): the home and Settings badge")
+            XCTAssertEqual(manager.promotionEntry, .hidden, "\(state): no nag during the trial")
+
+            // The next launch of the same install, and a reinstall: still announced once.
+            let (relaunched, _) = makeManager(capable: capable, clock: clock, keychain: keychain, defaults: defaults)
+            XCTAssertFalse(relaunched.trialAnnouncementDue(onboardingCompleted: true), "\(state)")
+            let (reinstalled, _) = makeManager(capable: capable, clock: clock, keychain: keychain)
+            reinstalled.reconcileTrial()
+            XCTAssertFalse(reinstalled.trialAnnouncementDue(onboardingCompleted: true), "\(state)")
+
+            clock.advance(days: 12.5)
+            manager.refreshFromAppGroup()
+            XCTAssertEqual(manager.trialBadgeDaysLeft, 2, "\(state)")
+            XCTAssertEqual(manager.promotionEntry, .trialEnding(daysLeft: 2), "\(state): the J-2 reminder")
+            XCTAssertEqual(manager.homeCardContent(activeFeatures: 3), .trialEnding(daysLeft: 2), "\(state)")
+
+            clock.advance(days: 2)
+            manager.refreshFromAppGroup()
+            XCTAssertFalse(manager.isProActive, "\(state)")
+            XCTAssertTrue(manager.endOfTrialPaywallDue, "\(state): the end opens its paywall once")
+            XCTAssertNil(manager.trialBadgeDaysLeft, "\(state)")
+            XCTAssertEqual(manager.promotionEntry, .hidden,
+                           "\(state): no ordinary upgrade entry, it sells AI reformulation")
+            XCTAssertFalse(manager.trialAnnouncementDue(onboardingCompleted: true), "\(state)")
+            XCTAssertFalse(manager.startTrialIfEligible(), "\(state): no second trial")
+        }
+    }
+
+    /// The capable side is unchanged by #922, Apple Intelligence switched off included.
+    @MainActor
+    func testACapableDeviceKeepsTheSameTrial() {
+        for state in [PolishAvailabilityState.available, .appleIntelligenceNotEnabled] {
+            let capable = SmartModeAvailability.isCapable(engineState: state)
+            XCTAssertTrue(capable, "\(state)")
+            let clock = TestClock(t0)
+            let (manager, _) = makeManager(capable: capable, clock: clock)
+            XCTAssertEqual(manager.promotionEntry, .upgrade, "\(state)")
+            XCTAssertTrue(manager.trialAnnouncementDue(onboardingCompleted: true), "\(state)")
+            XCTAssertTrue(manager.startTrialIfEligible(), "\(state)")
+            XCTAssertEqual(manager.trialBadgeDaysLeft, 14, "\(state)")
+            XCTAssertFalse(manager.trialAnnouncementDue(onboardingCompleted: true), "\(state)")
+
+            clock.advance(days: 12.5)
+            manager.refreshFromAppGroup()
+            XCTAssertEqual(manager.promotionEntry, .trialEnding(daysLeft: 2), "\(state)")
+
+            clock.advance(days: 2)
+            manager.refreshFromAppGroup()
+            XCTAssertEqual(manager.promotionEntry, .upgrade, "\(state)")
+            XCTAssertTrue(manager.endOfTrialPaywallDue, "\(state)")
+        }
+    }
+
+    /// A subscriber on such a device gets no trial, no announcement, no badge and no
+    /// reminder: there is nothing to try and nothing that runs out.
+    @MainActor
+    func testASubscriberWithoutAppleIntelligenceIsNeverAnnouncedATrial() {
+        for state in Self.nonCapableStates {
+            let clock = TestClock(t0)
+            let keychain = InMemoryKeychain()
+            let (manager, _) = makeManager(capable: SmartModeAvailability.isCapable(engineState: state),
+                                           clock: clock, keychain: keychain)
+            manager.setProActive(true)
+            XCTAssertFalse(manager.mayStartTrial, "\(state)")
+            XCTAssertFalse(manager.trialAnnouncementDue(onboardingCompleted: true), "\(state)")
+            XCTAssertFalse(manager.startTrialIfEligible(), "\(state)")
+            XCTAssertNil(keychain.record, "\(state)")
+            XCTAssertNil(manager.trialBadgeDaysLeft, "\(state)")
+            XCTAssertEqual(manager.promotionEntry, .hidden, "\(state)")
+            XCTAssertTrue(manager.isProActive, "\(state): the purchase is honoured")
+        }
+    }
+
+    /// A device that already had a trial (before #922, on a capable phone the Keychain
+    /// followed, or a TestFlight build) is never announced a second one.
+    @MainActor
+    func testADeviceWithoutAppleIntelligenceThatAlreadyHadATrialIsNotAnnouncedAgain() {
+        for state in Self.nonCapableStates {
+            let capable = SmartModeAvailability.isCapable(engineState: state)
+            let clock = TestClock(t0)
+
+            let usedUp = InMemoryKeychain()
+            usedUp.record = .starting(at: t0.addingTimeInterval(-30 * 86_400))
+            let (expired, _) = makeManager(capable: capable, clock: clock, keychain: usedUp)
+            expired.reconcileTrial()
+            XCTAssertTrue(expired.trialState.isExpired, "\(state)")
+            XCTAssertFalse(expired.trialAnnouncementDue(onboardingCompleted: true), "\(state)")
+            XCTAssertFalse(expired.startTrialIfEligible(), "\(state)")
+            XCTAssertNil(expired.trialBadgeDaysLeft, "\(state)")
+
+            let running = InMemoryKeychain()
+            running.record = .starting(at: t0.addingTimeInterval(-4 * 86_400))
+            let (ongoing, _) = makeManager(capable: capable, clock: clock, keychain: running)
+            ongoing.reconcileTrial()
+            XCTAssertFalse(ongoing.trialAnnouncementDue(onboardingCompleted: true), "\(state)")
+            XCTAssertEqual(ongoing.trialBadgeDaysLeft, 10, "\(state): the running trial keeps its badge")
+        }
     }
 
     @MainActor
