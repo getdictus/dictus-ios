@@ -57,7 +57,7 @@ class TextPredictionEngine {
 
     /// What one nat of the model's log-probability is worth in `CorrectionRanking`'s score.
     /// Chosen on the #954 bench runs (docs/research/996-llm-rerank/).
-    static let languageModelWeight = 0.03
+    static let languageModelWeight = 0.01
     /// How many of the trie's candidates the model scores. Each reading of more than one
     /// token costs a pass over the model's output layer (#996).
     static let languageModelCandidates = 5
@@ -1076,7 +1076,15 @@ extension TextPredictionEngine {
         }
         let path = folder.appendingPathComponent(name).path
         let model = KeyboardLanguageModel()
-        model.load { LocalLanguageModel.open(path: path) }
+        model.load {
+            let start = Date()
+            let opened = LocalLanguageModel.open(path: path)
+            // The debug log says why a model that was asked for is not there.
+            let outcome = opened != nil ? "loaded in \(Int(Date().timeIntervalSince(start) * 1000)) ms"
+                : LocalLanguageModel.isAvailable ? "cannot open \(path)" : "this build has no llama.cpp"
+            AutocorrectDebugLog.note("language model \(name): \(outcome)")
+            return opened
+        }
         setLanguageModel(model)
     }
 

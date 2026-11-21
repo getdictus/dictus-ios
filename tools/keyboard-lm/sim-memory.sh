@@ -12,8 +12,9 @@
 # Turns the model on with the Debug-only App Group key (TextPredictionEngine.languageModelDebugKey)
 # and copies the model into the App Group's keyboard-lm/ folder, or turns it off. Then it
 # ends the keyboard's process, opens a new reminder so the keyboard starts again, waits,
-# reads phys_footprint, types the first --sentences French sentences with sim_replay.py,
-# and reads phys_footprint again. Writes footprint.tsv and the typed texts.tsv to --out.
+# reads the footprint (phys_footprint, what jetsam counts), types the first --sentences
+# French sentences with sim_replay.py,
+# and reads the footprint (phys_footprint, what jetsam counts) again. Writes footprint.tsv and the typed texts.tsv to --out.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
@@ -57,7 +58,7 @@ keyboard_pid() {
     ps -axo pid=,comm= | awk -v u="$UDID" '$2 ~ u && $2 ~ /DictusKeyboard$/ {print $1}' | head -1
 }
 footprint_mb() {
-    footprint -p "$1" 2>/dev/null | awk '/phys_footprint:/ {print $2, $3; exit}'
+    footprint -p "$1" 2>/dev/null | awk '/Footprint:/ {for (i = 1; i < NF; i++) if ($i == "Footprint:") print $(i + 1), $(i + 2); exit}'
 }
 
 OLD=$(keyboard_pid)

@@ -32,8 +32,9 @@ import llama
 ///
 /// WHY mmap: the weights stay pages of the file, which iOS counts as clean memory and
 /// leaves out of the extension's footprint, the number jetsam kills a keyboard on. What
-/// counts is the KV cache, the compute buffer and the tables below: +34 MB loaded for
-/// Qwen2.5-0.5B in the spike, against ~180 MB a keyboard may use on an iPhone 15 Pro Max.
+/// counts is the KV cache, the compute buffer and the logits: +42 MB once loaded for
+/// Qwen2.5-0.5B in a simulator (#996), against ~180 MB a keyboard may use on an iPhone 15
+/// Pro Max.
 ///
 /// WHY the KV cache is kept: the text before the word does not change while the word is
 /// typed, so each request only feeds the model the tokens it has not seen.
@@ -48,12 +49,12 @@ final class LlamaLanguageModel: LanguageModelScoring {
     }()
 
     /// Sequence 0 holds the context; each reading or next word gets one of the others.
-    private static let sequences = 16
+    private static let sequences = 8
     /// Logit rows per decode. Each costs the vocabulary's size in floats (600 KB for Qwen),
     /// and llama.cpp keeps the largest output buffer it was ever asked for.
-    private static let maxOutputs = 16
+    private static let maxOutputs = 8
     /// The context's last tokens the model reads. llama.cpp aborts on a batch larger
-    /// than `n_batch` (512), and 200 characters of emoji or stacked accents can be more.
+    /// than `n_batch` (256), and 200 characters of emoji or stacked accents can be more.
     private static let maxContextTokens = 128
 
     private let model: OpaquePointer
@@ -63,7 +64,6 @@ final class LlamaLanguageModel: LanguageModelScoring {
     /// A token that starts a word after a space (` maison`), and one that starts it at a line start (`Maison`).
     private let startsWordAfterSpace: [Bool]
     private let startsWordAtLineStart: [Bool]
-    private let pieces: [[UInt8]]
 
     /// The tokens sequence 0 holds, and the logits after its last one.
     private var cached: [llama_token] = []
@@ -80,8 +80,9 @@ final class LlamaLanguageModel: LanguageModelScoring {
         guard let model = llama_model_load_from_file(path, modelParameters) else { return nil }
 
         var contextParameters = llama_context_default_params()
-        contextParameters.n_ctx = 512
-        contextParameters.n_batch = 512
+        // 128 tokens of context and five readings of a few tokens each.
+        contextParameters.n_ctx = 256
+        contextParameters.n_batch = 256
         // The compute buffer scales with it: 256 cost 18 MB in the spike, 32 cost 2 MB.
         contextParameters.n_ubatch = 32
         contextParameters.n_seq_max = UInt32(sequences)
@@ -101,19 +102,15 @@ final class LlamaLanguageModel: LanguageModelScoring {
         self.context = context
         vocab = llama_model_get_vocab(model)
         vocabSize = Int(llama_vocab_n_tokens(vocab))
-        var pieces: [[UInt8]] = []
         var afterSpace = [Bool](repeating: false, count: vocabSize)
         var atLineStart = [Bool](repeating: false, count: vocabSize)
-        pieces.reserveCapacity(vocabSize)
         for index in 0..<vocabSize {
             let token = llama_token(index)
             let bytes = Self.piece(token, vocab: vocab)
-            pieces.append(bytes)
             let kind = PieceKind(bytes)
             afterSpace[index] = kind.startsWordAfterSpace
             atLineStart[index] = kind.beginsWithLetter
         }
-        self.pieces = pieces
         startsWordAfterSpace = afterSpace
         startsWordAtLineStart = atLineStart
         exponentials = [Float](repeating: 0, count: vocabSize)
@@ -194,7 +191,7 @@ final class LlamaLanguageModel: LanguageModelScoring {
         var words: [String] = []
         for token in Self.best(cachedLogits, count: limit, where: { starts[$0] }) {
             // A token holding half of a multi-byte letter is not a word.
-            guard let word = String(bytes: pieces[Int(token)], encoding: .utf8)?.trimmingCharacters(in: .whitespaces),
+            guard let word = String(bytes: Self.piece(token, vocab: vocab), encoding: .utf8)?.trimmingCharacters(in: .whitespaces),
                   !word.isEmpty, !words.contains(word) else { continue }
             words.append(word)
         }

@@ -6,7 +6,7 @@ sentence	typed	context_words	accepted	today	day	kind
 4	j'aa	0	j'ai	j'la	2026-11-21	wrong
 5	j'ak	0	j'ai	j'au	2026-11-21	wrong
 6	lz	0	la|le	l'z	2026-11-21	wrong
-7	saisir	2	fonction	onction	2026-11-21	wrong
+7	lnction	0	fonction de saisir	onction de saisir	2026-11-21	wrong
 8	pasqueil	0	parce qu'il	pasque	2026-11-21	wrong
 9	j'ainhate	0	j'ai hâte	j'ainhate	2026-11-21	wrong
 10	j'aintrouve	0	j'ai trouvé	j'aintrouve	2026-11-21	wrong
