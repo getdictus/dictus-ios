@@ -26,6 +26,8 @@ file says what each piece is.
 | `KeyTargetModel.swift` | The #949 key-target model: picks each letter from the touch point and the letter the word needs next, from the shipped trie. `run.sh --hit model` uses it instead of the plain hit test. |
 | `journal_to_run.py` | Turns a typing journal exported from a Debug build (#1001) into `runs/<lang>-journal.tsv` and `corpus/<lang>-journal.txt`, so a session typed on a device replays here. Tests: `python3 -I -m unittest discover -s tools/keyboard-bench/tests`. |
 | `Journal.swift` | The typing journal's calls during a replay, at the moments the keyboard makes them. Only a bench built with `run.sh --debug` has the journal: `--journal` turns it on, writes `journal.log` beside the report, and adds the journal's cost per tap to it. |
+| `corpus/fr-pierre-device.txt`, `.keys`, `.cases` | The words Pierre typed on his iPhone on 2026-11-20 and 2026-11-21, each with the words before it (#996): what he meant, what he typed, and per case the accepted answers and whether today's keyboard gets it right (a guard) or wrong. `make_runs.py` types the `.keys` on the French page; `tools/keyboard-lm/compare.py --cases` scores them. |
+| `run.sh --lm <model.gguf>` | The keyboard's local language model on (#996), swept over `--lm-weights`. Needs `tools/keyboard-lm/build-llama.sh`. Results: [`docs/research/996-llm-rerank/`](../../docs/research/996-llm-rerank/README.md). |
 | `key_targets.sh` + `compare_hits.py` | The #949 spike in one command: draws held-out runs, replays them through both hit tests, and compares them tap by tap. Results: [`docs/research/949-key-targets/`](../../docs/research/949-key-targets/README.md). |
 
 ## Run

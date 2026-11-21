@@ -1,0 +1,10 @@
+run	model	pid	footprint_after_appear	pid_after_typing	footprint_after_typing
+mem-off	none	30634	33 MB	30634	41 MB
+mem2-qwen2.5-0.5b-instruct-q4_k_m	qwen2.5-0.5b-instruct-q4_k_m.gguf	38719	75 MB	38719	82 MB
+mem2-SmolLM2-135M.Q4_K_M	SmolLM2-135M.Q4_K_M.gguf	40622	52 MB	40622	57 MB
+mem-r2-none	none	47643	33 MB	47643	40 MB
+mem-r2-qwen2.5-0.5b-instruct-q4_k_m	qwen2.5-0.5b-instruct-q4_k_m.gguf	48674	75 MB	48674	82 MB
+mem-r2-SmolLM2-135M.Q4_K_M	SmolLM2-135M.Q4_K_M.gguf	49674	52 MB	49674	55 MB
+mem-r3-none	none	50821	33 MB	50821	41 MB
+mem-r3-qwen2.5-0.5b-instruct-q4_k_m	qwen2.5-0.5b-instruct-q4_k_m.gguf	55624	81 MB	55624	90 MB
+mem-r3-SmolLM2-135M.Q4_K_M	SmolLM2-135M.Q4_K_M.gguf	58106	59 MB	58106	64 MB
