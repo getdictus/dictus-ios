@@ -125,6 +125,7 @@ Every ID in this map, in one table: the 18 features first, then their 118 sub-fe
 | `typing.dead-keys` | Gratuit | non |
 | `typing.autocorrect-toggle` | Gratuit | non |
 | `typing.contacts-and-replacements` | Gratuit | non |
+| `typing.spatial-autocorrect` | Gratuit | non |
 | `learned-words.learn` | Gratuit | non |
 | `learned-words.reset` | Gratuit | non |
 | `keyboard.language-switch` | Gratuit | non |

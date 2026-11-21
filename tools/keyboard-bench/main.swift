@@ -88,6 +88,34 @@ func hitTest(_ point: CGPoint, cells: [Cell], width: CGFloat, height: CGFloat) -
     return cells.first { $0.frame.contains(p) }
 }
 
+/// The letter keys as `GiellaKeyboardView.spatialKeys()` reads them off the collection
+/// view: each letter's centre, one key unit by one row, the bottom letter row, the bar (#1011).
+func spatialKeys(_ cells: [Cell]) -> SpatialDecoder.Keys {
+    var centres: [Character: CGPoint] = [:]
+    var bottom: CGFloat = 0
+    var space: CGRect?
+    var pitch = CGSize.zero
+    for cell in cells {
+        switch cell.key.type {
+        case .spacebar:
+            space = cell.frame
+        case .input(let k, let alternate) where alternate != "accent":
+            guard k.count == 1, let letter = k.lowercased().first, letter.isLetter else { continue }
+            centres[letter] = CGPoint(x: cell.frame.midX, y: cell.frame.midY)
+            bottom = max(bottom, cell.frame.midY)
+            if pitch == .zero { pitch = CGSize(width: cell.unitWidth, height: cell.frame.height) }
+        default:
+            continue
+        }
+    }
+    return SpatialDecoder.Keys(centres: centres, pitch: pitch, bottomRowY: bottom, space: space)
+}
+
+/// The point the keyboard hands the decoder: the touch, clamped as `handleTouches` clamps it.
+func clamped(_ point: CGPoint, width: CGFloat, height: CGFloat) -> CGPoint {
+    CGPoint(x: min(max(point.x, 4), width - 4), y: min(max(point.y, 4), height - 4))
+}
+
 func target(of key: String, in cells: [Cell]) -> Cell {
     let found = cells.first { cell in
         switch cell.key.type {
@@ -162,6 +190,12 @@ func waitUntilLoaded(_ what: String) {
 
 func load(_ lang: SupportedLanguage) {
     SupportedLanguage.activate(lang)
+    // KB_LAYOUT replays a run typed on another layout than the language's default, as a
+    // device journal can be: English typed on AZERTY (#1011).
+    if let raw = ProcessInfo.processInfo.environment["KB_LAYOUT"], !raw.isEmpty {
+        guard let layout = LayoutType(rawValue: raw) else { fatalError("unknown KB_LAYOUT \(raw)") }
+        KeyboardLayoutPreference.setLayout(layout, for: lang)
+    }
     engine.setLanguage(lang.rawValue)
     waitUntilLoaded(lang.rawValue)
 }
@@ -215,8 +249,11 @@ struct PickCost {
 /// triggers the suggestion work `SuggestionState.updateAsync` does, every space the
 /// autocorrect `DictusKeyboardBridge.autocorrectBeforeCursor` does.
 func replay(_ taps: [Tap], cells: [Cell], width: CGFloat, height: CGFloat, picker: Picker?, journal: Journal?,
-            tapRow: (Tap, String, CGPoint, Int, PickCost, Int) -> Void) -> (text: String, commits: [Commit]) {
+            spatial: Bool, tapRow: (Tap, String, CGPoint, Int, PickCost, Int) -> Void) -> (text: String, commits: [Commit]) {
     let field = Field()
+    // #1011: what `DictusKeyboardBridge` keeps for the spatial decoder while its switch is on.
+    var touches = SpatialTouchBuffer()
+    let keys = spatialKeys(cells)
     let memory = AutocorrectRejectionMemory()
     let mirror = MirrorSyncState()
     var commits: [Commit] = []
@@ -258,11 +295,21 @@ func replay(_ taps: [Tap], cells: [Cell], width: CGFloat, height: CGFloat, picke
                 let last = field.text.last.map(String.init)
                 let before = field.text.dropLast().last.map(String.init)
                 let accent = FrenchAdaptiveKey.label(afterTyping: last, precedingChar: before)
-                if FrenchAdaptiveKey.shouldReplace(afterTyping: last, precedingChar: before) { field.deleteBackward() }
+                let replacing = FrenchAdaptiveKey.shouldReplace(afterTyping: last, precedingChar: before)
+                if replacing { field.deleteBackward() }
                 field.insertText(accent)
+                if spatial {
+                    touches.typed(accent, at: clamped(point, width: width, height: height), keys: keys,
+                                  token: SpatialTouchBuffer.token(before: field.text), replacing: replacing)
+                }
             } else {
                 // Auto-capitalisation: the field starts a sentence, so its first letter is a capital.
-                field.insertText(field.text.isEmpty ? k.uppercased() : k)
+                let typed = field.text.isEmpty ? k.uppercased() : k
+                field.insertText(typed)
+                if spatial {
+                    touches.typed(typed, at: clamped(point, width: width, height: height), keys: keys,
+                                  token: SpatialTouchBuffer.token(before: field.text))
+                }
             }
             let context = field.text
             cost = microseconds {
@@ -291,9 +338,11 @@ func replay(_ taps: [Tap], cells: [Cell], width: CGFloat, height: CGFloat, picke
                 defer { journal?.endWord(final, offered: offered) }
                 // `spellCheck` is this proposal's autocorrection; the journal also needs to
                 // know when corrections were only offered, as the keyboard's commit does.
+                let input = spatial ? touches.taps(for: word).map { SpatialCorrection.Input(taps: $0, keys: keys) } : nil
                 let checked = engine.correctionProposal(
                     for: word, previousWord: previous,
-                    isAtSentenceStart: ProperNounGuard.isAtSentenceStart(context: field.text, word: word)
+                    isAtSentenceStart: ProperNounGuard.isAtSentenceStart(context: field.text, word: word),
+                    spatial: input
                 )
                 let proposal = checked?.autocorrection?.correction
                 offered = checked?.suggestionRow(typedWord: word) != nil
@@ -313,6 +362,7 @@ func replay(_ taps: [Tap], cells: [Cell], width: CGFloat, height: CGFloat, picke
             tokenWords = []
         case .backspace?:
             field.deleteBackward()
+            if spatial { touches.deleted(token: SpatialTouchBuffer.token(before: field.text)) }
         default:
             // Shift, return, 123, a spacer, or no cell: nothing reaches the field.
             break
@@ -346,10 +396,41 @@ let modelParameters = ModelParameters(env["KB_MODEL"] ?? "")
 // #1001: the typing journal. A bench built with DEBUG (`run.sh --debug`) records it, its
 // toggle on with KB_JOURNAL=1 and off without; the default build has none.
 let journal = Journal.start(toggle: env["KB_JOURNAL"] == "1")
+// #1011: the spatial decoder, as its Debug switch turns it on in the keyboard. KB_SPATIAL_TUNE
+// changes Hex's parameters for a sweep: `validMargin=inf,accentMargin=7`.
+let spatialOn = env["KB_SPATIAL"] == "1"
+if let tune = env["KB_SPATIAL_TUNE"], !tune.isEmpty {
+    let pairs = tune.components(separatedBy: ",").map { $0.components(separatedBy: "=") }
+    SpatialAutocorrect.tuning = { p in
+        for pair in pairs where pair.count == 2 {
+            guard let value = Double(pair[1]) else { fatalError("bad KB_SPATIAL_TUNE value \(pair[1])") }
+            switch pair[0] {
+            case "validMargin": p.validMargin = value
+            case "autoMargin": p.autoMargin = value
+            case "accentMargin": p.accentMargin = value
+            case "lmWeight": p.lmWeight = value
+            case "sigmaX": p.sigmaX = value
+            case "sigmaY": p.sigmaY = value
+            case "splits": p.splits = value != 0
+            case "spaceTapCost": p.spaceTapCost = value
+            case "spaceOmissionCost": p.spaceOmissionCost = value
+            case "maxEdits": p.maxEdits = Int(value)
+            default: fatalError("unknown KB_SPATIAL_TUNE parameter \(pair[0])")
+            }
+        }
+    }
+}
 
 var tapsOut = ["lang\tsentence\ttap\tintended\tresolved\tx\ty\tengine_us\tplain\thit_ns\tvisited\tjournal_ns"]
 var commitsOut = ["lang\tsentence\tintended\ttyped\tfinal"]
 var textsOut = ["lang\tsentence\tintended\tfinal"]
+
+// KB_LAYOUT writes the layouts into the App Group; they are put back at the end. Both keys:
+// `setLayout` mirrors the active language's layout into the legacy key, and the #272
+// migration freezes that one back into the per-language store when it is missing.
+let layoutsBefore = [SharedKeys.keyboardLayoutsByLanguage, SharedKeys.keyboardLayout].map {
+    ($0, AppGroup.defaults.object(forKey: $0))
+}
 
 // The engine starts loading French as soon as it exists. A `setLanguage` issued before
 // that load lands overlaps it: in an English-only run the French load then reported
@@ -398,7 +479,7 @@ for code in langs {
         let intendedWords = intended.components(separatedBy: " ")
         journal?.startSentence(keyboard: "\(langCode)-\(LayoutType.active.rawValue)", document: "\(code)-\(s)")
         let (text, commits) = replay(run.filter { $0.sentence == s }, cells: cells, width: w, height: h,
-                                     picker: picker, journal: journal) { tap, resolved, p, us, pick, journalNs in
+                                     picker: picker, journal: journal, spatial: spatialOn) { tap, resolved, p, us, pick, journalNs in
             tapsOut.append("\(code)\t\(s)\t\(tap.index)\t\(tap.key)\t\(resolved)\t\(String(format: "%.2f", p.x))\t"
                            + "\(String(format: "%.2f", p.y))\t\(us)\t\(pick.plain)\t\(pick.ns)\t\(pick.visited)\t\(journalNs)")
         }
@@ -409,10 +490,17 @@ for code in langs {
         textsOut.append("\(code)\t\(s)\t\(intended)\t\(text)")
     }
     FileHandle.standardError.write(Data("\(code): \(order.count) sentences replayed, hit test \(hitMode)\n".utf8))
+    // phys_footprint, what iOS holds the keyboard's ~50 MB to. The spatial models are mapped
+    // clean pages, which it does not count (#1011).
+    FileHandle.standardError.write(Data("\(code): footprint \(MemoryFootprint.residentKB()) KB\n".utf8))
 }
 
 // The user dictionary is the simulator's App Group store: leave it as empty as it was found.
 UserDictionary.shared.resetAll()
+// And the layouts as they were: a later replay without KB_LAYOUT types on its defaults.
+for (key, value) in layoutsBefore {
+    if let value { AppGroup.defaults.set(value, forKey: key) } else { AppGroup.defaults.removeObject(forKey: key) }
+}
 journal?.finish(writingTo: "\(outDir)/journal.log")
 
 for (name, rows) in [("taps.tsv", tapsOut), ("commits.tsv", commitsOut), ("texts.tsv", textsOut)] {
