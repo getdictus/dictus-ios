@@ -12,6 +12,19 @@ public struct OnDeviceRecording: Sendable {
 
     public init(pcm16: Data = Data()) { self.pcm16 = pcm16 }
 
+    /// From the app's Float32 samples at 16 kHz (`UnifiedAudioEngine`), clipped to
+    /// [-1, 1]: the shape the app's own dictation path records in.
+    public init(samples: [Float]) {
+        var data = Data(count: samples.count * 2)
+        data.withUnsafeMutableBytes { raw in
+            let out = raw.bindMemory(to: Int16.self)
+            for index in samples.indices {
+                out[index] = Int16(max(-1, min(1, samples[index])) * 32_767).littleEndian
+            }
+        }
+        self.pcm16 = data
+    }
+
     public var seconds: Double { Double(pcm16.count / 2) / Self.sampleRate }
 }
 
@@ -30,6 +43,11 @@ public protocol OnDeviceRecognizer: AnyObject {
     /// Whether this engine can transcribe `languageCode` on the device right now, with
     /// nothing to download. Must never trigger a download or reach a server.
     func isReadyOnDevice(languageCode: String) async -> Bool
+
+    /// Whether the model for `languageCode` is on the device, and nothing else: no
+    /// reservation, no download. The app's Models screen asks this to draw the Apple
+    /// card, where `isReadyOnDevice` would start an install from merely looking.
+    func hasModelInstalled(languageCode: String) async -> Bool
 
     /// Transcribe a finished recording. Throws when nothing usable came back.
     /// `contextualStrings` are the user's Pro vocabulary terms, offered to the engine as
@@ -108,6 +126,11 @@ public final class AppleSpeechRecognizer: OnDeviceRecognizer {
         if await Self.isInstalled(module) { return true }
         Self.provisionLocally(module)
         return false
+    }
+
+    public func hasModelInstalled(languageCode: String) async -> Bool {
+        guard let module = await Self.module(for: languageCode) else { return false }
+        return await Self.isInstalled(module)
     }
 
     /// The keyboard reserves the locale and asks iOS for the model itself, so a keyboard
@@ -302,6 +325,11 @@ public final class SimulatorHostRecognizer: OnDeviceRecognizer {
         let detail = response.flatMap { String(bytes: $0.0, encoding: .utf8) } ?? "unreachable"
         OnDeviceSpeechLog.log("assetCheck", "module=simulator-host locale=\(locale) ready=\(status == 200) host=\(detail)")
         return status == 200
+    }
+
+    /// The host's answer has no side effect, so it is the same question.
+    public func hasModelInstalled(languageCode: String) async -> Bool {
+        await isReadyOnDevice(languageCode: languageCode)
     }
 
     public func transcribe(_ recording: OnDeviceRecording, languageCode: String, contextualStrings: [String]) async throws -> String {
