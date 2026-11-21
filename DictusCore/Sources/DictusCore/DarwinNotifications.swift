@@ -24,6 +24,11 @@ public enum DarwinNotificationName {
     /// Used when the app is already running in background — avoids opening the app via URL.
     /// Fallback: if app doesn't respond within 500ms, keyboard opens dictus://dictate URL.
     public static let startRecording = "com.pivi.dictus.startRecording" as CFString
+    /// Spike (#992): the keyboard asks whether DictusApp is running, when it appears.
+    public static let inKeyboardPing = "com.pivi.dictus.inKeyboardPing" as CFString
+    /// Spike (#992): DictusApp's answer to `inKeyboardPing`. A running app answers within
+    /// milliseconds; a suspended or terminated one never does.
+    public static let inKeyboardPong = "com.pivi.dictus.inKeyboardPong" as CFString
 
     /// Posted by DictusApp when AVAudioSession is interrupted (phone call, Siri, etc.)
     /// or when media services were reset by the OS. Consumers tear down dependent

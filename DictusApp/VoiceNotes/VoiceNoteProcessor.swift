@@ -231,10 +231,20 @@ final class VoiceNoteProcessor: ObservableObject {
                 return
             }
             await transcribe(note)
+            // #992: a note the share extension is still transcribing stays first in the
+            // queue; stop here, its "queued" post brings the loop back when it is done.
+            if store.queue.next?.id == note.id { return }
         }
     }
 
     private func transcribe(_ note: VoiceNote) async {
+        // #992: the share extension may have transcribed this note itself, with the app
+        // not running. One owner per note; the app adopts what the extension produced.
+        if let claims = DictationSessionClaim.defaultDirectory,
+           DictationSessionClaim.claim(note.id.uuidString, as: .app, in: claims) == .shareExtension {
+            await adoptExtensionResult(note)
+            return
+        }
         let started = Date()
         store.mutate { $0.update(note.id) { $0.state = .transcribing(progress: 0) } }
         DictationCoordinator.shared.extendWarmWindowForVoiceNote()
@@ -320,6 +330,32 @@ final class VoiceNoteProcessor: ObservableObject {
         await runSmartModeInBackground(noteID: note.id, source: SmartModeSource(
             transcript: transcript, language: record.language,
             engine: policy.engine, durationSeconds: Int(duration.rounded())
+        ))
+    }
+
+    /// Complete a note the share extension transcribed (#992): its History entry and the
+    /// keyboard delivery exist already; the queue, the island and the Smart Mode are this
+    /// process's to finish.
+    private func adoptExtensionResult(_ note: VoiceNote) async {
+        guard let storage = store.storage,
+              let result = VoiceNoteExtensionResult.read(note.id, from: storage) else {
+            log("adoptWaiting", "id=\(note.id.uuidString.prefix(8)) reason=noResultYet")
+            return
+        }
+        var evicted: [UUID] = []
+        store.mutate {
+            $0.update(note.id) { $0.durationSeconds = result.durationSeconds }
+            evicted = $0.complete(note.id, transcript: result.transcript, language: result.language,
+                                  savedToHistory: result.savedToHistory)
+        }
+        VoiceNoteExtensionResult.remove(note.id, from: storage)
+        withdrawKeyboardDeliveries(evicted, reason: "evictedFromQueue")
+        log("adopted", "id=\(note.id.uuidString.prefix(8)) chars=\(result.transcript.count) engine=\(result.engine) savedToHistory=\(result.savedToHistory)")
+        VoiceNoteIslandDriver.shared.finished(note.id, succeeded: true)
+        evaluatePresentation()
+        await runSmartModeInBackground(noteID: note.id, source: SmartModeSource(
+            transcript: result.transcript, language: result.language,
+            engine: nil, durationSeconds: result.durationSeconds
         ))
     }
 

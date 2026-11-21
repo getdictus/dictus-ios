@@ -336,6 +336,13 @@ struct DictusApp: App {
         // only process that owns hygiene over shared state.
         SharedKeys.clearRetiredKeys()
 
+        // Spike (#992): the Apple speech model the keyboard dictates with when the app is
+        // closed, reserved and installed at every launch so its first cold tap stays in
+        // the keyboard; and the per-session claims the keyboard and the app take.
+        InKeyboardSpeechAssets.prepareForDictationLanguage(reason: "launch")
+        InKeyboardSpeechAssets.pruneSessionClaims()
+        InKeyboardSpeechAssets.startAnsweringKeyboardPings()
+
         // Read n-gram diagnostic written by keyboard extension
         if let ngramDiag = AppGroup.defaults.string(forKey: "ngramDiagnostic") {
             DictusLogger.app.info("ngramDiagnostic: \(ngramDiag, privacy: .public)")
@@ -437,6 +444,9 @@ struct DictusApp: App {
                     switch phase {
                     case .active:
                         PersistentLog.log(.appDidBecomeActive)
+                        // #992: dictations the keyboard ran by itself while the app was
+                        // closed or suspended are in the file, not in this copy.
+                        TranscriptionHistoryStore.shared.reloadFromDisk()
                         catchUpOnProtectedData(trigger: "didBecomeActive")
                         // A purchase made outside the app while it was in the
                         // background unlocks Pro on return (#900).

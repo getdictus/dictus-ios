@@ -93,6 +93,17 @@ struct SettingsView: View {
     private var polishRefusalForced = false
     #endif
 
+    /// Spike: when the app is cold, the keyboard dictates by itself instead of opening
+    /// the app. On by default in this spike build. Read by `InKeyboardDictationRoute`.
+    @AppStorage(SharedKeys.inKeyboardDictationEnabled, store: UserDefaults(suiteName: AppGroup.identifier))
+    private var inKeyboardDictationEnabled = InKeyboardDictationRoute.defaultEnabled
+
+    /// Whether Apple covers the chosen dictation language (nil until read, and before
+    /// iOS 26). Not covered: the toggle shows off and is greyed, while the user's own
+    /// choice above stays stored, so a covered language later brings it back only if
+    /// they had not turned it off.
+    @State private var inKeyboardEligibility: InKeyboardLanguageEligibility?
+
     /// The keyboard language the pickers below operate on.
     private var keyboardLanguage: SupportedLanguage {
         SupportedLanguage(rawValue: language) ?? .french
@@ -239,6 +250,15 @@ struct SettingsView: View {
     #endif
 
     // MARK: - Body
+
+    /// The toggle as `InKeyboardLanguageEligibility.isEffectivelyOn` sees it; writing it
+    /// stores the user's choice.
+    private var inKeyboardDictationToggle: Binding<Bool> {
+        Binding(
+            get: { inKeyboardDictationEnabled && (inKeyboardEligibility?.isCovered ?? true) },
+            set: { inKeyboardDictationEnabled = $0 }
+        )
+    }
 
     var body: some View {
         List {
@@ -514,6 +534,31 @@ struct SettingsView: View {
                 Text(verbatim: "The keyboard treats every Smart Mode and polish call as refused by Apple Intelligence. Debug builds only.")
             }
             #endif
+
+            // Spike: in-keyboard dictation on a cold start. Turning it on also asks iOS for
+            // Apple's on-device speech model for the dictation language, which only the
+            // app may download: the keyboard checks it is installed and never fetches it.
+            Section {
+                Toggle("Dictate in the keyboard", isOn: inKeyboardDictationToggle)
+                    .disabled(inKeyboardEligibility.map { !$0.isCovered } ?? false)
+                    .onChange(of: inKeyboardDictationEnabled) { _, enabled in
+                        if enabled { InKeyboardSpeechAssets.prepareForDictationLanguage(reason: "setting") }
+                    }
+                    .task(id: "\(language)|\(transcriptionLanguage)") {
+                        guard #available(iOS 26.0, *) else {
+                            // No SpeechTranscriber before iOS 26 (Pierre, 2026-11-21).
+                            inKeyboardEligibility = .speechTranscriberUnavailable
+                            InKeyboardSpeechAssets.prepareForDictationLanguage(reason: "settings-language")
+                            return
+                        }
+                        inKeyboardEligibility = await InKeyboardSpeechAssets.refreshLanguageEligibility(reason: "settings-language")
+                    }
+                NavigationLink("How dictation works") {
+                    InKeyboardDictationInfoView()
+                }
+            } header: {
+                Text("Experiments")
+            }
 
             // Section 4: A propos
             Section("About") {

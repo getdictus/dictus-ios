@@ -493,6 +493,23 @@
         }
       }
     },
+    "Dictation in the keyboard failed. Try again." : {
+      "comment" : "Keyboard toolbar message when a dictation recorded and transcribed inside the keyboard (Experiments setting) produced no text.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dictation in the keyboard failed. Try again."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La dictée dans le clavier a échoué. Réessayez."
+          }
+        }
+      }
+    },
     "Dictation interrupted. Your text is in the Dictus app." : {
       "comment" : "Persistent keyboard toolbar banner after a dictation whose text could not be inserted (for example after a call). Tapping it opens Dictus on that text (#860).",
       "localizations" : {
@@ -823,6 +840,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Message"
+          }
+        }
+      }
+    },
+    "Microphone access is off for Dictus. Turn it on in Settings to dictate." : {
+      "comment" : "Keyboard toolbar line (#992): the microphone permission is refused, so neither the keyboard nor the app can record.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Microphone access is off for Dictus. Turn it on in Settings to dictate."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L’accès au micro est désactivé pour Dictus. Activez-le dans Réglages pour dicter."
           }
         }
       }
@@ -1573,6 +1607,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Symboles"
+          }
+        }
+      }
+    },
+    "The Dictus app was closed, so your iPhone dictated with Apple's dictation." : {
+      "comment" : "Keyboard toolbar line (#992): shown once, after the first dictation the keyboard ran itself with the app closed.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The Dictus app was closed, so your iPhone dictated with Apple's dictation."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L’app Dictus était fermée : votre iPhone a dicté avec la dictée d’Apple."
           }
         }
       }

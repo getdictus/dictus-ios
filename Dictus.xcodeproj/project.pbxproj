@@ -79,6 +79,8 @@
 		AA361008 /* KeyboardPolishStage.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA361007 /* KeyboardPolishStage.swift */; };
 		AA963002 /* KeyboardState+DictationSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA963001 /* KeyboardState+DictationSupport.swift */; };
 		AA361010 /* KeyboardSmartModeFan.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA361009 /* KeyboardSmartModeFan.swift */; };
+		AA0F0002 /* InKeyboardDictation.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0F0001 /* InKeyboardDictation.swift */; };
+		AA0F0006 /* InKeyboardWebCapture.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0F0005 /* InKeyboardWebCapture.swift */; };
 		AA637002 /* KeyboardVoiceNotes.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA637001 /* KeyboardVoiceNotes.swift */; };
 		AA423004 /* SmartModeDisplayName.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA423003 /* SmartModeDisplayName.swift */; };
 		AA423002 /* SmartModeDisplayName.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA423001 /* SmartModeDisplayName.swift */; };
@@ -94,6 +96,7 @@
 		AA000060 /* ToolbarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100060 /* ToolbarView.swift */; };
 		AA00006L /* KeyboardPanelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA10006L /* KeyboardPanelView.swift */; };
 		AA000061 /* RecordingOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100061 /* RecordingOverlay.swift */; };
+		AA0009E1 /* InKeyboardEngineIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1009E1 /* InKeyboardEngineIndicator.swift */; };
 		AA361012 /* SmartModeFanView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA361011 /* SmartModeFanView.swift */; };
 		AA637004 /* VoiceNoteReaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA637003 /* VoiceNoteReaderView.swift */; };
 		AA000062 /* KeyboardWaveformView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100062 /* KeyboardWaveformView.swift */; };
@@ -137,6 +140,8 @@
 		AA070602 /* AppleIntelligenceChecklistScript.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA170602 /* AppleIntelligenceChecklistScript.swift */; };
 		AA0000A4 /* ModelDownloadPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000A4 /* ModelDownloadPage.swift */; };
 		AA0000A5 /* GlobeKeyTutorialPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000A5 /* GlobeKeyTutorialPage.swift */; };
+		AA0F0008 /* InKeyboardSpeechAssets.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0F0007 /* InKeyboardSpeechAssets.swift */; };
+		AA0F000A /* InKeyboardDictationInfoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0F0009 /* InKeyboardDictationInfoView.swift */; };
 		AA0000A6 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000A6 /* SettingsView.swift */; };
 		AA0000A7 /* LicensesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000A7 /* LicensesView.swift */; };
 		AA0000A8 /* DebugLogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000A8 /* DebugLogView.swift */; };
@@ -227,6 +232,7 @@
 		VN6200000004 /* VoiceNoteResultView.swift in Sources */ = {isa = PBXBuildFile; fileRef = VN6201000004 /* VoiceNoteResultView.swift */; };
 		VN6200000005 /* VoiceNoteStackView.swift in Sources */ = {isa = PBXBuildFile; fileRef = VN6201000005 /* VoiceNoteStackView.swift */; };
 		DS6200000001 /* ShareViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DS6201000001 /* ShareViewController.swift */; };
+		DS6200000009 /* ShareOnDeviceTranscription.swift in Sources */ = {isa = PBXBuildFile; fileRef = DS6201000009 /* ShareOnDeviceTranscription.swift */; };
 		DS6200000002 /* ShareStatusView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DS6201000002 /* ShareStatusView.swift */; };
 		DS6200000003 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = DS6201000005 /* Localizable.xcstrings */; };
 		DS6200000004 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = DS6201000006 /* PrivacyInfo.xcprivacy */; };
@@ -338,6 +344,8 @@
 		AA361007 /* KeyboardPolishStage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardPolishStage.swift; sourceTree = "<group>"; };
 		AA963001 /* KeyboardState+DictationSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "KeyboardState+DictationSupport.swift"; sourceTree = "<group>"; };
 		AA361009 /* KeyboardSmartModeFan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardSmartModeFan.swift; sourceTree = "<group>"; };
+		AA0F0001 /* InKeyboardDictation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InKeyboardDictation.swift; sourceTree = "<group>"; };
+		AA0F0005 /* InKeyboardWebCapture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InKeyboardWebCapture.swift; sourceTree = "<group>"; };
 		AA637001 /* KeyboardVoiceNotes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardVoiceNotes.swift; sourceTree = "<group>"; };
 		AA423003 /* SmartModeDisplayName.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmartModeDisplayName.swift; sourceTree = "<group>"; };
 		AA423001 /* SmartModeDisplayName.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmartModeDisplayName.swift; sourceTree = "<group>"; };
@@ -355,6 +363,7 @@
 		AA100060 /* ToolbarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToolbarView.swift; sourceTree = "<group>"; };
 		AA10006L /* KeyboardPanelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardPanelView.swift; sourceTree = "<group>"; };
 		AA100061 /* RecordingOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingOverlay.swift; sourceTree = "<group>"; };
+		AA1009E1 /* InKeyboardEngineIndicator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InKeyboardEngineIndicator.swift; sourceTree = "<group>"; };
 		AA361011 /* SmartModeFanView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmartModeFanView.swift; sourceTree = "<group>"; };
 		AA637003 /* VoiceNoteReaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceNoteReaderView.swift; sourceTree = "<group>"; };
 		AA100062 /* KeyboardWaveformView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardWaveformView.swift; sourceTree = "<group>"; };
@@ -404,6 +413,8 @@
 		AA170602 /* AppleIntelligenceChecklistScript.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleIntelligenceChecklistScript.swift; sourceTree = "<group>"; };
 		AA1000A4 /* ModelDownloadPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelDownloadPage.swift; sourceTree = "<group>"; };
 		AA1000A5 /* GlobeKeyTutorialPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobeKeyTutorialPage.swift; sourceTree = "<group>"; };
+		AA0F0007 /* InKeyboardSpeechAssets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InKeyboardSpeechAssets.swift; sourceTree = "<group>"; };
+		AA0F0009 /* InKeyboardDictationInfoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InKeyboardDictationInfoView.swift; sourceTree = "<group>"; };
 		AA1000A6 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		AA1000A7 /* LicensesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LicensesView.swift; sourceTree = "<group>"; };
 		AA1000A8 /* DebugLogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugLogView.swift; sourceTree = "<group>"; };
@@ -524,6 +535,7 @@
 		VN6201000004 /* VoiceNoteResultView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceNoteResultView.swift; sourceTree = "<group>"; };
 		VN6201000005 /* VoiceNoteStackView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceNoteStackView.swift; sourceTree = "<group>"; };
 		DS6201000001 /* ShareViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareViewController.swift; sourceTree = "<group>"; };
+		DS6201000009 /* ShareOnDeviceTranscription.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareOnDeviceTranscription.swift; sourceTree = "<group>"; };
 		DS6201000002 /* ShareStatusView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareStatusView.swift; sourceTree = "<group>"; };
 		DS6201000003 /* DictusShare.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = DictusShare.entitlements; sourceTree = "<group>"; };
 		DS6201000004 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -662,6 +674,8 @@
 				AA963001 /* KeyboardState+DictationSupport.swift */,
 				AA361009 /* KeyboardSmartModeFan.swift */,
 				AA637001 /* KeyboardVoiceNotes.swift */,
+				AA0F0001 /* InKeyboardDictation.swift */,
+				AA0F0005 /* InKeyboardWebCapture.swift */,
 				AA423001 /* SmartModeDisplayName.swift */,
 				AA361005 /* TextProxyIdentity.h */,
 				AA023005 /* HostArbiterActivation.h */,
@@ -715,6 +729,7 @@
 				AA100060 /* ToolbarView.swift */,
 				AA10006L /* KeyboardPanelView.swift */,
 				AA100061 /* RecordingOverlay.swift */,
+				AA1009E1 /* InKeyboardEngineIndicator.swift */,
 				AA361011 /* SmartModeFanView.swift */,
 				AA637003 /* VoiceNoteReaderView.swift */,
 				AA100062 /* KeyboardWaveformView.swift */,
@@ -784,6 +799,8 @@
 				AA100071 /* TestDictationView.swift */,
 				AA100092 /* DiagnosticDetailView.swift */,
 				AA1000A6 /* SettingsView.swift */,
+				AA0F0009 /* InKeyboardDictationInfoView.swift */,
+				AA0F0007 /* InKeyboardSpeechAssets.swift */,
 				AA1000A7 /* LicensesView.swift */,
 				AA1000A8 /* DebugLogView.swift */,
 				B565F0A2 /* FeedbackView.swift */,
@@ -1071,6 +1088,7 @@
 			children = (
 				DS6201000001 /* ShareViewController.swift */,
 				DS6201000002 /* ShareStatusView.swift */,
+				DS6201000009 /* ShareOnDeviceTranscription.swift */,
 				DS6201000005 /* Localizable.xcstrings */,
 				DS6201000006 /* PrivacyInfo.xcprivacy */,
 				DS6201000003 /* DictusShare.entitlements */,
@@ -1486,6 +1504,8 @@
 				AA0000A5 /* GlobeKeyTutorialPage.swift in Sources */,
 				AA0000A9 /* OnboardingSuccessView.swift in Sources */,
 				AA0000A6 /* SettingsView.swift in Sources */,
+				AA0F000A /* InKeyboardDictationInfoView.swift in Sources */,
+				AA0F0008 /* InKeyboardSpeechAssets.swift in Sources */,
 				AA0000A7 /* LicensesView.swift in Sources */,
 				AA0000A8 /* DebugLogView.swift in Sources */,
 				B565F0A1 /* FeedbackView.swift in Sources */,
@@ -1551,6 +1571,8 @@
 				AA963002 /* KeyboardState+DictationSupport.swift in Sources */,
 				AA361010 /* KeyboardSmartModeFan.swift in Sources */,
 				AA637002 /* KeyboardVoiceNotes.swift in Sources */,
+				AA0F0002 /* InKeyboardDictation.swift in Sources */,
+				AA0F0006 /* InKeyboardWebCapture.swift in Sources */,
 				AA423002 /* SmartModeDisplayName.swift in Sources */,
 				AA361002 /* TextProxyIdentity.m in Sources */,
 				AA023004 /* HostArbiterActivation.m in Sources */,
@@ -1560,6 +1582,7 @@
 				AA000060 /* ToolbarView.swift in Sources */,
 				AA00006L /* KeyboardPanelView.swift in Sources */,
 				AA000061 /* RecordingOverlay.swift in Sources */,
+				AA0009E1 /* InKeyboardEngineIndicator.swift in Sources */,
 				AA361012 /* SmartModeFanView.swift in Sources */,
 				AA637004 /* VoiceNoteReaderView.swift in Sources */,
 				AA000062 /* KeyboardWaveformView.swift in Sources */,
@@ -1616,6 +1639,7 @@
 			files = (
 				DS6200000001 /* ShareViewController.swift in Sources */,
 				DS6200000002 /* ShareStatusView.swift in Sources */,
+				DS6200000009 /* ShareOnDeviceTranscription.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
