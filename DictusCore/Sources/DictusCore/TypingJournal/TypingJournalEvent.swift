@@ -48,7 +48,9 @@ public enum TypingJournalOutcome: String, Equatable, Sendable {
     case autocorrected
     /// Nothing was wrong with the word, or nothing better was found.
     case kept
-    /// Candidates were offered in the bar and none was applied (#993).
+    /// The corrector kept the word and offered corrections in the bar, and none was
+    /// applied (#993): close readings it would not pick between, or two accented
+    /// spellings as likely as each other (#994).
     case offered
     /// The user had refused a correction at this place, so the word was kept (#872).
     case refusedHere = "refused-here"

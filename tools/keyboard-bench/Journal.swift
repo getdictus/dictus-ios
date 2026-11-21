@@ -66,9 +66,10 @@ final class Journal {
         #endif
     }
 
-    func endWord(_ final: String) {
+    /// `offered`: the corrector kept the word and offered corrections for it.
+    func endWord(_ final: String, offered: Bool) {
         #if DEBUG
-        TypingJournal.endWord(final: final, autocorrectRan: true)
+        TypingJournal.endWord(final: final, autocorrectRan: true, offered: offered)
         #endif
     }
 

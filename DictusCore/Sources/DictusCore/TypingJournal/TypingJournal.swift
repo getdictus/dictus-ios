@@ -39,8 +39,8 @@ public enum TypingJournal {
         recorder.beginWord(typed: typed, previous: previous, committedBy: committedBy, bar: bar)
     }
 
-    public static func endWord(final: String, autocorrectRan: Bool) {
-        recorder.endWord(final: final, autocorrectRan: autocorrectRan)
+    public static func endWord(final: String, autocorrectRan: Bool, offered: Bool = false) {
+        recorder.endWord(final: final, autocorrectRan: autocorrectRan, offered: offered)
     }
 
     public static func barTapped(slot: Int, bar: TypingJournalBar, typed: String, commits: Bool) {

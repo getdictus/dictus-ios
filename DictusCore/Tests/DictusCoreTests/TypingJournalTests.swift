@@ -249,19 +249,26 @@ final class TypingJournalTests: XCTestCase {
 
     func testOutcomes() {
         func outcome(typed: String = "helo", final: String = "helo", whys: [String] = [], ran: Bool = true,
-                     bar: String = "completions") -> String {
+                     bar: String = "completions", offered: Bool = false) -> String {
             collected = Collected()
             let journal = recording()
             journal.beginWord(typed: typed, previous: nil, committedBy: " ",
                               bar: TypingJournalBar(mode: bar, words: []))
             for why in whys { _ = journal.absorb(why) }
-            journal.endWord(final: final, autocorrectRan: ran)
+            journal.endWord(final: final, autocorrectRan: ran, offered: offered)
             return written(journal).first { $0.hasPrefix("TJ WORD") }?
                 .components(separatedBy: " ").first { $0.hasPrefix("outcome=") } ?? "none"
         }
         XCTAssertEqual(outcome(final: "hello"), "outcome=autocorrected")
         XCTAssertEqual(outcome(), "outcome=kept")
-        XCTAssertEqual(outcome(bar: "candidates"), "outcome=offered")
+        XCTAssertEqual(outcome(offered: true), "outcome=offered")
+        // The commit's decision says what was offered, not the bar, which can still show
+        // the previous keystroke's row when the space comes fast (#993).
+        XCTAssertEqual(outcome(bar: "candidates"), "outcome=kept")
+        XCTAssertEqual(outcome(whys: ["AUTOCORRECT-SKIP word=\"reserve\" reason=ambiguous-accent"], offered: true),
+                       "outcome=offered", "two accented spellings offered (#994)")
+        XCTAssertEqual(outcome(final: "arrive", offered: false), "outcome=autocorrected",
+                       "a close reading picked (#997)")
         XCTAssertEqual(outcome(ran: false), "outcome=off")
         XCTAssertEqual(outcome(whys: ["AUTOCORRECT-SKIP word=\"helo\" reason=refused-here"]), "outcome=refused-here")
         XCTAssertEqual(outcome(whys: ["AUTOCORRECT-ABORT word=\"helo\" reason=boundary ctx=\"x\""]), "outcome=aborted")

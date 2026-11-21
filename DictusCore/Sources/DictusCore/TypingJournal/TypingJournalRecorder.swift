@@ -204,14 +204,18 @@ public final class TypingJournalRecorder: @unchecked Sendable {
 
     /// The word is committed as `final`. `autocorrectRan` is false when autocorrect is
     /// switched off or the field asks for none.
-    public func endWord(final: String, autocorrectRan: Bool) {
+    /// `offered` is true when the corrector kept the word and offered corrections for
+    /// it, the `CorrectionProposal.suggest` the commit decided (#993). It is read from the
+    /// decision, not from the bar: the bar updates off the main thread, so a fast space
+    /// can commit a word while the bar still shows the previous keystroke's row.
+    public func endWord(final: String, autocorrectRan: Bool, offered: Bool = false) {
         lock.withLock {
             guard let word = open else { return }
             open = nil
             let id = takeID()
             append(.word(TypingJournalWord(
                 id: id, typed: word.typed, previous: word.previous, final: final,
-                outcome: Self.outcome(of: word, final: final, autocorrectRan: autocorrectRan),
+                outcome: Self.outcome(of: word, final: final, autocorrectRan: autocorrectRan, offered: offered),
                 committedBy: word.committedBy, branches: word.branches, bar: word.bar, previews: previews
             )))
             for line in word.whys { append(.why(id: id, line: line)) }
@@ -407,14 +411,16 @@ public final class TypingJournalRecorder: @unchecked Sendable {
         watch = current
     }
 
-    private static func outcome(of word: OpenWord, final: String, autocorrectRan: Bool) -> TypingJournalOutcome {
+    private static func outcome(
+        of word: OpenWord, final: String, autocorrectRan: Bool, offered: Bool
+    ) -> TypingJournalOutcome {
         if final != word.typed { return .autocorrected }
         if word.whys.contains(where: { $0.hasPrefix("AUTOCORRECT-ABORT ") }) { return .aborted }
         if word.whys.contains(where: { $0.hasPrefix("AUTOCORRECT-SKIP ") && $0.hasSuffix("reason=refused-here") }) {
             return .refusedHere
         }
         if !autocorrectRan { return .off }
-        if word.bar?.mode == "candidates" { return .offered }
+        if offered { return .offered }
         return .kept
     }
 

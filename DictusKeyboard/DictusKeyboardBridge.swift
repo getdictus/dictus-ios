@@ -963,18 +963,25 @@ final class DictusKeyboardBridge: NSObject,
         #if DEBUG
         // Everything the decision logs between here and the return is the word's (#1001).
         var journalFinal = freshWord
+        var journalOffered = false
         beginJournalWord(freshWord, previous: previousWord, committedBy: key, bar: state)
-        defer { TypingJournal.endWord(final: journalFinal, autocorrectRan: autocorrectRuns) }
+        defer {
+            TypingJournal.endWord(final: journalFinal, autocorrectRan: autocorrectRuns, offered: journalOffered)
+        }
         #endif
 
         let checked = autocorrectRuns
             ? state.correctionProposal(freshWord, previousWord: previousWord, isAtSentenceStart: atSentenceStart)
             : nil
         let proposal = checked?.autocorrection?.correction
+        let offersCorrections = checked?.suggestionRow(typedWord: freshWord) != nil
+        #if DEBUG
+        journalOffered = offersCorrections
+        #endif
 
         switch memory.commit(
             prefix: prefix, word: freshWord, proposedCorrection: proposal,
-            offersCorrections: checked?.suggestionRow(typedWord: freshWord) != nil,
+            offersCorrections: offersCorrections,
             countable: wordWasEvaluated,
             allowsCasingChange: proposal != nil && state.isInSupplementaryLexicon(freshWord)
         ) {

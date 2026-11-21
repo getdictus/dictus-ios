@@ -287,9 +287,16 @@ func replay(_ taps: [Tap], cells: [Cell], width: CGFloat, height: CGFloat, picke
                 let ws = words(field.text)
                 let previous = ws.count >= 2 ? ws[ws.count - 2] : nil
                 journal?.beginWord(word, previous: previous)
-                defer { journal?.endWord(final) }
-                let proposal = engine.spellCheck(word, previousWord: previous,
-                                                 isAtSentenceStart: ProperNounGuard.isAtSentenceStart(context: field.text, word: word))?.correction
+                var offered = false
+                defer { journal?.endWord(final, offered: offered) }
+                // `spellCheck` is this proposal's autocorrection; the journal also needs to
+                // know when corrections were only offered, as the keyboard's commit does.
+                let checked = engine.correctionProposal(
+                    for: word, previousWord: previous,
+                    isAtSentenceStart: ProperNounGuard.isAtSentenceStart(context: field.text, word: word)
+                )
+                let proposal = checked?.autocorrection?.correction
+                offered = checked?.suggestionRow(typedWord: word) != nil
                 var applied = false
                 if memory.commit(prefix: prefix, word: word, proposedCorrection: proposal) == .correct,
                    let correction = proposal,
