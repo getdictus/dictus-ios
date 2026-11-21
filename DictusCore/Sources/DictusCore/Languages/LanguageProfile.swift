@@ -61,6 +61,10 @@ public struct LanguageProfile: Sendable {
     /// that nobody has written the list for.
     public let participleContext: ParticipleContext?
 
+    /// Elisions typed with a wrong prefix, a key in place of the apostrophe, or a
+    /// space (#1006). nil for languages without elision.
+    public let elisionRepair: ElisionRepair?
+
     public init(
         code: String,
         displayName: String,
@@ -72,7 +76,8 @@ public struct LanguageProfile: Sendable {
         accentMap: [Character: [Character]],
         contractionPrefixes: [String],
         collapseRules: [(from: String, to: String)] = [],
-        participleContext: ParticipleContext? = nil
+        participleContext: ParticipleContext? = nil,
+        elisionRepair: ElisionRepair? = nil
     ) {
         self.code = code
         self.displayName = displayName
@@ -85,6 +90,7 @@ public struct LanguageProfile: Sendable {
         self.contractionPrefixes = contractionPrefixes
         self.collapseRules = collapseRules
         self.participleContext = participleContext
+        self.elisionRepair = elisionRepair
     }
 }
 
