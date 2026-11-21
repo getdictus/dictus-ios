@@ -380,9 +380,12 @@ class SuggestionState: ObservableObject {
     func correctionProposal(
         _ word: String,
         previousWord: String?,
-        isAtSentenceStart: Bool
+        isAtSentenceStart: Bool,
+        spatial: SpatialCorrection.Input? = nil
     ) -> CorrectionProposal? {
-        engine.correctionProposal(for: word, previousWord: previousWord, isAtSentenceStart: isAtSentenceStart)
+        engine.correctionProposal(
+            for: word, previousWord: previousWord, isAtSentenceStart: isAtSentenceStart, spatial: spatial
+        )
     }
 
     /// Reads the contacts + text replacements lexicon (#873) and hands it to the

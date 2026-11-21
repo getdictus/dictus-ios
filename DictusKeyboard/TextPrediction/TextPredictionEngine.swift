@@ -628,10 +628,15 @@ class TextPredictionEngine {
     /// What `spellCheck(_:previousWord:isAtSentenceStart:)` decides, plus the
     /// suggestions it offers when it keeps the typed word (#993). The suggestion bar
     /// reads this; the space bar reads `spellCheck`, so a suggestion is never applied.
+    ///
+    /// `spatial` is where the finger landed for each character of `word` (#1011). With
+    /// it, the spatial decoder reads the taps before the trie reads the letters; without
+    /// it, nothing changes.
     func correctionProposal(
         for word: String,
         previousWord: String?,
-        isAtSentenceStart: Bool = true
+        isAtSentenceStart: Bool = true,
+        spatial: SpatialCorrection.Input? = nil
     ) -> CorrectionProposal? {
         let applied = { (result: (correction: String, alternatives: [String])?) -> CorrectionProposal? in
             result.map { .autocorrect($0.correction, alternatives: $0.alternatives) }
@@ -677,6 +682,22 @@ class TextPredictionEngine {
             )
             #endif
             return .autocorrect(contraction, alternatives: [])
+        }
+
+        // #1011: the taps, read by the spatial decoder. It comes after every authoritative
+        // branch above (lexicon, overrides, contractions) and before the trie, which only
+        // has the letters. When it keeps the word, the trie still gets its say.
+        if let spatial, let decoder = SpatialAutocorrect.decoder(for: language),
+           let read = SpatialCorrection.correct(
+               word, previousWord: previousWord, input: spatial, with: decoder,
+               known: (!isUnknownToDictionary(word), UserDictionary.shared.isLearned(word.lowercased()))
+           ) {
+            #if DEBUG
+            AutocorrectDebugLog.autocorrectDecision(
+                original: word, corrected: read.correction, branch: "spatial", prevWord: previousWord
+            )
+            #endif
+            return .autocorrect(read.correction, alternatives: read.alternatives)
         }
 
         let checked = checkWord(word, isAtSentenceStart: isAtSentenceStart, previousWord: previousWord)
