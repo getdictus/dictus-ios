@@ -1812,6 +1812,29 @@
         }
       }
     },
+    "Attach" : {
+      "comment" : "Feedback form, question before sending a bug without the log (#981).",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anhängen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adjuntar"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Joindre"
+          }
+        }
+      }
+    },
     "Attach the debug log" : {
       "comment" : "Feedback form (#565).",
       "localizations" : {
@@ -1831,6 +1854,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Joindre le journal technique"
+          }
+        }
+      }
+    },
+    "Attach the debug log?" : {
+      "comment" : "Feedback form, question before sending a bug without the log (#981).",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Technisches Protokoll anhängen?"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Adjuntar el registro técnico?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Joindre le journal technique ?"
           }
         }
       }
@@ -5288,6 +5334,29 @@
         }
       }
     },
+    "Send without" : {
+      "comment" : "Feedback form, question before sending a bug without the log (#981).",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ohne senden"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enviar sin él"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Envoyer sans"
+          }
+        }
+      }
+    },
     "Sent. Thank you." : {
       "comment" : "Feedback form (#565).",
       "localizations" : {
@@ -5582,6 +5651,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Nouveautés"
+          }
+        }
+      }
+    },
+    "Without the log, most bugs cannot be diagnosed." : {
+      "comment" : "Feedback form, question before sending a bug without the log (#981).",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ohne das Protokoll lassen sich die meisten Fehler nicht analysieren."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sin el registro, la mayoría de los errores no se pueden analizar."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sans le journal, la plupart des bugs ne peuvent pas être analysés."
           }
         }
       }
