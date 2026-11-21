@@ -48,6 +48,20 @@ class TextPredictionEngine {
     private var supplementaryLexicon = SupplementaryLexicon.empty
     private let lexiconLock = NSLock()
 
+    /// The local language model that reranks the trie's candidates and proposes next
+    /// words (#996), nil when it is off, which it is unless a Debug build turns it on.
+    /// Set on the main thread, read on the main thread and the suggestion queue.
+    private var languageModel: KeyboardLanguageModel?
+    private var languageModelWeight = TextPredictionEngine.languageModelWeight
+    private let languageModelLock = NSLock()
+
+    /// What one nat of the model's log-probability is worth in `CorrectionRanking`'s score.
+    /// Chosen on the #954 bench runs (docs/research/996-llm-rerank/).
+    static let languageModelWeight = 0.03
+    /// How many of the trie's candidates the model scores. Each reading of more than one
+    /// token costs a pass over the model's output layer (#996).
+    static let languageModelCandidates = 5
+
     private init() {
         loadDictionaries(for: language)
     }
@@ -294,10 +308,13 @@ class TextPredictionEngine {
 
     /// The body of `spellCheck(_:isAtSentenceStart:)`. `previousWord` is only read by
     /// the trie pass and the accent pass, which rank their candidates with it (#993).
+    /// `textBefore` is the text before the word the language model reads (#996); only
+    /// the trie pass reads it.
     private func checkWord(
         _ word: String,
         isAtSentenceStart: Bool,
-        previousWord: String?
+        previousWord: String?,
+        textBefore: String? = nil
     ) -> CheckedWord? {
         guard !word.isEmpty else { return nil }
 
@@ -533,7 +550,7 @@ class TextPredictionEngine {
 
         // Pass 5: the trie's candidates, ranked with the previous word (#993).
         return trieCorrection(of: word, wordToCheck: wordToCheck, apostrophePrefix: apostrophePrefix,
-                              previousWord: previousWord)
+                              previousWord: previousWord, textBefore: textBefore)
     }
 
     /// The trie pass of `checkWord`. `CorrectionRanking` keeps the typed word when two
@@ -543,23 +560,36 @@ class TextPredictionEngine {
         of word: String,
         wordToCheck: String,
         apostrophePrefix: String?,
-        previousWord: String?
+        previousWord: String?,
+        textBefore: String?
     ) -> CheckedWord? {
-        let candidates = rankedCandidates(for: wordToCheck, previousWord: previousWord)
-        let decision = CorrectionRanking.decide(candidates)
+        let isCapitalized = word.first?.isUppercase == true
+        let written = { (candidate: String) -> String in
+            let full = (apostrophePrefix ?? "") + candidate
+            return isCapitalized ? full.capitalized : full
+        }
+        var candidates = rankedCandidates(for: wordToCheck, previousWord: previousWord)
+        var decision = CorrectionRanking.decide(candidates)
+        // The model reranks a correction (#996): the best candidates without it, each as
+        // the space bar would write it. One it does not score counts as its worst.
+        if decision.replacement != nil, let textBefore, let (model, weight) = currentLanguageModel() {
+            let best = Array(decision.ranked.prefix(Self.languageModelCandidates))
+            if let scores = model.logProbabilities(of: best.map(written), after: textBefore),
+               let top = scores.max(), let bottom = scores.min() {
+                let verdict = Dictionary(zip(best, scores.map { $0 - top }), uniquingKeysWith: { first, _ in first })
+                candidates = candidates.map { $0.scored(byLanguageModel: verdict[$0.word] ?? bottom - top) }
+                decision = CorrectionRanking.rerank(candidates, languageModelWeight: weight)
+            }
+        }
         #if DEBUG
         AutocorrectDebugLog.trieCandidates(word: word, candidates: candidates, decision: decision)
         #endif
-        let isCapitalized = word.first?.isUppercase == true
         // The corrected word gets the accents a typed one would (#1006): `est zrrive`
         // is corrected to `arrive`, and after `est` that is `arrivé`.
         let accented = decision.proposal.map {
             CorrectedWordAccents.restored($0) { aospTrieEngine.accentRestoration($0, previousWord: previousWord) }
         }
-        guard let proposal = accented?.mapWords({ candidate in
-            let full = (apostrophePrefix ?? "") + candidate
-            return isCapitalized ? full.capitalized : full
-        }) else {
+        guard let proposal = accented?.mapWords(written) else {
             #if DEBUG
             AutocorrectDebugLog.autocorrectSkipped(word: word, reason: "no-trie-candidate")
             #endif
@@ -600,12 +630,35 @@ class TextPredictionEngine {
     /// When the user types a word not in the n-gram model (rare word, name, etc.),
     /// showing the most common words is better than an empty suggestion bar.
     /// These are the words most likely to follow any context.
-    func predictNextWords(after words: [String]) -> [String] {
+    ///
+    /// With the language model on (#996), its words come first, those the dictionary or
+    /// the user knows, and the n-gram predictions fill the rest.
+    /// - Parameter textBefore: the text the language model reads, nil to leave it out.
+    func predictNextWords(after words: [String], textBefore: String? = nil) -> [String] {
         let predictions = aospTrieEngine.predictNextWords(after: words)
-        if predictions.isEmpty {
-            return frequencyDict.topWords(count: 3)
-        }
-        return predictions
+        let ngram = predictions.isEmpty ? frequencyDict.topWords(count: 3) : predictions
+        let trie = aospTrieEngine
+        guard let textBefore, let (model, _) = currentLanguageModel(),
+              let modelled = model.nextWords(after: textBefore, limit: 3, isWord: { word in
+                  let lowered = word.lowercased()
+                  return trie.wordExists(lowered) || UserDictionary.shared.isLearned(lowered)
+              }) else { return ngram }
+        var seen = Set<String>()
+        return (modelled + ngram).filter { seen.insert($0.lowercased()).inserted }.prefix(3).map { $0 }
+    }
+
+    /// Turns the language model on with `model`, or off with nil (#996).
+    func setLanguageModel(_ model: KeyboardLanguageModel?, weight: Double = TextPredictionEngine.languageModelWeight) {
+        languageModelLock.lock()
+        languageModel = model
+        languageModelWeight = weight
+        languageModelLock.unlock()
+    }
+
+    private func currentLanguageModel() -> (KeyboardLanguageModel, Double)? {
+        languageModelLock.lock()
+        defer { languageModelLock.unlock() }
+        return languageModel.map { ($0, languageModelWeight) }
     }
 
     /// Spell check with n-gram context boosting.
@@ -628,10 +681,14 @@ class TextPredictionEngine {
     /// What `spellCheck(_:previousWord:isAtSentenceStart:)` decides, plus the
     /// suggestions it offers when it keeps the typed word (#993). The suggestion bar
     /// reads this; the space bar reads `spellCheck`, so a suggestion is never applied.
+    ///
+    /// - Parameter textBefore: the text before the word, which the language model reads
+    ///   to rerank the trie's candidates (#996); nil leaves the model out.
     func correctionProposal(
         for word: String,
         previousWord: String?,
-        isAtSentenceStart: Bool = true
+        isAtSentenceStart: Bool = true,
+        textBefore: String? = nil
     ) -> CorrectionProposal? {
         let applied = { (result: (correction: String, alternatives: [String])?) -> CorrectionProposal? in
             result.map { .autocorrect($0.correction, alternatives: $0.alternatives) }
@@ -679,7 +736,8 @@ class TextPredictionEngine {
             return .autocorrect(contraction, alternatives: [])
         }
 
-        let checked = checkWord(word, isAtSentenceStart: isAtSentenceStart, previousWord: previousWord)
+        let checked = checkWord(word, isAtSentenceStart: isAtSentenceStart, previousWord: previousWord,
+                                textBefore: textBefore)
         let result = checked?.proposal.autocorrection
 
         // If no previous word context or n-grams not loaded, return standard result.
@@ -991,3 +1049,36 @@ class TextPredictionEngine {
     }
 
 }
+
+#if DEBUG
+// MARK: - Language model switch (#996)
+
+extension TextPredictionEngine {
+
+    /// Debug-only App Group key that turns the language model on: the file name of a GGUF
+    /// model in the App Group's `keyboard-lm/` folder. Absent or empty, the model is off.
+    /// It lives here and not in `SharedKeys`: no setting shows it, and a Release build
+    /// never reads it.
+    static let languageModelDebugKey = "debug.keyboardLanguageModel"
+    static let languageModelFolder = "keyboard-lm"
+
+    /// Loads or drops the model to match the switch. Cheap when nothing changed, so the
+    /// keyboard calls it at every appearance. The load runs off the main thread.
+    func refreshLanguageModel() {
+        let name = AppGroup.defaults.string(forKey: Self.languageModelDebugKey) ?? ""
+        guard name != Self.languageModelFile else { return }
+        Self.languageModelFile = name
+        guard !name.isEmpty, let folder = AppGroup.containerURL?.appendingPathComponent(Self.languageModelFolder) else {
+            setLanguageModel(nil)
+            return
+        }
+        let path = folder.appendingPathComponent(name).path
+        let model = KeyboardLanguageModel()
+        model.load { LocalLanguageModel.open(path: path) }
+        setLanguageModel(model)
+    }
+
+    /// The file the loaded model came from; only touched on the main thread.
+    private static var languageModelFile = ""
+}
+#endif

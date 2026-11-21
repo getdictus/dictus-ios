@@ -162,7 +162,8 @@ class SuggestionState: ObservableObject {
             ? engine.correctionProposal(
                 for: partial,
                 previousWord: previousWord,
-                isAtSentenceStart: ProperNounGuard.isAtSentenceStart(context: context, word: partial)
+                isAtSentenceStart: ProperNounGuard.isAtSentenceStart(context: context, word: partial),
+                textBefore: LanguageModelContext.text(before: partial, in: context, policy: hostPolicy)
             )
             : nil
         if let result = proposal?.autocorrection,
@@ -237,6 +238,7 @@ class SuggestionState: ObservableObject {
 
         // Read on the main thread, like the context: the memory is not thread-safe.
         let previewsCorrection = rejectionMemory.previewsCorrection(context: context)
+        let policy = hostPolicy
 
         let work = DispatchWorkItem { [weak self] in
             guard let self = self else { return }
@@ -268,10 +270,13 @@ class SuggestionState: ObservableObject {
             // Check spell correction first (mirrors what handleSpace will do)
             let proposal: CorrectionProposal?
             if self.autocorrectEnabled, previewsCorrection {
+                // The language model runs here, off the main thread, at every keystroke:
+                // by the space, the finished word's answer is usually cached (#996).
                 proposal = self.engine.correctionProposal(
                     for: partial,
                     previousWord: previousWord,
-                    isAtSentenceStart: ProperNounGuard.isAtSentenceStart(context: context, word: partial)
+                    isAtSentenceStart: ProperNounGuard.isAtSentenceStart(context: context, word: partial),
+                    textBefore: LanguageModelContext.text(before: partial, in: context, policy: policy)
                 )
             } else {
                 proposal = nil
@@ -358,12 +363,18 @@ class SuggestionState: ObservableObject {
     /// corrections the bar offers when the typed word is kept (#993). The space bar
     /// applies only its autocorrection; the learning site reads whether corrections
     /// were offered.
+    /// `context` is the text before the cursor, which ends with `word`: the language
+    /// model reads what comes before the word, where the host field allows it (#996).
     func correctionProposal(
         _ word: String,
         previousWord: String?,
-        isAtSentenceStart: Bool
+        isAtSentenceStart: Bool,
+        context: String
     ) -> CorrectionProposal? {
-        engine.correctionProposal(for: word, previousWord: previousWord, isAtSentenceStart: isAtSentenceStart)
+        engine.correctionProposal(
+            for: word, previousWord: previousWord, isAtSentenceStart: isAtSentenceStart,
+            textBefore: LanguageModelContext.text(before: word, in: context, policy: hostPolicy)
+        )
     }
 
     /// Reads the contacts + text replacements lexicon (#873) and hands it to the
@@ -405,6 +416,9 @@ class SuggestionState: ObservableObject {
     /// Updates the prediction engine's language.
     func setLanguage(_ lang: String) {
         engine.setLanguage(lang)
+        #if DEBUG
+        engine.refreshLanguageModel()
+        #endif
     }
 
     /// Whether the active language's dictionary does not know this word (#287).
@@ -442,6 +456,7 @@ class SuggestionState: ObservableObject {
 
         // Cancel any in-flight completion work
         currentSuggestionWork?.cancel()
+        let modelText = LanguageModelContext.text(beforeCursor: context, policy: hostPolicy)
 
         let work = DispatchWorkItem { [weak self] in
             guard let self = self else { return }
@@ -453,7 +468,7 @@ class SuggestionState: ObservableObject {
                 return
             }
 
-            let predictions = self.engine.predictNextWords(after: words)
+            let predictions = self.engine.predictNextWords(after: words, textBefore: modelText)
             print("[SuggestionState] updatePredictions context=\(words) results=\(predictions)")
 
             DispatchQueue.main.async { [weak self] in
