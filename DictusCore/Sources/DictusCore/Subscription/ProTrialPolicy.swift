@@ -137,6 +137,11 @@ public enum ProPromotionEntry: Equatable, Sendable {
     /// The ordinary "Dictus Pro" entry, leading to the paywall.
     case upgrade
 
+    /// The same entry on an iPhone that can never run Smart Modes (#922): same place,
+    /// same paywall, but its words sell History search, Vocabulary and voice messages,
+    /// never AI rewording.
+    case upgradeWithoutSmartModes
+
     /// The trial ends soon (decision 3): the entry names how many days are left and
     /// leads to the paywall, where subscribing keeps Pro with no gap.
     case trialEnding(daysLeft: Int)
@@ -162,10 +167,11 @@ public enum ProPromotion {
     ///    no push notification, so without it the trial would end unannounced.
     /// 4. **Entitled otherwise** (a trial with days to spare, or the DEBUG override):
     ///    nothing. During the trial the only indicator is the discreet badge.
-    /// 5. **Device that can never run Smart Modes:** nothing. The ordinary entry sells
-    ///    "AI reformulation" first, which that device cannot have. Pro stays
-    ///    purchasable from the Settings row, and the trial's own end opens its paywall
-    ///    once, with Smart Modes labelled there (#922).
+    /// 5. **Device that can never run Smart Modes:** the entry, in its own words
+    ///    (#922, Pierre, 2026-11-21). The ordinary one sells "AI reformulation" first,
+    ///    which that device cannot have; hiding it altogether, as the first version of
+    ///    #922 did, left a user whose trial had ended no way back to Pro but the
+    ///    Settings row. Same placement and same rules, only the words change.
     /// 6. **Everyone else:** the ordinary entry.
     public static func entry(paywallVisible: Bool,
                              deviceIsCapable: Bool,
@@ -177,8 +183,8 @@ public enum ProPromotion {
         if trial.isInReminderWindow(now: now), let daysLeft = trial.daysLeft(now: now) {
             return .trialEnding(daysLeft: daysLeft)
         }
-        guard !isEntitled, deviceIsCapable else { return .hidden }
-        return .upgrade
+        guard !isEntitled else { return .hidden }
+        return deviceIsCapable ? .upgrade : .upgradeWithoutSmartModes
     }
     // swiftlint:enable function_parameter_count
 }

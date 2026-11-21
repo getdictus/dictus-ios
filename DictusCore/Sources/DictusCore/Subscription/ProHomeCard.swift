@@ -5,12 +5,15 @@ import Foundation
 /// The Home Pro card's content.
 public enum ProHomeCardContent: Equatable, Sendable {
 
-    /// Nothing: the paywall is hidden, or the device can never run Smart Modes and
-    /// nothing is owned nor in its last days (#593 decision 2, as #922 left it).
+    /// Nothing: the paywall is hidden.
     case hidden
 
     /// The sales card, as before #216.
     case upgrade
+
+    /// The sales card on an iPhone that can never run Smart Modes (#922): it sells
+    /// History search, Vocabulary and voice messages, never AI rewording.
+    case upgradeWithoutSmartModes
 
     /// The trial's last-days reminder, as before #216.
     case trialEnding(daysLeft: Int)
@@ -61,6 +64,7 @@ public enum ProHomeCard {
         switch promotion {
         case .hidden: return .hidden
         case .upgrade: return .upgrade
+        case .upgradeWithoutSmartModes: return .upgradeWithoutSmartModes
         case .trialEnding(let daysLeft): return .trialEnding(daysLeft: daysLeft)
         }
     }

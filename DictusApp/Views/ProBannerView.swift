@@ -44,6 +44,13 @@ struct ProBannerView: View {
                     title: Text("Unlock Dictus Pro"),
                     subtitle: Text("AI reformulation, history & more")
                 )
+            case .upgradeWithoutSmartModes:
+                // An iPhone without Apple Intelligence (#922): what Pro does there.
+                banner(
+                    icon: "crown.fill",
+                    title: Text("Unlock Dictus Pro"),
+                    subtitle: Text("History search, vocabulary & voice messages")
+                )
             case .trialEnding(let daysLeft):
                 banner(
                     icon: "hourglass",

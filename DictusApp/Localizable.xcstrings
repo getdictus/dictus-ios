@@ -7800,6 +7800,29 @@
         }
       }
     },
+    "History search, vocabulary & voice messages" : {
+      "comment" : "Home banner subtitle selling Dictus Pro on an iPhone without Apple Intelligence (#922): never mentions AI or Smart Modes.",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verlaufssuche, Vokabular und Sprachnachrichten"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Búsqueda en el historial, vocabulario y mensajes de voz"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recherche dans l’historique, vocabulaire et messages vocaux"
+          }
+        }
+      }
+    },
     "History search" : {
       "extractionState" : "manual",
       "localizations" : {

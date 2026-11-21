@@ -218,14 +218,17 @@ final class ProTrialTests: XCTestCase {
         }
         XCTAssertEqual(entry(), .upgrade)
         XCTAssertEqual(entry(visible: false), .hidden, "#236")
-        XCTAssertEqual(entry(capable: false), .hidden, "the ordinary entry sells AI reformulation: not on a device without it")
+        XCTAssertEqual(entry(capable: false), .upgradeWithoutSmartModes,
+                       "#922: the entry, in words that do not sell AI reformulation")
         XCTAssertEqual(entry(capable: false, entitled: true, trial: running), .hidden, "no nag during the trial")
         XCTAssertEqual(entry(capable: false, entitled: true, trial: running,
                              now: endsAt.addingTimeInterval(-1.5 * 86_400)),
                        .trialEnding(daysLeft: 2), "#922: the trial's end is announced on every device")
         XCTAssertEqual(entry(capable: false, paid: true, entitled: true, trial: running,
                              now: endsAt.addingTimeInterval(-60)), .hidden)
-        XCTAssertEqual(entry(capable: false, trial: .expired(endedAt: endsAt), now: endsAt), .hidden)
+        XCTAssertEqual(entry(capable: false, trial: .expired(endedAt: endsAt), now: endsAt), .upgradeWithoutSmartModes)
+        XCTAssertEqual(entry(capable: false, paid: true, entitled: true, trial: .expired(endedAt: endsAt), now: endsAt),
+                       .hidden, "a subscriber has nothing to buy")
         XCTAssertEqual(entry(paid: true, entitled: true), .hidden)
         XCTAssertEqual(entry(entitled: true, trial: running), .hidden, "no nag during the trial")
         XCTAssertEqual(entry(entitled: true, trial: running, now: endsAt.addingTimeInterval(-1.5 * 86_400)),
@@ -426,10 +429,45 @@ final class ProTrialTests: XCTestCase {
             XCTAssertFalse(manager.isProActive, "\(state)")
             XCTAssertTrue(manager.endOfTrialPaywallDue, "\(state): the end opens its paywall once")
             XCTAssertNil(manager.trialBadgeDaysLeft, "\(state)")
-            XCTAssertEqual(manager.promotionEntry, .hidden,
-                           "\(state): no ordinary upgrade entry, it sells AI reformulation")
+            XCTAssertEqual(manager.promotionEntry, .upgradeWithoutSmartModes,
+                           "\(state): the entry comes back, without AI reformulation in its words")
             XCTAssertFalse(manager.trialAnnouncementDue(onboardingCompleted: true), "\(state)")
             XCTAssertFalse(manager.startTrialIfEligible(), "\(state): no second trial")
+        }
+    }
+
+    /// Once the trial is over and nothing is bought, the Home banner and the keyboard
+    /// pill come back on an iPhone without Apple Intelligence (#922, 2026-11-21), in
+    /// their non-AI wording; a purchase removes them as anywhere else.
+    @MainActor
+    func testAfterTheTrialADeviceWithoutAppleIntelligenceIsOfferedProWithoutSmartModes() {
+        for state in Self.nonCapableStates {
+            let clock = TestClock(t0)
+            let (manager, _) = makeManager(capable: SmartModeAvailability.isCapable(engineState: state), clock: clock)
+            XCTAssertTrue(manager.startTrialIfEligible(), "\(state)")
+            clock.advance(days: 15)
+            manager.refreshFromAppGroup()
+            XCTAssertFalse(manager.isProActive, "\(state)")
+            XCTAssertEqual(manager.promotionEntry, .upgradeWithoutSmartModes, "\(state): the banner and the pill")
+            XCTAssertEqual(manager.homeCardContent(activeFeatures: 3), .upgradeWithoutSmartModes, "\(state)")
+
+            manager.setProActive(true)
+            XCTAssertEqual(manager.promotionEntry, .hidden, "\(state): a subscriber gets no banner")
+            XCTAssertEqual(manager.homeCardContent(activeFeatures: 3), .member(activeFeatures: 3), "\(state)")
+        }
+    }
+
+    /// A capable iPhone after its trial keeps today's entry and wording.
+    @MainActor
+    func testAfterTheTrialACapableDeviceKeepsTheOrdinaryEntry() {
+        for state in [PolishAvailabilityState.available, .appleIntelligenceNotEnabled] {
+            let clock = TestClock(t0)
+            let (manager, _) = makeManager(capable: SmartModeAvailability.isCapable(engineState: state), clock: clock)
+            manager.startTrialIfEligible()
+            clock.advance(days: 15)
+            manager.refreshFromAppGroup()
+            XCTAssertEqual(manager.promotionEntry, .upgrade, "\(state)")
+            XCTAssertEqual(manager.homeCardContent(activeFeatures: 3), .upgrade, "\(state)")
         }
     }
 
