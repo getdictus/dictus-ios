@@ -1,0 +1,720 @@
+lang	sentence	intended	typed	final	next	predicted
+fr	0	je	Je	Je	suis	ne,suis,me
+fr	0	suis	suis	suis	en	un,en,désolé
+fr	0	en	en	en	retard	plus,ce,fait
+fr	0	retard	retard	retard	de	de,entre,pour
+fr	0	de	de	de	dix	l',son,l
+fr	0	dix	dix	dix	minutes	ans,millions,mille
+fr	0	minutes	minutes	minutes		avant,de,plus
+fr	1	tu	Tu	Tu	peux	as,es,ne
+fr	1	peux	peux	peux	passer	vous,pas,me
+fr	1	passer	passer	passer	prendre	à,la,par
+fr	1	prendre	prendrr	prendre	le	le,la,en
+fr	1	le	le	le	pain	monde,premier,même
+fr	1	pain	pain	pain	en	et,de,est
+fr	1	en	en	en	rentrant	effet,plus,ce
+fr	1	rentrant	rentrant	rentrant		dans,en,chez
+fr	2	on	On	On	se	ne,peut,a
+fr	2	se	se	se	retrouve	sont,faire,mit
+fr	2	retrouve	retrouvr	retrouve	devant	dans,avec,à
+fr	2	devant	devant	devant	la	la,le,les
+fr	2	la	la	la	gare	porte,vie,tête
+fr	2	gare	gare	gare	vers	de,du,sncf
+fr	2	vers	vers	vers	midi	le,la,l'
+fr	2	midi	lidi	midi		olympique,libre,de
+fr	3	merci	Merci	Merci	pour	beaucoup,bien,de
+fr	3	pour	pour	pour	ton	les,la,le
+fr	3	ton	ton	ton	message	père,problème,nom
+fr	3	message	message	message	je	reçu,après,d'erreur
+fr	3	je	je	je	te	ne,suis,me
+fr	3	te	te	te	rappelle	le,faire,plaît
+fr	3	rappelle	rappelle	rappelle	ce	pas,plus,que
+fr	3	ce	ce	ce	soir	qui,que,sont
+fr	3	soir	soir	soir		à,le,la
+fr	4	la	La	La	réunion	vie,tête,première
+fr	4	réunion	reùion	reùion	est	de,je,la
+fr	4	est	est	est	décalée	un,le,une
+fr	4	décalée	decalee	decalee	à	de,je,la
+fr	4	à	a	a	jeudi	été,fait,pas
+fr	4	jeudi	jeudi	jeudi	matin	à,le,soir
+fr	4	matin	matin	matin		à,le,et
+fr	5	il	Ul	Il	fait	est,y,ne
+fr	5	fait	fait	fait	très	que,l',d'
+fr	5	très	tres	très	beau	bien,vite,peu
+fr	5	beau	beau	beau	ce	travail,boulot,jour
+fr	5	ce	ce	ce	matin	qui,que,sont
+fr	5	matin	matin	matin		à,dans,le
+fr	6	je	Je	Je	pense	ne,suis,me
+fr	6	pense	pense	pense	que	que,à,qu
+fr	6	que	que	que	nous	l',de,des
+fr	6	nous	nous	nous	allons	avons,sommes,ne
+fr	6	allons	zllons	allons	partir	voir,étudier,nous
+fr	6	partir	partir	partir	demain	de,du,d'
+fr	6	demain	demain	demain		matin,soir,à
+fr	7	tu	Tu	Tu	as	as,es,ne
+fr	7	as	as	as	bien	raison,fait,une
+fr	7	bien	bien	bien	reçu	que,sûr,plus
+fr	7	reçu	recu	reçu	le	le,un,une
+fr	7	le	le	le	document	plus,monde,temps
+fr	7	document	document	document		de,est,latex
+fr	8	nous	Nous	Nous	avons	avons,sommes,ne
+fr	8	avons	avons	avons	réservé	vu,besoin,déjà
+fr	8	réservé	reserve	réservé	une	aux,à,au
+fr	8	une	une	une	table	fois,autre,des
+fr	8	table	tzble	table	pour	faire,de,des
+fr	8	pour	pour	pour	quatre	les,la,le
+fr	8	quatre	quatee	quatre	personnes	ans,heures,cinq
+fr	8	personnes	personnes	personnes		ont,pour,de
+fr	9	le	Le	Le	train	plus,monde,temps
+fr	9	train	train	train	est	de,qui,et
+fr	9	est	est	est	arrivé	un,le,une
+fr	9	arrivé	arrive	arrivé	avec	à,en,au
+fr	9	avec	avec	avec	une	un,les,le
+fr	9	une	une	une	heure	fois,des,nouvelle
+fr	9	heure	heure	heure	de	de,et,après
+fr	9	de	de	de	retard	l',son,ses
+fr	9	retard	retard	retard		sur,et,à
+fr	10	je	Je	Je	dois	ne,suis,me
+fr	10	dois	dois	dois	encore	dire,vous,être
+fr	10	encore	encore	encore	finir	plus,une,un
+fr	10	finir	finir	finir	mon	avec,par,le
+fr	10	mon	mon	mon	rapport	père,cœur,dieu
+fr	10	rapport	rapport	rapport	avant	à,de,au
+fr	10	avant	avant	avant	vendredi	de,d',que
+fr	10	vendredi	vendredk	vendredi		de,à,soir
+fr	11	elle	Elle	Elle	a	se,est,ne
+fr	11	a	a	a	trouvé	été,pas,la
+fr	11	trouvé	trouve	trouvé	un	la,un,une
+fr	11	un	un	un	appartement	peu,autre,des
+fr	11	appartement	appartement	appartement	près	de,et,à
+fr	11	près	pres	près	du	de,du,d'
+fr	11	du	du	du	centre	monde,temps,travail
+fr	11	centre	centre	centre		de,udc,du
+fr	12	tu	Tu	Tu	pourrais	as,es,ne
+fr	12	pourrais	pourrais	pourrais	vérifier	pas,faire,le
+fr	12	vérifier	verifier	vérifier	les	que,les,la
+fr	12	les	leq	les	horaires	points,deux,yeux
+fr	12	horaires	horaires	horaires	du	de,et,des
+fr	12	du	du	du	cinéma	monde,temps,travail
+fr	12	cinéma	cinema	cinéma		p,français,et
+fr	13	les	Les	Les	enfants	deux,yeux,autres
+fr	13	enfants	enfants	enfants	sont	de,du,et
+fr	13	sont	sont	sont	déjà	pas,de,très
+fr	13	déjà	feja	déjà	couchés	en,fait,dit
+fr	13	couchés	couches	couchés	depuis	sur,ici,dans
+fr	13	depuis	depuis	depuis	une	le,la,longtemps
+fr	13	une	une	une	heure	fois,des,grande
+fr	13	heure	heute	heure		de,et,après
+fr	14	il	Il	Il	faut	est,y,ne
+fr	14	faut	faut	faut	acheter	que,bien,donc
+fr	14	acheter	acheter	acheter	des	des,en,un
+fr	14	des	des	des	tomates	années,hommes,autres
+fr	14	tomates	tomates	tomates	et	et,coupées,en
+fr	14	et	et	et	du	de,les,la
+fr	14	du	du	du	fromage	travail,tout,pays
+fr	14	fromage	fromage	fromage		blanc,râpé,de
+fr	15	je	Je	Je	ne	ne,suis,me
+fr	15	ne	ne	ne	sais	sais,suis,peux
+fr	15	sais	sais	sais	pas	pas,plus,que
+fr	15	pas	pas	pas	encore	si,ce,le
+fr	15	encore	encore	encore	si	été,plus,une
+fr	15	si	si	si	je	vous,elle,l'
+fr	15	je	je	je	viendrai	ne,vais,l'
+fr	15	viendrai	viendrao	viendrai		de,je,la
+fr	16	mon	Mon	Mon	téléphone	père,cœur,dieu
+fr	16	téléphone	telephone	téléphone	était	sonne,portable,mobile
+fr	16	était	etait	était	presque	un,en,le
+fr	16	presque	presque	presque	déchargé	fini,toujours,tous
+fr	16	déchargé	decharge	déchargé		à,le,au
+fr	17	nous	Nous	Nous	parlerons	avons,sommes,ne
+fr	17	parlerons	parlerons	parlerons	du	de,des,plus
+fr	17	du	du	du	budget	monde,temps,travail
+fr	17	budget	budget	budget	la	de,des,du
+fr	17	la	la	la	semaine	vie,tête,première
+fr	17	semaine	semaine	semaine	prochaine	dernière,prochaine,du
+fr	17	prochaine	prochaine	prochaine		fois,étape,version
+fr	18	tu	Tu	Tu	as	as,es,ne
+fr	18	as	as	as	oublié	raison,fait,une
+fr	18	oublié	oublie	oublié	tes	quelque,de,johan
+fr	18	tes	tes	tes	clés	affaires,conneries,rêves
+fr	18	clés	cles	clés	sur	de,énumérations,pour
+fr	18	sur	sur	sur	la	le,la,les
+fr	18	la	la	la	table	table,route,base
+fr	18	table	table	table		de,des,ronde
+fr	19	le	Le	Le	médecin	plus,monde,temps
+fr	19	médecin	medecin	médecin	peut	de,a,et
+fr	19	peut	peut	peut	me	être,pas,se
+fr	19	me	me	me	recevoir	suis,dit,faire
+fr	19	recevoir	recevoir	recevoir	lundi	des,les,une
+fr	19	lundi	lundi	lundi	en	au,à,le
+fr	19	en	en	en	fin	effet,plus,ce
+fr	19	fin	fin	fin	de	de,d',à
+fr	19	de	de	de	journée	la,l',compte
+fr	19	journée	journee	journée		championnat,coupe,ligue
+en	0	i	I	I	am	was,'m,do
+en	0	am	am	am	running	not,a,sure
+en	0	running	running	running	about	out,for,away
+en	0	about	about	about	ten	the,it,to
+en	0	ten minutes	tenminutes	ten minutes	late	later,of,to
+en	0	late	late	late		for,s,additions
+en	1	can	Can	Can	you	be,not,also
+en	1	you	you	you	pick	can,'re,are
+en	1	pick	pick	pick	up	up,on,the
+en	1	up	up	up	some	to,in,with
+en	1	some	some	some	bread	third,people,cases
+en	1	bread	bread	bread	on	and,to,of
+en	1	on	on	on	the	the,a,his
+en	1	the	the	the	way	other,basis,floor
+en	1	way	way	way	home	to,of,in
+en	1	home	home	home		and,to,in
+en	2	let	Let	Let	us	's,me,us
+en	2	us	us	us	meet	to,not,that
+en	2	meet	meet	meet	in	the,you,with
+en	2	in	in	in	front	his,which,their
+en	2	front	front	front	of	of,door,and
+en	2	of	of	of	the	the,him,her
+en	2	the	the	the	station	world,most,first
+en	2	station	station	station	around	and,was,to
+en	2	around	around	around	noon	the,her,and
+en	2	noon	noon	noon		and,on,in
+en	3	thanks	Thanks	Thanks	for	to,for,a
+en	3	for	for	for	your	a,example,her
+en	3	your	your	your	message	own,father,mind
+en	3	message	message	message	i	to,of,from
+en	3	i	i	i	will	was,'m,do
+en	3	will	will	will	call	not,be,never
+en	3	call	call	call	you	you,me,it
+en	3	you	you	you	tonight	can,'re,are
+en	3	tonight	tonight	tonight		i,and,show
+en	4	the	The	The	meeting	same,first,other
+en	4	meeting	meeting	meeting	has	of,was,with
+en	4	has	has	has	been	been,a,not
+en	4	been	een	een	moved	nieuwe,oud,ander
+en	4	moved	moved	moved	to	to,by,in
+en	4	to	to	to	thursday	be,do,make
+en	4	thursday	thutsday	thursday	morning	march,june,july
+en	4	morning	irning	irning		the,of,and
+en	5	the	The	The	weather	same,first,other
+en	5	weather	weather	weather	is	is,was,channel
+en	5	is	s	s	really	a,written,the
+en	5	really	really	really	nice	sorry,do,don't
+en	5	nice	nice	nice	today	to,day,work
+en	5	today	today	today		's,is,the
+en	6	i	I	I	think	was,'m,do
+en	6	think	think	think	we	i,it,you
+en	6	we	we	we	are	should,'re,had
+en	6	are	are	are	leaving	not,all,the
+en	6	leaving	leaving	leaving	tomorrow	the,now,you
+en	6	tomorrow	tomorrow	tomorrow		night,morning,and
+en	7	did	Did	Did	you	not,you,the
+en	7	you	you	you	get	know,get,do
+en	7	get	gwt	get	the	to,a,the
+en	7	the	thw	the	document	first,other,world
+en	7	document	doxument	document	i	was,is,the
+en	7	i	i	i	sent	was,'m,do
+en	7	sent	sent	sent		you,him,the
+en	8	we	We	We	booked	have,can,are
+en	8	booked	bookes	booked	a	in,for,a
+en	8	a	a	a	table	few,little,new
+en	8	table	table	table	for	and,in,of
+en	8	for	for	for	four	the,a,example
+en	8	four	four	four	people	years,days,hours
+en	8	people	people	people		's,of,were
+en	9	the	The	The	train	same,first,other
+en	9	train	train	train	arrived	was,to,and
+en	9	arrived	arriced	arrived	an	at,in,on
+en	9	an	an	an	hour	important,hour,example
+en	9	hour late	hourvlate	hourglass		of,and,has
+en	10	i	I	I	still	was,'m,do
+en	10	still	atill	still	have	have,in,be
+en	10	have	have	have	to	you,an,had
+en	10	to	to	to	finish	be,do,go
+en	10	finish	finish	finish	my	the,this,it
+en	10	my	finishy	finish	report	the,this,it
+en	10	report	report	report	before	of,on,to
+en	10	before	before	before	friday	the,he,i
+en	10	friday	friday	friday		june,march,april
+en	11	she	Shr	She	found	was,had,'d
+en	11	found	found	found	an	to,out,a
+en	11	an	an	an	apartment	important,hour,example
+en	11	apartment	apartment	apartment	near	building,in,on
+en	11	near	near	near	the	the,me,east
+en	11	the	the	the	city	same,first,other
+en	11	city	xity	city	centre	of,'s,and
+en	11	centre	centre	centre		of,for,in
+en	12	could	Could	Could	you	not,be,have
+en	12	you	you	you	check	can,'re,are
+en	12	check	check	check	the	it,this,out
+en	12	the	the	the	movie	same,first,other
+en	12	movie	movie	movie	times	is,the,was
+en	12	times	times	times	for	do,of,and
+en	12	for	for	for	tonight	the,a,example
+en	12	tonight	tonight	tonight		i,and,show
+en	13	the	The	The	kids	same,first,other
+en	13	kids	kids	kids	have	are,and,in
+en	13	have	have	have	been	been,to,a
+en	13	been	bern	bern	asleep	and,dan,april
+en	13	asleep	asleep	asleep	for	in,and,on
+en	13	for	for	for	an	the,a,example
+en	13	an	an	an	hour	important,example,individual
+en	13	hour	boue	hour		and,ago,later
+en	14	we	We	We	need	have,can,are
+en	14	need	meef	need	to	to,a,of
+en	14	to	to	to	buy	be,know,get
+en	14	buy	buy	buy	tomatoes	a,the,it
+en	14	tomatoes	tomatoes	tomatoes	and	the,official,and
+en	14	and	and	and	some	the,a,i
+en	14	some	some	some	cheese	of,time,third
+en	14	cheese	cheese	cheese		and,in,is
+en	15	i	I	I	do	was,'m,do
+en	15	do	do	do	not	not,you,know
+en	15	not	not	not	know	know,have,want
+en	15	know	know	know	yet	what,how,if
+en	15	yet	yet	yet	if	the,come,to
+en	15	if	if	if	i	she,not,this
+en	15	i	i	i	can	had,could,was
+en	15	can	can	can	come	not,see,do
+en	15	come	come	come		on,to,here
+en	16	my	My	My	phone	own,life,father
+en	16	phone	ohone	phone	was	rings,call,and
+en	16	was	was	was	almost	a,not,the
+en	16	almost	almost	almost	out	as,there,a
+en	16	out	out	out	of	of,the,to
+en	16	of	of	of	battery	the,his,her
+en	16	battery	battery	battery		explosion,and,of
+en	17	we	We	We	will	have,can,are
+en	17	will	will	will	talk	not,be,have
+en	17	talk	talk	talk	about	to,about,later
+en	17	about	about	about	the	the,it,to
+en	17	the	the	the	budget	year,first,other
+en	17	budget	budget	budget	next	of,deficit,is
+en	17	next	next	next	week	to,day,morning
+en	17	week	week	week		and,in,to
+en	18	you	You	You	left	can,'re,are
+en	18	left	left	left	your	to,me,the
+en	18	your	your	your	keys	own,life,father
+en	18	keys	keys	keys	on	to,of,and
+en	18	on	on	on	the	the,a,his
+en	18	the	the	the	kitchen	other,basis,floor
+en	18	kitchen	kitchen	kitchen	table	and,table,with
+en	18	table	table	table		and,of,with
+en	19	the	The	The	doctor	same,first,other
+en	19	doctor	doctor	doctor	can	and,is,who
+en	19	can	can	can	see	be,not,also
+en	19	see	see	see	me	the,also,that
+en	19	me	me	me	on	to,that,a
+en	19	on	on	on	monday	the,their,one
+en	19	monday	monday	monday	afternoon	the,in,morning
+en	19	afternoon	adternoon	afternoon		sir,and,in
+en-typos	0	i	I	I	can't	was,'m,do
+en-typos	0	can't	cant	can't	believe	believe,do,help
+en-typos	0	believe	beleive	beleive	you're	the,of,and
+en-typos	0	you're	youre	you're	really	right,not,welcome
+en-typos	0	really	really	really	in	sorry,do,don't
+en-typos	0	in	in	in	love	the,a,this
+en-typos	0	love	love	love	with	with,you,to
+en-typos	0	with	with	with	me	their,them,its
+en-typos	0	me	me	me		and,a,with
+en-typos	1	that's	Thats	That's	because	it,not,all
+en-typos	1	because	becuase	becuase	they	the,of,and
+en-typos	1	they	they	they	don't	were,are,had
+en-typos	1	don't	dont	don't	care	have,know,want
+en-typos	1	care	care	care		if,about,what
+en-typos	2	i'll	Ill	Ill	go	and,of,will
+en-typos	2	go	go	go	and	to,on,back
+en-typos	2	and	adn	adn	get	the,of,and
+en-typos	2	get	get	get	the	a,the,to
+en-typos	2	the	the	the	book	first,other,world
+en-typos	2	book	book	book	tomorrow	of,is,and
+en-typos	2	tomorrow	tomorrow	tomorrow		night,morning,and
+en-typos	3	people	Poeple	People	should	who,in,'s
+en-typos	3	should	should	should	do	be,not,know
+en-typos	3	do	do	do	their	not,you,with
+en-typos	3	their	their	their	best	lives,way,children
+en-typos	3	best	best	best		of,to,and
+en-typos	4	it's	Its	Its	something	own,way,first
+en-typos	4	something	somthing	something	i'm	that,to,else
+en-typos	4	i'm	im	i'm	proud	not,sorry,so
+en-typos	4	proud	proud	proud	of	of,to,that
+en-typos	4	of	of	of		a,these,an
+en-typos	5	i	I	I	didn't	was,'m,do
+en-typos	5	didn't	didnt	didn't	receive	know,want,have
+en-typos	5	receive	recieve	recieve	your	the,of,and
+en-typos	5	your	your	your	letter	own,life,father
+en-typos	5	letter	letter	letter	until	to,from,of
+en-typos	5	until	until	until	today	the,he,i
+en-typos	5	today	today	today		's,is,the
+en-typos	6	being	Beeing	Being	a	a,the,in
+en-typos	6	a	a	a	prince	few,new,lot
+en-typos	6	prince	prince	prince	isn't	who,of,or
+en-typos	6	isn't	isnt	isn't	easy	it,that,right
+en-typos	6	easy	easy	easy		to,easy,now
+en-typos	7	david	David	David	doesn't	cameron,miscavige,letterman
+en-typos	7	doesn't	doesnt	doesn't	have	matter,make,work
+en-typos	7	have	have	have	a	been,not,no
+en-typos	7	a	a	a	will	good,lot,few
+en-typos	7	will	wll	all		the,of,that
+en-typos	8	they're	Theyre	They're	definitely	coming,here,not
+en-typos	8	definitely	definately	definately	up	the,of,and
+en-typos	8	up	up	up	to	to,the,and
+en-typos	8	to	to	to	something	the,a,do
+en-typos	8	something	something	something		to,about,of
+en-typos	9	i've	Ive	I've	got	got,been,had
+en-typos	9	got	got	got	to	a,to,the
+en-typos	9	to	to	to	do	be,a,her
+en-typos	9	do	do	do	it	with,so,it
+en-typos	9	it	it	it		was,'s,would
+en-typos	10	sorry	Sorry	Sorry	i'm	about,sir,i'm
+en-typos	10	i'm	im	i'm	late	late,sorry,here
+en-typos	10	late	late	late	for	for,s,additions
+en-typos	10	for	for	for	the	example,this,her
+en-typos	10	the	teh	teh	meeting	masterer,pwnerer,balls
+en-typos	10	meeting	meeting	meeting		you,with,of
+en-typos	11	i'll	Ill	Ill	give	and,of,will
+en-typos	11	give	give	give	you	you,me,the
+en-typos	11	you	you	you	a	a,can,'re
+en-typos	11	a	a	a	call	small,very,large
+en-typos	11	call	call	call	when	the,from,to
+en-typos	11	when	when	when	i	the,he,i
+en-typos	11	i	i	i	get	was,'m,do
+en-typos	11	get	get	get	home	it,to,a
+en-typos	11	home	home	home		in,and,to
+en-typos	12	if	If	If	you	you,the,he
+en-typos	12	you	you	you	don't	are,do,'re
+en-typos	12	don't	dont	don't	hurry	have,know,want
+en-typos	12	hurry	hurry	hurry	you'll	up,hurry,it
+en-typos	12	you'll	youll	you'll	miss	see,be,excuse
+en-typos	12	miss	miss	miss	the	you,me,him
+en-typos	12	the	the	the	train	same,first,other
+en-typos	12	train	train	train		was,to,and
+en-typos	13	we	We	We	don't	have,can,are
+en-typos	13	don't	dont	don't	have	have,know,want
+en-typos	13	have	have	have	any	to,a,been
+en-typos	13	any	any	any	more	idea,time,one
+en-typos	13	more	more	more	bread	than,likely,important
+en-typos	13	bread	bread	bread		and,to,of
+en-typos	14	i'm	Im	I'm	sorry	not,sorry,so
+en-typos	14	sorry	sorry	sorry	i	i,but,to
+en-typos	14	i	i	i	can't	'm,do,can
+en-typos	14	can't	cant	can't	stay	believe,do,help
+en-typos	14	stay	stay	stay	long	in,here,with
+en-typos	14	long	long	long		as,time,and
+en-typos	15	i'll	Ill	Ill	drop	and,of,will
+en-typos	15	drop	drop	drop	you	it,your,the
+en-typos	15	you	you	you	off	can,'re,are
+en-typos	15	off	off	off	at	his,and,her
+en-typos	15	at	at	at	the	her,him,his
+en-typos	15	the	the	the	station	same,end,time
+en-typos	15	station	station	station		and,was,to
+en-typos	16	in	In	In	any	the,a,this
+en-typos	16	any	any	any	case	case,way,form
+en-typos	16	case	case	case	i'll	the,it,i
+en-typos	16	i'll	ill	ill	call	and,of,will
+en-typos	16	call	call	call	you	the,you,me
+en-typos	16	you	you	you	tomorrow	can,'re,are
+en-typos	16	tomorrow	tommorow	tomorrow		night,morning,and
+en-typos	17	i'm	Im	I'm	afraid	not,sorry,so
+en-typos	17	afraid	afraid	afraid	we're	i,of,that
+en-typos	17	we're	were	were	going	not,the,in
+en-typos	17	going	going	going	to	to,anywhere,down
+en-typos	17	to	to	to	be	be,do,have
+en-typos	17	be	be	be	late	a,the,in
+en-typos	17	late	late	late	for	for,s,additions
+en-typos	17	for	for	for	school	example,this,her
+en-typos	17	school	school	school		of,and,in
+en-typos	18	i'm	Im	I'm	sorry	not,sorry,so
+en-typos	18	sorry	sorry	sorry	i	i,but,to
+en-typos	18	i	i	i	didn't	'm,do,can
+en-typos	18	didn't	didnt	didn't	mean	know,want,have
+en-typos	18	mean	mean	mean	it	to,it,that
+en-typos	18	it	it	it		's,to,has
+en-typos	19	it's	Its	Its	time	own,way,first
+en-typos	19	time	time	time	for	to,of,and
+en-typos	19	for	for	for	us	example,each,her
+en-typos	19	us	us	us	to	to,and,in
+en-typos	19	to	to	to	go	her,his,me
+en-typos	19	go	go	go	home	to,back,on
+en-typos	19	home	home	home		and,to,with
+es	0	puede	Puede	Puede	que	ser,que,hacer
+es	0	que	que	que	llegue	me,en,había
+es	0	llegue	llegue	llegue	un	a,al,el
+es	0	un	un	un	par	poco,hombre,momento
+es	0	par	par	par	de	de,ordenado,propio
+es	0	de	de	de	minutos	la,los,las
+es	0	minutos	deinutos	dei unos	tarde	minutos,segundos,días
+es	0	tarde	rarde	tarde		en,se,y
+es	1	te	Td	Te	llamaré	lo,he,ha
+es	1	llamaré	llamare	llamaré	mañana	a,más,luego
+es	1	mañana	manana	mañana	por	siguiente,por,y
+es	1	por	por	por	la	la,el,qué
+es	1	la	la	la	mañana	que,mañana,noche
+es	1	mañana	ma	ma		n,usa,na
+es	1	mañana	ana	ana		maría,y,frank
+es	2	mi	Mi	Mi	apartamento	padre,madre,vida
+es	2	apartamento	apartamento	apartamento	está	de,y,en
+es	2	está	esta	esta	a	vez,noche,es
+es	2	a	a	a	cinco	las,un,través
+es	2	cinco	cinco	cinco	minutos	minutos,años,días
+es	2	minutos	minutos	minutos	de	a,de,después
+es	2	de	de	de	la	los,las,su
+es	2	la	la	la	estación	vida,ciudad,casa
+es	2	estación	watacion	estación		de,central,principal
+es	3	el	El	El	tren	que,mundo,tiempo
+es	3	tren	tren	tren	ya	de,es,a
+es	3	ya	ya	ya	había	que,no,se
+es	3	había	habia	había	salido	visto,estado,dicho
+es	3	salido	salido	salido	cuando	de,del,a
+es	3	cuando	cuando	cuando	llegué	se,el,la
+es	3	llegué	llegue	llegue	a	a,el,al
+es	3	a	a	a	la	través,lo,sus
+es	3	la	la	la	estación	que,vez,hora
+es	3	estación	estacion	estación		de,central,principal
+es	4	casi	Casi	Casi	he	todos,siempre,llegamos
+es	4	he	he	he	terminado	dicho,visto,hecho
+es	4	terminado	treminado	terminado	de	en,el,de
+es	4	de	de	de	escribir	la,los,las
+es	4	escribir	escribir	escribir	el	el,y,una
+es	4	el	el	el	informe	que,mundo,tiempo
+es	4	informe	informe	informe		de,del,final
+es	5	las	Las	Las	llaves	que,cosas,personas
+es	5	llaves	llaves	llaves	están	de,del,o
+es	5	están	estan	están	sobre	en,haciendo,bien
+es	5	sobre	sobre	sobre	la	la,el,todo
+es	5	la	la	la	mesa	mesa,base,cama
+es	5	mesa	mesa	mesa		de,y,se
+es	6	el	El	El	médico	que,mundo,tiempo
+es	6	médico	mexico	méxico	estará	de,y,en
+es	6	estará	estaea	estará	aquí	bien,en,a
+es	6	aquí	aqii	aquí	en	y,en,se
+es	6	en	en	en	un	que,sus,ese
+es	6	un	un	un	minuto	momento,lugar,mundo
+es	6	minuto	minuto	minuto		de,después,y
+es	7	todavía	Todavia	Todavía	no	no,más,nada
+es	7	no	no	no	sé	me,era,le
+es	7	sé	se	se	qué	puede,había,ha
+es	7	qué	que	que	haremos	se,no,la
+es	7	haremos	haeemos	haremos	el	ahora,y,un
+es	7	el	el	el	lunes	que,mundo,tiempo
+es	7	lunes	lunes	lunes		de,y,que
+es	8	la	La	La	semana	que,vida,cabeza
+es	8	semana	semana	semana	que	pasada,santa,de
+es	8	que	que	que	viene	se,no,la
+es	8	viene	viene	viene	estaré	a,de,en
+es	8	estaré	estare	estaré	ocupado	bien,en,esperando
+es	8	ocupado	ocupado	ocupado		por,en,y
+es	9	puedes	Puedrs	Puedes	venir	hacerlo,hacer,creerlo
+es	9	venir	venid	venid	a	aquí,a,caminemos
+es	9	a	a	a	cenar	la,los,su
+es	9	cenar	cenar	cenar	esta	en,y,o
+es	9	esta	esta	esta	noche	vez,noche,es
+es	9	noche	noche	noche		anterior,en,y
+es	10	te	Te	Te	llamo	lo,he,ha
+es	10	llamo	llamo	llamo	mañana	luego,después,más
+es	10	mañana	manana	mañana	desde	siguiente,por,y
+es	10	desde	desde	desde	el	el,la,que
+es	10	el	el	el	trabajo	punto,principio,primer
+es	10	trabajo	trabajo	trabajo		de,en,que
+es	11	tengo	Tenfo	Tengo	intención	que,la,una
+es	11	intención	intenxion	intención	de	de,es,del
+es	11	de	de	de	ir	las,un,una
+es	11	ir	ir	ir	mañana	a,al,de
+es	11	mañana	kanana	mañana	si	siguiente,por,y
+es	11	si	si	si	hace	no,se,el
+es	11	hace	hace	hace	buen	que,más,frío
+es	11	buen	buen	buen	tiempo	tiempo,trabajo,día
+es	11	tiempo	tiempo	tiempo		a,tenemos,es
+es	12	nos	Nos	Nos	puede	ha,hemos,encontramos
+es	12	puede	puede	puede	dar	ser,que,hacer
+es	12	dar	dar	dar	una	lugar,un,una
+es	12	una	una	una	mesa	de,mujer,gran
+es	12	mesa	mesa	mesa	afuera	de,para,en
+es	12	afuera	afuera	afuera		de,del,y
+es	13	qué	Que	Que	piensas	se,no,la
+es	13	piensas	piensas	piensas	de	hacer,eso,en
+es	13	de	de	de	la	la,los,las
+es	13	la	la	la	nueva	vida,ciudad,casa
+es	13	nueva	nueva	nueva	película	españa,constitución,york
+es	13	película	peljcula	película		de,en,que
+es	14	tengo que	Tengoque	Enfoque	entregar	de,en,pragmatico
+es	14	entregar	entregar	entregar	hoy	el,la,su
+es	14	hoy	hoy	hoy	el	en,no,se
+es	14	el	el	el	informe	que,tiempo,mismo
+es	14	informe	informe	informe		de,del,final
+es	15	mañana	Manana	Mañana	voy	siguiente,por,y
+es	15	voy	voy	voy	a	a,para,contigo
+es	15	a	a	a	ir	hacer,los,su
+es	15	ir	kr	ir	a	a,contigo,en
+es	15	a	a	a	comprar	la,sus,mi
+es	15	comprar	comprar	comprar		en,un,una
+es	16	hoy	Hoy	Hoy	es	en,no,se
+es	16	es	es	es	el	decir,lo,muy
+es	16	el	el	el	cumpleaños	que,caso,de
+es	16	cumpleaños	cumpleanos	cumpleaños	de	a,feliz,de
+es	16	de	de	de	mi	la,los,las
+es	16	mi	mi	mi	hermana	vida,padre,madre
+es	16	hermana	hermana	hermana		de,del,mayor
+es	17	me	Me	Me	gustaría	ha,lo,dijo
+es	17	gustaría	gustaria	gustaría	tomar	que,ser,una
+es	17	tomar	tomar	tomar	una	algo,un,el
+es	17	una	una	una	taza	vez,mujer,copa
+es	17	taza	taza	taza	de	de,y,pequeña
+es	17	de	de	de	café	la,los,las
+es	17	café	cafe	café		y,de,en
+es	18	mi	Mi	Mi	madre	padre,madre,vida
+es	18	madre	madre	madre	está	de,mía,me
+es	18	está	ests	esta	ocupada	vez,noche,es
+es	18	ocupada	ocupada	ocupada	preparando	por,en,con
+es	18	preparando	preprando	preparando	la	el,una,un
+es	18	la	la	la	cena	que,vida,cabeza
+es	18	cena	cena	cena		y,de,se
+es	19	podrías	Porrias	Podrías	darme	encontrarte,ser,tener
+es	19	darme	darme	darme	tu	cuenta,una,un
+es	19	tu	tu	tu	nombre	vida,padre,madre
+es	19	nombre	nombre	nombre	y	del,es,a
+es	19	y	y	y	tu	los,las,lo
+es	19	tu	tu	tu	número	vida,padre,madre
+es	19	número	numero	número	de	de,uno,equivocado
+es	19	de	fe	fe	teléfono	en,y,de
+es	19	teléfono	telefono	teléfono		gratuito,móvil,de
+de	0	ich	Ich	Ich	komme	habe,bin,mich
+de	0	komme	konme	komme	vielleicht	ich,gleich,mit
+de	0	vielleicht	vielleicht	vielleicht	ein	auch,war,ist
+de	0	ein	ein	ein	paar	bisschen,und,mann
+de	0	paar	paar	paar	minuten	minuten,tage,stunden
+de	0	minuten	minuten	minuten	später	später,nach,und
+de	0	später	später	später		wurde,an,dann
+de	1	der	Der	Der	zug	sich,welt,in
+de	1	zug	zug	zug	hatte	auf,mit,in
+de	1	hatte	hatte	hatte	heute	er,sie,sich
+de	1	heute	heute	heute	morgen	noch,abend,nicht
+de	1	morgen	morgen	morgen	verspätung	um,wurde,in
+de	1	verspätung	verspätung	verspätung		von,die,hatte
+de	2	ich	Ich	Ich	habe	habe,bin,mich
+de	2	habe	habe	habe	einen	mich,es,sie
+de	2	einen	einen	einen	tisch	moment,blick,augenblick
+de	2	tisch	tisch	tisch	für	und,aufgebahrt,zu
+de	2	für	für	für	vier	die,den,das
+de	2	vier	vier	vier	personen	geräte,personen,gängen
+de	2	personen	personen	personen	bestellt	die,in,und
+de	2	bestellt	vestellt	gestellt		werden,wird,und
+de	3	ich	Ich	Ich	werde	habe,bin,mich
+de	3	werde	werde	werde	dich	mich,es,ich
+de	3	dich	dich	dich	morgen	nicht,zu,in
+de	3	morgen	morgen	morgen	früh	sir,früh,abend
+de	3	früh	frh	früh	anrufen	qu,auf,wie
+de	3	anrufen	anrufen	anrufen		und,können,um
+de	4	der	Der	Der	zug	sich,welt,in
+de	4	zug	zug	zug	fährt	auf,mit,in
+de	4	fährt	fährt	fährt	in	man,im,mit
+de	4	in	in	in	zehn	der,den,die
+de	4	zehn	zehn	zehn	minuten	jahren,bänden,tagen
+de	4	minuten	minuten	minuten		später,nach,und
+de	5	wann	Wa	Wa	muss	dm,d,sanah
+de	5	wann	n	n	muss	n,displaystyle,a
+de	5	muss	muss	muss	ich	ich,man,die
+de	5	ich	ich	ich	den	habe,bin,nicht
+de	5	den	den	den	bericht	kopf,anderen,letzten
+de	5	bericht	bericht	bericht	abgeben	der,über,des
+de	5	abgeben	abgeben	abgeben		kommentare,portal,www
+de	6	willst	Willst	Willst	du	du,nicht,ni
+de	6	du	du	du	mit	hast,bist,das
+de	6	mit	mit	mit	mir	ihren,ihm,seinem
+de	6	mir	mir	mir	einkaufen	zu,die,das
+de	6	einkaufen	einkaufen	einkaufen	gehen	und,können,zu
+de	6	gehen	gehem	gehen		und,wir,sie
+de	7	ich	Ixh	Ich	weiß	habe,bin,mich
+de	7	weiß	weiss	weiß	noch	nicht,es,dass
+de	7	noch	noch	noch	nicht	nicht,einmal,ein
+de	7	nicht	nicht	nicht	was	einmal,so,ganz
+de	7	was	was	was	ich	ist,für,du
+de	7	ich	ich	ich	machen	habe,mich,kann
+de	7	machen	machen	machen	werde	und,sie,wir
+de	7	werde	werde	werde		ich,es,dich
+de	8	es	Es	Es	scheint	ist,war,nicht
+de	8	scheint	scheint	scheint	dass	es,dass,mir
+de	8	dass	dass	dass	ich	sie,die,er
+de	8	ich	ich	ich	meine	mich,nicht,es
+de	8	meine	meine	meine	schlüssel	mutter,frau,hand
+de	8	schlüssel	schlüdsel	schlüssel	verloren	zur,zu,für
+de	8	verloren	verloren	verloren	habe	gehen,geht,und
+de	8	habe	habe	habe		ich,es,mich
+de	9	ich	Ich	Ich	rufe	habe,bin,mich
+de	9	rufe	rufe	rufe	dich	dich,die,zurück
+de	9	dich	dich	dich	an	nicht,zu,in
+de	9	an	an	an	wenn	dem,einem,sich
+de	9	wenn	wenn	wenn	ich	ich,nicht,eine
+de	9	ich	ich	ich	nach	mich,nicht,es
+de	9	nach	nach	nach	hause	dem,der,einer
+de	9	hause	hause	hause	komme	zu,zurück,zurückkam
+de	9	komme	komme	komme		ich,gleich,mit
+de	10	es	Es	Es	ist	ist,war,nicht
+de	10	ist	ust	ist	zeit	ein,nicht,eine
+de	10	zeit	zeit	zeit	für	zu,der,und
+de	10	für	fr	fr	das	ca,bosch-regler,fr
+de	10	das	das	das	abendessen	ist,war,nicht
+de	10	abendessen	abendessen	abendessen		das,mit,in
+de	11	bitte	Bitte	Bitte	mach	sehr,nicht,schön
+de	11	mach	mach	mach	mir	schon,dir,das
+de	11	mir	mir	mir	doch	die,nicht,das
+de	11	doch	doch	doch	eine	nicht,die,noch
+de	11	eine	eine	eine	tasse	andere,solche,große
+de	11	tasse	gasse	gasse	kaffee	oder,die,ein
+de	11	kaffee	kaffee	kaffee		und,oder,trinken
+de	12	ruf	Ruf	Ruf	mich	mich,dich,die
+de	12	mich	mich	mich	an	nicht,an,zu
+de	12	an	an	an	falls	und,dem,sich
+de	12	falls	falls	falls	es	sie,die,der
+de	12	es	es	es	regnet	ist,war,gibt
+de	12	regnet	regnet	regnet		es,und,oder
+de	13	ich	Ich	Ich	liebe	habe,bin,mich
+de	13	liebe	liebe	liebe	es	dich,und,zu
+de	13	es	es	es	ins	ist,war,nicht
+de	13	ins	ins	ins	kino	gesicht,bett,haus
+de	13	kino	kino	kino	zu	oder,und,wurden
+de	13	zu	zu	zu	gehen	den,einem,sein
+de	13	gehen	grhen	gehen		und,wir,sie
+de	14	es	Es	Es	ist	ist,war,nicht
+de	14	ist	ist	ist	sehr	ein,nicht,eine
+de	14	sehr	sehr	sehr	heiß	guai,einfach,wohl
+de	14	heiß	heisa	heisa	heute	ich,sie,das
+de	14	heute	heute	heute	nicht	noch,abend,nicht
+de	14	nicht	nicht	nicht	wahr	mehr,zu,so
+de	14	wahr	wahr	wahr		sein,ist,und
+de	15	wir	Wor	Wir	haben	uns,haben,sind
+de	15	haben	haben	haben	glück	uns,es,die
+de	15	glück	glück	glück	dass	gehabt,dabei,damit
+de	15	dass	dass	dass	so	sie,die,er
+de	15	so	so	so	schönes	ist,viel,wie
+de	15	schönes	schönes	schönes	wetter	beispiel,wetter,bild
+de	15	wetter	wettet	wettet	ist	ich,sie,das
+de	15	ist	ist	ist		die,es,das
+de	16	sie	Sie	Sie	hat	sich,die,nicht
+de	16	hat	hat	hat	uns	sich,er,sie
+de	16	uns	uns	uns	zu	in,mit,das
+de	16	zu	zu	zu	ihrem	den,sein,einer
+de	16	ihrem	ihrrm	ihrem	geburtstag	leben,tod,schaden
+de	16	geburtstag	ceburtstag	geburtstag	eingeladen	viel,von,in
+de	16	eingeladen	wingeladen	eingeladen		worden,sind,wurde
+de	17	sie	Sie	Sie	müssen	sich,die,nicht
+de	17	müssen	müssen	müssen	eine	wir,sie,die
+de	17	eine	eime	eine	wohnung	andere,solche,große
+de	17	wohnung	wohnung	wohnung	in	in,des,im
+de	17	in	in	in	der	der,den,die
+de	17	der	der	der	stadt	regel,lage,nähe
+de	17	stadt	stadt	stadt	finden	und,in,zu
+de	17	finden	finden	finden		sich,sie,wir
+de	18	diese	Diese	Diese	schuhe	weise,frage,art
+de	18	schuhe	schuhe	schuhe	sind	mit,und,insbesondere
+de	18	sind	sind	sind	zu	die,sie,in
+de	18	zu	zu	zu	groß	sein,einer,können
+de	18	groß	gross	groß	für	ist,für,wird
+de	18	für	für	für	mich	die,den,das
+de	18	mich	mivh	mich		ist,nicht,an
+de	19	sie	Sie	Sie	müssen	sich,die,nicht
+de	19	müssen	müssen	müssen	bis	wir,sie,die
+de	19	bis	bis	bis	nächsten	zum,zu,zur
+de	19	nächsten	nächsten	nächsten	montag	tag,morgen,mal
+de	19	montag	montg	montg	im	ich,sie,das
+de	19	im	im	im	bett	rahmen,sinne,jahr
+de	19	bett	bett	bett	bleiben	und,zu,bleiben
+de	19	bleiben	bleibeb	bleiben		sie,hier,in

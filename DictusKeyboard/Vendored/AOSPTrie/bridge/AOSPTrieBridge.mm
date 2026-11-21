@@ -180,6 +180,11 @@ static int convertString(NSString *str, uint16_t *buffer, int bufferSize) {
     return (NSUInteger)_trie.wordCount();
 }
 
+- (NSUInteger)maxFrequency {
+    if (!_loaded) return 0;
+    return (NSUInteger)_trie.maxFreq();
+}
+
 - (BOOL)setProximityTableWithCharacters:(NSData *)characters distances:(NSData *)distances {
     NSUInteger count = characters.length / sizeof(uint16_t);
     if (count == 0 || distances.length != count * count * sizeof(float)) return NO;

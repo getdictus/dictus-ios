@@ -55,9 +55,9 @@ public func expandContractions(
             // "Cetait" → suffix "etait" → "était" → "c'était".
             // Without this fallback the expansion fails and the trie wins with
             // a destructive correction ("Cetait" → "Était", dropping the c).
-            // expandAccents only returns dictionary words (with the 5x
-            // dominance guard), so this cannot invent contractions.
-            if let accented = expandAccents(profile: profile, word: suffix, provider: provider) {
+            // restoreAccents only returns dictionary words, so this cannot
+            // invent contractions.
+            if case .restore(let accented) = restoreAccents(profile: profile, word: suffix, provider: provider) {
                 return candidatePrefix + accented
             }
         }

@@ -56,6 +56,11 @@ public struct LanguageProfile: Sendable {
     /// Empty for languages without length-changing collapses.
     public let collapseRules: [(from: String, to: String)]
 
+    /// Where an accented past participle is expected, for `restoreAccents` (#994).
+    /// nil for languages whose participles carry no accent (Spanish `llegado`) or
+    /// that nobody has written the list for.
+    public let participleContext: ParticipleContext?
+
     public init(
         code: String,
         displayName: String,
@@ -66,7 +71,8 @@ public struct LanguageProfile: Sendable {
         overrides: [String: String],
         accentMap: [Character: [Character]],
         contractionPrefixes: [String],
-        collapseRules: [(from: String, to: String)] = []
+        collapseRules: [(from: String, to: String)] = [],
+        participleContext: ParticipleContext? = nil
     ) {
         self.code = code
         self.displayName = displayName
@@ -78,6 +84,7 @@ public struct LanguageProfile: Sendable {
         self.accentMap = accentMap
         self.contractionPrefixes = contractionPrefixes
         self.collapseRules = collapseRules
+        self.participleContext = participleContext
     }
 }
 

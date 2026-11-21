@@ -226,30 +226,6 @@ final class CorrectionRankingTests: XCTestCase {
         ]).ranked, ["beta", "zeta"])
     }
 
-    // MARK: - Accent spellings
-
-    func testTwoEquallyLikelyAccentSpellingsAreAmbiguous() {
-        // `nous avons reserve`: `réserve` or `réservé`.
-        XCTAssertEqual(CorrectionRanking.ambiguousAccentSpellings(typed: "reserve", candidates: [
-            candidate("réserve", 0.15, 33_835), candidate("réservé", 0.30, 31_794),
-            candidate("réserves", 1.15, 29_642), candidate("préserve", 1.15, 24_437)
-        ]), ["réserve", "réservé"], "Both spellings are offered, neither is written")
-    }
-
-    func testAClearlyMoreFrequentAccentSpellingIsNotAmbiguous() {
-        // `pres`: `près` is far more frequent than `prés`.
-        XCTAssertNil(CorrectionRanking.ambiguousAccentSpellings(typed: "pres", candidates: [
-            candidate("près", 0.15, 43_000), candidate("prés", 0.15, 32_000), candidate("pris", 1.00, 46_000)
-        ]))
-    }
-
-    func testASingleAccentSpellingIsNotAmbiguous() {
-        // `tres`: other candidates do not share its letters.
-        XCTAssertNil(CorrectionRanking.ambiguousAccentSpellings(typed: "tres", candidates: [
-            candidate("très", 0.15, 52_000), candidate("tes", 1.00, 47_000), candidate("près", 1.15, 43_000)
-        ]))
-    }
-
     // MARK: - A kept word is still suggested
 
     func testAKeptWordIsSuggestedButNotApplied() {

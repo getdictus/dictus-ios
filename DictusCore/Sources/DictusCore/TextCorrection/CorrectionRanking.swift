@@ -171,24 +171,6 @@ public enum CorrectionRanking {
             return lhs.candidate.word < rhs.candidate.word
         }
     }
-
-    /// The accented spellings to suggest when the accent pass should leave `typed`
-    /// alone, because two of them are close readings: `reserve` is `réserve` or
-    /// `réservé`. Unlike in `decide`, neither is picked by frequency: the letters typed
-    /// are right for both, and the accent meant is a matter of grammar (`avons réservé`)
-    /// that the n-gram data does not hold. nil when one spelling is clearly the more
-    /// likely, and the accent pass may write it.
-    ///
-    /// - Parameters:
-    ///   - typed: the word as typed, lowercased, without any apostrophe prefix.
-    ///   - candidates: the trie's candidates for it. Only those spelled with the same
-    ///     letters once accents are dropped take part.
-    public static func ambiguousAccentSpellings(typed: String, candidates: [CorrectionCandidate]) -> [String]? {
-        let letters = folded(typed)
-        let spellings = candidates.filter { $0.word != typed && folded($0.word) == letters }
-        let close = closeReadings(scoredWithContext(spellings))
-        return close.count > 1 ? close.prefix(2).map(\.candidate.word) : nil
-    }
 }
 
 /// What the corrector proposes for the word being typed (#993).

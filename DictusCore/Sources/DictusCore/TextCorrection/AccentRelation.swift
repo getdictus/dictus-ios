@@ -43,15 +43,10 @@ public enum AccentRelation {
     /// form is not a word — `manana` → `mañana`, `espanpl` → `español` — exactly what the
     /// umlauts bought German. Choosing between two valid spellings needs the preceding
     /// words, which this path does not have; that is #114's problem, not this table's.
-    /// The accent path that *does* run before the guard is `expandAccents` over
-    /// `spanishProfile.accentMap` — it has held all six Spanish accents since the language
-    /// shipped. It cannot reach these pairs either: its 5× frequency-dominance rule runs on
-    /// the trie's *log-normalized* frequencies, so clearing 5× needs the target to be about
-    /// the input raised to the fifth power, which nothing in a 40K-entry corpus reaches
-    /// (diagnosed in #326). The rule is inert for any word the dictionary holds. So neither
-    /// accent path can correct a both-valid pair today, in any language — do not read the 5×
-    /// rule as a live safeguard that could be tuned. Making these pairs correctable at all
-    /// is #114's frequency-weighted guard, or curation out of the frequency list.
+    /// The accent path that *does* run before the guard is `restoreAccents` over
+    /// `spanishProfile.accentMap`. It decides both-valid pairs on their corpus counts and
+    /// the previous word (`AccentRestoration`, #994): `ano` → `año` (much more frequent),
+    /// `esta` stays (`está` is only 2.3x as frequent).
     ///
     /// WHY `ß` (U+00DF) is deliberately absent — the decision this table is asked to
     /// record: `ß` is not an accent of `s`, it is a ligature whose written equivalent is
@@ -61,7 +56,7 @@ public enum AccentRelation {
     /// it would make `s` → `ß` cheap everywhere in a language whose most frequent
     /// consonant is `s` — a silent over-correction risk for a case it would not fix.
     /// The `ss` → `ß` relation is modelled where a length change *can* be expressed:
-    /// `germanProfile.collapseRules` (see `expandAccents`).
+    /// `germanProfile.collapseRules` (see `restoreAccents`).
     public static let baseLetters: [Character: Character] = [
         // French — frozen.
         "\u{00E9}": "e",        // é
