@@ -414,6 +414,23 @@ public enum SharedKeys {
     /// `DictationTally`.
     public static let dictationTally = "dictus.dictationTally"
 
+    // MARK: - Experiments
+    /// Bool, absent = `InKeyboardDictationRoute.defaultEnabled` (on for the spike):
+    /// "Experiments > Dictate in the keyboard". When the app
+    /// is cold, the keyboard records and transcribes by itself instead of opening the
+    /// app. See `InKeyboardDictationRoute`.
+    public static let inKeyboardDictationEnabled = "dictus.experiments.inKeyboardDictation"
+    /// String: the session id of the keyboard's latest start request, written just before
+    /// the Darwin `startRecording` post so the app can claim that session. See
+    /// `DictationSessionClaim`.
+    public static let dictationSessionRequest = "dictus.dictationSessionRequest"
+    /// Bool: the one-time explanation of in-keyboard dictation has been shown in the
+    /// keyboard. See `InKeyboardFirstUse`.
+    public static let inKeyboardFirstUseShown = "dictus.inKeyboardFirstUseShown"
+    /// Bool: under the `newInstallsOnly` default policy, an existing user still owes an
+    /// answer to the one-time prompt in the app. See `InKeyboardDictationDefault`.
+    public static let inKeyboardDefaultPromptPending = "dictus.inKeyboardDefaultPromptPending"
+
     // MARK: - Retired keys
     /// The #357 probe's arming flag, removed with the probe in #361. Kept as a
     /// literal, and only here, so DictusApp can delete it from the App Group on

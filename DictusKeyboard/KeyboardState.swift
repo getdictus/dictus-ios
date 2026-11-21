@@ -627,6 +627,7 @@ class KeyboardState: ObservableObject {
     /// Uses the Darwin notification + Bool flag pattern: write the flag first,
     /// then post the notification so the app reads the flag when it handles the notification.
     func requestStop() {
+        if MainActor.assumeIsolated({ InKeyboardDictation.shared.stop() }) { return }
         let tapTime = Date()
         logProbe("requestStop", details: sessionDetails())
 
@@ -667,6 +668,7 @@ class KeyboardState: ObservableObject {
     /// while the Darwin notification tells the app to clean up its side.
     func requestCancel() {
         logProbe("requestCancel", details: sessionDetails())
+        MainActor.assumeIsolated { InKeyboardDictation.shared.cancel() }
         defaults.set(true, forKey: SharedKeys.cancelRequested)
         defaults.synchronize()
         DarwinNotificationCenter.post(DarwinNotificationName.cancelRecording)
@@ -710,7 +712,9 @@ class KeyboardState: ObservableObject {
         // own `init`, so an app terminated mid-dictation is caught here -- at the
         // first read, not after a watchdog grace. Reconciling already wrote `idle`,
         // so there is nothing left to adopt.
-        if reconcileIfOrphaned(source: "keyboard-refresh") { return }
+        // Spike: a dictation running in this process owns the status; the App Group's
+        // `idle` describes the app, which is not involved.
+        if MainActor.assumeIsolated({ InKeyboardDictation.shared.ownsKeyboardStatus }) || reconcileIfOrphaned(source: "keyboard-refresh") { return }
 
         if let rawStatus = defaults.string(forKey: SharedKeys.dictationStatus),
            let status = DictationStatus(rawValue: rawStatus) {
@@ -1461,7 +1465,7 @@ class KeyboardState: ObservableObject {
         // Core ML cache is cold, which is the case that used to record into a wait the
         // dictation could not survive. `intent=prepare` returns from `handleIncomingURL`
         // before any auto-return code, so the user stays in DictusApp and reads the screen.
-        if let deferral = preparationDeferral() {
+        if let deferral = preparationDeferralUnlessKeyboardTakesOver() {
             PersistentLog.log(.keyboardMicTapped)
             deferRecordingForModelPreparation(
                 reason: "keyboard opened Dictus for model preparation (\(deferral))"
@@ -1478,7 +1482,7 @@ class KeyboardState: ObservableObject {
         // The model can begin loading after the first check while this tap is
         // being handed to DictusApp. Re-check immediately before posting the
         // recording request so a model swap cannot race into a recording.
-        if let deferral = preparationDeferral() {
+        if let deferral = preparationDeferralUnlessKeyboardTakesOver() {
             forceResetToIdle()
             deferRecordingForModelPreparation(
                 reason: "model became unready before Darwin handoff (\(deferral))"
@@ -1488,7 +1492,9 @@ class KeyboardState: ObservableObject {
 
         // Try background recording first — if app is alive, it will handle this
         // notification and start recording without coming to the foreground.
-        DarwinNotificationCenter.post(DarwinNotificationName.startRecording)
+        // Spike: the same call also checks the on-device speech model and loads the
+        // capture web view while the app is given its 500 ms (see InKeyboardDictation).
+        postStartRecordingPreparingInKeyboardDictation()
 
         // Fallback: if app didn't respond (not running), open URL to launch it.
         // We check after 500ms whether status progressed past .requested.
@@ -1498,6 +1504,9 @@ class KeyboardState: ObservableObject {
             guard let self = self else { return }
             let elapsedMs = Int(Date().timeIntervalSince(darwinPostTime) * 1000)
             if self.dictationStatus == .requested {
+                // Spike: a cold app, and the keyboard can dictate by itself. No Dictus model
+                // is involved on this path, so the preparation deferral below does not apply.
+                if self.dictateInKeyboardInsteadOfOpeningApp(elapsedMs: elapsedMs) { return }
                 if let deferral = self.preparationDeferral() {
                     self.forceResetToIdle()
                     self.deferRecordingForModelPreparation(

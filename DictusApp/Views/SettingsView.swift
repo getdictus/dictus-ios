@@ -93,6 +93,11 @@ struct SettingsView: View {
     private var polishRefusalForced = false
     #endif
 
+    /// Spike: when the app is cold, the keyboard dictates by itself instead of opening
+    /// the app. On by default in this spike build. Read by `InKeyboardDictationRoute`.
+    @AppStorage(SharedKeys.inKeyboardDictationEnabled, store: UserDefaults(suiteName: AppGroup.identifier))
+    private var inKeyboardDictationEnabled = InKeyboardDictationRoute.defaultEnabled
+
     /// The keyboard language the pickers below operate on.
     private var keyboardLanguage: SupportedLanguage {
         SupportedLanguage(rawValue: language) ?? .french
@@ -514,6 +519,21 @@ struct SettingsView: View {
                 Text(verbatim: "The keyboard treats every Smart Mode and polish call as refused by Apple Intelligence. Debug builds only.")
             }
             #endif
+
+            // Spike: in-keyboard dictation on a cold start. Turning it on also asks iOS for
+            // Apple's on-device speech model for the dictation language, which only the
+            // app may download: the keyboard checks it is installed and never fetches it.
+            Section {
+                Toggle("Dictate in the keyboard", isOn: $inKeyboardDictationEnabled)
+                    .onChange(of: inKeyboardDictationEnabled) { _, enabled in
+                        if enabled { InKeyboardSpeechAssets.prepareForDictationLanguage(reason: "setting") }
+                    }
+                NavigationLink("How dictation works") {
+                    InKeyboardDictationInfoView()
+                }
+            } header: {
+                Text("Experiments")
+            }
 
             // Section 4: A propos
             Section("About") {

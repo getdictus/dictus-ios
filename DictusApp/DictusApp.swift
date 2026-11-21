@@ -142,6 +142,9 @@ struct DictusApp: App {
     /// available, at every activation and before a `dictate` URL is routed
     /// (`refreshOnboardingFlag`), and written through `onboardingCompletedBinding`.
     @State private var hasCompletedOnboarding: Bool?
+    /// #992: the one-time "dictate with the app closed?" question, owed only under the
+    /// `newInstallsOnly` default policy.
+    @State private var showsInKeyboardPrompt = false
 
     /// Whether the App Group can be read, for every launch decision that depends on it.
     private static let protectedData = SystemProtectedData()
@@ -336,6 +339,14 @@ struct DictusApp: App {
         // only process that owns hygiene over shared state.
         SharedKeys.clearRetiredKeys()
 
+        // Spike (#992): the Apple speech model the keyboard dictates with when the app is
+        // closed, reserved and installed at every launch so its first cold tap stays in
+        // the keyboard; and the per-session claims the keyboard and the app take.
+        InKeyboardSpeechAssets.applyDefaultPolicy()
+        InKeyboardSpeechAssets.prepareForDictationLanguage(reason: "launch")
+        InKeyboardSpeechAssets.pruneSessionClaims()
+        InKeyboardSpeechAssets.startAnsweringKeyboardPings()
+
         // Read n-gram diagnostic written by keyboard extension
         if let ngramDiag = AppGroup.defaults.string(forKey: "ngramDiagnostic") {
             DictusLogger.app.info("ngramDiagnostic: \(ngramDiag, privacy: .public)")
@@ -426,6 +437,12 @@ struct DictusApp: App {
                     ))
                     catchUpOnProtectedData(trigger: "protectedDataDidBecomeAvailable")
                 }
+                .alert("Dictate with the app closed?", isPresented: $showsInKeyboardPrompt) {
+                    Button("Turn on") { InKeyboardSpeechAssets.answerDefaultPrompt(turnOn: true) }
+                    Button("Later", role: .cancel) { InKeyboardSpeechAssets.answerDefaultPrompt(turnOn: false) }
+                } message: {
+                    Text("When the Dictus app is closed, the keyboard can dictate by itself with Apple's dictation, on your iPhone.")
+                }
                 .onChange(of: scenePhase) { phase in
                     // #281 probe: publish the phase before anything else in this
                     // closure, so the keyboard extension reads a value that is at
@@ -437,6 +454,12 @@ struct DictusApp: App {
                     switch phase {
                     case .active:
                         PersistentLog.log(.appDidBecomeActive)
+                        // #992: dictations the keyboard ran by itself while the app was
+                        // closed or suspended are in the file, not in this copy.
+                        TranscriptionHistoryStore.shared.reloadFromDisk()
+                        if hasCompletedOnboarding == true, InKeyboardSpeechAssets.defaultPromptPending {
+                            showsInKeyboardPrompt = true
+                        }
                         catchUpOnProtectedData(trigger: "didBecomeActive")
                         // A purchase made outside the app while it was in the
                         // background unlocks Pro on return (#900).

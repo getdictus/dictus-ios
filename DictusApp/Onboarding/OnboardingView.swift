@@ -348,6 +348,9 @@ struct OnboardingView: View {
     /// its compile waits for the foreground (`ModelManager.waitForForegroundToCompile`).
     private func confirmLanguage(_ setup: LanguageSetup) {
         setup.apply()
+        // Spike (#992): reserve the keyboard's speech model as soon as the language is
+        // known, so the first dictation from the keyboard does not need the app.
+        InKeyboardSpeechAssets.prepareForDictationLanguage(reason: "onboarding-language")
         let model = setup.recommendedModel(on: DeviceCapabilities.current())
         if startDownloadIfNeeded(model) {
             // The download is already running; the popup only asks the user to stay. Its

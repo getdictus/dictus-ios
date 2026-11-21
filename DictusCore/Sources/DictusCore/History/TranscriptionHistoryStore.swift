@@ -145,62 +145,47 @@ public final class TranscriptionHistoryStore: ObservableObject {
         guard !record.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
             return nil
         }
-        records.insert(record, at: 0)
         var evicted: [UUID] = []
-        if records.count > Self.maxRecords {
-            evicted = records.suffix(records.count - Self.maxRecords).map(\.id)
-            records.removeLast(records.count - Self.maxRecords)
+        mutate { records in
+            records.insert(record, at: 0)
+            if records.count > Self.maxRecords {
+                evicted = records.suffix(records.count - Self.maxRecords).map(\.id)
+                records.removeLast(records.count - Self.maxRecords)
+            }
+            return true
         }
-        persist()
         if !evicted.isEmpty { onEvicted?(evicted) }
         return record
     }
 
-    /// Replace the text of a record already saved, keeping its place and its date.
-    ///
-    /// **This is what a keyboard dictation needs.** The app writes the raw text down
-    /// before the keyboard polishes it (#361: the raw is durable before any
-    /// generation starts), and the keyboard reports what it actually typed seconds
-    /// later. Appending a second record then would show the user one dictation
-    /// twice; leaving the raw would show them text they never sent. A record whose
-    /// id is gone — evicted by the cap, or deleted by the user in between — is left
-    /// alone, which is why this returns nothing and never re-inserts.
-    /// Ungated, unlike `append`: this can only ever touch a record that is already
-    /// on disk, so it does not grow the history. Refusing it after a lapse between
-    /// the hand-off and the keyboard reporting back would leave the raw text
-    /// standing where the polished text belongs, which serves nobody.
     public func updateText(id: UUID, to newText: String) {
         guard !newText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
-        guard let index = records.firstIndex(where: { $0.id == id }) else { return }
-        guard records[index].text != newText else { return }
-        records[index] = records[index].withText(newText)
-        persist()
+        mutate { records in
+            guard let index = records.firstIndex(where: { $0.id == id }),
+                  records[index].text != newText else { return false }
+            records[index] = records[index].withText(newText)
+            return true
+        }
     }
 
-    /// Store the summary of a shared voice note (#620), computed when its result was
-    /// first opened. Ungated for `updateText`'s reason: it only ever touches a record
-    /// already on disk. A record that has gone in between is left alone.
     public func updateSummary(id: UUID, to summary: String, modeIdentifier: String) {
         guard !summary.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
-        guard let index = records.firstIndex(where: { $0.id == id }) else { return }
-        records[index] = records[index].withSummary(summary, modeIdentifier: modeIdentifier)
-        persist()
+        mutate { records in
+            guard let index = records.firstIndex(where: { $0.id == id }) else { return false }
+            records[index] = records[index].withSummary(summary, modeIdentifier: modeIdentifier)
+            return true
+        }
     }
 
-    /// Mark a voice note's result as opened (#620). Ungated for `updateText`'s reason.
-    /// Only the first opening is recorded.
     public func markOpened(id: UUID, at date: Date = Date()) {
-        guard let index = records.firstIndex(where: { $0.id == id }),
-              records[index].openedAt == nil else { return }
-        records[index] = records[index].withOpened(at: date)
-        persist()
+        mutate { records in
+            guard let index = records.firstIndex(where: { $0.id == id }),
+                  records[index].openedAt == nil else { return false }
+            records[index] = records[index].withOpened(at: date)
+            return true
+        }
     }
 
-    /// Voice notes never opened, oldest first: the order they were shared in.
-    ///
-    /// The history stores dates to the second, so notes shared in the same second tie.
-    /// The tie goes to insertion order: `records` is newest first, and the queue
-    /// transcribes in share order, so a later index is an earlier share.
     public var unreadVoiceNotes: [TranscriptionRecord] {
         records.enumerated()
             .filter { $0.element.isUnreadVoiceNote }
@@ -214,30 +199,79 @@ public final class TranscriptionHistoryStore: ObservableObject {
     }
 
     public func delete(id: UUID) {
-        let remaining = records.filter { $0.id != id }
-        guard remaining.count != records.count else { return }
-        records = remaining
-        persist()
+        mutate { records in
+            let remaining = records.filter { $0.id != id }
+            guard remaining.count != records.count else { return false }
+            records = remaining
+            return true
+        }
     }
 
     /// Delete by row offsets, for `List`'s own swipe-to-delete.
     public func delete(atOffsets offsets: IndexSet) {
         guard !offsets.isEmpty else { return }
-        records.remove(atOffsets: offsets)
-        persist()
+        // Offsets point into the list on screen; the file may hold more by now. Resolve
+        // them to identities first, then remove those from the fresh copy.
+        let ids = Set(offsets.compactMap { records.indices.contains($0) ? records[$0].id : nil })
+        mutate { records in
+            let before = records.count
+            records.removeAll { ids.contains($0.id) }
+            return records.count != before
+        }
     }
 
     /// Empty the history. The destructive Settings row (brief decision 3).
     public func clear() {
-        guard !records.isEmpty else { return }
-        records = []
-        persist()
+        mutate { records in
+            guard !records.isEmpty else { return false }
+            records = []
+            return true
+        }
     }
 
     // MARK: - Disk
 
-    private func persist() {
-        Self.write(records, to: fileURL)
+    /// Re-read the file and publish it when it changed. The app calls this when it comes
+    /// to the foreground (#992): the keyboard writes dictations it ran itself, with the
+    /// app closed or suspended, and this store used to be loaded once per process.
+    public func reloadFromDisk() {
+        let fresh = Self.read(from: fileURL)
+        if fresh != records { records = fresh }
+    }
+
+    /// Read-modify-write against the file, not against this process's copy.
+    ///
+    /// WHY (#992): two processes write this file — the app, and the keyboard since it
+    /// dictates by itself. Each used to persist its own in-memory array, loaded when its
+    /// process started, so whichever wrote last erased the other's entries: an
+    /// in-keyboard dictation vanished at the app's next save, and the other way round.
+    /// The change is applied to what is on disk now, inside a file coordinator, which
+    /// serialises the two processes' writes.
+    private func mutate(_ change: (inout [TranscriptionRecord]) -> Bool) {
+        guard let fileURL else {
+            var current = records
+            if change(&current) { records = current }
+            return
+        }
+        var result: [TranscriptionRecord]?
+        var coordinationError: NSError?
+        NSFileCoordinator(filePresenter: nil).coordinate(
+            writingItemAt: fileURL, options: .forMerging, error: &coordinationError
+        ) { url in
+            var current = Self.read(from: url)
+            if change(&current) { Self.write(current, to: url) }
+            result = current
+        }
+        if let result {
+            if result != records { records = result }
+        } else {
+            // Coordination failed: keep the old behaviour rather than lose the change.
+            var current = records
+            if change(&current) {
+                records = current
+                Self.write(current, to: fileURL)
+            }
+        }
     }
 
     static func read(from url: URL?) -> [TranscriptionRecord] {

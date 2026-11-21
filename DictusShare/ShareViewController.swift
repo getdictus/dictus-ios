@@ -218,6 +218,10 @@ final class ShareModel: ObservableObject {
         if taken {
             let withActivity = AppGroup.defaults.bool(forKey: SharedKeys.voiceNoteAcceptedWithActivity)
             state = .transcribing(count: drops.count, withActivity: withActivity)
+        } else if await transcribeHere(drops, storage: storage) {
+            // #992: transcribed in this extension; the keyboard and History have it.
+            log("onDevice", "count=\(drops.count)")
+            return
         } else {
             state = .waitingForApp(count: drops.count)
         }
@@ -226,6 +230,16 @@ final class ShareModel: ObservableObject {
 
     /// The warm detection (#620 open question 3): a live DictusApp moves the drop
     /// out of the inbox as soon as the post arrives. See `VoiceNoteInbox`.
+    /// #992: nobody took the notes. Transcribe them here when the device can, showing
+    /// the same "transcribing" sheet the warm path shows; otherwise today's behaviour.
+    private func transcribeHere(_ drops: [VoiceNoteDrop], storage: VoiceNoteStorage) async -> Bool {
+        let decision = await ShareOnDeviceTranscription.route()
+        guard decision.route == .shareExtension, let recognizer = decision.recognizer else { return false }
+        state = .transcribing(count: drops.count, withActivity: false)
+        return await ShareOnDeviceTranscription.run(drops, storage: storage, recognizer: recognizer,
+                                                    languageCode: decision.languageCode)
+    }
+
     private func waitForApp(_ drops: [VoiceNoteDrop], storage: VoiceNoteStorage) async -> Bool {
         let deadline = Date().addingTimeInterval(Self.acceptanceTimeout)
         while Date() < deadline {
