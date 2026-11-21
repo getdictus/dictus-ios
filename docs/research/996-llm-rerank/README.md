@@ -202,4 +202,4 @@ w = 0.01 (`qwen-w0.01-report.md`) give the numbers above, word for word: no chan
 #954 beyond the next word, 1 of 16 pierre-device cases and 11 of 11 guards. On that tree:
 `swift test` 3741 tests, 0 failures, 8 skipped (the five model tests among them, no
 `KEYBOARD_LM_MODEL`); `swiftlint lint --strict` clean; DictusApp builds for the simulator
-in Debug and Release; `scripts/simulator-smoke-test.sh` passed on `b6c4edb1`.
+in Debug and Release; `scripts/simulator-smoke-test.sh` passed (`SMOKE PASS commit=3eed7b70`).
