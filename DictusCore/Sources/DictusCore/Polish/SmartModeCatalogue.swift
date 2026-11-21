@@ -63,9 +63,21 @@ public enum SmartModeCatalogue {
     /// the metrics event and the per-dictation App Group snapshot.
     public static let summaryIdentifier = "summary"
 
-    /// Identifier of the Translate mode targeting `language`.
-    public static func translateIdentifier(target: SupportedLanguage) -> String {
-        "translate.\(target.rawValue)"
+    /// The prefix every Translate identifier carries.
+    static let translateIdentifierPrefix = "translate."
+
+    /// Identifier of the Translate mode targeting `target`: `translate.en` for the four
+    /// built-ins as always, `translate.pt` or `translate.zh-Hant` for the targets #622
+    /// added. A wire value, for the reason every identifier here is one.
+    public static func translateIdentifier(target: TranslationTarget) -> String {
+        translateIdentifierPrefix + target.code
+    }
+
+    /// The Translate target `identifier` names, or nil when it names no Translate mode
+    /// this build can build — another mode, or a target code it does not know.
+    public static func translateTarget(ofIdentifier identifier: String) -> TranslationTarget? {
+        guard identifier.hasPrefix(translateIdentifierPrefix) else { return nil }
+        return TranslationTarget(code: String(identifier.dropFirst(translateIdentifierPrefix.count)))
     }
 
     // MARK: - The rows
@@ -425,7 +437,11 @@ public enum SmartModeCatalogue {
     /// length by a lot in either direction — German compounds against English, a
     /// French circumlocution against a Spanish verb — and the check that actually
     /// guards this mode is the language one, not the length one.
-    public static func translate(to target: SupportedLanguage) -> SmartMode {
+    ///
+    /// The same row for every `TranslationTarget` since #622, built-in or added: the
+    /// band, the contract and the floor do not depend on the language. Only the prompt
+    /// does, and only in its example block (`SmartModeTranslatePrompt`).
+    public static func translate(to target: TranslationTarget) -> SmartMode {
         SmartMode(
             id: translateIdentifier(target: target),
             // Deliberately language-neutral, so one string works in every UI locale
@@ -442,7 +458,10 @@ public enum SmartModeCatalogue {
                 outputMarker: SmartModeTranslatePrompt.outputMarker
             ),
             contract: PolishAcceptanceContract(
-                minimumLengthRatio: 0.4,
+                // 0.4 for every target but Chinese, Japanese and Korean, whose scripts
+                // write the same sentence in a quarter of the characters (#622). The
+                // measurement is on `TranslationTarget.minimumLengthRatio`.
+                minimumLengthRatio: target.minimumLengthRatio,
                 maximumLengthRatio: 3.0,
                 outputLanguage: .fixed(target),
                 // A translation localises names: `Londres` becomes `London`,
@@ -465,9 +484,9 @@ public enum SmartModeCatalogue {
 
     /// Every mode this build defines, in catalogue order, with no pin state applied.
     ///
-    /// Translation targets are the four tested languages — the same set explicit
-    /// transcription and the per-language polish prompts are limited to. They are
-    /// **not** filtered by the keyboard language: the spoken language is unknown
+    /// The built-in translation targets are the four tested languages — the same set
+    /// explicit transcription and the per-language polish prompts are limited to. They
+    /// are **not** filtered by the keyboard language: the spoken language is unknown
     /// until the user speaks, so "→ FR" stays offerable on a French keyboard.
     ///
     /// Structured leads the structure-axis pair because it is the mode the
@@ -487,21 +506,50 @@ public enum SmartModeCatalogue {
     /// `Summary` (#571) follows `Message` on the same two grounds: appended rather
     /// than inserted, so no row a user has already read moves, and not in the seed,
     /// which is still full.
+    ///
+    /// **Still exactly these eight rows since #622.** The Translate targets the user adds
+    /// through "Other language…" are not built-ins: they are the user's part, like the
+    /// pinned list, and come after them in `all` (`addedTranslateModes`). Keeping this
+    /// list fixed is what keeps every consumer that sizes itself on it — the Apple FM
+    /// session cache, the onboarding's cards, the polish harness — from growing by 22.
     public static let builtIns: [SmartMode] =
-        [structured, notes, message, summary] + SupportedLanguage.allCases.map { translate(to: $0) }
+        [structured, notes, message, summary] + TranslationTarget.builtIns.map { translate(to: $0) }
 
-    /// Every mode, with the user's pin state stamped on each row.
+    /// The Translate modes the user added (#622), most recently chosen first — the
+    /// order `TranslationTargetStore` keeps, which is also the picker's recent order.
+    public static var addedTranslateModes: [SmartMode] {
+        TranslationTargetStore.chosen.map { translate(to: $0) }
+    }
+
+    /// Every mode, with the user's pin state stamped on each row: the built-ins, then
+    /// the Translate modes the user added.
     public static var all: [SmartMode] {
         let pinned = Set(SmartModeStore.pinnedIdentifiers)
-        return builtIns.map { $0.pinned(pinned.contains($0.id)) }
+        return (builtIns + addedTranslateModes).map { $0.pinned(pinned.contains($0.id)) }
     }
 
     /// The mode with this identifier, or nil when the identifier belongs to no mode
     /// this build ships — an install downgraded from a build with more modes, or a
     /// corrupted value. Nil means Normal, which is the safe answer: the dictation
     /// gets the free polish instead of a transformation nobody can resolve.
+    ///
+    /// Any `translate.<code>` for a target this build knows resolves, **whether or not
+    /// the user still has it in their list** (#622). A pinned or armed identifier is
+    /// read in the keyboard's process, where a language removed in the app a second
+    /// ago must not turn a dictation the user started under "→ PT" into Normal French.
+    /// `TranslationTargetStore.remove` unpins and disarms, so this is only ever the
+    /// race, never the steady state.
     public static func mode(withIdentifier identifier: String) -> SmartMode? {
-        all.first { $0.id == identifier }
+        let pinned = SmartModeStore.pinnedIdentifiers.contains(identifier)
+        return resolve(identifier: identifier)?.pinned(pinned)
+    }
+
+    /// The mode with this identifier, without reading the pinned list: a built-in, or
+    /// the Translate mode for any known target. For a caller that names a mode but has
+    /// no business with pin state — the voice note's chosen mode and its card title.
+    public static func resolve(identifier: String) -> SmartMode? {
+        if let builtIn = builtIns.first(where: { $0.id == identifier }) { return builtIn }
+        return translateTarget(ofIdentifier: identifier).map { translate(to: $0) }
     }
 
     /// The modes the user pinned, **in the order they pinned them**, capped at

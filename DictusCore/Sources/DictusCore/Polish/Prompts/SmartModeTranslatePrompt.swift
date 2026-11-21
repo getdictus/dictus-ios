@@ -32,27 +32,36 @@ enum SmartModeTranslatePrompt {
     /// document furniture the way an email or a set of notes does — but the three
     /// framings follow one template so the next mode added has one to copy. See
     /// `SmartModeNotesPrompt` for the measurement.
-    static func userInstruction(target: SupportedLanguage) -> String {
-        "Translate this text into \(englishName(of: target)). Output only the translation, nothing else."
+    static func userInstruction(target: TranslationTarget) -> String {
+        "Translate this text into \(target.englishName). Output only the translation, nothing else."
     }
 
     static let outputMarker = "Translated output:"
 
-    /// English name of the target, for the prompt text. Local to this file rather
-    /// than a property on `SupportedLanguage`: it exists only because these
-    /// instructions are written in English, and `displayName` is the endonym the UI
-    /// shows.
-    static func englishName(of language: SupportedLanguage) -> String {
-        switch language {
-        case .french: return "French"
-        case .english: return "English"
-        case .spanish: return "Spanish"
-        case .german: return "German"
-        }
-    }
-
-    static func instructions(target: SupportedLanguage) -> String {
-        let name = englishName(of: target)
+    /// Every Apple FM fallback prompt, built for `target`.
+    ///
+    /// ### Since #622 the target is any `TranslationTarget`, and the examples are not
+    ///
+    /// The rules are one builder for every target, as they always were: the language
+    /// is named in them, nothing else changes. The English name comes from
+    /// `TranslationTarget.englishName` — the system's, not a switch — and reads
+    /// "French", "English", "Spanish" and "German" for the four built-ins, so their
+    /// prompts are byte for byte the ones they shipped with (pinned by hash in
+    /// `TranslationTargetPromptTests`).
+    ///
+    /// The worked examples are a different matter: every OUTPUT line is a sentence
+    /// hand-written in the target, and they exist in four languages. For any other
+    /// target the block is **left out**, not filled with the nearest language: the
+    /// comment on `examples(target:)` is the reason, and an Italian prompt
+    /// demonstrating Spanish output would be that defect shipped on purpose. Whether
+    /// the instructions alone hold up is a measurement owed on the harness, which is
+    /// why the 22 new targets ride the framework first and this prompt second.
+    ///
+    /// A target with no Apple FM fallback (`hasModelFallback == false`) still gets a
+    /// prompt, because a `SmartMode` carries one — `TranslateRoutingPolishEngine`
+    /// never sends it.
+    static func instructions(target: TranslationTarget) -> String {
+        let name = target.englishName
         return """
         You are a TEXT TRANSFORMATION FUNCTION. You translate speech-to-text output into \(name).
 
@@ -84,7 +93,7 @@ enum SmartModeTranslatePrompt {
         - Do NOT explain a term instead of translating it, and do NOT add a gloss in brackets.
         - Do NOT shift the register up. A casual message must not come back formal.
 
-        \(examples(target: target))
+        \(target.builtIn.map(examples(target:)) ?? "")
         """
     }
 
@@ -109,7 +118,7 @@ enum SmartModeTranslatePrompt {
         let first = sources[0]
         let second = sources[1]
         return """
-        Examples — the input language varies; the output is always \(englishName(of: target)):
+        Examples — the input language varies; the output is always \(TranslationTarget(target).englishName):
 
         INPUT: \(casualInput(first))
         OUTPUT: \(casualOutput(target))

@@ -10,24 +10,32 @@ import Translation
 ///
 /// The source is a language code rather than a `SupportedLanguage` because a dictation
 /// can be in any language Parakeet or Whisper transcribes, not only the four Dictus has
-/// keyboards for. The target is one of the four, since those are the Translate modes.
+/// keyboards for. The target is a `TranslationTarget`: one of the 26 languages the
+/// framework writes since #622, of which the four dictation languages are a part.
 public struct TranslationLanguagePair: Hashable, Sendable {
     public let source: String
-    public let target: SupportedLanguage
+    public let target: TranslationTarget
 
     /// Nil when there is nothing to translate: source and target are the same language.
     /// That input runs Translate's Apple FM path, which is the shipped rule-8 behaviour
-    /// for text already in the target, and never a raw passthrough.
-    public init?(source: String, target: SupportedLanguage) {
+    /// for text already in the target, and never a raw passthrough — or, for a target
+    /// with no Apple FM fallback, the "translation unavailable" notice.
+    ///
+    /// Compared on the language subtag, so `zh` dictated into `zh-Hant` is the same
+    /// language here. That is the framework's own answer: measured 2026-11-21,
+    /// `.highFidelity` reads `unsupported` from `zh` to both Chinese scripts.
+    public init?(source: String, target: TranslationTarget) {
         let base = Locale.Language(identifier: source).languageCode?.identifier ?? source
-        guard base != target.rawValue else { return nil }
+        let targetBase = Locale.Language(identifier: target.frameworkIdentifier).languageCode?.identifier
+            ?? target.frameworkIdentifier
+        guard base != targetBase else { return nil }
         self.source = source
         self.target = target
     }
 
     /// The target of a Translate mode, or nil for any other mode.
-    public static func translateTarget(of mode: SmartMode) -> SupportedLanguage? {
-        SupportedLanguage.allCases.first { SmartModeCatalogue.translateIdentifier(target: $0) == mode.id }
+    public static func translateTarget(of mode: SmartMode) -> TranslationTarget? {
+        SmartModeCatalogue.translateTarget(ofIdentifier: mode.id)
     }
 }
 
@@ -62,7 +70,7 @@ public enum TranslationPairStatus: String, Equatable, Sendable {
         guard #available(iOS 26.4, macOS 26.4, *) else { return .unknown }
         let status = await LanguageAvailability(preferredStrategy: .highFidelity).status(
             from: Locale.Language(identifier: pair.source),
-            to: Locale.Language(identifier: pair.target.rawValue)
+            to: Locale.Language(identifier: pair.target.frameworkIdentifier)
         )
         switch status {
         case .installed: return .installed
