@@ -7,13 +7,15 @@ source, so a Dictus replay, an Apple run and a device run are counted the same w
 
   texts.tsv    lang, sentence, intended, final       every source has this
   taps.tsv     one row per tap: intended and resolved key, engine time
-  commits.tsv  one row per space-bar commit: intended word(s), typed, final
+  commits.tsv  one row per space-bar commit: intended word(s), typed, final, and the
+               word typed next with the next-word predictions shown after the space
 
 Only a replay knows its taps and commits. For any other source, the report holds the
 text section alone.
 
 Comparison is case-insensitive (auto-capitalisation is not under test) and
-accent-sensitive ("tres" for "très" is a wrong word).
+accent-sensitive ("tres" for "très" is a wrong word). The typographic apostrophe
+Apple's keyboard writes (’) counts as the straight one ('): "don’t" is "don't".
 
 A device run has no files of its own: what was typed is pasted into one text file per
 language, one sentence per line in corpus order, and passed with --typed.
@@ -48,6 +50,11 @@ def distance(a, b):
     return prev[-1]
 
 
+def norm(text):
+    """Lowercase, with Apple's typographic apostrophe made straight."""
+    return text.lower().replace("\u2019", "'")
+
+
 def fold(word):
     return "".join(c for c in unicodedata.normalize("NFD", word) if not unicodedata.combining(c))
 
@@ -73,13 +80,13 @@ def text_section(rows):
     for lang, rs in by_lang.items():
         words = wrong = chars = char_errors = folded_errors = glued = 0
         for r in rs:
-            meant = r["intended"].lower().split()
-            got = r["final"].lower().split()
+            meant = norm(r["intended"]).split()
+            got = norm(r["final"]).split()
             words += len(meant)
             wrong += distance(meant, got)
             chars += len(r["intended"])
-            char_errors += distance(r["intended"].lower(), r["final"].lower())
-            folded_errors += distance(fold(r["intended"].lower()), fold(r["final"].lower()))
+            char_errors += distance(norm(r["intended"]), norm(r["final"]))
+            folded_errors += distance(fold(norm(r["intended"])), fold(norm(r["final"])))
             pairs = {fold(a + b) for a, b in zip(meant, meant[1:])}
             glued += sum(1 for g in got if fold(g) in pairs)
         out.append(f"| {lang} | {len(rs)} | {words} | {wrong} | {pct(wrong, words)} | "
@@ -145,7 +152,7 @@ def commit_section(rows):
         for r in rs:
             # A run made from a device journal (#1001) writes a multi-word commit with "_"
             # and a word whose intent is unknown as "-" (journal_to_run.py --intended).
-            meant, typed, final = r["intended"].lower().replace("_", " "), r["typed"].lower(), r["final"].lower()
+            meant, typed, final = norm(r["intended"]).replace("_", " "), norm(r["typed"]), norm(r["final"])
             if meant == "-" or meant.startswith("- ") or meant.endswith(" -") or " - " in meant:
                 c["unknown"] += 1
                 continue
@@ -180,6 +187,29 @@ def commit_section(rows):
     for lang, kind, r in sorted(cases, key=lambda x: (x[0], order[x[1]])):
         out.append(f"| {lang} | {kind} | {r['intended']} | {r['typed']} | {r['final']} |")
     out.append("")
+    return out
+
+
+def prediction_section(rows):
+    """Next-word prediction: after each space, is the word typed next among the bar's words?"""
+    out = ["## Next-word prediction, after each space", "",
+           "| lang | spaces with a next word | next word first | next word in the bar (top 3) | bar empty |",
+           "|---|---:|---:|---:|---:|"]
+    by_lang = defaultdict(list)
+    for r in rows:
+        if r.get("next"):
+            by_lang[r["lang"]].append(r)
+    for lang, rs in by_lang.items():
+        first = top = empty = 0
+        for r in rs:
+            bar = [w.lower() for w in r["predicted"].split(",") if w] if r["predicted"] else []
+            first += bool(bar) and bar[0] == r["next"].lower()
+            top += r["next"].lower() in bar[:3]
+            empty += not bar
+        out.append(f"| {lang} | {len(rs)} | {first} ({pct(first, len(rs))}) | {top} ({pct(top, len(rs))}) | "
+                   f"{empty} ({pct(empty, len(rs))}) |")
+    out += ["", "The bar is what `predictNextWords` returns after the space, from the text the field holds then "
+            "(autocorrections included). A hit saves the typist the whole next word.", ""]
     return out
 
 
@@ -225,6 +255,8 @@ def main():
     commits = read(os.path.join(args.dir, "commits.tsv"))
     if commits:
         lines += commit_section(commits)
+        if "next" in commits[0]:
+            lines += prediction_section(commits)
     print("\n".join(lines))
 
 

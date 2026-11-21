@@ -230,6 +230,8 @@ struct Commit {
     let intendedWords: [Int]
     let typed: String
     let final: String
+    /// The next-word predictions the bar shows after this commit, best first.
+    let predicted: [String]
 }
 
 /// Picks the cell a tap types, from the point, today's answer (the cell under the
@@ -324,6 +326,7 @@ func replay(_ taps: [Tap], cells: [Cell], width: CGFloat, height: CGFloat, picke
         case .spacebar?:
             var typed = ""
             var final = ""
+            var predicted: [String] = []
             cost = microseconds {
                 guard let (prefix, word) = AutocorrectRejectionMemory.wordAtCursor(context: field.text) else {
                     field.insertText(" ")
@@ -356,9 +359,11 @@ func replay(_ taps: [Tap], cells: [Cell], width: CGFloat, height: CGFloat, picke
                     applied = true
                 }
                 if !applied { field.insertText(" ") }
-                _ = engine.predictNextWords(after: Array(words(field.text).suffix(2)))
+                predicted = engine.predictNextWords(after: Array(words(field.text).suffix(2)))
             }
-            if !typed.isEmpty { commits.append(Commit(intendedWords: tokenWords, typed: typed, final: final)) }
+            if !typed.isEmpty {
+                commits.append(Commit(intendedWords: tokenWords, typed: typed, final: final, predicted: predicted))
+            }
             tokenWords = []
         case .backspace?:
             field.deleteBackward()
@@ -422,7 +427,7 @@ if let tune = env["KB_SPATIAL_TUNE"], !tune.isEmpty {
 }
 
 var tapsOut = ["lang\tsentence\ttap\tintended\tresolved\tx\ty\tengine_us\tplain\thit_ns\tvisited\tjournal_ns"]
-var commitsOut = ["lang\tsentence\tintended\ttyped\tfinal"]
+var commitsOut = ["lang\tsentence\tintended\ttyped\tfinal\tnext\tpredicted"]
 var textsOut = ["lang\tsentence\tintended\tfinal"]
 
 // KB_LAYOUT writes the layouts into the App Group; they are put back at the end. Both keys:
@@ -485,7 +490,9 @@ for code in langs {
         }
         for c in commits {
             let meant = c.intendedWords.map { intendedWords[$0] }.joined(separator: " ")
-            commitsOut.append("\(code)\t\(s)\t\(meant)\t\(c.typed)\t\(c.final)")
+            // The word the typist types next, which the prediction bar should offer.
+            let next = c.intendedWords.last.map { $0 + 1 < intendedWords.count ? intendedWords[$0 + 1] : "" } ?? ""
+            commitsOut.append("\(code)\t\(s)\t\(meant)\t\(c.typed)\t\(c.final)\t\(next)\t\(c.predicted.joined(separator: ","))")
         }
         textsOut.append("\(code)\t\(s)\t\(intended)\t\(text)")
     }
