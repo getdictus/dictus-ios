@@ -387,7 +387,8 @@ let languageModel: KeyboardLanguageModel? = env["KB_LM"].flatMap { path in
     FileHandle.standardError.write(Data("language model \(path) loaded in \(String(format: "%.0f", ms)) ms\n".utf8))
     return model
 }
-let weights = languageModel == nil ? [0.0] : (env["KB_LM_WEIGHTS"] ?? "\(TextPredictionEngine.languageModelWeight)")
+let weights = languageModel == nil ? [0.0] : (env["KB_LM_WEIGHTS"].flatMap { $0.isEmpty ? nil : $0 }
+    ?? "\(TextPredictionEngine.languageModelWeight)")
     .components(separatedBy: ",").map { w -> Double in
         guard let value = Double(w) else { fatalError("KB_LM_WEIGHTS: \(w) is not a number") }
         return value

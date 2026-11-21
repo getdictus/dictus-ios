@@ -194,3 +194,12 @@ the layout and the learned words to its App Group.
 
 `swift test` with `KEYBOARD_LM_MODEL=<model.gguf>` runs `LlamaLanguageModelTests` against
 the real model; without it they are skipped.
+
+## After merging develop (#1005, `a06e3e11`)
+
+`c3cdf635`, same simulator and recipe. The model-off replay (`off-report.md`) and Qwen at
+w = 0.01 (`qwen-w0.01-report.md`) give the numbers above, word for word: no change on
+#954 beyond the next word, 1 of 16 pierre-device cases and 11 of 11 guards. On that tree:
+`swift test` 3741 tests, 0 failures, 8 skipped (the five model tests among them, no
+`KEYBOARD_LM_MODEL`); `swiftlint lint --strict` clean; DictusApp builds for the simulator
+in Debug and Release; `scripts/simulator-smoke-test.sh` passed on `b6c4edb1`.

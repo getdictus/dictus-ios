@@ -1,6 +1,6 @@
 # Keyboard measurement: Dictus (replay, 402x216 pt grid, hit test: plain)
 
-commit: `b6c4edb172fee9b5b2d1aec0b7aa47ff27065556`
+commit: `c3cdf63515a275f1969d82d6540667aae2057227`
 
 ## Final text
 
@@ -32,18 +32,18 @@ The suggestion work a letter triggers and the autocorrect a space triggers, run 
 
 | lang | key | taps | p50 | p95 | max |
 |---|---|---:|---:|---:|---:|
-| fr | letter | 669 | 0.16 | 0.63 | 44.34 |
-| fr | space | 152 | 0.12 | 0.57 | 2.21 |
-| en | letter | 626 | 1.16 | 2.14 | 111.79 |
-| en | space | 156 | 0.07 | 0.75 | 1.89 |
-| en-typos | letter | 491 | 0.99 | 2.02 | 5.33 |
-| en-typos | space | 129 | 0.06 | 0.12 | 2.40 |
-| es | letter | 605 | 0.10 | 0.70 | 38.24 |
-| es | space | 141 | 0.10 | 0.61 | 5.43 |
-| de | letter | 630 | 0.10 | 0.70 | 25.14 |
-| de | space | 142 | 0.09 | 0.59 | 1.58 |
-| fr-pierre-device | letter | 201 | 0.36 | 0.78 | 3.54 |
-| fr-pierre-device | space | 36 | 0.46 | 1.67 | 1.75 |
+| fr | letter | 669 | 0.11 | 0.54 | 53.62 |
+| fr | space | 152 | 0.10 | 0.47 | 7.25 |
+| en | letter | 626 | 0.91 | 1.78 | 102.38 |
+| en | space | 156 | 0.05 | 0.67 | 1.56 |
+| en-typos | letter | 491 | 0.89 | 1.90 | 6.51 |
+| en-typos | space | 129 | 0.05 | 0.16 | 2.30 |
+| es | letter | 605 | 0.11 | 0.74 | 28.64 |
+| es | space | 141 | 0.10 | 0.65 | 6.75 |
+| de | letter | 630 | 0.10 | 0.68 | 28.28 |
+| de | space | 142 | 0.09 | 0.60 | 1.57 |
+| fr-pierre-device | letter | 201 | 0.40 | 0.95 | 3.17 |
+| fr-pierre-device | space | 36 | 0.48 | 1.90 | 2.10 |
 
 ## Autocorrect, per word the space bar committed
 
