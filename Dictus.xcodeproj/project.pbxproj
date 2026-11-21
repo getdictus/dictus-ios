@@ -96,6 +96,7 @@
 		AA000060 /* ToolbarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100060 /* ToolbarView.swift */; };
 		AA00006L /* KeyboardPanelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA10006L /* KeyboardPanelView.swift */; };
 		AA000061 /* RecordingOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100061 /* RecordingOverlay.swift */; };
+		AA0009E1 /* InKeyboardEngineIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1009E1 /* InKeyboardEngineIndicator.swift */; };
 		AA361012 /* SmartModeFanView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA361011 /* SmartModeFanView.swift */; };
 		AA637004 /* VoiceNoteReaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA637003 /* VoiceNoteReaderView.swift */; };
 		AA000062 /* KeyboardWaveformView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100062 /* KeyboardWaveformView.swift */; };
@@ -362,6 +363,7 @@
 		AA100060 /* ToolbarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToolbarView.swift; sourceTree = "<group>"; };
 		AA10006L /* KeyboardPanelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardPanelView.swift; sourceTree = "<group>"; };
 		AA100061 /* RecordingOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingOverlay.swift; sourceTree = "<group>"; };
+		AA1009E1 /* InKeyboardEngineIndicator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InKeyboardEngineIndicator.swift; sourceTree = "<group>"; };
 		AA361011 /* SmartModeFanView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmartModeFanView.swift; sourceTree = "<group>"; };
 		AA637003 /* VoiceNoteReaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceNoteReaderView.swift; sourceTree = "<group>"; };
 		AA100062 /* KeyboardWaveformView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardWaveformView.swift; sourceTree = "<group>"; };
@@ -727,6 +729,7 @@
 				AA100060 /* ToolbarView.swift */,
 				AA10006L /* KeyboardPanelView.swift */,
 				AA100061 /* RecordingOverlay.swift */,
+				AA1009E1 /* InKeyboardEngineIndicator.swift */,
 				AA361011 /* SmartModeFanView.swift */,
 				AA637003 /* VoiceNoteReaderView.swift */,
 				AA100062 /* KeyboardWaveformView.swift */,
@@ -1579,6 +1582,7 @@
 				AA000060 /* ToolbarView.swift in Sources */,
 				AA00006L /* KeyboardPanelView.swift in Sources */,
 				AA000061 /* RecordingOverlay.swift in Sources */,
+				AA0009E1 /* InKeyboardEngineIndicator.swift in Sources */,
 				AA361012 /* SmartModeFanView.swift in Sources */,
 				AA637004 /* VoiceNoteReaderView.swift in Sources */,
 				AA000062 /* KeyboardWaveformView.swift in Sources */,

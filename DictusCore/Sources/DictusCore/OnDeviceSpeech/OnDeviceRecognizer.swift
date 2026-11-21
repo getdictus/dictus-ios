@@ -306,13 +306,22 @@ public final class SimulatorHostRecognizer: OnDeviceRecognizer {
     public let engineName = "simulator-host-speechanalyzer"
     private let base = URL(string: "http://127.0.0.1:47811")
 
+    /// Asks the host whether ITS `SpeechTranscriber` supports and has installed the
+    /// locale, so a language Apple does not cover falls back here as it would on a device.
     public func isReadyOnDevice(languageCode: String) async -> Bool {
-        guard let url = base?.appendingPathComponent("health") else { return false }
-        var request = URLRequest(url: url, timeoutInterval: 0.4)
-        request.httpMethod = "GET"
-        let ok = (try? await URLSession.shared.data(for: request)).map { ($0.1 as? HTTPURLResponse)?.statusCode == 200 } ?? false
-        OnDeviceSpeechLog.log("assetCheck", "module=simulator-host reachable=\(ok)")
-        return ok
+        let locale = InKeyboardDictationRoute.speechLocaleIdentifier(
+            languageCode: languageCode, deviceLocaleIdentifier: Locale.current.identifier
+        )
+        guard var components = base.flatMap({ URLComponents(url: $0.appendingPathComponent("ready"), resolvingAgainstBaseURL: false) })
+        else { return false }
+        components.queryItems = [URLQueryItem(name: "locale", value: locale)]
+        guard let url = components.url else { return false }
+        let request = URLRequest(url: url, timeoutInterval: 3)
+        let response = try? await URLSession.shared.data(for: request)
+        let status = (response?.1 as? HTTPURLResponse)?.statusCode ?? 0
+        let detail = response.flatMap { String(bytes: $0.0, encoding: .utf8) } ?? "unreachable"
+        OnDeviceSpeechLog.log("assetCheck", "module=simulator-host locale=\(locale) ready=\(status == 200) host=\(detail)")
+        return status == 200
     }
 
     public func transcribe(_ recording: OnDeviceRecording, languageCode: String, contextualStrings: [String]) async throws -> String {

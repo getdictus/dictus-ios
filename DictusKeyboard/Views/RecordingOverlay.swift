@@ -47,6 +47,11 @@ struct RecordingOverlay: View {
     /// and a setting that cost them a dictation.
     var armedSmartMode: SmartMode?
 
+    /// The keyboard dictates by itself with Apple's dictation (app closed, #992): the
+    /// caption carries `InKeyboardEngineIndicator`, so the user can tell why vocabulary
+    /// or quality may differ from the app's model.
+    var onDeviceEngine = false
+
     @State private var instanceID = String(UUID().uuidString.prefix(8))
 
     /// Adaptive foreground color -- dark on light keyboard, light on dark keyboard.
@@ -244,9 +249,7 @@ struct RecordingOverlay: View {
                 .frame(height: timerFontSize)
                 .padding(.bottom, 4)
 
-            Text("Starting...")
-                .font(.dictusCaption)
-                .foregroundColor(secondaryForeground)
+            caption("Starting...")
                 .padding(.bottom, 8)
 
         case .transcribing:
@@ -255,9 +258,7 @@ struct RecordingOverlay: View {
                 .frame(height: timerFontSize)
                 .padding(.bottom, 4)
 
-            Text("Transcribing...")
-                .font(.dictusCaption)
-                .foregroundColor(secondaryForeground)
+            caption("Transcribing...")
                 .padding(.bottom, 8)
 
         case .processing:
@@ -272,9 +273,7 @@ struct RecordingOverlay: View {
             // stage name. There is no armed mode to read today -- `ProFeature`
             // .smartMode is a paywall flag, not a selection -- so this stays one
             // string until that state exists.
-            Text("Processing...")
-                .font(.dictusCaption)
-                .foregroundColor(secondaryForeground)
+            caption("Processing...")
                 .padding(.bottom, 8)
 
         default:
@@ -283,14 +282,31 @@ struct RecordingOverlay: View {
                 .foregroundColor(foregroundColor)
                 .padding(.bottom, 4)
 
-            Text("Listening...")
-                .font(.dictusCaption)
-                .foregroundColor(secondaryForeground)
+            caption("Listening...")
                 .padding(.bottom, 8)
         }
     }
 
     // MARK: - Helpers
+
+    /// The footer caption, with the engine indicator on the in-keyboard path. Same font
+    /// and colour as the caption, on the same line, so the footer height never changes.
+    private func caption(_ key: LocalizedStringKey) -> some View {
+        HStack(spacing: 4) {
+            if onDeviceEngine, InKeyboardEngineIndicator.style == .icon {
+                Image(systemName: InKeyboardEngineIndicator.iconName)
+                    .imageScale(.small)
+                    .accessibilityLabel(Text(verbatim: InKeyboardEngineIndicator.label))
+            }
+            Text(key)
+            if onDeviceEngine, InKeyboardEngineIndicator.style == .label {
+                // A product name, not translated.
+                Text(verbatim: "· \(InKeyboardEngineIndicator.label)")
+            }
+        }
+        .font(.dictusCaption)
+        .foregroundColor(secondaryForeground)
+    }
 
     private var formattedTime: String {
         let minutes = Int(elapsedSeconds) / 60

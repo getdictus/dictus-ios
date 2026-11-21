@@ -1,6 +1,6 @@
 // DictusCore/InKeyboardDictationPolicies.swift
-// The small rules around in-keyboard dictation (#992): what an interruption does, when
-// the one-time explanation shows, and how the setting's default is applied on update.
+// The small rules around in-keyboard dictation (#992): what an interruption does, and
+// when the one-time explanation shows.
 import Foundation
 
 /// What a dictation running in the keyboard does when something takes the audio away.
@@ -54,48 +54,46 @@ public enum InKeyboardFirstUse {
     }
 }
 
-/// How "Dictate in the keyboard" is on or off after the update ships. One constant.
-public enum InKeyboardDictationDefault {
+/// Whether the chosen dictation language lets the keyboard dictate with the app closed
+/// (Pierre, 2026-11-21): activation by the language the user chose, checked against
+/// Apple's `SpeechTranscriber.supportedLocales`, never by detecting what they speak.
+///
+/// The user's own choice (the "Dictate in the keyboard" toggle, absent = on) is stored
+/// apart from this. The setting is ON in effect only when both hold, so changing to a
+/// language Apple does not cover turns it off, and changing back turns it on again only
+/// if the user had not turned it off themselves.
+public enum InKeyboardLanguageEligibility: Equatable, Sendable {
+    /// Apple lists the chosen language.
+    case covered(String)
+    /// Apple does not list it: the setting is off in effect and shown greyed.
+    case notCovered(String)
+    /// Automatic detection: no single language to dictate in, so off in effect.
+    case autoDetect
 
-    public enum Policy: String, Sendable {
-        /// On for everyone, existing users included, from the update on.
-        case onForEveryone
-        /// On for new installs; existing users start off and are asked once in the app.
-        case newInstallsOnly
+    public var isCovered: Bool {
+        if case .covered = self { return true }
+        return false
     }
 
-    /// `.newInstallsOnly`, decided by Pierre on 2026-11-21 (PR #992).
-    ///
-    /// WHY: existing users chose Dictus for its own model. With the setting on, a tap with
-    /// the app closed gives Apple's dictation instead, with a different accuracy and the
-    /// microphone indicator coming from the keyboard. Asking them once ("Turn on" /
-    /// "Later") makes that change their choice and announces it; new users never knew the
-    /// app switch, so they start with it on. Changing this one line switches the behaviour.
-    public static let policy: Policy = .newInstallsOnly
-
-    public struct LaunchResolution: Equatable, Sendable {
-        /// The value to write to the setting now, or nil to leave it.
-        public let write: Bool?
-        /// Whether the app should ask the existing user once.
-        public let prompt: Bool
+    /// The value the app writes to the App Group for its UI.
+    public var storedValue: String {
+        switch self {
+        case .covered: return "covered"
+        case .notCovered: return "notCovered"
+        case .autoDetect: return "autoDetect"
+        }
     }
 
-    /// What the app does at launch. `storedValue` is the setting as stored (nil when the
-    /// user never touched it); `onboardingCompleted` tells an existing user from a new
-    /// install at the first launch of the update.
-    public static func resolveAtLaunch(policy: Policy, storedValue: Bool?, onboardingCompleted: Bool,
-                                       promptPending: Bool) -> LaunchResolution {
-        guard storedValue == nil else {
-            // The user (or an earlier launch) decided; only an unanswered prompt remains.
-            return LaunchResolution(write: nil, prompt: promptPending)
-        }
-        switch policy {
-        case .onForEveryone:
-            return LaunchResolution(write: nil, prompt: false)
-        case .newInstallsOnly:
-            return onboardingCompleted
-                ? LaunchResolution(write: false, prompt: true)
-                : LaunchResolution(write: true, prompt: false)
-        }
+    public static func evaluate(mode: TranscriptionLanguageMode, keyboardLanguageCode: String,
+                                supportedLocales: [String]) -> InKeyboardLanguageEligibility {
+        guard let code = InKeyboardDictationRoute.dictationLanguageCode(mode: mode, keyboardLanguageCode: keyboardLanguageCode)
+        else { return .autoDetect }
+        return InKeyboardDictationRoute.isLanguageCovered(code, bySupportedLocales: supportedLocales)
+            ? .covered(code) : .notCovered(code)
+    }
+
+    /// The setting as the user sees it and the keyboard applies it.
+    public static func isEffectivelyOn(userChoice: Bool?, eligibility: InKeyboardLanguageEligibility) -> Bool {
+        (userChoice ?? InKeyboardDictationRoute.defaultEnabled) && eligibility.isCovered
     }
 }

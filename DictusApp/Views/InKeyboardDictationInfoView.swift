@@ -1,4 +1,5 @@
 // DictusApp/Views/InKeyboardDictationInfoView.swift
+import DictusCore
 import SwiftUI
 
 /// Settings > Experiments > How dictation works (spike, #992).
@@ -7,8 +8,22 @@ import SwiftUI
 /// the keyboard's mic, and the user cannot see that. This screen says it once, in plain
 /// words: what each case uses, what works in both, and what only the app can do.
 struct InKeyboardDictationInfoView: View {
+    /// `InKeyboardLanguageEligibility.storedValue`, written by the app when either
+    /// language changes. Absent reads as covered: no line.
+    @AppStorage(SharedKeys.inKeyboardLanguageEligibility, store: UserDefaults(suiteName: AppGroup.identifier))
+    private var eligibility = "covered"
+
     var body: some View {
         List {
+            if eligibility == "notCovered" {
+                Section {
+                    Text("Your dictation language is not available for Apple's dictation, so the keyboard opens the app, as before.")
+                }
+            } else if eligibility == "autoDetect" {
+                Section {
+                    Text("With automatic language detection, the keyboard opens the app, as before: Apple's dictation needs one language.")
+                }
+            }
             Section {
                 Text("The keyboard dictates by itself with Apple's dictation, on your iPhone. Your voice stays on your iPhone.")
             } header: {

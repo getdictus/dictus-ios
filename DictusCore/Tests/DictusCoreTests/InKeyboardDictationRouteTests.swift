@@ -115,13 +115,10 @@ final class InKeyboardDictationRouteTests: XCTestCase {
 
     // MARK: - Inputs
 
-    /// Under the decided `.newInstallsOnly` policy an absent key reads as off: an existing
-    /// user's keyboard, before the app's first launch after the update, stays on today's
-    /// path. A new install gets `true` written at its first launch (see the policy tests).
-    func testAbsentSettingFollowsTheDecidedPolicy() {
-        XCTAssertEqual(InKeyboardDictationDefault.policy, .newInstallsOnly)
-        XCTAssertFalse(InKeyboardDictationRoute.defaultEnabled)
-        XCTAssertFalse(InKeyboardDictationRoute.isSettingEnabled(in: defaults))
+    /// Decided on 2026-11-21: on for everyone; an absent key reads as on.
+    func testAbsentSettingIsOn() {
+        XCTAssertTrue(InKeyboardDictationRoute.defaultEnabled)
+        XCTAssertTrue(InKeyboardDictationRoute.isSettingEnabled(in: defaults))
     }
 
     func testSettingReadsTheAppGroupKey() {
@@ -170,12 +167,12 @@ final class InKeyboardDictationRouteTests: XCTestCase {
         )
     }
 
-    func testAutoDetectReservesTheKeyboardLanguage() {
+    func testAutoDetectReservesNothing() {
         XCTAssertEqual(
             InKeyboardDictationRoute.speechLocalesToReserve(
-                transcriptionMode: .autoDetect, keyboardLanguageCode: "de", deviceLocaleIdentifier: "en_GB"
+                transcriptionMode: .autoDetect, keyboardLanguageCode: "en", deviceLocaleIdentifier: "en_GB"
             ),
-            ["de-DE"]
+            []
         )
     }
 

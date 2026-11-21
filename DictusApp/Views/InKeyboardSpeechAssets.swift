@@ -28,8 +28,30 @@ enum InKeyboardSpeechAssets {
         )
         log("prepare", "reason=\(reason) locales=\(locales)")
         Task.detached(priority: .utility) {
+            _ = await refreshLanguageEligibility(reason: reason)
             for locale in locales { await install(languageCode: locale) }
         }
+    }
+
+    /// Whether Apple covers the chosen dictation language, read from
+    /// `SpeechTranscriber.supportedLocales` (`DictationTranscriber`'s where the former is
+    /// unavailable), and stored in the App Group for the "How dictation works" line.
+    /// Activation follows the language the user chose, never the one they speak
+    /// (Pierre, 2026-11-21). Called by Settings whenever either language changes.
+    @available(iOS 26.0, *)
+    static func refreshLanguageEligibility(reason: String) async -> InKeyboardLanguageEligibility {
+        let locales = SpeechTranscriber.isAvailable
+            ? await SpeechTranscriber.supportedLocales
+            : await DictationTranscriber.supportedLocales
+        let eligibility = InKeyboardLanguageEligibility.evaluate(
+            mode: TranscriptionLanguageMode.active,
+            keyboardLanguageCode: SupportedLanguage.active.rawValue,
+            supportedLocales: locales.map { $0.identifier(.bcp47) }
+        )
+        AppGroup.defaults.set(eligibility.storedValue, forKey: SharedKeys.inKeyboardLanguageEligibility)
+        log("eligibility", "reason=\(reason) result=\(eligibility) supportedCount=\(locales.count) "
+            + "userChoice=\(InKeyboardDictationRoute.isSettingEnabled(in: AppGroup.defaults))")
+        return eligibility
     }
 
     /// The app's side of `DictationSessionClaim`, for the keyboard's Darwin start post.
@@ -50,36 +72,6 @@ enum InKeyboardSpeechAssets {
         DarwinNotificationCenter.addObserver(for: DarwinNotificationName.inKeyboardPing) {
             DarwinNotificationCenter.post(DarwinNotificationName.inKeyboardPong)
         }
-    }
-
-    /// Apply `InKeyboardDictationDefault.policy` at launch: under `newInstallsOnly`, a new
-    /// install starts on and an existing user starts off with a one-time prompt pending.
-    /// Under `onForEveryone` nothing is written. A choice the user made is never touched.
-    static func applyDefaultPolicy() {
-        let defaults = AppGroup.defaults
-        let stored = defaults.object(forKey: SharedKeys.inKeyboardDictationEnabled) as? Bool
-        let resolution = InKeyboardDictationDefault.resolveAtLaunch(
-            policy: InKeyboardDictationDefault.policy,
-            storedValue: stored,
-            onboardingCompleted: defaults.bool(forKey: SharedKeys.hasCompletedOnboarding),
-            promptPending: defaults.bool(forKey: SharedKeys.inKeyboardDefaultPromptPending)
-        )
-        if let value = resolution.write { defaults.set(value, forKey: SharedKeys.inKeyboardDictationEnabled) }
-        defaults.set(resolution.prompt, forKey: SharedKeys.inKeyboardDefaultPromptPending)
-        log("defaultPolicy", "policy=\(InKeyboardDictationDefault.policy.rawValue) stored=\(stored.map(String.init) ?? "nil") write=\(resolution.write.map(String.init) ?? "nil") prompt=\(resolution.prompt)")
-    }
-
-    /// Whether the one-time prompt is owed (only ever under `newInstallsOnly`).
-    static var defaultPromptPending: Bool {
-        AppGroup.defaults.bool(forKey: SharedKeys.inKeyboardDefaultPromptPending)
-    }
-
-    /// The user answered the one-time prompt.
-    static func answerDefaultPrompt(turnOn: Bool) {
-        AppGroup.defaults.set(turnOn, forKey: SharedKeys.inKeyboardDictationEnabled)
-        AppGroup.defaults.set(false, forKey: SharedKeys.inKeyboardDefaultPromptPending)
-        log("defaultPrompt", "answer=\(turnOn ? "on" : "later")")
-        if turnOn { prepareForDictationLanguage(reason: "prompt") }
     }
 
     /// Old session claims, once per launch.

@@ -76,7 +76,11 @@ final class InKeyboardDictation {
               let recognizer
         else { return }
         self.state = state
-        let code = Self.languageCode()
+        // No single dictation language (automatic detection): today's path, nothing to check.
+        guard let code = Self.languageCode() else {
+            Self.log("localeCheck", "skipped=true reason=autoDetect")
+            return
+        }
         if localeAnswer?.code != code {
             localeAnswer = nil
             Task { [weak self] in
@@ -168,8 +172,8 @@ final class InKeyboardDictation {
               Self.systemMajorVersion >= InKeyboardDictationRoute.minimumSystemMajorVersion,
               recognizer != nil,
               state?.controller?.hasFullAccess ?? true,
-              Self.microphonePermission == .granted else { return false }
-        let code = Self.languageCode()
+              Self.microphonePermission == .granted,
+              let code = Self.languageCode() else { return false }
         if let answer = localeAnswer, answer.code == code { return answer.installed }
         return true
     }
@@ -183,8 +187,9 @@ final class InKeyboardDictation {
 
     /// The route for a tap whose wait has just ended.
     func route(appAnswered: Bool) -> InKeyboardDictationRoute {
+        // Automatic detection has no language to check: `nil` routes to today's path.
         let code = Self.languageCode()
-        let installed = localeAnswer.flatMap { $0.code == code ? $0.installed : nil }
+        let installed = code.flatMap { code in localeAnswer.flatMap { $0.code == code ? $0.installed : nil } }
         return InKeyboardDictationRoute.decide(
             settingEnabled: InKeyboardDictationRoute.isSettingEnabled(in: AppGroup.defaults),
             appAnswered: appAnswered,
@@ -247,7 +252,7 @@ final class InKeyboardDictation {
         waveformClock = Timer.scheduledTimer(withTimeInterval: WaveformFeed.publishInterval, repeats: true) { [weak self] _ in
             MainActor.assumeIsolated { self?.publishWaveform() }
         }
-        Self.log("start", "engine=\(recognizer?.engineName ?? "none") lang=\(Self.languageCode()) \(MemoryTrace.reading())")
+        Self.log("start", "engine=\(recognizer?.engineName ?? "none") lang=\(Self.languageCode() ?? "auto") \(MemoryTrace.reading())")
     }
 
     /// Start the page's capture into a fresh buffer. Used at the tap (provisional) and at
@@ -370,7 +375,12 @@ final class InKeyboardDictation {
         }
         state.dictationStatus = .transcribing
         HapticFeedback.recordingStopped()
-        let code = Self.languageCode()
+        guard let code = Self.languageCode() else {
+            // The route never sends automatic detection here; a toolbar change during the
+            // recording could, and then nothing is inserted rather than a wrong language.
+            fail("no dictation language (automatic detection)")
+            return
+        }
         // The per-dictation snapshot DictusApp takes at the same moment (#226, #79):
         // language policy and armed Smart Mode, read once so a change on the toolbar
         // during transcription cannot make the polish disagree with the transcript.
@@ -529,12 +539,10 @@ final class InKeyboardDictation {
         InKeyboardDictationRoute.majorVersion(of: UIDevice.current.systemVersion)
     }
 
-    /// The dictation language: the explicit transcription language when there is one,
-    /// otherwise the keyboard's. Auto-detect has no single locale to check, so it falls
-    /// back to the keyboard language too.
-    private static func languageCode() -> String {
-        let keyboard = SupportedLanguage.active.rawValue
-        return TranscriptionLanguageMode.active.resolvedLanguageCode(keyboardLanguageCode: keyboard) ?? keyboard
+    /// The dictation language the user chose (`InKeyboardDictationRoute.dictationLanguageCode`);
+    /// nil under automatic detection, where the keyboard keeps today's path.
+    private static func languageCode() -> String? {
+        InKeyboardDictationRoute.activeDictationLanguageCode()
     }
 
     /// The Pro vocabulary's enabled terms, the strings offered to the recognizer. Empty

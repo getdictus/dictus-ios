@@ -98,6 +98,12 @@ struct SettingsView: View {
     @AppStorage(SharedKeys.inKeyboardDictationEnabled, store: UserDefaults(suiteName: AppGroup.identifier))
     private var inKeyboardDictationEnabled = InKeyboardDictationRoute.defaultEnabled
 
+    /// Whether Apple covers the chosen dictation language (nil until read, and before
+    /// iOS 26). Not covered: the toggle shows off and is greyed, while the user's own
+    /// choice above stays stored, so a covered language later brings it back only if
+    /// they had not turned it off.
+    @State private var inKeyboardEligibility: InKeyboardLanguageEligibility?
+
     /// The keyboard language the pickers below operate on.
     private var keyboardLanguage: SupportedLanguage {
         SupportedLanguage(rawValue: language) ?? .french
@@ -244,6 +250,15 @@ struct SettingsView: View {
     #endif
 
     // MARK: - Body
+
+    /// The toggle as `InKeyboardLanguageEligibility.isEffectivelyOn` sees it; writing it
+    /// stores the user's choice.
+    private var inKeyboardDictationToggle: Binding<Bool> {
+        Binding(
+            get: { inKeyboardDictationEnabled && (inKeyboardEligibility?.isCovered ?? true) },
+            set: { inKeyboardDictationEnabled = $0 }
+        )
+    }
 
     var body: some View {
         List {
@@ -524,9 +539,14 @@ struct SettingsView: View {
             // Apple's on-device speech model for the dictation language, which only the
             // app may download: the keyboard checks it is installed and never fetches it.
             Section {
-                Toggle("Dictate in the keyboard", isOn: $inKeyboardDictationEnabled)
+                Toggle("Dictate in the keyboard", isOn: inKeyboardDictationToggle)
+                    .disabled(inKeyboardEligibility.map { !$0.isCovered } ?? false)
                     .onChange(of: inKeyboardDictationEnabled) { _, enabled in
                         if enabled { InKeyboardSpeechAssets.prepareForDictationLanguage(reason: "setting") }
+                    }
+                    .task(id: "\(language)|\(transcriptionLanguage)") {
+                        guard #available(iOS 26.0, *) else { return }
+                        inKeyboardEligibility = await InKeyboardSpeechAssets.refreshLanguageEligibility(reason: "settings-language")
                     }
                 NavigationLink("How dictation works") {
                     InKeyboardDictationInfoView()

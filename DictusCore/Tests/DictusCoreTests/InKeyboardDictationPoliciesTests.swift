@@ -78,77 +78,120 @@ final class InKeyboardDictationPoliciesTests: XCTestCase {
         XCTAssertFalse(InKeyboardFirstUse.shouldShow(in: defaults))
     }
 
-    // MARK: - Default setting
+    // MARK: - Default setting (decided: on for everyone, Pierre, 2026-11-21)
 
-    func testOnForEveryoneTouchesNothing() {
-        let resolution = InKeyboardDictationDefault.resolveAtLaunch(policy: .onForEveryone, storedValue: nil,
-                                                                    onboardingCompleted: true, promptPending: false)
-        XCTAssertEqual(resolution, .init(write: nil, prompt: false))
+    /// A new install has no stored value: on.
+    func testNewInstallIsOn() {
+        XCTAssertTrue(InKeyboardDictationRoute.defaultEnabled)
+        XCTAssertTrue(InKeyboardDictationRoute.isSettingEnabled(in: defaults))
     }
 
-    func testNewInstallsOnlyTurnsItOnForANewInstall() {
-        let resolution = InKeyboardDictationDefault.resolveAtLaunch(policy: .newInstallsOnly, storedValue: nil,
-                                                                    onboardingCompleted: false, promptPending: false)
-        XCTAssertEqual(resolution, .init(write: true, prompt: false))
+    /// An existing user after the update has no stored value either (the key is new):
+    /// on too, with nothing written and no question — the app has no such question any more.
+    func testExistingUserIsOnWithoutAQuestion() {
+        defaults.set(true, forKey: SharedKeys.hasCompletedOnboarding)
+        XCTAssertTrue(InKeyboardDictationRoute.isSettingEnabled(in: defaults))
+        XCTAssertNil(defaults.object(forKey: SharedKeys.inKeyboardDictationEnabled))
     }
 
-    func testNewInstallsOnlyAsksAnExistingUserOnce() {
-        let first = InKeyboardDictationDefault.resolveAtLaunch(policy: .newInstallsOnly, storedValue: nil,
-                                                               onboardingCompleted: true, promptPending: false)
-        XCTAssertEqual(first, .init(write: false, prompt: true))
-        // Next launch, prompt still unanswered: ask again, write nothing.
-        let unanswered = InKeyboardDictationDefault.resolveAtLaunch(policy: .newInstallsOnly, storedValue: false,
-                                                                    onboardingCompleted: true, promptPending: true)
-        XCTAssertEqual(unanswered, .init(write: nil, prompt: true))
-        // Answered: never again.
-        let answered = InKeyboardDictationDefault.resolveAtLaunch(policy: .newInstallsOnly, storedValue: true,
-                                                                  onboardingCompleted: true, promptPending: false)
-        XCTAssertEqual(answered, .init(write: nil, prompt: false))
+    /// A user who turned it off keeps it off.
+    func testAChoiceTheUserMadeIsKept() {
+        defaults.set(false, forKey: SharedKeys.inKeyboardDictationEnabled)
+        XCTAssertFalse(InKeyboardDictationRoute.isSettingEnabled(in: defaults))
     }
 
-    func testAChoiceTheUserMadeIsNeverOverwritten() {
-        for policy in [InKeyboardDictationDefault.Policy.onForEveryone, .newInstallsOnly] {
-            for stored in [true, false] {
-                let resolution = InKeyboardDictationDefault.resolveAtLaunch(policy: policy, storedValue: stored,
-                                                                            onboardingCompleted: true, promptPending: false)
-                XCTAssertNil(resolution.write)
-            }
+    // MARK: - Languages Apple does not cover
+
+    /// SpeechTranscriber's supported locales, printed on macOS 26 on 2026-11-21.
+    private let appleSupported = ["bn-IN", "de-AT", "de-CH", "de-DE", "en-AU", "en-CA", "en-GB", "en-IE", "en-IN",
+                                  "en-NZ", "en-SG", "en-US", "en-ZA", "es-CL", "es-ES", "es-MX", "es-US", "fr-BE",
+                                  "fr-CA", "fr-CH", "fr-FR", "gu-IN", "hi-IN", "it-CH", "it-IT", "ja-JP", "kn-IN",
+                                  "ko-KR", "ks-IN", "mai-IN", "ml-IN", "mr-IN", "mul-IN", "ne-IN", "or-IN", "pa-IN",
+                                  "pt-BR", "pt-PT", "ta-IN", "te-IN", "ur-IN", "yue-CN", "zh-CN", "zh-HK", "zh-TW"]
+
+    func testCoverageReadsTheLanguageSubtagOnly() {
+        XCTAssertTrue(InKeyboardDictationRoute.isLanguageCovered("zh", bySupportedLocales: appleSupported))
+        XCTAssertTrue(InKeyboardDictationRoute.isLanguageCovered("fr", bySupportedLocales: appleSupported))
+        XCTAssertFalse(InKeyboardDictationRoute.isLanguageCovered("ru", bySupportedLocales: appleSupported))
+        XCTAssertFalse(InKeyboardDictationRoute.isLanguageCovered("nl", bySupportedLocales: appleSupported))
+    }
+
+    /// The fallback: a language Apple does not cover (or whose model is not installed)
+    /// answers "not installed", and the tap takes today's path — open the app — with no
+    /// error line and nothing inserted.
+    func testUncoveredLanguageOpensTheAppQuietly() {
+        let route = InKeyboardDictationRoute.decide(settingEnabled: true, appAnswered: false, systemMajorVersion: 26,
+                                                    localeInstalled: false, hasFullAccess: true, microphone: .granted)
+        XCTAssertEqual(route, .openAppURL)
+    }
+
+    // MARK: - Activation by the chosen dictation language (Pierre, 2026-11-21)
+
+    private func eligibility(_ mode: TranscriptionLanguageMode, keyboard: String = "fr") -> InKeyboardLanguageEligibility {
+        InKeyboardLanguageEligibility.evaluate(mode: mode, keyboardLanguageCode: keyboard, supportedLocales: appleSupported)
+    }
+
+    func testCoveredLanguageKeepsTheSettingOn() {
+        XCTAssertEqual(eligibility(.followKeyboard), .covered("fr"))
+        XCTAssertTrue(InKeyboardLanguageEligibility.isEffectivelyOn(userChoice: nil, eligibility: eligibility(.followKeyboard)))
+    }
+
+    func testUncoveredLanguageTurnsTheSettingOff() {
+        let uncovered = InKeyboardLanguageEligibility.evaluate(mode: .followKeyboard, keyboardLanguageCode: "ru",
+                                                               supportedLocales: appleSupported)
+        XCTAssertEqual(uncovered, .notCovered("ru"))
+        XCTAssertFalse(InKeyboardLanguageEligibility.isEffectivelyOn(userChoice: nil, eligibility: uncovered))
+        XCTAssertFalse(InKeyboardLanguageEligibility.isEffectivelyOn(userChoice: true, eligibility: uncovered))
+    }
+
+    /// The user never touched the toggle: off while the language is not covered, back on
+    /// when they return to a covered one.
+    func testChangingToAnUncoveredLanguageTurnsItOffAndBackOnWhenCoveredAgain() {
+        let before = InKeyboardLanguageEligibility.evaluate(mode: .followKeyboard, keyboardLanguageCode: "fr", supportedLocales: appleSupported)
+        let during = InKeyboardLanguageEligibility.evaluate(mode: .followKeyboard, keyboardLanguageCode: "ru", supportedLocales: appleSupported)
+        let after = InKeyboardLanguageEligibility.evaluate(mode: .explicit(.german), keyboardLanguageCode: "ru", supportedLocales: appleSupported)
+        XCTAssertTrue(InKeyboardLanguageEligibility.isEffectivelyOn(userChoice: nil, eligibility: before))
+        XCTAssertFalse(InKeyboardLanguageEligibility.isEffectivelyOn(userChoice: nil, eligibility: during))
+        XCTAssertTrue(InKeyboardLanguageEligibility.isEffectivelyOn(userChoice: nil, eligibility: after))
+    }
+
+    /// The user turned it off themselves: a covered language never turns it back on.
+    func testAUserWhoTurnedItOffStaysOffWhenTheLanguageIsCoveredAgain() {
+        for mode in [TranscriptionLanguageMode.followKeyboard, .explicit(.english)] {
+            XCTAssertFalse(InKeyboardLanguageEligibility.isEffectivelyOn(userChoice: false, eligibility: eligibility(mode)))
         }
     }
 
-    // MARK: - The decided policy (Pierre, 2026-11-21)
-
-    func testTheShippedPolicyIsNewInstallsOnly() {
-        XCTAssertEqual(InKeyboardDictationDefault.policy, .newInstallsOnly)
+    /// Covered, but Apple's model for it is not on the iPhone yet: today's path for this
+    /// dictation (the keyboard reserves the locale and starts the download, logged as
+    /// `reserve` / `assetInstall`); nothing is shown and nothing is inserted.
+    func testCoveredLanguageWithoutTheModelTakesTodaysPathForThatDictation() {
+        XCTAssertTrue(eligibility(.followKeyboard).isCovered)
+        XCTAssertEqual(InKeyboardDictationRoute.decide(settingEnabled: true, appAnswered: false, systemMajorVersion: 26,
+                                                       localeInstalled: false), .openAppURL)
     }
 
-    /// New install under the shipped policy: the first launch (onboarding not done) turns
-    /// the setting on, and no question is asked.
-    func testShippedPolicyTurnsANewInstallOn() {
-        let resolution = InKeyboardDictationDefault.resolveAtLaunch(
-            policy: InKeyboardDictationDefault.policy, storedValue: nil,
-            onboardingCompleted: false, promptPending: false
-        )
-        XCTAssertEqual(resolution, .init(write: true, prompt: false))
+    /// Automatic detection, whatever the spoken language declared in onboarding: no
+    /// single language to dictate in, so off in effect and today's path.
+    func testAutoDetectTurnsItOff() {
+        XCTAssertEqual(eligibility(.autoDetect), .autoDetect)
+        XCTAssertNil(InKeyboardDictationRoute.dictationLanguageCode(mode: .autoDetect, keyboardLanguageCode: "en"))
+        XCTAssertFalse(InKeyboardLanguageEligibility.isEffectivelyOn(userChoice: true, eligibility: .autoDetect))
     }
 
-    /// Existing user under the shipped policy: off, and exactly one "Turn on / Later"
-    /// question until it is answered, then never again.
-    func testShippedPolicyAsksAnExistingUserOnceWithTheSettingOff() {
-        let policy = InKeyboardDictationDefault.policy
-        let first = InKeyboardDictationDefault.resolveAtLaunch(policy: policy, storedValue: nil,
-                                                               onboardingCompleted: true, promptPending: false)
-        XCTAssertEqual(first, .init(write: false, prompt: true))
-        defaults.set(false, forKey: SharedKeys.inKeyboardDictationEnabled)
-        XCTAssertFalse(InKeyboardDictationRoute.isSettingEnabled(in: defaults))
+    /// Several keyboard languages in "follow the keyboard": each tap dictates in the
+    /// keyboard language of the moment, checked again each time.
+    func testFollowKeyboardFollowsEachKeyboardLanguage() {
+        for code in ["fr", "en", "es", "de"] {
+            XCTAssertEqual(InKeyboardDictationRoute.dictationLanguageCode(mode: .followKeyboard, keyboardLanguageCode: code), code)
+            XCTAssertTrue(eligibility(.followKeyboard, keyboard: code).isCovered)
+        }
+    }
 
-        // "Later": the setting stays off, the question is answered.
-        let afterLater = InKeyboardDictationDefault.resolveAtLaunch(policy: policy, storedValue: false,
-                                                                    onboardingCompleted: true, promptPending: false)
-        XCTAssertEqual(afterLater, .init(write: nil, prompt: false))
-        // "Turn on": the setting is on, the question is answered.
-        let afterTurnOn = InKeyboardDictationDefault.resolveAtLaunch(policy: policy, storedValue: true,
-                                                                     onboardingCompleted: true, promptPending: false)
-        XCTAssertEqual(afterTurnOn, .init(write: nil, prompt: false))
+    func testChineseLocaleFollowsTheDeviceRegion() {
+        XCTAssertEqual(InKeyboardDictationRoute.speechLocaleIdentifier(languageCode: "zh", deviceLocaleIdentifier: "en_US"), "zh-CN")
+        XCTAssertEqual(InKeyboardDictationRoute.speechLocaleIdentifier(languageCode: "zh", deviceLocaleIdentifier: "zh_TW"), "zh-TW")
+        // Russian is not listed by Apple: the bare code goes to `supportedLocale`, which answers nil.
+        XCTAssertEqual(InKeyboardDictationRoute.speechLocaleIdentifier(languageCode: "ru", deviceLocaleIdentifier: "ru_RU"), "ru-RU")
     }
 }

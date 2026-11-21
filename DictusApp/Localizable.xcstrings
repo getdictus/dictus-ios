@@ -3473,17 +3473,6 @@
         }
       }
     },
-    "Dictate with the app closed?" : {
-      "comment" : "One-time question in DictusApp after the update, only under the newInstallsOnly default policy (#992): title.",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dicter avec l’app fermée ?"
-          }
-        }
-      }
-    },
     "Dictate, get the translation" : {
       "comment" : "Onboarding Smart Mode pick, Translate group, when the spoken language is unknown (#677).",
       "localizations" : {
@@ -4451,6 +4440,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Comment fonctionne la dictée"
+          }
+        }
+      }
+    },
+    "Your dictation language is not available for Apple's dictation, so the keyboard opens the app, as before." : {
+      "comment" : "How dictation works: shown when Apple's on-device dictation does not cover the chosen dictation language, which greys out Dictate in the keyboard (#992).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Votre langue de dictée n’est pas disponible pour la dictée d’Apple : le clavier ouvre l’app, comme avant."
+          }
+        }
+      }
+    },
+    "With automatic language detection, the keyboard opens the app, as before: Apple's dictation needs one language." : {
+      "comment" : "How dictation works: shown when the transcription language is automatic detection, which greys out Dictate in the keyboard (#992).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avec la détection automatique de la langue, le clavier ouvre l’app, comme avant : la dictée d’Apple a besoin d’une seule langue."
           }
         }
       }
@@ -5426,17 +5437,6 @@
         }
       }
     },
-    "Turn on" : {
-      "comment" : "One-time question in DictusApp after the update, only under the newInstallsOnly default policy (#992): button that turns the setting on.",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Activer"
-          }
-        }
-      }
-    },
     "Type" : {
       "comment" : "Feedback form (#565).",
       "localizations" : {
@@ -5536,17 +5536,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Quand l’app Dictus est fermée"
-          }
-        }
-      }
-    },
-    "When the Dictus app is closed, the keyboard can dictate by itself with Apple's dictation, on your iPhone." : {
-      "comment" : "One-time question in DictusApp after the update, only under the newInstallsOnly default policy (#992): message.",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Quand l’app Dictus est fermée, le clavier peut dicter seul avec la dictée d’Apple, sur votre iPhone."
           }
         }
       }

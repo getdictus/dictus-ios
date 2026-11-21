@@ -427,9 +427,10 @@ public enum SharedKeys {
     /// Bool: the one-time explanation of in-keyboard dictation has been shown in the
     /// keyboard. See `InKeyboardFirstUse`.
     public static let inKeyboardFirstUseShown = "dictus.inKeyboardFirstUseShown"
-    /// Bool: under the `newInstallsOnly` default policy, an existing user still owes an
-    /// answer to the one-time prompt in the app. See `InKeyboardDictationDefault`.
-    public static let inKeyboardDefaultPromptPending = "dictus.inKeyboardDefaultPromptPending"
+    /// String: the app's last reading of `InKeyboardLanguageEligibility` for the chosen
+    /// dictation language ("covered" / "notCovered" / "autoDetect"), for the greyed
+    /// setting and its explanation line. The keyboard checks the language itself.
+    public static let inKeyboardLanguageEligibility = "dictus.inKeyboardLanguageEligibility"
 
     // MARK: - Retired keys
     /// The #357 probe's arming flag, removed with the probe in #361. Kept as a

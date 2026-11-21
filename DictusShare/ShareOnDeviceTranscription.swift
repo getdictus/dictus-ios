@@ -33,15 +33,18 @@ enum ShareOnDeviceTranscription {
         let recognizer = OnDeviceRecognizerFactory.make()
         let code = languageCode()
         var installed: Bool?
-        if let recognizer { installed = await recognizer.isReadyOnDevice(languageCode: code) }
+        // Automatic detection: no single language for Apple's transcriber, so `nil`
+        // routes to today's "open Dictus".
+        if let recognizer, let code { installed = await recognizer.isReadyOnDevice(languageCode: code) }
         let route = VoiceNoteRoute.decide(
             appTookIt: false,
             settingEnabled: InKeyboardDictationRoute.isSettingEnabled(in: AppGroup.defaults),
             systemMajorVersion: InKeyboardDictationRoute.majorVersion(of: UIDevice.current.systemVersion),
             localeInstalled: installed
         )
-        log("route", "route=\(route.rawValue) engine=\(recognizer?.engineName ?? "none") lang=\(code) installed=\(installed.map(String.init) ?? "unknown") \(memory())")
-        return Decision(route: route, recognizer: recognizer, languageCode: code)
+        log("route", "route=\(route.rawValue) engine=\(recognizer?.engineName ?? "none") lang=\(code ?? "auto") installed=\(installed.map(String.init) ?? "unknown") \(memory())")
+        // `languageCode` is only read on the on-device route, which needs a language.
+        return Decision(route: route, recognizer: recognizer, languageCode: code ?? "")
     }
 
     /// Transcribe every drop here. Returns false at the first one that cannot be done, so
@@ -143,12 +146,13 @@ enum ShareOnDeviceTranscription {
     // MARK: - Inputs
 
     /// The voice note's dictation language, the same policy the app's queue uses.
-    private static func languageCode() -> String {
+    private static func languageCode() -> String? {
         let policy = VoiceNoteSettings.load().languagePolicy(
             activeModel: AppGroup.defaults.string(forKey: SharedKeys.activeModel) ?? "openai_whisper-small",
             keyboardLanguage: SupportedLanguage.active
         )
-        return policy.sttLanguageCode ?? SupportedLanguage.active.rawValue
+        // Automatic detection: nil, as in the keyboard.
+        return policy.sttLanguageCode ?? InKeyboardDictationRoute.activeDictationLanguageCode()
     }
 
     private static func vocabularyTerms() -> [String] {

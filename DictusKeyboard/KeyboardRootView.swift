@@ -298,7 +298,10 @@ struct KeyboardRootView: View {
                     // sticky mode safe, so naming a mode this dictation will not
                     // run is the one thing it must never do. It already draws
                     // nothing for Normal, and a mode that will not run *is* Normal.
-                    armedSmartMode: smartModes.effectiveMode
+                    armedSmartMode: smartModes.effectiveMode,
+                    // Read at each render; every status change re-renders, and the
+                    // flag is set before the first one of an in-keyboard dictation.
+                    onDeviceEngine: InKeyboardDictation.shared.ownsKeyboardStatus
                 )
             } else if presentedMode == .voiceNoteResult, let reader = voiceNotes.reader {
                 // The voice note reader (#637): the whole surface, toolbar band
