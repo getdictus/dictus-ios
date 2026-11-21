@@ -332,6 +332,55 @@ public enum PersistentLog {
         return String(line[line.index(after: line.startIndex)..<closeBracket])
     }
 
+    #if DEBUG
+    // MARK: - Typing journal (#1001)
+
+    /// Whether this process has already dropped the lines older than `retentionPeriod`.
+    /// Read and written on `writeQueue` only.
+    private static var prunedForJournal = false
+
+    /// Appends the text `make` builds, in order with every other line. `make` runs on
+    /// the write queue, so the keystroke that produced the events does not format them.
+    ///
+    /// The first append of a process also drops the lines older than 7 days, so a
+    /// journal left running is purged on the device, not only on export.
+    static func appendDebugText(_ make: @escaping @Sendable () -> String) {
+        guard let url = fileURL else { return }
+        writeQueue.async {
+            // Marked done only once the file could be read: before the first unlock after
+            // a boot the App Group refuses it, and the next append tries again.
+            if !prunedForJournal, FileManager.default.isReadableFile(atPath: url.path) {
+                prunedForJournal = true
+                pruneOldEntries(url: url, cutoffDate: Date().addingTimeInterval(-retentionPeriod))
+            }
+            let made = make()
+            guard !made.isEmpty else { return }
+            var text = takePendingRepeatLine() ?? ""
+            text += made
+            resetCollapseState()
+            coordinatedAppend(text, to: url)
+            coordinatedTrim(url: url)
+        }
+    }
+
+    /// Rewrites the file without the lines `isRemoved` matches. Runs on the write
+    /// queue, so no line logged before the call survives it, and reads and writes in
+    /// one coordinated pass, so the keyboard's process cannot append in between.
+    static func removeLines(where isRemoved: @escaping (Substring) -> Bool) {
+        guard let url = fileURL else { return }
+        writeQueue.sync {
+            let coordinator = NSFileCoordinator()
+            var error: NSError?
+            coordinator.coordinate(writingItemAt: url, options: .forReplacing, error: &error) { coordURL in
+                guard let content = try? String(contentsOf: coordURL, encoding: .utf8) else { return }
+                let kept = content.split(separator: "\n", omittingEmptySubsequences: true).filter { !isRemoved($0) }
+                try? (kept.isEmpty ? "" : kept.joined(separator: "\n") + "\n")
+                    .write(to: coordURL, atomically: true, encoding: .utf8)
+            }
+        }
+    }
+    #endif
+
     // MARK: - Legacy API (Deprecated)
 
     /// Legacy free-text log method. Use `log(_ event: LogEvent)` instead.

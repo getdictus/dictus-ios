@@ -48,6 +48,10 @@ public struct LanguageProfile: Sendable {
     /// apostrophe. Empty for languages without contractions (English, Spanish).
     public let contractionPrefixes: [String]
 
+    /// Elisions typed with a wrong prefix, a key in place of the apostrophe, or a
+    /// space (#1006). nil for languages without elision.
+    public let elisionRepair: ElisionRepair?
+
     /// Length-changing substring substitutions tried by `AccentExpander` when a
     /// typed word isn't a stronger match in the dictionary. Each rule is
     /// `(from, to)` where `from` is the substring to find and `to` is its
@@ -61,6 +65,17 @@ public struct LanguageProfile: Sendable {
     /// that nobody has written the list for.
     public let participleContext: ParticipleContext?
 
+    /// Known misspellings, lowercase, with their correct form: the entries
+    /// `tools/misspellings/` removed from the word list (`teh` → `the`). Read
+    /// with `overrides`, and kept apart from it because it is generated from a
+    /// public list rather than curated. See `KnownMisspellings.swift`.
+    public let misspellings: [String: String]
+
+    /// Contractions typed without their apostrophe that are also words on their
+    /// own (`ill` for `I'll`), corrected only where the words before call for
+    /// the contraction. See `ContextualContraction`.
+    public let contextualContractions: [ContextualContraction]
+
     public init(
         code: String,
         displayName: String,
@@ -71,8 +86,11 @@ public struct LanguageProfile: Sendable {
         overrides: [String: String],
         accentMap: [Character: [Character]],
         contractionPrefixes: [String],
+        elisionRepair: ElisionRepair? = nil,
         collapseRules: [(from: String, to: String)] = [],
-        participleContext: ParticipleContext? = nil
+        participleContext: ParticipleContext? = nil,
+        misspellings: [String: String] = [:],
+        contextualContractions: [ContextualContraction] = []
     ) {
         self.code = code
         self.displayName = displayName
@@ -83,8 +101,11 @@ public struct LanguageProfile: Sendable {
         self.overrides = overrides
         self.accentMap = accentMap
         self.contractionPrefixes = contractionPrefixes
+        self.elisionRepair = elisionRepair
         self.collapseRules = collapseRules
         self.participleContext = participleContext
+        self.misspellings = misspellings
+        self.contextualContractions = contextualContractions
     }
 }
 

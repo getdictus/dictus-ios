@@ -349,6 +349,11 @@ class SuggestionState: ObservableObject {
         return engine.spellCheck(word, previousWord: previousWord, isAtSentenceStart: isAtSentenceStart)
     }
 
+    /// The elision the previous word and `word` make across a mistyped space (#1006).
+    func elisionAcrossSpace(previousWord: String, word: String) -> String? {
+        engine.elisionAcrossSpace(previousWord: previousWord, word: word)
+    }
+
     /// What `performSpellCheck(_:previousWord:isAtSentenceStart:)` decides, plus the
     /// corrections the bar offers when the typed word is kept (#993). The space bar
     /// applies only its autocorrection; the learning site reads whether corrections

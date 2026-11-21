@@ -525,6 +525,14 @@ struct KeyboardRootView: View {
         guard index < suggestionState.suggestions.count else { return }
         let suggestion = suggestionState.suggestions[index]
         guard let proxy = state.controller?.textDocumentProxy else { return }
+        #if DEBUG
+        TypingJournal.barTapped(
+            slot: index,
+            bar: TypingJournalBar(mode: "\(suggestionState.mode)", words: suggestionState.suggestions),
+            typed: suggestionState.currentWord,
+            commits: !(suggestionState.mode == .undoAvailable && index == 0)
+        )
+        #endif
 
         // Prediction mode: insert word + trailing space, bypass autocorrect, chain predictions.
         if suggestionState.mode == .predictions {
@@ -686,7 +694,8 @@ struct KeyboardRootView: View {
         memory.correctionUndone(prefix: context[..<range.lowerBound], original: undo.originalWord)
         // A host without a document identifier keeps no memory, so nothing could be
         // learned later: learn on the tap there, as before #872.
-        if !memory.remembersRefusals {
+        // Two words restored by an elision repair (#1006) are never one learned word.
+        if !memory.remembersRefusals, !undo.originalWord.contains(" ") {
             UserDictionary.shared.learn(undo.originalWord)
         }
     }

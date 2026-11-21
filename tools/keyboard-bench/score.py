@@ -117,6 +117,17 @@ def tap_section(rows):
             us = [int(r["engine_us"]) for r in rs if pick(r)]
             out.append(f"| {lang} | {kind} | {len(us)} | {ms(us, 0.5)} | {ms(us, 0.95)} | {ms(us, 1.0)} |")
     out.append("")
+    # A bench built with `run.sh --debug` also times the typing journal's tap call (#1001).
+    if any(int(r.get("journal_ns") or 0) for r in rows):
+        out += ["## Typing journal per tap (µs)", "",
+                "What recording one tap costs on the keystroke: the call `GiellaKeyboardView` makes where a "
+                "touch resolves to a key. Taps that resolved to no key are not recorded.", "",
+                "| lang | taps | p50 | p95 | max |", "|---|---:|---:|---:|---:|"]
+        for lang, rs in by_lang.items():
+            us = sorted(int(r["journal_ns"]) / 1000 for r in rs if r["resolved"] != "none")
+            at = lambda q: f"{us[min(len(us) - 1, int(q * len(us)))]:.1f}" if us else "n/a"
+            out.append(f"| {lang} | {len(us)} | {at(0.5)} | {at(0.95)} | {at(1.0)} |")
+        out.append("")
     return out
 
 

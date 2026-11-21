@@ -53,6 +53,26 @@ public let frenchProfile = LanguageProfile(
         // 2-character prefix (qu')
         "qu'"
     ],
+    elisionRepair: ElisionRepair(
+        // AZERTY neighbours of the prefix that was meant. Valid prefixes are not keys.
+        prefixSlips: [
+            "v": "c", "x": "c",              // v'est, x'est → c'est
+            "f": "d",                        // f'un → d'un
+            "g": "j", "h": "j", "k": "j",    // g'ai, h'ai, k'ai → j'ai
+            "b": "n",                        // b'est → n'est
+            "y": "t", "r": "t", "u": "t",    // y'es, r'es, u'es → t'es
+            "q": "qu",                       // q'il → qu'il
+            "qy": "qu", "qi": "qu", "qj": "qu"  // the keys left of, right of and under `u`
+        ],
+        // The key left of the apostrophe on the AZERTY letter page: `qunil` → `qu'il`.
+        apostropheNeighbours: ["n"],
+        // Only the elisions a slip or a space is repaired into: the shapes also occur
+        // inside words and their typos.
+        elidedWords: [
+            "qu": ["il", "ils", "elle", "elles", "on", "un", "une"],
+            "c": ["est", "\u{00E9}tait"]  // est, était
+        ]
+    ),
     // `il est arrive` → `arrivé`, `il arrive` stays (#994). The auxiliaries être and
     // avoir in their simple tenses, and the adverbs that sit between an auxiliary and
     // its participle (`sont déjà couchés`, `était presque déchargé`). French puts these

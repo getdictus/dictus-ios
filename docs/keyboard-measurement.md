@@ -93,9 +93,24 @@ Taps keep the run's rhythm: `axe` sleeps between them for the run's own interval
 
 ### 3. Device
 
-What a device adds is the real finger and the real hardware. What it cannot give is
-the touch points: recording them needs code in the keyboard extension, which this
-protocol does not add.
+What a device adds is the real finger and the real hardware. A Release build gives no
+touch points. A Debug build records them in its typing journal (#1001), with the
+"Autocorrect debug logs" switch on (Settings, Developer): every tap with its key and
+its offset from the key centre, every committed word with its candidates, the bar, and
+what the user did next. Export the logs, then turn the session into a run and replay
+it before and after a change:
+
+```bash
+python3 -I tools/keyboard-bench/journal_to_run.py dictus-logs.txt build/keyboard-bench/session
+tools/keyboard-bench/run.sh --udid <udid> --langs fr-journal \
+    --corpus build/keyboard-bench/session/corpus --runs build/keyboard-bench/session/runs
+```
+
+A replayed session types every tap on the key it hit on the device: checked on the
+bench's own journal, 1604 of 1604 taps resolved to the same key and 306 of 307 words
+came out the same; the other one was capitalised, because the converter starts a new
+sentence at a return tap, as the device does. Taps on the symbols page, held-backspace
+repeats and words tapped in the bar do not replay; the converter counts them.
 
 **Accuracy.** For each keyboard (Apple's, then Dictus) and each language:
 
