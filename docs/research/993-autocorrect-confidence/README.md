@@ -109,3 +109,54 @@ bold. A space then left `Nous avons reserve ` in the field.
 Reminders, fed the replay's tap points for en sentence 14 with `axe`. The taps type
 `meef`; the keyboard writes "We need to buy tomatoes and some cheese". Before this
 change the same taps gave "meet" or "meer", depending on the launch.
+
+## Device follow-up: close readings are corrected (2026-11-21)
+
+Pierre's device test of the PR (build `b85eeb31`, typing journal) found the
+ambiguity band too conservative: `zrrive` (after `est`), `zrreve`, `arribe`
+(after `suis`), `sats` (after `les`) and `qur` (after `passai`) were offered in
+the bar and left as typed, where Apple's keyboard corrects them. Two close
+readings are now settled by context, then frequency. The typed word is still kept
+when three or more readings are close once accents are dropped, or when the pick
+scores under 0.15. The accent pass keeps its tie rule.
+
+The trie's real top ten for each case, read with the bench's dictionaries, sit in
+`CorrectionRankingTests`. The n-gram data has no pair for any of them
+(`est arrivé`, `suis arrivé`, `les sais`, `passai que` all score 0), so frequency
+decides:
+
+| typed | before | after | the device wanted |
+|---|---|---|---|
+| `zrrive`, `arribe` | kept | arrive (`arrivé` second) | arrivé |
+| `zrreve` | kept | arrive | arrive |
+| `sats` | kept | sais | sais |
+| `qur` | kept | sur (`que` second) | que or qui |
+| `Disxord`, French | discord | discord | Discord |
+| `Disxord`, English | kept | kept (`discard` scores 0.12) | Discord, not in the English list |
+
+Bench, `after-device-followup.md` (fr, en) and
+`after-device-followup-en-typos-es-de.md`, head `facfc8ed`:
+
+| run | miscorrected, #997 | miscorrected, now | broken | fixed |
+|---|---:|---:|---:|---:|
+| fr | 1 | 1 | 0 → 0 | 22 → 22 |
+| en | 1 | 1 | 0 → 0 | 13 → 13 |
+| en-typos | 1 | 1 | 0 → 0 | 23 → 23 |
+| es | 1 | **2** | 0 → 0 | 16 → 16 |
+| de | 0 | **1** | 0 → 0 | 16 → 16 |
+
+Two words changed, both the rule doing what it says on a word the data cannot
+place: `ests` (meant `está`) becomes `esta` over `este`, and `vestellt` (meant
+`bestellt`) becomes `gestellt`, 0.005 dearer to reach and more frequent. That is
+the same choice as `sats` → `sais`. `irning`, `decalee`, `reùion` and `reserve` stay
+as typed.
+
+`dictus-sim-arribe-bar.png` and `dictus-sim-arribe-sats-after.png`: the Dictus
+keyboard on the simulator, French, the taps of `je suis arribe tu les sats `. Before
+the space the bar shows `"arribe" | arrive | arrivé` with `arrive` in bold; the text
+ends as "Je suis arrive tu les sais".
+
+A word kept as typed while the bar offered corrections is no longer counted toward
+learning: `arribe`, kept twice that way on the device, had been learned, and
+`areibe` then became `arribe`. A tap on the typed word and an undo still teach it
+(`AutocorrectRejectionMemoryTests`).

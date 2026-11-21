@@ -81,3 +81,25 @@ Reminders, fed the replay's tap points for fr sentences 9, 11, 13 and 18 with `a
 - Elle a trouvé un appartement près du centre
 - Les enfants sont déjà couchés depuis une heure
 - Tu as oublié tes clés sur la table
+
+## After merging #997's device follow-up (`0e0a930d`)
+
+`3c6009ec` merges #997 at `0e0a930d` into this branch. Same bench, same simulator,
+2026-11-21, the three commits rerun side by side. The rerun of `d86d5a99` wrote the
+same `commits.tsv` as `after-commits.tsv` above, byte for byte.
+
+| run | miscorrected (#997 `0e0a930d` / #1000 `d86d5a99` → merge) | broken | fixed | accent-only misses |
+|---|---|---|---|---|
+| fr | 1 / 0 → **0** | 0 / 0 → 0 | 22 / 28 → **28** | 7 / 2 → **2** |
+| es | 2 / 2 → **3** | 0 / 0 → 0 | 16 / 29 → **29** | 18 / 5 → **5** |
+| en | 1 / 1 → 1 | 0 / 0 → 0 | 13 / 13 → 13 | 0 / 0 → 0 |
+| en-typos | 1 / 1 → 1 | 0 / 0 → 0 | 23 / 23 → 23 | 0 / 0 → 0 |
+| de | 1 / 0 → **1** | 0 / 0 → 0 | 16 / 16 → 16 | 0 / 0 → 0 |
+
+Against `d86d5a99`, two words changed, and they are the two #997's follow-up changes on
+its own branch: Spanish `ests` (meant `está`) becomes `esta`, German `vestellt` (meant
+`bestellt`) becomes `gestellt`. Against `0e0a930d`, the words that changed are exactly the
+accent restorations of the table above (`reserve` → `réservé` after `avons` included).
+The accent pass still decides with `AccentRestoration`: the merge drops #997's rewrite of
+`ambiguousAccentSpellings`, which this branch had removed. Report and per-word commits:
+`after-997-followup.md`, `after-997-followup-commits.tsv`.

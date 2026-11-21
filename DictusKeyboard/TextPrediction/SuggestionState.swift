@@ -354,6 +354,18 @@ class SuggestionState: ObservableObject {
         engine.elisionAcrossSpace(previousWord: previousWord, word: word)
     }
 
+    /// What `performSpellCheck(_:previousWord:isAtSentenceStart:)` decides, plus the
+    /// corrections the bar offers when the typed word is kept (#993). The space bar
+    /// applies only its autocorrection; the learning site reads whether corrections
+    /// were offered.
+    func correctionProposal(
+        _ word: String,
+        previousWord: String?,
+        isAtSentenceStart: Bool
+    ) -> CorrectionProposal? {
+        engine.correctionProposal(for: word, previousWord: previousWord, isAtSentenceStart: isAtSentenceStart)
+    }
+
     /// Reads the contacts + text replacements lexicon (#873) and hands it to the
     /// engine. `requestSupplementaryLexicon` needs neither Contacts permission nor
     /// Full Access.
