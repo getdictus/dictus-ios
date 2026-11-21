@@ -33,6 +33,12 @@ first baseline is [`docs/research/954-keyboard-baseline/`](research/954-keyboard
   common words (`mzrci`, `thabks`) among them, learned once. Pass
   `--langs fr,en,fr-learned,en-learned` to `run.sh` to replay them. The `fr` and `en`
   runs start from an empty user dictionary.
+- **Mixed French and English** (#1009). `corpus/mixed.txt` and `mixed-heldout.txt`
+  hold 20 sentences each that switch between the two languages, with the gold language
+  of every word in `<name>.lang`. `run.sh --pair fr,en` replays them, with `fr` and `en`,
+  through the bilingual keyboard ([README](../tools/keyboard-bench/README.md#bilingual-replay-1009)).
+  `mixed` is the run the detection was designed on; `mixed-heldout` was written before
+  any replay and is never tuned on.
 
 - **Typo runs.** `corpus/<lang>-typos.txt` and `.keys` for en, es, de: what the typist
   means and what they type when they make the language's frequent real mistakes (no

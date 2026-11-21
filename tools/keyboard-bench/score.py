@@ -150,7 +150,12 @@ def commit_section(rows):
     for lang, rs in by_lang.items():
         c = Counter()
         for r in rs:
-            meant, typed, final = norm(r["intended"]), norm(r["typed"]), norm(r["final"])
+            # A run made from a device journal (#1001) writes a multi-word commit with "_"
+            # and a word whose intent is unknown as "-" (journal_to_run.py --intended).
+            meant, typed, final = norm(r["intended"]).replace("_", " "), norm(r["typed"]), norm(r["final"])
+            if meant == "-" or meant.startswith("- ") or meant.endswith(" -") or " - " in meant:
+                c["unknown"] += 1
+                continue
             if " " in meant:
                 c["glued"] += 1
                 if final == meant:

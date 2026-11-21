@@ -127,6 +127,10 @@ final class DictusKeyboardBridge: NSObject,
     /// several instances live in this process.
     let mirrorSync = MirrorSyncState()
 
+    /// Where the finger landed for each character of the word being typed, for the
+    /// spatial decoder (#1011). Filled only while its Debug switch is on.
+    fileprivate var spatialTouches = SpatialTouchBuffer()
+
     /// The document, behind the seam the counting sites are tested through (#530).
     /// Rebuilt on demand because `controller` is weak and may be swapped out.
     var documentEditor: TextDocumentEditing { ProxyDocumentEditor(controller: controller) }
@@ -441,6 +445,7 @@ final class DictusKeyboardBridge: NSObject,
 
         // Trigger suggestion update after every character input.
         let context = controller?.textDocumentProxy.documentContextBeforeInput
+        noteSpatialTap(character, context: context)
         suggestionState?.updateAsync(context: context)
     }
 
@@ -484,6 +489,7 @@ final class DictusKeyboardBridge: NSObject,
         updateAccentKeyDisplay()
         let context = controller?.textDocumentProxy.documentContextBeforeInput
         noteDeletion(before: contextBefore, after: context)
+        noteSpatialDeletion(context: context)
         suggestionState?.updateAsync(context: context)
     }
 
@@ -739,7 +745,10 @@ final class DictusKeyboardBridge: NSObject,
             precedingChar: secondToLastInsertedCharacter
         )
 
-        if FrenchAdaptiveKey.shouldReplace(afterTyping: lastInsertedCharacter, precedingChar: secondToLastInsertedCharacter) {
+        let replacesVowel = FrenchAdaptiveKey.shouldReplace(
+            afterTyping: lastInsertedCharacter, precedingChar: secondToLastInsertedCharacter
+        )
+        if replacesVowel {
             // Replace previous vowel with accented version
             let mirrorBefore = mirrorLength()
             controller?.textDocumentProxy.deleteBackward()
@@ -776,6 +785,7 @@ final class DictusKeyboardBridge: NSObject,
         updateCapitalization()
         updateAccentKeyDisplay()
         let context = controller?.textDocumentProxy.documentContextBeforeInput
+        noteSpatialTap(label, context: context, replacing: replacesVowel)
         suggestionState?.updateAsync(context: context)
     }
 
@@ -983,7 +993,10 @@ final class DictusKeyboardBridge: NSObject,
         }
 
         let checked = autocorrectRuns
-            ? state.correctionProposal(freshWord, previousWord: previousWord, isAtSentenceStart: atSentenceStart)
+            ? state.correctionProposal(
+                freshWord, previousWord: previousWord, isAtSentenceStart: atSentenceStart,
+                spatial: spatialInput(for: freshWord), context: context
+            )
             : nil
         let proposal = checked?.autocorrection?.correction
         let offersCorrections = checked?.suggestionRow(typedWord: freshWord) != nil
@@ -1383,3 +1396,31 @@ extension DictusKeyboardBridge {
     }
 }
 #endif
+
+// MARK: - Spatial autocorrect (#1011)
+
+extension DictusKeyboardBridge {
+    /// Records where `typed` was tapped, for the spatial decoder. `context` is the
+    /// document after the keystroke: the buffer keeps the tap only while it agrees with
+    /// the token there.
+    fileprivate func noteSpatialTap(_ typed: String, context: String?, replacing: Bool = false) {
+        guard SpatialAutocorrect.isOn else { return }
+        spatialTouches.typed(
+            typed, at: keyboardView?.lastTriggerPoint, keys: keyboardView?.spatialKeys(),
+            token: SpatialTouchBuffer.token(before: context), replacing: replacing
+        )
+    }
+
+    /// A backspace, after which the document reads `context`.
+    fileprivate func noteSpatialDeletion(context: String?) {
+        guard SpatialAutocorrect.isOn else { return }
+        spatialTouches.deleted(token: SpatialTouchBuffer.token(before: context))
+    }
+
+    /// The taps of `word` and the keys they were made on, when the buffer holds them.
+    fileprivate func spatialInput(for word: String) -> SpatialCorrection.Input? {
+        guard SpatialAutocorrect.isOn, let keys = spatialTouches.keys,
+              let taps = spatialTouches.taps(for: word) else { return nil }
+        return SpatialCorrection.Input(taps: taps, keys: keys)
+    }
+}

@@ -378,7 +378,30 @@ struct DictusApp: App {
             ))
         }
         refreshOnboardingFlag()
+        #if DEBUG
+        Self.applyKeyboardDebugArgument("DictusDebugSpatialAutocorrect", key: "debug.spatialAutocorrect")
+        Self.applyKeyboardDebugArgument("DictusDebugBilingualAutocorrect", key: "debug.bilingualAutocorrect")
+        #endif
     }
+
+    #if DEBUG
+    /// `-<argument> YES` (or `NO`) on the launch line turns one of the keyboard's Debug
+    /// experiments on or off, for a device test of a Debug build:
+    /// `xcrun devicectl device process launch --device <id> com.pivi.dictus -DictusDebugSpatialAutocorrect YES`.
+    ///
+    /// - `DictusDebugSpatialAutocorrect`: the spatial decoder (#1011), key
+    ///   `SpatialAutocorrect.switchKey` in DictusKeyboard;
+    /// - `DictusDebugBilingualAutocorrect`: the bilingual check (#1015), key
+    ///   `BilingualAutocorrect.switchKey`.
+    ///
+    /// WHY a launch argument: the switches have no row in the app's settings yet (#992 owns
+    /// SettingsView), and the keyboard, which reads them, gets no launch arguments. Written
+    /// here, with the launch's other App Group writes, once protected data is available.
+    private static func applyKeyboardDebugArgument(_ argument: String, key: String) {
+        guard ProcessInfo.processInfo.arguments.contains("-\(argument)") else { return }
+        AppGroup.defaults.set(UserDefaults.standard.bool(forKey: argument), forKey: key)
+    }
+    #endif
 
     /// Read the onboarding flag from the App Group again: from the file when this
     /// process's view of it is stale (#868).
