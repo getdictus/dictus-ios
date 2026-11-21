@@ -960,6 +960,8 @@ final class DictusKeyboardBridge: NSObject,
             wordWasEvaluated = false
         }
 
+        if autocorrectRuns, let previousWord, replaceElisionAcrossSpace(context: context, previousWord: previousWord, word: freshWord, trailing: trailing) { return true }
+
         let proposal = autocorrectRuns
             ? state.performSpellCheck(
                 freshWord, previousWord: previousWord, isAtSentenceStart: atSentenceStart
@@ -1100,13 +1102,6 @@ final class DictusKeyboardBridge: NSObject,
         updateCapitalization()
         updateAccentKeyDisplay()
         return outcome
-    }
-
-    /// Last ~30 characters of a context string, for DEBUG replacement logs.
-    /// Keeps log lines short while showing the text around the replacement site.
-    static func contextTail(_ context: String?) -> String {
-        guard let context = context else { return "<nil>" }
-        return String(context.suffix(30))
     }
 
     // MARK: - Refused corrections (#872)
@@ -1290,5 +1285,39 @@ extension DictusKeyboardBridge {
               )
         else { return }
         suggestionState?.pendingUndo = nil
+    }
+}
+
+extension DictusKeyboardBridge {
+
+    /// `ce st` → `c'est`, `qu il` → `qu'il` (#1006): the space between the two words
+    /// stood for an apostrophe, so both are replaced, with the usual undo chip.
+    /// False when nothing was replaced: refused here before, mirror suspect, or the
+    /// context does not end with the two words. The caller then commits the word alone.
+    fileprivate func replaceElisionAcrossSpace(
+        context: String,
+        previousWord: String,
+        word: String,
+        trailing: String
+    ) -> Bool {
+        let span = "\(previousWord) \(word)"
+        guard let state = suggestionState, let memory = rejectionMemory,
+              let elision = state.elisionAcrossSpace(previousWord: previousWord, word: word),
+              context.hasSuffix(span) else { return false }
+        let prefix = context.dropLast(span.count)
+        // Not countable: the two words are never learned as one.
+        guard case .correct = memory.commit(prefix: prefix, word: span, proposedCorrection: elision, countable: false),
+              case .applied = applyAutocorrect(state: state, freshWord: span, correction: elision,
+                                               trailing: trailing, previousWord: nil)
+        else { return false }
+        memory.correctionApplied(prefix: prefix, corrected: elision)
+        return true
+    }
+
+    /// Last ~30 characters of a context string, for DEBUG replacement logs.
+    /// Keeps log lines short while showing the text around the replacement site.
+    static func contextTail(_ context: String?) -> String {
+        guard let context = context else { return "<nil>" }
+        return String(context.suffix(30))
     }
 }

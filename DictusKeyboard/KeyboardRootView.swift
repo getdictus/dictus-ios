@@ -686,7 +686,8 @@ struct KeyboardRootView: View {
         memory.correctionUndone(prefix: context[..<range.lowerBound], original: undo.originalWord)
         // A host without a document identifier keeps no memory, so nothing could be
         // learned later: learn on the tap there, as before #872.
-        if !memory.remembersRefusals {
+        // Two words restored by an elision repair (#1006) are never one learned word.
+        if !memory.remembersRefusals, !undo.originalWord.contains(" ") {
             UserDictionary.shared.learn(undo.originalWord)
         }
     }

@@ -349,6 +349,11 @@ class SuggestionState: ObservableObject {
         return engine.spellCheck(word, previousWord: previousWord, isAtSentenceStart: isAtSentenceStart)
     }
 
+    /// The elision the previous word and `word` make across a mistyped space (#1006).
+    func elisionAcrossSpace(previousWord: String, word: String) -> String? {
+        engine.elisionAcrossSpace(previousWord: previousWord, word: word)
+    }
+
     /// Reads the contacts + text replacements lexicon (#873) and hands it to the
     /// engine. `requestSupplementaryLexicon` needs neither Contacts permission nor
     /// Full Access.
