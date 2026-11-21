@@ -558,8 +558,9 @@ class KeyboardViewController: UIInputViewController {
         bridge?.updateCapitalization()
 
         // Read the host field's input traits now that the connection exists (#200).
-        // Search/URL/email fields disable autocorrect and suggestions.
-        bridge?.refreshHostPolicy()
+        // Search/URL/email fields disable autocorrect and suggestions. This is the
+        // focus reading a mention cannot downgrade later (#1004).
+        bridge?.refreshHostPolicy(fieldFocused: true)
 
         // Re-sync the learned-words dictionary from the App Group (#222).
         // The singleton caches in memory per process; if the user reset the
