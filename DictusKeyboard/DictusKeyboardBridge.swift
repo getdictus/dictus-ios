@@ -364,10 +364,13 @@ final class DictusKeyboardBridge: NSObject,
     ///
     /// WHY cached on SuggestionState: updateAsync/updatePredictions run on a
     /// background queue and cannot read UITextDocumentProxy (main-thread only).
-    func refreshHostPolicy() {
-        guard let proxy = controller?.textDocumentProxy else { return }
-        let policy = HostInputTraits.policy(for: proxy)
-        guard policy != suggestionState?.hostPolicy else { return }
+    ///
+    /// - Parameter fieldFocused: the keyboard is appearing, so this reading is the
+    ///   field's focus reading, the one a later mention cannot downgrade (#1004).
+    func refreshHostPolicy(fieldFocused: Bool = false) {
+        guard let proxy = controller?.textDocumentProxy, let state = suggestionState else { return }
+        let policy = state.readHostPolicy(from: proxy, fieldFocused: fieldFocused)
+        guard policy != state.hostPolicy else { return }
 
         #if DEBUG
         AutocorrectDebugLog.hostPolicy(
@@ -377,11 +380,11 @@ final class DictusKeyboardBridge: NSObject,
         )
         #endif
 
-        suggestionState?.hostPolicy = policy
+        state.hostPolicy = policy
         if !policy.suggestionsAllowed {
             // Empty the bar immediately — stale suggestions from the previous
             // field must not survive into a no-suggestions field.
-            suggestionState?.clear()
+            state.clear()
         }
     }
 
