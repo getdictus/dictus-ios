@@ -198,6 +198,7 @@
 		EE000009 /* fr_ngrams.dict in Resources */ = {isa = PBXBuildFile; fileRef = EE100009A /* fr_ngrams.dict */; };
 		EE00000A /* en_ngrams.dict in Resources */ = {isa = PBXBuildFile; fileRef = EE10000AA /* en_ngrams.dict */; };
 		SD1011A1 /* SpatialAutocorrect.swift in Sources */ = {isa = PBXBuildFile; fileRef = SD1011B1 /* SpatialAutocorrect.swift */; };
+		AT1014A1 /* AdaptiveTouchSwitch.swift in Sources */ = {isa = PBXBuildFile; fileRef = AT1014B1 /* AdaptiveTouchSwitch.swift */; };
 		SD1011A2 /* fr.hextm in Resources */ = {isa = PBXBuildFile; fileRef = SD1011B2 /* fr.hextm */; };
 		SD1011A3 /* en.hextm in Resources */ = {isa = PBXBuildFile; fileRef = SD1011B3 /* en.hextm */; };
 		EE0ES001 /* es_spellcheck.dict in Resources */ = {isa = PBXBuildFile; fileRef = EE1ES001 /* es_spellcheck.dict */; };
@@ -518,6 +519,7 @@
 		EE100009A /* fr_ngrams.dict */ = {isa = PBXFileReference; lastKnownFileType = "compiled"; path = fr_ngrams.dict; sourceTree = "<group>"; };
 		EE10000AA /* en_ngrams.dict */ = {isa = PBXFileReference; lastKnownFileType = "compiled"; path = en_ngrams.dict; sourceTree = "<group>"; };
 		SD1011B1 /* SpatialAutocorrect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpatialAutocorrect.swift; sourceTree = "<group>"; };
+		AT1014B1 /* AdaptiveTouchSwitch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdaptiveTouchSwitch.swift; sourceTree = "<group>"; };
 		SD1011B2 /* fr.hextm */ = {isa = PBXFileReference; lastKnownFileType = "compiled"; path = fr.hextm; sourceTree = "<group>"; };
 		SD1011B3 /* en.hextm */ = {isa = PBXFileReference; lastKnownFileType = "compiled"; path = en.hextm; sourceTree = "<group>"; };
 		EE1ES001 /* es_spellcheck.dict */ = {isa = PBXFileReference; lastKnownFileType = "compiled"; path = es_spellcheck.dict; sourceTree = "<group>"; };
@@ -908,6 +910,7 @@
 				AA1000D1 /* SuggestionState.swift */,
 				EE100005 /* AOSPTrieEngine.swift */,
 				SD1011B1 /* SpatialAutocorrect.swift */,
+				AT1014B1 /* AdaptiveTouchSwitch.swift */,
 			);
 			path = TextPrediction;
 			sourceTree = "<group>";
@@ -1582,6 +1585,7 @@
 				AA0000D0 /* TextPredictionEngine.swift in Sources */,
 				AA0000D1 /* SuggestionState.swift in Sources */,
 				SD1011A1 /* SpatialAutocorrect.swift in Sources */,
+				AT1014A1 /* AdaptiveTouchSwitch.swift in Sources */,
 				AA0000D4 /* SuggestionBarView.swift in Sources */,
 				AA0000G0 /* KeyTapSignposter.swift in Sources */,
 				CC000030 /* KeyboardMetrics.swift in Sources */,

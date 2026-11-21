@@ -35,6 +35,7 @@ import DictusCore
 /// (CC BY 3.0, which asks for the attribution), and the word lists that filter them,
 /// SCOWL for English (its notice asks to travel with the output) and Grammalecte's French
 /// dictionary (MPL 2.0, whose notice and source location travel with a derived file).
+/// Adaptive touch (#1014) is ported from Hex too: its entry names both.
 struct LicensesView: View {
     var body: some View {
         ScrollView {
@@ -93,7 +94,7 @@ struct LicensesView: View {
                     name: "Hex",
                     author: "Christopher Langton",
                     url: "https://github.com/anomalyco/hex",
-                    license: mitLicense(copyright: "Copyright (c) 2026 Christopher Langton")
+                    license: Self.hexNotice + mitLicense(copyright: "Copyright (c) 2026 Christopher Langton")
                 )
 
                 licenseBlock(
@@ -145,6 +146,15 @@ struct LicensesView: View {
         (https://creativecommons.org/licenses/by/3.0/). Word and word-pair counts are \
         summed over 1980-2019 and kept only for words in the word lists below; the \
         English model is Hex's, the French one Dictus's, built with Hex's script.
+        """
+
+    /// What Dictus took from Hex, so the entry says which code the MIT notice covers (#1014).
+    private static let hexNotice = """
+        The keyboard's spatial autocorrect decoder and its model format and build script \
+        (#1011), and Adaptive touch, which learns where you tap each key (#1014), are \
+        ported from Hex.
+
+
         """
 
     private static let grammalecteNotice = """
