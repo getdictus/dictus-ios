@@ -20,6 +20,14 @@ instead of folding the intended sentence: the realistic mistakes of
 docs/research/multilingual-autocorrect/. Its taps land on the key centre (no offset),
 so the run measures what autocorrect does with the mistake alone.
 
+`fr-pierre-device` (#996) is typed the same way, from `corpus/fr-pierre-device.keys`: the
+words Pierre typed on his iPhone, each with the words before it. Its lines keep the
+accents and apostrophes he typed, which the French letter page types with the key beside
+`n` (`FrenchAdaptiveKey`): `é`, `à`, `ô`, `î`, `ù` are the vowel then that key, and an
+apostrophe after a consonant is that key alone. An apostrophe after a vowel, which that
+key would turn into an accent, comes from the symbols page (`sym:'`). A line may glue
+two intended words (`pasqueil` for `parce qu'il`).
+
 The touch model is an assumption, not a measurement: Gaussian offsets with the
 standard deviations below, the same for every key. It is what a recorded device run
 would replace (docs/keyboard-measurement.md, "Limits").
@@ -42,7 +50,7 @@ import unicodedata
 # The learned runs type the corpus that holds the learned words of <lang>-learned.words
 # (#498). Each run seeds its own random stream, so adding one leaves the others unchanged.
 LANGS = ["fr", "en", "fr-learned", "en-learned", "es", "de",
-         "en-typos", "es-typos", "de-typos"]
+         "en-typos", "es-typos", "de-typos", "fr-pierre-device"]
 SEED = 954
 # Spread of the landing point around the key centre, in key units.
 SIGMA_X = 0.22
@@ -76,11 +84,26 @@ def keys_for(sentence, lang="fr"):
     return keys
 
 
-def typed_keys(line):
-    """A typo run's keys: every character of the line as written, one space per word."""
+# What the French adaptive key writes after each vowel (FrenchAdaptiveKey.defaults).
+FRENCH_ACCENT_KEY = {"é": "e", "à": "a", "ô": "o", "î": "i", "ù": "u"}
+VOWELS = "aeiouy"
+
+
+def typed_keys(line, lang="en"):
+    """A typed run's keys: every character of the line as written, one space per word.
+    On the French page, an accented vowel or an apostrophe goes through the adaptive key."""
     keys = []
     for word in line.split():
-        keys.extend(word)
+        for i, char in enumerate(word):
+            if lang != "fr":
+                keys.append(char)
+            elif char in FRENCH_ACCENT_KEY:
+                keys.extend([FRENCH_ACCENT_KEY[char], "accent"])
+            elif char == "'":
+                after_vowel = i > 0 and word[i - 1] in VOWELS and word[max(0, i - 2):i] != "qu"
+                keys.append("sym:'" if after_vowel else "accent")
+            else:
+                keys.append(char)
         keys.append("space")
     return keys
 
@@ -101,17 +124,19 @@ def main():
         rng = random.Random(f"{args.seed}-{lang}")
         with open(os.path.join(args.corpus, f"{lang}.txt"), encoding="utf-8") as f:
             sentences = [line.strip() for line in f if line.strip()]
-        typos = lang.endswith("-typos")
+        typos = os.path.exists(os.path.join(args.corpus, f"{lang}.keys"))
         if typos:
             with open(os.path.join(args.corpus, f"{lang}.keys"), encoding="utf-8") as f:
                 typed = [line.strip() for line in f if line.strip()]
-            if len(typed) != len(sentences) or any(len(a.split()) != len(b.split()) for a, b in zip(typed, sentences)):
-                raise SystemExit(f"{lang}.keys must have one line per sentence, with as many words")
+            if len(typed) != len(sentences):
+                raise SystemExit(f"{lang}.keys must have one line per sentence")
+            if lang.endswith("-typos") and any(len(a.split()) != len(b.split()) for a, b in zip(typed, sentences)):
+                raise SystemExit(f"{lang}.keys must have as many words per line as {lang}.txt")
         base = lang.split("-")[0]
         rows = []
         for index, sentence in enumerate(sentences * args.passes):
             t = 0
-            keys = typed_keys(typed[index % len(typed)]) if typos else keys_for(sentence, base)
+            keys = typed_keys(typed[index % len(typed)], base) if typos else keys_for(sentence, base)
             for tap, key in enumerate(keys):
                 if tap > 0:
                     t += max(MIN_INTERVAL_MS, round(rng.gauss(MEAN_INTERVAL_MS, SIGMA_INTERVAL_MS)))

@@ -1,0 +1,28 @@
+sentence	typed	context_words	accepted	today	day	kind
+0	trouce	1	trouve	trouvé	2026-11-21	wrong
+1	triuce	1	trouve	trouvé	2026-11-21	wrong
+2	trojce	1	trouvé	trouvé	2026-11-21	guard
+3	trouvr	1	trouve	trouve	2026-11-21	guard
+4	j'aa	0	j'ai	j'la	2026-11-21	wrong
+5	j'ak	0	j'ai	j'au	2026-11-21	wrong
+6	lz	0	la|le	l'z	2026-11-21	wrong
+7	saisir	2	fonction	onction	2026-11-21	wrong
+8	pasqueil	0	parce qu'il	pasque	2026-11-21	wrong
+9	j'ainhate	0	j'ai hâte	j'ainhate	2026-11-21	wrong
+10	j'aintrouve	0	j'ai trouvé	j'aintrouve	2026-11-21	wrong
+11	integté	0	intégré	integté	2026-11-21	wrong
+12	fràvhelent	0	franchement	fràvhelent	2026-11-21	wrong
+13	sôt	1	sont	sont	2026-11-21	guard
+14	boir	0	voir	voir	2026-11-21	guard
+15	ckavier	0	clavier	clavier	2026-11-21	guard
+16	interessang	0	intéressant	intéressant	2026-11-21	guard
+17	desagrebale	0	désagréable	désagréable	2026-11-21	guard
+18	oji	0	oui		2026-11-20	device
+19	jusge	0	juste		2026-11-20	device
+20	ma'qje	0	manque		2026-11-20	device
+21	dizcitd	0	discord		2026-11-20	device
+22	we	1	we		2026-11-20	device
+23	honetre	0	honnête		2026-11-20	device
+24	donnequoi	0	donne quoi		2026-11-20	device
+25	sats	0	sais		2026-11-20	device
+26	qur	1	que		2026-11-20	device

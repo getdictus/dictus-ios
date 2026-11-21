@@ -225,7 +225,28 @@ func replay(_ taps: [Tap], cells: [Cell], width: CGFloat, height: CGFloat, picke
     var wordIndex = 0
     var tokenWords: [Int] = []
 
+    // On a letter, the suggestion work `SuggestionState.updateAsync` does.
+    func letterWork() -> Int {
+        let context = field.text
+        return microseconds {
+            guard let (_, partial) = AutocorrectRejectionMemory.wordAtCursor(context: context) else { return }
+            let previous = words(context).dropLast().last
+            if memory.previewsCorrection(context: context) {
+                _ = engine.spellCheck(partial, previousWord: previous,
+                                      isAtSentenceStart: ProperNounGuard.isAtSentenceStart(context: context, word: partial))
+            }
+            _ = engine.suggestions(for: partial)
+        }
+    }
+
     for tap in taps {
+        // A character typed from the symbols page (`sym:'`, #996): the letter page has no key for it.
+        if tap.key.hasPrefix("sym:") {
+            field.insertText(String(tap.key.dropFirst(4)))
+            if tokenWords.last != wordIndex { tokenWords.append(wordIndex) }
+            tapRow(tap, tap.key, .zero, letterWork(), PickCost(plain: tap.key, ns: 0, visited: 0), 0)
+            continue
+        }
         let aim = target(of: tap.key, in: cells)
         let point = CGPoint(x: aim.frame.midX + tap.dx * aim.unitWidth, y: aim.frame.midY + tap.dy * aim.frame.height)
         // The word being typed and the one before it. The keyboard tracks these as it
@@ -266,16 +287,7 @@ func replay(_ taps: [Tap], cells: [Cell], width: CGFloat, height: CGFloat, picke
                 // Auto-capitalisation: the field starts a sentence, so its first letter is a capital.
                 field.insertText(field.text.isEmpty ? k.uppercased() : k)
             }
-            let context = field.text
-            cost = microseconds {
-                guard let (_, partial) = AutocorrectRejectionMemory.wordAtCursor(context: context) else { return }
-                let previous = words(context).dropLast().last
-                if memory.previewsCorrection(context: context) {
-                    _ = engine.spellCheck(partial, previousWord: previous,
-                                          isAtSentenceStart: ProperNounGuard.isAtSentenceStart(context: context, word: partial))
-                }
-                _ = engine.suggestions(for: partial)
-            }
+            cost = letterWork()
         case .spacebar?:
             var typed = ""
             var final = ""
