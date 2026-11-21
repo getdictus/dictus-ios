@@ -15,12 +15,22 @@ public struct CorrectionCandidate: Equatable, Sendable {
     /// The bigram score of this word after the previous word, 0 when the n-gram data
     /// has no such pair or there is no previous word.
     public let context: UInt16
+    /// The keyboard's language model's verdict on this word after the text before it
+    /// (#996): its log-probability minus the best candidate's, in nats, so 0 for the
+    /// model's favourite and below 0 for the others. 0 when no model ran.
+    public let languageModel: Double
 
-    public init(word: String, cost: Double, frequency: UInt16, context: UInt16 = 0) {
+    public init(word: String, cost: Double, frequency: UInt16, context: UInt16 = 0, languageModel: Double = 0) {
         self.word = word
         self.cost = cost
         self.frequency = frequency
         self.context = context
+        self.languageModel = languageModel
+    }
+
+    /// The same candidate with the language model's verdict (#996).
+    public func scored(byLanguageModel languageModel: Double) -> CorrectionCandidate {
+        CorrectionCandidate(word: word, cost: cost, frequency: frequency, context: context, languageModel: languageModel)
     }
 }
 
@@ -60,6 +70,15 @@ public struct CorrectionCandidate: Equatable, Sendable {
 ///   A runner-up that is much cheaper or much dearer to reach is not a close reading:
 ///   `bookes` gives `booked` (0.40) over `books` (1.00).
 /// - **Total order.** Ties fall to the cheaper candidate, then to the word itself.
+///
+/// The keyboard's language model reranks a correction, and only a correction (#996):
+/// `rerank` adds `languageModelWeight * languageModel` to every candidate's score when the
+/// ranking below already replaces the typed word, and keeps that replacement when the
+/// summed scores leave the readings too close to pick. A word the ranking keeps stays
+/// kept. Letting the model turn a kept word into a correction fixed `réunion`, `morning`
+/// and `montag` on the #954 runs, and wrote `déclaré` for `decalee` and `beide` for
+/// `heisa`: the word meant was not among the candidates, and the model picked the likeliest
+/// wrong one (docs/research/996-llm-rerank/).
 ///
 /// The constants were fitted on the #954 bench runs (fr, en, en-typos) and checked on
 /// the runs they were not fitted on. `plausibleScore` and `maxCloseReadings` were set on
@@ -101,8 +120,9 @@ public enum CorrectionRanking {
         }
     }
 
-    public static func decide(_ candidates: [CorrectionCandidate]) -> Decision {
-        let scored = scoredWithContext(candidates)
+    /// - Parameter languageModelWeight: what one nat of `languageModel` is worth in score.
+    public static func decide(_ candidates: [CorrectionCandidate], languageModelWeight: Double = 0) -> Decision {
+        let scored = scoredWithContext(candidates, languageModelWeight: languageModelWeight)
         guard !scored.isEmpty else { return Decision(replacement: nil, ranked: []) }
 
         let ranked = scored.map(\.candidate.word)
@@ -122,6 +142,15 @@ public enum CorrectionRanking {
     /// however many rarer neighbours sit near the runner-up: `rins` gives `runs`, whose
     /// runner-up `find` is a whole key further, although `rims`, `ribs` and `fins` are as
     /// close as `runs` (#997 review).
+    /// `decide`, then the language model's verdict on its replacement (#996). With the
+    /// weight at 0, or no replacement to rerank, this is `decide`.
+    public static func rerank(_ candidates: [CorrectionCandidate], languageModelWeight: Double) -> Decision {
+        let plain = decide(candidates)
+        guard languageModelWeight > 0, plain.replacement != nil else { return plain }
+        let modelled = decide(candidates, languageModelWeight: languageModelWeight)
+        return modelled.replacement == nil ? plain : modelled
+    }
+
     private static func closeReadings(_ scored: [Scored]) -> [Scored] {
         guard scored.count > 1, isClose(scored[1], to: scored[0]) else { return [] }
         return scored.filter { isClose($0, to: scored[0]) }
@@ -148,15 +177,17 @@ public enum CorrectionRanking {
 
     private typealias Scored = (candidate: CorrectionCandidate, score: Double)
 
-    /// Every candidate with its score, best first, context added where it may lift.
-    private static func scoredWithContext(_ candidates: [CorrectionCandidate]) -> [Scored] {
+    /// Every candidate with its score, best first, context added where it may lift and
+    /// the language model's verdict added to every one.
+    private static func scoredWithContext(_ candidates: [CorrectionCandidate], languageModelWeight: Double) -> [Scored] {
         let withoutContext = sorted(candidates.map { ($0, priorScore($0)) })
         guard let anchor = withoutContext.first?.candidate else { return [] }
         return sorted(withoutContext.map { candidate, score in
+            let modelled = score + languageModelWeight * candidate.languageModel
             guard candidate.context > 0, candidate.cost <= anchor.cost + contextWindow else {
-                return (candidate, score)
+                return (candidate, modelled)
             }
-            return (candidate, score + contextWeight * Double(candidate.context) / 65535)
+            return (candidate, modelled + contextWeight * Double(candidate.context) / 65535)
         })
     }
 
