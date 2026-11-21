@@ -1,6 +1,6 @@
 # Keyboard measurement: Dictus (replay, 402x216 pt grid, hit test: plain)
 
-commit: `facfc8ed5ae7c84dfec153c29d5a70295085684b`
+commit: `0e0a930d4b6d8660b7852220ec24fd3856c8652f`
 
 ## Final text
 
@@ -24,10 +24,10 @@ The suggestion work a letter triggers and the autocorrect a space triggers, run 
 
 | lang | key | taps | p50 | p95 | max |
 |---|---|---:|---:|---:|---:|
-| fr | letter | 669 | 0.12 | 0.58 | 20.08 |
-| fr | space | 152 | 0.10 | 0.57 | 2.17 |
-| en | letter | 626 | 1.12 | 2.09 | 49.09 |
-| en | space | 156 | 0.06 | 0.70 | 1.57 |
+| fr | letter | 669 | 0.11 | 0.52 | 39.24 |
+| fr | space | 152 | 0.09 | 0.63 | 4.93 |
+| en | letter | 626 | 0.90 | 1.77 | 98.26 |
+| en | space | 156 | 0.05 | 0.65 | 1.54 |
 
 ## Autocorrect, per word the space bar committed
 
