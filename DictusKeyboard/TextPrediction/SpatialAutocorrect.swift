@@ -15,8 +15,10 @@ enum SpatialAutocorrect {
     /// and nothing else reads it. It moves to `SharedKeys`, with a row in the app's Debug
     /// settings, once the decoder is measured on a device and earns a setting.
     ///
-    /// Set it on a simulator with:
-    /// `xcrun simctl spawn <udid> defaults write group.solutions.pivi.dictus debug.spatialAutocorrect -bool YES`
+    /// Turn it on with the Debug app's launch argument, which writes it (`DictusApp`,
+    /// `applySpatialAutocorrectArgument`), then make the keyboard reappear:
+    /// `xcrun devicectl device process launch --device <id> com.pivi.dictus -DictusDebugSpatialAutocorrect YES`
+    /// (`xcrun simctl launch <udid> com.pivi.dictus -DictusDebugSpatialAutocorrect YES` on a simulator).
     static let switchKey = "debug.spatialAutocorrect"
 
     static var isOn: Bool {
