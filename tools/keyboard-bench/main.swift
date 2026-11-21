@@ -202,6 +202,8 @@ struct Commit {
     let intendedWords: [Int]
     let typed: String
     let final: String
+    /// The next-word predictions the bar shows after this commit, best first.
+    let predicted: [String]
 }
 
 /// What a space tap runs: `DictusKeyboardBridge.autocorrectBeforeCursor` on the word
@@ -314,6 +316,7 @@ func replay(_ taps: [Tap], cells: [Cell], width: CGFloat, height: CGFloat, picke
         case .spacebar?:
             var typed = ""
             var final = ""
+            var predicted: [String] = []
             cost = microseconds {
                 guard let (prefix, word) = AutocorrectRejectionMemory.wordAtCursor(context: field.text) else {
                     field.insertText(" ")
@@ -345,9 +348,11 @@ func replay(_ taps: [Tap], cells: [Cell], width: CGFloat, height: CGFloat, picke
                     applied = true
                 }
                 if !applied { field.insertText(" ") }
-                _ = engine.predictNextWords(after: Array(words(field.text).suffix(2)))
+                predicted = engine.predictNextWords(after: Array(words(field.text).suffix(2)))
             }
-            if !typed.isEmpty { commits.append(Commit(intendedWords: tokenWords, typed: typed, final: final)) }
+            if !typed.isEmpty {
+                commits.append(Commit(intendedWords: tokenWords, typed: typed, final: final, predicted: predicted))
+            }
             tokenWords = []
         case .backspace?:
             field.deleteBackward()
@@ -386,7 +391,7 @@ let modelParameters = ModelParameters(env["KB_MODEL"] ?? "")
 let journal = Journal.start(toggle: env["KB_JOURNAL"] == "1")
 
 var tapsOut = ["lang\tsentence\ttap\tintended\tresolved\tx\ty\tengine_us\tplain\thit_ns\tvisited\tjournal_ns"]
-var commitsOut = ["lang\tsentence\tintended\ttyped\tfinal"]
+var commitsOut = ["lang\tsentence\tintended\ttyped\tfinal\tnext\tpredicted"]
 var textsOut = ["lang\tsentence\tintended\tfinal"]
 var registerOut = ["lang\tbefore\ttyped\texpected\treported\tlexicon\tfinal"]
 let register = readLines("\(benchDir)/register.tsv").dropFirst().map { $0.components(separatedBy: "\t") }
@@ -444,7 +449,9 @@ for code in langs {
         }
         for c in commits {
             let meant = c.intendedWords.map { intendedWords[$0] }.joined(separator: " ")
-            commitsOut.append("\(code)\t\(s)\t\(meant)\t\(c.typed)\t\(c.final)")
+            // The word the typist types next, which the prediction bar should offer.
+            let next = c.intendedWords.last.map { $0 + 1 < intendedWords.count ? intendedWords[$0 + 1] : "" } ?? ""
+            commitsOut.append("\(code)\t\(s)\t\(meant)\t\(c.typed)\t\(c.final)\t\(next)\t\(c.predicted.joined(separator: ","))")
         }
         textsOut.append("\(code)\t\(s)\t\(intended)\t\(text)")
     }
