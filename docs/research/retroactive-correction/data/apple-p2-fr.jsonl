@@ -1,0 +1,10 @@
+{"s": 0, "case": "elision", "sentence": "il ma dit non", "states": ["il ", "il m’a ", "il m’a dit ", "il m’a dit non "], "bars": {}}
+{"s": 1, "case": "elision", "sentence": "ces bon pour moi", "states": ["ces ", "ces bon ", "ces bon pour ", "ces bon pour moi "], "bars": {}}
+{"s": 2, "case": "elision", "sentence": "sa va bien", "states": ["sa ", "sa va ", "sa va bien "], "bars": {}}
+{"s": 3, "case": "homograph", "sentence": "ou est la gare", "states": ["ou ", "ou est ", "ou est la ", "ou est la gare "], "bars": {}}
+{"s": 4, "case": "homograph", "sentence": "il et parti", "states": ["il ", "il et ", "il et parti "], "bars": {}}
+{"s": 5, "case": "homograph", "sentence": "ils son partis", "states": ["ils ", "ils son ", "ils son partis "], "bars": {}}
+{"s": 6, "case": "homograph", "sentence": "il ce lave", "states": ["il ", "il ce ", "il ce lave "], "bars": {}}
+{"s": 7, "case": "homograph", "sentence": "je suis la ce soir", "states": ["je ", "je suis ", "je suis là ", "je suis là ce ", "je suis là ce soir "], "bars": {}}
+{"s": 8, "case": "homograph", "sentence": "je vais a paris", "states": ["je ", "je vais ", "je vais à ", "je vais à Paris "], "bars": {"2": {"left": "", "middle": "à", "right": "aller", "band": "«а» | aller"}}}
+{"s": 9, "case": "homograph", "sentence": "on a gagne", "states": ["on ", "on a ", "on a gagné "], "bars": {"1": {"left": "", "middle": "arrive", "right": "avait", "band": "«а» | arrive | avait"}}}

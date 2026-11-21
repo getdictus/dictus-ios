@@ -1,0 +1,26 @@
+{"s": 0, "case": "pronoun-i", "sentence": "i think so", "states": ["I ", "I think ", "I think so "], "bars": {}}
+{"s": 1, "case": "contraction", "sentence": "its raining again", "states": ["it’s ", "it’s raining ", "it’s raining again "], "bars": {}}
+{"s": 2, "case": "contraction", "sentence": "its a good idea", "states": ["it’s ", "it’s a ", "it’s a good ", "it’s a good idea "], "bars": {"1": {"left": "\"a\"", "middle": "all", "right": "an", "band": "\"a\" | all | an"}}}
+{"s": 3, "case": "contraction", "sentence": "were going home now", "states": ["we’re ", "we’re going ", "we’re going home ", "we’re going home now "], "bars": {}}
+{"s": 4, "case": "contraction", "sentence": "your welcome", "states": ["your ", "your welcome "], "bars": {}}
+{"s": 5, "case": "contraction", "sentence": "id like a coffee", "states": ["I’d ", "I’d like ", "I’d like a ", "I’d like a coffee "], "bars": {"2": {"left": "\"a\"", "middle": "an", "right": "another", "band": "\"a\" | an | another"}}}
+{"s": 6, "case": "contraction", "sentence": "ill be there soon", "states": ["I’ll ", "I’ll be ", "I’ll be there ", "I’ll be there soon "], "bars": {}}
+{"s": 7, "case": "contraction", "sentence": "well be late", "states": ["well ", "we’ll be ", "we’ll be late "], "bars": {}}
+{"s": 8, "case": "contraction", "sentence": "shell be back tomorrow", "states": ["she’ll ", "she’ll be ", "she’ll be back ", "she’ll be back tomorrow "], "bars": {}}
+{"s": 9, "case": "contraction", "sentence": "hell be fine", "states": ["he’ll ", "he’ll be ", "he’ll be fine "], "bars": {}}
+{"s": 10, "case": "contraction", "sentence": "lets go now", "states": ["let’s ", "let’s go ", "let’s go now "], "bars": {}}
+{"s": 11, "case": "contraction", "sentence": "wont you come", "states": ["won’t ", "won’t you ", "won’t you come "], "bars": {}}
+{"s": 12, "case": "contraction", "sentence": "cant wait", "states": ["can’t ", "can’t wait "], "bars": {}}
+{"s": 13, "case": "contraction", "sentence": "dont worry", "states": ["don’t ", "don’t worry "], "bars": {}}
+{"s": 14, "case": "homophone", "sentence": "their is a problem", "states": ["their ", "their is ", "their is a ", "their is a problem "], "bars": {"2": {"left": "\"a\"", "middle": "an", "right": "always", "band": "\"a\" | an | always"}}}
+{"s": 15, "case": "homophone", "sentence": "there car is red", "states": ["there ", "there car ", "there car is ", "there car is red "], "bars": {}}
+{"s": 16, "case": "homophone", "sentence": "better then nothing", "states": ["better ", "better then ", "better then nothing "], "bars": {}}
+{"s": 17, "case": "homophone", "sentence": "i dont want to loose it", "states": ["I ", "I don’t ", "I don’t want ", "I don’t want to ", "I don’t want to loose ", "I don’t want to loose it "], "bars": {}}
+{"s": 18, "case": "homophone", "sentence": "it was to late", "states": ["it ", "it was ", "it was to ", "it was to late "], "bars": {}}
+{"s": 19, "case": "typo", "sentence": "teh car is red", "states": ["the ", "the car ", "the car is ", "the car is red "], "bars": {}}
+{"s": 20, "case": "contraction", "sentence": "shed be back soon", "states": ["she’d ", "she’d be ", "she’d be back ", "she’d be back soon "], "bars": {}}
+{"s": 21, "case": "contraction", "sentence": "wed like to come", "states": ["we’d ", "we’d like ", "we’d like to ", "we’d like to come "], "bars": {}}
+{"s": 22, "case": "keep", "sentence": "its own way", "states": ["it’s ", "its own ", "its own way "], "bars": {}}
+{"s": 23, "case": "keep", "sentence": "were here yesterday", "states": ["we’re ", "we’re here ", "we’re here yesterday "], "bars": {}}
+{"s": 24, "case": "keep", "sentence": "well done", "states": ["well ", "well done "], "bars": {}}
+{"s": 25, "case": "keep", "sentence": "hell no", "states": ["he’ll ", "he’ll no "], "bars": {}}
