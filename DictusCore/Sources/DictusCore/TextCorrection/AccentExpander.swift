@@ -1,32 +1,21 @@
 // DictusCore/Sources/DictusCore/TextCorrection/AccentExpander.swift
-// Generates accent variants of a typed word and picks the best dictionary match,
-// requiring strong frequency dominance over the unaccented input.
+// Generates the accented spellings of a typed word that the dictionary has, and lets
+// AccentRestoration pick one.
 import Foundation
 
-/// Multiplier required for an accented variant to override the unaccented input
-/// when the unaccented input itself exists in the dictionary.
+/// Tries adding accents to `word` and decides whether one of the resulting dictionary
+/// words replaces it (`AccentRestoration`).
 ///
-/// Set to 5x: typical French accent pairs have wildly different frequencies
-/// (e.g., "très" vs "tres" >100x), so 5x is a conservative floor that rejects
-/// weak cases while keeping strong ones. Prevents `"publie"` (valid, "je publie")
-/// from auto-correcting to `"publié"`.
-public let accentExpansionDominanceMultiplier: Int = 5
-
-/// Tries adding accents to `word` and returns the highest-frequency dictionary
-/// match, or `nil` if no accented form exists or the unaccented input is itself
-/// frequent enough to keep.
-///
-/// Examples (French): `"deja"` → `"déjà"`, `"apres"` → `"après"`, `"publie"` → `nil`
-/// (because "publie" is a valid French verb form and not dominated 5x).
+/// Examples (French): `"deja"` → `déjà`, `"apres"` → `après`, `"publie"` → kept
+/// (`publié` is only 3.6x as frequent), `"arrive"` after `est` → `arrivé`.
 ///
 /// Algorithm:
 ///   1. Find each position in `word` whose letter has accent variants in `profile.accentMap`.
-///   2. Generate single-substitution candidates and double-substitution candidates.
-///   3. For each candidate, query `provider.frequency(of:)` and `provider.wordExists(_:)`.
-///   4. Pick the highest-frequency candidate that exists in the dictionary.
-///   5. If the unaccented input is also in the dictionary, require the candidate
-///      to dominate it by `accentExpansionDominanceMultiplier` (5x) to override.
-///      If the unaccented input is *not* in the dictionary, any matching candidate wins.
+///   2. Generate single-substitution candidates and double-substitution candidates,
+///      then the length-changing ones of `profile.collapseRules`.
+///   3. Keep the candidates the dictionary has, with their corpus counts.
+///   4. Hand them, the typed word's own count when it is a word, and the participle
+///      context of `previousWord` to `AccentRestoration.decide`.
 ///
 /// WHY only single and double substitutions (not all combinations):
 /// Real-world accented words rarely have more than two accented characters.
@@ -38,26 +27,26 @@ public let accentExpansionDominanceMultiplier: Int = 5
 /// Single/double character substitutions preserve word length. Some accents
 /// (German `ß`, replacing `ss`) require deleting a position, so they're
 /// modeled as substring substitutions in `profile.collapseRules`. Each
-/// collapse occurrence is tried independently against the dictionary,
-/// subject to the same 5x-dominance check.
+/// collapse occurrence is tried independently against the dictionary.
 ///
 /// - Parameters:
 ///   - profile: The active language's profile.
-///   - word: The input word (any case).
+///   - word: The input word (any case), without any apostrophe prefix.
+///   - previousWord: The word before it, for `profile.participleContext`.
 ///   - provider: Backend used to score candidates by frequency and existence.
-/// - Returns: The best accented form or `nil`.
-public func expandAccents(
+public func restoreAccents(
     profile: LanguageProfile,
     word: String,
+    previousWord: String? = nil,
     provider: FrequencyProvider
-) -> String? {
-    guard provider.isReady else { return nil }
+) -> AccentRestoration.Decision {
+    guard provider.isReady else { return .keepTyped }
     let lowered = word.lowercased()
-    guard lowered.count >= 2 else { return nil }
+    guard lowered.count >= 2 else { return .keepTyped }
 
     let accentMap = profile.accentMap
     let collapseRules = profile.collapseRules
-    guard !accentMap.isEmpty || !collapseRules.isEmpty else { return nil }
+    guard !accentMap.isEmpty || !collapseRules.isEmpty else { return .keepTyped }
 
     var accentablePositions: [(Int, [Character])] = []
     let chars = Array(lowered)
@@ -67,19 +56,11 @@ public func expandAccents(
         }
     }
 
-    var bestMatch: String?
-    var bestFreq: Int = -1
+    var spellings: [AccentRestoration.Spelling] = []
 
     func checkCandidate(_ candidateWord: String) {
-        let freq = Int(provider.frequency(of: candidateWord))
-        if freq > 0 && freq > bestFreq {
-            bestMatch = candidateWord
-            bestFreq = freq
-        } else if freq == 0 && bestFreq < 0 && provider.wordExists(candidateWord) {
-            // Fallback: word exists but `frequency(of:)` returns 0 (edge case).
-            bestMatch = candidateWord
-            bestFreq = 0
-        }
+        guard provider.frequency(of: candidateWord) > 0 || provider.wordExists(candidateWord) else { return }
+        spellings.append(.init(word: candidateWord, count: provider.corpusCount(of: candidateWord)))
     }
 
     // Single substitutions.
@@ -113,8 +94,7 @@ public func expandAccents(
     // For each rule, find every occurrence of the `from` substring in the
     // input and try substituting that single occurrence with `to`. We try one
     // occurrence at a time rather than all combinations because German words
-    // with multiple `ss → ß` collapses in the same word are exceedingly rare
-    // (and the 5x-dominance check would reject ambiguous cases anyway).
+    // with multiple `ss → ß` collapses in the same word are exceedingly rare.
     for rule in collapseRules {
         let from = rule.from
         let to = rule.to
@@ -127,16 +107,13 @@ public func expandAccents(
         }
     }
 
-    let inputFreq = Int(provider.frequency(of: lowered))
-    guard let match = bestMatch else { return nil }
-
-    if inputFreq == 0 {
-        // Unaccented form is not in the dictionary — accented version is the fix.
-        return match
+    let typed = provider.frequency(of: lowered) > 0
+        ? AccentRestoration.Spelling(word: lowered, count: provider.corpusCount(of: lowered))
+        : nil
+    let participles = profile.participleContext.flatMap {
+        $0.expectsParticiple(after: previousWord) ? $0 : nil
     }
-    // Both forms valid: require strong frequency dominance to override.
-    if bestFreq > inputFreq * accentExpansionDominanceMultiplier {
-        return match
+    return AccentRestoration.decide(typed: typed, accented: spellings) { spelling in
+        participles?.isParticiple(spelling.word, of: lowered) ?? false
     }
-    return nil
 }

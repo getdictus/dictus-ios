@@ -132,7 +132,7 @@ func evidence(_ c: Case) -> (Evidence, left: String, right: String)? {
 func cause(_ c: Case, _ outcome: String, _ result: String?) -> String {
     let w = c.typed
     if probe.languageOverride(for: w) != nil { return "before-split:language-override" }
-    if probe.accentExpansion(w) != nil { return "before-split:accent-expansion" }
+    if probe.accentRestoration(w, previousWord: nil) != .keepTyped { return "before-split:accent-expansion" }
     if probe.wordExists(w) { return "before-split:glue-is-a-word" }
     if probe.contractionExpansion(w) != nil { return "before-split:contraction" }
     guard let (e, left, right) = evidence(c) else { return "other:unparsable" }

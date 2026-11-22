@@ -33,10 +33,8 @@ public let germanProfile = LanguageProfile(
         // and out of habit anywhere else. They stay after #151 gave the layout real
         // ä/ö/ü keys: the keys removed the *need* to transliterate, not the habit,
         // and a user who still types `koennen` expects `können`. Each rule converts
-        // the 2-char ASCII sequence to its single-char umlaut counterpart. The same
-        // 5x-dominance protection as single-char accent expansion guards against
-        // false positives like `bauer` (farmer) → `baür` (not a word, no false
-        // correction).
+        // the 2-char ASCII sequence to its single-char umlaut counterpart. Only
+        // dictionary words come out, so `bauer` (farmer) does not become `baür`.
         //
         // Without these rules, `tuer` → `tier` (animal, edit-distance 1) via
         // the trie's spell-check fallback instead of `Tür` (door).
@@ -44,8 +42,8 @@ public let germanProfile = LanguageProfile(
         ("oe", "\u{00F6}"),         // oe → ö   (können, schön, möchte)
         ("ue", "\u{00FC}"),         // ue → ü   (Tür, müssen, fünf, früh)
         // German ß: lets users get `straße`, `weiß`, `groß`, `Spaß`, `heißen`.
-        // `muss` (valid post-1996-reform 1st/3rd-person form) is protected by
-        // the 5x dominance rule against archaic `muß`.
+        // `muss` (valid post-1996-reform 1st/3rd-person form) stays: archaic
+        // `muß` is 0.02x as frequent (`AccentRestoration.typedWordOdds`).
         ("ss", "\u{00DF}")
     ]
 )

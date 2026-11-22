@@ -110,6 +110,7 @@ def main():
     parser.add_argument("--taps", help="dictus: the taps.tsv the in-process replay wrote")
     parser.add_argument("--grid-top", type=float, help="dictus: screen y of the key grid's top edge, in points")
     parser.add_argument("--start", type=int, default=0, help="first sentence: resumes a run that stopped, appending to its texts.tsv")
+    parser.add_argument("--end", type=int, help="stop before this sentence: with --start, retypes one sentence")
     args = parser.parse_args()
     if args.keyboard == "dictus" and (args.taps is None or args.grid_top is None):
         parser.error("--keyboard dictus needs --taps and --grid-top")
@@ -137,6 +138,8 @@ def main():
     for s, intended in enumerate(sentences):
         if s < args.start:
             continue
+        if args.end is not None and s >= args.end:
+            break
         new_reminder(args.udid)
         nodes = tree(args.udid)
         before = titles(nodes)
