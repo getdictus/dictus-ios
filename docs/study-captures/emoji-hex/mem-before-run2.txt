@@ -1,0 +1,6 @@
+rest:       phys_footprint: 31 MB  phys_footprint_peak: 33 MB 
+open:       phys_footprint: 41 MB  phys_footprint_peak: 41 MB 
+scrolled:   phys_footprint: 110 MB  phys_footprint_peak: 115 MB 
+search:     phys_footprint: 103 MB  phys_footprint_peak: 115 MB 
+closed:     phys_footprint: 104 MB  phys_footprint_peak: 115 MB 
+closed+10s:  phys_footprint: 104 MB  phys_footprint_peak: 115 MB 

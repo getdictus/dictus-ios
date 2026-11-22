@@ -1,0 +1,13 @@
+start:             phys_footprint: 34 MB  phys_footprint_peak: 43 MB 
+10 open/close:     phys_footprint: 34 MB  phys_footprint_peak: 43 MB 
+  round 1: system keyboard came back
+  round 2: system keyboard came back
+  round 3: system keyboard came back
+  round 4: system keyboard came back
+  round 5: system keyboard came back
+  round 6: system keyboard came back
+  round 7: system keyboard came back
+  round 8: system keyboard came back
+  round 9: system keyboard came back
+  round 10: system keyboard came back
+10 hide/show:      phys_footprint: 33 MB  phys_footprint_peak: 43 MB 
