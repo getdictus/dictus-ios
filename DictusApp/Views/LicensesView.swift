@@ -68,6 +68,15 @@ struct LicensesView: View {
                 )
 
                 licenseBlock(
+                    name: "Hex",
+                    author: "Christopher Langton",
+                    url: "https://github.com/anomalyco/hex",
+                    license: "The keyboard's emoji panel is Hex's, ported (#1027): its views, search, "
+                        + "suggestions, shortcodes, skin tones and the builder of its emoji index.\n\n"
+                        + mitLicense(copyright: "Copyright (c) 2026 Christopher Langton")
+                )
+
+                licenseBlock(
                     name: "Nemotron 3.5 ASR",
                     author: "NVIDIA Corporation",
                     url: "https://huggingface.co/nvidia/nemotron-3.5-asr-streaming-0.6b",
@@ -76,6 +85,15 @@ struct LicensesView: View {
                             + "Core ML conversion by FluidInference "
                             + "(huggingface.co/FluidInference/Nemotron-3.5-ASR-Streaming-Multilingual-0.6b-CoreML)."
                     )
+                )
+
+                licenseBlock(
+                    name: "Unicode emoji data and CLDR",
+                    author: "Unicode, Inc.",
+                    url: "https://cldr.unicode.org",
+                    license: "The emoji search index is built from Unicode's emoji-test.txt 18.0 and CLDR 49's "
+                        + "emoji names and keywords in French, English, Spanish and German.\n\n"
+                        + EmojiDataLicense.text
                 )
 
                 licenseBlock(
