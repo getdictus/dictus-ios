@@ -7,7 +7,7 @@
 
 ## Résumé
 
-1. **Debout (portrait), les rangées de Dictus étaient 2 à 2,5 pt trop hautes** sur l'iPhone SE et l'iPhone 17 : Dictus laissait 5,5 pt sous la rangée 4, Apple 4 pt (SE) et 3 pt (17) par rapport au bas de la grille que Dictus déclare. Le Pro Max était déjà aligné (réglé en #117).
+1. **Debout (portrait), les rangées de Dictus étaient 2 à 2,5 pt trop hautes** sur l'iPhone SE et l'iPhone 17 : Dictus laissait 5,5 pt sous la rangée 4, Apple 4 pt (SE) et 3 pt (17) par rapport au bas de la grille que Dictus déclare. Sur le SE, les touches de Dictus faisaient aussi 43 pt contre 42. Le Pro Max était déjà aligné verticalement (réglé en #117).
 2. **Debout, les touches de Dictus partaient à 3 pt du bord, celles d'Apple à 6,5 pt** sur les trois tailles, avec le même écart de 6 pt entre touches. Les centres des touches A…P étaient décalés jusqu'à 3,3 pt vers les bords.
 3. **Couché (paysage), Dictus dessinait d'autres touches qu'Apple** : 36,7 pt sur un pas de 43,8 pt contre 27,3 pt sur 35,3 pt (17, Pro Max) et 37 pt sur 43,8 contre 32 pt sur 40 (SE). Sur le SE couché, Apple rentre ses touches de 72 pt de chaque côté, Dictus les étalait sur toute la largeur (−62 pt sur les centres extrêmes). Sur le 17 et le Pro Max couchés, la rangée 1 de Dictus était 34 pt au-dessus de celle d'Apple.
 4. **Le clavier Dictus est plus haut que celui d'Apple** : +25 pt debout (SE, 17), +23 pt (Pro Max), +21 pt (SE couché), +40 pt (17 et Pro Max couchés). Debout, 17 pt de cet écart sont la bande qu'iOS dessine au-dessus de tout clavier tiers (la « bande de 17 pt » de Hex) : **elle apparaît bien, sur les trois iPhone, en portrait seulement**. Le reste vient de la barre d'outils de 52 pt (contre ~44 pt de barre de suggestions chez Apple) et, couché, de la grille de 175 pt. **Cette hauteur est la contrainte de hauteur déclarée (#166), zone interdite : elle n'est pas touchée.**
@@ -402,6 +402,7 @@ Captures : `promax-landscape-apple.png`, `promax-landscape-dictus-apres.png`
 | Écart (avant) | Où | Correction |
 |---|---|---|
 | Rangées 2 à 2,5 pt trop hautes | SE et 17, portrait | rangée 4 à 4 pt (SE) / 3 pt (17) du bas de la grille au lieu de 5,5 |
+| Touches de 43 pt au lieu de 42 | SE, portrait | touche 42 pt sur un pas de 54 |
 | Touches à 3 pt du bord au lieu de 6,5 (centres jusqu'à ±3,3 pt) | portrait, les trois tailles | bord 6,5 pt, écart 6 pt |
 | Touches couchées de 37 pt sur 43,8 au lieu de 32 sur 40, toute la largeur au lieu de 72 pt de retrait | SE, paysage | touches 32 pt, pas 40, retrait 72 pt |
 | Touches couchées de 36,7 pt sur 43,8 au lieu de 27,3 sur 35,3, rangée 1 34 pt trop haute | 17 et Pro Max, paysage | touches 27,33 pt, pas 35,33, 4 pt sous la rangée 4 |
@@ -436,3 +437,15 @@ Dans `docs/study-captures/` (branche `study/disposition-apple-captures`) et `/Us
 - Simulateur seulement. Un iPhone peut donner à un clavier tiers une hauteur différente selon l'app (Hex #2280 : Spotlight sur iOS 27.3) ; la table ne s'applique que si la grille est assez haute pour les rangées d'Apple, sinon Dictus garde sa grille régulière.
 - Un seul champ (un `UITextField` sans barre d'accessoires). Hex note que la bande de 17 pt dépend du champ sur iOS 27.2 ; ici elle est apparue dans ce champ, sur les trois iPhone, en portrait.
 - Clavier français AZERTY, apparence claire, sans Accès complet. Les pages 123 et `#+=` (quatre rangées) suivent la même table ; elles n'ont pas été capturées.
+
+## Banc #954 (fr, en, en-typos), avant et après
+
+`tools/keyboard-bench/run.sh --langs fr,en,en-typos`, grille 402 × 216 pt (iPhone 17 debout), même simulateur, `develop` 4ebcf0d4 puis la branche (`bench-avant.md`, `bench-apres.md` à côté de cette étude).
+
+| Langue | Mots faux avant → après | Lettres fausses | Espaces manqués | Autocorrection cassée / mal corrigée |
+|---|---|---|---|---|
+| fr | 3 → 3 | 13 → 13 | 0 → 0 | 0 / 0 → 0 / 0 |
+| en | 7 → 8 | 21 → 20 | 2 → 3 | 0 / 1 → 0 / 1 |
+| en-typos | 1 → 1 | 0 → 0 | 0 → 0 | 0 / 1 → 0 / 1 |
+
+Seuls deux appuis changent de résultat, tous deux en anglais : un « i » visé 1 pt au-dessus de la grille (dans la barre d'outils) ne tapait rien et tape « i » (la rangée 1 est descendue de 2,5 pt) ; une espace visée 0,49 rangée sous le centre de la barre d'espace tombe 2 pt sous la grille et ne tape plus rien (la barre d'espace finit maintenant 3 pt au-dessus du bas de la grille, comme celle d'Apple), ce qui colle « still have ». Le banc vise le centre de la touche dessinée : les appuis suivent les touches là où elles sont.
