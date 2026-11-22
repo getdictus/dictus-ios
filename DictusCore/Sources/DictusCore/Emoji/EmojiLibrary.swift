@@ -142,8 +142,8 @@ public final class EmojiLibrary: @unchecked Sendable {
     /// keyboard comes up, inside the same extension process. Hex built an index per keyboard
     /// view and leaked about 0.8 MB per presentation until iOS killed the keyboard (Hex #2352,
     /// 994b346); this cache is their fix, carried over with the index.
-    /// `bundle` nil reads this package's resources (`Bundle.module`, which a public default
-    /// argument cannot name).
+    /// `bundle` nil reads this package's resources (`Bundle.dictusCoreResources`, which a public
+    /// default argument cannot name).
     @MainActor public static func bundled(language: String, bundle: Bundle? = nil) -> EmojiLibrary? {
         observeMemoryWarnings()
         let resolved = languages.contains(language) ? language : "en"
@@ -181,7 +181,7 @@ public final class EmojiLibrary: @unchecked Sendable {
         isDrawable: (String) -> Bool = EmojiLibrary.fontDraws
     ) -> EmojiLibrary? {
         let language = languages.contains(language) ? language : "en"
-        let bundle = bundle ?? .module
+        let bundle = bundle ?? .dictusCoreResources
         // Package.swift copies the EmojiIndex folder whole, so the files sit in it.
         let name = "emoji-index-\(language)"
         guard let url = bundle.url(forResource: name, withExtension: "txt", subdirectory: "EmojiIndex")
