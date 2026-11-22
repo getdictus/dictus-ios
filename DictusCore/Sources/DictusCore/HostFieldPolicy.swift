@@ -125,4 +125,38 @@ public struct HostFieldPolicy: Equatable {
         }
         return .allowed
     }
+
+    /// Same decision, from one reading of the field's traits.
+    public static func evaluate(_ traits: HostFieldTraits) -> HostFieldPolicy {
+        evaluate(
+            keyboard: traits.keyboard,
+            content: traits.content,
+            autocorrectionDisabled: traits.autocorrectionDisabled,
+            spellCheckingDisabled: traits.spellCheckingDisabled,
+            isSecureEntry: traits.isSecureEntry
+        )
+    }
+}
+
+/// One reading of the host field's input traits, projected off UIKit.
+public struct HostFieldTraits: Equatable {
+    public var keyboard: HostFieldPolicy.KeyboardKind
+    public var content: HostFieldPolicy.ContentKind
+    public var autocorrectionDisabled: Bool
+    public var spellCheckingDisabled: Bool
+    public var isSecureEntry: Bool
+
+    public init(
+        keyboard: HostFieldPolicy.KeyboardKind = .standard,
+        content: HostFieldPolicy.ContentKind = .none,
+        autocorrectionDisabled: Bool = false,
+        spellCheckingDisabled: Bool = false,
+        isSecureEntry: Bool = false
+    ) {
+        self.keyboard = keyboard
+        self.content = content
+        self.autocorrectionDisabled = autocorrectionDisabled
+        self.spellCheckingDisabled = spellCheckingDisabled
+        self.isSecureEntry = isSecureEntry
+    }
 }

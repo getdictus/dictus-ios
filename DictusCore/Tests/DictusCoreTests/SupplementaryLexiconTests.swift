@@ -29,6 +29,15 @@ final class SupplementaryLexiconTests: XCTestCase {
         )
     }
 
+    /// An all-caps `ST` entry turned the `st` of a mistyped `ce st` into "ST" (#1006).
+    func testTwoLetterLowercaseWordIsKeptButNotRecased() {
+        let initials = SupplementaryLexicon(entries: [(userInput: "ST", documentText: "ST")])
+        XCTAssertEqual(initials.decision(for: "st", isDictionaryWord: false), .keep)
+        XCTAssertEqual(initials.decision(for: "ST", isDictionaryWord: false), .keep)
+        let threeLetters = SupplementaryLexicon(entries: [(userInput: "STE", documentText: "STE")])
+        XCTAssertEqual(threeLetters.decision(for: "ste", isDictionaryWord: false), .replace(with: "STE"))
+    }
+
     func testAllCapsContactIsKeptAsTyped() {
         XCTAssertEqual(lexicon.decision(for: "ZOFIAK", isDictionaryWord: false), .keep)
     }

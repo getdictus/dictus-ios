@@ -558,8 +558,9 @@ class KeyboardViewController: UIInputViewController {
         bridge?.updateCapitalization()
 
         // Read the host field's input traits now that the connection exists (#200).
-        // Search/URL/email fields disable autocorrect and suggestions.
-        bridge?.refreshHostPolicy()
+        // Search/URL/email fields disable autocorrect and suggestions. This is the
+        // focus reading a mention cannot downgrade later (#1004).
+        bridge?.refreshHostPolicy(fieldFocused: true)
 
         // Re-sync the learned-words dictionary from the App Group (#222).
         // The singleton caches in memory per process; if the user reset the
@@ -1270,6 +1271,7 @@ class KeyboardViewController: UIInputViewController {
         // The focused field may have changed (e.g. tapping another field in the
         // same app) — re-read its input traits (#200).
         bridge?.refreshHostPolicy()
+        NotificationCenter.default.post(name: .dictusHostDocumentDidChange, object: self)
     }
 
     override func selectionDidChange(_ textInput: UITextInput?) {
@@ -1289,6 +1291,9 @@ class KeyboardViewController: UIInputViewController {
         // Re-read the field's input traits so the autocorrect/suggestions policy
         // matches the newly-focused field (#200).
         bridge?.refreshHostPolicy()
+        // A copy in the host app changes neither, but the user selects before copying
+        // and taps back into the field after: the Paste offer re-reads here (#634).
+        NotificationCenter.default.post(name: .dictusHostDocumentDidChange, object: self)
     }
 
     // MARK: - Window Gesture Delay

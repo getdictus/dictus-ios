@@ -15,11 +15,14 @@ import DictusCore
 struct Tap {
     let sentence: Int
     let index: Int
-    /// A letter, or "space".
+    /// A letter, or "space". A run converted from a typing journal (#1001) also has
+    /// "backspace", "shift", "return", "123" and "accent".
     let key: String
     /// Landing offset from the key centre, in one-unit key widths and in row heights.
     let dx: CGFloat
     let dy: CGFloat
+    /// Milliseconds since the sentence's first tap.
+    let ms: Double
 }
 
 func readLines(_ path: String) -> [String] {
@@ -33,8 +36,10 @@ func readRun(_ path: String) -> [Tap] {
     readLines(path).dropFirst().map { line in
         let f = line.components(separatedBy: "\t")
         guard f.count == 6, let s = Int(f[0]), let i = Int(f[1]),
-              let dx = Double(f[3]), let dy = Double(f[4]) else { fatalError("bad run row: \(line)") }
-        return Tap(sentence: s, index: i, key: f[2], dx: CGFloat(dx), dy: CGFloat(dy))
+              let dx = Double(f[3]), let dy = Double(f[4]), let ms = Double(f[5]) else {
+            fatalError("bad run row: \(line)")
+        }
+        return Tap(sentence: s, index: i, key: f[2], dx: CGFloat(dx), dy: CGFloat(dy), ms: ms)
     }
 }
 
@@ -87,7 +92,11 @@ func target(of key: String, in cells: [Cell]) -> Cell {
     let found = cells.first { cell in
         switch cell.key.type {
         case .spacebar: return key == "space"
-        case .input(let k, _): return k == key
+        case .backspace: return key == "backspace"
+        case .shift: return key == "shift"
+        case .returnkey: return key == "return"
+        case .symbols: return key == "123"
+        case .input(let k, let alternate): return k == key || (alternate == "accent" && key == "accent")
         default: return false
         }
     }
@@ -187,6 +196,8 @@ struct Commit {
     let intendedWords: [Int]
     let typed: String
     let final: String
+    /// The next-word predictions the bar shows after this commit, best first.
+    let predicted: [String]
 }
 
 /// Picks the cell a tap types, from the point, today's answer (the cell under the
@@ -205,8 +216,8 @@ struct PickCost {
 /// Types one sentence: every tap goes through the grid (or the picker), every letter
 /// triggers the suggestion work `SuggestionState.updateAsync` does, every space the
 /// autocorrect `DictusKeyboardBridge.autocorrectBeforeCursor` does.
-func replay(_ taps: [Tap], cells: [Cell], width: CGFloat, height: CGFloat, picker: Picker?,
-            tapRow: (Tap, String, CGPoint, Int, PickCost) -> Void) -> (text: String, commits: [Commit]) {
+func replay(_ taps: [Tap], cells: [Cell], width: CGFloat, height: CGFloat, picker: Picker?, journal: Journal?,
+            tapRow: (Tap, String, CGPoint, Int, PickCost, Int) -> Void) -> (text: String, commits: [Commit]) {
     let field = Field()
     let memory = AutocorrectRejectionMemory()
     let mirror = MirrorSyncState()
@@ -237,6 +248,8 @@ func replay(_ taps: [Tap], cells: [Cell], width: CGFloat, height: CGFloat, picke
                                 visited: visited)
         let resolved = label(hit)
         if tap.key != "space", tokenWords.last != wordIndex { tokenWords.append(wordIndex) }
+        // The keyboard records a tap where the touch resolves to a key, from the touch point.
+        let journalNs = hit.map { journal?.tap($0, at: point, ms: tap.ms) ?? 0 } ?? 0
 
         var cost = 0
         switch hit?.key.type {
@@ -266,6 +279,7 @@ func replay(_ taps: [Tap], cells: [Cell], width: CGFloat, height: CGFloat, picke
         case .spacebar?:
             var typed = ""
             var final = ""
+            var predicted: [String] = []
             cost = microseconds {
                 guard let (prefix, word) = AutocorrectRejectionMemory.wordAtCursor(context: field.text) else {
                     field.insertText(" ")
@@ -275,8 +289,17 @@ func replay(_ taps: [Tap], cells: [Cell], width: CGFloat, height: CGFloat, picke
                 final = word
                 let ws = words(field.text)
                 let previous = ws.count >= 2 ? ws[ws.count - 2] : nil
-                let proposal = engine.spellCheck(word, previousWord: previous,
-                                                 isAtSentenceStart: ProperNounGuard.isAtSentenceStart(context: field.text, word: word))?.correction
+                journal?.beginWord(word, previous: previous)
+                var offered = false
+                defer { journal?.endWord(final, offered: offered) }
+                // `spellCheck` is this proposal's autocorrection; the journal also needs to
+                // know when corrections were only offered, as the keyboard's commit does.
+                let checked = engine.correctionProposal(
+                    for: word, previousWord: previous,
+                    isAtSentenceStart: ProperNounGuard.isAtSentenceStart(context: field.text, word: word)
+                )
+                let proposal = checked?.autocorrection?.correction
+                offered = checked?.suggestionRow(typedWord: word) != nil
                 var applied = false
                 if memory.commit(prefix: prefix, word: word, proposedCorrection: proposal) == .correct,
                    let correction = proposal,
@@ -287,9 +310,11 @@ func replay(_ taps: [Tap], cells: [Cell], width: CGFloat, height: CGFloat, picke
                     applied = true
                 }
                 if !applied { field.insertText(" ") }
-                _ = engine.predictNextWords(after: Array(words(field.text).suffix(2)))
+                predicted = engine.predictNextWords(after: Array(words(field.text).suffix(2)))
             }
-            if !typed.isEmpty { commits.append(Commit(intendedWords: tokenWords, typed: typed, final: final)) }
+            if !typed.isEmpty {
+                commits.append(Commit(intendedWords: tokenWords, typed: typed, final: final, predicted: predicted))
+            }
             tokenWords = []
         case .backspace?:
             field.deleteBackward()
@@ -298,7 +323,7 @@ func replay(_ taps: [Tap], cells: [Cell], width: CGFloat, height: CGFloat, picke
             break
         }
         if tap.key == "space" { wordIndex += 1 }
-        tapRow(tap, resolved, point, cost, pickCost)
+        tapRow(tap, resolved, point, cost, pickCost, journalNs)
     }
     return (field.text.trimmingCharacters(in: .whitespaces), commits)
 }
@@ -323,9 +348,12 @@ let runsDir = env["KB_RUNS"] ?? "\(benchDir)/runs"
 let hitMode = env["KB_HIT"] ?? "plain"
 guard ["plain", "model"].contains(hitMode) else { fatalError("KB_HIT must be plain or model") }
 let modelParameters = ModelParameters(env["KB_MODEL"] ?? "")
+// #1001: the typing journal. A bench built with DEBUG (`run.sh --debug`) records it, its
+// toggle on with KB_JOURNAL=1 and off without; the default build has none.
+let journal = Journal.start(toggle: env["KB_JOURNAL"] == "1")
 
-var tapsOut = ["lang\tsentence\ttap\tintended\tresolved\tx\ty\tengine_us\tplain\thit_ns\tvisited"]
-var commitsOut = ["lang\tsentence\tintended\ttyped\tfinal"]
+var tapsOut = ["lang\tsentence\ttap\tintended\tresolved\tx\ty\tengine_us\tplain\thit_ns\tvisited\tjournal_ns"]
+var commitsOut = ["lang\tsentence\tintended\ttyped\tfinal\tnext\tpredicted"]
 var textsOut = ["lang\tsentence\tintended\tfinal"]
 
 // The engine starts loading French as soon as it exists. A `setLanguage` issued before
@@ -373,14 +401,17 @@ for code in langs {
         // A run of several passes keeps numbering its sentences: sentence s is corpus line s modulo its length.
         let intended = sentences[s % sentences.count]
         let intendedWords = intended.components(separatedBy: " ")
+        journal?.startSentence(keyboard: "\(langCode)-\(LayoutType.active.rawValue)", document: "\(code)-\(s)")
         let (text, commits) = replay(run.filter { $0.sentence == s }, cells: cells, width: w, height: h,
-                                     picker: picker) { tap, resolved, p, us, pick in
+                                     picker: picker, journal: journal) { tap, resolved, p, us, pick, journalNs in
             tapsOut.append("\(code)\t\(s)\t\(tap.index)\t\(tap.key)\t\(resolved)\t\(String(format: "%.2f", p.x))\t"
-                           + "\(String(format: "%.2f", p.y))\t\(us)\t\(pick.plain)\t\(pick.ns)\t\(pick.visited)")
+                           + "\(String(format: "%.2f", p.y))\t\(us)\t\(pick.plain)\t\(pick.ns)\t\(pick.visited)\t\(journalNs)")
         }
         for c in commits {
             let meant = c.intendedWords.map { intendedWords[$0] }.joined(separator: " ")
-            commitsOut.append("\(code)\t\(s)\t\(meant)\t\(c.typed)\t\(c.final)")
+            // The word the typist types next, which the prediction bar should offer.
+            let next = c.intendedWords.last.map { $0 + 1 < intendedWords.count ? intendedWords[$0 + 1] : "" } ?? ""
+            commitsOut.append("\(code)\t\(s)\t\(meant)\t\(c.typed)\t\(c.final)\t\(next)\t\(c.predicted.joined(separator: ","))")
         }
         textsOut.append("\(code)\t\(s)\t\(intended)\t\(text)")
     }
@@ -389,6 +420,7 @@ for code in langs {
 
 // The user dictionary is the simulator's App Group store: leave it as empty as it was found.
 UserDictionary.shared.resetAll()
+journal?.finish(writingTo: "\(outDir)/journal.log")
 
 for (name, rows) in [("taps.tsv", tapsOut), ("commits.tsv", commitsOut), ("texts.tsv", textsOut)] {
     do {

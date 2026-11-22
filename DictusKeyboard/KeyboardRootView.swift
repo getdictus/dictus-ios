@@ -63,6 +63,18 @@ struct KeyboardRootView: View {
     /// ObservableObject alive in a 50 MB process.
     @State private var proPromotion: ProPromotionEntry = .hidden
 
+    /// Whether the toolbar offers Paste (#634). Refreshed on appearance, when the
+    /// suggestions empty out, when the host's text or selection moves (the user
+    /// copies in the host app with this keyboard on screen), and when this process
+    /// changes the pasteboard. Not while suggestions show: the offer cannot win the
+    /// slot then, so the pasteboard round trip would buy nothing.
+    @State private var offersPaste = false
+
+    /// When the offered copy's window ends. Keys the expiry task, so a newer copy
+    /// replacing an offered one re-arms it.
+    @State private var pasteOfferExpiry: Date?
+    private let clipboardOffer = ClipboardPasteOffer()
+
     /// The panel's Pro entry as the App Group says it is now.
     ///
     /// The flag is checked first so a build with the paywall hidden never asks
@@ -182,6 +194,8 @@ struct KeyboardRootView: View {
             suggestions: presentedMode == .keys ? suggestionState.suggestions : [],
             suggestionMode: presentedMode == .keys ? suggestionState.mode : .idle,
             onSuggestionTap: { index in handleSuggestionTap(index: index) },
+            offersPaste: offersPaste,
+            onPaste: { providers in pasteClipboard(providers) },
             // Undo survives opening the emoji picker (#266): browsing emoji is not
             // typing, and the insertion is still the tail of the field. The panel
             // presentation ignores these — its bar has no centre slot.
@@ -409,6 +423,32 @@ struct KeyboardRootView: View {
         }
         .onChange(of: state.isKeyboardVisible) { _, _ in
             syncWaveformDriver()
+            refreshPasteOffer()
+        }
+        .onChange(of: suggestionState.suggestions.isEmpty) { _, isEmpty in
+            if isEmpty { refreshPasteOffer() }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: UIPasteboard.changedNotification)) { _ in
+            refreshPasteOffer()
+        }
+        // Fires on every keystroke, so it reads the change count alone and goes on
+        // to the full check only when the clipboard has moved.
+        .onReceive(NotificationCenter.default.publisher(for: .dictusHostDocumentDidChange)) { _ in
+            // Owner only: the sighting it records is shared through the App Group, and a
+            // hidden controller recording it first would make the visible one skip.
+            guard state.activeControllerID == controllerID, state.isKeyboardVisible,
+                  suggestionState.suggestions.isEmpty,
+                  state.controller?.hasFullAccess == true,
+                  UIPasteboard.general.changeCount != clipboardOffer.lastSeenChangeCount else { return }
+            refreshPasteOffer()
+        }
+        // Takes Paste down when its window runs out, on a keyboard nobody touches.
+        .task(id: pasteOfferExpiry) {
+            guard let expiry = pasteOfferExpiry else { return }
+            let remaining = max(expiry.timeIntervalSinceNow, 0) + 0.5
+            try? await Task.sleep(nanoseconds: UInt64(remaining * 1_000_000_000))
+            guard !Task.isCancelled else { return }
+            refreshPasteOffer()
         }
         .onAppear {
             PersistentLog.log(.diagnosticProbe(
@@ -432,6 +472,8 @@ struct KeyboardRootView: View {
             // to a fresh controller while the panel is open, and viewWillAppear
             // restores `.panel` — that path never goes through the toggle.
             proPromotion = Self.readProPromotion()
+
+            refreshPasteOffer()
 
             // Language is set in KeyboardViewController.viewWillAppear, which fires
             // on every keyboard appearance and picks up any App Group preference changes.
@@ -509,6 +551,85 @@ struct KeyboardRootView: View {
         }
     }
 
+    // MARK: - Paste (#634)
+
+    /// Reads only whether the clipboard holds text or a URL, and its change count,
+    /// never the item itself, and nothing at all without Full Access.
+    private func refreshPasteOffer() {
+        offersPaste = clipboardOffer.isOffered(
+            hasFullAccess: state.controller?.hasFullAccess ?? false,
+            pasteboard: Self.pasteboardSnapshot()
+        )
+        pasteOfferExpiry = offersPaste ? clipboardOffer.expiry() : nil
+    }
+
+    private static func pasteboardSnapshot() -> PasteboardSnapshot {
+        let pasteboard = UIPasteboard.general
+        return PasteboardSnapshot(
+            changeCount: pasteboard.changeCount,
+            hasInsertableContent: pasteboard.hasStrings || pasteboard.hasURLs
+        )
+    }
+
+    /// Inserts what the user pasted through the system Paste control.
+    ///
+    /// The item is loaded here, after the tap and only then, and goes straight into
+    /// the document: it is never logged, stored or kept. Text wins over a URL because
+    /// a copied link usually carries both, and the text is what the user saw. An item
+    /// that yields neither leaves the document untouched. The owner gate and the
+    /// mirror arming are `insertVoiceNote`'s, for the same reasons.
+    private func pasteClipboard(_ providers: [NSItemProvider]) {
+        let changeCount = UIPasteboard.general.changeCount
+        let documentAtTap = state.controller.flatMap {
+            DictusTextProxyIdentity.documentIdentifier(of: $0.textDocumentProxy)
+        }
+        Task { @MainActor in
+            let text = await Self.insertableText(from: providers)
+            // The load is asynchronous: if focus moved to another field meanwhile, the
+            // text is not for it. The offer stays, so the user can paste again.
+            guard let text, !text.isEmpty,
+                  state.activeControllerID == controllerID, state.isKeyboardVisible,
+                  let proxy = state.controller?.textDocumentProxy,
+                  DictusTextProxyIdentity.documentIdentifier(of: proxy) == documentAtTap else {
+                refreshPasteOffer()
+                return
+            }
+            let mirrorBefore = bridge?.mirrorLength() ?? 0
+            proxy.insertText(text)
+            bridge?.observeMirror(before: mirrorBefore, inserted: text.count)
+            #if DEBUG
+            MirrorProbe.shared.record(.insert(text))
+            #endif
+            HapticFeedback.keyTapped()
+            clipboardOffer.notePasted(changeCount: changeCount)
+            refreshPasteOffer()
+        }
+    }
+
+    private static func insertableText(from providers: [NSItemProvider]) async -> String? {
+        for provider in providers {
+            if provider.canLoadObject(ofClass: String.self),
+               let text = await load(String.self, from: provider) {
+                return text
+            }
+            if provider.canLoadObject(ofClass: URL.self),
+               let url = await load(URL.self, from: provider) {
+                return url.absoluteString
+            }
+        }
+        return nil
+    }
+
+    private static func load<T: _ObjectiveCBridgeable & Sendable>(
+        _ type: T.Type, from provider: NSItemProvider
+    ) async -> T? where T._ObjectiveCType: NSItemProviderReading {
+        await withCheckedContinuation { continuation in
+            _ = provider.loadObject(ofClass: type) { object, _ in
+                continuation.resume(returning: object)
+            }
+        }
+    }
+
     // MARK: - Suggestion Handling
 
     /// Handles a tap on one of the suggestion bar slots.
@@ -528,6 +649,14 @@ struct KeyboardRootView: View {
         guard index < suggestionState.suggestions.count else { return }
         let suggestion = suggestionState.suggestions[index]
         guard let proxy = state.controller?.textDocumentProxy else { return }
+        #if DEBUG
+        TypingJournal.barTapped(
+            slot: index,
+            bar: TypingJournalBar(mode: "\(suggestionState.mode)", words: suggestionState.suggestions),
+            typed: suggestionState.currentWord,
+            commits: !(suggestionState.mode == .undoAvailable && index == 0)
+        )
+        #endif
 
         // Prediction mode: insert word + trailing space, bypass autocorrect, chain predictions.
         if suggestionState.mode == .predictions {
@@ -549,7 +678,9 @@ struct KeyboardRootView: View {
             return
         }
 
-        if suggestionState.mode == .corrections {
+        // Candidates mode (#993) has the same row shape, minus the bold slot: slot 0
+        // keeps the typed word, the others replace it.
+        if suggestionState.mode == .corrections || suggestionState.mode == .candidates {
             if index == 0 {
                 keepTypedWord(proxy: proxy, rowWord: suggestion)
                 // #548: reported, but deliberately NOT treated as a settling boundary.
@@ -687,7 +818,8 @@ struct KeyboardRootView: View {
         memory.correctionUndone(prefix: context[..<range.lowerBound], original: undo.originalWord)
         // A host without a document identifier keeps no memory, so nothing could be
         // learned later: learn on the tap there, as before #872.
-        if !memory.remembersRefusals {
+        // Two words restored by an elision repair (#1006) are never one learned word.
+        if !memory.remembersRefusals, !undo.originalWord.contains(" ") {
             UserDictionary.shared.learn(undo.originalWord)
         }
     }
@@ -788,4 +920,9 @@ struct KeyboardRootView: View {
         )
         #endif
     }
+}
+
+extension Notification.Name {
+    /// The host's text or selection changed, posted by `KeyboardViewController` (#634).
+    static let dictusHostDocumentDidChange = Notification.Name("DictusHostDocumentDidChange")
 }
