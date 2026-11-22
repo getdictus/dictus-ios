@@ -46,8 +46,8 @@ final class Journal {
         if TypingJournal.isRecording {
             TypingJournal.tap(
                 Self.name(of: cell.key.type),
-                dx: Double((point.x - cell.frame.midX) / cell.unitWidth),
-                dy: Double((point.y - cell.frame.midY) / cell.frame.height),
+                dx: Double((point.x - cell.center.x) / cell.unitWidth),
+                dy: Double((point.y - cell.center.y) / cell.rowHeight),
                 time: ms / 1000,
                 keyboard: keyboard
             )
