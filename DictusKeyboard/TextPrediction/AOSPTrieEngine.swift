@@ -194,6 +194,18 @@ final class AOSPTrieEngine {
         return (fullCorrection, Array(alts))
     }
 
+    /// The dictionary words within two weighted edits of `word`, best scored first,
+    /// each with its cost and frequency, for `CorrectionRanking` to choose from (#993).
+    /// `word` is lowercased and has no apostrophe prefix. Ten rather than the five
+    /// `spellCheck` reads: the word that was meant can sit sixth, as `morning` does for
+    /// `irning`, and it has to be there for context to lift it.
+    func correctionCandidates(for word: String, maxResults: Int = 10) -> [CorrectionCandidate] {
+        guard bridge.isLoaded(), !word.isEmpty else { return [] }
+        return bridge.candidates(forWord: word, maxEditDistance: 2.0, maxResults: UInt(maxResults))
+            .filter { $0.word != word }
+            .map { CorrectionCandidate(word: $0.word, cost: Double($0.cost), frequency: $0.frequency) }
+    }
+
     /// Whether a dictionary is loaded and ready for lookups.
     var isLoaded: Bool { bridge.isLoaded() }
 
@@ -220,14 +232,14 @@ final class AOSPTrieEngine {
         return expandContractions(profile: profile, word: word, provider: self)
     }
 
-    /// Try adding accents to an unaccented word and check if the result exists.
-    /// French: "deja" → "déjà", "apres" → "après", "tres" → "très".
-    /// Spanish: "espanol" → "español".
+    /// Whether a word typed without its accents gets them back, from the corpus counts
+    /// of its spellings and the previous word (#994).
+    /// French: "deja" → "déjà", "arrive" after "est" → "arrivé". Spanish: "manana" → "mañana".
     ///
-    /// Returns nil for languages whose `LanguageProfile.accentMap` is empty (English).
-    func accentExpansion(_ word: String) -> String? {
-        guard let profile = currentProfile else { return nil }
-        return expandAccents(profile: profile, word: word, provider: self)
+    /// Keeps the typed word for languages whose `LanguageProfile.accentMap` is empty (English).
+    func accentRestoration(_ word: String, previousWord: String?) -> AccentRestoration.Decision {
+        guard let profile = currentProfile else { return .keepTyped }
+        return restoreAccents(profile: profile, word: word, previousWord: previousWord, provider: self)
     }
 
     // MARK: - N-gram prediction
@@ -300,10 +312,11 @@ final class AOSPTrieEngine {
 
 // MARK: - FrequencyProvider conformance
 //
-// Lets DictusCore autocorrect helpers (`expandAccents`, `expandContractions`)
+// Lets DictusCore autocorrect helpers (`restoreAccents`, `expandContractions`)
 // query the trie via the protocol without importing the bridge. `wordExists(_:)`
 // is already defined on the class and matches the protocol signature.
 extension AOSPTrieEngine: FrequencyProvider {
     var isReady: Bool { isLoaded }
     func frequency(of word: String) -> UInt16 { wordFrequency(word) }
+    var frequencyScale: FrequencyScale { .logNormalized(maxCount: UInt32(clamping: bridge.maxFrequency())) }
 }
