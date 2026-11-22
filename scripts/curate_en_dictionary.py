@@ -4,6 +4,9 @@ Curate English frequency dictionary from Norvig's count_1w.txt.
 
 Downloads count_1w.txt (Google Trillion Word Corpus), takes top 40K words,
 outputs JSON {word: count} where higher count = more common.
+
+The corpus holds common misspellings (`teh`, `recieve`). Run
+tools/misspellings/prune_misspellings.py on the output before building the trie (#995).
 """
 
 import json

@@ -227,6 +227,47 @@ final class AutocorrectRejectionMemoryTests: XCTestCase {
                        "the bar previews what space does")
     }
 
+    // MARK: - #993: a typo the bar offered corrections for is not learned by keeping it
+
+    /// What the bridge's learning site does with a decision: a counted keep goes to
+    /// `recordUsage`, a refusal to `learn`, anything else teaches nothing.
+    private func teaches(_ decision: AutocorrectRejectionMemory.Decision) -> Bool {
+        switch decision {
+        case .keep(countUsage: true), .keepAndLearn: return true
+        case .keep(countUsage: false), .correct: return false
+        }
+    }
+
+    func testKeepingAWordTheBarOfferedCorrectionsForTeachesNothing() {
+        // Device test of #997: `arribe` kept twice with `arrive | arrivé` in the bar
+        // reached the repetition threshold, and `areibe` then became `arribe`.
+        let taught = ["Je suis arribe", "Je suis arribe et tu es arribe"].map { context -> Bool in
+            guard let (prefix, word) = AutocorrectRejectionMemory.wordAtCursor(context: context) else { return true }
+            return teaches(memory.commit(prefix: prefix, word: word, proposedCorrection: nil, offersCorrections: true))
+        }
+        XCTAssertEqual(taught, [false, false])
+    }
+
+    func testAWordKeptWithCorrectionsOfferedIsNotMarkedAsCounted() {
+        // The same word committed at the same place with nothing offered still counts.
+        XCTAssertEqual(memory.commit(prefix: "le ", word: "blorpa", proposedCorrection: nil, offersCorrections: true),
+                       .keep(countUsage: false))
+        XCTAssertEqual(commit("le blorpa", proposing: nil), .keep(countUsage: true))
+    }
+
+    func testTappingTheKeptWordInTheBarStillTeachesIt() {
+        // The explicit tap on «arribe» is what teaches the word: the bridge learns it on
+        // the tap, and the position is refused for the corrections that follow.
+        XCTAssertTrue(memory.typedWordKept(prefix: "Je suis ", word: "arribe", rowWord: "arribe"))
+        XCTAssertTrue(teaches(memory.commit(prefix: "Je suis ", word: "arribe", proposedCorrection: "arrive")))
+    }
+
+    func testUndoingACorrectionStillTeachesTheWord() {
+        applyCorrection("Je suis arribe", to: "arrive")
+        memory.correctionUndone(prefix: "Je suis ", original: "arribe")
+        XCTAssertEqual(memory.movingOn(context: "Je suis arribe "), "arribe")
+    }
+
     // MARK: - Undo
 
     func testUndoThenMovingOnLearnsTheRestoredWord() {

@@ -728,6 +728,9 @@ final internal class GiellaKeyboardView: UIView,
             let touchPoint = clampedPoint(touch.location(in: collectionView))
             if let indexPath = collectionView.indexPathForItem(at: touchPoint) {
                 let key = currentPage[indexPath.section][indexPath.row]
+                #if DEBUG
+                recordJournalTap(touch, key: key, at: indexPath)
+                #endif
 
                 // Click on finger contact, in step with the haptic fired above (#286).
                 // This is the only point where a touch resolves to a key, so it is also
@@ -772,6 +775,48 @@ final internal class GiellaKeyboardView: UIView,
             }
         }
     }
+
+    #if DEBUG
+    /// The language and layout this grid was built for. The view is rebuilt when
+    /// either changes, so it is read once, at the first recorded tap.
+    private lazy var journalKeyboard = "\(SupportedLanguage.active.rawValue)-\(LayoutType.active.rawValue)"
+
+    /// Records the tap in the typing journal (#1001): the key, and where the finger
+    /// landed from its centre in key units, the unit of tools/keyboard-bench runs.
+    /// The point is the touch's own, before `clampedPoint`, so a replay that clamps
+    /// it again resolves the same key.
+    private func recordJournalTap(_ touch: UITouch, key: KeyDefinition, at indexPath: IndexPath) {
+        guard TypingJournal.isRecording,
+              let frame = collectionView.layoutAttributesForItem(at: indexPath)?.frame,
+              frame.width > 0, frame.height > 0 else { return }
+        let point = touch.location(in: collectionView)
+        let unitWidth = frame.width / max(key.size.width, 0.01)
+        TypingJournal.tap(
+            Self.journalName(of: key.type),
+            dx: Double((point.x - frame.midX) / unitWidth),
+            dy: Double((point.y - frame.midY) / frame.height),
+            time: touch.timestamp,
+            keyboard: journalKeyboard
+        )
+    }
+
+    /// A key as the journal and the bench's run files name it.
+    private static func journalName(of type: KeyType) -> String {
+        switch type {
+        case .input(let key, let alternate): return alternate == "accent" ? "accent" : key.lowercased()
+        case .spacebar: return "space"
+        case .backspace: return "backspace"
+        case .shift, .caps: return "shift"
+        case .returnkey: return "return"
+        case .symbols: return "123"
+        case .shiftSymbols: return "#+="
+        case .keyboard: return "globe"
+        case .comma: return ","
+        case .fullStop: return "."
+        default: return "other"
+        }
+    }
+    #endif
 
     /// Clamp a touch point into the collection view's content area.
     ///
@@ -952,6 +997,9 @@ final internal class GiellaKeyboardView: UIView,
 
         switch outcome {
         case .deleted:
+            #if DEBUG
+            if case .backspace = activeKey.key.type { TypingJournal.repeatDelete() }
+            #endif
             // The feedback follows the deletion, not the tick (#390). Both used to fire
             // unconditionally, which is what produced "haptics in a chain while nothing
             // is deleted". Still exactly one haptic and one click per deletion, as #286

@@ -15,6 +15,7 @@ class Trie;
 struct Candidate {
     char word[128];     // UTF-8, null-terminated (avoids std::string allocation)
     float score;
+    float cost;         // weighted edit cost from the input, 0 when the word was typed as is
     uint16_t frequency;
 };
 

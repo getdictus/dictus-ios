@@ -127,6 +127,23 @@ struct DebugLogView: View {
                         } label: {
                             Label("Clear", systemImage: "trash")
                         }
+                        #if DEBUG
+                        // The typing journal's own control (#1001): removes every line
+                        // holding typed text and keeps the diagnostics. Verbatim, like
+                        // the rest of this Debug-only surface's developer wording, so no
+                        // string reaches the catalogue.
+                        Button(role: .destructive) {
+                            TypingJournal.clear()
+                            Task { await reloadLogs() }
+                        } label: {
+                            Label {
+                                Text(verbatim: "Clear typing journal")
+                            } icon: {
+                                Image(systemName: "keyboard.badge.ellipsis")
+                            }
+                        }
+                        .accessibilityIdentifier("debugLogs.clearTypingJournal")
+                        #endif
                     }
 
                     Button {

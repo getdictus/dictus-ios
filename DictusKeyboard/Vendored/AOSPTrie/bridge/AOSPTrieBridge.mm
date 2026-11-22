@@ -15,6 +15,9 @@
 @implementation AOSPTrieResult
 @end
 
+@implementation AOSPTrieCandidate
+@end
+
 // ---------- AOSPTrieBridge ----------
 
 @implementation AOSPTrieBridge {
@@ -132,6 +135,30 @@ static int convertString(NSString *str, uint16_t *buffer, int bufferSize) {
     return [result copy];
 }
 
+- (NSArray<AOSPTrieCandidate *> *)candidatesForWord:(NSString *)word
+                                    maxEditDistance:(float)maxDist
+                                         maxResults:(NSUInteger)maxResults {
+    if (!_loaded || [word length] == 0 || maxResults == 0) return @[];
+
+    uint16_t inputBuf[256];
+    int inputLen = convertString(word, inputBuf, 256);
+    if (inputLen == 0) return @[];
+
+    std::vector<dictus::Candidate> candidates = _scorer.correct(
+        _trie, inputBuf, inputLen, maxDist, (int)maxResults
+    );
+
+    NSMutableArray<AOSPTrieCandidate *> *result = [NSMutableArray arrayWithCapacity:candidates.size()];
+    for (const auto& c : candidates) {
+        AOSPTrieCandidate *candidate = [[AOSPTrieCandidate alloc] init];
+        candidate.word = [NSString stringWithUTF8String:c.word];
+        candidate.cost = c.cost;
+        candidate.frequency = c.frequency;
+        [result addObject:candidate];
+    }
+    return [result copy];
+}
+
 - (BOOL)wordExists:(NSString *)word {
     if (!_loaded || [word length] == 0) return NO;
 
@@ -151,6 +178,11 @@ static int convertString(NSString *str, uint16_t *buffer, int bufferSize) {
 - (NSUInteger)wordCount {
     if (!_loaded) return 0;
     return (NSUInteger)_trie.wordCount();
+}
+
+- (NSUInteger)maxFrequency {
+    if (!_loaded) return 0;
+    return (NSUInteger)_trie.maxFreq();
 }
 
 - (BOOL)setProximityTableWithCharacters:(NSData *)characters distances:(NSData *)distances {

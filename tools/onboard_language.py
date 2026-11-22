@@ -142,7 +142,7 @@ final class {Lang}LanguageTests: XCTestCase {{
         XCTAssertTrue({lang}Profile.contractionPrefixes.isEmpty)
     }}
 
-    // TODO: add expandAccents tests once accentMap is populated.
+    // TODO: add restoreAccents tests once accentMap is populated.
 }}
 '''
 
