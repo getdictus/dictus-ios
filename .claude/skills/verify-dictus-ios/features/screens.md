@@ -63,7 +63,7 @@ Captures are in [`docs/agents/screens/`](../../../../docs/agents/screens/), one 
 | `kbd.numbers` | Keyboard 123 page: digits, punctuation, `#+=`, `ABC` | kbd abc on the letters page (the same bottom-left key reads 123) | keyboard.languages | [oui](../../../../docs/agents/screens/kbd.numbers.png) |
 | `kbd.symbols` | Keyboard `#+=` page: brackets, maths, currencies, `123`, `ABC` | on `kbd.numbers`, tap `#+=` at (+30, +187) pt from `inputView` | keyboard.languages | [oui](../../../../docs/agents/screens/kbd.symbols.png) |
 | `kbd.panel` | Keyboard panel: languages and layouts | kbd menu-hold | keyboard.languages | [oui](../../../../docs/agents/screens/kbd.panel.png) |
-| `kbd.emoji` | Emoji picker | kbd emoji | keyboard.emoji | [oui](../../../../docs/agents/screens/kbd.emoji.png) |
+| `kbd.emoji` | Emoji panel (Hex's, #1027): suggestions and search at the top, one grid of every category, ABC · categories · delete | kbd emoji | keyboard.emoji | [oui](../../../../docs/agents/screens/kbd.emoji.png) |
 | `kbd.voice-note-reader` | Voice-note reader (empty: « Aucune note vocale récente ») | kbd menu | voice-notes | [oui](../../../../docs/agents/screens/kbd.voice-note-reader.png) |
 | `kbd.smart-mode-fan` | Smart Mode fan (greyed: no Apple Intelligence) | Pro on, kbd mic-fan, screenshot during the drag | smart-modes | [oui](../../../../docs/agents/screens/kbd.smart-mode-fan.png) |
 | `kbd.suggestions` | Suggestion bar above the keys (undo chip after a correction) | Rappels, `type bonjoru`, `space` (see typing.autocorrect) | typing.autocorrect | [oui](../../../../docs/agents/screens/kbd.suggestions.png) |
