@@ -68,6 +68,13 @@ struct LicensesView: View {
                 )
 
                 licenseBlock(
+                    name: "Hex",
+                    author: "Christopher Langton",
+                    url: "https://github.com/anomalyco/hex",
+                    license: mitLicense(copyright: "Copyright (c) 2026 Christopher Langton")
+                )
+
+                licenseBlock(
                     name: "Nemotron 3.5 ASR",
                     author: "NVIDIA Corporation",
                     url: "https://huggingface.co/nvidia/nemotron-3.5-asr-streaming-0.6b",

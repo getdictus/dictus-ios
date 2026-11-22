@@ -17,6 +17,7 @@
 - `typing.dead-keys`: Dead keys compose accented letters.
 - `typing.autocorrect-toggle`: « Correction automatique » switch in Réglages → Clavier.
 - `typing.contacts-and-replacements`: Contact names and iOS text replacements (#873). A contact name or a phrase-only replacement is never corrected, a lowercase contact name takes its casing (`zofiak` → `Zofiak`), a shortcut is replaced by its phrase with the undo chip (`qqc` → `Quelque chose` at sentence start).
+- `typing.cursor-trackpad` (#950): Hold the space bar 0.35 s without sliding: the keys go blank and the space bar is a trackpad. The cursor follows the finger through the text in two dimensions, line to line, at the text's own scale, faster the faster the finger (Hex's model, MIT). Lifting types no space. A quick tap that drifts stays a space. A second finger types nothing. No haptic of its own. No selection: a keyboard cannot make one.
 
 ## How to get to it (user POV)
 
@@ -53,6 +54,8 @@ Measured 2026-10-30 (iPhone 17 Pro, iOS 27.0, build `fef07756`), keys tapped by 
 Measured 2026-11-13 (iPhone 17, iOS 26.5, builds `fd92aaa0` and `bbaa7b36`, #919), in the Notes field of a Rappels item (tap under the title, « Ajouter une note »), every key tapped on the Dictus keys: `contact helene.bethmont@gmail.com site https://github.com/x et www.getdictus.com puis bonjoru. ` gives `Contact gelée.bethmont@émail.com site héros://github.com/x et wax.getdictus.com puis bonjour. ` before the fix and the text as typed, `bonjour.` aside, after it. The after log carries `ADDRESS-REVERT orig="helene" undone="gelée"`, `ADDRESS-REVERT orig="https" undone="héros"` and `AUTOCORRECT-SKIP word=… reason=address` for every later segment. `drive.sh type` has no punctuation; the keys were tapped at these points (iPhone 17, `inputView` at y = 548): letters rows y = 610 / 665 / 719 on the 40.2 pt pitch of `drive.sh`, `123` / `ABC` (25, 772), space (210, 772); on the `123` page `-` (20, 664), `/` (60, 664), `:` (100, 664), `@` (340, 664), `.` (104, 718), delete (371, 718). The keyboard stays on `123` after a mark, and goes back to letters by itself after `. ` and space.
 
 ## Gotchas
+
+- `typing.cursor-trackpad`: a multi-line field is needed, and a slimmed device has no Notes. A `<textarea>` page served from the Mac works in Safari (`python3 -m http.server --bind 127.0.0.1`, then `simctl openurl <udid> http://127.0.0.1:<port>/`; `simctl openurl` refuses `data:` URLs). `axe drag --hold 0.7 --start-x 210 --start-y 772 --end-x <x> --end-y <y> --duration 1 --steps 90` holds the space bar, then slides. Measured 2026-11-22 (iPhone 17, iOS 26.5), with Apple's keyboard on the same gestures as the reference: `docs/study-captures/trackpad/` on the `study/trackpad` branch. Safari shares about 60 characters around the cursor, cut anywhere, so a line whose start it has not shown is laid out by guess until it does. The feel, the speed curve on a real finger and the haptics are iPhone-only.
 
 - Safari's address bar turns suggestions off: typing there shows no suggestion bar. Test in Rappels. A slimmed iOS 26.5 device has no Notes app (`simctl launch com.apple.mobilenotes` fails), and on 2026-11-13 Messages opened a conversation without drawing its compose box.
 - Reset the user dictionary first (`typing.learned-words`): a learned word silently changes what autocorrect does.

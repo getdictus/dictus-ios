@@ -15,8 +15,11 @@ protocol LongPressOverlayDelegate: AnyObject {
 }
 
 protocol LongPressCursorMovementDelegate: AnyObject {
+    /// Move the host's cursor `movedCursor` UTF-16 units, as `adjustTextPosition` counts.
     func longpress(movedCursor: Int)
     func longpressDidCancel()
+    /// The text the host shares around its cursor, read now (it lags the moves).
+    func longpressTextContext() -> (before: String, after: String)
 }
 
 protocol LongPressBehaviorProvider {
@@ -25,94 +28,193 @@ protocol LongPressBehaviorProvider {
     func touchesEnded(_ point: CGPoint)
 }
 
+/// The space-bar trackpad (#950): held, the space bar moves the cursor through the text in
+/// two dimensions, at the text's own scale, faster the faster the finger, as Apple's does.
+///
+/// The approach is Hex's (https://github.com/anomalyco/hex, PRs #2219 and #2233, MIT
+/// License, Copyright (c) 2026 Christopher Langton): the text the host shares is laid out the
+/// way a field most likely shows it, and the finger drags a point through that layout. The
+/// math lives in DictusCore (`TrackpadCursor`), where it is unit-tested; this class only feeds
+/// it the finger and moves the host's cursor by what it answers.
+///
+/// What changed from the giellakbd controller this replaces: 12 pt per character whatever
+/// the text, an acceleration that never engaged (its baseline reset after every move, so
+/// the ×3 it promised stayed near ×1.2), horizontal only, a 60 Hz cap that dropped moves, an
+/// 8 pt dead zone after the hold, and a selection tick per move.
 final class LongPressCursorMovementController: NSObject, LongPressBehaviorProvider {
     public weak var delegate: LongPressCursorMovementDelegate?
 
-    /// Initial touch point when trackpad mode activates.
-    private var baselinePoint: CGPoint?
+    /// The finger that held the space bar. Other fingers on the keys are ignored while the
+    /// trackpad is on: they type nothing (Apple's starts a selection there, which a keyboard
+    /// cannot make), and lifting one does not end the trackpad.
+    private weak var touch: UITouch?
 
-    /// Dead zone in points -- absorbs finger jitter after activation.
-    /// 8pt matches the feel from the SwiftUI reference implementation.
-    private let deadZone: CGFloat = 8.0
+    private let wrapWidth: CGFloat
+    private var gesture: TrackpadCursor.Gesture?
 
-    /// Base delta in points per character movement.
-    /// Smaller = more sensitive. 12pt provides good balance between precision and speed.
-    private let baseDelta: CGFloat = 12.0
+    /// The keycaps without their labels, over the keys while the trackpad is on.
+    private var blankKeys: UIView?
 
-    /// Maximum speed multiplier for acceleration.
-    private let maxSpeedMultiplier: CGFloat = 3.0
+    /// The look a moment after each move, for what the host shows by then (see `refresh`).
+    private var refreshes: [DispatchWorkItem] = []
 
-    /// Distance in points at which maximum speed is reached.
-    private let accelerationRange: CGFloat = 120.0
+    /// - Parameters:
+    ///   - touch: the finger holding the space bar, when the view knows it.
+    ///   - keyboardWidth: the keyboard's width, which the host's lines are guessed from.
+    init(touch: UITouch?, keyboardWidth: CGFloat) {
+        self.touch = touch
+        wrapWidth = TrackpadCursor.wrapWidth(forWidth: keyboardWidth)
+    }
 
-    /// Whether the dead zone has been crossed (activation confirmed).
-    private var isActive = false
-
-    /// Accumulated fractional movement for sub-delta precision.
-    private var accumulatedMovement: CGFloat = 0.0
-
-    /// Rate limiter: minimum time between cursor moves to avoid overwhelming textDocumentProxy.
-    /// textDocumentProxy.adjustTextPosition is IPC -- too many calls causes lag.
-    private var lastMoveTime: TimeInterval = 0
-    private let minMoveInterval: TimeInterval = 0.016  // ~60Hz max
-
+    /// The trackpad starts where the finger is: travel before the hold doesn't count. Called
+    /// again for every other finger that lands while it is on, which it ignores.
     public func touchesBegan(_ point: CGPoint) {
-        if baselinePoint == nil {
-            baselinePoint = point
-            isActive = false
-            accumulatedMovement = 0
-        }
+        guard gesture == nil, let delegate else { return }
+        let context = delegate.longpressTextContext()
+        let font = Self.font()
+        let state = TrackpadCursor.State(
+            before: context.before,
+            after: context.after,
+            wrapWidth: wrapWidth,
+            lineHeight: font.lineHeight,
+            width: Self.width
+        )
+        gesture = TrackpadCursor.Gesture(state: state, at: point, time: touch?.timestamp ?? CACurrentMediaTime())
     }
 
+    /// Fallback for a caller that has only a point: the time is now.
     public func touchesMoved(_ point: CGPoint) {
-        guard let baseline = baselinePoint else { return }
+        move(to: point, at: CACurrentMediaTime())
+    }
 
-        let dx = point.x - baseline.x
-
-        // Phase 1: Dead zone -- absorb jitter
-        if !isActive {
-            if abs(dx) > deadZone {
-                isActive = true
-                // Haptic confirmation that trackpad mode is fully active
-                HapticFeedback.trackpadActivated()
-                // Reset baseline to edge of dead zone so movement starts from zero
-                baselinePoint = CGPoint(
-                    x: baseline.x + (dx > 0 ? deadZone : -deadZone),
-                    y: baseline.y
-                )
-                accumulatedMovement = 0
-            }
-            return
-        }
-
-        // Phase 2: Active cursor movement with acceleration
-        let now = Date.timeIntervalSinceReferenceDate
-        guard now - lastMoveTime >= minMoveInterval else { return }
-
-        let currentDx = point.x - (baselinePoint?.x ?? baseline.x)
-
-        // Acceleration: move faster the further from baseline
-        let distance = abs(currentDx)
-        let speedMultiplier = min(maxSpeedMultiplier, 1.0 + (distance / accelerationRange) * (maxSpeedMultiplier - 1.0))
-
-        // Calculate how many characters to move
-        accumulatedMovement += (currentDx / baseDelta) * speedMultiplier
-        let charsToMove = Int(accumulatedMovement)
-
-        if charsToMove != 0 {
-            delegate?.longpress(movedCursor: charsToMove)
-            accumulatedMovement -= CGFloat(charsToMove)
-            lastMoveTime = now
-            // Reset baseline to current position for continuous tracking
-            baselinePoint = point
+    /// The trackpad finger's moves among `touches`, each coalesced sample at its own time,
+    /// so the speed reads the finger as the screen sampled it (120 Hz on ProMotion).
+    func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?, in view: UIView) {
+        guard let own = ownTouch(in: touches) else { return }
+        let samples = event?.coalescedTouches(for: own) ?? [own]
+        for sample in samples {
+            move(to: sample.location(in: view), at: sample.timestamp)
         }
     }
 
+    /// Whether the trackpad's own finger is among `touches`. A view that never told the
+    /// trackpad which finger it is gets the first one, as before.
+    func owns(_ touches: Set<UITouch>) -> Bool {
+        ownTouch(in: touches) != nil
+    }
+
+    /// The finger lifts: the cursor goes where the point is, among the rows known.
     public func touchesEnded(_ point: CGPoint) {
-        baselinePoint = nil
-        isActive = false
-        accumulatedMovement = 0
+        if var gesture {
+            let offset = gesture.lift(at: CACurrentMediaTime())
+            self.gesture = gesture
+            if offset != 0 { delegate?.longpress(movedCursor: offset) }
+        }
+        finish()
+    }
+
+    /// The system took the touch away (a system gesture, a call): stop where the cursor is.
+    func cancel() {
+        finish()
+    }
+
+    /// Lays blank keycaps over `collectionView`'s keys: Apple's keys lose their labels while
+    /// the trackpad is on, and each keycap sits 60% of the way to the backdrop (Hex, from
+    /// Apple's 242,242,247 on 226,227,232 in light and 54 on 32 in dark). The view hides the
+    /// keys themselves; these stand in for them until the trackpad ends.
+    func showBlankKeys(over collectionView: UICollectionView) {
+        guard blankKeys == nil, let container = collectionView.superview else { return }
+        let overlay = UIView(frame: collectionView.frame)
+        overlay.isUserInteractionEnabled = false
+        overlay.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        for cell in collectionView.visibleCells {
+            guard let cap = Self.keycap(in: cell),
+                  let color = cap.backgroundColor,
+                  color.cgColor.alpha > 0 else { continue }
+            let blank = UIView(frame: cap.convert(cap.bounds, to: collectionView))
+            blank.backgroundColor = color.withAlphaComponent(color.cgColor.alpha * 0.4)
+            blank.layer.cornerRadius = cap.layer.cornerRadius
+            blank.layer.cornerCurve = cap.layer.cornerCurve
+            overlay.addSubview(blank)
+        }
+        container.insertSubview(overlay, aboveSubview: collectionView)
+        blankKeys = overlay
+    }
+
+    // MARK: - Private
+
+    private func ownTouch(in touches: Set<UITouch>) -> UITouch? {
+        guard let touch else { return touches.first }
+        return touches.contains(touch) ? touch : nil
+    }
+
+    private func move(to point: CGPoint, at time: TimeInterval) {
+        guard var gesture, let delegate else { return }
+        let offset = gesture.move(to: point, at: time, context: delegate.longpressTextContext, width: Self.width)
+        self.gesture = gesture
+        if offset != 0 { delegate.longpress(movedCursor: offset) }
+        scheduleRefresh()
+    }
+
+    /// Hex settles the cursor again on the host's text and selection callbacks, which tell it
+    /// the host has caught up with a move. Those callbacks reach Dictus in the view
+    /// controller; looking again a moment after each move gets the same answers without
+    /// another hook there. Two looks: one for a host that has caught up (about 10 ms in the
+    /// simulator's UITextView), one just after `edgeTimeout`, which is when a step past the
+    /// known text that went unanswered is taken as the text's start or end.
+    private func scheduleRefresh() {
+        refreshes.forEach { $0.cancel() }
+        refreshes = [0.03, TrackpadCursor.edgeTimeout + 0.02].map { delay in
+            let work = DispatchWorkItem { [weak self] in self?.refresh() }
+            DispatchQueue.main.asyncAfter(deadline: .now() + delay, execute: work)
+            return work
+        }
+    }
+
+    private func refresh() {
+        guard var gesture, let delegate else { return }
+        let offset = gesture.refresh(at: CACurrentMediaTime(), context: delegate.longpressTextContext, width: Self.width)
+        self.gesture = gesture
+        if offset != 0 { delegate.longpress(movedCursor: offset) }
+    }
+
+    private func finish() {
+        refreshes.forEach { $0.cancel() }
+        refreshes = []
+        gesture = nil
+        blankKeys?.removeFromSuperview()
+        blankKeys = nil
         delegate?.longpressDidCancel()
+    }
+
+    /// The keycap of a key cell: its `KeyView`'s background view.
+    private static func keycap(in cell: UICollectionViewCell) -> UIView? {
+        var stack: [UIView] = [cell]
+        while let view = stack.popLast() {
+            if let key = view as? KeyView { return key.contentView }
+            stack.append(contentsOf: view.subviews)
+        }
+        return nil
+    }
+
+    // MARK: Character widths
+
+    private static var widths: (font: UIFont, widths: [Character: CGFloat]) = (.systemFont(ofSize: 17), [:])
+
+    /// Body text, as most fields show it (17 pt, larger with Dynamic Type): the font the
+    /// trackpad measures characters in (Hex's choice).
+    private static func font() -> UIFont {
+        let font = UIFont.preferredFont(forTextStyle: .body)
+        if font != widths.font { widths = (font, [:]) }
+        return font
+    }
+
+    /// A character's width in `font()`, measured once.
+    private static func width(_ character: Character) -> CGFloat {
+        if let width = widths.widths[character] { return width }
+        let width = character.isNewline ? 0 : (String(character) as NSString).size(withAttributes: [.font: widths.font]).width
+        widths.widths[character] = width
+        return width
     }
 }
 
