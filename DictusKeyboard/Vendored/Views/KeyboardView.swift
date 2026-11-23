@@ -290,7 +290,7 @@ final internal class GiellaKeyboardView: UIView,
                 guard let cell = collectionView.cellForItem(at: indexPath) as? KeyCell else { continue }
                 let isPressed = activeKey?.indexPath == indexPath
                 cell.configure(page: page, key: key, theme: theme, traits: traitCollection,
-                               returnKey: appearance)
+                               returnKey: appearance, capInsets: capInsets(at: indexPath))
                 cell.keyView?.active = isPressed
             }
         }
