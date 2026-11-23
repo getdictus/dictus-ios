@@ -55,6 +55,15 @@ final class ElisionOnsetTests: XCTestCase {
         }
     }
 
+    /// The curated context overrides (`il ma` → `il m'a`, #500) write elisions too.
+    func test_french_everyContextOverridePassesTheRule() {
+        for (previous, corrections) in frenchProfile.contextOverrides {
+            for (typed, corrected) in corrections {
+                XCTAssertTrue(frenchProfile.allowsElision(corrected), "\(previous) \(typed) → \(corrected)")
+            }
+        }
+    }
+
     // MARK: - English is untouched
 
     func test_english_hasNoElisionRule() {
