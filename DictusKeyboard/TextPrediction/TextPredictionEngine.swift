@@ -382,7 +382,7 @@ class TextPredictionEngine {
         // Our downstream apostrophe split only validates the part AFTER the
         // apostrophe — "v'est" → checks "est" (valid) → returns nil (no correction).
         // We need to intercept wrong prefixes explicitly.
-        if let repaired = profile?.elisionRepair?.repairPrefix(word, isWord: aospTrieEngine.wordExists) {
+        if let repaired = profile?.elisionRepair?.repairPrefix(word, isWord: aospTrieEngine.wordExists), allowsElision(repaired) {
             let display = Self.capitalized(repaired, like: word)
             #if DEBUG
             AutocorrectDebugLog.autocorrectDecision(
@@ -424,8 +424,9 @@ class TextPredictionEngine {
             let full = (apostrophePrefix ?? "") + spelling
             return isCapitalized ? full.capitalized : full
         }
+        let elided = { (spelling: String) in self.allowsElided(spelling, after: apostrophePrefix) }
         switch aospTrieEngine.accentRestoration(wordToCheck, previousWord: previousWord) {
-        case .restore(let accented):
+        case .restore(let accented) where elided(accented):
             let corrected = display(accented)
             #if DEBUG
             AutocorrectDebugLog.autocorrectDecision(
@@ -433,14 +434,14 @@ class TextPredictionEngine {
             )
             #endif
             return CheckedWord(correction: corrected, alternatives: [])
-        case .ambiguous(let spellings):
+        case .ambiguous(let spellings) where spellings.contains(where: elided):
             // Two accented spellings, equally likely (#993): `reserve` is `réserve` or
             // `réservé`. Keep what was typed, offer both.
             #if DEBUG
             AutocorrectDebugLog.autocorrectSkipped(word: word, reason: "ambiguous-accent")
             #endif
-            return CheckedWord(.suggest(spellings.map(display)))
-        case .keepTyped:
+            return CheckedWord(.suggest(spellings.filter(elided).map(display)))
+        case .restore, .ambiguous, .keepTyped:
             break
         }
 
@@ -506,7 +507,7 @@ class TextPredictionEngine {
             for: wordToCheck,
             learnedWords: UserDictionary.shared.allLearnedWords,
             dictionaryKnows: aospTrieEngine.wordExists
-        ) {
+        ), allowsElided(learned, after: apostrophePrefix) {
             let full = (apostrophePrefix ?? "") + learned
             let isCapitalized = word.first?.isUppercase == true
             let corrected = isCapitalized ? full.capitalized : full
@@ -545,25 +546,7 @@ class TextPredictionEngine {
             if splitHasBigram {
                 useSplit = true  // bigram confirmed, accept
             } else if splitHasBoundary {
-                // Boundary-only (no bigram): compare with single-word correction via ED
-                if let single = aospTrieEngine.spellCheck(word) {
-                    let splitJoined = candidate.left + candidate.right
-                    let splitED = Self.editDistance(wordToCheck, splitJoined)
-                    let singleLower = single.correction.lowercased()
-                    let singleWordPart: String
-                    if let idx = singleLower.lastIndex(of: "'") {
-                        singleWordPart = String(singleLower[singleLower.index(after: idx)...])
-                    } else {
-                        singleWordPart = singleLower
-                    }
-                    let singleED = Self.editDistance(wordToCheck, singleWordPart)
-                    // Accept split only if strictly better fit (split + 1 ≤ single).
-                    // "pasnmal": split "pasmal" ED 1, single "pascal" ED 2 → 1+1=2 ≤ 2 ✓
-                    // "fonctionnalités": split "fonctionagités" ED ~3, single ED 0/1 → reject ✓
-                    useSplit = (splitED + 1) <= singleED
-                } else {
-                    useSplit = true  // no single-word alternative, accept split
-                }
+                useSplit = acceptsBoundarySplit(candidate, word: word, wordToCheck: wordToCheck)
             } else {
                 useSplit = false  // direct split rejected without bigram (prevented by trySplit)
             }
@@ -590,6 +573,33 @@ class TextPredictionEngine {
                               previousWord: previousWord)
     }
 
+    /// Whether a split found only through a key next to the space bar, with no bigram
+    /// to confirm it, beats the trie's single-word correction.
+    private func acceptsBoundarySplit(_ candidate: GluedWordSplit.Candidate, word: String, wordToCheck: String) -> Bool {
+        switch aospTrieEngine.check(word) {
+        case .corrected(let correction, _):
+            let splitED = Self.editDistance(wordToCheck, candidate.left + candidate.right)
+            let singleLower = correction.lowercased()
+            let singleWordPart: String
+            if let idx = singleLower.lastIndex(of: "'") {
+                singleWordPart = String(singleLower[singleLower.index(after: idx)...])
+            } else {
+                singleWordPart = singleLower
+            }
+            let singleED = Self.editDistance(wordToCheck, singleWordPart)
+            // Accept split only if strictly better fit (split + 1 ≤ single).
+            // "pasnmal": split "pasmal" ED 1, single "pascal" ED 2 → 1+1=2 ≤ 2 ✓
+            // "fonctionnalités": split "fonctionagités" ED ~3, single ED 0/1 → reject ✓
+            return (splitED + 1) <= singleED
+        case .keepTyped:
+            // Every single-word candidate put a consonant after an elision. The typed
+            // word stays: a split would drop the prefix (`d'bonbjour` → `bon jour`).
+            return false
+        case .noCandidate:
+            return true  // no single-word alternative, accept split
+        }
+    }
+
     /// The trie pass of `checkWord`. `CorrectionRanking` keeps the typed word when two
     /// candidates are equally good, rather than letting whichever the trie listed
     /// first win (#993).
@@ -599,7 +609,10 @@ class TextPredictionEngine {
         apostrophePrefix: String?,
         previousWord: String?
     ) -> CheckedWord? {
+        // French never elides before a consonant: `d'cirre` is not `d'votre`. With
+        // every candidate dropped, the decision keeps the typed word.
         let candidates = rankedCandidates(for: wordToCheck, previousWord: previousWord)
+            .filter { allowsElided($0.word, after: apostrophePrefix) }
         let decision = CorrectionRanking.decide(candidates)
         #if DEBUG
         AutocorrectDebugLog.trieCandidates(word: word, candidates: candidates, decision: decision)
@@ -779,6 +792,7 @@ class TextPredictionEngine {
         if wordToCheck.count >= 3 {
             let predictions = aospTrieEngine.predictNextWords(after: [prevLower], maxResults: 8)
             closePredictions = predictions.compactMap { prediction in
+                guard allowsElided(prediction, after: prefix) else { return nil }
                 let dist = Self.editDistance(wordToCheck, prediction)
                 guard dist == 1 else { return nil }
                 let score = aospTrieEngine.bigramScore(for: prediction, after: prevLower)
@@ -901,6 +915,17 @@ class TextPredictionEngine {
         guard let joined = repair.joinAcrossSpace(previousWord: previousWord, word: word, isWord: aospTrieEngine.wordExists)
         else { return nil }
         return Self.capitalized(joined, like: previousWord)
+    }
+
+    /// Whether `word` may follow the apostrophe prefix `prefix` in the active language:
+    /// French never elides before a consonant, so `votre` may not follow `d'`.
+    private func allowsElided(_ word: String, after prefix: String?) -> Bool {
+        profile?.allowsElided(word, after: prefix) ?? true
+    }
+
+    /// Whether a whole word, prefix included, is allowed in the active language.
+    private func allowsElision(_ word: String) -> Bool {
+        profile?.allowsElision(word) ?? true
     }
 
     /// `text` with a capital first letter when `typed` starts with one. Only the first

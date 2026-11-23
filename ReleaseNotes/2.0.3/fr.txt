@@ -1,0 +1,50 @@
+Nouveautés de la 2.0.3
+
+## Highlights
+
+Un clavier repensé
+Les touches sont placées comme sur le clavier d'Apple, et un appui long sur la barre d'espace déplace le curseur.
+
+Des emojis plus simples
+Recherche en français, tons de peau, et toute la hauteur du clavier pour les emojis.
+
+Une autocorrection plus juste en français
+« il m'a », « à », les accents et les mots collés.
+
+## All changes
+
+Clavier repensé
+Touches placées comme sur le clavier d'Apple, sur chaque iPhone, en portrait et en paysage.
+
+Curseur
+Appui long sur la barre d'espace pour le déplacer.
+
+Nouveau clavier emoji
+Recherche en français, tons de peau, plus de place pour les emojis.
+
+Autocorrection plus juste en français
+« il m'a », « à », accents, mots collés et apostrophes.
+
+La touche Retour s'adapte au champ
+Envoyer, Aller, Rechercher.
+
+Raccourcis de texte
+Ceux de vos réglages iOS fonctionnent partout.
+
+Coller
+En un geste depuis la barre du clavier.
+
+WhatsApp
+L'autocorrection reste active après une mention @.
+
+Traduction
+Vers 25 langues avec « Autre langue… » (Dictus Pro, iPhone avec Apple Intelligence).
+
+Apple
+Choisissez le modèle de dictée d'Apple, sur l'iPhone, dans l'écran Modèles.
+
+Essai gratuit
+Disponible pour Dictus Pro sur tous les iPhone.
+
+Signaler un bug
+Dictus propose de joindre le journal technique.

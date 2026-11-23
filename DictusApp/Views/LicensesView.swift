@@ -10,9 +10,9 @@ import DictusCore
 /// Placing them in Settings > A propos > Licences follows the standard iOS
 /// convention (e.g., Settings > General > Legal & Regulatory).
 ///
-/// All 7 entries are listed alphabetically: DeviceKit, Dictus, FluidAudio,
-/// giellakbd-ios, Nemotron 3.5 ASR, VivaDicta, WhisperKit. FluidAudio uses Apache 2.0,
-/// Nemotron 3.5 ASR uses OpenMDW-1.1; all others use MIT.
+/// All 9 entries are listed alphabetically: DeviceKit, Dictus, DM Sans, FluidAudio,
+/// giellakbd-ios, Hex, Nemotron 3.5 ASR, VivaDicta, WhisperKit. FluidAudio uses Apache 2.0,
+/// Nemotron 3.5 ASR uses OpenMDW-1.1, DM Sans the SIL Open Font License; all others use MIT.
 ///
 /// Nemotron 3.5 ASR is a MODEL, not code (#558): NVIDIA's weights, converted to Core ML by
 /// FluidInference and downloaded by the user from HuggingFace. It is listed because its
@@ -20,11 +20,12 @@ import DictusCore
 /// because the brief asks for NVIDIA's attribution. The FluidAudio entry covers the SDK that
 /// runs it and stays as it was.
 ///
-/// "Dependency" is the loose sense here, and two entries are not packages at all.
-/// giellakbd-ios is vendored source, and VivaDicta is a ported data table — the host-app
-/// return catalogue in `KnownAppSchemes.swift`, copied with its annotations (#23). Both
+/// "Dependency" is the loose sense here, and three entries are not packages at all.
+/// giellakbd-ios is vendored source, Hex is the return key's glyph-and-colour table in
+/// `ReturnKeyStyle.swift` (#1023), and VivaDicta is a ported data table — the host-app
+/// return catalogue in `KnownAppSchemes.swift`, copied with its annotations (#23). All
 /// are redistribution of MIT-licensed work, and MIT requires the copyright notice and the
-/// licence text to travel with it, so both belong on this screen exactly like a linked
+/// licence text to travel with it, so all three belong on this screen exactly like a linked
 /// package. A provenance comment in the source file is honest but does not discharge the
 /// condition.
 ///
