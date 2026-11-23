@@ -29,6 +29,8 @@ protocol GiellaKeyboardViewDelegate: AnyObject {
     /// fires its haptic and its click on that answer (#390), and stops on it (#419).
     func didTriggerRepeat(_ key: KeyDefinition, wordMode: Bool) -> KeyRepeatOutcome
     func didMoveCursor(_ movement: Int)
+    /// The text the host shares around its cursor, for the space-bar trackpad (#950).
+    func trackpadTextContext() -> (before: String, after: String)
 }
 
 @objc protocol GiellaKeyboardViewKeyboardKeyDelegate {
@@ -51,7 +53,8 @@ final internal class GiellaKeyboardView: UIView,
     UICollectionViewDelegate,
     UICollectionViewDelegateFlowLayout,
     LongPressOverlayDelegate,
-    LongPressCursorMovementDelegate
+    LongPressCursorMovementDelegate,
+    UIGestureRecognizerDelegate
 {
     // The three cadences below are Apple's own, measured rather than guessed --
     // Apple documents none of this. See docs/research/419-backspace-cadence/ for the
@@ -135,6 +138,8 @@ final internal class GiellaKeyboardView: UIView,
 
     private var longpressController: LongPressBehaviorProvider?
     private var currentlyLongpressedKey: KeyDefinition?
+    /// The finger on the space bar whose hold may start the trackpad (#950).
+    private weak var spaceHoldTouch: UITouch?
 
     private var keyboardButtonFrame: CGRect? {
         didSet {
@@ -196,6 +201,8 @@ final internal class GiellaKeyboardView: UIView,
         // delivery at screen edges where system gesture disambiguation can add ~100ms.
         recognizer.delaysTouchesBegan = false
         recognizer.delaysTouchesEnded = false
+        // Picks the hold's length per touch: shorter on the space bar (#950).
+        recognizer.delegate = self
         return recognizer
     }()
 
@@ -539,6 +546,33 @@ final internal class GiellaKeyboardView: UIView,
         delegate?.didMoveCursor(movedCursor)
     }
 
+    func longpressTextContext() -> (before: String, after: String) {
+        delegate?.trackpadTextContext() ?? ("", "")
+    }
+
+    // MARK: - UIGestureRecognizerDelegate
+
+    /// The space bar's hold starts the trackpad after `TrackpadCursor.holdDelay` (Apple's
+    /// 0.35 s), where the other keys keep UIKit's 0.5 s for their popups. Set here, before
+    /// the recognizer sees the touch, and only for the first finger down: changing it while a
+    /// press is being timed would retime that press. A touch that slides `holdSlop` (UIKit's
+    /// `allowableMovement`) before then fails the hold, so it stays a tap and types its space.
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
+        guard gestureRecognizer === longpressGestureRecognizer, longpressGestureRecognizer.numberOfTouches == 0 else { return true }
+        var onSpace = false
+        if let indexPath = collectionView.indexPathForItem(at: clampedPoint(touch.location(in: collectionView))),
+           case .spacebar = currentPage[indexPath.section][indexPath.row].type {
+            onSpace = true
+        }
+        longpressGestureRecognizer.minimumPressDuration = onSpace ? TrackpadCursor.holdDelay : Self.keyHoldDelay
+        longpressGestureRecognizer.allowableMovement = TrackpadCursor.holdSlop
+        spaceHoldTouch = onSpace ? touch : nil
+        return true
+    }
+
+    /// UIKit's default hold, which the key popups have always used.
+    private static let keyHoldDelay: TimeInterval = 0.5
+
     // MARK: - Input handling
 
     struct KeyTriggerTiming {
@@ -848,7 +882,11 @@ final internal class GiellaKeyboardView: UIView,
         )
     }
 
-    override func touchesMoved(_ touches: Set<UITouch>, with _: UIEvent?) {
+    override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
+        if let trackpad = longpressController as? LongPressCursorMovementController {
+            trackpad.touchesMoved(touches, with: event, in: collectionView)
+            return
+        }
         if let longpressController = self.longpressController, let touch = touches.first {
             longpressController.touchesMoved(touch.location(in: collectionView))
             return
@@ -889,11 +927,14 @@ final internal class GiellaKeyboardView: UIView,
     }
 
     override func touchesCancelled(_: Set<UITouch>, with _: UIEvent?) {
+        (longpressController as? LongPressCursorMovementController)?.cancel()
         longpressController = nil
         activeKey = nil
     }
 
     override func touchesEnded(_ touches: Set<UITouch>, with _: UIEvent?) {
+        // Another finger lifting leaves the trackpad on (#950).
+        if let trackpad = longpressController as? LongPressCursorMovementController, !trackpad.owns(touches) { return }
         if let longpressController = self.longpressController, let touch = touches.first {
             longpressController.touchesEnded(touch.location(in: collectionView))
             removeAllOverlays()
@@ -975,13 +1016,17 @@ final internal class GiellaKeyboardView: UIView,
 
             case .spacebar:
                 if longpressGestureRecognizer.state == .began {
-                    let longpressController = LongPressCursorMovementController()
-                    longpressController.delegate = self
-                    self.longpressController = longpressController
-                    collectionView.alpha = 0.4
-                    // Initialize baseline so touchesMoved can compute deltas
-                    let startPoint = longpressGestureRecognizer.location(in: collectionView)
-                    longpressController.touchesBegan(startPoint)
+                    let trackpad = LongPressCursorMovementController(touch: spaceHoldTouch, keyboardWidth: bounds.width)
+                    trackpad.delegate = self
+                    self.longpressController = trackpad
+                    // The space bar is a trackpad now, not a pressed key: it types nothing on
+                    // lift, and it goes blank with the others.
+                    activeKey = nil
+                    // The keys go blank, as Apple's do; `longpressDidCancel` brings them back.
+                    trackpad.showBlankKeys(over: collectionView)
+                    collectionView.alpha = 0
+                    // The trackpad starts where the finger is now.
+                    trackpad.touchesBegan(longpressGestureRecognizer.location(in: collectionView))
                 }
             case .backspace:
                 break

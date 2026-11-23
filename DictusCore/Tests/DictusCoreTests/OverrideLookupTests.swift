@@ -139,4 +139,35 @@ final class OverrideLookupTests: XCTestCase {
         // Matches legacy behavior: capitalize() lowercases all but first.
         XCTAssertEqual(applyOverride(profile: englishProfile, word: "DONT"), "Don't")
     }
+
+    // MARK: - Context overrides (#500)
+
+    func test_french_ilMa_correctsToMApostropheA() {
+        // The first case of the #500 register: "ma" is a word, so nothing else corrects it.
+        XCTAssertEqual(applyContextOverride(profile: frenchProfile, previousWord: "il", word: "ma"), "m'a")
+        XCTAssertEqual(applyContextOverride(profile: frenchProfile, previousWord: "Elle", word: "ta"), "t'a")
+        XCTAssertEqual(applyContextOverride(profile: frenchProfile, previousWord: "\u{00E7}a", word: "ma"), "m'a")
+        XCTAssertEqual(applyContextOverride(profile: frenchProfile, previousWord: "tu", word: "ma"), "m'as")
+    }
+
+    func test_french_elidedPreviousWord_matchesItsLastPart() {
+        XCTAssertEqual(applyContextOverride(profile: frenchProfile, previousWord: "qu'il", word: "ma"), "m'a")
+        XCTAssertEqual(applyContextOverride(profile: frenchProfile, previousWord: "s'il", word: "ta"), "t'a")
+    }
+
+    func test_french_capitalizedWord_keepsItsCapital() {
+        XCTAssertEqual(applyContextOverride(profile: frenchProfile, previousWord: "il", word: "Ma"), "M'a")
+    }
+
+    func test_french_validPositions_areLeftAlone() {
+        XCTAssertNil(applyContextOverride(profile: frenchProfile, previousWord: "il", word: "la"))
+        XCTAssertNil(applyContextOverride(profile: frenchProfile, previousWord: "de", word: "ma"))
+        XCTAssertNil(applyContextOverride(profile: frenchProfile, previousWord: "pour", word: "ta"))
+        XCTAssertNil(applyContextOverride(profile: frenchProfile, previousWord: "il", word: "sa"))
+    }
+
+    func test_languagesWithoutContextOverrides_returnNil() {
+        XCTAssertNil(applyContextOverride(profile: englishProfile, previousWord: "il", word: "ma"))
+        XCTAssertNil(applyContextOverride(profile: germanProfile, previousWord: "il", word: "ma"))
+    }
 }
