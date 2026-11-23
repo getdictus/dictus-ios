@@ -587,12 +587,17 @@ struct PaywallView: View {
     /// upgrades their iPhone would never learn the feature had been there all along.
     /// Marking says the same true thing to everyone. Pro still sells on History and
     /// Vocabulary, which is exactly what #79 decided.
+    ///
+    /// #922 kept the mark when it gave these devices the trial, and shortened it to the
+    /// one fact that matters to the buyer: Smart Modes need an iPhone with Apple
+    /// Intelligence. A model list ("iPhone 15 Pro or later") goes stale with every
+    /// release and was already wrong for the iPhone 16e.
     private var unsupportedNotice: some View {
         HStack(spacing: 4) {
             Image(systemName: "exclamationmark.triangle.fill")
                 .font(.system(size: 10))
 
-            Text("Requires Apple Intelligence (iPhone 15 Pro or later, iOS 26)")
+            Text("iPhone with Apple Intelligence")
                 .font(.dictusCaption)
                 .lineLimit(2)
         }
