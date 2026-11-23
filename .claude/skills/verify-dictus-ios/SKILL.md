@@ -204,6 +204,7 @@ Two lists. The first is what an agent proves alone with this skill; the second i
 | Live Activity and Dynamic Island | Not reproduced by this skill; states, stop from the island, Focus dropping alerts, dev installs killing activities | `live-activity.*`, `voice-notes.progress-activity`, `widget.live-activity`, `onboarding.stop-standby` |
 | Haptics and sounds | No haptic engine and no audible check; only the preference is provable | `haptics.toggle` (effect), `sounds.*` (effect) |
 | Return key in third-party apps (#1023) | The simulator has only Apple's apps: the return key's type in WhatsApp, Telegram, Google, a login form, and its off state there | `keyboard.return-key-type` |
+| Space-bar trackpad feel (#950) | `axe` plays a scripted, even finger; the simulator proves where the cursor lands, not how a real thumb's speed curve feels, nor the haptics. Apple's keyboard on the same phone is the reference | `typing.cursor-trackpad` |
 | Voice notes from a messaging app | No messaging app in the simulator to share from | `voice-notes.share-in`, `share.voice-note`, `app.voice-note.result` |
 | Contacts and text replacements | The simulator proves the rules on a contact and a replacement made by hand. The lexicon iOS hands a third-party keyboard on a real phone (a full contact book, replacements synced from iCloud) is device-only | `typing.contacts-and-replacements` |
 | Host spell-check | Host underlines are not a usable probe in the simulator (`docs/agents/simulator.md` §8) | `typing.autocorrect` |

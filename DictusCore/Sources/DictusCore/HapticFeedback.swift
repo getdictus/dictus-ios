@@ -26,7 +26,9 @@ import UIKit
 /// - recordingStopped: light impact -- subtle confirmation that recording stopped
 /// - textInserted: soft impact -- one rounded tap when transcribed text appears (#711)
 /// - keyTapped: light impact -- matches native iOS keyboard tactile feel
-/// - trackpadActivated: medium impact -- confirms spacebar trackpad mode activation
+///
+/// The space-bar trackpad has none of its own (#950): Apple's keyboard gives no feedback
+/// after the space bar's own key-down, neither when the trackpad starts nor per character.
 public enum HapticFeedback {
 
     // MARK: - Pre-allocated generators
@@ -36,7 +38,7 @@ public enum HapticFeedback {
     /// Static allocation avoids 2-5ms per-call overhead from creating new generators.
     private static let lightGenerator = UIImpactFeedbackGenerator(style: .light)
 
-    /// Medium impact generator for recording events and trackpad activation.
+    /// Medium impact generator for recording events and long presses.
     private static let mediumGenerator = UIImpactFeedbackGenerator(style: .medium)
 
     /// Soft impact generator for text insertion: one rounded tap, unlike any other
@@ -197,17 +199,6 @@ public enum HapticFeedback {
         #endif
     }
 
-    /// Medium impact feedback for spacebar trackpad mode activation.
-    /// Provides a stronger haptic cue when the user activates cursor movement
-    /// mode by long-pressing the spacebar (Plan 04 feature).
-    public static func trackpadActivated() {
-        #if canImport(UIKit) && !os(macOS)
-        guard isEnabled() else { return }
-        mediumGenerator.impactOccurred()
-        mediumGenerator.prepare()
-        #endif
-    }
-
     /// Medium impact when a long press is recognised and opens something under the
     /// finger: the Home mic's Smart Mode dial (#489). Heavier than the selection tick that
     /// follows on each mode change, so the hand feels "it opened" and then "it moved".
@@ -216,18 +207,6 @@ public enum HapticFeedback {
         guard isEnabled() else { return }
         mediumGenerator.impactOccurred()
         mediumGenerator.prepare()
-        #endif
-    }
-
-    /// Selection tick feedback for each character of cursor movement during trackpad drag.
-    /// Uses UISelectionFeedbackGenerator — the same subtle "tick" Apple uses for pickers
-    /// and the native cursor. This is the #1 factor for perceived trackpad fluidity.
-    /// Pre-arms the generator immediately after firing for zero-latency on the next tick.
-    public static func cursorMoved() {
-        #if canImport(UIKit) && !os(macOS)
-        guard isEnabled() else { return }
-        selectionGenerator.selectionChanged()
-        selectionGenerator.prepare()
         #endif
     }
 }

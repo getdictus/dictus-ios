@@ -169,6 +169,9 @@ xcrun xctrace export --input build/keyboard-bench/device.trace \
   pass recovered the two words (#499).
 - **Char error rate, accents ignored**: on a keyboard whose autocorrect is off, these
   are its wrong keys. That is the column to read for Apple's French run.
+- **Register of real cases**: the cases filed on #500, each committed by the space bar
+  after the text typed before it. Only the replay runs it. A case that comes out right
+  must stay right.
 - **Engine time**: the work one keystroke triggers in the text prediction engine,
   serialised on one thread. In the keyboard the letter work runs on a background
   queue and can be cancelled by the next keystroke, so this is an upper bound on that
