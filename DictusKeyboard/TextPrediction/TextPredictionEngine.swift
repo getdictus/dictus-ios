@@ -543,25 +543,7 @@ class TextPredictionEngine {
             if splitHasBigram {
                 useSplit = true  // bigram confirmed, accept
             } else if splitHasBoundary {
-                // Boundary-only (no bigram): compare with single-word correction via ED
-                if let single = aospTrieEngine.spellCheck(word) {
-                    let splitJoined = candidate.left + candidate.right
-                    let splitED = Self.editDistance(wordToCheck, splitJoined)
-                    let singleLower = single.correction.lowercased()
-                    let singleWordPart: String
-                    if let idx = singleLower.lastIndex(of: "'") {
-                        singleWordPart = String(singleLower[singleLower.index(after: idx)...])
-                    } else {
-                        singleWordPart = singleLower
-                    }
-                    let singleED = Self.editDistance(wordToCheck, singleWordPart)
-                    // Accept split only if strictly better fit (split + 1 ≤ single).
-                    // "pasnmal": split "pasmal" ED 1, single "pascal" ED 2 → 1+1=2 ≤ 2 ✓
-                    // "fonctionnalités": split "fonctionagités" ED ~3, single ED 0/1 → reject ✓
-                    useSplit = (splitED + 1) <= singleED
-                } else {
-                    useSplit = true  // no single-word alternative, accept split
-                }
+                useSplit = acceptsBoundarySplit(candidate, word: word, wordToCheck: wordToCheck)
             } else {
                 useSplit = false  // direct split rejected without bigram (prevented by trySplit)
             }
@@ -586,6 +568,33 @@ class TextPredictionEngine {
         // Pass 5: the trie's candidates, ranked with the previous word (#993).
         return trieCorrection(of: word, wordToCheck: wordToCheck, apostrophePrefix: apostrophePrefix,
                               previousWord: previousWord)
+    }
+
+    /// Whether a split found only through a key next to the space bar, with no bigram
+    /// to confirm it, beats the trie's single-word correction.
+    private func acceptsBoundarySplit(_ candidate: GluedWordSplit.Candidate, word: String, wordToCheck: String) -> Bool {
+        switch aospTrieEngine.check(word) {
+        case .corrected(let correction, _):
+            let splitED = Self.editDistance(wordToCheck, candidate.left + candidate.right)
+            let singleLower = correction.lowercased()
+            let singleWordPart: String
+            if let idx = singleLower.lastIndex(of: "'") {
+                singleWordPart = String(singleLower[singleLower.index(after: idx)...])
+            } else {
+                singleWordPart = singleLower
+            }
+            let singleED = Self.editDistance(wordToCheck, singleWordPart)
+            // Accept split only if strictly better fit (split + 1 ≤ single).
+            // "pasnmal": split "pasmal" ED 1, single "pascal" ED 2 → 1+1=2 ≤ 2 ✓
+            // "fonctionnalités": split "fonctionagités" ED ~3, single ED 0/1 → reject ✓
+            return (splitED + 1) <= singleED
+        case .keepTyped:
+            // Every single-word candidate put a consonant after an elision. The typed
+            // word stays: a split would drop the prefix (`d'bonbjour` → `bon jour`).
+            return false
+        case .noCandidate:
+            return true  // no single-word alternative, accept split
+        }
     }
 
     /// The trie pass of `checkWord`. `CorrectionRanking` keeps the typed word when two
