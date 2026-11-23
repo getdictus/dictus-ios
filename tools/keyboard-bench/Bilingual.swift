@@ -128,6 +128,10 @@ final class CheckingCorrector: Corrector {
     func preview(_ partial: String, previous: String?, isAtSentenceStart: Bool, context: String) {
         _ = keyboard.preview(partial, previousWord: previous, isAtSentenceStart: isAtSentenceStart, context: context)
     }
+
+    func acrossSpace(previous: String, word: String) -> String? {
+        keyboard.contractionAcrossSpace(previousWord: previous, word: word)
+    }
 }
 
 /// Runs `body`, then puts back the active language and the layouts it set in the

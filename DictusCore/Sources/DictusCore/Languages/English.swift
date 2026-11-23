@@ -80,8 +80,24 @@ public let englishProfile = LanguageProfile(
             ])
         ),
         // The possessive `its` follows almost any word (`has its own`, `of its`), so
-        // `it's` is restored only where a possessive rarely starts: a sentence.
-        ContextualContraction(word: "its", contraction: "it's", atSentenceStart: true, after: .only([])),
+        // `it's` is restored only where a possessive rarely starts: a sentence. Or once the
+        // next word is one a possessive is never followed by (`before`): an article or
+        // determiner, a pronoun, a preposition, a negation or adverb, a verb in -ing.
+        // Not an adjective: "its own", "its new owner", "its true meaning" are possessive.
+        ContextualContraction(
+            word: "its", contraction: "it's", atSentenceStart: true, after: .only([]),
+            before: [
+                "a", "an", "the", "my", "your", "his", "her", "our", "their", "this", "that",
+                "these", "those", "some", "any", "no", "all", "every", "another",
+                "me", "you", "him", "us", "them", "what", "how", "who", "when", "where", "why",
+                "in", "on", "at", "for", "from", "to", "with", "about", "like", "up", "out", "off",
+                "into", "because", "not", "never", "so", "too", "really", "just", "also", "always",
+                "already", "actually", "definitely", "probably", "almost", "totally", "literally",
+                "basically", "quite", "kinda", "gonna", "ok", "okay",
+                "been", "going", "getting", "coming", "raining", "snowing", "happening", "working",
+                "looking", "taking", "starting"
+            ]
+        ),
         // `were` follows a subject (`we were`, `they were`) or opens a question
         // (`Were you there?`). `we're` follows a word that introduces a clause,
         // where a bare `were` has no subject. Not `sure`: "they sure were".

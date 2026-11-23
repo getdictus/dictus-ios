@@ -157,6 +157,24 @@ final class BilingualKeyboard {
         return decision.proposal
     }
 
+    /// The contraction the previous word was, now that `word` follows it, with `word`:
+    /// `its a` is `it's a` (`contextualContraction(profile:word:before:)`). The space bar
+    /// writes both words; nil leaves them. Either language of the pair may have the rule,
+    /// whatever the window says: `its` is no French word. Never a learned word (ADR 0004).
+    ///
+    /// WHY on the bilingual keyboard: Pierre's device test of #1015 (2026-11-23) found that
+    /// `its` never became `it's`. The English keyboard alone restores it at a sentence's
+    /// start only (#995), and a French window keeps it as a word of English.
+    func contractionAcrossSpace(previousWord: String, word: String) -> String? {
+        guard !UserDictionary.shared.isLearned(previousWord.lowercased()) else { return nil }
+        for language in [pair.primary, pair.secondary] {
+            if let contraction = contextualContraction(profile: language.profile, word: previousWord, before: word) {
+                return "\(contraction) \(word)"
+            }
+        }
+        return nil
+    }
+
     /// What the bar previews for the word being typed: the bar's language's correction,
     /// with the keep rules, without moving the window and without taps (the preview never
     /// had them).

@@ -376,9 +376,12 @@ class SuggestionState: ObservableObject {
         return engine.spellCheck(word, previousWord: previousWord, isAtSentenceStart: isAtSentenceStart)
     }
 
-    /// The elision the previous word and `word` make across a mistyped space (#1006).
+    /// The elision the previous word and `word` make across a mistyped space (#1006). On a
+    /// bilingual keyboard (#1015), also the contraction `word` shows the previous word was
+    /// (`its a` -> `it's a`). The space bar replaces both words with it.
     func elisionAcrossSpace(previousWord: String, word: String) -> String? {
         engine.elisionAcrossSpace(previousWord: previousWord, word: word)
+            ?? BilingualAutocorrect.current?.contractionAcrossSpace(previousWord: previousWord, word: word)
     }
 
     /// What `performSpellCheck(_:previousWord:isAtSentenceStart:)` decides, plus the

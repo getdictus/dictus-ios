@@ -243,9 +243,16 @@ protocol Corrector: AnyObject {
                   spatial: SpatialCorrection.Input?, context: String) -> CorrectionProposal?
     /// The correction preview a letter runs (`SuggestionState.updateAsync`).
     func preview(_ partial: String, previous: String?, isAtSentenceStart: Bool, context: String)
+    /// What the space bar writes in place of the previous word and `word`, as the keyboard's
+    /// `replaceElisionAcrossSpace` does, or nil.
+    func acrossSpace(previous: String, word: String) -> String?
 }
 
 extension Corrector {
+    /// None: the replay never had #1006's elisions across a space, and keeps its numbers.
+    /// The bilingual check replays its own (`its a` -> `it's a`, #1015).
+    func acrossSpace(previous: String, word: String) -> String? { nil }
+
     /// The bench's preview since #954: the engine's spell check of the partial word.
     func preview(_ partial: String, previous: String?, isAtSentenceStart: Bool, context: String) {
         _ = typingEngine.spellCheck(partial, previousWord: previous, isAtSentenceStart: isAtSentenceStart)
@@ -272,7 +279,8 @@ final class SingleEngine: Corrector {
 struct Commit {
     let intendedWords: [Int]
     let typed: String
-    let final: String
+    /// Var: a later word may revise it across the space (`Corrector.acrossSpace`).
+    var final: String
     let language: SupportedLanguage
     /// The next-word predictions the bar shows after this commit, best first.
     let predicted: [String]
@@ -374,6 +382,7 @@ func replay(_ taps: [Tap], cells: [Cell], width: CGFloat, height: CGFloat, picke
             var typed = ""
             var final = ""
             var predicted: [String] = []
+            var revisedPrevious: String?
             cost = microseconds {
                 guard let (prefix, word) = AutocorrectRejectionMemory.wordAtCursor(context: field.text) else {
                     field.insertText(" ")
@@ -386,6 +395,19 @@ func replay(_ taps: [Tap], cells: [Cell], width: CGFloat, height: CGFloat, picke
                 journal?.beginWord(word, previous: previous)
                 var offered = false
                 defer { journal?.endWord(final, offered: offered) }
+                if let previous, let joined = corrector.acrossSpace(previous: previous, word: word) {
+                    let span = "\(previous) \(word)"
+                    let spanPrefix = field.text.dropLast(span.count)
+                    if field.text.hasSuffix(span),
+                       memory.commit(prefix: spanPrefix, word: span, proposedCorrection: joined, countable: false) == .correct,
+                       case .applied = AutocorrectCountingSite.apply(editor: field, word: span, correction: joined,
+                                                                     trailing: " ", previousWord: nil, mirror: mirror) {
+                        memory.correctionApplied(prefix: spanPrefix, corrected: joined)
+                        revisedPrevious = String(joined.dropLast(word.count + 1))
+                        predicted = corrector.typingEngine.predictNextWords(after: Array(words(field.text).suffix(2)))
+                        return
+                    }
+                }
                 // `spellCheck` is this proposal's autocorrection; the journal also needs to
                 // know when corrections were only offered, as the keyboard's commit does.
                 let input = spatial ? touches.taps(for: word).map { SpatialCorrection.Input(taps: $0, keys: keys) } : nil
@@ -408,6 +430,7 @@ func replay(_ taps: [Tap], cells: [Cell], width: CGFloat, height: CGFloat, picke
                 if !applied { field.insertText(" ") }
                 predicted = corrector.typingEngine.predictNextWords(after: Array(words(field.text).suffix(2)))
             }
+            if let revisedPrevious, !commits.isEmpty { commits[commits.count - 1].final = revisedPrevious }
             if !typed.isEmpty {
                 commits.append(Commit(intendedWords: tokenWords, typed: typed, final: final, language: corrector.language,
                                       predicted: predicted))

@@ -30,6 +30,7 @@ file says what each piece is.
 | `corpus/mixed.txt`, `corpus/mixed.lang`, `runs/mixed.tsv` | 20 sentences that mix French and English, the gold language of every word (`f` or `e`), and their touch run (#1009). The run the bilingual detection was designed on in #1007. |
 | `corpus/mixed-heldout.txt`, `corpus/mixed-heldout.lang`, `runs/mixed-heldout.tsv` | 20 more mixed sentences, written before the bilingual replay first ran. Nothing is ever tuned on them: a change judged on this run needs a new held-out run. #1015's rules were changed after it was read, so for the bilingual check it is a second tuning run. |
 | `corpus/mixed-heldout-2.txt`, `corpus/mixed-heldout-2.lang`, `runs/mixed-heldout-2.tsv` | 20 mixed sentences written for #1015 and committed before the bilingual check first typed them (`192f660d`). The held-out run of the check's final rules. |
+| `corpus/en-its.txt`, `runs/en-its.tsv` | 8 English sentences with `its`, typed on the key centres: possessive ("the dog wagged its tail") and the contraction typed without its apostrophe before a word no possessive takes ("its raining", "its a good idea"), #1015. Not in the default runs: `run.sh --spatial --bilingual --langs en-its`. |
 | `Bilingual.swift` + `score_pair.py` | The bilingual replay (`run.sh --pair fr,en`): the same taps through one engine per language and the DictusCore language detection, then its report. |
 
 ## Run
