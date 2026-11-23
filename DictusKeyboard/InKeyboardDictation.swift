@@ -61,11 +61,6 @@ final class InKeyboardDictation {
     /// When the capture was asked to start.
     private var captureRequestedAt: Date?
     private var firstSampleLogged = false
-    /// The last time DictusApp answered `inKeyboardPing` with "I will record".
-    private var lastPong: Date?
-    /// The last time it answered "running, but I cannot record" (#992 round 2).
-    private var lastDeclinedPong: Date?
-    private var isObservingPongs = false
     /// When this tap's ping was posted: only a pong after it counts.
     private var tapPingSentAt: Date?
     /// Full Access read at the tap, for a route decided after iOS tore the controller
@@ -119,8 +114,8 @@ final class InKeyboardDictation {
         fullAccessAtTap = state.controller?.hasFullAccess
         showsRecordingAhead = false
         // Ask the app now, not on a pong from when the keyboard appeared: a pong says
-        // nothing about this tap (`InKeyboardEarlyCapture`, device 2026-11-23).
-        observePongsIfNeeded()
+        // nothing about this tap (`InKeyboardEarlyCapture`, device 2026-11-23). The answer
+        // is the app's stamp in the App Group (`PingAnswerStamp`).
         tapPingSentAt = tap
         DarwinNotificationCenter.post(DarwinNotificationName.inKeyboardPing)
         guard mayTakeColdTap, !isActive, !isProvisional else {
@@ -140,7 +135,8 @@ final class InKeyboardDictation {
         let appAnswer = appAnswer(since: tap)
         let answered = appAnswer == .willRecord
         let owner = sessionOwner(of: state)
-        let pongMs = lastPong.flatMap { $0 >= tap ? Int($0.timeIntervalSince(tap) * 1000) : nil } ?? -1
+        let stamp = DictationStartTable.PingAnswerStamp(storedValue: AppGroup.defaults.string(forKey: SharedKeys.inKeyboardPingAnswer))
+        let pongMs = stamp.flatMap { $0.answeredAt >= tap ? Int($0.answeredAt.timeIntervalSince(tap) * 1000) : nil } ?? -1
         guard state.dictationStatus == .requested,
               InKeyboardEarlyCapture.shouldStartCapture(mayTakeColdTap: mayTakeColdTap, appAnsweredTapPing: answered,
                                                         sessionOwner: owner) else {
@@ -172,34 +168,19 @@ final class InKeyboardDictation {
         guard InKeyboardDictationRoute.isSettingEnabled(in: AppGroup.defaults),
               Self.systemMajorVersion >= InKeyboardDictationRoute.minimumSystemMajorVersion,
               recognizer != nil else { return }
-        observePongsIfNeeded()
         observeAudioSessionIfNeeded()
         DarwinNotificationCenter.post(DarwinNotificationName.inKeyboardPing)
         if capture == nil { Self.log("prewarm", "webview=loading") }
         loadCaptureIfNeeded(into: view)
     }
 
-    private func observePongsIfNeeded() {
-        guard !isObservingPongs else { return }
-        isObservingPongs = true
-        DarwinNotificationCenter.addObserver(for: DarwinNotificationName.inKeyboardPong) {
-            DispatchQueue.main.async {
-                MainActor.assumeIsolated { InKeyboardDictation.shared.lastPong = Date() }
-            }
-        }
-        DarwinNotificationCenter.addObserver(for: DarwinNotificationName.inKeyboardPongDeclined) {
-            DispatchQueue.main.async {
-                MainActor.assumeIsolated { InKeyboardDictation.shared.lastDeclinedPong = Date() }
-            }
-        }
-    }
-
-    /// What DictusApp said to the ping sent at `tap`: only an answer after it counts.
+    /// Read from the app's stamp in the App Group (`PingAnswerStamp`), never from when the
+    /// Darwin pong reached this process, which a suspended keyboard receives late.
     private func appAnswer(since tap: Date?) -> DictationStartTable.AppAnswer {
-        guard let tap else { return .silent }
-        if InKeyboardEarlyCapture.appAnsweredTapPing(pingSentAt: tap, lastPong: lastPong) { return .willRecord }
-        if InKeyboardEarlyCapture.appAnsweredTapPing(pingSentAt: tap, lastPong: lastDeclinedPong) { return .declined }
-        return .silent
+        AppGroup.defaults.synchronize()
+        return DictationStartTable.PingAnswerStamp.answer(
+            to: tap, stored: AppGroup.defaults.string(forKey: SharedKeys.inKeyboardPingAnswer)
+        )
     }
 
     /// Called by `KeyboardPolishCoordinator` after an in-keyboard dictation was typed: the
@@ -436,10 +417,12 @@ final class InKeyboardDictation {
                 isActive = false
                 recording = OnDeviceRecording()
                 refuseForMicrophone(reason: "capture-refused")
-            } else if !firstSampleLogged, isActive {
-                // The capture never delivered a sample: the user has nothing yet, and a
-                // "try again" line would leave them there. The safety net opens the app.
-                Self.log("captureFailedBeforeAudio", "reason=\(reason)")
+            } else if isActive, recording.seconds < InKeyboardInterruptionPolicy.minimumSeconds {
+                // The capture died before the dictation began (the same half second as an
+                // interruption, `InKeyboardInterruptionPolicy`): a "try again" line would
+                // leave the user with nothing. The safety net opens the app (simulator,
+                // 14:15:48: the web content process killed 0.34 s into a capture).
+                Self.log("captureFailedBeforeAudio", "reason=\(reason) seconds=\(String(format: "%.2f", recording.seconds))")
                 abandonKeyboardCapture()
                 captureEndedWithoutAudio = true
                 evaluateSafetyNet(trigger: "capture-failed")
@@ -713,6 +696,9 @@ final class InKeyboardDictation {
                  + "status=\(status.rawValue) appAnswer=\(appAnswer(since: tapPingSentAt).rawValue) session=\(session)")
         guard case .fire = verdict else { return }
         abandonKeyboardCapture()
+        // The keyboard's own bars and clock describe a capture that is gone.
+        state.waveformEnergy = []
+        state.recordingElapsed = 0
         state.openAppByTodaysPath(source: "startSafetyNet", elapsedMs: elapsedMs)
     }
 

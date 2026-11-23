@@ -86,6 +86,10 @@ enum InKeyboardSpeechAssets {
             let reply = {
                 MainActor.assumeIsolated {
                     let decided = answer()
+                    let stamp = DictationStartTable.PingAnswerStamp(answer: decided.willRecord ? .willRecord : .declined,
+                                                                    answeredAt: Date())
+                    AppGroup.defaults.set(stamp.storedValue, forKey: SharedKeys.inKeyboardPingAnswer)
+                    AppGroup.defaults.synchronize()
                     DarwinNotificationCenter.post(decided.willRecord
                         ? DarwinNotificationName.inKeyboardPong
                         : DarwinNotificationName.inKeyboardPongDeclined)

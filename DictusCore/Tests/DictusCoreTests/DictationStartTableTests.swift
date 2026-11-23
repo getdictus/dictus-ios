@@ -146,6 +146,19 @@ final class DictationStartTableTests: XCTestCase {
         XCTAssertEqual(decision.why, "full-access-off")
     }
 
+    /// A pong delivered after the tap but answered before it (a keyboard iOS had
+    /// suspended, simulator 14:08:11) is not this tap's answer: only the app's stamp counts.
+    func testPingAnswerCountsOnlyWhenTheAppAnsweredAtOrAfterTheTap() {
+        let tap = Date(timeIntervalSince1970: 2_000_000)
+        let before = DictationStartTable.PingAnswerStamp(answer: .declined, answeredAt: tap.addingTimeInterval(-2)).storedValue
+        let after = DictationStartTable.PingAnswerStamp(answer: .willRecord, answeredAt: tap.addingTimeInterval(0.007)).storedValue
+        XCTAssertEqual(DictationStartTable.PingAnswerStamp.answer(to: tap, stored: before), .silent)
+        XCTAssertEqual(DictationStartTable.PingAnswerStamp.answer(to: tap, stored: after), .willRecord)
+        XCTAssertEqual(DictationStartTable.PingAnswerStamp.answer(to: tap, stored: nil), .silent)
+        XCTAssertEqual(DictationStartTable.PingAnswerStamp.answer(to: tap, stored: "garbage"), .silent)
+        XCTAssertEqual(DictationStartTable.PingAnswerStamp.answer(to: nil, stored: after), .silent)
+    }
+
     // MARK: - The two device failures of log 200
 
     /// Device A, 2026-11-23 13:38:56. App alive in the background, model compiling

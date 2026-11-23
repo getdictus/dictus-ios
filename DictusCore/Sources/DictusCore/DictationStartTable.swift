@@ -112,6 +112,40 @@ public enum DictationStartTable {
         case silent
     }
 
+    /// The app's answer to a ping, stamped with the moment it answered, written to the
+    /// App Group before the Darwin pong.
+    ///
+    /// WHY a stamp and not the pong's arrival time (simulator, 2026-11-23 14:07:09 and
+    /// 14:08:11): a keyboard process that iOS had suspended gets a Darwin notification
+    /// when it resumes, possibly after the tap, so a pong the app sent to the keyboard's
+    /// appearance ping read as the answer to the tap, from an app suspended since. Both
+    /// processes read the same clock; only an answer given at or after the tap counts.
+    public struct PingAnswerStamp: Equatable, Sendable {
+        public let answer: AppAnswer
+        public let answeredAt: Date
+
+        public init(answer: AppAnswer, answeredAt: Date) {
+            self.answer = answer
+            self.answeredAt = answeredAt
+        }
+
+        public var storedValue: String { "\(answer.rawValue)|\(answeredAt.timeIntervalSince1970)" }
+
+        public init?(storedValue: String?) {
+            let parts = storedValue?.split(separator: "|")
+            guard let parts, parts.count == 2, let answer = AppAnswer(rawValue: String(parts[0])),
+                  let seconds = TimeInterval(String(parts[1])) else { return nil }
+            self.init(answer: answer, answeredAt: Date(timeIntervalSince1970: seconds))
+        }
+
+        /// What the app said to the ping sent at `tap`: `.silent` for no answer or an
+        /// answer from before it.
+        public static func answer(to tap: Date?, stored: String?) -> AppAnswer {
+            guard let tap, let stamp = PingAnswerStamp(storedValue: stored), stamp.answeredAt >= tap else { return .silent }
+            return stamp.answer
+        }
+    }
+
     public enum Outcome: String, Sendable {
         /// DictusApp records in the background.
         case appRecords
