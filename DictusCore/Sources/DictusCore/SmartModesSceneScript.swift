@@ -185,12 +185,14 @@ public enum SmartModesSceneScript {
             .compactMap { identifier in SmartModeCatalogue.builtIns.first { $0.id == identifier } }
         return [.normal]
             + modes.map(SmartModeFanEntry.mode)
-            + [.mode(SmartModeCatalogue.translate(to: translationTarget(spokenLanguage: spokenLanguage)))]
+            + [.mode(SmartModeCatalogue.translate(to: TranslationTarget(translationTarget(spokenLanguage: spokenLanguage))))]
     }
 
-    /// The translation the scene arms: the first target the pick offers.
+    /// The translation the scene arms: the first target the pick offers. Always one of
+    /// the four built-ins, which the pick is limited to, because the scene's sentences
+    /// are written in those four only.
     public static func translationTarget(spokenLanguage: String?) -> SupportedLanguage {
-        SmartModePick.translateTargets(spokenLanguage: spokenLanguage).first ?? .english
+        SmartModePick.translateTargets(spokenLanguage: spokenLanguage).first?.builtIn ?? .english
     }
 
     /// The languages the two sentences are written in: what the user dictates, and what

@@ -27,6 +27,14 @@ public struct FeedbackDraft: Equatable, Sendable {
 
     public init() {}
 
+    /// Whether Send asks « Attach the debug log? » first (#981). Only a bug
+    /// report without the log: most bugs cannot be read without it, while the
+    /// toggle stays off by default. An idea, or a report that already carries
+    /// the log, leaves as it is.
+    public var asksToAttachLog: Bool {
+        kind == .bug && !attachesLog
+    }
+
     public var problems: Set<FeedbackDraftProblem> {
         var problems: Set<FeedbackDraftProblem> = []
         let name = cleanName

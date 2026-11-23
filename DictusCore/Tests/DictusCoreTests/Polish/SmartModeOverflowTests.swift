@@ -23,11 +23,11 @@ final class SmartModeOverflowTests: XCTestCase {
     /// Translation cannot degrade: the floor is the input language, which is the one
     /// thing the mode exists to change.
     func testEveryTranslateModeRefuses() {
-        for language in SupportedLanguage.allCases {
+        for language in TranslationTarget.all {
             XCTAssertEqual(
                 SmartModeCatalogue.translate(to: language).floorBehaviour,
                 .insertNothing,
-                "translate.\(language.rawValue) must not fall back to the input language"
+                "translate.\(language.code) must not fall back to the input language"
             )
         }
     }
@@ -115,11 +115,11 @@ final class SmartModeOverflowTests: XCTestCase {
     /// still the mode's own declared behaviour, and Translate's floor is the input
     /// language — the one thing the mode exists to change.
     func testTranslateInsertsNothingOnAGuardrailRejection() {
-        for language in SupportedLanguage.allCases {
+        for language in TranslationTarget.all {
             let mode = SmartModeCatalogue.translate(to: language)
             XCTAssertFalse(
                 PolishPipeline.degradesToFloor(mode, outcome: .rejectedGuardrail),
-                "translate.\(language.rawValue) must not fall back to the input language"
+                "translate.\(language.code) must not fall back to the input language"
             )
             XCTAssertNil(PolishPipeline.resolvedOutput(
                 result(.rejectedGuardrail),
@@ -183,11 +183,11 @@ final class SmartModeOverflowTests: XCTestCase {
     /// The negative case this outcome must not take with it, and the reason the test
     /// above is not enough on its own: Translate's floor is the input language.
     func testTranslateInsertsNothingOnAnEngineThrow() {
-        for language in SupportedLanguage.allCases {
+        for language in TranslationTarget.all {
             let mode = SmartModeCatalogue.translate(to: language)
             XCTAssertFalse(
                 PolishPipeline.degradesToFloor(mode, outcome: .engineFailed),
-                "translate.\(language.rawValue) must not fall back to the input language"
+                "translate.\(language.code) must not fall back to the input language"
             )
             XCTAssertNil(PolishPipeline.resolvedOutput(
                 result(.engineFailed),

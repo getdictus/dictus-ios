@@ -44,17 +44,32 @@ struct ProBannerView: View {
                     title: Text("Unlock Dictus Pro"),
                     subtitle: Text("AI reformulation, history & more")
                 )
+            case .upgradeWithoutSmartModes:
+                // An iPhone without Apple Intelligence (#922): what Pro does there.
+                banner(
+                    icon: "crown.fill",
+                    title: Text("Unlock Dictus Pro"),
+                    subtitle: Text("History search, vocabulary & voice messages")
+                )
             case .trialEnding(let daysLeft):
                 banner(
                     icon: "hourglass",
                     title: Text("Your Pro trial ends in \(daysLeft) days"),
-                    subtitle: Text("Subscribe to keep your Smart Modes, with no interruption.")
+                    subtitle: trialEndingSubtitle
                 )
             case .member(let activeFeatures):
                 memberCard(activeFeatures: activeFeatures)
             }
         }
         .animation(.easeOut(duration: 0.3), value: content)
+    }
+
+    /// What the reminder says the subscription keeps. Since #922 it also reaches an
+    /// iPhone without Apple Intelligence, whose trial had no Smart Modes to keep.
+    private var trialEndingSubtitle: Text {
+        proStatus.deviceIsCapable
+            ? Text("Subscribe to keep your Smart Modes, with no interruption.")
+            : Text("Subscribe to keep History, Vocabulary and voice messages, with no interruption.")
     }
 
     /// The subscriber's card: same family as Home's model status card (glass, no

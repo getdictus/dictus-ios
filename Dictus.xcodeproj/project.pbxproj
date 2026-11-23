@@ -25,6 +25,7 @@
 		RT5930000001 /* ProTrialCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = RT5930100001 /* ProTrialCoordinator.swift */; };
 		SS000002 /* PaywallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = SS100002 /* PaywallView.swift */; };
 		AA361014 /* SmartModeListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA361013 /* SmartModeListView.swift */; };
+		6220A002 /* TranslationTargetPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6220A001 /* TranslationTargetPickerView.swift */; };
 		AA489002 /* HomeSmartModeRing.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA489001 /* HomeSmartModeRing.swift */; };
 		AA800081 /* VocabularyListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA800181 /* VocabularyListView.swift */; };
 		AA512071 /* VocabularySuggestionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA512171 /* VocabularySuggestionsView.swift */; };
@@ -465,6 +466,7 @@
 		RT5930100001 /* ProTrialCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProTrialCoordinator.swift; sourceTree = "<group>"; };
 		SS100002 /* PaywallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaywallView.swift; sourceTree = "<group>"; };
 		AA361013 /* SmartModeListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmartModeListView.swift; sourceTree = "<group>"; };
+		6220A001 /* TranslationTargetPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranslationTargetPickerView.swift; sourceTree = "<group>"; };
 		AA489001 /* HomeSmartModeRing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeSmartModeRing.swift; sourceTree = "<group>"; };
 		AA800181 /* VocabularyListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyListView.swift; sourceTree = "<group>"; };
 		AA512171 /* VocabularySuggestionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularySuggestionsView.swift; sourceTree = "<group>"; };
@@ -815,6 +817,7 @@
 				SS100002 /* PaywallView.swift */,
 				AA913F12 /* PaywallSalesSections.swift */,
 				AA361013 /* SmartModeListView.swift */,
+				6220A001 /* TranslationTargetPickerView.swift */,
 				AA489001 /* HomeSmartModeRing.swift */,
 				AA800181 /* VocabularyListView.swift */,
 				AA512171 /* VocabularySuggestionsView.swift */,
@@ -1535,6 +1538,7 @@
 				AA913B12 /* PaywallSalesSections.swift in Sources */,
 				AA913B11 /* Font+DMSans.swift in Sources */,
 				AA361014 /* SmartModeListView.swift in Sources */,
+				6220A002 /* TranslationTargetPickerView.swift in Sources */,
 				AA489002 /* HomeSmartModeRing.swift in Sources */,
 				AA800081 /* VocabularyListView.swift in Sources */,
 				AA512071 /* VocabularySuggestionsView.swift in Sources */,

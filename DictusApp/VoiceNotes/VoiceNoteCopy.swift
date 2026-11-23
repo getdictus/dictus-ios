@@ -81,6 +81,13 @@ enum VoiceNoteCopy {
 
     /// Why the summary was attempted and did not come back.
     static func summaryFailed(_ failure: SmartModeFailure) -> String {
+        // A translation into a language Apple Intelligence cannot write, which the
+        // Translation framework could not produce either (#622). Named, because the
+        // generic sentence below reads as a fault in the note.
+        if failure.isTranslationUnavailable {
+            return String(localized: "The translation into this language is not available right now.",
+                          comment: "Voice note result: the Translation framework could not translate into a language Apple Intelligence does not write, so there is no fallback (#622).")
+        }
         switch failure.outcome {
         case PolishMetrics.Outcome.exceededContextBudget.rawValue:
             return String(localized: "This voice note is too long for Apple Intelligence to summarise.",
