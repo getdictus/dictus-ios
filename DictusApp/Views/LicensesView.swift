@@ -119,6 +119,15 @@ struct LicensesView: View {
                 )
 
                 licenseBlock(
+                    name: "Unicode emoji data and CLDR",
+                    author: "Unicode, Inc.",
+                    url: "https://cldr.unicode.org",
+                    license: "The emoji search index is built from Unicode's emoji-test.txt 18.0 and CLDR 49's "
+                        + "emoji names and keywords in French, English, Spanish and German.\n\n"
+                        + EmojiDataLicense.text
+                )
+
+                licenseBlock(
                     name: "VivaDicta",
                     author: "Anton Novoselov",
                     url: "https://github.com/n0an/VivaDicta",
@@ -155,6 +164,8 @@ struct LicensesView: View {
     private static let hexNotice = """
         The keyboard's key geometry (KeyPlaneGeometry) follows Hex's approach: Apple's key \
         plane measured per iPhone size, and touch targets that tile the keyboard. \
+        The keyboard's emoji panel is Hex's, ported (#1027): its views, search, suggestions, \
+        shortcodes, skin tones and the builder of its emoji index. \
         The keyboard's spatial autocorrect decoder and its model format and build script \
         (#1011), and Adaptive touch, which learns where you tap each key (#1014), are \
         ported from Hex.
