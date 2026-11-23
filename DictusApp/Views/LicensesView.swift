@@ -30,11 +30,13 @@ import DictusCore
 /// package. A provenance comment in the source file is honest but does not discharge the
 /// condition.
 ///
-/// The spatial decoder (#1011) adds four entries. Hex is ported code (MIT). The other three
-/// are where its models come from: word and word-pair counts from Google Books Ngram
-/// (CC BY 3.0, which asks for the attribution), and the word lists that filter them,
-/// SCOWL for English (its notice asks to travel with the output) and Grammalecte's French
-/// dictionary (MPL 2.0, whose notice and source location travel with a derived file).
+/// Hex is listed for the keyboard's key geometry (`KeyPlaneGeometry`): no code is copied,
+/// but the approach is Hex's (MIT), and the entry says so. Its entry also covers the spatial
+/// decoder (#1011), which is ported Hex code. The decoder adds three entries for where its
+/// models come from: word and word-pair counts from Google Books Ngram (CC BY 3.0, which
+/// asks for the attribution), and the word lists that filter them, SCOWL for English (its
+/// notice asks to travel with the output) and Grammalecte's French dictionary (MPL 2.0,
+/// whose notice and source location travel with a derived file).
 struct LicensesView: View {
     var body: some View {
         ScrollView {
@@ -93,7 +95,10 @@ struct LicensesView: View {
                     name: "Hex",
                     author: "Christopher Langton",
                     url: "https://github.com/anomalyco/hex",
-                    license: mitLicense(copyright: "Copyright (c) 2026 Christopher Langton")
+                    license: "The keyboard's key geometry (KeyPlaneGeometry) follows Hex's approach: "
+                        + "Apple's key plane measured per iPhone size, and touch targets that tile the keyboard. "
+                        + "The spatial autocorrect decoder (SpatialDecoder) is ported from Hex's TypingDecoder.\n\n"
+                        + mitLicense(copyright: "Copyright (c) 2026 Christopher Langton")
                 )
 
                 licenseBlock(

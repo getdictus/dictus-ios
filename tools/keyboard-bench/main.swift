@@ -48,9 +48,14 @@ func readRun(_ path: String) -> [Tap] {
 /// One cell of the letter page, where the collection view puts it.
 struct Cell {
     let key: KeyDefinition
+    /// The touch target: a tap inside it types this key.
     let frame: CGRect
     /// Width of one key unit in this cell's row.
     let unitWidth: CGFloat
+    /// The keycap's centre, which a run's offsets are measured from.
+    let center: CGPoint
+    /// The row pitch, the unit of a run's vertical offsets.
+    let rowHeight: CGFloat
 }
 
 /// The grid `GiellaKeyboardView` lays out: every row the same height, every key as wide
@@ -60,7 +65,27 @@ struct Cell {
 /// between two keys reaches no cell. Measured on the simulator: the drawn key centres
 /// of the top row match this to within a pixel, and a tap the replay put in such a gap
 /// typed nothing on the real keyboard either.
+///
+/// Since the Apple-geometry PR, a four-row page on an iPhone is laid out by
+/// `KeyPlaneGeometry` instead (`GiellaKeyboardView.keyPlaneSlots`): Apple's keycaps for the
+/// phone size the grid's width names (375 pt SE, 402 pt 17, 440 pt Pro Max, held upright),
+/// with touch targets that tile the grid. The flow layout gets the same targets, so the
+/// even-grid arithmetic below only runs for the pages the table does not cover.
 func grid(_ page: [[KeyDefinition]], width: CGFloat, height: CGFloat) -> [Cell] {
+    let sizeClass: KeyPlaneSizeClass = width <= 375 ? .small : (width >= 430 ? .large : .standard)
+    let geometry = KeyPlaneGeometry.apple(sizeClass, .portrait)
+    if let slots = geometry.layout(rows: page.map { $0.map { $0.size.width } }, width: width, height: height) {
+        var cells: [Cell] = []
+        for (row, rowSlots) in zip(page, slots) {
+            let units = row.reduce(0) { $0 + $1.size.width }
+            let unitWidth = (width - 2 * geometry.sideInset + geometry.keyGap) / units
+            for (key, slot) in zip(row, rowSlots) {
+                cells.append(Cell(key: key, frame: slot.hit, unitWidth: unitWidth,
+                                  center: CGPoint(x: slot.cap.midX, y: slot.cap.midY), rowHeight: geometry.rowPitch))
+            }
+        }
+        return cells
+    }
     let rowHeight = height / CGFloat(page.count)
     var cells: [Cell] = []
     for (r, row) in page.enumerated() {
@@ -70,8 +95,9 @@ func grid(_ page: [[KeyDefinition]], width: CGFloat, height: CGFloat) -> [Cell] 
         var x: CGFloat = 0
         for key in row {
             let w = key.size.width * unitWidth
-            cells.append(Cell(key: key, frame: CGRect(x: x, y: CGFloat(r) * rowHeight, width: w, height: rowHeight),
-                              unitWidth: unitWidth))
+            let frame = CGRect(x: x, y: CGFloat(r) * rowHeight, width: w, height: rowHeight)
+            cells.append(Cell(key: key, frame: frame, unitWidth: unitWidth,
+                              center: CGPoint(x: frame.midX, y: frame.midY), rowHeight: rowHeight))
             x += w + gap
         }
     }
@@ -264,7 +290,7 @@ func replay(_ taps: [Tap], cells: [Cell], width: CGFloat, height: CGFloat, picke
 
     for tap in taps {
         let aim = target(of: tap.key, in: cells)
-        let point = CGPoint(x: aim.frame.midX + tap.dx * aim.unitWidth, y: aim.frame.midY + tap.dy * aim.frame.height)
+        let point = CGPoint(x: aim.center.x + tap.dx * aim.unitWidth, y: aim.center.y + tap.dy * aim.rowHeight)
         // The word being typed and the one before it. The keyboard tracks these as it
         // types; the replay reads them off the field, outside the timed pick.
         let current = field.text.split(separator: " ", omittingEmptySubsequences: false).last.map(String.init) ?? ""

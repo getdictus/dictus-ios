@@ -261,7 +261,8 @@ final internal class GiellaKeyboardView: UIView,
                     let indexPath = IndexPath(row: row, section: section)
                     if let cell = collectionView.cellForItem(at: indexPath) as? KeyCell {
                         let key = KeyDefinition(type: .input(key: accentKeyLabel, alternate: nil))
-                        cell.configure(page: page, key: key, theme: theme, traits: self.traitCollection)
+                        cell.configure(page: page, key: key, theme: theme, traits: self.traitCollection,
+                                       capInsets: capInsets(at: indexPath))
                     }
                     return
                 }
@@ -845,11 +846,23 @@ final internal class GiellaKeyboardView: UIView,
               let frame = collectionView.layoutAttributesForItem(at: indexPath)?.frame,
               frame.width > 0, frame.height > 0 else { return }
         let point = touch.location(in: collectionView)
-        let unitWidth = frame.width / max(key.size.width, 0.01)
+        var centre = CGPoint(x: frame.midX, y: frame.midY)
+        var unitWidth = frame.width / max(key.size.width, 0.01)
+        var rowHeight = frame.height
+        // On Apple's key plane an outer key's target runs to the screen edge and row 1's up
+        // to the toolbar, so the offsets are taken from the keycap and the row pitch, as the
+        // bench's runs are.
+        if let geometry = planeGeometry, let slots = planeSlots, indexPath.section < slots.count,
+           indexPath.row < slots[indexPath.section].count {
+            let cap = slots[indexPath.section][indexPath.row].cap
+            centre = CGPoint(x: cap.midX, y: cap.midY)
+            unitWidth = (cap.width + geometry.keyGap) / max(key.size.width, 0.01)
+            rowHeight = geometry.rowPitch
+        }
         TypingJournal.tap(
             Self.journalName(of: key.type),
-            dx: Double((point.x - frame.midX) / unitWidth),
-            dy: Double((point.y - frame.midY) / frame.height),
+            dx: Double((point.x - centre.x) / unitWidth),
+            dy: Double((point.y - centre.y) / rowHeight),
             time: touch.timestamp,
             keyboard: journalKeyboard
         )
@@ -1151,6 +1164,46 @@ final internal class GiellaKeyboardView: UIView,
 
     private var rowNumberOfUnits: [CGFloat]!
 
+    /// Apple's key plane for the current page and bounds (`KeyPlaneGeometry`), or nil where
+    /// the table does not apply and the even grid below stays: an iPad, the digit row's five
+    /// rows (#331), or a grid too short for Apple's rows.
+    ///
+    /// WHY here and not in the height: the grid's height is the declared keyboard height
+    /// (`KeyboardHeightProvider`, #166), which this does not touch. Only where the keys sit
+    /// inside it changes, so the keyboard is exactly as tall as before.
+    private var planeSlots: [[KeyPlaneSlot]]?
+    /// The table entry `planeSlots` was laid out from.
+    private var planeGeometry: KeyPlaneGeometry?
+
+    private func keyPlaneSlots() -> [[KeyPlaneSlot]]? {
+        let device = DeviceContext.current
+        guard device.isPhone, !shouldUseiPadLayout, bounds.width > 0, bounds.height > 0 else { return nil }
+        let geometry = KeyPlaneGeometry.apple(
+            .forScreen(UIScreen.main.bounds.size),
+            device.isLandscape ? .landscape : .portrait
+        )
+        planeGeometry = geometry
+        return geometry.layout(
+            rows: currentPage.map { row in row.map { $0.size.width } },
+            width: bounds.width,
+            height: bounds.height
+        )
+    }
+
+    /// Where the keycap sits inside its cell (the touch target), or nil for the theme's even
+    /// margins.
+    private func capInsets(at indexPath: IndexPath) -> UIEdgeInsets? {
+        guard let slots = planeSlots, indexPath.section < slots.count,
+              indexPath.row < slots[indexPath.section].count else { return nil }
+        let slot = slots[indexPath.section][indexPath.row]
+        return UIEdgeInsets(
+            top: slot.cap.minY - slot.hit.minY,
+            left: slot.cap.minX - slot.hit.minX,
+            bottom: slot.hit.maxY - slot.cap.maxY,
+            right: slot.hit.maxX - slot.cap.maxX
+        )
+    }
+
     private func calculateRows() {
         var mutableWidths = [CGFloat]()
 
@@ -1162,6 +1215,7 @@ final internal class GiellaKeyboardView: UIView,
         }
 
         rowNumberOfUnits = mutableWidths
+        planeSlots = keyPlaneSlots()
 
         collectionView.reloadData()
     }
@@ -1207,7 +1261,8 @@ final internal class GiellaKeyboardView: UIView,
             key = KeyDefinition(type: .input(key: accentKeyLabel, alternate: nil))
         }
 
-        cell.configure(page: page, key: key, theme: theme, traits: self.traitCollection)
+        cell.configure(page: page, key: key, theme: theme, traits: self.traitCollection,
+                       capInsets: capInsets(at: indexPath))
 
         if let swipeKeyView = cell.keyView, swipeKeyView.isSwipeKey {
             swipeKeyView.percentageAlternative = 0.0
@@ -1217,6 +1272,15 @@ final internal class GiellaKeyboardView: UIView,
     }
 
     func collectionView(_: UICollectionView, layout _: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        if let slots = planeSlots, indexPath.section < slots.count, indexPath.row < slots[indexPath.section].count {
+            let row = slots[indexPath.section]
+            let hit = row[indexPath.row].hit
+            // The targets tile the full width; a hundredth of a point off the last one keeps
+            // rounding from pushing it onto a line of its own in the flow layout.
+            let width = indexPath.row == row.count - 1 ? hit.width - 0.01 : hit.width
+            return CGSize(width: width, height: hit.height)
+        }
+
         let key = currentPage[indexPath.section][indexPath.row]
 
         let width = key.size.width * ((bounds.size.width - 1) / rowNumberOfUnits[indexPath.section])
@@ -1244,7 +1308,8 @@ final internal class GiellaKeyboardView: UIView,
             contentView.fill(superview: self)
         }
 
-        func configure(page: KeyboardPage, key: KeyDefinition, theme: Theme, traits: UITraitCollection) {
+        func configure(page: KeyboardPage, key: KeyDefinition, theme: Theme, traits: UITraitCollection,
+                       capInsets: UIEdgeInsets? = nil) {
             contentView.subviews.forEach { view in
                 view.removeFromSuperview()
             }
@@ -1257,7 +1322,7 @@ final internal class GiellaKeyboardView: UIView,
                 contentView.addSubview(emptyview)
                 emptyview.fill(superview: contentView)
             } else {
-                let keyView = KeyView(page: page, key: key, theme: theme, traits: traits)
+                let keyView = KeyView(page: page, key: key, theme: theme, traits: traits, capInsets: capInsets)
                 if let accessibilityLabel = key.accessibilityLabel(for: page) {
                     keyView.isAccessibilityElement = true
                     keyView.accessibilityLabel = accessibilityLabel
