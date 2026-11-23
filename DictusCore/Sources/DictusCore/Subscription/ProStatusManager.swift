@@ -13,9 +13,11 @@ import SwiftUI
 public struct ProTrialEnvironment {
     /// The clock. Injected so expiry is testable without waiting fourteen days.
     public var now: () -> Date
-    /// `SmartModeAvailability.deviceIsCapable`, the decision-2 input. Read once per
-    /// manager: the definitive reasons it reflects (hardware, OS, SDK) cannot change
-    /// inside a process, and the live read asks `SystemLanguageModel`.
+    /// `SmartModeAvailability.deviceIsCapable`. Since #922 it no longer decides who
+    /// gets a trial, only whether the ordinary Pro promotion may push Pro (see
+    /// `ProPromotion.entry`). Read once per manager: the definitive reasons it reflects
+    /// (hardware, OS, SDK) cannot change inside a process, and the live read asks
+    /// `SystemLanguageModel`.
     public var deviceIsCapable: () -> Bool
     /// `PremiumFlags.paywallVisible`. With it down no trial starts and nothing about
     /// one appears (#279).
@@ -223,7 +225,19 @@ public final class ProStatusManager: ObservableObject {
     public var mayStartTrial: Bool {
         ProTrialPolicy.mayStart(
             paywallVisible: environment.paywallVisible,
-            deviceIsCapable: deviceIsCapable,
+            isPaid: isPaid,
+            trial: trialState
+        )
+    }
+
+    /// Whether the trial announcement is due now (`ProTrialPolicy.announcementDue`).
+    ///
+    /// - Parameter onboardingCompleted: `SharedKeys.hasCompletedOnboarding`, which the
+    ///   caller reads: onboarding is DictusApp's to finish.
+    public func trialAnnouncementDue(onboardingCompleted: Bool) -> Bool {
+        ProTrialPolicy.announcementDue(
+            onboardingCompleted: onboardingCompleted,
+            paywallVisible: environment.paywallVisible,
             isPaid: isPaid,
             trial: trialState
         )
@@ -237,8 +251,8 @@ public final class ProStatusManager: ObservableObject {
     /// gets theirs, and how a new user gets it until #494's screens exist.
     ///
     /// Refuses, and changes nothing, when `ProTrialPolicy.mayStart` does: paywall
-    /// hidden, a device that can never run Smart Modes (decision 2), a subscriber, or
-    /// any trial already recorded on this device, reinstalls included.
+    /// hidden, a subscriber, or any trial already recorded on this device, reinstalls
+    /// included. Not the device: since #922 every iPhone gets the trial.
     ///
     /// - Parameter start: when the trial counts from. The announcement passes the
     ///   instant it was shown, so the end date it printed is the end date stored, even

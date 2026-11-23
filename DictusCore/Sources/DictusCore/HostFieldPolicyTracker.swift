@@ -56,6 +56,7 @@ public struct HostFieldPolicyTracker {
             return HostFieldPolicy(
                 autocorrectAllowed: kept.autocorrectAllowed,
                 suggestionsAllowed: kept.suggestionsAllowed,
+                textReplacementsAllowed: kept.textReplacementsAllowed,
                 reason: "\(kept.reason) (autocorrectionType.no after a mention, ignored)"
             )
         }

@@ -96,7 +96,7 @@ public enum ProFeature: String, CaseIterable {
     /// English, like every other string on this type, and for the same stated reason:
     /// DictusCore ships no string catalog. The paywall owns its translation.
     public var unsupportedNotice: String? {
-        isSupportedByThisDevice ? nil : "Requires Apple Intelligence (iPhone 15 Pro or later, iOS 26)"
+        isSupportedByThisDevice ? nil : "iPhone with Apple Intelligence"
     }
 }
 

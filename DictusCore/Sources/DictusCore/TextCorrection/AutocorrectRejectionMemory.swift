@@ -215,13 +215,20 @@ public final class AutocorrectRejectionMemory {
     /// says nothing about the word, so it is not counted: `arribe` kept twice that way
     /// was learned, and `areibe` then became `arribe`. Only tapping the typed word in
     /// the bar (`typedWordKept`) or undoing a correction (`correctionUndone`) teaches it.
+    ///
+    /// `isTextReplacement` is true when `proposedCorrection` is the phrase of one of the
+    /// user's text replacement shortcuts (#1022). It is applied even where a correction
+    /// was refused: Apple's keyboard expands a shortcut every time it is typed, however
+    /// often it was kept, so one refusal must not turn a shortcut off at that place, nor
+    /// teach the shortcut as a word.
     public func commit(
         prefix: Substring,
         word: String,
         proposedCorrection: String?,
         offersCorrections: Bool = false,
         countable: Bool = true,
-        allowsCasingChange: Bool = false
+        allowsCasingChange: Bool = false,
+        isTextReplacement: Bool = false
     ) -> Decision {
         let key = Self.positionKey(prefix: prefix)
         let proposes = proposedCorrection.map {
@@ -229,8 +236,10 @@ public final class AutocorrectRejectionMemory {
         } ?? false
 
         if proposes {
-            if rejected.contains(key) {
-                restoredByUndo[key] = nil
+            // A restored word only ever sits at a refused position, so this is a no-op
+            // for a correction proposed anywhere else.
+            restoredByUndo[key] = nil
+            if rejected.contains(key), !isTextReplacement {
                 return .keepAndLearn
             }
             return .correct
