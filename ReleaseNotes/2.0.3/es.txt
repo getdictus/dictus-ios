@@ -3,13 +3,13 @@ Novedades de la 2.0.3
 ## Highlights
 
 Un teclado mejorado
-Teclas colocadas como en el de Apple, cursor en la barra espaciadora, nuevos emojis y una autocorrección más precisa en francés.
+Teclas como en Apple, cursor en la barra espaciadora, emojis y autocorrección.
 
 El modelo de dictado de Apple
-Elígelo en la pantalla Modelos: funciona en tu iPhone.
+Elígelo en la pantalla Modelos.
 
 Traduce a 25 idiomas
-Con «Otro idioma…» en los Smart Modes (Dictus Pro, iPhone con Apple Intelligence).
+Con Dictus Pro, en los Smart Modes.
 
 ## All changes
 

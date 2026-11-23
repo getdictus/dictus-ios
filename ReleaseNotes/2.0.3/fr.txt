@@ -3,13 +3,13 @@ Nouveautés de la 2.0.3
 ## Highlights
 
 Un clavier amélioré
-Touches placées comme chez Apple, curseur sur la barre d'espace, nouveaux emojis et autocorrection plus juste en français.
+Touches comme chez Apple, curseur sur la barre d'espace, emojis et autocorrection.
 
 Le modèle de dictée d'Apple
-Choisissez-le dans l'écran Modèles : il tourne sur l'iPhone.
+Choisissez-le dans l'écran Modèles.
 
 Traduisez vers 25 langues
-Avec « Autre langue… » dans les modes intelligents (Dictus Pro, iPhone avec Apple Intelligence).
+Avec Dictus Pro, dans les modes intelligents.
 
 ## All changes
 

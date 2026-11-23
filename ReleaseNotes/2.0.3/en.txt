@@ -3,13 +3,13 @@ What's new in 2.0.3
 ## Highlights
 
 A better keyboard
-Keys placed like Apple's, cursor control on the space bar, new emoji and smarter French autocorrect.
+Keys like Apple's, space-bar cursor, emoji and autocorrect.
 
 Apple's dictation model
-Pick it in the Models screen: it runs on your iPhone.
+Pick it in the Models screen.
 
 Translate into 25 languages
-With « Other language… » in Smart Modes (Dictus Pro, iPhone with Apple Intelligence).
+With Dictus Pro, in Smart Modes.
 
 ## All changes
 

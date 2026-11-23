@@ -3,13 +3,13 @@ Neu in 2.0.3
 ## Highlights
 
 Eine bessere Tastatur
-Tasten wie bei Apple, Cursorsteuerung über die Leertaste, neue Emojis und eine genauere Autokorrektur auf Französisch.
+Tasten wie bei Apple, Cursor auf der Leertaste, Emojis und Autokorrektur.
 
 Apples Diktiermodell
-Wähle es im Bildschirm „Modelle“: Es läuft auf deinem iPhone.
+Wähle es im Bildschirm „Modelle“.
 
 Übersetzen in 25 Sprachen
-Mit „Andere Sprache …“ in den Smart Modes (Dictus Pro, iPhone mit Apple Intelligence).
+Mit Dictus Pro, in den Smart Modes.
 
 ## All changes
 
