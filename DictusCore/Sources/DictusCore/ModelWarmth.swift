@@ -94,6 +94,10 @@ public enum ModelWarmth {
         bundlePathComponents: [String] = Bundle.main.bundleURL.pathComponents,
         systemVersion: String
     ) -> Bool {
+        // Apple's recognizer has no Core ML cache of Dictus's to compile (the model runs
+        // in Apple's speech daemon), so a user who picked it is never sent to the
+        // preparation screen for the downloaded model they are not dictating with.
+        if SpeechEngineChoice.read(from: defaults) == .apple { return true }
         guard let model = defaults.string(forKey: SharedKeys.activeModel) else {
             // No active model is not a cold model. It is the "no model downloaded" case,
             // which `RecordTapRouting` hands to the coordinator to word for itself.

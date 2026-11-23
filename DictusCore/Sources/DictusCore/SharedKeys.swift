@@ -428,6 +428,13 @@ public enum SharedKeys {
     /// `DictationTally`.
     public static let dictationTally = "dictus.dictationTally"
 
+    // MARK: - Speech engine choice
+    /// String: which engine the app dictates with, "model" (the downloaded
+    /// `activeModel`) or "apple" (Apple's on-device recognizer). Absent = "model", so
+    /// nothing changes for a user who never picks Apple. `activeModel` keeps naming the
+    /// downloaded model either way. See `SpeechEngineChoice`.
+    public static let speechEngineChoice = "dictus.speechEngineChoice"
+
     // MARK: - Retired keys
     /// The #357 probe's arming flag, removed with the probe in #361. Kept as a
     /// literal, and only here, so DictusApp can delete it from the App Group on

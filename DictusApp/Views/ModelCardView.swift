@@ -80,6 +80,15 @@ struct ModelCardView: View {
         modelManager.activeModel == model.identifier
     }
 
+    /// The user dictates with Apple's engine, picked on the same screen, so the active
+    /// model is only the fallback: it keeps its delete protection, not its highlight.
+    var isSupersededByApple = false
+
+    /// The model dictations run with now.
+    private var isHighlighted: Bool {
+        isActive && !isSupersededByApple
+    }
+
     /// Whether the card should be tappable (disabled during download/prewarming,
     /// and permanently when the device cannot run the model — issue #369).
     private var isCardDisabled: Bool {
@@ -379,7 +388,7 @@ struct ModelCardView: View {
         .padding(16)
         .background(
             Group {
-                if isActive {
+                if isHighlighted {
                     RoundedRectangle(cornerRadius: 16)
                         .fill(Color.dictusAccent.opacity(0.10))
                 }
@@ -389,7 +398,7 @@ struct ModelCardView: View {
         .overlay(
             // Active model gets a dark blue border stroke on top of glass
             Group {
-                if isActive {
+                if isHighlighted {
                     RoundedRectangle(cornerRadius: 16)
                         .stroke(Color.dictusAccent.opacity(0.6), lineWidth: 2)
                 }
@@ -412,7 +421,7 @@ struct ModelCardView: View {
         guard incompatibilityReason == nil else { return }
         switch state {
         case .ready:
-            if !isActive {
+            if !isHighlighted {
                 modelManager.selectModel(model.identifier)
             }
         case .notDownloaded, .error:

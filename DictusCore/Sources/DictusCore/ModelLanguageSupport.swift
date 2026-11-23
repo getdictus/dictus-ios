@@ -295,6 +295,10 @@ extension ModelInfo {
                 return .parakeetV3
             case .nemotron:
                 return .nemotron35
+            case .apple:
+                // No catalogue entry has this engine (Apple is chosen outside the
+                // catalogue, `SpeechEngineChoice`); the most conservative claim.
+                return .whisperSmallClass
             }
         }
     }
