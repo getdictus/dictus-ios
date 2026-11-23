@@ -18,6 +18,7 @@
 - `typing.dead-keys`: Dead keys compose accented letters.
 - `typing.autocorrect-toggle`: « Correction automatique » switch in Réglages → Clavier.
 - `typing.contacts-and-replacements`: Contact names and iOS text replacements (#873). A contact name or a phrase-only replacement is never corrected, a lowercase contact name takes its casing (`zofiak` → `Zofiak`), a shortcut is replaced by its phrase with the undo chip (`qqc` → `Quelque chose` at sentence start). Since #1022 a shortcut expands like on Apple's keyboard: with « Correction automatique » off, in a field that turns autocorrection off (search, URL, e-mail, username), for a shortcut holding a digit (`adr1`), and after any number of refusals at the same place. It never expands in a secure or password field, nor at the end of an e-mail address or a URL (#919; Apple's behaviour there is unchecked). Contact casing and curated names stay autocorrections: off when autocorrect is off.
+- `typing.cursor-trackpad` (#950): Hold the space bar 0.35 s without sliding: the keys go blank and the space bar is a trackpad. The cursor follows the finger through the text in two dimensions, line to line, at the text's own scale, faster the faster the finger (Hex's model, MIT). Lifting types no space. A quick tap that drifts stays a space. A second finger types nothing. No haptic of its own. No selection: a keyboard cannot make one.
 
 ## How to get to it (user POV)
 
@@ -56,6 +57,8 @@ Measured 2026-11-13 (iPhone 17, iOS 26.5, builds `fd92aaa0` and `bbaa7b36`, #919
 Measured 2026-11-17 (iPhone 17, iOS 26.5, build `c9361321`, #501), same recipe: `je vais a elle a ` typed on the Dictus keys in a Rappels title reads `Je vais à elle a `, with `APPLIED orig="a" → "à" prev="vais"` then `AUTOCORRECT-SKIP word="a" reason=already-valid` in the log.
 
 ## Gotchas
+
+- `typing.cursor-trackpad`: a multi-line field is needed, and a slimmed device has no Notes. A `<textarea>` page served from the Mac works in Safari (`python3 -m http.server --bind 127.0.0.1`, then `simctl openurl <udid> http://127.0.0.1:<port>/`; `simctl openurl` refuses `data:` URLs). `axe drag --hold 0.7 --start-x 210 --start-y 772 --end-x <x> --end-y <y> --duration 1 --steps 90` holds the space bar, then slides. Measured 2026-11-22 (iPhone 17, iOS 26.5), with Apple's keyboard on the same gestures as the reference: `docs/study-captures/trackpad/` on the `study/trackpad` branch. Safari shares about 60 characters around the cursor, cut anywhere, so a line whose start it has not shown is laid out by guess until it does. The feel, the speed curve on a real finger and the haptics are iPhone-only.
 
 - Safari's address bar turns suggestions off: typing there shows no suggestion bar. Test in Rappels. A slimmed iOS 26.5 device has no Notes app (`simctl launch com.apple.mobilenotes` fails), and on 2026-11-13 Messages opened a conversation without drawing its compose box.
 - Reset the user dictionary first (`typing.learned-words`): a learned word silently changes what autocorrect does.
