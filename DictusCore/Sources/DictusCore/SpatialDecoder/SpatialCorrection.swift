@@ -47,6 +47,11 @@ public enum SpatialCorrection {
     /// score (more than one edit away, two words, a word its model lacks) stays the trie's:
     /// on Pierre's device sessions the trie was right in most such cases ("sats" -> "sais",
     /// "orzt" -> "est"), and the decoder's strength is where the trie keeps the word.
+    ///
+    /// Except when the decoder's reading keeps every letter typed and the trie's does not
+    /// (`keepsTheLetters`): "Jaihate" is "J'ai hâte" with a space, an apostrophe and an
+    /// accent put in, where the trie changed three letters to write "Lainage" (Pierre's
+    /// device session of 2026-11-23). The decoder then needs no score of the trie's word.
     public static func correct(
         _ word: String,
         previousWord: String?,
@@ -88,7 +93,8 @@ public enum SpatialCorrection {
         SpatialDecoder.withoutAccents(replacement) != SpatialDecoder.withoutAccents(literal) else { return nil }
         let taps = kept.map { input.taps[$0] }
 
-        if let trie = facts.trieCorrection?.lowercased(), trie != clitic.lowercased() + replacement {
+        if let trie = facts.trieCorrection?.lowercased(), trie != clitic.lowercased() + replacement,
+           !keepsTheLetters(replacement, typed: literal) || keepsTheLetters(trie, typed: String(lowered)) {
             // The trie's word in the decoder's terms: what follows the same clitic.
             guard trie.hasPrefix(clitic.lowercased()),
                   let best = decision.readings.first?.cost,
@@ -105,5 +111,22 @@ public enum SpatialCorrection {
         }
         let alternatives = decision.readings.map(\.text).filter { $0 != replacement }.map(display)
         return Result(correction: display(replacement), alternatives: alternatives)
+    }
+
+    /// Whether `reading` is the letters of `typed`, in order, with nothing but spaces,
+    /// apostrophes and accents put in ("jaihate" -> "j'ai hâte"), or with the one tap
+    /// between its two words read as the space it was meant for ("jainhate" ->
+    /// "j'ai hâte", the n just above the space bar). No letter the typist meant is changed.
+    static func keepsTheLetters(_ reading: String, typed: String) -> Bool {
+        func letters(_ text: Substring) -> String {
+            SpatialDecoder.withoutAccents(String(text)).lowercased().filter(\.isLetter)
+        }
+        let typedLetters = letters(typed[...])
+        if letters(reading[...]) == typedLetters { return true }
+        let words = reading.split(separator: " ")
+        guard words.count == 2 else { return false }
+        let (left, right) = (letters(words[0]), letters(words[1]))
+        return typedLetters.count == left.count + right.count + 1
+            && typedLetters.hasPrefix(left) && typedLetters.hasSuffix(right)
     }
 }
