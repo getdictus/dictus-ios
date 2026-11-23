@@ -145,20 +145,24 @@ case "$cmd" in
   type | space)
     # Typed through the Dictus keyboard itself, key by key: `axe type` sends hardware
     # keyboard events, which reach the text field without going through the extension and
-    # so never trigger its autocorrect. AZERTY, letters page, measured on iPhone 17 / iOS
-    # 26.5: ten keys per row on a 40.2 pt pitch; rows 80, 132, 187 pt below inputView's
-    # top; row 3 holds w x c v b n between shift and backspace; space at (220, +239).
+    # so never trigger its autocorrect. AZERTY, letters page, iPhone 17 / iOS 26.5, keycap
+    # centres from Apple's key plane (`KeyPlaneGeometry`, standard upright): ten keys per row
+    # on a 39.5 pt pitch from 23.25 pt; rows 81.5, 135.5, 189.5 pt below inputView's top (52 pt
+    # of toolbar, then keycaps 8, 62 and 116 pt into the grid); row 3 holds w x c v b n
+    # between shift and backspace, from 82.5 pt; space at (220, +243). Computed, not
+    # re-measured: the points the recipe used before (40.2 pt pitch from 20.1, rows 80, 132,
+    # 187, space +239) also fall inside each key's target.
     frame=$(stable_frame id inputView) || die "no inputView: the Dictus keyboard is not on screen"
     read -r x y w h <<<"$frame"
     press() { axe tap -x "$(python3 -c "print(round($x + $1))")" -y "$(python3 -c "print(round($y + $2))")" --udid "$UDID" >/dev/null; sleep 0.35; }
-    if [ "$cmd" = space ]; then press 220 239; echo "pressed space"; exit 0; fi
+    if [ "$cmd" = space ]; then press 220 243; echo "pressed space"; exit 0; fi
     word=${1:?word}
     for ((i = 0; i < ${#word}; i++)); do
       c=${word:$i:1}
       pos=$(python3 -c "
 import sys
-c=sys.argv[1]; p=40.2
-for row,keys,y,x0 in ((0,'azertyuiop',80,20.1),(1,'qsdfghjklm',132,20.1),(2,'wxcvbn',187,80.4)):
+c=sys.argv[1]; p=39.5
+for row,keys,y,x0 in ((0,'azertyuiop',81.5,23.25),(1,'qsdfghjklm',135.5,23.25),(2,'wxcvbn',189.5,82.5)):
     if c in keys: print(round(x0+p*keys.index(c)), y); sys.exit(0)
 sys.exit(1)" "$c") || die "'$c' is not a lowercase a–z letter on the AZERTY letters page"
       press $pos
