@@ -100,7 +100,7 @@ final class ProTrialCoordinator: ObservableObject {
               announcement == nil, !showsEndOfTrialPaywall else { return }
 
         let onboarded = AppGroup.defaults.bool(forKey: SharedKeys.hasCompletedOnboarding)
-        if onboarded && proStatus.mayStartTrial {
+        if proStatus.trialAnnouncementDue(onboardingCompleted: onboarded) {
             let next = Announcement(kind: onboardedThisLaunch ? .newUser : .existingUser, shownAt: Date())
             pendingStart = next
             announcement = next
