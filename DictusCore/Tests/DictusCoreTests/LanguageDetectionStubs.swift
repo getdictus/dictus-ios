@@ -21,7 +21,8 @@ struct StubEvidence: LanguageEvidenceSource {
 
 /// The shipped French and English dictionaries' answers for the words the tests type,
 /// read off the tries and n-grams with
-/// `tools/keyboard-bench/run.sh --pair fr,en --probe <words>` on 2026-11-21, rounded to
+/// `tools/keyboard-bench/run.sh --pair fr,en --probe <words>` on 2026-11-21 (`test`, `bug`,
+/// `jaihate`, `us` on 2026-11-23), rounded to
 /// two decimals. A word absent from a table is absent from that dictionary.
 enum ShippedDictionaries {
     static let french = StubEvidence(
@@ -31,13 +32,14 @@ enum ShippedDictionaries {
             "un": -0.85, "demain": -4.46, "matin": -4.59, "le": -0.67, "meeting": -8.93,
             "décalé": -11.15, "oui": -2.49, "je": -0.31, "regarde": -4.09, "ça": -1.43, "ce": -1.87,
             "soir": -3.98, "camp": -5.71, "thé": -6.18, "téléphone": -5.37, "juste": -4.07,
-            "projet": -6.53, "client": -6.45, "table": -5.09, "ses": -3.00, "toi": -2.74, "fois": -3.41
+            "projet": -6.53, "client": -6.45, "table": -5.09, "ses": -3.00, "toi": -2.74, "fois": -3.41,
+            "test": -7.06, "bug": -11.09, "lainage": -10.56, "us": -8.36
         ],
         accents: ["the": "thé", "telephone": "téléphone"],
         contractions: ["cest": "c'est"],
         corrections: [
             "call": "camp", "sounds": "rounds", "good": "fois", "see": "ses", "you": "toi",
-            "oji": "oui", "jusge": "juste"
+            "oji": "oui", "jusge": "juste", "jaihate": "lainage"
         ],
         bigrams: [
             "trop cool": 0.39, "on se": 0.78, "se fait": 0.76, "fait un": 0.74, "demain matin": 0.40,
@@ -54,12 +56,12 @@ enum ShippedDictionaries {
             "camp": -6.49, "the": 0.00, "telephone": -5.91, "judge": -6.62, "oki": -9.47,
             "projet": -10.44, "client": -5.81, "table": -4.94, "remain": -6.63, "latin": -6.45,
             "decals": -8.94, "regards": -7.49, "ca": -5.18, "sour": -8.73, "trip": -6.17,
-            "fair": -6.15, "in": -1.01, "he": -3.31
+            "fair": -6.15, "in": -1.01, "he": -3.31, "test": -5.01, "bug": -6.37, "navigate": -7.30, "us": -2.94
         ],
         corrections: [
             "trop": "trip", "fait": "fair", "un": "in", "demain": "remain", "matin": "latin",
             "décalé": "decals", "regarde": "regards", "ça": "ca", "soir": "sour", "thé": "the",
-            "téléphone": "telephone", "oji": "oki", "jusge": "judge"
+            "téléphone": "telephone", "oji": "oki", "jusge": "judge", "jaihate": "navigate"
         ],
         bigrams: ["se fait": 0.12, "fait un": 0.11, "oui je": 0.07, "sounds good": 0.46, "see you": 0.75]
     )

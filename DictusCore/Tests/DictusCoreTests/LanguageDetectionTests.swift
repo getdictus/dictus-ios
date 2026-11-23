@@ -87,6 +87,23 @@ final class WordLanguageVoteTests: XCTestCase {
         XCTAssertEqual(vote("jusge"), 2.55, accuracy: 0.01)
     }
 
+    /// Pierre's device session of 2026-11-23: French has `test` and `bug`, English has them
+    /// more often but rarely. They vote near zero for English; a common English word French
+    /// has rarely keeps its vote, and so does a French word English books have rarely.
+    func testARareWordThePrimaryHasVotesNearZeroForTheSecondary() {
+        XCTAssertEqual(vote("Test"), -1)
+        XCTAssertEqual(vote("bug", after: "Test"), -1)
+        XCTAssertEqual(vote("us"), -4)
+        XCTAssertGreaterThan(vote("projet"), 3)
+    }
+
+    /// `Jaihate`: English reads `navigate`, French `lainage`, both rare words. `Oji` keeps
+    /// its vote: French's correction, `oui`, is common.
+    func testARareCorrectionBothLanguagesReachVotesNearZero() {
+        XCTAssertEqual(vote("Jaihate"), -1)
+        XCTAssertEqual(vote("Oji"), 4)
+    }
+
     func testAWordReachedOnlyByCorrectionCountsBelowItsCorrection() {
         XCTAssertEqual(WordLanguageVote.evidence(for: "jusge", after: nil, in: french), -4.07 - 3, accuracy: 1e-9)
     }
@@ -143,6 +160,13 @@ final class LanguageWindowTests: XCTestCase {
             var window = LanguageWindow(pair: frenchFirst)
             XCTAssertEqual(Set(type(sentence, into: &window)), [.french], sentence)
         }
+    }
+
+    /// Pierre's device session of 2026-11-23: the keyboard had just launched, and `Test bug`
+    /// flipped it to English, which then wrote `Navigate` for `Jaihate`.
+    func testFrenchWordsAndAFrenchTypoKeepAFreshFrenchWindow() {
+        var window = LanguageWindow(pair: frenchFirst)
+        XCTAssertEqual(Set(type("Test bug Jaihate", into: &window)), [.french])
     }
 
     /// The study's mixed run, sentences 11 and 12: the first two English words are still
