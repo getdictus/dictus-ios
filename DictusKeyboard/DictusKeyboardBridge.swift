@@ -64,7 +64,14 @@ final class ProxyDocumentEditor: TextDocumentEditing {
 /// sounding the click from here is what made typing feel out of sync with the
 /// haptic (#286). The haptics that remain here are the ones with no touchDown to
 /// attach to: the cursor-movement tick, and the emoji toggle's own feedback.
-final class DictusKeyboardBridge: NSObject,
+///
+/// WHY exempt from `type_body_length` (#1014): with develop after #1022 and the spatial
+/// decoder (#1011), this body is at the 650-line budget, and Adaptive touch needs six lines
+/// of hooks in the key and space handlers, where every keystroke passes. The rule is there
+/// to catch a type ballooning, not the bridge every key event goes through; moving those
+/// handlers into an extension restructures the keyboard's hot path, which a Debug-only
+/// experiment should not carry. Scoped here, as `UnifiedAudioEngine` (#417).
+final class DictusKeyboardBridge: NSObject, // swiftlint:disable:this type_body_length
     GiellaKeyboardViewDelegate,
     GiellaKeyboardViewKeyboardKeyDelegate {
     // MARK: - Dependencies
