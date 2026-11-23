@@ -207,7 +207,8 @@ final class BilingualKeyboard {
         let own = engine(active)
         guard let activeEvidence = evidence(active) else {
             let proposal = own.correctionProposal(for: word, previousWord: previousWord,
-                                                  isAtSentenceStart: isAtSentenceStart, spatial: spatial)
+                                                  isAtSentenceStart: isAtSentenceStart, spatial: spatial,
+                                                  context: query.context)
             return BilingualCheck.Decision(proposal: proposal, rule: .alone)
         }
         // A partner still loading, or one whose dictionary takes any letters, is none.
@@ -216,12 +217,13 @@ final class BilingualKeyboard {
             word, before: query.context, active: activeEvidence, other: otherEvidence,
             own: { otherKnows in
                 own.correctionProposal(for: word, previousWord: previousWord, isAtSentenceStart: isAtSentenceStart,
-                                       spatial: spatial, otherLanguageKnowsWord: otherKnows)
+                                       spatial: spatial, otherLanguageKnowsWord: otherKnows, context: query.context)
             },
             theirs: {
                 guard asksOther else { return nil }
                 return self.engine(other).correctionProposal(for: word, previousWord: previousWord,
-                                                             isAtSentenceStart: isAtSentenceStart, spatial: spatial)
+                                                             isAtSentenceStart: isAtSentenceStart, spatial: spatial,
+                                                             context: query.context)
             }
         )
         #if DEBUG

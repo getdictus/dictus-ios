@@ -80,7 +80,8 @@ final class DetectingCorrector: Corrector {
                                           secondary: source(pair.secondary)))
         let active = window.language
         guard let correction = engine(active).spellCheck(word, previousWord: previous,
-                                                          isAtSentenceStart: isAtSentenceStart)?.correction
+                                                          isAtSentenceStart: isAtSentenceStart,
+                                                          context: context)?.correction
         else { return nil }
         let kept = BilingualKeepRule.keepsTyped(word, over: correction, active: source(active),
                                                 other: source(pair.other(than: active)))

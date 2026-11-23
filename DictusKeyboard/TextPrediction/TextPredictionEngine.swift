@@ -103,6 +103,49 @@ class TextPredictionEngine {
         return lexicon.decision(for: word, isDictionaryWord: aospTrieEngine.wordExists(word.lowercased()))
     }
 
+    /// The lexicon's verdict or a context rule's spelling for `word`, in the order
+    /// `SupplementaryLexicon.earlyAnswer` documents, or nil when none applies.
+    private func earlyAnswer(
+        for word: String, previousWord: String?, context: String?
+    ) -> SupplementaryLexicon.EarlyAnswer? {
+        lexiconLock.lock()
+        let lexicon = supplementaryLexicon
+        lexiconLock.unlock()
+        return lexicon.earlyAnswer(
+            for: word, previousWord: previousWord, context: context, profile: profile,
+            isDictionaryWord: aospTrieEngine.wordExists(word.lowercased())
+        )
+    }
+
+    /// Turns an early answer into the proposal `correctionProposal` returns: a
+    /// lexicon keep is nil, every other answer is applied at the space.
+    private func proposal(
+        for early: SupplementaryLexicon.EarlyAnswer, word: String, previousWord: String?
+    ) -> CorrectionProposal? {
+        switch early {
+        case .lexicon(let decision):
+            return lexiconResult(decision, for: word).map {
+                .autocorrect($0.correction, alternatives: $0.alternatives)
+            }
+        case .homograph(let spelling):
+            #if DEBUG
+            AutocorrectDebugLog.autocorrectDecision(
+                original: word, corrected: spelling,
+                branch: "contextual-homograph", prevWord: previousWord
+            )
+            #endif
+            return .autocorrect(spelling, alternatives: [])
+        case .contextOverride(let corrected):
+            #if DEBUG
+            AutocorrectDebugLog.autocorrectDecision(
+                original: word, corrected: corrected,
+                branch: "context-override", prevWord: previousWord
+            )
+            #endif
+            return .autocorrect(corrected, alternatives: [])
+        }
+    }
+
     /// The phrase of the text replacement shortcut `word` is, or nil (#1022).
     func textReplacement(for word: String) -> String? {
         lexiconLock.lock()
@@ -640,13 +683,18 @@ class TextPredictionEngine {
     /// Strategy 2 is the key insight: instead of asking "what are the corrections for sui?"
     /// and hoping "suis" appears, we ask "what does the n-gram model predict after je?"
     /// and check if any prediction (like "suis") is close to what was typed ("sui").
+    ///
+    /// `context` is the text before the cursor, ending with `word`. It lets a word
+    /// with two correct spellings take the one the sentence calls for (#501).
     func spellCheck(
         _ word: String,
         previousWord: String?,
-        isAtSentenceStart: Bool = true
+        isAtSentenceStart: Bool = true,
+        context: String? = nil
     ) -> (correction: String, alternatives: [String])? {
-        correctionProposal(for: word, previousWord: previousWord, isAtSentenceStart: isAtSentenceStart)?
-            .autocorrection
+        correctionProposal(
+            for: word, previousWord: previousWord, isAtSentenceStart: isAtSentenceStart, context: context
+        )?.autocorrection
     }
 
     /// What `spellCheck(_:previousWord:isAtSentenceStart:)` decides, plus the
@@ -666,7 +714,8 @@ class TextPredictionEngine {
         previousWord: String?,
         isAtSentenceStart: Bool = true,
         spatial: SpatialCorrection.Input? = nil,
-        otherLanguageKnowsWord: Bool = false
+        otherLanguageKnowsWord: Bool = false,
+        context: String? = nil
     ) -> CorrectionProposal? {
         let applied = { (result: (correction: String, alternatives: [String])?) -> CorrectionProposal? in
             result.map { .autocorrect($0.correction, alternatives: $0.alternatives) }
@@ -680,8 +729,9 @@ class TextPredictionEngine {
 
         // Lexicon verdicts (#873) return before the bigram rerank, which could
         // otherwise swap a replacement phrase or a kept name for a neighbour.
-        if let decision = lexiconDecision(for: word) {
-            return applied(lexiconResult(decision, for: word))
+        // The lexicon and both context rules, in the order `earlyAnswer` documents.
+        if let early = earlyAnswer(for: word, previousWord: previousWord, context: context) {
+            return proposal(for: early, word: word, previousWord: previousWord)
         }
 
         // Language overrides are authoritative — return before the bigram

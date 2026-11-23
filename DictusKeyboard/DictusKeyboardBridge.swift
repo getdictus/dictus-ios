@@ -64,7 +64,14 @@ final class ProxyDocumentEditor: TextDocumentEditing {
 /// sounding the click from here is what made typing feel out of sync with the
 /// haptic (#286). The haptics that remain here are the ones with no touchDown to
 /// attach to: the cursor-movement tick, and the emoji toggle's own feedback.
-final class DictusKeyboardBridge: NSObject,
+///
+/// WHY exempt from `type_body_length` (#1011): develop after #1017, #1022 and #1028 brings
+/// this body to the 650-line budget, and the spatial decoder needs a few lines of hooks in
+/// the key and space handlers, where every keystroke passes (Adaptive touch, #1014, a few
+/// more). The rule is there to catch a type ballooning, not the bridge every key event goes
+/// through; moving those handlers into an extension restructures the keyboard's hot path,
+/// which Debug-only experiments should not carry. Scoped here, as `UnifiedAudioEngine` (#417).
+final class DictusKeyboardBridge: NSObject, // swiftlint:disable:this type_body_length
     GiellaKeyboardViewDelegate,
     GiellaKeyboardViewKeyboardKeyDelegate {
     // MARK: - Dependencies
@@ -343,9 +350,15 @@ final class DictusKeyboardBridge: NSObject,
         // here rather than wait for the host to report the selection change (#266).
         KeyboardState.shared.invalidateDictationUndo(reason: "cursor-moved")
 
-        // Spacebar trackpad cursor movement
+        // Spacebar trackpad cursor movement, in UTF-16 units. No haptic per move: Apple's
+        // keyboard asks for no feedback after the space bar's own (Hex's reading of iOS 27.2's
+        // log, #950), and at the new speeds a tick per move was a buzz.
         controller?.textDocumentProxy.adjustTextPosition(byCharacterOffset: movement)
-        HapticFeedback.cursorMoved()
+    }
+
+    func trackpadTextContext() -> (before: String, after: String) {
+        let proxy = controller?.textDocumentProxy
+        return (proxy?.documentContextBeforeInput ?? "", proxy?.documentContextAfterInput ?? "")
     }
 
     // MARK: - GiellaKeyboardViewKeyboardKeyDelegate
