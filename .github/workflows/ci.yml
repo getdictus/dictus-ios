@@ -10,6 +10,22 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
+# Where the macOS jobs run. Internal work — a push to develop / main, or a pull request
+# whose head branch lives in this repository — runs on `m1-dictus`, a self-hosted Mac
+# (labels self-hosted, macOS, m1-dictus). A pull request from a fork stays on GitHub's
+# `macos-26`: this repository is public, and a self-hosted runner must never execute
+# code a stranger wrote. Three guards, because a fork PR runs ITS OWN copy of this file
+# and can rewrite the `runs-on` below:
+#   1. the `runs-on` expression below (only stops an unmodified workflow);
+#   2. a job-started hook on the machine (ACTIONS_RUNNER_HOOK_JOB_STARTED), outside
+#      git, that fails any job that is not a push / workflow_dispatch on this
+#      repository or a pull_request whose head repository is this one;
+#   3. the repository's fork PR approval policy, which holds fork workflows until a
+#      maintainer approves them.
+# On m1-dictus a job-completed hook deletes the workspace's build/ and DictusCore/.build.
+# The toolchain differs: GitHub uses Xcode 26.4.1, m1-dictus the Xcode installed there
+# (/Applications/Xcode.app). See "Select Xcode" in the build job.
+
 jobs:
   lint:
     name: SwiftLint
@@ -29,7 +45,8 @@ jobs:
 
   build:
     name: Build (iOS Simulator)
-    runs-on: macos-26
+    # m1-dictus for internal work, macos-26 for forks (see the comment above `jobs`).
+    runs-on: ${{ (github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository) && fromJSON('["self-hosted","macOS","m1-dictus"]') || 'macos-26' }}
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
@@ -42,8 +59,21 @@ jobs:
       # half of this generic simulator build fails to link. 26.4.1 honours the key, which
       # is also what the device and TestFlight builds are made with. The macos-26 image
       # ships 26.0.1 through 26.6 (actions/runner-images, image 20260907).
-      - name: Select Xcode 26.4.1
-        run: sudo xcode-select -s /Applications/Xcode_26.4.1.app
+      #
+      # Selected with DEVELOPER_DIR rather than `sudo xcode-select`: the self-hosted
+      # m1-dictus runner has no sudo, and DEVELOPER_DIR changes nothing outside the job.
+      # m1-dictus has a single Xcode, /Applications/Xcode.app (27.2 when this was
+      # written), so internal work builds with a newer toolchain than TestFlight does;
+      # the step prints the version so the log says which one it was. Xcode 27 honours
+      # `traits = ()` like 26.4.1 (CLAUDE.md: 26.4.1 or newer).
+      - name: Select Xcode
+        run: |
+          if [ "$RUNNER_ENVIRONMENT" = "self-hosted" ]; then
+            XCODE=/Applications/Xcode.app
+          else
+            XCODE=/Applications/Xcode_26.4.1.app
+          fi
+          echo "DEVELOPER_DIR=$XCODE/Contents/Developer" >> "$GITHUB_ENV"
 
       - name: Show Xcode version
         run: xcodebuild -version
@@ -54,7 +84,11 @@ jobs:
             brew install xcbeautify
           fi
 
+      # GitHub-hosted only. On m1-dictus a restore would write into the user's own
+      # ~/Library (DerivedData and the SwiftPM cache the Mac's developer uses), so
+      # there the packages resolve into the workspace instead (next step).
       - name: Cache SwiftPM
+        if: runner.environment == 'github-hosted'
         uses: actions/cache@v4
         with:
           path: |
@@ -68,11 +102,19 @@ jobs:
           restore-keys: |
             spm-fa015-${{ runner.os }}-
 
+      # On m1-dictus, into build/DerivedData — the path the build and test steps use,
+      # and the one the runner's job-completed hook deletes — so nothing piles up in
+      # ~/Library/Developer/Xcode/DerivedData between jobs.
       - name: Resolve SwiftPM dependencies
         run: |
+          DERIVED=()
+          if [ "$RUNNER_ENVIRONMENT" = "self-hosted" ]; then
+            DERIVED=(-derivedDataPath build/DerivedData)
+          fi
           xcodebuild -resolvePackageDependencies \
             -project Dictus.xcodeproj \
-            -scheme DictusApp
+            -scheme DictusApp \
+            "${DERIVED[@]}"
 
       - name: Build DictusApp (and embedded Keyboard, Widgets, Core)
         run: |
@@ -108,7 +150,8 @@ jobs:
     # macOS, no simulator: the suite runs on the Mac directly. The iOS Simulator
     # destination passes too since #301 but executes exactly the same tests while
     # paying for a simulator boot (CLAUDE.md, "Build, test, lint").
-    runs-on: macos-26
+    # m1-dictus for internal work, macos-26 for forks (see the comment above `jobs`).
+    runs-on: ${{ (github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository) && fromJSON('["self-hosted","macOS","m1-dictus"]') || 'macos-26' }}
     timeout-minutes: 20
     steps:
       # On a pull request, test the PR's head commit itself rather than the
@@ -124,8 +167,14 @@ jobs:
         run: git rev-parse HEAD
 
       # Same toolchain as the build job, for the same reasons (see its comment).
-      - name: Select Xcode 26.4.1
-        run: sudo xcode-select -s /Applications/Xcode_26.4.1.app
+      - name: Select Xcode
+        run: |
+          if [ "$RUNNER_ENVIRONMENT" = "self-hosted" ]; then
+            XCODE=/Applications/Xcode.app
+          else
+            XCODE=/Applications/Xcode_26.4.1.app
+          fi
+          echo "DEVELOPER_DIR=$XCODE/Contents/Developer" >> "$GITHUB_ENV"
 
       - name: Show toolchain
         run: |
@@ -200,19 +249,30 @@ jobs:
   # purchase with `notEntitled`, so it needs an app host on a simulator.
   app-tests:
     name: App Tests (iOS Simulator)
-    runs-on: macos-26
+    # m1-dictus for internal work, macos-26 for forks (see the comment above `jobs`).
+    runs-on: ${{ (github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository) && fromJSON('["self-hosted","macOS","m1-dictus"]') || 'macos-26' }}
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
 
       # Same toolchain as the build job, for the same reasons (see its comment).
-      - name: Select Xcode 26.4.1
-        run: sudo xcode-select -s /Applications/Xcode_26.4.1.app
+      - name: Select Xcode
+        run: |
+          if [ "$RUNNER_ENVIRONMENT" = "self-hosted" ]; then
+            XCODE=/Applications/Xcode.app
+          else
+            XCODE=/Applications/Xcode_26.4.1.app
+          fi
+          echo "DEVELOPER_DIR=$XCODE/Contents/Developer" >> "$GITHUB_ENV"
 
       - name: Show Xcode version
         run: xcodebuild -version
 
+      # GitHub-hosted only. On m1-dictus a restore would write into the user's own
+      # ~/Library (DerivedData and the SwiftPM cache the Mac's developer uses), so
+      # there the packages resolve into the workspace instead (next step).
       - name: Cache SwiftPM
+        if: runner.environment == 'github-hosted'
         uses: actions/cache@v4
         with:
           path: |
@@ -223,11 +283,19 @@ jobs:
           restore-keys: |
             spm-fa015-${{ runner.os }}-
 
+      # On m1-dictus, into build/DerivedData — the path the build and test steps use,
+      # and the one the runner's job-completed hook deletes — so nothing piles up in
+      # ~/Library/Developer/Xcode/DerivedData between jobs.
       - name: Resolve SwiftPM dependencies
         run: |
+          DERIVED=()
+          if [ "$RUNNER_ENVIRONMENT" = "self-hosted" ]; then
+            DERIVED=(-derivedDataPath build/DerivedData)
+          fi
           xcodebuild -resolvePackageDependencies \
             -project Dictus.xcodeproj \
-            -scheme DictusApp
+            -scheme DictusApp \
+            "${DERIVED[@]}"
 
       # What the image offers, so the log shows why the next step chose what it chose.
       - name: Show installed Xcodes and iOS runtimes
@@ -242,12 +310,36 @@ jobs:
       # - B: an Xcode 27 with an iOS 27 runtime on the image, used for this job only;
       # - A, otherwise: Xcode 26.4.1 kept, an iPhone on the iOS 26.2 runtime the image
       #   ships. Nothing is installed; no such iPhone fails here, by name.
+      #
+      # On m1-dictus (self-hosted), the Mac's Xcode selected above, and a simulator this
+      # job creates for itself — `ci-<run_id>-<attempt>`, an iPhone 17 on the newest
+      # iOS 27 runtime — deleted by the last step whatever happens. Other simulators on
+      # that Mac belong to other work: none is reused, shut down or deleted.
       - name: Pick Xcode and simulator for SKTestSession
         run: |
+          if [ "$RUNNER_ENVIRONMENT" = "self-hosted" ]; then
+            xcodebuild -version
+            DEVICE_TYPE=com.apple.CoreSimulator.SimDeviceType.iPhone-17
+            RUNTIME_ID=$(xcrun simctl list -j runtimes available | jq -r --arg dt "$DEVICE_TYPE" '
+              [.runtimes[] | select(.platform == "iOS" and (.version | startswith("27.")))
+                           | select(any(.supportedDeviceTypes[]?; .identifier == $dt))]
+              | sort_by(.version | split(".") | map(tonumber)) | last | .identifier // empty')
+            if [ -z "$RUNTIME_ID" ]; then
+              echo "::error::No iOS 27 runtime supporting $DEVICE_TYPE on this runner. SKTestSession fails on iOS 26.3 to 26.5 (SKInternalErrorDomain 3), so no other runtime is taken."
+              exit 1
+            fi
+            SIM_NAME="ci-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+            UDID=$(xcrun simctl create "$SIM_NAME" "$DEVICE_TYPE" "$RUNTIME_ID")
+            echo "CI_SIM_UDID=$UDID" >> "$GITHUB_ENV"
+            echo "SIM_UDID=$UDID" >> "$GITHUB_ENV"
+            echo "Simulator: $SIM_NAME, $DEVICE_TYPE, $RUNTIME_ID, $UDID (created for this job)"
+            exit 0
+          fi
           XCODE27=$(ls -d /Applications/Xcode_27*.app 2>/dev/null | tail -1 || true)
           if [ -n "$XCODE27" ] && xcrun simctl list runtimes available | grep -q "^iOS 27\."; then
             echo "Option B: $XCODE27 with an iOS 27 runtime"
-            sudo xcode-select -s "$XCODE27"
+            export DEVELOPER_DIR="$XCODE27/Contents/Developer"
+            echo "DEVELOPER_DIR=$DEVELOPER_DIR" >> "$GITHUB_ENV"
             xcodebuild -version
             WANT=27
           else
@@ -312,3 +404,12 @@ jobs:
           path: ${{ runner.temp }}/app-tests.log
           retention-days: 7
           if-no-files-found: ignore
+
+      # m1-dictus only: delete the simulator this job created, pass, fail or cancel.
+      # By UDID, so no other simulator on the Mac can be hit. Never `shutdown all`.
+      - name: Delete the job's simulator
+        if: always() && env.CI_SIM_UDID != ''
+        run: |
+          xcrun simctl shutdown "$CI_SIM_UDID" 2>/dev/null || true
+          xcrun simctl delete "$CI_SIM_UDID"
+          echo "Deleted $CI_SIM_UDID"
