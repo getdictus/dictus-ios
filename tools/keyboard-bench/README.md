@@ -29,6 +29,7 @@ file says what each piece is.
 | `key_targets.sh` + `compare_hits.py` | The #949 spike in one command: draws held-out runs, replays them through both hit tests, and compares them tap by tap. Results: [`docs/research/949-key-targets/`](../../docs/research/949-key-targets/README.md). |
 | `corpus/mixed.txt`, `corpus/mixed.lang`, `runs/mixed.tsv` | 20 sentences that mix French and English, the gold language of every word (`f` or `e`), and their touch run (#1009). The run the bilingual detection was designed on in #1007. |
 | `corpus/mixed-heldout.txt`, `corpus/mixed-heldout.lang`, `runs/mixed-heldout.tsv` | 20 more mixed sentences, written before the bilingual replay first ran. Nothing is ever tuned on them: a change judged on this run needs a new held-out run. |
+| `corpus/mixed-device.txt`, `corpus/mixed-device.lang`, `runs/mixed-device.tsv` | Words Pierre typed on his iPhone on 2026-11-23 that the bilingual keyboard got wrong, replayed from the keys and offsets of the session's `TJ TAP` lines (times evened to 170 ms): `test bug`, which flipped a fresh French window to English, then `j'ai hâte` typed `jaihate`, `j'aihate` and `j'ainhate`, and `oui` typed `oji`; then `its` as a possessive and before a verb, typed on the key centres. Not in the default runs: `run.sh --pair fr,en --langs mixed-device`. |
 | `Bilingual.swift` + `score_pair.py` | The bilingual replay (`run.sh --pair fr,en`): the same taps through one engine per language and the DictusCore language detection, then its report. |
 
 ## Run
