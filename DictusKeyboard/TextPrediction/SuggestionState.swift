@@ -456,10 +456,13 @@ class SuggestionState: ObservableObject {
         currentWord = ""
     }
 
-    /// Updates the prediction engine's language.
+    /// Updates the prediction engine's language. Runs on every keyboard appearance.
     func setLanguage(_ lang: String) {
         engine.setLanguage(lang)
         BilingualAutocorrect.follow(primary: lang, engine: engine)
+        #if DEBUG
+        AutocorrectDebugLog.switches(BilingualAutocorrect.debugSwitches)
+        #endif
     }
 
     /// Whether the active language's dictionary does not know this word (#287).

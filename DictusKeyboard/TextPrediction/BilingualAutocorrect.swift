@@ -31,6 +31,26 @@ enum BilingualAutocorrect {
         #endif
     }
 
+    #if DEBUG
+    /// The App Group key of Adaptive touch's switch (#1014, `AdaptiveTouchSwitch.switchKey`).
+    static let adaptiveSwitchKey = "debug.adaptiveTouch"
+
+    /// The three Debug switches, for the journal's `TJ SWITCHES` line.
+    ///
+    /// WHY Adaptive touch's rule restated: `AdaptiveTouchSwitch` is #1018's, not on this
+    /// branch. Its `isOn` is the decoder's switch and its own; once both PRs are in, this
+    /// reads `AdaptiveTouchSwitch.isOn`.
+    static var debugSwitches: DebugSwitches {
+        let keys = [SpatialAutocorrect.switchKey, adaptiveSwitchKey, switchKey]
+        return DebugSwitches(
+            spatial: SpatialAutocorrect.isOn,
+            adaptive: SpatialAutocorrect.isOn && AppGroup.defaults.bool(forKey: adaptiveSwitchKey),
+            bilingual: isOn,
+            source: DebugSwitches.source(of: keys, in: AppGroup.defaults)
+        )
+    }
+    #endif
+
     private static let lock = NSLock()
     private static var keyboard: BilingualKeyboard?
     private static var lexicon: SupplementaryLexicon?
