@@ -315,7 +315,7 @@ struct KeyboardRootView: View {
                     armedSmartMode: smartModes.effectiveMode,
                     // Read at each render; every status change re-renders, and the
                     // flag is set before the first one of an in-keyboard dictation.
-                    onDeviceEngine: InKeyboardDictation.shared.ownsKeyboardStatus
+                    onDeviceEngine: InKeyboardDictation.shared.drawsAsOnDevice
                 )
             } else if presentedMode == .voiceNoteResult, let reader = voiceNotes.reader {
                 // The voice note reader (#637): the whole surface, toolbar band

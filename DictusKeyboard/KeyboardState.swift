@@ -1931,6 +1931,18 @@ extension KeyboardState {
         transcribingHoldTimer?.invalidate()
         transcribingHoldTimer = nil
     }
+
+    /// #992: `ahead` draws "Listening" while `dictationStatus` is still `requested`,
+    /// because the keyboard's own capture already has audio (`InKeyboardDictation`).
+    /// Display only, so the 500 ms fallback still reads `requested`. `false` draws the
+    /// real status again after the early capture was dropped.
+    func drawRecordingStageAhead(_ ahead: Bool) {
+        let applies = ahead ? dictationStatus == .requested
+            : displayedDictationStatus == .recording && dictationStatus != .recording
+        guard applies else { return }
+        cancelTranscribingHoldTimer()
+        displayedDictationStatus = ahead ? .recording : dictationStatus
+    }
 }
 
 // MARK: - Model readiness

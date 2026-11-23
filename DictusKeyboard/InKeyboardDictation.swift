@@ -64,6 +64,14 @@ final class InKeyboardDictation {
     /// The last time DictusApp answered `inKeyboardPing`.
     private var lastPong: Date?
     private var isObservingPongs = false
+    /// When this tap's ping was posted: only a pong after it counts.
+    private var tapPingSentAt: Date?
+    /// Full Access read at the tap, for a route decided after iOS tore the controller
+    /// down (`InKeyboardDictationRoute.fullAccess`).
+    private var fullAccessAtTap: Bool?
+    /// The recording stage is on screen ahead of the route decision (first sample of an
+    /// early capture): the overlay shows "Listening" as soon as audio arrives.
+    private var showsRecordingAhead = false
 
     // MARK: - Before the 500 ms wait ends
 
@@ -95,23 +103,55 @@ final class InKeyboardDictation {
             Self.log("memory", "phase=idle-with-webview \(MemoryTrace.reading())")
         }
         loadCaptureIfNeeded(into: state.controller?.view)
-        tapAt = Date()
-        let appAnswered = InKeyboardEarlyCapture.appAnsweredRecently(lastPong: lastPong, now: Date())
-        guard InKeyboardEarlyCapture.shouldStartAtTap(mayTakeColdTap: mayTakeColdTap, appAnsweredRecently: appAnswered),
-              !isActive, !isProvisional else {
-            Self.log("earlyCapture", "started=false appAnsweredPing=\(appAnswered) mayTakeColdTap=\(mayTakeColdTap)")
+        let tap = Date()
+        tapAt = tap
+        fullAccessAtTap = state.controller?.hasFullAccess
+        showsRecordingAhead = false
+        // Ask the app now, not on a pong from when the keyboard appeared: a pong says
+        // nothing about this tap (`InKeyboardEarlyCapture`, device 2026-11-23).
+        observePongsIfNeeded()
+        tapPingSentAt = tap
+        DarwinNotificationCenter.post(DarwinNotificationName.inKeyboardPing)
+        guard mayTakeColdTap, !isActive, !isProvisional else {
+            Self.log("earlyCapture", "started=false mayTakeColdTap=\(mayTakeColdTap)")
+            return
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + InKeyboardEarlyCapture.tapPingWindow) { [weak self] in
+            self?.startEarlyCaptureIfTheAppIsSilent(tap: tap)
+        }
+    }
+
+    /// The end of `tapPingWindow`: open the keyboard's microphone only when the app did
+    /// not answer this tap's ping, has not claimed the session, and has not moved the
+    /// status past `requested`. Nothing touches the audio session before this point.
+    private func startEarlyCaptureIfTheAppIsSilent(tap: Date) {
+        guard let state, tapAt == tap, !isActive, !isProvisional else { return }
+        let answered = InKeyboardEarlyCapture.appAnsweredTapPing(pingSentAt: tap, lastPong: lastPong)
+        let owner = sessionOwner(of: state)
+        let pongMs = lastPong.flatMap { $0 >= tap ? Int($0.timeIntervalSince(tap) * 1000) : nil } ?? -1
+        guard state.dictationStatus == .requested,
+              InKeyboardEarlyCapture.shouldStartCapture(mayTakeColdTap: mayTakeColdTap, appAnsweredTapPing: answered,
+                                                        sessionOwner: owner) else {
+            Self.log("earlyCapture", "started=false appAnsweredTapPing=\(answered) pongAtTapMs=\(pongMs) "
+                     + "owner=\(owner?.rawValue ?? "none") status=\(state.dictationStatus.rawValue)")
             return
         }
         isProvisional = true
         beginCapture()
-        Self.log("earlyCapture", "started=true lastPongAgeMs=\(lastPong.map { Int(Date().timeIntervalSince($0) * 1000) } ?? -1)")
+        Self.log("earlyCapture", "started=true appAnsweredTapPing=false windowMs=\(Int(InKeyboardEarlyCapture.tapPingWindow * 1000))")
         // The route decision lands at ~510–520 ms and keeps or drops this. If it never
         // comes — the app answered inside the window, so the keyboard's fallback closure
         // does not run — drop it here rather than leave the microphone open.
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) { [weak self] in
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.7) { [weak self] in
             guard let self, self.isProvisional else { return }
             self.dropEarlyCapture(reason: "no-route-decision")
         }
+    }
+
+    /// Who claimed the tap's session, read from the App Group.
+    func sessionOwner(of state: KeyboardState) -> DictationSessionClaim.Owner? {
+        guard let sessionID = state.activeSessionID, let claims = DictationSessionClaim.defaultDirectory else { return nil }
+        return DictationSessionClaim.current(sessionID, in: claims)
     }
 
     /// Called when a keyboard controller appears: load the capture page now, off the
@@ -160,8 +200,13 @@ final class InKeyboardDictation {
         guard isProvisional else { return }
         isProvisional = false
         capture?.stop()
+        endTicking()
         let dropped = recording.seconds
         recording = OnDeviceRecording()
+        if showsRecordingAhead {
+            showsRecordingAhead = false
+            state?.drawRecordingStageAhead(false)
+        }
         Self.log("earlyCapture", "dropped reason=\(reason) bufferedMs=\(Int(dropped * 1000))")
     }
 
@@ -190,14 +235,23 @@ final class InKeyboardDictation {
         // Automatic detection has no language to check: `nil` routes to today's path.
         let code = Self.languageCode()
         let installed = code.flatMap { code in localeAnswer.flatMap { $0.code == code ? $0.installed : nil } }
-        return InKeyboardDictationRoute.decide(
+        let owner = state.flatMap { sessionOwner(of: $0) }
+        let current = state?.controller?.hasFullAccess
+        let route = InKeyboardDictationRoute.decide(
             settingEnabled: InKeyboardDictationRoute.isSettingEnabled(in: AppGroup.defaults),
             appAnswered: appAnswered,
             systemMajorVersion: Self.systemMajorVersion,
             localeInstalled: installed,
-            hasFullAccess: state?.controller?.hasFullAccess ?? false,
-            microphone: Self.microphonePermission
+            hasFullAccess: InKeyboardDictationRoute.fullAccess(current: current, atTap: fullAccessAtTap),
+            microphone: Self.microphonePermission,
+            sessionOwner: owner
         )
+        // Every input, so a route that surprises can be read from one line (device,
+        // 2026-11-23 10:32:01: `openAppURL` with nothing to say why).
+        Self.log("routeInputs", "lang=\(code ?? "auto") localeInstalled=\(installed.map(String.init) ?? "unknown") "
+                 + "fullAccess=\(current.map(String.init) ?? "noController") fullAccessAtTap=\(fullAccessAtTap.map(String.init) ?? "unknown") "
+                 + "microphone=\(Self.microphonePermission.rawValue) owner=\(owner?.rawValue ?? "none") appAnswered=\(appAnswered)")
+        return route
     }
 
     /// DictusApp's microphone permission, which WebKit's capture is attributed to.
@@ -231,6 +285,8 @@ final class InKeyboardDictation {
         isProvisional = false
         isActive = true
         if !keptEarly { beginCapture() }
+        let wasShownAhead = showsRecordingAhead
+        showsRecordingAhead = false
         Self.log("earlyCapture", "kept=\(keptEarly) bufferedMs=\(Int(recording.seconds * 1000))")
         startedAt = tapAt ?? Date()
         memory.beginDictation()
@@ -249,8 +305,13 @@ final class InKeyboardDictation {
         tick = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
             MainActor.assumeIsolated { self?.everySecond() }
         }
-        waveformClock = Timer.scheduledTimer(withTimeInterval: WaveformFeed.publishInterval, repeats: true) { [weak self] _ in
-            MainActor.assumeIsolated { self?.publishWaveform() }
+        if waveformClock == nil {
+            waveformClock = Timer.scheduledTimer(withTimeInterval: WaveformFeed.publishInterval, repeats: true) { [weak self] _ in
+                MainActor.assumeIsolated { self?.publishWaveform() }
+            }
+        }
+        if !wasShownAhead {
+            Self.log("recordingShown", "tapToListeningMs=\(tapAt.map { Int(Date().timeIntervalSince($0) * 1000) } ?? -1) ahead=false")
         }
         Self.log("start", "engine=\(recognizer?.engineName ?? "none") lang=\(Self.languageCode() ?? "auto") \(MemoryTrace.reading())")
     }
@@ -317,6 +378,7 @@ final class InKeyboardDictation {
                 firstSampleLogged = true
                 let ms = tapAt.map { Int(Date().timeIntervalSince($0) * 1000) } ?? -1
                 Self.log("firstSample", "tapToFirstSampleMs=\(ms) provisional=\(isProvisional)")
+                if isProvisional { showRecordingAhead(tapMs: ms) }
             }
             recording.pcm16.append(data)
             waveform.append(pcm16: data)
@@ -343,11 +405,31 @@ final class InKeyboardDictation {
         }
     }
 
+    /// The first sample of an early capture: the app was silent to this tap's ping, so
+    /// show "Listening" now rather than at the route decision, ~0.1–0.2 s later (device,
+    /// 2026-11-23: first sample at 374–490 ms, overlay switched at ~510 ms). Display only:
+    /// `dictationStatus` stays `requested` until the route, which the 500 ms closure reads.
+    private func showRecordingAhead(tapMs: Int) {
+        guard let state, !showsRecordingAhead else { return }
+        showsRecordingAhead = true
+        state.drawRecordingStageAhead(true)
+        if waveformClock == nil {
+            waveformClock = Timer.scheduledTimer(withTimeInterval: WaveformFeed.publishInterval, repeats: true) { [weak self] _ in
+                MainActor.assumeIsolated { self?.publishWaveform() }
+            }
+        }
+        Self.log("recordingShown", "tapToListeningMs=\(tapMs) ahead=true")
+    }
+
+    /// Whether the overlay should name Apple's engine: the keyboard dictates, or its
+    /// early capture is on screen.
+    var drawsAsOnDevice: Bool { ownsKeyboardStatus || showsRecordingAhead }
+
     /// Publish on the app's clock, never on a chunk's arrival. `KeyboardWaveformDriver`
     /// eases toward each published array frame by frame, so the motion now depends on
     /// the audio and the 5 Hz clock, as it does for a recording in DictusApp.
     private func publishWaveform() {
-        guard let state, isActive else { return }
+        guard let state, isActive || showsRecordingAhead else { return }
         state.waveformEnergy = waveform.snapshot()
         state.recordingElapsed = Double(waveform.sampleCount) / OnDeviceRecording.sampleRate
     }
@@ -710,43 +792,60 @@ private struct ChunkArrivalTrace {
     }
 }
 
-/// The keyboard extension's side of the audio session (round 4: music paused for good).
+/// The keyboard extension's side of the audio session (music paused for good).
 ///
-/// What WebKit does (WebKit main, 2026-11-21): any capture makes
-/// `MediaSessionManagerCocoa` pick `PlayAndRecord`, whatever `navigator.audioSession.type`
-/// says; `AudioSessionIOS.mm` sets it with `AllowBluetooth | AllowBluetoothA2DP |
-/// AllowAirPlay | DefaultToSpeaker` and neither `MixWithOthers` nor `DuckOthers`, so it
-/// interrupts the music; and `AudioSessionCocoa.mm` deactivates with `setActive:NO
-/// withOptions:0`, so iOS never tells the music it may resume. A web page has no API to
-/// ask for ducking.
+/// What WebKit does (WebKit main, `Source/WebCore/platform/audio/ios/AudioSessionIOS.mm`
+/// and `cocoa/AudioSessionCocoa.mm`, read 2026-11-21 and again 2026-11-23): any capture
+/// sets `PlayAndRecord` with `AllowBluetooth | AllowBluetoothA2DP | AllowAirPlay |
+/// DefaultToSpeaker`, never `MixWithOthers` or `DuckOthers`, so it interrupts the music;
+/// it activates with `setActive:YES withOptions:0` and deactivates with `setActive:NO
+/// withOptions:0`, so iOS never tells the music it may resume. That session lives in
+/// WebKit's process, not this one (the extension's own category never changes in the
+/// log), and a page has no API to ask for ducking. **Ducking is not reachable.**
 ///
-/// What the extension can do, following anomalyco/hex's keyboard (MIT): set its own
-/// session to a mixable, ducking category before the capture, and deactivate with
-/// `notifyOthersOnDeactivation` once the page has stopped. Whether iOS applies the
-/// extension's category to WebKit's capture is what the device has to show; the
-/// simulator cannot (WebKit fakes PlayAndRecord as Playback there). The release is the
-/// part that does not depend on it: it is what lets paused music resume.
+/// Device, 2026-11-23: the two dictations started over music logged
+/// `otherAudioPlaying=true` before the capture and `false` after the release, and Pierre
+/// heard the music stop for good. The extension's `notifyOthersOnDeactivation` did
+/// nothing, because its session had never been active: it had not interrupted anyone.
+///
+/// The fallback: when music plays, the extension activates its own non-mixable session
+/// before the capture, so it is the extension that interrupts the music, and it
+/// deactivates with `notifyOthersOnDeactivation` once WebKit has stopped, which is the
+/// signal a music app resumes on. The device has to confirm it (the simulator fakes
+/// WebKit's capture as `Playback` and plays no music); without music nothing changes.
 enum InKeyboardAudioSession {
+    /// Set when the extension activated its session over music, so the release knows
+    /// it has an interruption to end.
+    private static var interruptedMusic = false
+
     static func prepareForCapture() {
         let session = AVAudioSession.sharedInstance()
         log("before", session)
+        // Kept from round 4: ask for the iPhone microphone, so AirPods stay on A2DP. The
+        // device log shows `device=Micro de l’iPhone` either way.
+        if let builtIn = session.availableInputs?.first(where: { $0.portType == .builtInMic }) {
+            try? session.setPreferredInput(builtIn)
+        }
+        guard session.isOtherAudioPlaying else {
+            interruptedMusic = false
+            return
+        }
         do {
-            try session.setCategory(.playAndRecord, mode: .default,
-                                    options: [.duckOthers, .allowBluetoothA2DP, .defaultToSpeaker])
-            if let builtIn = session.availableInputs?.first(where: { $0.portType == .builtInMic }) {
-                // The iPhone microphone keeps AirPods on A2DP: music stays in the ears,
-                // ducked, instead of switching the headset to call audio.
-                try session.setPreferredInput(builtIn)
-            }
+            try session.setCategory(.playback, mode: .default, options: [])
+            try session.setActive(true)
+            interruptedMusic = true
         } catch {
+            interruptedMusic = false
             InKeyboardDictation.log("audioSession", "phase=prepare error=\(error.localizedDescription)")
         }
         log("prepared", session)
     }
 
     /// After the page has stopped. A short delay lets WebKit's own deactivation, which
-    /// is asynchronous, land first; then the extension's notifies others.
+    /// is asynchronous, land first; then the extension's notifies the music.
     static func releaseAfterCapture() {
+        guard interruptedMusic else { return }
+        interruptedMusic = false
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
             let session = AVAudioSession.sharedInstance()
             do {
@@ -755,6 +854,8 @@ enum InKeyboardAudioSession {
                 InKeyboardDictation.log("audioSession", "phase=release error=\(error.localizedDescription)")
             }
             log("released", session)
+            // Read again a second later: whether the music came back is the answer.
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1) { log("afterRelease", session) }
         }
     }
 
