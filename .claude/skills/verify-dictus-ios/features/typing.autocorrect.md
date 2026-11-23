@@ -8,7 +8,7 @@
 ## Sub-features
 
 - `typing.suggestions`: Suggestion bar with predictions and corrections.
-- `typing.autocorrect-on-space`: A mistyped word is corrected when space is pressed.
+- `typing.autocorrect-on-space`: A mistyped word is corrected when space is pressed. In French, after an elision (`d'` `l'` `j'` `m'` `n'` `t'` `s'` `c'` `qu'` `jusqu'` `lorsqu'` `puisqu'`) the correction never starts with a consonant other than h: `d'cirre` is kept rather than written `d'votre`, `l'homne` still gives `l'homme` (#1034).
 - `typing.autocorrect-on-punctuation`: A mistyped word is also corrected by `, . ; : ! ?` and Return, never by `'` or `-` (#872). Never inside an e-mail address or a URL, whatever the field (#919): a token holding `@` or `://`, starting with `www.`, or with a `.` `:` `/` `_` glued to a letter, a digit or `/ _ @ + -` is left alone. The first segment, corrected at its `.` or `:`, is put back by the next key glued to the mark (`helene.` → `gelée.`, then `b` → `helene.b`).
 - `typing.autocorrect-on-space`, French `a` or `à` (#501): a typed `a` becomes `à` when the words before prove a verb precedes it (`je vais a` → `je vais à`, `est arrivé a`, `du mal a`), and stays `a` after a subject, an object pronoun, a noun or inside a relative clause (`il a`, `il y a`, `le train a`, `ce que tu as fait a`). The first word of a sentence becomes `à`, capital kept (`A demain` → `À demain`, #979), but not a clause start after a comma. The suggestion bar previews `à` before space. French only.
 - `typing.undo-correction`: The suggestion bar offers to undo the last correction.

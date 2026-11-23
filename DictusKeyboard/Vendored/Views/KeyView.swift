@@ -3,10 +3,13 @@
 // Stripped: No external dependencies to remove
 
 import UIKit
+import DictusCore
 
 final class KeyView: UIView {
     private let key: KeyDefinition
     private let theme: Theme
+    /// What the return key draws for the host field (#1023). Ignored by every other key.
+    private let returnKey: ReturnKeyAppearance
 
     public var contentView: UIView!
 
@@ -38,9 +41,7 @@ final class KeyView: UIView {
     var active: Bool = false {
         didSet {
             if let contentView = self.contentView {
-                let regularColor = key.type.isSpecialKeyStyle
-                    ? theme.specialKeyColor
-                    : theme.regularKeyColor
+                let regularColor = restingColor
 
                 let activeColor: UIColor
                 if iOSVersion.isIOS26OrNewer {
@@ -271,9 +272,10 @@ final class KeyView: UIView {
     /// `capInsets` places the keycap inside the key's cell where `KeyPlaneGeometry` lays the
     /// page out (Apple's key plane); nil keeps the theme's even margins.
     init(page: KeyboardPage, key: KeyDefinition, theme: Theme, traits: UITraitCollection,
-         capInsets: UIEdgeInsets? = nil) {
+         returnKey: ReturnKeyAppearance = .standard, capInsets: UIEdgeInsets? = nil) {
         self.key = key
         self.theme = theme
+        self.returnKey = returnKey
 
         super.init(frame: .zero)
 
@@ -341,16 +343,54 @@ final class KeyView: UIView {
         }
     }
 
+    /// The return key follows the host field's `returnKeyType` (#1023): a glyph, white on
+    /// the blue key for the types that act, and faint while the host keeps it off
+    /// (`enablesReturnKeyAutomatically` on an empty field). Only the large iPad before
+    /// iOS 26 keeps a word, as it did before, now the word for the type.
     private func setupReturnKey(_ page: KeyboardPage, _ traits: UITraitCollection, _ string: String) {
-        if iOSVersion.isIOS26OrNewer {
-            sfSymbol(named: "return", traits: traits)
-        } else {
-            if device.isLargeIPad {
-                text(string, page: page)
-            } else {
-                sfSymbol(named: "return", traits: traits)
+        let style = returnKey.style
+        if !iOSVersion.isIOS26OrNewer, device.isLargeIPad {
+            text(style.role == .newline ? string : style.label(in: Self.labelLanguage), page: page)
+            if !returnKey.isEnabled {
+                label.textColor = theme.textColor.withAlphaComponent(Self.offGlyphAlpha)
+            } else if style.isAction {
+                label.textColor = .white
             }
+        } else {
+            sfSymbol(named: style.symbol, traits: traits, tintColor: returnGlyphColor)
         }
+    }
+
+    /// The return glyph's colour: white on the blue key, faint while the key is off.
+    private var returnGlyphColor: UIColor {
+        guard returnKey.isEnabled else {
+            return theme.textColor.withAlphaComponent(Self.offGlyphAlpha)
+        }
+        return returnKey.style.isAction ? .white : theme.textColor
+    }
+
+    /// Apple's off return key keeps a faint trace of its glyph (Hex measured 10% on
+    /// iOS 27.2). A little more here so the key still reads as a key on the darker
+    /// Dictus greys.
+    private static let offGlyphAlpha: CGFloat = 0.25
+
+    /// The blue of the acting return key. Apple's keyboard uses the system blue, and so
+    /// does this key, so that it looks like the keyboard it stands in for.
+    static let returnActionColor = UIColor.systemBlue
+
+    /// The language of the return key's words: the keyboard's, as on Apple's keyboard, whose
+    /// French layout says « accéder » and English one "go" whatever the iPhone's language
+    /// (measured on the iOS 26.5 simulator, #1023). The space bar's word follows it too.
+    static var labelLanguage: SupportedLanguage {
+        SupportedLanguage.active
+    }
+
+    /// The colour the key returns to when no finger is on it.
+    private var restingColor: UIColor {
+        if case .returnkey = key.type, returnKey.style.isAction, returnKey.isEnabled {
+            return Self.returnActionColor
+        }
+        return key.type.isSpecialKeyStyle ? theme.specialKeyColor : theme.regularKeyColor
     }
 
     private func setupSymbols(_ page: KeyboardPage, _ traits: UITraitCollection) {
@@ -416,9 +456,7 @@ final class KeyView: UIView {
             return theme.shiftActiveColor
         }
 
-        return key.type.isSpecialKeyStyle
-            ? theme.specialKeyColor
-            : theme.regularKeyColor
+        return restingColor
     }
 
     override func layoutSubviews() {

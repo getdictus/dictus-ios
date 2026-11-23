@@ -271,6 +271,9 @@ public struct ModelInfo: Identifiable {
                 return isIOS17OrLater
             case .whisperKit:
                 return true
+            case .apple:
+                // Not a download: Apple's engine has its own card (`SpeechEngineChoice`).
+                return false
             }
         }
     }()

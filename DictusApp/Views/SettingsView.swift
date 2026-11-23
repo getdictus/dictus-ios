@@ -143,7 +143,7 @@ struct SettingsView: View {
         switch ModelInfo.forIdentifier(activeModel)?.engine {
         case .whisperKit, nil:
             return true
-        case .parakeet, .nemotron:
+        case .parakeet, .nemotron, .apple:
             return false
         }
     }
