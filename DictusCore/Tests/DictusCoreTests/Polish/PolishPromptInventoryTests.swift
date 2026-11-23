@@ -32,8 +32,8 @@ final class PolishPromptInventoryTests: XCTestCase {
             ("smart.structured", SmartModeStructuredPrompt.instructions()),
             ("smart.message", SmartModeMessagePrompt.instructions()),
             ("smart.summary", SmartModeSummaryPrompt.instructions())
-        ] + SupportedLanguage.allCases.map {
-            ("smart.translate.\($0.rawValue)", SmartModeTranslatePrompt.instructions(target: $0))
+        ] + TranslationTarget.builtIns.map {
+            ("smart.translate.\($0.code)", SmartModeTranslatePrompt.instructions(target: $0))
         }
     }
 

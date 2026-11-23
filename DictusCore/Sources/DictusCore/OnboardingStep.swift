@@ -117,17 +117,17 @@ public enum OnboardingStep: String, CaseIterable, Sendable {
 
     /// Whether this step sells or sets up a Pro feature (#649).
     ///
-    /// Pro steps are hidden on a device that can never run Smart Modes, for the reason the
-    /// reverse trial is withheld there (#593 decision 2): on such an iPhone Pro is History,
-    /// Vocabulary and voice notes only, and a step about Smart Modes would describe a
-    /// feature the user cannot have. A capable iPhone with Apple Intelligence switched off
-    /// still sees them.
+    /// Pro steps are hidden on a device that can never run Smart Modes: on such an iPhone
+    /// Pro is History, Vocabulary and voice notes only, and a step about Smart Modes would
+    /// describe a feature the user cannot have. A capable iPhone with Apple Intelligence
+    /// switched off still sees them.
     ///
     /// WHY THE VOICE NOTES, VOCABULARY AND HISTORY SCENES TOO (#680): those features run on
-    /// every iPhone, but they are Pro, and decision 2 also says no Pro promotion where no
-    /// trial starts (#593 acceptance: "no trial starts and no Pro promotion appears"). A
-    /// scene showing a feature the user would have to buy, on the one device the trial
-    /// skips, is that promotion.
+    /// every iPhone, but they are Pro, and #593 decision 2 said no Pro promotion where no
+    /// trial starts. #922 lifted the trial half of that decision (every iPhone now gets the
+    /// trial, announced after onboarding), but not this one: whether these three scenes
+    /// should come back on those devices is an onboarding question #922 did not take, so
+    /// they stay hidden until someone decides it.
     public var isProStep: Bool {
         switch self {
         case .appleIntelligence, .smartModesScene, .smartModePick, .voiceNotesScene, .vocabularyScene, .historyScene:

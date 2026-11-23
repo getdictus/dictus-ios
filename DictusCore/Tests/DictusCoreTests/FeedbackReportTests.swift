@@ -36,6 +36,20 @@ final class FeedbackReportTests: XCTestCase {
         XCTAssertTrue(draft.attachesLog)
     }
 
+    func testSendAsksAboutTheLogOnlyForABugWithoutIt() {
+        var draft = FeedbackDraft()
+        XCTAssertTrue(draft.asksToAttachLog, "a fresh draft is a bug without the log")
+        draft.attachesLog = true
+        XCTAssertFalse(draft.asksToAttachLog)
+        for kind in [FeedbackKind.idea, .other] {
+            draft.kind = kind
+            draft.attachesLog = false
+            XCTAssertFalse(draft.asksToAttachLog, "\(kind)")
+            draft.attachesLog = true
+            XCTAssertFalse(draft.asksToAttachLog, "\(kind)")
+        }
+    }
+
     func testAFreshDraftSendsNoLog() throws {
         var fresh = FeedbackDraft()
         fresh.name = "Pierre"

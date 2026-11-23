@@ -9,9 +9,10 @@ import DictusCore
 ///
 /// The fan is not the catalogue. It holds Normal plus the modes the user pinned,
 /// and it holds four entries because that is what fits above 44 pt on the smallest
-/// supported screen — see `SmartModeFanLayout`. The catalogue is six modes today
-/// (Structured, List and four translation targets) and grows with #269, so a choice
-/// has to be made somewhere. It is made here rather than in the keyboard because the keyboard
+/// supported screen — see `SmartModeFanLayout`. The catalogue is eight built-in modes
+/// (four structure and register modes, four translation targets), plus any language the
+/// user adds through "Other language…" (#622), and grows with #269, so a choice has to
+/// be made somewhere. It is made here rather than in the keyboard because the keyboard
 /// has 52 pt of chrome and no room for a settings screen, and because this is a
 /// decision taken once rather than during a dictation.
 ///
@@ -28,6 +29,14 @@ struct SmartModeListView: View {
     /// screen the user backs out of must not lose what they just arranged.
     @State private var pinnedIdentifiers: [String] = SmartModeStore.pinnedIdentifiers
 
+    /// The Translate modes the user added through "Other language…" (#622), most recent
+    /// first. Local state for the reason `pinnedIdentifiers` is: the store publishes
+    /// nothing, so the list re-reads it after every change it makes.
+    @State private var addedTranslateModes: [SmartMode] = SmartModeCatalogue.addedTranslateModes
+
+    /// Whether the "Other language…" sheet is up.
+    @State private var isPickingLanguage = false
+
     /// Whether this iPhone can run Smart Modes at all. Read once: it cannot change
     /// while this screen is open, short of an OS update.
     private let deviceIsCapable = SmartModeAvailability.deviceIsCapable
@@ -36,8 +45,11 @@ struct SmartModeListView: View {
         pinnedIdentifiers.compactMap(SmartModeCatalogue.mode(withIdentifier:))
     }
 
+    /// Every mode not in the fan: the built-ins in catalogue order, then the languages the
+    /// user added, so the added rows sit right after the four built-in translations and
+    /// right above "Other language…" — the translation group the brief places it in.
     private var unpinnedModes: [SmartMode] {
-        SmartModeCatalogue.builtIns.filter { !pinnedIdentifiers.contains($0.id) }
+        (SmartModeCatalogue.builtIns + addedTranslateModes).filter { !pinnedIdentifiers.contains($0.id) }
     }
 
     private var isFull: Bool {
@@ -52,6 +64,9 @@ struct SmartModeListView: View {
     /// the DEBUG force flipped) relocks or unlocks it: `FeatureGate` reads the App
     /// Group, which publishes nothing.
     @EnvironmentObject private var proStatus: ProStatusManager
+
+    /// The UI language, which the added rows name their language in.
+    @Environment(\.locale) private var locale
 
     /// Whether the list below the switch is live: `FeatureGate.isAvailable`, the one
     /// predicate. Off, the arrangement stays visible and cannot be edited, since the
@@ -97,23 +112,29 @@ struct SmartModeListView: View {
             }
             .proFeatureContent(isAvailable: isAvailable)
 
-            if !unpinnedModes.isEmpty {
-                Section {
-                    ForEach(unpinnedModes) { mode in
-                        row(mode, isPinned: false)
-                    }
-                } header: {
-                    Text("Other modes")
-                } footer: {
-                    if isFull {
-                        Text("Remove one above to add another.")
-                    }
+            // Never empty: the catalogue holds eight built-ins and the fan three, so this
+            // section always carries at least five rows, then the "Other language…" entry.
+            Section {
+                ForEach(unpinnedModes) { mode in
+                    row(mode, isPinned: false)
                 }
-                .proFeatureContent(isAvailable: isAvailable)
+                otherLanguageRow
+            } header: {
+                Text("Other modes")
+            } footer: {
+                if isFull {
+                    Text("Remove one above to add another.")
+                }
             }
+            .proFeatureContent(isAvailable: isAvailable)
         }
         .navigationTitle("Smart Modes")
         .navigationBarTitleDisplayMode(.inline)
+        .sheet(isPresented: $isPickingLanguage) {
+            TranslationTargetPickerView { _ in
+                addedTranslateModes = SmartModeCatalogue.addedTranslateModes
+            }
+        }
         .toolbar {
             // Only useful with something to reorder, and a lone EditButton over one
             // row reads as an unfinished screen.
@@ -132,8 +153,18 @@ struct SmartModeListView: View {
                 .foregroundColor(isPinned ? .dictusAccent : .secondary)
                 .frame(width: 24)
 
-            Text(Self.listName(for: mode))
-                .foregroundColor(.primary)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(Self.listName(for: mode))
+                    .foregroundColor(.primary)
+                // An added language says which one in words (#622): "→ PT" is enough for
+                // the four everyone knows, not for "→ MS" or "→ 繁". The name is the
+                // system's, in the UI language. The four built-in rows are unchanged.
+                if let target = Self.addedTarget(of: mode) {
+                    Text(verbatim: TranslationTargetPickerView.listName(target, locale: locale))
+                        .font(.dictusCaption)
+                        .foregroundColor(.secondary)
+                }
+            }
 
             Spacer()
 
@@ -156,6 +187,50 @@ struct SmartModeListView: View {
                     : Text("Add \(Self.listName(for: mode)) to the keyboard")
             )
         }
+        .accessibilityIdentifier("smartModeRow.\(mode.id)")
+        // An added language can be taken out of the list again; a built-in cannot. Only
+        // from "Other modes": a pinned row is unpinned first, which is the gesture that
+        // already exists there, and a swipe beside a drag handle invites the wrong one.
+        .swipeActions(edge: .trailing) {
+            if !isPinned, let target = Self.addedTarget(of: mode) {
+                Button(role: .destructive) {
+                    TranslationTargetStore.remove(target)
+                    addedTranslateModes = SmartModeCatalogue.addedTranslateModes
+                    pinnedIdentifiers = SmartModeStore.pinnedIdentifiers
+                } label: {
+                    Text("Remove", comment: "Swipe action that takes a translation language the user added out of the Smart Mode list (#622).")
+                }
+            }
+        }
+    }
+
+    /// The row that opens "Other language…" (#622), at the end of the translation rows.
+    private var otherLanguageRow: some View {
+        Button {
+            isPickingLanguage = true
+        } label: {
+            HStack(spacing: 12) {
+                Image(systemName: "globe")
+                    .foregroundColor(.dictusAccent)
+                    .frame(width: 24)
+                Text("Other language…", comment: "Row at the end of the Smart Mode list that opens the list of every other translation language (#622).")
+                    .foregroundColor(.dictusAccent)
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .font(.footnote.weight(.semibold))
+                    .foregroundColor(.secondary)
+            }
+        }
+        .accessibilityIdentifier("smartModes.otherLanguage")
+    }
+
+    /// The target of a Translate mode the user added, or nil for a built-in or any
+    /// other mode.
+    private static func addedTarget(of mode: SmartMode) -> TranslationTarget? {
+        guard let target = SmartModeCatalogue.translateTarget(ofIdentifier: mode.id), target.builtIn == nil else {
+            return nil
+        }
+        return target
     }
 
     /// The line a device that cannot run Smart Modes is owed, on the screen where it

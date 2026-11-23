@@ -28,6 +28,9 @@ import DictusCore
 /// licence text to travel with it, so all three belong on this screen exactly like a linked
 /// package. A provenance comment in the source file is honest but does not discharge the
 /// condition.
+///
+/// Hex is listed for the keyboard's key geometry (`KeyPlaneGeometry`): no code is copied,
+/// but the approach is Hex's (MIT), and the entry says so.
 struct LicensesView: View {
     var body: some View {
         ScrollView {
@@ -72,7 +75,9 @@ struct LicensesView: View {
                     name: "Hex",
                     author: "Christopher Langton",
                     url: "https://github.com/anomalyco/hex",
-                    license: mitLicense(copyright: "Copyright (c) 2026 Christopher Langton")
+                    license: "The keyboard's key geometry (KeyPlaneGeometry) follows Hex's approach: "
+                        + "Apple's key plane measured per iPhone size, and touch targets that tile the keyboard.\n\n"
+                        + mitLicense(copyright: "Copyright (c) 2026 Christopher Langton")
                 )
 
                 licenseBlock(
