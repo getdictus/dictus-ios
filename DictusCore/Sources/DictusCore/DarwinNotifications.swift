@@ -29,6 +29,11 @@ public enum DarwinNotificationName {
     /// Spike (#992): DictusApp's answer to `inKeyboardPing`. A running app answers within
     /// milliseconds; a suspended or terminated one never does.
     public static let inKeyboardPong = "com.pivi.dictus.inKeyboardPong" as CFString
+    /// #992 round 2: DictusApp's answer to `inKeyboardPing` when it runs but cannot
+    /// record a keyboard start (`AppKeyboardStartAnswer.decline`): engine stopped in the
+    /// background, model loading or cold. The keyboard then opens its own microphone at
+    /// the tap as for a silent app, instead of waiting on an app that will not record.
+    public static let inKeyboardPongDeclined = "com.pivi.dictus.inKeyboardPongDeclined" as CFString
 
     /// Posted by DictusApp when AVAudioSession is interrupted (phone call, Siri, etc.)
     /// or when media services were reset by the OS. Consumers tear down dependent

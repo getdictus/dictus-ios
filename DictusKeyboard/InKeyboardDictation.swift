@@ -61,9 +61,6 @@ final class InKeyboardDictation {
     /// When the capture was asked to start.
     private var captureRequestedAt: Date?
     private var firstSampleLogged = false
-    /// The last time DictusApp answered `inKeyboardPing`.
-    private var lastPong: Date?
-    private var isObservingPongs = false
     /// When this tap's ping was posted: only a pong after it counts.
     private var tapPingSentAt: Date?
     /// Full Access read at the tap, for a route decided after iOS tore the controller
@@ -72,6 +69,15 @@ final class InKeyboardDictation {
     /// The recording stage is on screen ahead of the route decision (first sample of an
     /// early capture): the overlay shows "Listening" as soon as audio arrives.
     private var showsRecordingAhead = false
+
+    // Round 2 (2026-11-23): the start safety net (`DictationStartSafetyNet`).
+    /// The session the net watches; nil once it fired or stood down.
+    private var safetyNetSession: String?
+    private var safetyNetTap: Date?
+    /// The keyboard's capture for this tap ended before half a second of audio.
+    private var captureEndedWithoutAudio = false
+    /// The tap left the keyboard: a URL to DictusApp was opened.
+    private var tapLeftKeyboard = false
 
     // MARK: - Before the 500 ms wait ends
 
@@ -108,8 +114,8 @@ final class InKeyboardDictation {
         fullAccessAtTap = state.controller?.hasFullAccess
         showsRecordingAhead = false
         // Ask the app now, not on a pong from when the keyboard appeared: a pong says
-        // nothing about this tap (`InKeyboardEarlyCapture`, device 2026-11-23).
-        observePongsIfNeeded()
+        // nothing about this tap (`InKeyboardEarlyCapture`, device 2026-11-23). The answer
+        // is the app's stamp in the App Group (`PingAnswerStamp`).
         tapPingSentAt = tap
         DarwinNotificationCenter.post(DarwinNotificationName.inKeyboardPing)
         guard mayTakeColdTap, !isActive, !isProvisional else {
@@ -126,19 +132,21 @@ final class InKeyboardDictation {
     /// status past `requested`. Nothing touches the audio session before this point.
     private func startEarlyCaptureIfTheAppIsSilent(tap: Date) {
         guard let state, tapAt == tap, !isActive, !isProvisional else { return }
-        let answered = InKeyboardEarlyCapture.appAnsweredTapPing(pingSentAt: tap, lastPong: lastPong)
+        let appAnswer = appAnswer(since: tap)
+        let answered = appAnswer == .willRecord
         let owner = sessionOwner(of: state)
-        let pongMs = lastPong.flatMap { $0 >= tap ? Int($0.timeIntervalSince(tap) * 1000) : nil } ?? -1
+        let stamp = DictationStartTable.PingAnswerStamp(storedValue: AppGroup.defaults.string(forKey: SharedKeys.inKeyboardPingAnswer))
+        let pongMs = stamp.flatMap { $0.answeredAt >= tap ? Int($0.answeredAt.timeIntervalSince(tap) * 1000) : nil } ?? -1
         guard state.dictationStatus == .requested,
               InKeyboardEarlyCapture.shouldStartCapture(mayTakeColdTap: mayTakeColdTap, appAnsweredTapPing: answered,
                                                         sessionOwner: owner) else {
-            Self.log("earlyCapture", "started=false appAnsweredTapPing=\(answered) pongAtTapMs=\(pongMs) "
+            Self.log("earlyCapture", "started=false appAnswer=\(appAnswer.rawValue) pongAtTapMs=\(pongMs) "
                      + "owner=\(owner?.rawValue ?? "none") status=\(state.dictationStatus.rawValue)")
             return
         }
         isProvisional = true
         beginCapture()
-        Self.log("earlyCapture", "started=true appAnsweredTapPing=false windowMs=\(Int(InKeyboardEarlyCapture.tapPingWindow * 1000))")
+        Self.log("earlyCapture", "started=true appAnswer=\(appAnswer.rawValue) windowMs=\(Int(InKeyboardEarlyCapture.tapPingWindow * 1000))")
         // The route decision lands at ~510–520 ms and keeps or drops this. If it never
         // comes — the app answered inside the window, so the keyboard's fallback closure
         // does not run — drop it here rather than leave the microphone open.
@@ -160,21 +168,19 @@ final class InKeyboardDictation {
         guard InKeyboardDictationRoute.isSettingEnabled(in: AppGroup.defaults),
               Self.systemMajorVersion >= InKeyboardDictationRoute.minimumSystemMajorVersion,
               recognizer != nil else { return }
-        observePongsIfNeeded()
         observeAudioSessionIfNeeded()
         DarwinNotificationCenter.post(DarwinNotificationName.inKeyboardPing)
         if capture == nil { Self.log("prewarm", "webview=loading") }
         loadCaptureIfNeeded(into: view)
     }
 
-    private func observePongsIfNeeded() {
-        guard !isObservingPongs else { return }
-        isObservingPongs = true
-        DarwinNotificationCenter.addObserver(for: DarwinNotificationName.inKeyboardPong) {
-            DispatchQueue.main.async {
-                MainActor.assumeIsolated { InKeyboardDictation.shared.lastPong = Date() }
-            }
-        }
+    /// Read from the app's stamp in the App Group (`PingAnswerStamp`), never from when the
+    /// Darwin pong reached this process, which a suspended keyboard receives late.
+    private func appAnswer(since tap: Date?) -> DictationStartTable.AppAnswer {
+        AppGroup.defaults.synchronize()
+        return DictationStartTable.PingAnswerStamp.answer(
+            to: tap, stored: AppGroup.defaults.string(forKey: SharedKeys.inKeyboardPingAnswer)
+        )
     }
 
     /// Called by `KeyboardPolishCoordinator` after an in-keyboard dictation was typed: the
@@ -230,28 +236,42 @@ final class InKeyboardDictation {
             && Self.microphonePermission == .denied
     }
 
-    /// The route for a tap whose wait has just ended.
+    /// The route for a tap whose wait has just ended: `DictationStartTable`, with every
+    /// input and the row it chose logged (`routeInputs`, `startRow`).
     func route(appAnswered: Bool) -> InKeyboardDictationRoute {
         // Automatic detection has no language to check: `nil` routes to today's path.
         let code = Self.languageCode()
         let installed = code.flatMap { code in localeAnswer.flatMap { $0.code == code ? $0.installed : nil } }
         let owner = state.flatMap { sessionOwner(of: $0) }
         let current = state?.controller?.hasFullAccess
-        let route = InKeyboardDictationRoute.decide(
+        let answer = appAnswer(since: tapPingSentAt)
+        let needsPreparation = state?.preparationDeferral()
+        let decision = DictationStartTable.decide(.init(
             settingEnabled: InKeyboardDictationRoute.isSettingEnabled(in: AppGroup.defaults),
-            appAnswered: appAnswered,
             systemMajorVersion: Self.systemMajorVersion,
+            languageCode: code,
             localeInstalled: installed,
             hasFullAccess: InKeyboardDictationRoute.fullAccess(current: current, atTap: fullAccessAtTap),
             microphone: Self.microphonePermission,
-            sessionOwner: owner
-        )
+            appAnswer: answer,
+            sessionOwner: owner,
+            appMovedPastRequested: appAnswered,
+            dictusModelNeedsPreparation: needsPreparation != nil
+        ))
         // Every input, so a route that surprises can be read from one line (device,
         // 2026-11-23 10:32:01: `openAppURL` with nothing to say why).
         Self.log("routeInputs", "lang=\(code ?? "auto") localeInstalled=\(installed.map(String.init) ?? "unknown") "
                  + "fullAccess=\(current.map(String.init) ?? "noController") fullAccessAtTap=\(fullAccessAtTap.map(String.init) ?? "unknown") "
-                 + "microphone=\(Self.microphonePermission.rawValue) owner=\(owner?.rawValue ?? "none") appAnswered=\(appAnswered)")
-        return route
+                 + "microphone=\(Self.microphonePermission.rawValue) owner=\(owner?.rawValue ?? "none") appAnswered=\(appAnswered) "
+                 + "appAnswer=\(answer.rawValue) dictusModel=\(needsPreparation ?? "ready")")
+        Self.log("startRow", "outcome=\(decision.outcome.rawValue) why=\(decision.why) session=\(state?.activeSessionID ?? "none")")
+        return decision.route
+    }
+
+    /// The app moved the status past `requested` within the wait: its row, for the log.
+    func noteAppTookTapWithinWait(status: DictationStatus, elapsedMs: Int) {
+        Self.log("startRow", "outcome=appRecords why=app-status-\(status.rawValue) elapsedMs=\(elapsedMs) "
+                 + "appAnswer=\(appAnswer(since: tapPingSentAt).rawValue) session=\(state?.activeSessionID ?? "none")")
     }
 
     /// DictusApp's microphone permission, which WebKit's capture is attributed to.
@@ -397,6 +417,15 @@ final class InKeyboardDictation {
                 isActive = false
                 recording = OnDeviceRecording()
                 refuseForMicrophone(reason: "capture-refused")
+            } else if isActive, recording.seconds < InKeyboardInterruptionPolicy.minimumSeconds {
+                // The capture died before the dictation began (the same half second as an
+                // interruption, `InKeyboardInterruptionPolicy`): a "try again" line would
+                // leave the user with nothing. The safety net opens the app (simulator,
+                // 14:15:48: the web content process killed 0.34 s into a capture).
+                Self.log("captureFailedBeforeAudio", "reason=\(reason) seconds=\(String(format: "%.2f", recording.seconds))")
+                abandonKeyboardCapture()
+                captureEndedWithoutAudio = true
+                evaluateSafetyNet(trigger: "capture-failed")
             } else {
                 fail("capture: \(reason)")
             }
@@ -555,6 +584,10 @@ final class InKeyboardDictation {
             isActive = false
             recording = OnDeviceRecording()
             state?.forceResetToIdle()
+        case .openApp:
+            abandonKeyboardCapture()
+            captureEndedWithoutAudio = true
+            evaluateSafetyNet(trigger: "capture-ended")
         case .continue:
             break
         }
@@ -600,6 +633,83 @@ final class InKeyboardDictation {
         tick = nil
         waveformClock?.invalidate()
         waveformClock = nil
+    }
+
+    // MARK: - Start safety net (round 2)
+
+    /// Armed at every mic tap, whatever the row (`DictationStartSafetyNet`): checked at
+    /// `deadline`, and at once when the keyboard's capture ends without audio.
+    func armSafetyNet(for state: KeyboardState) {
+        self.state = state
+        safetyNetSession = state.activeSessionID
+        safetyNetTap = tapAt.flatMap { Date().timeIntervalSince($0) < 0.5 ? $0 : nil } ?? Date()
+        captureEndedWithoutAudio = false
+        tapLeftKeyboard = false
+        if !isProvisional { firstSampleLogged = false }
+        let session = safetyNetSession
+        DispatchQueue.main.asyncAfter(deadline: .now() + DictationStartSafetyNet.deadline) { [weak self] in
+            guard let self, self.safetyNetSession == session else { return }
+            self.evaluateSafetyNet(trigger: "deadline")
+        }
+    }
+
+    /// A URL to DictusApp was opened for this tap: the tap is the app's now.
+    func noteTapLeftKeyboard() {
+        tapLeftKeyboard = true
+    }
+
+    private func evaluateSafetyNet(trigger: String) {
+        // A capture that dies after the net stood down at its deadline (a few samples
+        // in, then cut) still needs it: the overlay would otherwise stay on nothing.
+        let lateCaptureEnd = safetyNetSession == nil && captureEndedWithoutAudio
+        guard let state, let tap = safetyNetTap,
+              let session = safetyNetSession ?? (lateCaptureEnd ? state.activeSessionID : nil) else { return }
+        let elapsed = Date().timeIntervalSince(tap)
+        let elapsedMs = Int(elapsed * 1000)
+        let status = state.dictationStatus
+        // The app's status as the app wrote it: the keyboard's own dictation draws
+        // `recording` locally and leaves the App Group at `idle` (`start`).
+        let appStatuses: Set<DictationStatus> = [.recording, .transcribing, .processing, .ready]
+        AppGroup.defaults.synchronize()
+        let stored = AppGroup.defaults.string(forKey: SharedKeys.dictationStatus).flatMap(DictationStatus.init(rawValue:))
+        let reading = DictationStartSafetyNet.Reading(
+            elapsed: elapsed,
+            keyboardHasAudio: firstSampleLogged,
+            appIsRecording: !ownsKeyboardStatus && stored.map(appStatuses.contains) == true,
+            tapEnded: tapLeftKeyboard || state.activeSessionID != session || status == .idle || status == .failed,
+            captureEndedWithoutAudio: captureEndedWithoutAudio
+        )
+        var verdict = DictationStartSafetyNet.evaluate(reading)
+        // Never open the app for a tap the user can no longer see, or that a suspended
+        // extension wakes up to long after it (iOS does not run timers in a suspended
+        // extension): the watchdog owns those.
+        if case .fire = verdict {
+            if !state.isKeyboardVisible {
+                verdict = .standDown("keyboard-hidden")
+            } else if elapsed > DictationStartSafetyNet.deadline + 2, !captureEndedWithoutAudio {
+                verdict = .standDown("late-\(elapsedMs)ms")
+            }
+        }
+        if case .keepWaiting = verdict { return }
+        safetyNetSession = nil
+        Self.log("startSafetyNet", "\(verdict.logFields) elapsedMs=\(elapsedMs) trigger=\(trigger) "
+                 + "status=\(status.rawValue) appAnswer=\(appAnswer(since: tapPingSentAt).rawValue) session=\(session)")
+        guard case .fire = verdict else { return }
+        abandonKeyboardCapture()
+        // The keyboard's own bars and clock describe a capture that is gone.
+        state.waveformEnergy = []
+        state.recordingElapsed = 0
+        state.openAppByTodaysPath(source: "startSafetyNet", elapsedMs: elapsedMs)
+    }
+
+    /// Stop whatever the keyboard captures for this tap, without touching the status.
+    private func abandonKeyboardCapture() {
+        if isProvisional { dropEarlyCapture(reason: "safety-net") }
+        guard isActive else { return }
+        capture?.stop()
+        endTicking()
+        isActive = false
+        recording = OnDeviceRecording()
     }
 
     // MARK: - Web view
@@ -727,6 +837,15 @@ extension KeyboardState {
         AppGroup.defaults.set(activeSessionID, forKey: SharedKeys.dictationSessionRequest)
         AppGroup.defaults.synchronize()
         DarwinNotificationCenter.post(DarwinNotificationName.startRecording)
+        // Every row, setting on or off (`DictationStartSafetyNet`).
+        MainActor.assumeIsolated { InKeyboardDictation.shared.armSafetyNet(for: self) }
+    }
+
+    /// The 500 ms wait ended with the status past `requested`: the app took the tap.
+    func noteAppTookTapWithinWait(elapsedMs: Int) {
+        guard activeSessionID != nil else { return }
+        let status = dictationStatus
+        MainActor.assumeIsolated { InKeyboardDictation.shared.noteAppTookTapWithinWait(status: status, elapsedMs: elapsedMs) }
     }
 
     /// Called when the 500 ms wait ends with the app silent. Returns true when the

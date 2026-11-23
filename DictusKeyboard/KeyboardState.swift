@@ -1503,35 +1503,11 @@ class KeyboardState: ObservableObject {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
             guard let self = self else { return }
             let elapsedMs = Int(Date().timeIntervalSince(darwinPostTime) * 1000)
-            if self.dictationStatus == .requested {
-                // Spike: a cold app, and the keyboard can dictate by itself. No Dictus model
-                // is involved on this path, so the preparation deferral below does not apply.
-                if self.dictateInKeyboardInsteadOfOpeningApp(elapsedMs: elapsedMs) { return }
-                if let deferral = self.preparationDeferral() {
-                    self.forceResetToIdle()
-                    self.deferRecordingForModelPreparation(
-                        reason: "model became unready before fallback URL (\(deferral))"
-                    )
-                    return
-                }
-                PersistentLog.log(.coldStartDarwinFallback(
-                    elapsedMs: elapsedMs,
-                    status: self.dictationStatus.rawValue
-                ))
-                self.logProbe("fallbackOpenURL", details: self.sessionDetails())
-                // App didn't respond — not running. Open URL to launch it.
-                //
-                // The host resolved at the tap rides along as `&hostId=` (#23), and is
-                // consumed here so it cannot be reused by a later hand-off. A nil host
-                // simply omits the parameter and the app shows the swipe-back overlay,
-                // which is what it does today.
-                let hostId = self.pendingHostId
-                self.pendingHostId = nil
-                guard let url = KeyboardDictationURL.dictationURL(intent: .record, hostId: hostId) else {
-                    return
-                }
-                self.openDictusURL(url)
-            }
+            guard self.dictationStatus == .requested else { return self.noteAppTookTapWithinWait(elapsedMs: elapsedMs) }
+            // Spike: a cold app, and the keyboard can dictate by itself. No Dictus model
+            // is involved on this path, so the preparation deferral does not apply.
+            if self.dictateInKeyboardInsteadOfOpeningApp(elapsedMs: elapsedMs) { return }
+            self.openAppByTodaysPath(source: "darwinFallback", elapsedMs: elapsedMs)
         }
     }
 
@@ -2058,6 +2034,8 @@ extension KeyboardState {
     /// Prefer the extension context because the SwiftUI openURL callback has no
     /// success result and can fail silently in a keyboard extension.
     private func openDictusURL(_ url: URL) {
+        // Whatever this URL is for, the tap is the app's now (start safety net, #992).
+        MainActor.assumeIsolated { InKeyboardDictation.shared.noteTapLeftKeyboard() }
         if controller?.extensionContext != nil {
             openURLFromExtension(url) { [weak self] succeeded in
                 guard !succeeded else { return }
@@ -2074,6 +2052,39 @@ extension KeyboardState {
         } else if let openURL {
             openURL(url)
         }
+    }
+
+    // MARK: Opening the app by today's path (#992 round 2)
+
+    /// The path every tap took before #992, from the 500 ms fallback (app silent, the
+    /// keyboard not taking the tap) and from `DictationStartSafetyNet` (nothing captured
+    /// 1.5 s after the tap). The preparation screen when the Dictus model is not ready
+    /// (#262, #542), else `dictus://dictate` to record.
+    func openAppByTodaysPath(source: String, elapsedMs: Int) {
+        if let deferral = preparationDeferral() {
+            forceResetToIdle()
+            deferRecordingForModelPreparation(reason: "model became unready before fallback URL (\(deferral)) source=\(source)")
+            return
+        }
+        // The safety net can fire with the keyboard's own dictation drawn as `recording`:
+        // back to `requested`, which the app picks up from the URL; the watchdog restarts
+        // on the transition.
+        if dictationStatus != .requested {
+            defaults.set(DictationStatus.requested.rawValue, forKey: SharedKeys.dictationStatus)
+            defaults.synchronize()
+            dictationStatus = .requested
+        }
+        PersistentLog.log(.coldStartDarwinFallback(elapsedMs: elapsedMs, status: dictationStatus.rawValue))
+        logProbe("fallbackOpenURL", details: "source=\(source) \(sessionDetails())")
+        // App didn't respond — not running. Open URL to launch it.
+        //
+        // The host resolved at the tap rides along as `&hostId=` (#23), and is
+        // consumed here so it cannot be reused by a later hand-off. A nil host
+        // simply omits the parameter and the app shows the swipe-back overlay,
+        // which is what it does today.
+        let url = KeyboardDictationURL.dictationURL(intent: .record, hostId: pendingHostId)
+        pendingHostId = nil
+        if let url { openDictusURL(url) }
     }
 }
 

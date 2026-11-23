@@ -424,6 +424,9 @@ public enum SharedKeys {
     /// the Darwin `startRecording` post so the app can claim that session. See
     /// `DictationSessionClaim`.
     public static let dictationSessionRequest = "dictus.dictationSessionRequest"
+    /// String: DictusApp's latest answer to `inKeyboardPing`, with the time it answered.
+    /// See `DictationStartTable.PingAnswerStamp`.
+    public static let inKeyboardPingAnswer = "dictus.inKeyboardPingAnswer"
     /// Bool: the one-time explanation of in-keyboard dictation has been shown in the
     /// keyboard. See `InKeyboardFirstUse`.
     public static let inKeyboardFirstUseShown = "dictus.inKeyboardFirstUseShown"

@@ -1194,8 +1194,10 @@ class DictationCoordinator: ObservableObject {
 
         DarwinNotificationCenter.addObserver(for: DarwinNotificationName.startRecording) { [weak self] in
             DispatchQueue.main.async {
-                // Spike: the keyboard may already dictate this session itself (#992).
-                guard let self = self, InKeyboardSpeechAssets.appMayStartKeyboardSession() else { return }
+                // #992: decide first, claim second. A start this app cannot record claims
+                // nothing, so the keyboard takes the session (round 2, 13:38:56). And the
+                // keyboard may already dictate this session itself (round 1).
+                guard let self = self, InKeyboardSpeechAssets.appMayStartKeyboardSession(for: self) else { return }
                 let appState = UIApplication.shared.applicationState
                 PersistentLog.log(.engineDarwinStartReceived(
                     appState: "\(appState.rawValue)",

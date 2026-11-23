@@ -341,7 +341,7 @@ struct DictusApp: App {
         // the keyboard; and the per-session claims the keyboard and the app take.
         InKeyboardSpeechAssets.prepareForDictationLanguage(reason: "launch")
         InKeyboardSpeechAssets.pruneSessionClaims()
-        InKeyboardSpeechAssets.startAnsweringKeyboardPings()
+        InKeyboardSpeechAssets.startAnsweringKeyboardPings { InKeyboardSpeechAssets.keyboardStartAnswer(for: .shared) }
 
         // Read n-gram diagnostic written by keyboard extension
         if let ngramDiag = AppGroup.defaults.string(forKey: "ngramDiagnostic") {

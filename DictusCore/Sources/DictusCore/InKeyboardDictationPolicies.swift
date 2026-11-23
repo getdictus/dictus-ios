@@ -27,6 +27,9 @@ public enum InKeyboardInterruptionPolicy {
         case discard
         /// Nothing to do.
         case `continue`
+        /// The capture died before the dictation began: hand the tap to
+        /// `DictationStartSafetyNet`, which opens the app by URL.
+        case openApp
     }
 
     /// Below this, a recording is a tap and a breath, not a sentence.
@@ -36,8 +39,14 @@ public enum InKeyboardInterruptionPolicy {
         switch event {
         case .inputDeviceLost:
             return .continue
-        case .interruptionBegan, .captureEnded:
+        case .interruptionBegan:
             return recordedSeconds >= minimumSeconds ? .finishKeepingText : .discard
+        case .captureEnded:
+            // A capture that dies before the dictation began is not the user's stop and
+            // not a call they can see: they tapped and got nothing (device, 2026-11-23
+            // 13:39:21, `context-interrupted` at 660 ms, `seconds=0.0`, back to idle).
+            // The tap goes to the start safety net, which opens the app.
+            return recordedSeconds >= minimumSeconds ? .finishKeepingText : .openApp
         }
     }
 }
