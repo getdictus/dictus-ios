@@ -747,9 +747,7 @@ final class DictusKeyboardBridge: NSObject,
             precedingChar: secondToLastInsertedCharacter
         )
 
-        let replacesVowel = FrenchAdaptiveKey.shouldReplace(
-            afterTyping: lastInsertedCharacter, precedingChar: secondToLastInsertedCharacter
-        )
+        let replacesVowel = FrenchAdaptiveKey.shouldReplace(afterTyping: lastInsertedCharacter, precedingChar: secondToLastInsertedCharacter)
         if replacesVowel {
             // Replace previous vowel with accented version
             let mirrorBefore = mirrorLength()
