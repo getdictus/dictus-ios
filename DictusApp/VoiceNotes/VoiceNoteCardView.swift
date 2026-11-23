@@ -369,7 +369,9 @@ struct VoiceNoteCardView: View {
     }
 
     private func modeTitle(_ identifier: String?) -> String {
-        guard let identifier, let mode = SmartModeCatalogue.builtIns.first(where: { $0.id == identifier }) else {
+        // `resolve` rather than `builtIns` since #622, so a note translated "→ PT" is
+        // titled "Translate → PT" and not "Summary".
+        guard let identifier, let mode = SmartModeCatalogue.resolve(identifier: identifier) else {
             return String(localized: "Summary", comment: "Fallback title of the voice note result's upper section (#620).")
         }
         return SmartModeListView.listName(for: mode)
