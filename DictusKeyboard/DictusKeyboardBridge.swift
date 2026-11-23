@@ -45,6 +45,14 @@ final class ProxyDocumentEditor: TextDocumentEditing {
     }
 }
 
+// WHY the type_body_length exemption on the class below (#1025): once #1028's trackpad
+// landed, the return key's hooks (#1023) took the body to 654 lines of the 650-line budget.
+// Those hooks are seven lines that have to sit in it: a property observer, an early return
+// and two calls in existing methods. The threshold's rationale in .swiftlint.yml is to
+// catch a NEW type ballooning, not to police the large classes that already exist, as for
+// UnifiedAudioEngine (#417); moving tested methods out to an extension to make room is a
+// restructuring this PR does not owe. Scoped to this class, and only to it.
+
 /// Adapts GiellaKeyboardView delegate callbacks into Dictus keyboard actions.
 ///
 /// WHY a separate bridge class (not making KeyboardViewController the delegate):
@@ -64,7 +72,7 @@ final class ProxyDocumentEditor: TextDocumentEditing {
 /// sounding the click from here is what made typing feel out of sync with the
 /// haptic (#286). The haptics that remain here are the ones with no touchDown to
 /// attach to: the cursor-movement tick, and the emoji toggle's own feedback.
-final class DictusKeyboardBridge: NSObject,
+final class DictusKeyboardBridge: NSObject, // swiftlint:disable:this type_body_length
     GiellaKeyboardViewDelegate,
     GiellaKeyboardViewKeyboardKeyDelegate {
     // MARK: - Dependencies
@@ -76,7 +84,12 @@ final class DictusKeyboardBridge: NSObject,
 
     /// Reference to the keyboard view for page state management (shift/symbols).
     /// WHY weak: The keyboard view is owned by the controller's view hierarchy.
-    weak var keyboardView: GiellaKeyboardView?
+    ///
+    /// A new view (the controller rebuilds it on a layout or language change) gets the
+    /// return key of the field already focused at once, not at the next keystroke (#1023).
+    weak var keyboardView: GiellaKeyboardView? {
+        didSet { refreshReturnKey() }
+    }
 
     /// Reference to the suggestion state for triggering prediction updates.
     /// WHY weak: The controller owns SuggestionState. Bridge must not create a retain cycle.
@@ -161,6 +174,13 @@ final class DictusKeyboardBridge: NSObject,
     // MARK: - GiellaKeyboardViewDelegate
 
     func didTriggerKey(_ key: KeyDefinition) {
+        // An off return key does nothing, as Apple's does (#1023): the host asked for it to
+        // be off while the field is empty. Read again here rather than trusting the drawn
+        // state, which can be one event behind the document.
+        if case .returnkey = key.type, !refreshReturnKey().isEnabled {
+            return
+        }
+
         // The first keystroke after a dictation ends its undo offer (#266). The
         // safety check would refuse anyway once the typed character lands, but the
         // proxy's view of the document can lag the keystroke by an event, and an
@@ -374,6 +394,8 @@ final class DictusKeyboardBridge: NSObject,
     /// - Parameter fieldFocused: the keyboard is appearing, so this reading is the
     ///   field's focus reading, the one a later mention cannot downgrade (#1004).
     func refreshHostPolicy(fieldFocused: Bool = false) {
+        // Same moments as the field's return key type: focus, text and selection changes.
+        refreshReturnKey()
         guard let proxy = controller?.textDocumentProxy, let state = suggestionState else { return }
         let policy = state.readHostPolicy(from: proxy, fieldFocused: fieldFocused)
         guard policy != state.hostPolicy else { return }
@@ -1199,6 +1221,9 @@ final class DictusKeyboardBridge: NSObject,
     /// (via double-tap shift), autocapitalization must not interfere. The user
     /// explicitly wants ALL CAPS and tapping shift will deactivate it.
     func updateCapitalization() {
+        // Every keystroke ends here, and a keystroke is what fills or empties the field
+        // that turns the return key on or off (#1023).
+        refreshReturnKey()
         guard let proxy = controller?.textDocumentProxy else { return }
         guard let kbView = keyboardView else { return }
 
@@ -1255,6 +1280,30 @@ final class DictusKeyboardBridge: NSObject,
         default: // .none
             break
         }
+    }
+}
+
+// MARK: - Return key type (#1023)
+
+extension DictusKeyboardBridge {
+
+    /// Reads the field's `returnKeyType`, `enablesReturnKeyAutomatically` and `hasText`,
+    /// and redraws the return key when they changed.
+    ///
+    /// Called from `refreshHostPolicy` (keyboard appearance, `textDidChange`,
+    /// `selectionDidChange`: the focused field can change under the keyboard) and from
+    /// `updateCapitalization` (after each keystroke, which can fill or empty the field).
+    /// Three property reads on the proxy; the view redraws only on a change.
+    @discardableResult
+    func refreshReturnKey() -> ReturnKeyAppearance {
+        guard let proxy = controller?.textDocumentProxy else { return .standard }
+        let appearance = ReturnKeyAppearance(
+            returnKeyTypeRawValue: proxy.returnKeyType?.rawValue,
+            enablesReturnKeyAutomatically: proxy.enablesReturnKeyAutomatically,
+            hasText: proxy.hasText
+        )
+        keyboardView?.updateReturnKey(appearance)
+        return appearance
     }
 }
 
