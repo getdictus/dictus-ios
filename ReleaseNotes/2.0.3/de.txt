@@ -1,0 +1,50 @@
+Neu in 2.0.3
+
+## Highlights
+
+Eine neu gestaltete Tastatur
+Die Tasten sitzen dort, wo Apples Tastatur sie hat, und langes Drücken auf die Leertaste bewegt den Cursor.
+
+Einfachere Emojis
+Suche, Hauttöne und die volle Tastaturhöhe für Emojis.
+
+Bessere Autokorrektur auf Französisch
+„il m'a“, „à“, Akzente und zusammengeschriebene Wörter.
+
+## All changes
+
+Neu gestaltete Tastatur
+Tasten wie auf Apples Tastatur, auf jedem iPhone, im Hoch- und Querformat.
+
+Cursor
+Halte die Leertaste gedrückt, um ihn zu bewegen.
+
+Neue Emoji-Tastatur
+Suche, Hauttöne, mehr Platz für Emojis.
+
+Bessere Autokorrektur auf Französisch
+„il m'a“, „à“, Akzente, zusammengeschriebene Wörter und Apostrophe.
+
+Die Eingabetaste passt sich dem Feld an
+Senden, Öffnen, Suchen.
+
+Textersetzungen
+Die aus deinen iOS-Einstellungen funktionieren überall.
+
+Einfügen
+Mit einem Tipp direkt in der Tastaturleiste.
+
+WhatsApp
+Die Autokorrektur bleibt nach einer @-Erwähnung aktiv.
+
+Übersetzung
+In 25 Sprachen mit „Andere Sprache …“ (Dictus Pro, iPhone mit Apple Intelligence).
+
+Apple
+Wähle Apples Diktiermodell, direkt auf dem iPhone, im Bildschirm „Modelle“.
+
+Kostenlose Testphase
+Für Dictus Pro auf jedem iPhone verfügbar.
+
+Fehler melden
+Dictus bietet an, das technische Protokoll anzuhängen.

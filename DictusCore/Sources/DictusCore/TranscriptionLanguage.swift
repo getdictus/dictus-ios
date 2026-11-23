@@ -370,9 +370,11 @@ public struct TranscriptionLanguagePolicy: Equatable, Sendable, Codable {
     ///
     /// Nemotron honours it (#558): the code becomes the encoder's language prompt, which
     /// is the whole reason the engine is in the catalogue.
+    ///
+    /// Apple's recognizer takes exactly one locale, the chosen dictation language.
     public var sttLanguageIsEffective: Bool {
         switch engine {
-        case .whisperKit, .nemotron:
+        case .whisperKit, .nemotron, .apple:
             return true
         case .parakeet:
             return false

@@ -21,7 +21,7 @@ struct FluidAudioDownloadRoute {
             return AsrModels.defaultCacheDirectory(for: .v3)
         case .nemotron:
             return NemotronEngine.repositoryCacheDirectory
-        case .whisperKit:
+        case .whisperKit, .apple:
             // Not a FluidAudio engine; `ModelManager` never builds a route for it. Answered
             // rather than trapped, and answered with WhisperKit's own location, so a mistake
             // could only ever point at the right engine's files.
@@ -32,7 +32,7 @@ struct FluidAudioDownloadRoute {
     /// Which repository and which files.
     var downloaderConfiguration: ModelRepoDownloader.Configuration {
         switch engine {
-        case .parakeet, .whisperKit:
+        case .parakeet, .whisperKit, .apple:
             return .parakeet()
         case .nemotron:
             return .nemotron()
@@ -42,7 +42,7 @@ struct FluidAudioDownloadRoute {
     /// A fresh, unloaded engine for the compile step.
     func makeEngine() -> SpeechModelProtocol {
         switch engine {
-        case .parakeet, .whisperKit:
+        case .parakeet, .whisperKit, .apple:
             return ParakeetEngine()
         case .nemotron:
             return NemotronEngine()
@@ -52,7 +52,7 @@ struct FluidAudioDownloadRoute {
     /// What a load would find missing right now. Empty when the files are complete.
     func missingEntries() -> [String] {
         switch engine {
-        case .parakeet, .whisperKit:
+        case .parakeet, .whisperKit, .apple:
             return ParakeetCacheRepair.missingEntries()
         case .nemotron:
             return NemotronEngine.missingEntries()
@@ -62,7 +62,7 @@ struct FluidAudioDownloadRoute {
     /// The `component` of the repair's diagnostic lines, so a log reader greps one engine.
     var repairLogComponent: String {
         switch engine {
-        case .parakeet, .whisperKit:
+        case .parakeet, .whisperKit, .apple:
             return "ParakeetCacheRepair"
         case .nemotron:
             return "NemotronCacheRepair"
@@ -95,7 +95,7 @@ struct FluidAudioDownloadRoute {
             if fileManager.fileExists(atPath: directory.path) {
                 try fileManager.removeItem(at: directory)
             }
-        case .whisperKit:
+        case .whisperKit, .apple:
             break
         }
     }

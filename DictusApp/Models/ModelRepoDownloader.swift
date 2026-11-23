@@ -342,7 +342,7 @@ final class ModelRepoDownloader {
             return AsrModels.defaultCacheDirectory(for: .v3)
         case .nemotron:
             return NemotronEngine.repositoryCacheDirectory
-        case .whisperKit, nil:
+        case .whisperKit, .apple, nil:
             return WhisperModelRepository.repositoryURL()
         }
     }
