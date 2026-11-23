@@ -25,16 +25,21 @@ struct PaywallFeatureList: View {
     }
 
     private func row(_ feature: ProFeature) -> some View {
-        HStack(alignment: .firstTextBaseline, spacing: 12) {
-            Image(systemName: "checkmark")
+        // Read once per row: it asks `SystemLanguageModel`.
+        let isSupported = feature.isSupportedByThisDevice
+        return HStack(alignment: .firstTextBaseline, spacing: 12) {
+            // The blue checkmark says "included". On an iPhone without Apple
+            // Intelligence Smart Modes are not, so their line gets a neutral dash
+            // instead and reads as part of Pro, not as part of this purchase (#922).
+            Image(systemName: isSupported ? "checkmark" : "minus")
                 .font(.system(size: 15, weight: .bold))
-                .foregroundColor(.dictusAccent)
+                .foregroundColor(isSupported ? .dictusAccent : .secondary)
                 .frame(width: 18)
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(title(feature))
                     .font(.dmSans(.medium, size: 16, relativeTo: .body))
-                    .foregroundColor(.primary)
+                    .foregroundColor(isSupported ? .primary : .secondary)
 
                 if let detail = detail(feature) {
                     Text(detail)
@@ -43,12 +48,18 @@ struct PaywallFeatureList: View {
                 }
 
                 // The review-risk line, kept from the cards it replaces (#79): a
-                // device without Apple Intelligence is told before it pays.
-                if !feature.isSupportedByThisDevice {
-                    Text("Requires Apple Intelligence (iPhone 15 Pro or later, iOS 26)")
-                        .font(.dmSans(.regular, size: 12, relativeTo: .caption))
-                        .foregroundColor(.secondary)
-                        .fixedSize(horizontal: false, vertical: true)
+                // device without Apple Intelligence is told before it pays. Labelled
+                // rather than hidden (#922), for the reason `PaywallView`'s
+                // `unsupportedNotice` gives.
+                if !isSupported {
+                    Label {
+                        Text("iPhone with Apple Intelligence")
+                    } icon: {
+                        Image(systemName: "iphone")
+                    }
+                    .font(.dmSans(.regular, size: 12, relativeTo: .caption))
+                    .foregroundColor(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
                 }
             }
             .multilineTextAlignment(.leading)

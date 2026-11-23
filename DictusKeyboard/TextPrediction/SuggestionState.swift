@@ -416,6 +416,12 @@ class SuggestionState: ObservableObject {
             && (correction.lowercased() != word.lowercased() || isInSupplementaryLexicon(word))
     }
 
+    /// The phrase that replaces `word` when it is one of the user's text replacement
+    /// shortcuts (#1022). Whether the field lets it expand is `hostPolicy`'s call.
+    func textReplacement(for word: String) -> String? {
+        engine.textReplacement(for: word)
+    }
+
     /// Whether the lexicon decides `word` (#873). The space handler asks so it
     /// can apply a casing-only replacement (`zofiak` -> "Zofiak").
     func isInSupplementaryLexicon(_ word: String) -> Bool {

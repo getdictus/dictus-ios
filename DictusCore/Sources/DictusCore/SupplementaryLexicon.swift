@@ -75,6 +75,20 @@ public struct SupplementaryLexicon: Equatable {
     public var shortcutCount: Int { shortcuts.count }
     public var wordCount: Int { words.count }
 
+    /// The phrase that replaces `word` when it is one of the user's text replacement
+    /// shortcuts, or nil. A leading capital (sentence autocap) capitalizes the phrase:
+    /// `Qqc` -> "Quelque chose".
+    ///
+    /// Asked on its own by the keyboard before anything else decides the word (#1022),
+    /// because a shortcut expands where autocorrect does not run: with autocorrect off,
+    /// in a field that turns it off, for a shortcut holding a digit (`adr1`), and at a
+    /// place where the user refused a correction, as on Apple's keyboard.
+    public func expansion(ofShortcut word: String) -> String? {
+        guard let phrase = shortcuts[word.lowercased()] else { return nil }
+        let capitalize = word.first?.isUppercase == true
+        return capitalize ? phrase.prefix(1).uppercased() + phrase.dropFirst() : phrase
+    }
+
     /// What autocorrect must do with `word`, or `nil` when the lexicon does
     /// not know it and the normal correction pipeline decides.
     ///
@@ -90,11 +104,8 @@ public struct SupplementaryLexicon: Equatable {
     ///   `ce st` into "ST" (#1006). Such a word is still kept.
     public func decision(for word: String, isDictionaryWord: @autoclosure () -> Bool) -> Decision? {
         guard !word.isEmpty else { return nil }
+        if let phrase = expansion(ofShortcut: word) { return .replace(with: phrase) }
         let key = word.lowercased()
-        if let phrase = shortcuts[key] {
-            let capitalize = word.first?.isUppercase == true
-            return .replace(with: capitalize ? phrase.prefix(1).uppercased() + phrase.dropFirst() : phrase)
-        }
         if let curated = CuratedNames.decision(for: word) { return curated }
         guard let casing = words[key] else { return nil }
         if word == key, casing != word, word.count >= Self.shortestRecasedWord, !isDictionaryWord() {

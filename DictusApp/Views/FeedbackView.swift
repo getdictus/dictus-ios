@@ -12,6 +12,8 @@ import SwiftUI
 struct FeedbackView: View {
     @ObservedObject private var composer = FeedbackComposer.shared
     @Environment(\.dismiss) private var dismiss
+    @State private var asksAboutLog = false
+    @State private var showsLogFromQuestion = false
 
     var body: some View {
         NavigationStack {
@@ -35,13 +37,34 @@ struct FeedbackView: View {
                         if composer.phase == .sending {
                             ProgressView()
                         } else {
-                            Button("Send") { Task { await composer.send() } }
-                                .disabled(!composer.canSend)
-                                .accessibilityIdentifier("feedback.send")
+                            Button("Send") {
+                                if composer.draft.asksToAttachLog {
+                                    asksAboutLog = true
+                                } else {
+                                    Task { await composer.send() }
+                                }
+                            }
+                            .disabled(!composer.canSend)
+                            .accessibilityIdentifier("feedback.send")
+                            // WHY a question rather than the toggle on by default: the log leaves
+                            // the device only by an explicit choice (#939 security review), and a
+                            // bug report without it can rarely be acted on (#981).
+                            .confirmationDialog("Attach the debug log?", isPresented: $asksAboutLog, titleVisibility: .visible) {
+                                Button("Attach") { Task { await composer.sendAttachingLog() } }
+                                    .accessibilityIdentifier("feedback.logQuestion.attach")
+                                Button("Send without") { Task { await composer.send() } }
+                                    .accessibilityIdentifier("feedback.logQuestion.sendWithout")
+                                Button("See what will be sent") { showsLogFromQuestion = true }
+                                    .accessibilityIdentifier("feedback.logQuestion.seeLog")
+                                Button("Cancel", role: .cancel) {}
+                            } message: {
+                                Text("Without the log, most bugs cannot be diagnosed.")
+                            }
                         }
                     }
                 }
             }
+            .navigationDestination(isPresented: $showsLogFromQuestion) { logPreview }
         }
         .task { await composer.sheetDidAppear() }
         .onDisappear {
@@ -112,11 +135,7 @@ struct FeedbackView: View {
                     .accessibilityIdentifier("feedback.attachLog")
                 if composer.draft.attachesLog {
                     NavigationLink {
-                        if let snapshot = composer.logSnapshot {
-                            DebugLogView(snapshot: snapshot)
-                        } else {
-                            ProgressView()
-                        }
+                        logPreview
                     } label: {
                         Text("See what will be sent")
                     }
@@ -136,6 +155,14 @@ struct FeedbackView: View {
         }
         // An edit made while sending would be lost when the confirmation clears the form.
         .disabled(composer.phase == .sending)
+    }
+
+    @ViewBuilder private var logPreview: some View {
+        if let snapshot = composer.logSnapshot {
+            DebugLogView(snapshot: snapshot)
+        } else {
+            ProgressView()
+        }
     }
 
     private var messagePrompt: LocalizedStringKey {
