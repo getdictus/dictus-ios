@@ -48,8 +48,8 @@ final class SmartModePickTests: XCTestCase {
     }
 
     func testASpokenLanguageWithoutADictusKeyboardRemovesNoTarget() {
-        XCTAssertEqual(SmartModePick.translateTargets(spokenLanguage: "zh"), SupportedLanguage.allCases)
-        XCTAssertEqual(SmartModePick.translateTargets(spokenLanguage: nil), SupportedLanguage.allCases)
+        XCTAssertEqual(SmartModePick.translateTargets(spokenLanguage: "zh"), TranslationTarget.builtIns)
+        XCTAssertEqual(SmartModePick.translateTargets(spokenLanguage: nil), TranslationTarget.builtIns)
     }
 
     func testEveryOfferedTargetIsACatalogueMode() {

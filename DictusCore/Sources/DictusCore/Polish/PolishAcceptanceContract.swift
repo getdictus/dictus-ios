@@ -22,7 +22,13 @@ public enum PolishOutputLanguage: Equatable, Sendable, Codable {
     /// Must read as this language and no other. Only translation uses it, and for
     /// translation the check flips from obstacle to asset — it catches the model
     /// forgetting to translate.
-    case fixed(SupportedLanguage)
+    ///
+    /// A `TranslationTarget` rather than a `SupportedLanguage` since #622, which
+    /// opened Translate to 25 of the languages Apple's Translation framework writes. The
+    /// stored value is the target's `code`, so the four that existed before encode as
+    /// they always did (`"de"` is still `"de"`) and no snapshot written by an older
+    /// build reads differently.
+    case fixed(TranslationTarget)
 
     // MARK: - Encoding
 
@@ -34,7 +40,7 @@ public enum PolishOutputLanguage: Equatable, Sendable, Codable {
         switch self {
         case .polishTarget: return "polishTarget"
         case .sameAsInput: return "sameAsInput"
-        case .fixed(let language): return language.rawValue
+        case .fixed(let target): return target.code
         }
     }
 
@@ -42,18 +48,22 @@ public enum PolishOutputLanguage: Equatable, Sendable, Codable {
     /// throws rather than degrading: the degradation would be a guess about which
     /// language the user's text is allowed to come back in, and on a translation
     /// mode a wrong guess accepts untranslated output.
+    ///
+    /// That is also what a build older than #622 does with a `pt` snapshot written by
+    /// this one: it cannot parse it, and the mode fails closed rather than accepting
+    /// whatever language comes back.
     public init(storedValue: String) throws {
         switch storedValue {
         case "polishTarget": self = .polishTarget
         case "sameAsInput": self = .sameAsInput
         default:
-            guard let language = SupportedLanguage(rawValue: storedValue) else {
+            guard let target = TranslationTarget(code: storedValue) else {
                 throw DecodingError.dataCorrupted(.init(
                     codingPath: [],
                     debugDescription: "unrecognised output language '\(storedValue)'"
                 ))
             }
-            self = .fixed(language)
+            self = .fixed(target)
         }
     }
 

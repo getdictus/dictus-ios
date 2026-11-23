@@ -71,6 +71,15 @@ public struct SmartModeFailure: Equatable, Sendable {
         outcome == PolishMetrics.Outcome.engineFailed.rawValue
             && PolishFailureReason(slug: reason).isModelRefusal
     }
+
+    /// Whether a Translate mode into a language Apple Foundation Models cannot write
+    /// found the Translation framework unable to translate (#622), so nothing was
+    /// inserted. What a surface keys on to say "translation unavailable" rather than
+    /// the generic "could not be applied": the cause is known and is not the words.
+    public var isTranslationUnavailable: Bool {
+        outcome == PolishMetrics.Outcome.engineFailed.rawValue
+            && reason == PolishFailureReason.translationUnavailable.slug
+    }
 }
 
 /// The result of one polish call.
