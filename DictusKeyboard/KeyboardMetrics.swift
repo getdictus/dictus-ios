@@ -1,6 +1,6 @@
 // DictusKeyboard/KeyboardMetrics.swift
 // Keyboard layout constants and feedback types. Extracted from LegacyCompat.swift (Phase 21).
-// Used by EmojiPickerView, EmojiCategoryBar, DictusKeyboardBridge.
+// Used by DictusKeyboardBridge and the keyboard views.
 
 import SwiftUI
 import UIKit
@@ -82,18 +82,4 @@ enum KeySound {
     static let letter: SystemSoundID = KeySoundCategory.letter.systemSoundID
     static let delete: SystemSoundID = KeySoundCategory.delete.systemSoundID
     static let modifier: SystemSoundID = KeySoundCategory.modifier.systemSoundID
-}
-
-// MARK: - Key Popup (from old KeyButton.swift, used by EmojiPickerView)
-
-/// Minimal popup view for emoji key labels. Preserves compilation for EmojiPickerView.
-struct KeyPopup: View {
-    let label: String
-    var body: some View {
-        Text(label)
-            .font(.system(size: 24))
-            .padding(6)
-            .background(KeyMetrics.letterKeyColor)
-            .cornerRadius(KeyMetrics.keyCornerRadius)
-    }
 }

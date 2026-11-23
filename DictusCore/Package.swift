@@ -9,7 +9,16 @@ let package = Package(
         .executable(name: "polish-harness", targets: ["polish-harness"])
     ],
     targets: [
-        .target(name: "DictusCore", path: "Sources/DictusCore"),
+        // The emoji panel's search indexes (#1027): memory-mapped at run time, so their pages
+        // stay clean and do not count against the keyboard extension's ~50 MB. Copied as files,
+        // not processed, so they keep the exact bytes `EmojiLibrary` searches in place. The
+        // folder must not be called "Resources": in a flat iOS bundle codesign then takes the
+        // bundle for a macOS one and refuses it ("bundle format unrecognized").
+        .target(
+            name: "DictusCore",
+            path: "Sources/DictusCore",
+            resources: [.copy("Emoji/EmojiIndex")]
+        ),
         // The #570 / #581 fidelity scorers: proposition recall, person and stance,
         // order, and speaker-state fabrication. Deterministic and model-free.
         //

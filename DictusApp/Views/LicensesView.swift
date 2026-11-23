@@ -96,7 +96,9 @@ struct LicensesView: View {
                     author: "Christopher Langton",
                     url: "https://github.com/anomalyco/hex",
                     license: "The keyboard's key geometry (KeyPlaneGeometry) follows Hex's approach: "
-                        + "Apple's key plane measured per iPhone size, and touch targets that tile the keyboard. "
+                        + "Apple's key plane measured per iPhone size, and touch targets that tile the keyboard.\n\n"
+                        + "The keyboard's emoji panel is Hex's, ported (#1027): its views, search, "
+                        + "suggestions, shortcodes, skin tones and the builder of its emoji index.\n\n"
                         + "The spatial autocorrect decoder (SpatialDecoder) is ported from Hex's TypingDecoder.\n\n"
                         + mitLicense(copyright: "Copyright (c) 2026 Christopher Langton")
                 )
@@ -117,6 +119,15 @@ struct LicensesView: View {
                     author: "Kevin Atkinson",
                     url: "http://wordlist.aspell.net",
                     license: Self.scowlNotice
+                )
+
+                licenseBlock(
+                    name: "Unicode emoji data and CLDR",
+                    author: "Unicode, Inc.",
+                    url: "https://cldr.unicode.org",
+                    license: "The emoji search index is built from Unicode's emoji-test.txt 18.0 and CLDR 49's "
+                        + "emoji names and keywords in French, English, Spanish and German.\n\n"
+                        + EmojiDataLicense.text
                 )
 
                 licenseBlock(
