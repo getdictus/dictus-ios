@@ -181,7 +181,8 @@ class SuggestionState: ObservableObject {
             ? engine.correctionProposal(
                 for: partial,
                 previousWord: previousWord,
-                isAtSentenceStart: ProperNounGuard.isAtSentenceStart(context: context, word: partial)
+                isAtSentenceStart: ProperNounGuard.isAtSentenceStart(context: context, word: partial),
+                context: context
             )
             : nil
         if let result = proposal?.autocorrection,
@@ -290,7 +291,8 @@ class SuggestionState: ObservableObject {
                 proposal = self.engine.correctionProposal(
                     for: partial,
                     previousWord: previousWord,
-                    isAtSentenceStart: ProperNounGuard.isAtSentenceStart(context: context, word: partial)
+                    isAtSentenceStart: ProperNounGuard.isAtSentenceStart(context: context, word: partial),
+                    context: context
                 )
             } else {
                 proposal = nil
@@ -363,9 +365,12 @@ class SuggestionState: ObservableObject {
     func performSpellCheck(
         _ word: String,
         previousWord: String?,
-        isAtSentenceStart: Bool = true
+        isAtSentenceStart: Bool = true,
+        context: String
     ) -> (correction: String, alternatives: [String])? {
-        return engine.spellCheck(word, previousWord: previousWord, isAtSentenceStart: isAtSentenceStart)
+        return engine.spellCheck(
+            word, previousWord: previousWord, isAtSentenceStart: isAtSentenceStart, context: context
+        )
     }
 
     /// The elision the previous word and `word` make across a mistyped space (#1006).
@@ -380,9 +385,12 @@ class SuggestionState: ObservableObject {
     func correctionProposal(
         _ word: String,
         previousWord: String?,
-        isAtSentenceStart: Bool
+        isAtSentenceStart: Bool,
+        context: String
     ) -> CorrectionProposal? {
-        engine.correctionProposal(for: word, previousWord: previousWord, isAtSentenceStart: isAtSentenceStart)
+        engine.correctionProposal(
+            for: word, previousWord: previousWord, isAtSentenceStart: isAtSentenceStart, context: context
+        )
     }
 
     /// Reads the contacts + text replacements lexicon (#873) and hands it to the
