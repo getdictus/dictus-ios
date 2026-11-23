@@ -75,6 +75,8 @@ public final class EmojiPanelView: UIView, UICollectionViewDataSource, UICollect
     /// An emoji without skin tones held down: typed when the finger lifts over it.
     var heldEntry: (entry: Int, frame: CGRect)?
     private var layoutKey: GridGeometry?
+    /// How many emoji the last `fill` gave Recents; the first layout corrects it (see there).
+    private var filledCapacity: Int?
     private var sectionStarts: [CGFloat] = []
     private var deleteTimer: Timer?
     private var deleteStartedAt: TimeInterval = 0
@@ -206,6 +208,7 @@ public final class EmojiPanelView: UIView, UICollectionViewDataSource, UICollect
         var scores: [Int: Float] = [:]
         var frequent: [Int] = []
         let capacity = frequentCapacity
+        filledCapacity = capacity
         for (emoji, score) in usage.ranked(limit: capacity) {
             guard let entry = library.entryByEmoji[emoji], scores[entry] == nil else { continue }
             scores[entry] = score
@@ -318,6 +321,12 @@ public final class EmojiPanelView: UIView, UICollectionViewDataSource, UICollect
         callout.frame = bounds
         tonePicker.frame = bounds
         layoutSearch()
+        // The host fills the panel before its first layout, when the grid's rows are not
+        // known yet: Recents came out three rows' worth, and in a four-row grid it left a
+        // gap. Refilled here once the height is known, before anything is on screen.
+        if let filledCapacity, filledCapacity != frequentCapacity, query == nil {
+            fill()
+        }
         applyGridLayout(height: gridFrame.height)
     }
 

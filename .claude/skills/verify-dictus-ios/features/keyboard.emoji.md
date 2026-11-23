@@ -7,7 +7,7 @@
 
 ## Sub-features
 
-- `emoji.picker`: every category in one grid that scrolls sideways (Récents, then Smileys, Personnes, … Drapeaux); the bar under it jumps to a category on a tap and scrubs through them on a slide. Holding an emoji shows it larger.
+- `emoji.picker`: the panel takes the whole keyboard: the toolbar (mic, ☰) folds away while it is open and comes back with ABC, as Hex's strip does; the keyboard's height does not move (#166). Every category in one grid of four rows that scrolls sideways (Récents, then Smileys, Personnes, … Drapeaux); the bar under it jumps to a category on a tap and scrubs through them on a slide. Holding an emoji shows it larger.
 - `emoji.recents`: « Récents », the grid's first section: the emoji you use most, fading over ten days, filled up with common ones. Read when the panel opens, so a pick does not move them under the finger. Imports the old picker's list once (`recentEmojis` in the App Group).
 - `emoji.search`: the magnifier at the top left (the whole band left of the suggestions answers) opens « Rechercher des Emoji » with its own letter keys; results come from Unicode's CLDR names and keywords in the keyboard's language plus English. « coeur » and « cœur » both find ❤️.
 - `emoji.back-to-letters`: ABC returns to the letters. The whole band under the grid left of the categories answers, not only the word.
@@ -32,6 +32,6 @@
 ## Gotchas
 
 - Emoji cells are inside the keyboard: coordinates only. Recents persist in the App Group across runs on the same device, never across devices (each run's device is new).
-- On an iPhone 17 (402 pt), from the top-left of `inputView` the panel starts under the toolbar: the magnifier is at about (+26, +80) pt, ABC (+26, +256), the categories from (+66, +256) every 30 pt (clock, then the nine categories), delete (+375, +256). Measured 2026-11-22 (#1027); re-read a screenshot if the toolbar changes.
+- From the top-left of `inputView`, the panel starts at its top (no toolbar in emoji mode): the magnifier at about (+26, +20) pt; ABC at (+26, height − 95), the categories from x +66 every 30 pt on an iPhone 17 (clock, then the nine), delete at (width − 27, height − 95). The emoji key is at (width × 75/402, height − 102). `inputView` is 326 pt tall on an iPhone 17 and 351 pt on a 17 Pro Max, the same in letters and emoji mode. Measured 2026-11-23 (#1027).
 - `axe` taps reach the keyboard, its drags do not (swipe, finer samples, a held swipe and contact-token moves all tried, 2026-11-22): the grid cannot be scrolled from outside and the bar cannot be scrubbed. Debug builds scroll every open panel through the whole grid on `xcrun simctl spawn <udid> notifyutil -p dictus.debug.emojiScrollAll` (`EmojiPanelDebug.swift`), and log `EMOJI_DEBUG panel created/freed` (a leaked panel would show as more than one live panel). A slide onto a skin tone needs a drag too: lift in place and tap the tone instead.
-- Memory is a device figure (Physical test shortlist). On the simulator (iPhone 17, iOS 26.5, #1027) the extension went 31 MB at rest, 38 MB open, 42 MB after scrolling every emoji, 34 MB once closed; the old picker reached 110 MB and kept 104 MB after closing.
+- Memory is a device figure (Physical test shortlist). On the simulator (iPhone 17, iOS 26.5, #1027) the extension went 31 MB at rest, 38 MB open, 42 MB after scrolling every emoji, 34 MB once closed (three-row grid; the four-row grid opens at 39–40 MB); the old picker reached 110 MB and kept 104 MB after closing.

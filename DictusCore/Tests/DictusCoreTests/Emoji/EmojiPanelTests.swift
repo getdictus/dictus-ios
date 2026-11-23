@@ -310,6 +310,24 @@ final class EmojiPanelTests: XCTestCase {
         XCTAssertEqual(panel.query, "pi")
     }
 
+    /// With the toolbar folded away in emoji mode, the panel has the whole keyboard area
+    /// (about 278 pt on an iPhone 17): four rows, as Hex's, and Recents fills all four even
+    /// though the host fills the panel before its first layout.
+    func testTheWholeKeyboardAreaGivesFourFullRows() throws {
+        let panel = try makePanel()
+        panel.fill()
+        panel.frame = CGRect(x: 0, y: 0, width: 402, height: 278)
+        panel.layoutIfNeeded()
+        XCTAssertEqual(panel.gridRows, 4)
+        XCTAssertEqual(panel.sections[0].entries.count, 32, "Recents: four rows of eight")
+        let narrow = try makePanel()
+        narrow.fill()
+        narrow.frame = CGRect(x: 0, y: 0, width: 402, height: 226)
+        narrow.layoutIfNeeded()
+        XCTAssertEqual(narrow.gridRows, 3, "under a 52 pt bar there is room for three")
+        XCTAssertEqual(narrow.sections[0].entries.count, 24)
+    }
+
     func testTheGridFitsTheKeyboardArea() throws {
         let panel = try makePanel()
         panel.fill()
