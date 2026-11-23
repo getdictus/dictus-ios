@@ -16,8 +16,8 @@ Une autocorrection plus juste en français
 Clavier repensé
 Touches placées comme sur le clavier d'Apple, sur chaque iPhone, en portrait et en paysage.
 
-Déplacer le curseur
-Appui long sur la barre d'espace pour déplacer le curseur.
+Curseur
+Appui long sur la barre d'espace pour le déplacer.
 
 Nouveau clavier emoji
 Recherche en français, tons de peau, plus de place pour les emojis.
@@ -29,19 +29,22 @@ La touche Retour s'adapte au champ
 Envoyer, Aller, Rechercher.
 
 Raccourcis de texte
-Vos raccourcis de texte iOS fonctionnent partout.
+Ceux de vos réglages iOS fonctionnent partout.
 
-Bouton Coller
-Bouton Coller dans la barre du clavier.
+Coller
+En un geste depuis la barre du clavier.
 
-Mentions dans WhatsApp
-L'autocorrection reste active après une mention @ dans WhatsApp.
+WhatsApp
+L'autocorrection reste active après une mention @.
 
-25 langues de traduction
-Traduisez vers 25 langues avec « Autre langue… » (Dictus Pro, iPhone avec Apple Intelligence).
+Traduction
+Vers 25 langues avec « Autre langue… » (Dictus Pro, iPhone avec Apple Intelligence).
+
+Apple
+Choisissez le modèle de dictée d'Apple, sur l'iPhone, dans l'écran Modèles.
 
 Essai gratuit
-Essai gratuit de Dictus Pro sur tous les iPhone.
+Disponible pour Dictus Pro sur tous les iPhone.
 
 Signaler un bug
-En signalant un bug, Dictus propose de joindre le journal technique.
+Dictus propose de joindre le journal technique.

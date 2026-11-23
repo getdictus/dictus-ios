@@ -16,8 +16,8 @@ Bessere Autokorrektur auf Französisch
 Neu gestaltete Tastatur
 Tasten wie auf Apples Tastatur, auf jedem iPhone, im Hoch- und Querformat.
 
-Cursor bewegen
-Halte die Leertaste gedrückt, um den Cursor zu bewegen.
+Cursor
+Halte die Leertaste gedrückt, um ihn zu bewegen.
 
 Neue Emoji-Tastatur
 Suche, Hauttöne, mehr Platz für Emojis.
@@ -29,19 +29,22 @@ Die Eingabetaste passt sich dem Feld an
 Senden, Öffnen, Suchen.
 
 Textersetzungen
-Deine iOS-Textersetzungen funktionieren überall.
+Die aus deinen iOS-Einstellungen funktionieren überall.
 
-Einfügen-Taste
-Einfügen-Taste in der Tastaturleiste.
+Einfügen
+Mit einem Tipp direkt in der Tastaturleiste.
 
-WhatsApp-Erwähnungen
-Die Autokorrektur bleibt nach einer @-Erwähnung in WhatsApp aktiv.
+WhatsApp
+Die Autokorrektur bleibt nach einer @-Erwähnung aktiv.
 
-25 Übersetzungssprachen
-Übersetze mit „Andere Sprache …“ in 25 Sprachen (Dictus Pro, iPhone mit Apple Intelligence).
+Übersetzung
+In 25 Sprachen mit „Andere Sprache …“ (Dictus Pro, iPhone mit Apple Intelligence).
+
+Apple
+Wähle Apples Diktiermodell, direkt auf dem iPhone, im Bildschirm „Modelle“.
 
 Kostenlose Testphase
-Kostenlose Testphase von Dictus Pro auf jedem iPhone.
+Für Dictus Pro auf jedem iPhone verfügbar.
 
 Fehler melden
-Wenn du einen Fehler meldest, bietet Dictus an, das technische Protokoll anzuhängen.
+Dictus bietet an, das technische Protokoll anzuhängen.

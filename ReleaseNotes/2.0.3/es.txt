@@ -16,8 +16,8 @@ Mejor autocorrección en francés
 Teclado renovado
 Teclas colocadas como en el teclado de Apple, en todos los iPhone, en vertical y en horizontal.
 
-Mover el cursor
-Mantén pulsada la barra espaciadora para mover el cursor.
+Cursor
+Mantén pulsada la barra espaciadora para moverlo.
 
 Nuevo teclado de emojis
 Búsqueda, tonos de piel, más espacio para los emojis.
@@ -29,19 +29,22 @@ La tecla Intro se adapta al campo
 Enviar, Ir, Buscar.
 
 Sustituciones de texto
-Tus sustituciones de texto de iOS funcionan en todas partes.
+Las de tus ajustes de iOS funcionan en todas partes.
 
-Botón Pegar
-Botón Pegar en la barra del teclado.
+Pegar
+Con un toque desde la barra del teclado.
 
-Menciones en WhatsApp
-La autocorrección sigue activa después de una mención @ en WhatsApp.
+WhatsApp
+La autocorrección sigue activa después de una mención @.
 
-25 idiomas de traducción
-Traduce a 25 idiomas con «Otro idioma…» (Dictus Pro, iPhone con Apple Intelligence).
+Traducción
+A 25 idiomas con «Otro idioma…» (Dictus Pro, iPhone con Apple Intelligence).
+
+Apple
+Elige el modelo de dictado de Apple, en el propio iPhone, en la pantalla Modelos.
 
 Prueba gratuita
-Prueba gratuita de Dictus Pro en todos los iPhone.
+Disponible para Dictus Pro en todos los iPhone.
 
 Informar de un error
-Cuando informas de un error, Dictus te ofrece adjuntar el registro técnico.
+Dictus te ofrece adjuntar el registro técnico.

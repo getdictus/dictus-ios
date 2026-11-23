@@ -16,8 +16,8 @@ Better French autocorrect
 Redesigned keyboard
 Keys placed like Apple's keyboard, on every iPhone, in portrait and landscape.
 
-Move the cursor
-Long-press the space bar to move the cursor.
+Cursor
+Long-press the space bar to move it.
 
 New emoji keyboard
 Search, skin tones, more room for emoji.
@@ -29,19 +29,22 @@ The Return key matches the field
 Send, Go, Search.
 
 Text replacements
-Your iOS text replacements work everywhere.
+The ones in your iOS settings work everywhere.
 
-Paste button
-Paste button in the keyboard bar.
+Paste
+One tap away in the keyboard bar.
 
-WhatsApp mentions
-Autocorrect stays on after an @ mention in WhatsApp.
+WhatsApp
+Autocorrect stays on after an @ mention.
 
-25 translation languages
-Translate into 25 languages with « Other language… » (Dictus Pro, iPhone with Apple Intelligence).
+Translation
+Into 25 languages with « Other language… » (Dictus Pro, iPhone with Apple Intelligence).
+
+Apple
+Pick Apple's on-device dictation model in the Models screen.
 
 Free trial
-Free Dictus Pro trial on every iPhone.
+Available for Dictus Pro on every iPhone.
 
 Report a bug
-When you report a bug, Dictus offers to attach the debug log.
+Dictus offers to attach the debug log.
