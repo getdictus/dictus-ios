@@ -343,9 +343,15 @@ final class DictusKeyboardBridge: NSObject,
         // here rather than wait for the host to report the selection change (#266).
         KeyboardState.shared.invalidateDictationUndo(reason: "cursor-moved")
 
-        // Spacebar trackpad cursor movement
+        // Spacebar trackpad cursor movement, in UTF-16 units. No haptic per move: Apple's
+        // keyboard asks for no feedback after the space bar's own (Hex's reading of iOS 27.2's
+        // log, #950), and at the new speeds a tick per move was a buzz.
         controller?.textDocumentProxy.adjustTextPosition(byCharacterOffset: movement)
-        HapticFeedback.cursorMoved()
+    }
+
+    func trackpadTextContext() -> (before: String, after: String) {
+        let proxy = controller?.textDocumentProxy
+        return (proxy?.documentContextBeforeInput ?? "", proxy?.documentContextAfterInput ?? "")
     }
 
     // MARK: - GiellaKeyboardViewKeyboardKeyDelegate
@@ -1007,7 +1013,7 @@ final class DictusKeyboardBridge: NSObject,
         let checked = autocorrectRuns
             ? state.correctionProposal(
                 freshWord, previousWord: previousWord, isAtSentenceStart: atSentenceStart,
-                spatial: spatialInput(for: freshWord)
+                spatial: spatialInput(for: freshWord), context: context
             )
             : nil
         let proposal = expansion ?? checked?.autocorrection?.correction
