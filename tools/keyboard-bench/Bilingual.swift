@@ -73,13 +73,14 @@ final class DetectingCorrector: Corrector {
     var language: SupportedLanguage { window.language }
     var typingEngine: TextPredictionEngine { engine(window.language) }
 
-    func proposal(for word: String, previous: String?, isAtSentenceStart: Bool) -> CorrectionProposal? {
+    func proposal(for word: String, previous: String?, isAtSentenceStart: Bool, context: String) -> CorrectionProposal? {
         let pair = window.pair
         window.push(WordLanguageVote.vote(for: word, after: previous, primary: source(pair.primary),
                                           secondary: source(pair.secondary)))
         let active = window.language
         guard let correction = engine(active).spellCheck(word, previousWord: previous,
-                                                          isAtSentenceStart: isAtSentenceStart)?.correction
+                                                          isAtSentenceStart: isAtSentenceStart,
+                                                          context: context)?.correction
         else { return nil }
         let kept = BilingualKeepRule.keepsTyped(word, over: correction, active: source(active),
                                                 other: source(pair.other(than: active)))

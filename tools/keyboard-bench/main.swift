@@ -194,6 +194,12 @@ func load(_ lang: SupportedLanguage) {
     waitUntilLoaded(engine, lang.rawValue)
 }
 
+// `run.sh --lexicon a,ma`: those words as the iPhone's contacts and text replacements.
+let lexiconWords = (ProcessInfo.processInfo.environment["BENCH_LEXICON"] ?? "")
+    .split(separator: ",").map(String.init)
+let benchLexicon = SupplementaryLexicon(entries: lexiconWords.map { (userInput: $0, documentText: $0) })
+engine.setSupplementaryLexicon(benchLexicon)
+
 /// Puts the learned words of `corpus/<code>.words` in the user dictionary, or empties it
 /// when the file does not exist, so every run starts from the state it names (#498).
 /// One row per word: the word, then how many times it has been used. `learn` is called
@@ -229,8 +235,8 @@ protocol Corrector: AnyObject {
     /// next-word prediction after a space.
     var typingEngine: TextPredictionEngine { get }
     /// What the space bar decides for `word`: its autocorrection is applied, a suggestion
-    /// only offered.
-    func proposal(for word: String, previous: String?, isAtSentenceStart: Bool) -> CorrectionProposal?
+    /// only offered. `context` is the document before the space (#501's `a` / `à`).
+    func proposal(for word: String, previous: String?, isAtSentenceStart: Bool, context: String) -> CorrectionProposal?
 }
 
 /// The keyboard as it ships: one engine for everything.
@@ -243,8 +249,9 @@ final class SingleEngine: Corrector {
         self.language = language
     }
 
-    func proposal(for word: String, previous: String?, isAtSentenceStart: Bool) -> CorrectionProposal? {
-        typingEngine.correctionProposal(for: word, previousWord: previous, isAtSentenceStart: isAtSentenceStart)
+    func proposal(for word: String, previous: String?, isAtSentenceStart: Bool, context: String) -> CorrectionProposal? {
+        typingEngine.correctionProposal(for: word, previousWord: previous, isAtSentenceStart: isAtSentenceStart,
+                                        context: context)
     }
 }
 
@@ -255,6 +262,36 @@ struct Commit {
     let language: SupportedLanguage
     /// The next-word predictions the bar shows after this commit, best first.
     let predicted: [String]
+}
+
+/// What a space tap runs: `DictusKeyboardBridge.autocorrectBeforeCursor` on the word
+/// before the cursor, then the space, then the next-word prediction. Returns the word as
+/// typed and as committed, or nil when there was no word before the cursor.
+func commitWord(in field: Field, memory: AutocorrectRejectionMemory,
+                mirror: MirrorSyncState) -> (typed: String, final: String)? {
+    guard let (prefix, word) = AutocorrectRejectionMemory.wordAtCursor(context: field.text) else {
+        field.insertText(" ")
+        return nil
+    }
+    var final = word
+    let ws = words(field.text)
+    let previous = ws.count >= 2 ? ws[ws.count - 2] : nil
+    let proposal = engine.spellCheck(word, previousWord: previous,
+                                     isAtSentenceStart: ProperNounGuard.isAtSentenceStart(context: field.text, word: word),
+                                     context: field.text)?.correction
+    var applied = false
+    if memory.commit(prefix: prefix, word: word, proposedCorrection: proposal,
+                     allowsCasingChange: proposal != nil && engine.lexiconDecision(for: word) != nil) == .correct,
+       let correction = proposal,
+       case .applied = AutocorrectCountingSite.apply(editor: field, word: word, correction: correction,
+                                                     trailing: " ", previousWord: previous, mirror: mirror) {
+        memory.correctionApplied(prefix: prefix, corrected: correction)
+        final = correction
+        applied = true
+    }
+    if !applied { field.insertText(" ") }
+    _ = engine.predictNextWords(after: Array(words(field.text).suffix(2)))
+    return (word, final)
 }
 
 /// Picks the cell a tap types, from the point, today's answer (the cell under the
@@ -331,7 +368,8 @@ func replay(_ taps: [Tap], cells: [Cell], width: CGFloat, height: CGFloat, picke
                 let previous = words(context).dropLast().last
                 if memory.previewsCorrection(context: context) {
                     _ = engine.spellCheck(partial, previousWord: previous,
-                                          isAtSentenceStart: ProperNounGuard.isAtSentenceStart(context: context, word: partial))
+                                          isAtSentenceStart: ProperNounGuard.isAtSentenceStart(context: context, word: partial),
+                                          context: context)
                 }
                 _ = engine.suggestions(for: partial)
             }
@@ -355,7 +393,8 @@ func replay(_ taps: [Tap], cells: [Cell], width: CGFloat, height: CGFloat, picke
                 // know when corrections were only offered, as the keyboard's commit does.
                 let checked = corrector.proposal(
                     for: word, previous: previous,
-                    isAtSentenceStart: ProperNounGuard.isAtSentenceStart(context: field.text, word: word)
+                    isAtSentenceStart: ProperNounGuard.isAtSentenceStart(context: field.text, word: word),
+                    context: field.text
                 )
                 let proposal = checked?.autocorrection?.correction
                 offered = checked?.suggestionRow(typedWord: word) != nil
@@ -431,10 +470,12 @@ if let pairArg = env["KB_PAIR"] {
 var tapsOut = ["lang\tsentence\ttap\tintended\tresolved\tx\ty\tengine_us\tplain\thit_ns\tvisited\tjournal_ns"]
 var commitsOut = ["lang\tsentence\tintended\ttyped\tfinal\tnext\tpredicted"]
 var textsOut = ["lang\tsentence\tintended\tfinal"]
+var registerOut = ["lang\tbefore\ttyped\texpected\treported\tlexicon\tfinal"]
+let register = readLines("\(benchDir)/register.tsv").dropFirst().map { $0.components(separatedBy: "\t") }
 
 // The engine starts loading French as soon as it exists. A `setLanguage` issued before
 // that load lands overlaps it: in an English-only run the French load then reported
-// the English trie's word count (40000; the French file holds 39622).
+// the English trie's word count (40000; the French file holds 39627).
 waitUntilLoaded(engine, "initial")
 
 for code in langs {
@@ -492,6 +533,20 @@ for code in langs {
         }
         textsOut.append("\(code)\t\(s)\t\(intended)\t\(text)")
     }
+    // The register of real cases (#500): each one in a fresh field holding what was
+    // typed before it, committed by the same space bar as the runs.
+    for f in register where f[0] == code {
+        let entries = f[6].split(separator: ",").map { entry -> (userInput: String, documentText: String) in
+            let parts = entry.split(separator: "=", maxSplits: 1).map(String.init)
+            return (parts[0], parts.last ?? parts[0])
+        }
+        engine.setSupplementaryLexicon(SupplementaryLexicon(entries: entries))
+        let field = Field()
+        field.text = f[1] + f[2]
+        let final = commitWord(in: field, memory: AutocorrectRejectionMemory(), mirror: MirrorSyncState())?.final ?? f[2]
+        registerOut.append("\(code)\t\(f[1])\t\(f[2])\t\(f[3])\t\(f[4])\t\(f[6])\t\(final)")
+    }
+    engine.setSupplementaryLexicon(benchLexicon)
     FileHandle.standardError.write(Data("\(code): \(order.count) sentences replayed, hit test \(hitMode)\n".utf8))
 }
 
@@ -499,7 +554,8 @@ for code in langs {
 UserDictionary.shared.resetAll()
 journal?.finish(writingTo: "\(outDir)/journal.log")
 
-for (name, rows) in [("taps.tsv", tapsOut), ("commits.tsv", commitsOut), ("texts.tsv", textsOut)] {
+for (name, rows) in [("taps.tsv", tapsOut), ("commits.tsv", commitsOut), ("texts.tsv", textsOut),
+                     ("register.tsv", registerOut)] {
     do {
         try (rows.joined(separator: "\n") + "\n").write(toFile: "\(outDir)/\(name)", atomically: true, encoding: .utf8)
     } catch {
