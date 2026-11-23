@@ -10,13 +10,20 @@ import Foundation
 /// its first sample; the route decision then keeps or drops what was buffered.
 ///
 /// The one thing it must not do is open the keyboard's microphone while DictusApp is
-/// recording the same words. So it starts only when the app did not answer the
-/// keyboard's last ping (sent when the keyboard appeared), and the decision drops the
-/// buffer whenever the app ends up owning the session.
+/// recording the same words: the capture's audio session interrupts the app's engine
+/// (device, 2026-11-23 12:55:37: `earlyCapture started=true lastPongAgeMs=60810`, the
+/// app claimed the session, then `audioInterruptionBegan` in the app and nobody
+/// recorded). So the keyboard asks again at the tap: it posts `inKeyboardPing` beside
+/// the start post and waits `tapPingWindow`. A running app answers both (the pong and
+/// the session claim) within that window; only a silent app gets the capture. A pong
+/// from before the tap says nothing about this tap, in either direction (device,
+/// 10:32:01: a pong from when the keyboard appeared, then the app was killed).
 public enum InKeyboardEarlyCapture {
 
-    /// How long a pong from DictusApp vouches for it being alive.
-    public static let pongFreshness: TimeInterval = 30
+    /// How long the keyboard waits for the app's answer to the ping sent at the tap
+    /// before it opens its own microphone. A running app answers a Darwin ping in a few
+    /// milliseconds (`pongAtTapMs` in the log); the rest of the 500 ms wait is untouched.
+    public static let tapPingWindow: TimeInterval = 0.12
 
     public enum Resolution: String, Equatable, Sendable {
         /// The keyboard dictates: the buffer is the start of the dictation.
@@ -25,17 +32,19 @@ public enum InKeyboardEarlyCapture {
         case drop
     }
 
-    /// Whether the app answered a ping recently enough to be trusted to answer the start.
-    public static func appAnsweredRecently(lastPong: Date?, now: Date) -> Bool {
+    /// Whether the app answered the ping sent at this tap. Only a pong received at or
+    /// after `pingSentAt` counts: an older one is about an earlier moment of the app.
+    public static func appAnsweredTapPing(pingSentAt: Date, lastPong: Date?) -> Bool {
         guard let lastPong else { return false }
-        let age = now.timeIntervalSince(lastPong)
-        return age >= 0 && age <= pongFreshness
+        return lastPong >= pingSentAt
     }
 
-    /// Start capturing at the tap only when the keyboard could take the tap and the app
-    /// is not known to be running.
-    public static func shouldStartAtTap(mayTakeColdTap: Bool, appAnsweredRecently: Bool) -> Bool {
-        mayTakeColdTap && !appAnsweredRecently
+    /// Open the keyboard's microphone at the end of `tapPingWindow` only when the keyboard
+    /// could take the tap, the app did not answer this tap's ping, and the app has not
+    /// claimed the session.
+    public static func shouldStartCapture(mayTakeColdTap: Bool, appAnsweredTapPing: Bool,
+                                          sessionOwner: DictationSessionClaim.Owner?) -> Bool {
+        mayTakeColdTap && !appAnsweredTapPing && sessionOwner != .app
     }
 
     /// What the route decision does with an early capture. Kept only when the keyboard

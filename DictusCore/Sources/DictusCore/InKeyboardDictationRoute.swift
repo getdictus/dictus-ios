@@ -51,15 +51,20 @@ public enum InKeyboardDictationRoute: String, Equatable, Sendable {
     ///     Full Access bar instead of the mic, so this is defensive; it routes to today's
     ///     path, which has its own handling.
     ///   - microphone: the microphone permission.
+    ///   - sessionOwner: who claimed the session (`DictationSessionClaim`). The app
+    ///     owning it means the app records, whatever the keyboard's own status says: the
+    ///     route and the claim must agree (device, 2026-11-23 12:55:39, `route=inKeyboard`
+    ///     with `owner=app`, and nobody recorded).
     public static func decide(
         settingEnabled: Bool,
         appAnswered: Bool,
         systemMajorVersion: Int,
         localeInstalled: Bool?,
         hasFullAccess: Bool = true,
-        microphone: MicrophonePermission = .granted
+        microphone: MicrophonePermission = .granted,
+        sessionOwner: DictationSessionClaim.Owner? = nil
     ) -> InKeyboardDictationRoute {
-        if appAnswered { return .appIsRecording }
+        if appAnswered || sessionOwner == .app { return .appIsRecording }
         guard settingEnabled,
               systemMajorVersion >= minimumSystemMajorVersion,
               localeInstalled == true,
@@ -70,6 +75,18 @@ public enum InKeyboardDictationRoute: String, Equatable, Sendable {
         case .undetermined: return .openAppURL
         case .denied: return .microphoneDenied
         }
+    }
+
+    /// Full Access as the route reads it: the current controller's answer, else the one
+    /// read at the tap.
+    ///
+    /// WHY: iOS tears keyboard controllers down and rebuilds them at any moment (#281). On
+    /// the device (2026-11-23 10:32:01) the controller the keyboard held was deinited
+    /// between the tap and the end of the wait; read through it, Full Access came back
+    /// false and the tap opened the app (`route=openAppURL`) although the keyboard had
+    /// just shown the mic, which it only does with Full Access.
+    public static func fullAccess(current: Bool?, atTap: Bool?) -> Bool {
+        current ?? atTap ?? false
     }
 
     /// Whether the setting is on when the user never touched it: on, for every user, new
