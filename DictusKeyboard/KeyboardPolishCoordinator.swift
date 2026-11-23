@@ -471,7 +471,7 @@ final class KeyboardPolishCoordinator {
     }
 
     /// The sentence for one refusal. Split out of `announce` so the copy can be read
-    /// as a set of seven alternatives rather than as a presentation with branches in it.
+    /// as a set of eight alternatives rather than as a presentation with branches in it.
     private static func message(for failure: SmartModeFailure, degraded: Bool) -> String {
         let name = SmartMode.localizedDisplayName(
             identifier: failure.modeIdentifier, fallback: failure.modeDisplayName
@@ -505,6 +505,18 @@ final class KeyboardPolishCoordinator {
             return String(
                 localized: "\(name): Apple Intelligence does not support the dictated language (\(language)).",
                 comment: "Shown when an armed Smart Mode could not run because the language the user dictated is outside the set Apple Intelligence reads. First placeholder is the mode's name, second is the dictated language."
+            )
+        }
+        if failure.isTranslationUnavailable {
+            // A Translate target Apple Intelligence cannot write (#622): the Translation
+            // framework could not translate it (not installed, an error, the deadline)
+            // and there is no model to fall back on. Nothing went in, and the sentence
+            // says so and why, rather than "could not be applied", which reads as the
+            // mode being broken. Never the source text: that is the floor this mode
+            // refuses.
+            return String(
+                localized: "\(name): translation unavailable right now, nothing was inserted.",
+                comment: "Shown when a Translate Smart Mode into a language Apple Intelligence cannot write could not be translated by the Translation framework, so nothing was inserted. The placeholder is the mode's name, e.g. \"→ RU\"."
             )
         }
         if failure.isModelRefusal, degraded {

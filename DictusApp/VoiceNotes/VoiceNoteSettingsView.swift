@@ -82,7 +82,9 @@ struct VoiceNoteSettingsSections: View {
         Section {
             Picker("After transcription", selection: $settings.mode) {
                 Text("Transcript only").tag(VoiceNoteMode.transcriptOnly)
-                ForEach(VoiceNoteSettings.availableModes) { mode in
+                // `keeping:` the current mode, so a language removed from the Smart Mode
+                // list after it was chosen here still has a row to be selected on (#622).
+                ForEach(VoiceNoteSettings.availableModes(keeping: settings.mode)) { mode in
                     Text(SmartModeListView.listName(for: mode)).tag(VoiceNoteMode.smartMode(mode.id))
                 }
             }

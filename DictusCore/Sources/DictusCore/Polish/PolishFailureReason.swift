@@ -76,6 +76,15 @@ public struct PolishFailureReason: Sendable, Hashable, Codable, CustomStringConv
         self == .safetyRefusal || self == .refusal
     }
 
+    // MARK: - Translation framework
+
+    /// The Translation framework declined a Translate target Apple Foundation Models
+    /// cannot write, so the mode had no fallback (#622). Not a refusal and not a fault
+    /// in the words: the pair was not installed, the call threw, or the deadline
+    /// passed. The surfaces name it, because "try again" alone would leave a Russian
+    /// target looking broken when it is a framework state.
+    public static let translationUnavailable = PolishFailureReason(slug: "translationUnavailable")
+
     // MARK: - Catch-all
 
     /// The reason for an error no engine recognised, carrying the error's Swift
