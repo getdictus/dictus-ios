@@ -49,14 +49,14 @@ public enum LanguageLean {
 
     /// Above zero the words before lean `other`, below zero `active`. `before` is the
     /// document before the word being decided; the word itself, if it ends `before`, is
-    /// left out.
+    /// left out, and so is everything before the sentence it is in (`sentence(before:)`).
     public static func lean(
         before: String,
         word: String,
         active: some LanguageEvidenceSource,
         other: some LanguageEvidenceSource
     ) -> Int {
-        let text = before.hasSuffix(word) ? String(before.dropLast(word.count)) : before
+        let text = sentence(before: before.hasSuffix(word) ? String(before.dropLast(word.count)) : before)
         let recent = text.split(whereSeparator: { !$0.isLetter && $0 != "'" }).suffix(words)
         var lean = 0
         for token in recent where token.count >= 2 {
@@ -72,5 +72,17 @@ public enum LanguageLean {
             }
         }
         return lean
+    }
+
+    /// The part of `text` after its last full stop, question or exclamation mark, or line
+    /// break: the sentence being typed.
+    ///
+    /// WHY (unlike Hex, which reads the last 120 characters): the words of another sentence
+    /// say what language that one was in. On Pierre's device session of 2026-11-23, `Oji`
+    /// began a paragraph and became English's `Oki` instead of French's `Oui`, because
+    /// `Navigate`, two lines above, leaned the lean English.
+    static func sentence(before text: String) -> Substring {
+        guard let end = text.lastIndex(where: { ".!?\n\r\u{2026}".contains($0) }) else { return text[...] }
+        return text[text.index(after: end)...]
     }
 }

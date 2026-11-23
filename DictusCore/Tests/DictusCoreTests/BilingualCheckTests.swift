@@ -111,6 +111,17 @@ final class BilingualCheckTests: XCTestCase {
         XCTAssertFalse(engines.otherWasAsked)
     }
 
+    /// Pierre's device session of 2026-11-23: `Oji` began a paragraph, under a line the
+    /// keyboard had made English, and became English's `Oki`.
+    func testAWordStartingAParagraphKeepsTheActiveLanguagesFix() {
+        let engines = Engines()
+        engines.ownFixes = ["Oji": "Oui"]
+        engines.theirFixes = ["Oji": "Oki"]
+        let decision = engines.decide("Oji", before: "see you tomorrow \n\nOji")
+        XCTAssertEqual(decision.proposal?.autocorrection?.correction, "Oui")
+        XCTAssertEqual(decision.rule, .active)
+    }
+
     func testFrenchWordsBeforeKeepTheFrenchFix() {
         let engines = Engines()
         engines.ownFixes = ["jusge": "juste"]
@@ -162,6 +173,13 @@ final class LanguageLeanTests: XCTestCase {
     func testOnlyTheLastFourWordsCount() {
         let before = "demain matin demain matin sounds good see you "
         XCTAssertEqual(LanguageLean.lean(before: before, word: "x", active: french, other: english), 4)
+    }
+
+    func testOnlyTheSentenceBeingTypedCounts() {
+        for before in ["see you tomorrow\n\n", "see you tomorrow. ", "see you tomorrow! ", "see you tomorrow?"] {
+            XCTAssertEqual(LanguageLean.lean(before: before, word: "x", active: french, other: english), 0, before)
+        }
+        XCTAssertEqual(LanguageLean.lean(before: "oui. see you tomorrow ", word: "x", active: french, other: english), 3)
     }
 
     func testTheWordBeingDecidedIsLeftOut() {
