@@ -43,6 +43,15 @@ import Translation
 /// source, and a raw transcript inserted under "Translate" is the failure #79 names
 /// worst.
 ///
+/// ### Nine targets have no fallback, and say so (#622)
+///
+/// Apple FM writes 16 languages; Translate offers 25. For the nine it does not
+/// (`TranslationTarget.hasModelFallback == false`: ar, fi, he, hi, id, pl, ru, th, uk), every decline above throws `TranslationUnavailable` instead of calling a model
+/// that cannot write the language. The pipeline reads that as a failed mode, the
+/// mode's floor is `insertNothing`, and the surfaces show a sentence naming the cause
+/// (`PolishFailureReason.translationUnavailable`). The source text is never inserted:
+/// that would be the raw transcript under "Translate", the failure #79 names worst.
+///
 /// Two exceptions, both about long text. In DictusApp a timeout fails the mode instead
 /// of falling back (see `TranslationTimeBudget`). And a fallback whose text does not fit
 /// Apple FM's context window throws `FallbackExceedsContext` rather than calling it:
@@ -103,8 +112,16 @@ public struct TranslateRoutingPolishEngine: PolishEngineProtocol {
         case .translated(let text):
             return PolishEngineOutput(text: text, engine: Self.translationEngineLabel)
         case .failed(let error):
+            // DictusApp's timeout fails every target, as it always has. For a target
+            // with no fallback it is the same event as a decline from the user's side —
+            // the language could not be produced — so it carries the same reason and
+            // the same sentence. A cancellation stays a cancellation.
+            if let timeout = error as? TranslationTimedOut, !target.hasModelFallback {
+                throw TranslationUnavailable(decline: "deadline\(timeout.seconds)s")
+            }
             throw error
-        case .fallback:
+        case .fallback(let decline):
+            guard target.hasModelFallback else { throw TranslationUnavailable(decline: decline.slug) }
             guard case .fits = inner.contextFit(input: raw, targetLanguage: targetLanguage, task: task) else {
                 throw FallbackExceedsContext()
             }
@@ -113,7 +130,11 @@ public struct TranslateRoutingPolishEngine: PolishEngineProtocol {
         }
     }
 
+    /// Nothing to warm for a target with no Apple FM fallback (#622): its prompt is
+    /// never sent, and a warmed session would hold memory in the keyboard for nothing.
     public func prewarm(task: PolishTask, targetLanguage: SupportedLanguage) async {
+        if let mode = task.smartMode, let target = TranslationLanguagePair.translateTarget(of: mode),
+           !target.hasModelFallback { return }
         await inner.prewarm(task: task, targetLanguage: targetLanguage)
     }
 
@@ -131,6 +152,7 @@ public struct TranslateRoutingPolishEngine: PolishEngineProtocol {
     public func failureReason(for error: Error) -> PolishFailureReason {
         if error is FallbackExceedsContext { return .exceededContextWindowSize }
         if error is TranslationTimedOut { return .other(error) }
+        if error is TranslationUnavailable { return .translationUnavailable }
         return inner.failureReason(for: error)
     }
 
@@ -138,6 +160,13 @@ public struct TranslateRoutingPolishEngine: PolishEngineProtocol {
 
     /// A Translate fallback whose text does not fit Apple FM's context window.
     public struct FallbackExceedsContext: Error {}
+
+    /// The framework declined a target Apple FM cannot write (#622). `decline` is the
+    /// `Decline.slug` the `translateEngineCall` line already carries, kept on the
+    /// error so a test, or a debugger, can read why without the log.
+    public struct TranslationUnavailable: Error, Equatable {
+        public let decline: String
+    }
 
     /// The framework did not finish within DictusApp's budget. The mode fails rather
     /// than handing a long text to the slower Apple FM.
@@ -182,8 +211,8 @@ public struct TranslateRoutingPolishEngine: PolishEngineProtocol {
     }
 
     /// One framework attempt. Logs exactly one `translateEngineCall` line.
-    private func attemptTranslation(_ raw: String, source: String?, target: SupportedLanguage) async -> Attempt {
-        var line = TranslateCallLine(source: source ?? "-", target: target.rawValue)
+    private func attemptTranslation(_ raw: String, source: String?, target: TranslationTarget) async -> Attempt {
+        var line = TranslateCallLine(source: source ?? "-", target: target.code)
         line.memBeforeMB = MemoryFootprint.residentMB()
         let start = Date()
         line.appState = await appState()
@@ -207,7 +236,7 @@ public struct TranslateRoutingPolishEngine: PolishEngineProtocol {
         return attempt
     }
 
-    private func translate(_ raw: String, source: String?, target: SupportedLanguage,
+    private func translate(_ raw: String, source: String?, target: TranslationTarget,
                            line: inout TranslateCallLine) async -> Attempt {
         guard let source else { return .fallback(.noSourceLanguage) }
         guard let pair = TranslationLanguagePair(source: source, target: target) else {
@@ -298,7 +327,7 @@ struct TranslationFrameworkCall: Sendable {
             if #available(iOS 26.4, macOS 26.4, *) {
                 let box = SessionBox(TranslationSession(
                     installedSource: Locale.Language(identifier: pair.source),
-                    target: Locale.Language(identifier: pair.target.rawValue),
+                    target: Locale.Language(identifier: pair.target.frameworkIdentifier),
                     preferredStrategy: .highFidelity
                 ))
                 return TranslationChunkSession(
