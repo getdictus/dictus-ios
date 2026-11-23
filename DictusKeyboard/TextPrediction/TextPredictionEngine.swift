@@ -55,19 +55,6 @@ class TextPredictionEngine {
         loadDictionaries(for: language)
     }
 
-    /// The language this engine's dictionaries are for.
-    var languageCode: String { language }
-
-    /// This engine's trie, as the bilingual check questions it (#1015), or nil while it
-    /// is not loaded. Built on every call: it is two references and a number, and the
-    /// language and its frequency file change with `setLanguage`.
-    var languageEvidence: TrieLanguageEvidence? {
-        guard aospTrieEngine.isReady, let supported = SupportedLanguage(rawValue: language),
-              frequencyDict.topCount > 0 else { return nil }
-        return TrieLanguageEvidence(language: supported, trie: aospTrieEngine,
-                                    scale: TrieFrequencyScale(topCount: Double(frequencyDict.topCount)))
-    }
-
     /// Updates the active language for completions and spell-checking.
     /// Reloads the frequency dictionary for the new language.
     ///
@@ -1108,4 +1095,23 @@ class TextPredictionEngine {
         return winner
     }
 
+}
+
+// MARK: - Bilingual check (#1015)
+
+// WHY an extension: the class body is at SwiftLint's 650-line budget since #1017. In the
+// same file, the extension still reads the engine's private trie and frequencies.
+extension TextPredictionEngine {
+    /// The language this engine's dictionaries are for.
+    var languageCode: String { language }
+
+    /// This engine's trie, as the bilingual check questions it (#1015), or nil while it
+    /// is not loaded. Built on every call: it is two references and a number, and the
+    /// language and its frequency file change with `setLanguage`.
+    var languageEvidence: TrieLanguageEvidence? {
+        guard aospTrieEngine.isReady, let supported = SupportedLanguage(rawValue: language),
+              frequencyDict.topCount > 0 else { return nil }
+        return TrieLanguageEvidence(language: supported, trie: aospTrieEngine,
+                                    scale: TrieFrequencyScale(topCount: Double(frequencyDict.topCount)))
+    }
 }
