@@ -45,6 +45,14 @@ final class ProxyDocumentEditor: TextDocumentEditing {
     }
 }
 
+// WHY the type_body_length exemption on the class below (#1025): once #1028's trackpad
+// landed, the return key's hooks (#1023) took the body to 654 lines of the 650-line budget.
+// Those hooks are seven lines that have to sit in it: a property observer, an early return
+// and two calls in existing methods. The threshold's rationale in .swiftlint.yml is to
+// catch a NEW type ballooning, not to police the large classes that already exist, as for
+// UnifiedAudioEngine (#417); moving tested methods out to an extension to make room is a
+// restructuring this PR does not owe. Scoped to this class, and only to it.
+
 /// Adapts GiellaKeyboardView delegate callbacks into Dictus keyboard actions.
 ///
 /// WHY a separate bridge class (not making KeyboardViewController the delegate):
@@ -64,14 +72,7 @@ final class ProxyDocumentEditor: TextDocumentEditing {
 /// sounding the click from here is what made typing feel out of sync with the
 /// haptic (#286). The haptics that remain here are the ones with no touchDown to
 /// attach to: the cursor-movement tick, and the emoji toggle's own feedback.
-// WHY the exemption (#1025): once #1028's trackpad landed, the return key's hooks (#1023)
-// took the body to 654 lines of the 650-line budget. Those hooks are seven lines that have
-// to sit in it — a property observer, an early return and two calls in existing methods. The threshold's rationale in
-// .swiftlint.yml is to catch a NEW type ballooning, not to police the large classes that
-// already exist, as for UnifiedAudioEngine (#417); moving tested methods out to an
-// extension to make room is a restructuring this PR does not owe. Scoped here, and only here.
-// swiftlint:disable:next type_body_length
-final class DictusKeyboardBridge: NSObject,
+final class DictusKeyboardBridge: NSObject, // swiftlint:disable:this type_body_length
     GiellaKeyboardViewDelegate,
     GiellaKeyboardViewKeyboardKeyDelegate {
     // MARK: - Dependencies
