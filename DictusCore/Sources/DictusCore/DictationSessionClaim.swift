@@ -71,6 +71,16 @@ public enum DictationSessionClaim {
         return owner == nil || owner == .app
     }
 
+    /// The app's side, given what it can do (#992 round 2): an app that cannot record
+    /// this start claims nothing and returns false, so the keyboard finds the session
+    /// free and takes it (device, 2026-11-23 13:38:56: the app claimed, then deferred
+    /// with its engine stopped, and the keyboard's route read the claim as "the app
+    /// records"). Only a `.record` answer goes on to claim.
+    public static func appMayStart(defaults: UserDefaults, directory: URL?, answer: AppKeyboardStartAnswer) -> Bool {
+        guard answer.willRecord else { return false }
+        return appMayStart(defaults: defaults, directory: directory)
+    }
+
     /// Remove claims older than `maximumAge`.
     public static func prune(in directory: URL, now: Date = Date()) {
         let fileManager = FileManager.default

@@ -2,6 +2,7 @@
 import DictusCore
 import Foundation
 import Speech
+import UIKit
 
 /// Installs Apple's on-device speech model for in-keyboard dictation (spike).
 ///
@@ -60,23 +61,58 @@ enum InKeyboardSpeechAssets {
     }
 
     /// The app's side of `DictationSessionClaim`, for the keyboard's Darwin start post.
-    /// False: the keyboard took this session after its 500 ms window, so the app must not
-    /// record it too.
-    static func appMayStartKeyboardSession() -> Bool {
+    /// False: the app cannot record this start (`answer` declines, and then nothing is
+    /// claimed, so the keyboard takes the session), or the keyboard took this session
+    /// after its 500 ms window, so the app must not record it too.
+    @MainActor
+    static func appMayStartKeyboardSession(for coordinator: DictationCoordinator) -> Bool {
+        let answer = keyboardStartAnswer(for: coordinator)
         let directory = DictationSessionClaim.defaultDirectory
-        let mayStart = DictationSessionClaim.appMayStart(defaults: AppGroup.defaults, directory: directory)
+        let mayStart = DictationSessionClaim.appMayStart(defaults: AppGroup.defaults, directory: directory, answer: answer)
         let session = AppGroup.defaults.string(forKey: SharedKeys.dictationSessionRequest) ?? "none"
-        log("sessionClaim", "session=\(session) side=app mayStart=\(mayStart)")
+        log("sessionClaim", "session=\(session) side=app mayStart=\(mayStart) answer=\(answer.logValue)")
         return mayStart
     }
 
-    /// Answer the keyboard's `inKeyboardPing` while this process runs, so a keyboard that
-    /// appears knows the app will answer its start post and does not open its own
-    /// microphone at the tap (#992 round 4). Registered once, at launch.
-    static func startAnsweringKeyboardPings() {
+    /// Answer the keyboard's `inKeyboardPing` while this process runs (#992 round 4):
+    /// `inKeyboardPong` when it would record a start now, `inKeyboardPongDeclined` when it
+    /// runs but would not (round 2, device 2026-11-23 13:38:56: an app alive with its
+    /// engine stopped answered "here", so the keyboard kept its microphone closed, and
+    /// then the app did not record). Registered once, at launch.
+    static func startAnsweringKeyboardPings(answer: @escaping @MainActor () -> AppKeyboardStartAnswer) {
         DarwinNotificationCenter.addObserver(for: DarwinNotificationName.inKeyboardPing) {
-            DarwinNotificationCenter.post(DarwinNotificationName.inKeyboardPong)
+            // Darwin callbacks arrive on the main thread; the hop is only a fallback, and
+            // costs a run-loop turn a ping cannot afford in the common case.
+            let reply = {
+                MainActor.assumeIsolated {
+                    let decided = answer()
+                    DarwinNotificationCenter.post(decided.willRecord
+                        ? DarwinNotificationName.inKeyboardPong
+                        : DarwinNotificationName.inKeyboardPongDeclined)
+                    if !decided.willRecord { log("pingAnswered", "answer=\(decided.logValue)") }
+                }
+            }
+            if Thread.isMainThread { reply() } else { DispatchQueue.main.async(execute: reply) }
         }
+    }
+
+    /// What `coordinator` would do with a keyboard's Darwin start right now: the
+    /// questions `startDictation` asks before it records, asked before the session is
+    /// claimed and when the keyboard pings (#992 round 2).
+    @MainActor
+    static func keyboardStartAnswer(for coordinator: DictationCoordinator) -> AppKeyboardStartAnswer {
+        let defaults = AppGroup.defaults
+        defaults.synchronize()
+        let rawLoadState = defaults.string(forKey: SharedKeys.modelLoadState) ?? ""
+        return AppKeyboardStartAnswer.decide(.init(
+            appIsActive: UIApplication.shared.applicationState == .active,
+            engineRunning: coordinator.isAudioEngineRunning,
+            dictationStatus: coordinator.status,
+            onboardingCompleted: KeyboardOnboardingGate.isOnboardingCompleted(in: defaults),
+            isModelDownloaded: defaults.bool(forKey: SharedKeys.modelReady),
+            loadState: ModelLoadState(rawValue: rawLoadState) ?? .idle,
+            isModelWarm: ModelWarmth.isActiveModelWarm(defaults: defaults, systemVersion: UIDevice.current.systemVersion)
+        ))
     }
 
     /// Old session claims, once per launch.
