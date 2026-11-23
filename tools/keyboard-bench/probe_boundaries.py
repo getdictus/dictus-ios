@@ -8,8 +8,11 @@ left of the boundary to 1.2 pt right, on the real keyboard in a simulator. A tap
 up as two "q" in a row. Prints, per boundary, the letter each probe typed ("_" for
 nothing) and the band of x that typed nothing.
 
-The boundaries are where the in-process replay puts them (main.swift, `grid`): key k
-starts at k * 401/10 + k/9 pt on a 402 pt wide keyboard.
+The boundaries are where the in-process replay puts them (main.swift, `grid`, which
+lays the page out with DictusCore's `KeyPlaneGeometry` as the keyboard does): Apple's
+keycaps start 6.5 pt in with 6 pt between them, so on a 402 pt wide keyboard key k's
+target starts at 3.5 + k * 39.5 pt (the first and last targets reach the edges). Before
+that geometry, key k started at k * 401/10 + k/9 pt.
 
 Same setup as sim_replay.py --keyboard dictus: the Dictus keyboard showing in
 Reminders, French AZERTY, --grid-top read off a screenshot.
@@ -28,6 +31,12 @@ import sim_replay  # noqa: E402
 
 WIDTH = 402
 KEYS = 10
+# KeyPlaneGeometry.apple(.standard, .portrait): side inset, gap, row pitch, row 1's keycap.
+SIDE = 6.5
+GAP = 6
+ROW_PITCH = 54
+ROW1_CAP_TOP = 8
+KEY_HEIGHT = 43
 
 
 def main():
@@ -35,14 +44,13 @@ def main():
     parser.add_argument("--udid", required=True)
     parser.add_argument("--grid-top", type=float, required=True)
     args = parser.parse_args()
-    row_height = 54
-    top_y = args.grid_top + row_height / 2
-    q = (round((WIDTH - 1) / KEYS / 2, 2), args.grid_top + row_height * 1.5)
-    unit = (WIDTH - 1) / KEYS
-    gap = 1 / (KEYS - 1)
+    start = SIDE - GAP / 2
+    unit = (WIDTH - 2 * start) / KEYS
+    top_y = args.grid_top + ROW1_CAP_TOP + KEY_HEIGHT / 2
+    q = (round(start + unit / 2, 2), top_y + ROW_PITCH)
 
     for k in range(1, KEYS):
-        boundary = k * unit + k * gap
+        boundary = start + k * unit
         xs = [round(boundary - 1.2 + 0.1 * i, 2) for i in range(25)]
         sim_replay.new_reminder(args.udid)
         steps = []
