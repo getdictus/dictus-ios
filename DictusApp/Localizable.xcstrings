@@ -1812,6 +1812,29 @@
         }
       }
     },
+    "Attach" : {
+      "comment" : "Feedback form, question before sending a bug without the log (#981).",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anhängen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adjuntar"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Joindre"
+          }
+        }
+      }
+    },
     "Attach the debug log" : {
       "comment" : "Feedback form (#565).",
       "localizations" : {
@@ -1831,6 +1854,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Joindre le journal technique"
+          }
+        }
+      }
+    },
+    "Attach the debug log?" : {
+      "comment" : "Feedback form, question before sending a bug without the log (#981).",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Technisches Protokoll anhängen?"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Adjuntar el registro técnico?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Joindre le journal technique ?"
           }
         }
       }
@@ -3939,6 +3985,29 @@
         }
       }
     },
+    "Dictus Pro is unlocked, free, starting today." : {
+      "comment" : "Trial announcement subtitle on an iPhone without Apple Intelligence (#922), where not everything in Pro can run.",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dictus Pro ist ab heute kostenlos freigeschaltet."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dictus Pro está desbloqueado gratis desde hoy."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dictus Pro est débloqué gratuitement, dès aujourd’hui."
+          }
+        }
+      }
+    },
     "Dictus Pro Lifetime" : {
       "comment" : "Dictus Pro hub: the plan a lifetime owner holds (#216). No date, nothing renews.",
       "localizations" : {
@@ -4442,6 +4511,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Idée"
+          }
+        }
+      }
+    },
+    "iPhone with Apple Intelligence" : {
+      "comment" : "Label on the Smart Modes line of the paywall, the Pro hub and the trial announcement, on an iPhone that cannot run them (#922). Replaces the iPhone model list.",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iPhone mit Apple Intelligence"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iPhone con Apple Intelligence"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iPhone avec Apple Intelligence"
           }
         }
       }
@@ -5143,6 +5235,29 @@
         }
       }
     },
+    "Send without" : {
+      "comment" : "Feedback form, question before sending a bug without the log (#981).",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ohne senden"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enviar sin él"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Envoyer sans"
+          }
+        }
+      }
+    },
     "Sent. Thank you." : {
       "comment" : "Feedback form (#565).",
       "localizations" : {
@@ -5415,6 +5530,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Nouveautés"
+          }
+        }
+      }
+    },
+    "Without the log, most bugs cannot be diagnosed." : {
+      "comment" : "Feedback form, question before sending a bug without the log (#981).",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ohne das Protokoll lassen sich die meisten Fehler nicht analysieren."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sin el registro, la mayoría de los errores no se pueden analizar."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sans le journal, la plupart des bugs ne peuvent pas être analysés."
           }
         }
       }
@@ -7750,6 +7888,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "L’historique fait partie de Dictus Pro"
+          }
+        }
+      }
+    },
+    "History search, vocabulary & voice messages" : {
+      "comment" : "Home banner subtitle selling Dictus Pro on an iPhone without Apple Intelligence (#922): never mentions AI or Smart Modes.",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verlaufssuche, Vokabular und Sprachnachrichten"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Búsqueda en el historial, vocabulario y mensajes de voz"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recherche dans l’historique, vocabulaire et messages vocaux"
           }
         }
       }
@@ -10532,29 +10693,6 @@
         }
       }
     },
-    "Requires Apple Intelligence (iPhone 15 Pro or later, iOS 26)" : {
-      "comment" : "Paywall notice on a feature card the current device cannot run.",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Erfordert Apple Intelligence (iPhone 15 Pro oder neuer, iOS 26)"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Requiere Apple Intelligence (iPhone 15 Pro o posterior, iOS 26)"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nécessite Apple Intelligence (iPhone 15 Pro ou plus récent, iOS 26)"
-          }
-        }
-      }
-    },
     "Reset learned words" : {
       "localizations" : {
         "de" : {
@@ -11623,6 +11761,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "S’abonner pour %@"
+          }
+        }
+      }
+    },
+    "Subscribe to keep History, Vocabulary and voice messages, with no interruption." : {
+      "comment" : "Home banner subtitle in the last two days of the free trial, on an iPhone without Apple Intelligence (#922).",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abonniere, um Verlauf, Vokabular und Sprachnachrichten ohne Unterbrechung zu behalten."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suscríbete para mantener el historial, el vocabulario y los mensajes de voz sin interrupción."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abonnez-vous pour garder l’historique, le vocabulaire et les messages vocaux, sans interruption."
           }
         }
       }
@@ -12970,6 +13131,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Pour vous entendre pendant la dictée. Le son est transcrit sur votre iPhone et n’en sort jamais."
+          }
+        }
+      }
+    },
+    "To keep History, Vocabulary and voice messages afterwards, you will need a Dictus Pro subscription." : {
+      "comment" : "Trial announcement disclosure on an iPhone without Apple Intelligence (#922): what it takes to keep Pro after the trial. Deliberately names no price.",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Um Verlauf, Vokabular und Sprachnachrichten danach zu behalten, brauchst du ein Dictus Pro-Abo."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Para conservar después el historial, el vocabulario y los mensajes de voz, necesitarás una suscripción a Dictus Pro."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pour garder ensuite l’historique, le vocabulaire et les messages vocaux, il faudra un abonnement Dictus Pro."
           }
         }
       }

@@ -91,6 +91,13 @@ struct SettingsView: View {
     /// keyboard and the app; off writes false, which is the same as the key's absence.
     @AppStorage(SharedKeys.debugPolishRefusalForced, store: UserDefaults(suiteName: AppGroup.identifier))
     private var polishRefusalForced = false
+
+    /// Debug-only: Smart Modes read as `deviceNotEligible`, so the screens an iPhone
+    /// without Apple Intelligence gets (#922) can be walked on a capable iPhone. Read
+    /// live by `SmartModeAvailability.engineState` in both processes; `ProStatusManager`
+    /// reads the capability once per launch, hence the relaunch the footer asks for.
+    @AppStorage(SharedKeys.debugAppleIntelligenceUnsupported, store: UserDefaults(suiteName: AppGroup.identifier))
+    private var appleIntelligenceUnsupported = false
     #endif
 
     /// The keyboard language the pickers below operate on.
@@ -512,6 +519,17 @@ struct SettingsView: View {
                 }
             } footer: {
                 Text(verbatim: "The keyboard treats every Smart Mode and polish call as refused by Apple Intelligence. Debug builds only.")
+            }
+
+            // #922: the path of an iPhone without Apple Intelligence, on a phone that has
+            // it. Verbatim strings, like the section above.
+            Section {
+                Toggle(isOn: $appleIntelligenceUnsupported) {
+                    Text(verbatim: "Simulate no Apple Intelligence")
+                }
+                .accessibilityIdentifier("settings.debug.simulateNoAppleIntelligence")
+            } footer: {
+                Text(verbatim: "Smart Modes read as unsupported (deviceNotEligible), as on an iPhone 15. The paywall, the Pro hub and the keyboard follow at once; relaunch the app for Home and the trial. To replay the trial, use \"Forget the trial\" above, then relaunch. Debug builds only.")
             }
             #endif
 

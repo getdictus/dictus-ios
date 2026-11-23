@@ -27,6 +27,8 @@ final class FeedbackComposer: ObservableObject {
     /// can be deleted when it closes.
     @Published private(set) var shareItems: [Any]?
     private var shareDirectory: URL?
+    /// The read `sheetDidAppear()` started, so « Attach » can wait for it.
+    private var logRead: Task<String, Never>?
 
     let device = FeedbackDeviceInfo.current
 
@@ -37,8 +39,10 @@ final class FeedbackComposer: ObservableObject {
     func sheetDidAppear() async {
         guard phase == .editing else { return }
         logSnapshot = nil
-        let content = await Task.detached(priority: .userInitiated) { PersistentLog.exportContent() }.value
-        guard phase == .editing else { return }
+        let read = Task.detached(priority: .userInitiated) { PersistentLog.exportContent() }
+        logRead = read
+        let content = await read.value
+        guard phase == .editing, logRead == read else { return }
         logSnapshot = content
     }
 
@@ -63,6 +67,23 @@ final class FeedbackComposer: ObservableObject {
         PersistentLog.log(.diagnosticProbe(component: "feedback", instanceID: payload.type,
                                            action: outcome == .delivered ? "delivered" : "failed",
                                            details: "failure=\(Self.logName(outcome)) log=\(payload.log != nil)"))
+    }
+
+    /// « Attach » in the question Send asks for a bug without the log (#981):
+    /// turns the toggle on for this report, then sends it with the snapshot.
+    /// A log still being read is waited for behind the sending spinner, so the
+    /// tap is never dropped by `canSend`.
+    func sendAttachingLog() async {
+        draft.attachesLog = true
+        if logSnapshot == nil, let read = logRead {
+            let before = phase
+            phase = .sending
+            let content = await read.value
+            phase = before
+            guard logRead == read else { return }
+            logSnapshot = logSnapshot ?? content
+        }
+        await send()
     }
 
     /// After the confirmation: an empty form, with the name and email kept for
