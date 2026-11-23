@@ -268,7 +268,10 @@ final class KeyView: UIView {
         sfSymbol(named: symbolName, traits: traits, tintColor: theme.textColor)
     }
 
-    init(page: KeyboardPage, key: KeyDefinition, theme: Theme, traits: UITraitCollection) {
+    /// `capInsets` places the keycap inside the key's cell where `KeyPlaneGeometry` lays the
+    /// page out (Apple's key plane); nil keeps the theme's even margins.
+    init(page: KeyboardPage, key: KeyDefinition, theme: Theme, traits: UITraitCollection,
+         capInsets: UIEdgeInsets? = nil) {
         self.key = key
         self.theme = theme
 
@@ -283,7 +286,7 @@ final class KeyView: UIView {
         layer.shadowOpacity = 1.0
         layer.shadowRadius = 0.0
 
-        contentView.fill(superview: self, margins: UIEdgeInsets(
+        contentView.fill(superview: self, margins: capInsets ?? UIEdgeInsets(
             top: theme.keyVerticalMargin,
             left: theme.keyHorizontalMargin,
             bottom: theme.keyVerticalMargin,

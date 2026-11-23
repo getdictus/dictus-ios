@@ -30,6 +30,9 @@ import DictusCore
 /// package. A provenance comment in the source file is honest but does not discharge the
 /// condition.
 ///
+/// Hex is listed for the keyboard's key geometry (`KeyPlaneGeometry`) too: no code is copied
+/// there, but the approach is Hex's (MIT), and the entry says so.
+///
 /// The spatial decoder (#1011) adds four entries. Hex is ported code (MIT). The other three
 /// are where its models come from: word and word-pair counts from Google Books Ngram
 /// (CC BY 3.0, which asks for the attribution), and the word lists that filter them,
@@ -150,6 +153,8 @@ struct LicensesView: View {
 
     /// What Dictus took from Hex, so the entry says which code the MIT notice covers (#1014).
     private static let hexNotice = """
+        The keyboard's key geometry (KeyPlaneGeometry) follows Hex's approach: Apple's key \
+        plane measured per iPhone size, and touch targets that tile the keyboard. \
         The keyboard's spatial autocorrect decoder and its model format and build script \
         (#1011), and Adaptive touch, which learns where you tap each key (#1014), are \
         ported from Hex.

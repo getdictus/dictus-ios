@@ -24,8 +24,11 @@ public struct SmartModePick: Equatable, Sendable {
         SmartModeCatalogue.builtIns.filter { !isTranslate($0.id) }
     }
 
-    /// The translation targets offered: the four `SupportedLanguage` targets the catalogue
-    /// ships, minus the language the user said they speak on the language screen.
+    /// The translation targets offered: the four built-in targets the catalogue ships,
+    /// minus the language the user said they speak on the language screen. The 22
+    /// targets #622 added are not offered here: they are reached through "Other
+    /// language…" in the app, and a first-run screen of 25 chips would bury the choice
+    /// it exists to make.
     ///
     /// WHY THAT ONE GOES (decision 16): translating French into French is not a mode. The
     /// catalogue itself keeps every target, because outside onboarding the spoken
@@ -34,9 +37,9 @@ public struct SmartModePick: Equatable, Sendable {
     /// - Parameter spokenLanguage: `SharedKeys.spokenLanguage`, a `SpokenLanguage` code.
     ///   A language Dictus has no keyboard for (Chinese) or nil removes nothing: all four
     ///   targets are a real translation from it.
-    public static func translateTargets(spokenLanguage: String?) -> [SupportedLanguage] {
+    public static func translateTargets(spokenLanguage: String?) -> [TranslationTarget] {
         let spoken = spokenLanguage.flatMap(SupportedLanguage.init(rawValue:))
-        return SupportedLanguage.allCases.filter { $0 != spoken }
+        return TranslationTarget.builtIns.filter { $0.builtIn != spoken }
     }
 
     /// The most modes the pick can hold: what the fan can draw.
@@ -132,6 +135,6 @@ public struct SmartModePick: Equatable, Sendable {
     }
 
     private static func isTranslate(_ identifier: String) -> Bool {
-        SupportedLanguage.allCases.contains { SmartModeCatalogue.translateIdentifier(target: $0) == identifier }
+        SmartModeCatalogue.translateTarget(ofIdentifier: identifier) != nil
     }
 }
