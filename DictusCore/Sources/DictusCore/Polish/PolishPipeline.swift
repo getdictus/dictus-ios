@@ -555,11 +555,12 @@ public enum PolishPipeline {
     /// Choose the polish mode. Whisper respects the language picker upstream →
     /// always Natural. Parakeet auto-detects → Repair when detected ≠ target.
     /// Nemotron is forced to the language upstream, as Whisper is (#558) → Natural.
+    /// Apple's recognizer is given one locale, the chosen language → Natural.
     public static func mode(sttEngine: SpeechEngine,
                             detected: SupportedLanguage,
                             target: SupportedLanguage) -> PolishMode {
         switch sttEngine {
-        case .whisperKit, .nemotron:
+        case .whisperKit, .nemotron, .apple:
             return .natural
         case .parakeet:
             return detected == target ? .natural : .repair

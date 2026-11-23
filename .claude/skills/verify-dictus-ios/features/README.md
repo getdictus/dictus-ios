@@ -31,7 +31,7 @@ Out of the map on purpose: the "Developer" section of Réglages (Debug builds on
 
 ## All IDs
 
-Every ID in this map, in one table: the 18 features first, then their 122 sub-features (in the order of the feature files), then the 58 screens of [screens.md](screens.md) — 198 IDs in all. **Gratuit/Pro** is the tier of the feature the ID belongs to. **Spécifique iOS** is « oui » when the ID has no Android equivalent to compare against: the keyboard-to-app hand-off and Full Access (an iOS keyboard extension cannot record and must ask for Full Access), return to the host app, Apple Intelligence (polish), the Dynamic Island (Live Activity, stopping standby), and the App Group check.
+Every ID in this map, in one table: the 18 features first, then their 125 sub-features (in the order of the feature files), then the 58 screens of [screens.md](screens.md) — 201 IDs in all. **Gratuit/Pro** is the tier of the feature the ID belongs to. **Spécifique iOS** is « oui » when the ID has no Android equivalent to compare against: the keyboard-to-app hand-off and Full Access (an iOS keyboard extension cannot record and must ask for Full Access), return to the host app, Apple Intelligence (polish), the Dynamic Island (Live Activity, stopping standby), and the App Group check.
 
 | ID | Gratuit/Pro | Spécifique iOS |
 | --- | --- | --- |
@@ -136,6 +136,7 @@ Every ID in this map, in one table: the 18 features first, then their 122 sub-fe
 | `keyboard.reopen-letters` | Gratuit | non |
 | `keyboard.transcription-language` | Gratuit | non |
 | `keyboard.open-app` | Gratuit | non |
+| `keyboard.return-key-type` | Gratuit | non |
 | `emoji.picker` | Gratuit | non |
 | `emoji.recents` | Gratuit | non |
 | `emoji.search` | Gratuit | non |

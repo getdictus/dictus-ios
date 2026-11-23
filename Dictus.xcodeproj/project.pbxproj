@@ -54,6 +54,7 @@
 		AA000775 /* DictationCoordinator+SessionActivation.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100775 /* DictationCoordinator+SessionActivation.swift */; };
 		AA000380 /* DictationCoordinator+WarmEngineTimeout.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100380 /* DictationCoordinator+WarmEngineTimeout.swift */; };
 		AA000851 /* DictationCoordinator+StageWatchdog.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100851 /* DictationCoordinator+StageWatchdog.swift */; };
+		AE0E0006 /* DictationCoordinator+KeyboardSignals.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE0E0005 /* DictationCoordinator+KeyboardSignals.swift */; };
 		AA000007 /* KeyboardState.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA10000B /* KeyboardState.swift */; };
 		AA0000F7 /* KeyboardLifecycleProbe.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000F6 /* KeyboardLifecycleProbe.swift */; };
 		AA023002 /* HostAppResolver.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA023001 /* HostAppResolver.swift */; };
@@ -166,6 +167,8 @@
 		AA000484 /* ModelPreparationPresentation.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100484 /* ModelPreparationPresentation.swift */; };
 		AA000302 /* ModelLanguageDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100302 /* ModelLanguageDetailView.swift */; };
 		AA0000F0 /* SpeechModelProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000F0 /* SpeechModelProtocol.swift */; };
+		AE0E0002 /* AppleSpeechEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE0E0001 /* AppleSpeechEngine.swift */; };
+		AE0E0004 /* AppleEngineCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE0E0003 /* AppleEngineCardView.swift */; };
 		AA0000F1 /* ParakeetEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000F1 /* ParakeetEngine.swift */; };
 		AA0000F2 /* SoundFeedbackService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000F2 /* SoundFeedbackService.swift */; };
 		B565F0B1 /* FeedbackComposer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B565F0B2 /* FeedbackComposer.swift */; };
@@ -318,6 +321,7 @@
 		AA100775 /* DictationCoordinator+SessionActivation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DictationCoordinator+SessionActivation.swift"; sourceTree = "<group>"; };
 		AA100380 /* DictationCoordinator+WarmEngineTimeout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DictationCoordinator+WarmEngineTimeout.swift"; sourceTree = "<group>"; };
 		AA100851 /* DictationCoordinator+StageWatchdog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DictationCoordinator+StageWatchdog.swift"; sourceTree = "<group>"; };
+		AE0E0005 /* DictationCoordinator+KeyboardSignals.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DictationCoordinator+KeyboardSignals.swift"; sourceTree = "<group>"; };
 		AA10000B /* KeyboardState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardState.swift; sourceTree = "<group>"; };
 		AA1000F6 /* KeyboardLifecycleProbe.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardLifecycleProbe.swift; sourceTree = "<group>"; };
 		AA023001 /* HostAppResolver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HostAppResolver.swift; sourceTree = "<group>"; };
@@ -436,6 +440,8 @@
 		AA100484 /* ModelPreparationPresentation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelPreparationPresentation.swift; sourceTree = "<group>"; };
 		AA100302 /* ModelLanguageDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelLanguageDetailView.swift; sourceTree = "<group>"; };
 		AA1000F0 /* SpeechModelProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechModelProtocol.swift; sourceTree = "<group>"; };
+		AE0E0001 /* AppleSpeechEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleSpeechEngine.swift; sourceTree = "<group>"; };
+		AE0E0003 /* AppleEngineCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleEngineCardView.swift; sourceTree = "<group>"; };
 		AA1000F1 /* ParakeetEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParakeetEngine.swift; sourceTree = "<group>"; };
 		AA1000F2 /* SoundFeedbackService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoundFeedbackService.swift; sourceTree = "<group>"; };
 		B565F0B2 /* FeedbackComposer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedbackComposer.swift; sourceTree = "<group>"; };
@@ -631,6 +637,7 @@
 				AA100775 /* DictationCoordinator+SessionActivation.swift */,
 				AA100380 /* DictationCoordinator+WarmEngineTimeout.swift */,
 				AA100851 /* DictationCoordinator+StageWatchdog.swift */,
+				AE0E0005 /* DictationCoordinator+KeyboardSignals.swift */,
 				AA1000F5 /* LiveActivityManager.swift */,
 				SS400001 /* Subscription */,
 				AA400007 /* Audio */,
@@ -751,6 +758,7 @@
 				AA1000F1 /* ParakeetEngine.swift */,
 				AA155803 /* NemotronEngine.swift */,
 				AA1000F0 /* SpeechModelProtocol.swift */,
+				AE0E0001 /* AppleSpeechEngine.swift */,
 				AA100041 /* TranscriptionService.swift */,
 				AA100045 /* UnifiedAudioEngine.swift */,
 				AA100390 /* UnifiedAudioEngine+IdleRelease.swift */,
@@ -797,6 +805,7 @@
 				B565F0A2 /* FeedbackView.swift */,
 				AA1000E2 /* GaugeBarView.swift */,
 				AA1000E3 /* ModelCardView.swift */,
+				AE0E0003 /* AppleEngineCardView.swift */,
 				AA100302 /* ModelLanguageDetailView.swift */,
 				AA1000E4 /* SwipeBackOverlayView.swift */,
 				AA1000F3 /* SoundSettingsView.swift */,
@@ -1442,6 +1451,7 @@
 				AA000775 /* DictationCoordinator+SessionActivation.swift in Sources */,
 				AA000380 /* DictationCoordinator+WarmEngineTimeout.swift in Sources */,
 				AA000851 /* DictationCoordinator+StageWatchdog.swift in Sources */,
+				AE0E0006 /* DictationCoordinator+KeyboardSignals.swift in Sources */,
 				AA0000F5 /* LiveActivityManager.swift in Sources */,
 				AA00P201 /* PolishAvailability.swift in Sources */,
 				AA00P203 /* PolishCoordinator.swift in Sources */,
@@ -1505,6 +1515,8 @@
 				B565F0A1 /* FeedbackView.swift in Sources */,
 				AA0000EA /* LanguageSetupPage.swift in Sources */,
 				AA0000F0 /* SpeechModelProtocol.swift in Sources */,
+				AE0E0002 /* AppleSpeechEngine.swift in Sources */,
+				AE0E0004 /* AppleEngineCardView.swift in Sources */,
 				AA0000F1 /* ParakeetEngine.swift in Sources */,
 				AA0000E2 /* GaugeBarView.swift in Sources */,
 				AA0000E3 /* ModelCardView.swift in Sources */,

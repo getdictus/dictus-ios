@@ -151,15 +151,34 @@ final class AOSPTrieEngine {
     ///    ("qu'il" -> checks "il", not the whole string).
     /// 3. Case restoration: if input starts with uppercase, correction is capitalized.
     func spellCheck(_ word: String) -> (correction: String, alternatives: [String])? {
+        guard case let .corrected(correction, alternatives) = check(word) else { return nil }
+        return (correction, alternatives)
+    }
+
+    /// What `spellCheck` decides for a word.
+    enum CheckOutcome {
+        /// The correction and up to two alternatives, prefix and case restored.
+        case corrected(String, alternatives: [String])
+        /// The trie had candidates, but each would put a consonant after an elision
+        /// (`d'cirre` → `votre`): the typed word stays, and it is the best reading.
+        case keepTyped
+        /// The word is correct, or the trie has nothing for it.
+        case noCandidate
+    }
+
+    /// `spellCheck`, telling a typed word kept by the elision rule from one the trie
+    /// has nothing for. The split pass reads the difference: only the second lets a
+    /// split that drops the prefix win (`d'bonbjour` must not become `bon jour`).
+    func check(_ word: String) -> CheckOutcome {
         let lowered = word.lowercased()
 
         // Check language-specific overrides first (works even before dictionary loads)
         if let profile = currentProfile,
            let corrected = applyOverride(profile: profile, word: word) {
-            return (corrected, [])
+            return .corrected(corrected, alternatives: [])
         }
 
-        guard bridge.isLoaded(), !word.isEmpty else { return nil }
+        guard bridge.isLoaded(), !word.isEmpty else { return .noCandidate }
 
         // Handle apostrophe words: "qu'il" -> check "il", "l'homme" -> check "homme"
         // French contractions split at the apostrophe; only the main word can be misspelled.
@@ -167,7 +186,7 @@ final class AOSPTrieEngine {
         let prefix: String?
         if let apoIndex = lowered.lastIndex(of: "'") {
             let afterApo = String(lowered[lowered.index(after: apoIndex)...])
-            if afterApo.isEmpty { return nil }
+            if afterApo.isEmpty { return .noCandidate }
             wordToCheck = afterApo
             prefix = String(lowered[...apoIndex])
         } else {
@@ -176,22 +195,29 @@ final class AOSPTrieEngine {
         }
 
         guard let result = bridge.spellCheck(wordToCheck, maxEditDistance: 2.0) else {
-            return nil
+            return .noCandidate
         }
+
+        // French never elides before a consonant: after `d'`, a candidate such as
+        // `votre` is dropped, and the typed word is kept when none is left.
+        let allowed = ([result.correction] + result.alternatives).filter {
+            currentProfile?.allowsElided($0, after: prefix) ?? true
+        }
+        guard let best = allowed.first else { return .keepTyped }
 
         // Restore case and reassemble with prefix if present
         let isCapitalized = word.first?.isUppercase == true
         // `prefix ?? ""` reproduces the nil branch exactly: prepending the empty
         // string is the identity, which is what the nil case returned before.
-        let correction = (prefix ?? "") + result.correction
+        let correction = (prefix ?? "") + best
         let fullCorrection = isCapitalized ? correction.capitalized : correction
 
-        let alts = result.alternatives.prefix(2).map { alt -> String in
+        let alts = allowed.dropFirst().prefix(2).map { alt -> String in
             let full = (prefix ?? "") + alt
             return isCapitalized ? full.capitalized : full
         }
 
-        return (fullCorrection, Array(alts))
+        return .corrected(fullCorrection, alternatives: Array(alts))
     }
 
     /// The dictionary words within two weighted edits of `word`, best scored first,
