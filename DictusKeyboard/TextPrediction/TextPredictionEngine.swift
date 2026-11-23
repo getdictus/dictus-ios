@@ -759,26 +759,8 @@ class TextPredictionEngine {
         // branch above (lexicon, overrides, contractions) and is weighed against the trie,
         // which only has the letters. When it keeps the word, the trie decides.
         let trie = trieProposal(for: word, previousWord: previousWord, isAtSentenceStart: isAtSentenceStart)
-        guard let spatial, let decoder = SpatialAutocorrect.decoder(for: language) else { return trie }
-        let trieCorrection = trie?.autocorrection?.correction
-        // The same word up to its accents: the accents are the trie's, whose French rules
-        // (#1000, #1008) know `suis arrivé` where the word-pair model may not.
-        let trieWord = trieCorrection.map { SpatialDecoder.withoutAccents($0.lowercased()) }
-        guard let read = SpatialCorrection.correct(
-                  word, previousWord: previousWord, input: spatial, with: decoder,
-                  facts: SpatialCorrection.Facts(
-                      isKnown: !isUnknownToDictionary(word),
-                      isLearned: UserDictionary.shared.isLearned(word.lowercased()),
-                      trieCorrection: trieCorrection
-                  )
-              ),
-              SpatialDecoder.withoutAccents(read.correction.lowercased()) != trieWord else { return trie }
-        #if DEBUG
-        AutocorrectDebugLog.autocorrectDecision(
-            original: word, corrected: read.correction, branch: "spatial", prevWord: previousWord
-        )
-        #endif
-        return .autocorrect(read.correction, alternatives: read.alternatives)
+        guard let spatial else { return trie }
+        return spatialProposal(for: word, previousWord: previousWord, spatial: spatial, trie: trie)
     }
 
     /// What the trie proposes for `word` from its letters: the spell check, then the
@@ -1111,4 +1093,37 @@ class TextPredictionEngine {
         return winner
     }
 
+}
+
+// MARK: - Spatial autocorrect (#1011)
+
+// WHY an extension: the class body is at SwiftLint's 650-line budget since #1035. In the same
+// file, the extension still reads the engine's private language and dictionary.
+extension TextPredictionEngine {
+    /// The spatial decoder's reading of `word`'s taps, weighed against the trie's `trie`
+    /// proposal: the decoder's correction when it has one the trie does not, else `trie`.
+    fileprivate func spatialProposal(
+        for word: String, previousWord: String?, spatial: SpatialCorrection.Input, trie: CorrectionProposal?
+    ) -> CorrectionProposal? {
+        guard let decoder = SpatialAutocorrect.decoder(for: language) else { return trie }
+        let trieCorrection = trie?.autocorrection?.correction
+        // The same word up to its accents: the accents are the trie's, whose French rules
+        // (#1000, #1008) know `suis arrivé` where the word-pair model may not.
+        let trieWord = trieCorrection.map { SpatialDecoder.withoutAccents($0.lowercased()) }
+        guard let read = SpatialCorrection.correct(
+                  word, previousWord: previousWord, input: spatial, with: decoder,
+                  facts: SpatialCorrection.Facts(
+                      isKnown: !isUnknownToDictionary(word),
+                      isLearned: UserDictionary.shared.isLearned(word.lowercased()),
+                      trieCorrection: trieCorrection
+                  )
+              ),
+              SpatialDecoder.withoutAccents(read.correction.lowercased()) != trieWord else { return trie }
+        #if DEBUG
+        AutocorrectDebugLog.autocorrectDecision(
+            original: word, corrected: read.correction, branch: "spatial", prevWord: previousWord
+        )
+        #endif
+        return .autocorrect(read.correction, alternatives: read.alternatives)
+    }
 }
