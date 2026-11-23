@@ -8,7 +8,7 @@
 ## Sub-features
 
 - `typing.suggestions`: Suggestion bar with predictions and corrections.
-- `typing.autocorrect-on-space`: A mistyped word is corrected when space is pressed.
+- `typing.autocorrect-on-space`: A mistyped word is corrected when space is pressed. In French, after an elision (`d'` `l'` `j'` `m'` `n'` `t'` `s'` `c'` `qu'` `jusqu'` `lorsqu'` `puisqu'`) the correction never starts with a consonant other than h: `d'cirre` is kept rather than written `d'votre`, `l'homne` still gives `l'homme` (#1034).
 - `typing.autocorrect-on-punctuation`: A mistyped word is also corrected by `, . ; : ! ?` and Return, never by `'` or `-` (#872). Never inside an e-mail address or a URL, whatever the field (#919): a token holding `@` or `://`, starting with `www.`, or with a `.` `:` `/` `_` glued to a letter, a digit or `/ _ @ + -` is left alone. The first segment, corrected at its `.` or `:`, is put back by the next key glued to the mark (`helene.` → `gelée.`, then `b` → `helene.b`).
 - `typing.undo-correction`: The suggestion bar offers to undo the last correction.
 - `typing.refused-correction`: Erasing into a correction, Undo, or tapping the quoted typed word refuses it: the word committed at that place next is kept and learned (#872). A text replacement shortcut is the exception: typed again at that place, it expands again (#1022).

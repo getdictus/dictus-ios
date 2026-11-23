@@ -73,6 +73,23 @@ public let frenchProfile = LanguageProfile(
             "c": ["est", "\u{00E9}tait"]  // est, était
         ]
     ),
+    // French elides before a vowel or a mute h, never before a consonant: `d'cirre` must
+    // not become `d'votre` (device report, 2026-11-23).
+    elisionOnset: ElisionOnset(
+        prefixes: [
+            "d'", "l'", "j'", "m'", "n'", "t'", "s'", "c'",
+            "qu'", "jusqu'", "lorsqu'", "puisqu'"
+        ],
+        initials: [
+            "a", "e", "i", "o", "u", "y", "h",
+            "\u{00E0}", "\u{00E2}", "\u{00E4}",               // à â ä
+            "\u{00E9}", "\u{00E8}", "\u{00EA}", "\u{00EB}",  // é è ê ë
+            "\u{00EE}", "\u{00EF}",                          // î ï
+            "\u{00F4}", "\u{00F6}",                          // ô ö
+            "\u{00F9}", "\u{00FB}", "\u{00FC}",               // ù û ü
+            "\u{00FF}", "\u{0153}", "\u{00E6}"                // ÿ œ æ
+        ]
+    ),
     // `il est arrive` → `arrivé`, `il arrive` stays (#994). The auxiliaries être and
     // avoir in their simple tenses, and the adverbs that sit between an auxiliary and
     // its participle (`sont déjà couchés`, `était presque déchargé`). French puts these

@@ -179,14 +179,21 @@ final class AOSPTrieEngine {
             return nil
         }
 
+        // French never elides before a consonant: after `d'`, a candidate such as
+        // `votre` is dropped, and the typed word is kept when none is left.
+        let allowed = ([result.correction] + result.alternatives).filter {
+            currentProfile?.allowsElided($0, after: prefix) ?? true
+        }
+        guard let best = allowed.first else { return nil }
+
         // Restore case and reassemble with prefix if present
         let isCapitalized = word.first?.isUppercase == true
         // `prefix ?? ""` reproduces the nil branch exactly: prepending the empty
         // string is the identity, which is what the nil case returned before.
-        let correction = (prefix ?? "") + result.correction
+        let correction = (prefix ?? "") + best
         let fullCorrection = isCapitalized ? correction.capitalized : correction
 
-        let alts = result.alternatives.prefix(2).map { alt -> String in
+        let alts = allowed.dropFirst().prefix(2).map { alt -> String in
             let full = (prefix ?? "") + alt
             return isCapitalized ? full.capitalized : full
         }

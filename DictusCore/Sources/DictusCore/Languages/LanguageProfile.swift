@@ -52,6 +52,10 @@ public struct LanguageProfile: Sendable {
     /// space (#1006). nil for languages without elision.
     public let elisionRepair: ElisionRepair?
 
+    /// The prefixes that elide and the letters an elided word may start with: French
+    /// `d'votre` is never a word. nil for languages without elision.
+    public let elisionOnset: ElisionOnset?
+
     /// Length-changing substring substitutions tried by `AccentExpander` when a
     /// typed word isn't a stronger match in the dictionary. Each rule is
     /// `(from, to)` where `from` is the substring to find and `to` is its
@@ -87,6 +91,7 @@ public struct LanguageProfile: Sendable {
         accentMap: [Character: [Character]],
         contractionPrefixes: [String],
         elisionRepair: ElisionRepair? = nil,
+        elisionOnset: ElisionOnset? = nil,
         collapseRules: [(from: String, to: String)] = [],
         participleContext: ParticipleContext? = nil,
         misspellings: [String: String] = [:],
@@ -102,6 +107,7 @@ public struct LanguageProfile: Sendable {
         self.accentMap = accentMap
         self.contractionPrefixes = contractionPrefixes
         self.elisionRepair = elisionRepair
+        self.elisionOnset = elisionOnset
         self.collapseRules = collapseRules
         self.participleContext = participleContext
         self.misspellings = misspellings
