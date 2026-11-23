@@ -593,10 +593,12 @@ final class DictusKeyboardBridge: NSObject,
         // Guard: never autocorrect tokens containing digits (#74).
         // WHY CharacterSet.decimalDigits: covers all Unicode digits (0-9 plus other scripts).
         // Tokens like "test123", "h2o", "3pm" should be inserted as-is.
+        // A text replacement shortcut with a digit (`adr1`) goes on to
+        // `autocorrectBeforeCursor`, which expands it (#1022).
         let containsDigit = freshWord.unicodeScalars.contains {
             CharacterSet.decimalDigits.contains($0)
         }
-        if containsDigit {
+        if containsDigit, suggestionState?.textReplacement(for: freshWord) == nil {
             // Skip autocorrect — insert space normally
             let mirrorBefore = mirrorLength()
             controller?.textDocumentProxy.insertText(" ")
@@ -914,10 +916,17 @@ final class DictusKeyboardBridge: NSObject,
               let (prefix, freshWord) = AutocorrectRejectionMemory.wordAtCursor(context: context)
         else { return false }
 
-        // Guard: never autocorrect tokens containing digits (#74). The space bar
-        // has its own branch for them; a punctuation mark just inserts itself.
-        guard !freshWord.unicodeScalars.contains(where: { CharacterSet.decimalDigits.contains($0) })
+        // The user's text replacement shortcut (#1022) is looked up first: on Apple's
+        // keyboard it expands where autocorrect never would, `adr1` included.
+        let shortcutPhrase = state.textReplacement(for: freshWord)
+
+        // Guard: never autocorrect tokens containing digits (#74), a shortcut aside.
+        // The space bar has its own branch for them; a punctuation mark just inserts itself.
+        guard shortcutPhrase != nil
+                || !freshWord.unicodeScalars.contains(where: { CharacterSet.decimalDigits.contains($0) })
         else { return false }
+        // An address is left alone even when it ends with a shortcut (#919). Whether
+        // Apple's keyboard does the same is still to be checked on a device (#1022, gap 5).
         guard !endsInAddress(context, word: freshWord, committedBy: key) else { return false }
 
         // Extract previous word for n-gram context boost
@@ -934,6 +943,11 @@ final class DictusKeyboardBridge: NSObject,
         // Refresh the host-traits policy right before the apply decision (#200):
         // the proxy read is cheap and this is the freshest possible signal.
         refreshHostPolicy()
+
+        // A shortcut expands in every field but a secure or password one, with
+        // autocorrect on or off, as on Apple's keyboard (#1022). It is not an
+        // autocorrection, so neither switch below gates it.
+        let expansion = state.hostPolicy.textReplacementsAllowed ? shortcutPhrase : nil
 
         // Sentence position for the proper-noun guard (#199): an unknown
         // capitalized word mid-sentence is preserved; at sentence start the
@@ -991,17 +1005,24 @@ final class DictusKeyboardBridge: NSObject,
         let checked = autocorrectRuns
             ? state.correctionProposal(freshWord, previousWord: previousWord, isAtSentenceStart: atSentenceStart)
             : nil
-        let proposal = checked?.autocorrection?.correction
+        let proposal = expansion ?? checked?.autocorrection?.correction
         let offersCorrections = checked?.suggestionRow(typedWord: freshWord) != nil
         #if DEBUG
         journalOffered = offersCorrections
+        if let expansion, !autocorrectRuns {
+            // With autocorrect on, the engine's lexicon branch has logged it already.
+            AutocorrectDebugLog.autocorrectDecision(
+                original: freshWord, corrected: expansion, branch: "text-replacement", prevWord: previousWord
+            )
+        }
         #endif
 
         switch memory.commit(
             prefix: prefix, word: freshWord, proposedCorrection: proposal,
             offersCorrections: offersCorrections,
             countable: wordWasEvaluated,
-            allowsCasingChange: proposal != nil && state.isInSupplementaryLexicon(freshWord)
+            allowsCasingChange: proposal != nil && state.isInSupplementaryLexicon(freshWord),
+            isTextReplacement: expansion != nil
         ) {
         case .correct:
             guard let correction = proposal else { return false }
