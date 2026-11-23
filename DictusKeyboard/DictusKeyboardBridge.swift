@@ -65,12 +65,12 @@ final class ProxyDocumentEditor: TextDocumentEditing {
 /// haptic (#286). The haptics that remain here are the ones with no touchDown to
 /// attach to: the cursor-movement tick, and the emoji toggle's own feedback.
 ///
-/// WHY exempt from `type_body_length` (#1014): with develop after #1022 and the spatial
-/// decoder (#1011), this body is at the 650-line budget, and Adaptive touch needs six lines
-/// of hooks in the key and space handlers, where every keystroke passes. The rule is there
-/// to catch a type ballooning, not the bridge every key event goes through; moving those
-/// handlers into an extension restructures the keyboard's hot path, which a Debug-only
-/// experiment should not carry. Scoped here, as `UnifiedAudioEngine` (#417).
+/// WHY exempt from `type_body_length` (#1011): develop after #1017, #1022 and #1028 brings
+/// this body to the 650-line budget, and the spatial decoder needs a few lines of hooks in
+/// the key and space handlers, where every keystroke passes (Adaptive touch, #1014, a few
+/// more). The rule is there to catch a type ballooning, not the bridge every key event goes
+/// through; moving those handlers into an extension restructures the keyboard's hot path,
+/// which Debug-only experiments should not carry. Scoped here, as `UnifiedAudioEngine` (#417).
 final class DictusKeyboardBridge: NSObject, // swiftlint:disable:this type_body_length
     GiellaKeyboardViewDelegate,
     GiellaKeyboardViewKeyboardKeyDelegate {
@@ -352,9 +352,15 @@ final class DictusKeyboardBridge: NSObject, // swiftlint:disable:this type_body_
         // The word in front of the cursor is no longer the one being typed (#1014).
         AdaptiveTouchSwitch.current?.forget()
 
-        // Spacebar trackpad cursor movement
+        // Spacebar trackpad cursor movement, in UTF-16 units. No haptic per move: Apple's
+        // keyboard asks for no feedback after the space bar's own (Hex's reading of iOS 27.2's
+        // log, #950), and at the new speeds a tick per move was a buzz.
         controller?.textDocumentProxy.adjustTextPosition(byCharacterOffset: movement)
-        HapticFeedback.cursorMoved()
+    }
+
+    func trackpadTextContext() -> (before: String, after: String) {
+        let proxy = controller?.textDocumentProxy
+        return (proxy?.documentContextBeforeInput ?? "", proxy?.documentContextAfterInput ?? "")
     }
 
     // MARK: - GiellaKeyboardViewKeyboardKeyDelegate
@@ -1022,7 +1028,7 @@ final class DictusKeyboardBridge: NSObject, // swiftlint:disable:this type_body_
         let checked = autocorrectRuns
             ? state.correctionProposal(
                 freshWord, previousWord: previousWord, isAtSentenceStart: atSentenceStart,
-                spatial: spatialInput(for: freshWord)
+                spatial: spatialInput(for: freshWord), context: context
             )
             : nil
         let proposal = expansion ?? checked?.autocorrection?.correction

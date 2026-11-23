@@ -12,7 +12,10 @@
 #       [--corpus <dir>] [--runs <dir>] [--hit plain|model] [--model <spec>] [--no-build]
 #       [--debug] [--journal] [--spatial] [--spatial-tune <k=v,...>] [--layout azerty|qwerty|qwertz]
 #       [--adaptive learn|frozen|monitor] [--adaptive-load <profile>] [--adaptive-save <profile>]
+#       [--lexicon a,ma]
 #
+# --lexicon loads those words as contacts / text replacements (#873), the way an iPhone
+# hands its lexicon to the keyboard. The default is none, as on a fresh simulator.
 # --width and --height are the key grid in points. The defaults are an iPhone 17
 # held upright: 402 pt wide, and the 216 pt KeyboardHeightProvider gives a 6.3" screen.
 # Writes taps.tsv, commits.tsv and texts.tsv to <dir>; prints the report on stdout.
@@ -62,6 +65,7 @@ ADAPTIVE=""
 ADAPTIVE_LOAD=""
 ADAPTIVE_SAVE=""
 ADAPTIVE_TUNE=""
+LEXICON=""
 while [[ $# -gt 0 ]]; do
     case "$1" in
         --udid) UDID="$2"; shift 2 ;;
@@ -83,6 +87,7 @@ while [[ $# -gt 0 ]]; do
         --adaptive-tune) ADAPTIVE_TUNE="$2"; shift 2 ;;
         --adaptive-load) ADAPTIVE_LOAD="$(cd "$(dirname "$2")" && pwd)/$(basename "$2")"; shift 2 ;;
         --adaptive-save) ADAPTIVE_SAVE="$(cd "$(dirname "$2")" && pwd)/$(basename "$2")"; shift 2 ;;
+        --lexicon) LEXICON="$2"; shift 2 ;;
         *) echo "unknown argument: $1" >&2; exit 2 ;;
     esac
 done
@@ -153,6 +158,7 @@ SIMCTL_CHILD_SWIFT_DETERMINISTIC_HASHING=1 SIMCTL_CHILD_KB_JOURNAL="$JOURNAL" \
 SIMCTL_CHILD_KB_ADAPTIVE="$ADAPTIVE" SIMCTL_CHILD_KB_ADAPTIVE_TUNE="$ADAPTIVE_TUNE" SIMCTL_CHILD_KB_ADAPTIVE_LOAD="$ADAPTIVE_LOAD" SIMCTL_CHILD_KB_ADAPTIVE_SAVE="$ADAPTIVE_SAVE" \
 SIMCTL_CHILD_KB_SPATIAL="$SPATIAL" SIMCTL_CHILD_KB_LAYOUT="$LAYOUT" SIMCTL_CHILD_KB_SPATIAL_TUNE="$SPATIAL_TUNE" \
 SIMCTL_CHILD_KB_CORPUS="$CORPUS" SIMCTL_CHILD_KB_RUNS="$RUNS" SIMCTL_CHILD_KB_HIT="$HIT" SIMCTL_CHILD_KB_MODEL="$MODEL" \
+SIMCTL_CHILD_BENCH_LEXICON="$LEXICON" \
     xcrun simctl spawn "$UDID" "$BIN/keyboard-bench" "$BENCH" "$LANGS" "$OUT" "$WIDTH" "$HEIGHT" \
     2> >(grep -v "Lexicon creation for" >&2) >&2
 
