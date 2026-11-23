@@ -130,6 +130,47 @@ final class SpatialDecoderTests: XCTestCase {
         XCTAssertEqual(result?.correction, "think")
     }
 
+    /// Pierre's taps of "J'ai hâte" typed without its space (device session of 2026-11-23,
+    /// `TJ TAP` offsets in key units), with and without the apostrophe.
+    private static let jaihate: [CGVector] = [
+        CGVector(dx: -0.0737, dy: 0.1190), CGVector(dx: 0.1422, dy: -0.1012), CGVector(dx: -0.0571, dy: 0.1905),
+        CGVector(dx: 0.1068, dy: 0.0536), CGVector(dx: 0.0713, dy: -0.0417), CGVector(dx: 0.2715, dy: 0.3274),
+        CGVector(dx: 0.0729, dy: -0.1786)
+    ]
+
+    private static func correctAgainstTrie(_ word: String, offsets: [CGVector], trie: String) throws -> String? {
+        let keys = Self.keys(Self.azerty)
+        let letters = word.filter { $0 != "'" }
+        var taps = Self.taps(letters, on: keys, offsets: Dictionary(uniqueKeysWithValues: offsets.enumerated().map { ($0, $1) }))
+        if let apostrophe = word.firstIndex(of: "'") {
+            taps.insert(CGPoint(x: 380, y: 140), at: word.distance(from: word.startIndex, to: apostrophe))
+        }
+        return SpatialCorrection.correct(
+            word, previousWord: nil, input: SpatialCorrection.Input(taps: taps, keys: keys), with: try Self.decoder("fr"),
+            facts: SpatialCorrection.Facts(isKnown: false, isLearned: false, trieCorrection: trie)
+        )?.correction
+    }
+
+    func testAReadingThatKeepsEveryLetterBeatsATrieCorrectionThatChangesThem() throws {
+        // The trie changed three letters ("Lainage", "J'acheté"); the decoder only puts the
+        // space, the apostrophe and the accent back. It cannot score the trie's word, and
+        // needs not.
+        XCTAssertEqual(try Self.correctAgainstTrie("Jaihate", offsets: Self.jaihate, trie: "Lainage"), "J'ai hâte")
+        XCTAssertEqual(try Self.correctAgainstTrie("J'aihate", offsets: Self.jaihate, trie: "J'acheté"), "J'ai hâte")
+    }
+
+    func testReadingsThatKeepTheLetters() {
+        XCTAssertTrue(SpatialCorrection.keepsTheLetters("j'ai hâte", typed: "jaihate"))
+        XCTAssertTrue(SpatialCorrection.keepsTheLetters("j'ai hâte", typed: "j'aihate"))
+        // The n between the two words read as the space.
+        XCTAssertTrue(SpatialCorrection.keepsTheLetters("j'ai hâte", typed: "jainhate"))
+        XCTAssertTrue(SpatialCorrection.keepsTheLetters("don't", typed: "dont"))
+        XCTAssertFalse(SpatialCorrection.keepsTheLetters("think", typed: "thinl"))
+        XCTAssertFalse(SpatialCorrection.keepsTheLetters("lainage", typed: "jaihate"))
+        // A letter dropped inside a word is a change, not a space.
+        XCTAssertFalse(SpatialCorrection.keepsTheLetters("thin", typed: "thinl"))
+    }
+
     func testAChangeOfAccentsAloneIsLeftToTheAccentRules() throws {
         // "tres" reads best as "très", which only adds an accent: the accent rules of the
         // trie (#1000) own that call, so the decoder leaves the word to them.
