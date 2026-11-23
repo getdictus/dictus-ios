@@ -1,0 +1,47 @@
+Novedades de la 2.0.3
+
+## Highlights
+
+Un teclado renovado
+Las teclas están donde las pone el teclado de Apple, y al mantener pulsada la barra espaciadora mueves el cursor.
+
+Emojis más sencillos
+Búsqueda, tonos de piel y toda la altura del teclado para los emojis.
+
+Mejor autocorrección en francés
+«il m'a», «à», los acentos y las palabras pegadas.
+
+## All changes
+
+Teclado renovado
+Teclas colocadas como en el teclado de Apple, en todos los iPhone, en vertical y en horizontal.
+
+Mover el cursor
+Mantén pulsada la barra espaciadora para mover el cursor.
+
+Nuevo teclado de emojis
+Búsqueda, tonos de piel, más espacio para los emojis.
+
+Mejor autocorrección en francés
+«il m'a», «à», acentos, palabras pegadas y apóstrofos.
+
+La tecla Intro se adapta al campo
+Enviar, Ir, Buscar.
+
+Sustituciones de texto
+Tus sustituciones de texto de iOS funcionan en todas partes.
+
+Botón Pegar
+Botón Pegar en la barra del teclado.
+
+Menciones en WhatsApp
+La autocorrección sigue activa después de una mención @ en WhatsApp.
+
+25 idiomas de traducción
+Traduce a 25 idiomas con «Otro idioma…» (Dictus Pro, iPhone con Apple Intelligence).
+
+Prueba gratuita
+Prueba gratuita de Dictus Pro en todos los iPhone.
+
+Informar de un error
+Cuando informas de un error, Dictus te ofrece adjuntar el registro técnico.
