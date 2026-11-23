@@ -105,3 +105,11 @@ the spread layout to within a pixel.
 Where the two still differ: `probe_boundaries.py` found 4 of the 9 top-row boundaries
 swallowing taps in a 0.2 to 0.6 pt band. The replay has no such bands, so a replay tap
 that lands in one types a letter that the real keyboard does not.
+
+**Since the keys moved onto Apple's key plane** (`KeyPlaneGeometry` in DictusCore,
+branch `fix/layout-apple-geometry`), `grid` lays a four-row page out with that table, as
+the keyboard does: keycaps 6.5 pt in from each side, rows 8 pt below the grid's top on the
+iPhone 17, targets that tile the grid with no gap (the flow layout's 1/9 pt gaps are gone
+with the old arithmetic). A run's offsets are taken from the keycap's centre and the row
+pitch. Both checks above were made on the old grid and need redoing on the new one;
+they drive the keyboard with `axe`, which the machine that made the change did not have.

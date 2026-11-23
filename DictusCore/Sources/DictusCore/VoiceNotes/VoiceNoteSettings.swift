@@ -73,7 +73,9 @@ public enum VoiceNoteMode: Equatable, Hashable, Sendable {
     /// guessing at a replacement.
     public var smartMode: SmartMode? {
         guard case .smartMode(let identifier) = self else { return nil }
-        return SmartModeCatalogue.builtIns.first { $0.id == identifier }
+        // `resolve`, not `builtIns`, since #622: a voice note set to "→ PT" is a
+        // Translate mode the catalogue builds for any known target.
+        return SmartModeCatalogue.resolve(identifier: identifier)
     }
 }
 
@@ -128,5 +130,17 @@ public struct VoiceNoteSettings: Equatable, Sendable {
     /// The modes the hub section offers: every built-in mode. Translation included —
     /// "give me this note in English" is a reasonable default for someone who
     /// receives messages in a language they read slowly.
-    public static var availableModes: [SmartMode] { SmartModeCatalogue.builtIns }
+    ///
+    /// Plus the Translate modes the user added through "Other language…" (#622), after
+    /// the built-ins, so a language they chose for the keyboard is one a voice note can
+    /// come back in too. The mode the settings currently hold is kept in the list even
+    /// once its language is removed, so the picker never shows a selection it has no
+    /// row for.
+    public static func availableModes(keeping current: VoiceNoteMode = .transcriptOnly) -> [SmartMode] {
+        var modes = SmartModeCatalogue.builtIns + SmartModeCatalogue.addedTranslateModes
+        if let selected = current.smartMode, !modes.contains(where: { $0.id == selected.id }) {
+            modes.append(selected)
+        }
+        return modes
+    }
 }

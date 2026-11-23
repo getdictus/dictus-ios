@@ -202,14 +202,14 @@ final class KeyTargetModel {
         // Space, shift, delete and the accent key keep today's behaviour.
         if let plain = plain {
             guard isLetter(plain) else { return plain }
-            let dx = abs(point.x - plain.frame.midX) / plain.unitWidth
-            let dy = abs(point.y - plain.frame.midY) / plain.frame.height
+            let dx = abs(point.x - plain.center.x) / plain.unitWidth
+            let dy = abs(point.y - plain.center.y) / plain.rowHeight
             if dx <= parameters.coreX && dy <= parameters.coreY { return plain }
         }
         let candidates = cells.filter { cell in
             isLetter(cell)
-                && abs(point.x - cell.frame.midX) / cell.unitWidth <= 1.5
-                && abs(point.y - cell.frame.midY) / cell.frame.height <= 1.0
+                && abs(point.x - cell.center.x) / cell.unitWidth <= 1.5
+                && abs(point.y - cell.center.y) / cell.rowHeight <= 1.0
         }
         guard candidates.count > 1 else { return candidates.first ?? plain }
 
@@ -235,8 +235,8 @@ final class KeyTargetModel {
         var best: Cell?
         var bestScore = -Double.infinity
         for (cell, mass) in zip(candidates, masses) {
-            let dx = (point.x - cell.frame.midX) / cell.unitWidth / parameters.sigmaX
-            let dy = (point.y - cell.frame.midY) / cell.frame.height / parameters.sigmaY
+            let dx = (point.x - cell.center.x) / cell.unitWidth / parameters.sigmaX
+            let dy = (point.y - cell.center.y) / cell.rowHeight / parameters.sigmaY
             var score = -0.5 * Double(dx * dx + dy * dy)
             if total > 0 {
                 let share = (mass + parameters.floor * total) / (total * (1 + parameters.floor * Double(candidates.count)))
