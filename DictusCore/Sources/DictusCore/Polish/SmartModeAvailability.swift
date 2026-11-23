@@ -243,9 +243,12 @@ public enum SmartModeAvailability {
     /// `SharedKeys.debugAppleIntelligenceForced`: a simulator has no Apple Intelligence,
     /// so without it no screen that draws an armable mode can be captured there (#489).
     /// Compiled out of Release with the key, like `PremiumFlags.debugProEntitlementForced`.
+    /// `SharedKeys.debugAppleIntelligenceUnsupported` is the opposite force, for the
+    /// screens an iPhone without Apple Intelligence sees (#922).
     static var engineState: PolishAvailabilityState {
         #if DEBUG
         if AppGroup.defaults.bool(forKey: SharedKeys.debugAppleIntelligenceForced) { return .available }
+        if AppGroup.defaults.bool(forKey: SharedKeys.debugAppleIntelligenceUnsupported) { return .deviceNotEligible }
         #endif
         return PolishAvailability.state
     }

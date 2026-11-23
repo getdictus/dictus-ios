@@ -1,0 +1,5 @@
+type=probe log=none
+type=bug log=yes 7511 chars
+type=bug log=none
+type=idea log=none
+type=bug log=yes 14495 chars

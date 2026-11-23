@@ -87,6 +87,14 @@ class TextPredictionEngine {
         return lexicon.decision(for: word, isDictionaryWord: aospTrieEngine.wordExists(word.lowercased()))
     }
 
+    /// The phrase of the text replacement shortcut `word` is, or nil (#1022).
+    func textReplacement(for word: String) -> String? {
+        lexiconLock.lock()
+        let lexicon = supplementaryLexicon
+        lexiconLock.unlock()
+        return lexicon.expansion(ofShortcut: word)
+    }
+
     /// Turns a lexicon verdict into a `spellCheck` result: nil keeps the word.
     private func lexiconResult(
         _ decision: SupplementaryLexicon.Decision,

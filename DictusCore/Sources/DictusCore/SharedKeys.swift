@@ -149,6 +149,14 @@ public enum SharedKeys {
     /// model and fails where it is missing. Inside the conditional for the reason above.
     public static let debugAppleIntelligenceForced = "dictus.debugAppleIntelligenceForced"
 
+    // Forced unsupported device (DEBUG builds only - see SmartModeAvailability.engineState).
+    /// Bool: when true, the Smart Mode surfaces read Apple Foundation Models as
+    /// `deviceNotEligible`, the iPhone 15 / iPhone 13 case. A simulator on a Mac reports
+    /// `appleIntelligenceNotEnabled`, which is *capable*, so without it the screens #922
+    /// changes for an iPhone without Apple Intelligence cannot be captured there.
+    /// `debugAppleIntelligenceForced` wins when both are set.
+    public static let debugAppleIntelligenceUnsupported = "dictus.debugAppleIntelligenceUnsupported"
+
     /// Bool: when true, the keyboard never opens the voice note reader on its own; it
     /// opens from a tap on ☰ only (#637 decision 3, #639). Absent reads false,
     /// the default "auto-open". Exists for one device comparison between the two
