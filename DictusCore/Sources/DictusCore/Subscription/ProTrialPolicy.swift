@@ -32,23 +32,24 @@ public enum ProTrialPolicy {
 
     /// Whether a reverse trial may start now.
     ///
-    /// - **Decision 2.** `deviceIsCapable` is `SmartModeAvailability.deviceIsCapable`,
-    ///   which is `SmartModeUnavailableReason.isRecoverable` read as a capability
-    ///   question: `deviceNotEligible` and `osTooOld` (and `sdkMissing`) are the
-    ///   definitive reasons, and a device in one of them never gets a trial, new user
-    ///   or existing. On such a device Pro is History, Vocabulary and voice notes only,
-    ///   and Pierre does not want to push a subscription that light. A capable iPhone
-    ///   with Apple Intelligence switched off **is** capable and gets the trial.
+    /// - **Every iPhone (#922).** #593 decision 2 withheld the trial from a device
+    ///   that can never run Smart Modes (`deviceNotEligible`, `osTooOld`,
+    ///   `sdkMissing`). Pierre reversed it on 2026-11-20, after showing Dictus to an
+    ///   iPhone 15 owner who could not try anything: on such a device History search,
+    ///   Vocabulary and voice notes all work, and they are worth fourteen days of
+    ///   trying. So the capability is no longer an input here. What it still decides
+    ///   is what the trial's screens may *say*: Smart Modes are labelled as needing an
+    ///   iPhone with Apple Intelligence there, never sold as included, and they stay
+    ///   unavailable.
     /// - **No second trial.** Anything but `.neverStarted` refuses, whatever the rest
     ///   says. The Keychain behind `ProTrialStore` is what makes `.neverStarted` true
     ///   only once per device.
     /// - **Paid users get nothing to start.** They already have Pro; a trial clock
     ///   ticking under a subscription would only ever produce a wrong badge.
     public static func mayStart(paywallVisible: Bool,
-                                deviceIsCapable: Bool,
                                 isPaid: Bool,
                                 trial: ProTrialState) -> Bool {
-        paywallVisible && deviceIsCapable && !isPaid && trial == .neverStarted
+        paywallVisible && !isPaid && trial == .neverStarted
     }
 
     /// Whether the announcement that starts the trial is due.
@@ -58,21 +59,21 @@ public enum ProTrialPolicy {
     /// completed onboarding long ago and meets it on the first launch that finds no
     /// trial recorded. Either way the disclosure is on screen **before** the trial
     /// starts: the announcement starts it when the user dismisses it.
+    ///
+    /// Since #922 that includes an existing user on an iPhone without Apple
+    /// Intelligence, who updates to the version that lifts decision 2: once, because
+    /// dismissing it records the trial and `mayStart` then refuses for good.
     public static func announcementDue(onboardingCompleted: Bool,
                                        paywallVisible: Bool,
-                                       deviceIsCapable: Bool,
                                        isPaid: Bool,
                                        trial: ProTrialState) -> Bool {
-        onboardingCompleted && mayStart(
-            paywallVisible: paywallVisible, deviceIsCapable: deviceIsCapable, isPaid: isPaid, trial: trial
-        )
+        onboardingCompleted && mayStart(paywallVisible: paywallVisible, isPaid: isPaid, trial: trial)
     }
 
     /// Whether the end-of-trial paywall should open now.
     ///
     /// Once, on the next launch after the trial ended, and only for someone who did
-    /// not subscribe. A device covered by decision 2 never reaches it, because it
-    /// never had a trial to end.
+    /// not subscribe. Device-blind, like the trial it ends (#922).
     public static func endOfTrialPaywallDue(paywallVisible: Bool,
                                             isPaid: Bool,
                                             trial: ProTrialState,
@@ -136,12 +137,17 @@ public enum ProPromotionEntry: Equatable, Sendable {
     /// The ordinary "Dictus Pro" entry, leading to the paywall.
     case upgrade
 
+    /// The same entry on an iPhone that can never run Smart Modes (#922): same place,
+    /// same paywall, but its words sell History search, Vocabulary and voice messages,
+    /// never AI rewording.
+    case upgradeWithoutSmartModes
+
     /// The trial ends soon (decision 3): the entry names how many days are left and
     /// leads to the paywall, where subscribing keeps Pro with no gap.
     case trialEnding(daysLeft: Int)
 }
 
-/// The promotion policy (#593 decision 2, #279).
+/// The promotion policy (#593 decisions 2 and 3, #279, #922).
 public enum ProPromotion {
 
     // swiftlint:disable function_parameter_count
@@ -154,13 +160,18 @@ public enum ProPromotion {
     /// The order is the message:
     ///
     /// 1. **Paywall hidden:** nothing, the product has no subscription (#236).
-    /// 2. **Device that can never run Smart Modes:** nothing. Pro stays purchasable
-    ///    from the Settings row, which is not a promotion and is not governed here;
-    ///    what disappears is every place that *pushes* it (decision 2).
-    /// 3. **Subscriber:** nothing to sell.
-    /// 4. **Trial in its last two days:** the reminder (decision 3).
-    /// 5. **Entitled otherwise** (a trial with days to spare, or the DEBUG override):
+    /// 2. **Subscriber:** nothing to sell.
+    /// 3. **Trial in its last two days:** the reminder (decision 3), on every device.
+    ///    Since #922 an iPhone without Apple Intelligence runs the trial too, and the
+    ///    reminder is what tells its user that Pro is about to switch off; Dictus sends
+    ///    no push notification, so without it the trial would end unannounced.
+    /// 4. **Entitled otherwise** (a trial with days to spare, or the DEBUG override):
     ///    nothing. During the trial the only indicator is the discreet badge.
+    /// 5. **Device that can never run Smart Modes:** the entry, in its own words
+    ///    (#922, Pierre, 2026-11-21). The ordinary one sells "AI reformulation" first,
+    ///    which that device cannot have; hiding it altogether, as the first version of
+    ///    #922 did, left a user whose trial had ended no way back to Pro but the
+    ///    Settings row. Same placement and same rules, only the words change.
     /// 6. **Everyone else:** the ordinary entry.
     public static func entry(paywallVisible: Bool,
                              deviceIsCapable: Bool,
@@ -168,11 +179,12 @@ public enum ProPromotion {
                              isEntitled: Bool,
                              trial: ProTrialState,
                              now: Date) -> ProPromotionEntry {
-        guard paywallVisible, deviceIsCapable, !isPaid else { return .hidden }
+        guard paywallVisible, !isPaid else { return .hidden }
         if trial.isInReminderWindow(now: now), let daysLeft = trial.daysLeft(now: now) {
             return .trialEnding(daysLeft: daysLeft)
         }
-        return isEntitled ? .hidden : .upgrade
+        guard !isEntitled else { return .hidden }
+        return deviceIsCapable ? .upgrade : .upgradeWithoutSmartModes
     }
     // swiftlint:enable function_parameter_count
 }

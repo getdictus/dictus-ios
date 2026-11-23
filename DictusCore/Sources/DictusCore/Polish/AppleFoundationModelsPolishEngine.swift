@@ -22,8 +22,15 @@ public final class AppleFoundationModelsPolishEngine: PolishEngineProtocol, Send
     ///
     /// Sized rather than guessed because an under-sized cache is invisible: it
     /// evicts a warmed session and the next dictation silently pays for a cold one.
+    ///
+    /// The Translate modes a user adds (#622) are bounded by the fan, not by the 22
+    /// targets: a dictation only ever runs an armed mode, and a mode is armed from the
+    /// fan or the home picker, which hold `maximumPinnedModes`. Sizing on every target
+    /// would hold sessions the user never warms; sizing on `builtIns` alone would evict
+    /// a pinned "→ PT" every time a built-in ran.
     static let sessionCacheCapacity =
         SupportedLanguage.allCases.count * 2 + 1 + SmartModeCatalogue.builtIns.count
+            + SmartModeCatalogue.maximumPinnedModes
 
     /// Optional instructions override. `nil` in the app (uses the shipping
     /// prompts via `Self.instructions`); the eval harness injects a candidate
