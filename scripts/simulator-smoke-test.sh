@@ -105,20 +105,28 @@ fail() {
 }
 
 frontmost_app() {
-  # Needs Automation permission for System Events; "unknown" when it is missing.
-  osascript -e 'tell application "System Events" to get name of first process whose frontmost is true' \
-    2>/dev/null || echo unknown
+  # Reads the frontmost app from LaunchServices with lsappinfo: no Apple Events, so no
+  # macOS permission prompt (osascript to System Events raised an Automation one).
+  # Two output shapes are parsed: '"LSDisplayName"="Name"' and, on recent macOS,
+  # '"Name" ASN:0x0-0x...: (in front)' on the first line. "unknown" when neither comes back.
+  local asn name
+  # `|| true`: the caller may run under `set -e`, and a failed read means "unknown".
+  asn=$(lsappinfo front 2>/dev/null || true)
+  [ -n "$asn" ] || { echo unknown; return; }
+  name=$(lsappinfo info -only name "$asn" 2>/dev/null \
+    | sed -n -e 's/^"LSDisplayName"="\(.*\)"$/\1/p' -e '1s/^"\([^"]*\)" ASN:.*/\1/p' | head -1 || true)
+  echo "${name:-unknown}"
 }
 
-# Reports the frontmost Mac app, and says so plainly when it could not be read: without
-# Automation permission the "never in front" check has checked nothing, and a report
+# Reports the frontmost Mac app, and says so plainly when it could not be read: when
+# lsappinfo gives no name the "never in front" check has checked nothing, and a report
 # that stayed silent about it would read as a pass. Not a failure: what is under test is
 # Dictus, not this Mac's privacy settings.
 report_frontmost() {
   local front
   front=$(frontmost_app)
   if [ "$front" = unknown ]; then
-    say "frontmost app $1: foreground check NOT performed (no Automation permission for System Events)"
+    say "frontmost app $1: foreground check NOT performed (lsappinfo gave no frontmost app name)"
   else
     say "frontmost app $1: $front"
   fi
