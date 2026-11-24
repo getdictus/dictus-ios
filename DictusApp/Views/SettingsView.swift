@@ -623,7 +623,7 @@ struct SettingsView: View {
                             UIApplication.shared.open(url)
                         }
                     } label: {
-                        Text("Open iPhone Settings")
+                        Text("Open \(DeviceNoun.current) Settings")
                             .font(.caption.bold())
                     }
                 }
@@ -643,7 +643,7 @@ struct SettingsView: View {
         case .available:
             return ""
         case .appleIntelligenceNotEnabled:
-            return "Apple Intelligence is required for polish. Enable it in iPhone Settings → Apple Intelligence & Siri. Apple requires Siri and your iPhone to use the same language — if Siri is in English and your iPhone is in French (or vice versa), Apple Intelligence stays off."
+            return "Apple Intelligence is required for polish. Enable it in \(DeviceNoun.current) Settings → Apple Intelligence & Siri. Apple requires Siri and your \(DeviceNoun.current) to use the same language — if Siri is in English and your \(DeviceNoun.current) is in French (or vice versa), Apple Intelligence stays off."
         case .modelNotReady:
             return "The Apple Intelligence model is downloading on your device. Try again in a few minutes."
         case .deviceNotEligible:

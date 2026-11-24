@@ -53,7 +53,7 @@ struct PaywallFeatureList: View {
                 // `unsupportedNotice` gives.
                 if !isSupported {
                     Label {
-                        Text("iPhone with Apple Intelligence")
+                        Text("\(DeviceNoun.current) with Apple Intelligence")
                     } icon: {
                         Image(systemName: "iphone")
                     }
@@ -71,7 +71,7 @@ struct PaywallFeatureList: View {
 
     private func title(_ feature: ProFeature) -> LocalizedStringKey {
         switch feature {
-        case .smartMode: return "Smart Modes, AI on your iPhone"
+        case .smartMode: return "Smart Modes, AI on your \(DeviceNoun.current)"
         case .history: return "History search"
         case .vocabulary: return "Custom vocabulary"
         case .voiceNotes: return "Transcribed voice messages"
