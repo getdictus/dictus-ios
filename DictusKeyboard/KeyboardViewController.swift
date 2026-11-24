@@ -373,6 +373,11 @@ class KeyboardViewController: UIInputViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
 
+        // #982: orientation is read from this controller's window scene from now on,
+        // before anything below asks for it (number row, height). The last controller
+        // to appear is the one on screen; see `KeyboardSceneOrientation`.
+        KeyboardSceneOrientation.track(self)
+
         // #530: a new appearance is a new input context — iOS builds the proxy's
         // mirror afresh, so whatever it was over-reporting is gone and the surplus
         // accounting starts from zero. This is a reset, not the thing that makes the
@@ -865,9 +870,10 @@ class KeyboardViewController: UIInputViewController {
     /// how #202 happened (bounds change → rebuild → bounds change), and it reached App Review.
     /// `viewWillTransition` fires once per rotation and is not a layout callback.
     ///
-    /// WHY the completion block: `DeviceContext.isLandscape` compares `UIScreen.main.bounds`,
-    /// which has not turned yet when this method is entered. `size` here is the input view's,
-    /// not the screen's, so it cannot stand in for it either.
+    /// WHY the completion block: `DeviceContext.isLandscape` reads the window scene's
+    /// orientation (#982; `UIScreen.main.bounds` before that), and neither has turned yet
+    /// when this method is entered. `size` here is the input view's, not the screen's, so
+    /// it cannot stand in for it either.
     ///
     /// With the number row off, `drawsDigitRow` is false in both orientations, the guard
     /// inside never opens, and this override adds nothing but a `super` call.
@@ -976,8 +982,11 @@ class KeyboardViewController: UIInputViewController {
             action: "computeKbHeight",
             // numberRow= is the composed predicate, not the preference: it is the value the
             // grid was built from, so a log where it disagrees with the height is the #331
-            // failure mode (five rows in a four-row box, or the reverse).
-            details: "grid=\(keyGridHeight) total=\(total) screen=\(Int(screen.width))x\(Int(screen.height)) landscape=\(deviceContext.isLandscape) numberRow=\(KeyboardLayouts.drawsDigitRow)"
+            // failure mode (five rows in a four-row box, or the reverse). screen= is still
+            // UIScreen.main; orientSource= says whether landscape= came from the window
+            // scene or fell back to that screen (#982).
+            details: "grid=\(keyGridHeight) total=\(total) screen=\(Int(screen.width))x\(Int(screen.height)) landscape=\(deviceContext.isLandscape) numberRow=\(KeyboardLayouts.drawsDigitRow) "
+                + KeyboardSceneOrientation.probeDetails
         ))
         return total
     }
