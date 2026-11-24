@@ -29,6 +29,8 @@ protocol GiellaKeyboardViewDelegate: AnyObject {
     /// fires its haptic and its click on that answer (#390), and stops on it (#419).
     func didTriggerRepeat(_ key: KeyDefinition, wordMode: Bool) -> KeyRepeatOutcome
     func didMoveCursor(_ movement: Int)
+    /// The text the host shares around its cursor, for the space-bar trackpad (#950).
+    func trackpadTextContext() -> (before: String, after: String)
 }
 
 @objc protocol GiellaKeyboardViewKeyboardKeyDelegate {
@@ -51,7 +53,8 @@ final internal class GiellaKeyboardView: UIView,
     UICollectionViewDelegate,
     UICollectionViewDelegateFlowLayout,
     LongPressOverlayDelegate,
-    LongPressCursorMovementDelegate
+    LongPressCursorMovementDelegate,
+    UIGestureRecognizerDelegate
 {
     // The three cadences below are Apple's own, measured rather than guessed --
     // Apple documents none of this. See docs/research/419-backspace-cadence/ for the
@@ -135,6 +138,8 @@ final internal class GiellaKeyboardView: UIView,
 
     private var longpressController: LongPressBehaviorProvider?
     private var currentlyLongpressedKey: KeyDefinition?
+    /// The finger on the space bar whose hold may start the trackpad (#950).
+    private weak var spaceHoldTouch: UITouch?
 
     private var keyboardButtonFrame: CGRect? {
         didSet {
@@ -196,6 +201,8 @@ final internal class GiellaKeyboardView: UIView,
         // delivery at screen edges where system gesture disambiguation can add ~100ms.
         recognizer.delaysTouchesBegan = false
         recognizer.delaysTouchesEnded = false
+        // Picks the hold's length per touch: shorter on the space bar (#950).
+        recognizer.delegate = self
         return recognizer
     }()
 
@@ -266,6 +273,32 @@ final internal class GiellaKeyboardView: UIView,
                     }
                     return
                 }
+            }
+        }
+    }
+
+    /// What the return key draws for the focused field (#1023). Set by the bridge each time
+    /// it reads the host's traits; every page's return cell is built from it.
+    private(set) var returnKeyAppearance: ReturnKeyAppearance = .standard
+
+    /// Redraws the return key for the field's `returnKeyType` and its off state.
+    ///
+    /// The cell is reconfigured in place, for the reason `updateAccentKeyLabel` gives:
+    /// `reloadItems` runs a layout pass that makes iOS re-measure the keyboard height. And
+    /// only on a change, because the bridge calls this after every keystroke.
+    func updateReturnKey(_ appearance: ReturnKeyAppearance) {
+        guard appearance != returnKeyAppearance else { return }
+        returnKeyAppearance = appearance
+        for section in 0..<currentPage.count {
+            for row in 0..<currentPage[section].count {
+                let key = currentPage[section][row]
+                guard case .returnkey = key.type else { continue }
+                let indexPath = IndexPath(row: row, section: section)
+                guard let cell = collectionView.cellForItem(at: indexPath) as? KeyCell else { continue }
+                let isPressed = activeKey?.indexPath == indexPath
+                cell.configure(page: page, key: key, theme: theme, traits: traitCollection,
+                               returnKey: appearance, capInsets: capInsets(at: indexPath))
+                cell.keyView?.active = isPressed
             }
         }
     }
@@ -538,6 +571,33 @@ final internal class GiellaKeyboardView: UIView,
     func longpress(movedCursor: Int) {
         delegate?.didMoveCursor(movedCursor)
     }
+
+    func longpressTextContext() -> (before: String, after: String) {
+        delegate?.trackpadTextContext() ?? ("", "")
+    }
+
+    // MARK: - UIGestureRecognizerDelegate
+
+    /// The space bar's hold starts the trackpad after `TrackpadCursor.holdDelay` (Apple's
+    /// 0.35 s), where the other keys keep UIKit's 0.5 s for their popups. Set here, before
+    /// the recognizer sees the touch, and only for the first finger down: changing it while a
+    /// press is being timed would retime that press. A touch that slides `holdSlop` (UIKit's
+    /// `allowableMovement`) before then fails the hold, so it stays a tap and types its space.
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
+        guard gestureRecognizer === longpressGestureRecognizer, longpressGestureRecognizer.numberOfTouches == 0 else { return true }
+        var onSpace = false
+        if let indexPath = collectionView.indexPathForItem(at: clampedPoint(touch.location(in: collectionView))),
+           case .spacebar = currentPage[indexPath.section][indexPath.row].type {
+            onSpace = true
+        }
+        longpressGestureRecognizer.minimumPressDuration = onSpace ? TrackpadCursor.holdDelay : Self.keyHoldDelay
+        longpressGestureRecognizer.allowableMovement = TrackpadCursor.holdSlop
+        spaceHoldTouch = onSpace ? touch : nil
+        return true
+    }
+
+    /// UIKit's default hold, which the key popups have always used.
+    private static let keyHoldDelay: TimeInterval = 0.5
 
     // MARK: - Input handling
 
@@ -848,7 +908,11 @@ final internal class GiellaKeyboardView: UIView,
         )
     }
 
-    override func touchesMoved(_ touches: Set<UITouch>, with _: UIEvent?) {
+    override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
+        if let trackpad = longpressController as? LongPressCursorMovementController {
+            trackpad.touchesMoved(touches, with: event, in: collectionView)
+            return
+        }
         if let longpressController = self.longpressController, let touch = touches.first {
             longpressController.touchesMoved(touch.location(in: collectionView))
             return
@@ -889,11 +953,14 @@ final internal class GiellaKeyboardView: UIView,
     }
 
     override func touchesCancelled(_: Set<UITouch>, with _: UIEvent?) {
+        (longpressController as? LongPressCursorMovementController)?.cancel()
         longpressController = nil
         activeKey = nil
     }
 
     override func touchesEnded(_ touches: Set<UITouch>, with _: UIEvent?) {
+        // Another finger lifting leaves the trackpad on (#950).
+        if let trackpad = longpressController as? LongPressCursorMovementController, !trackpad.owns(touches) { return }
         if let longpressController = self.longpressController, let touch = touches.first {
             longpressController.touchesEnded(touch.location(in: collectionView))
             removeAllOverlays()
@@ -975,13 +1042,17 @@ final internal class GiellaKeyboardView: UIView,
 
             case .spacebar:
                 if longpressGestureRecognizer.state == .began {
-                    let longpressController = LongPressCursorMovementController()
-                    longpressController.delegate = self
-                    self.longpressController = longpressController
-                    collectionView.alpha = 0.4
-                    // Initialize baseline so touchesMoved can compute deltas
-                    let startPoint = longpressGestureRecognizer.location(in: collectionView)
-                    longpressController.touchesBegan(startPoint)
+                    let trackpad = LongPressCursorMovementController(touch: spaceHoldTouch, keyboardWidth: bounds.width)
+                    trackpad.delegate = self
+                    self.longpressController = trackpad
+                    // The space bar is a trackpad now, not a pressed key: it types nothing on
+                    // lift, and it goes blank with the others.
+                    activeKey = nil
+                    // The keys go blank, as Apple's do; `longpressDidCancel` brings them back.
+                    trackpad.showBlankKeys(over: collectionView)
+                    collectionView.alpha = 0
+                    // The trackpad starts where the finger is now.
+                    trackpad.touchesBegan(longpressGestureRecognizer.location(in: collectionView))
                 }
             case .backspace:
                 break
@@ -1204,7 +1275,7 @@ final internal class GiellaKeyboardView: UIView,
         }
 
         cell.configure(page: page, key: key, theme: theme, traits: self.traitCollection,
-                       capInsets: capInsets(at: indexPath))
+                       returnKey: returnKeyAppearance, capInsets: capInsets(at: indexPath))
 
         if let swipeKeyView = cell.keyView, swipeKeyView.isSwipeKey {
             swipeKeyView.percentageAlternative = 0.0
@@ -1251,7 +1322,7 @@ final internal class GiellaKeyboardView: UIView,
         }
 
         func configure(page: KeyboardPage, key: KeyDefinition, theme: Theme, traits: UITraitCollection,
-                       capInsets: UIEdgeInsets? = nil) {
+                       returnKey: ReturnKeyAppearance = .standard, capInsets: UIEdgeInsets? = nil) {
             contentView.subviews.forEach { view in
                 view.removeFromSuperview()
             }
@@ -1264,10 +1335,18 @@ final internal class GiellaKeyboardView: UIView,
                 contentView.addSubview(emptyview)
                 emptyview.fill(superview: contentView)
             } else {
-                let keyView = KeyView(page: page, key: key, theme: theme, traits: traits, capInsets: capInsets)
+                let keyView = KeyView(
+                    page: page, key: key, theme: theme, traits: traits,
+                    returnKey: returnKey, capInsets: capInsets
+                )
                 if let accessibilityLabel = key.accessibilityLabel(for: page) {
                     keyView.isAccessibilityElement = true
                     keyView.accessibilityLabel = accessibilityLabel
+                } else if case .returnkey = key.type {
+                    // The key's name for its type, since the glyph has no words (#1023).
+                    keyView.isAccessibilityElement = true
+                    keyView.accessibilityLabel = returnKey.style.label(in: KeyView.labelLanguage)
+                    keyView.accessibilityTraits = returnKey.isEnabled ? .keyboardKey : [.keyboardKey, .notEnabled]
                 }
                 keyView.translatesAutoresizingMaskIntoConstraints = false
                 contentView.addSubview(keyView)

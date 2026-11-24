@@ -1,0 +1,50 @@
+What's new in 2.0.3
+
+## Highlights
+
+A better keyboard
+Keys like Apple's, space-bar cursor, emoji and autocorrect.
+
+Apple's dictation model
+Pick it in the Models screen.
+
+Translate into 25 languages
+With Dictus Pro, in Smart Modes.
+
+## All changes
+
+Redesigned keyboard
+Keys placed like Apple's keyboard, on every iPhone, in portrait and landscape.
+
+Cursor
+Long-press the space bar to move it.
+
+New emoji keyboard
+Search, skin tones, more room for emoji.
+
+Better French autocorrect
+« il m'a », « à », accents, words typed together and apostrophes.
+
+The Return key matches the field
+Send, Go, Search.
+
+Text replacements
+The ones in your iOS settings work everywhere.
+
+Paste
+One tap away in the keyboard bar.
+
+WhatsApp
+Autocorrect stays on after an @ mention.
+
+Translation
+Into 25 languages with « Other language… » (Dictus Pro, iPhone with Apple Intelligence).
+
+Apple
+Pick Apple's on-device dictation model in the Models screen.
+
+Free trial
+Available for Dictus Pro on every iPhone.
+
+Report a bug
+Dictus offers to attach the debug log.

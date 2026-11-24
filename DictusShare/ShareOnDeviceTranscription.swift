@@ -30,6 +30,7 @@ enum ShareOnDeviceTranscription {
     /// The route for drops the app did not take, decided once for the batch.
     static func route() async -> Decision {
         OnDeviceSpeechLog.component = "VoiceNoteShare"
+        OnDeviceSpeechLog.instanceID = "shared"
         let recognizer = OnDeviceRecognizerFactory.make()
         let code = languageCode()
         var installed: Bool?

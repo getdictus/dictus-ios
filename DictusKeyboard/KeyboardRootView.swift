@@ -220,7 +220,15 @@ struct KeyboardRootView: View {
             onMenuTap: { voiceNotes.openFromTap() },
             onMenuLongPress: { voiceNotes.menuLongPressRecognised() }
         )
-        .frame(height: toolbarHeight)
+        // Emoji mode (#1027): the panel takes the whole keyboard, as Hex's does (its
+        // `openEmojiPanel` hides the strip, FullKeyboardView+Emoji.swift, github.com/anomalyco/hex,
+        // MIT). The bar stays in the hierarchy (#79: its identity must survive mode changes)
+        // and folds to 0 pt; the keyboard's height (#166) does not move.
+        .frame(height: presentedMode == .emoji ? 0 : toolbarHeight)
+        .clipped()
+        .opacity(presentedMode == .emoji ? 0 : 1)
+        .allowsHitTesting(presentedMode != .emoji)
+        .accessibilityHidden(presentedMode == .emoji)
     }
 
     /// What fills the keyboard area under the bar. `.keys` puts nothing here — the

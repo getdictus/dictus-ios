@@ -72,6 +72,8 @@ final class ModelCatalogueSizeAuditTests: XCTestCase {
             case .whisperKit: return .whisperKit(variant: model.identifier)
             case .parakeet: return .parakeet()
             case .nemotron: return .nemotron()
+            // No catalogue entry has this engine (`testAppleIsNotACatalogueDownload`).
+            case .apple: preconditionFailure("Apple's engine is not a catalogue download")
             }
         }
     }

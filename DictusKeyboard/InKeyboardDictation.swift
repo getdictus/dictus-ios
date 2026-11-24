@@ -35,7 +35,12 @@ final class InKeyboardDictation {
     /// Hard cap on one recording. 120 s of 16 kHz Int16 is 3.75 MB, held in this process.
     private static let maximumSeconds: Double = 120
 
-    private lazy var recognizer: OnDeviceRecognizer? = OnDeviceRecognizerFactory.make()
+    private lazy var recognizer: OnDeviceRecognizer? = {
+        // The keyboard's lines keep their name in the log (`OnDeviceSpeechLog`).
+        OnDeviceSpeechLog.component = "InKeyboardDictation"
+        OnDeviceSpeechLog.instanceID = "shared"
+        return OnDeviceRecognizerFactory.make()
+    }()
     private var capture: InKeyboardWebCapture?
     private var localeAnswer: (code: String, installed: Bool)?
     private var recording = OnDeviceRecording()

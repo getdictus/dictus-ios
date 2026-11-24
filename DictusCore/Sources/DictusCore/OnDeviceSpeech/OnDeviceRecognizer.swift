@@ -1,34 +1,57 @@
 // DictusCore/OnDeviceSpeech/OnDeviceRecognizer.swift
-// Moved from DictusKeyboard (#992): the keyboard and the share extension both transcribe
-// on the device with it, from one copy.
+// Apple's on-device speech recognizer behind a small protocol, for the app's
+// "Apple (on-device)" engine (Models screen), and for the keyboard and the share
+// extension, which transcribe with it when the app is closed (#992).
 import AVFAudio
 import Foundation
 import Speech
 
-/// A finished in-keyboard recording: 16 kHz mono Int16 little-endian PCM.
+/// A finished recording: 16 kHz mono Int16 little-endian PCM.
 public struct OnDeviceRecording: Sendable {
     public static let sampleRate: Double = 16_000
     public var pcm16 = Data()
 
     public init(pcm16: Data = Data()) { self.pcm16 = pcm16 }
 
+    /// From the app's Float32 samples at 16 kHz (`UnifiedAudioEngine`), clipped to
+    /// [-1, 1]: the shape the app's own dictation path records in.
+    public init(samples: [Float]) {
+        var data = Data(count: samples.count * 2)
+        data.withUnsafeMutableBytes { raw in
+            let out = raw.bindMemory(to: Int16.self)
+            for index in samples.indices {
+                out[index] = Int16(max(-1, min(1, samples[index])) * 32_767).littleEndian
+            }
+        }
+        self.pcm16 = data
+    }
+
     public var seconds: Double { Double(pcm16.count / 2) / Self.sampleRate }
 }
 
-/// The speech-to-text engine behind in-keyboard dictation (spike).
+/// An on-device speech-to-text engine that takes a finished recording and one language.
 ///
-/// WHY a protocol: two engines are planned and they live in different places. Apple's
-/// `SpeechTranscriber` runs in a system daemon and is what this spike ships. Parakeet
-/// running in the same hidden web view (measured on another thread) would take the
-/// same 16 kHz PCM and return the same string. The session that records and inserts
-/// does not care which one answers.
+/// WHY a protocol: the device runs Apple's `SpeechTranscriber` (`AppleSpeechRecognizer`),
+/// and a Debug simulator build, where no runtime ships Apple's speech model, runs a test
+/// harness behind the same seam (`SimulatorHostRecognizer`). The app's engine adapter does
+/// not care which one answers.
 @MainActor
 public protocol OnDeviceRecognizer: AnyObject {
     /// Short name for the log.
     var engineName: String { get }
 
-    /// Whether this engine can transcribe `languageCode` on the device right now, with
-    /// nothing to download. Must never trigger a download or reach a server.
+    /// The locales this engine can transcribe on this device, as BCP 47 identifiers, or
+    /// nil when its recognizer is not available here at all.
+    func supportedLocaleIdentifiers() async -> [String]?
+
+    /// Whether the model for `languageCode` is on the device, and nothing else: no
+    /// reservation, no download. The Models screen asks this to draw the Apple card.
+    func hasModelInstalled(languageCode: String) async -> Bool
+
+    /// The keyboard's and the share extension's question (#992): whether this engine can
+    /// transcribe `languageCode` on the device right now. Never reaches a server. When the
+    /// model is missing, an engine may ask iOS to install it for the next dictation (this
+    /// process's own reservation); this call still answers false.
     func isReadyOnDevice(languageCode: String) async -> Bool
 
     /// Transcribe a finished recording. Throws when nothing usable came back.
@@ -53,8 +76,8 @@ public enum OnDeviceRecognizerError: LocalizedError {
 
 /// Picks the engine for this device. Nil before iOS 26 and wherever Apple's
 /// `SpeechTranscriber` reports itself unavailable: there is no fallback to another Apple
-/// module (Pierre, 2026-11-21), so the keyboard and the share extension keep today's
-/// open-the-app path.
+/// module (Pierre, 2026-11-21), so the Apple card is greyed and the app dictates with the
+/// downloaded model.
 @MainActor
 public enum OnDeviceRecognizerFactory {
     public static func make() -> OnDeviceRecognizer? {
@@ -80,17 +103,15 @@ public enum OnDeviceRecognizerFactory {
 ///
 /// On-device only, by construction: the SpeechAnalyzer modules have no server mode
 /// (unlike `SFSpeechRecognizer`, which this file deliberately does not use), and the asset
-/// check below refuses any locale whose model is not already installed, so nothing is
-/// ever downloaded from the keyboard. The model runs in Apple's speech daemon, not in
-/// this process, which is why it fits beside the keyboard's ~68 MB ceiling (#555).
+/// check below refuses any locale whose model is not already installed, so transcribing
+/// never downloads anything. Installing the model is the Models screen's explicit step
+/// (`AssetInventory`, when the user picks the engine). The model runs in Apple's speech
+/// daemon, not in this process.
 ///
 /// `SpeechTranscriber` only. Where it reports itself unavailable (`isAvailable == false`:
 /// older hardware, and every iOS Simulator, measured 2026-11-19 on iOS 26.5) this class is
 /// never made (`OnDeviceRecognizerFactory`): Pierre decided on 2026-11-21 against falling
-/// back to `DictationTranscriber`; the setting is greyed in the app instead.
-///
-/// The batch shape (record, then transcribe a file) follows anomalyco/hex's
-/// `KeyboardSpeech` (MIT License).
+/// back to `DictationTranscriber`.
 @available(iOS 26.0, *)
 @MainActor
 public final class AppleSpeechRecognizer: OnDeviceRecognizer {
@@ -98,6 +119,16 @@ public final class AppleSpeechRecognizer: OnDeviceRecognizer {
 
     public var engineName: String {
         "apple-speechtranscriber"
+    }
+
+    public func supportedLocaleIdentifiers() async -> [String]? {
+        guard SpeechTranscriber.isAvailable else { return nil }
+        return await SpeechTranscriber.supportedLocales.map { $0.identifier(.bcp47) }
+    }
+
+    public func hasModelInstalled(languageCode: String) async -> Bool {
+        guard let module = await Self.module(for: languageCode) else { return false }
+        return await Self.isInstalled(module)
     }
 
     public func isReadyOnDevice(languageCode: String) async -> Bool {
@@ -111,13 +142,14 @@ public final class AppleSpeechRecognizer: OnDeviceRecognizer {
     }
 
     /// The keyboard reserves the locale and asks iOS for the model itself, so a keyboard
-    /// whose app was never opened since install does not depend on the app having done it.
+    /// whose app was never opened since install does not depend on the app having done it
+    /// (#992).
     ///
-    /// This tap still opens the app (the model is not there yet); the next one finds it
-    /// once iOS has installed it. Reservations are per bundle, which is the point: the
-    /// app's reservation of the same locale does not count for this one. Every step and
-    /// its answer goes to the log, because whether an extension may reserve and download
-    /// at all is what the device run has to tell.
+    /// This tap still takes the app's path (the model is not there yet); the next one finds
+    /// it once iOS has installed it. Reservations are per bundle, which is the point: the
+    /// app's reservation of the same locale does not count for this one. Every step and its
+    /// answer goes to the log, because whether an extension may reserve and download at all
+    /// is what the device run has to tell.
     private static var provisioning: Set<String> = []
 
     private static func provisionLocally(_ module: Module) {
@@ -141,13 +173,13 @@ public final class AppleSpeechRecognizer: OnDeviceRecognizer {
                 OnDeviceSpeechLog.log("reserve", "locale=\(locale.identifier) error=\(error.localizedDescription)")
             }
             do {
-                guard let request = try await AssetInventory.assetInstallationRequest(supporting: [module.speechModule]) else {
+                guard let request = try await AssetInventory.assetInstallationRequest(supporting: [module.transcriber]) else {
                     OnDeviceSpeechLog.log("assetInstall", "locale=\(locale.identifier) request=none")
                     return
                 }
                 OnDeviceSpeechLog.log("assetInstall", "locale=\(locale.identifier) step=downloading")
                 try await request.downloadAndInstall()
-                let after = await AssetInventory.status(forModules: [module.speechModule])
+                let after = await AssetInventory.status(forModules: [module.transcriber])
                 OnDeviceSpeechLog.log("assetInstall", "locale=\(locale.identifier) step=done status=\(after)")
             } catch {
                 OnDeviceSpeechLog.log("assetInstall", "locale=\(locale.identifier) error=\(error.localizedDescription)")
@@ -155,22 +187,23 @@ public final class AppleSpeechRecognizer: OnDeviceRecognizer {
         }
     }
 
-    /// Installed per `AssetInventory`, or present in the module's `installedLocales`.
+    /// Installed per `AssetInventory`, or present in `SpeechTranscriber.installedLocales`.
     ///
     /// WHY both: `AssetInventory.status` answers for the calling bundle's reservation, and
-    /// the keyboard is a different bundle from the app that reserved the locale. Measured
-    /// on macOS 26 (2026-11-19) from a process with no reservation: `status` said
-    /// `supported` while `installedLocales` listed `fr_FR`, and `SpeechAnalyzer`
-    /// transcribed a French file in 150 ms. Both answers are about models on this device;
-    /// neither downloads anything.
+    /// another bundle may have reserved and installed the same locale. Measured on macOS 26
+    /// (2026-11-19) from a process with no reservation: `status` said `supported` while
+    /// `installedLocales` listed `fr_FR`, and `SpeechAnalyzer` transcribed a French file in
+    /// 150 ms. Both answers are about models on this device; neither downloads anything.
     private static func isInstalled(_ module: Module) async -> Bool {
-        let status = await AssetInventory.status(forModules: [module.speechModule])
+        let status = await AssetInventory.status(forModules: [module.transcriber])
         let installed = await SpeechTranscriber.installedLocales
         let listed = installed.contains { $0.identifier(.bcp47) == module.locale.identifier(.bcp47) }
+        // Whether THIS bundle holds a reservation (#992): the keyboard's and the app's are
+        // separate, which is what a device log has to show when a model reads missing.
         let reserved = await AssetInventory.reservedLocales.contains { $0.identifier(.bcp47) == module.locale.identifier(.bcp47) }
         OnDeviceSpeechLog.log(
             "assetCheck",
-            "module=\(module.name) locale=\(module.locale.identifier) status=\(status) inInstalledLocales=\(listed) reservedByKeyboard=\(reserved)"
+            "locale=\(module.locale.identifier) status=\(status) inInstalledLocales=\(listed) reservedByThisBundle=\(reserved)"
         )
         return status == .installed || listed
     }
@@ -179,22 +212,22 @@ public final class AppleSpeechRecognizer: OnDeviceRecognizer {
         guard let module = await Self.module(for: languageCode) else {
             throw OnDeviceRecognizerError.localeNotInstalled(languageCode)
         }
-        // Checked again at the moment of use: the route decision may be a few seconds old.
+        // Checked again at the moment of use: the availability reading may be stale.
         guard await Self.isInstalled(module) else {
             throw OnDeviceRecognizerError.localeNotInstalled(languageCode)
         }
 
         let url = FileManager.default.temporaryDirectory
-            .appendingPathComponent("in-keyboard-\(UUID().uuidString).wav")
+            .appendingPathComponent("apple-speech-\(UUID().uuidString).wav")
         defer { try? FileManager.default.removeItem(at: url) }
         try Self.writeWAV(recording, to: url)
 
         let analyzer = SpeechAnalyzer(
-            modules: [module.speechModule],
+            modules: [module.transcriber],
             options: SpeechAnalyzer.Options(priority: .userInitiated, modelRetention: .whileInUse)
         )
         let file = try AVAudioFile(forReading: url)
-        await Self.offer(contextualStrings, to: analyzer, module: module)
+        await Self.offer(contextualStrings, to: analyzer)
         try await analyzer.start(inputAudioFile: file, finishAfterFile: true)
 
         var transcript = AttributedString()
@@ -204,37 +237,30 @@ public final class AppleSpeechRecognizer: OnDeviceRecognizer {
         return text
     }
 
-    /// Study (#80 follow-up): the vocabulary as `AnalysisContext.contextualStrings`.
-    /// `setContext` is on `SpeechAnalyzer`, not on the module, so both transcribers get
-    /// it. Whether it is *accepted* is logged here; whether it *changes* anything is read
-    /// by comparing transcripts. Measured on macOS 26 (2026-11-20) with "Dictus" as the
-    /// only string: accepted, and it did not change "dicttu" / "dictée".
-    private static func offer(_ strings: [String], to analyzer: SpeechAnalyzer, module: Module) async {
-        guard !strings.isEmpty else {
-            OnDeviceSpeechLog.log("contextualStrings", "module=\(module.name) terms=0 offered=false")
-            return
-        }
+    /// The vocabulary as `AnalysisContext.contextualStrings`. Whether it is *accepted* is
+    /// logged here; whether it *changes* anything is read by comparing transcripts.
+    /// Measured on macOS 26 (2026-11-20) with "Dictus" as the only string: accepted, and
+    /// it did not change "dicttu" / "dictée".
+    private static func offer(_ strings: [String], to analyzer: SpeechAnalyzer) async {
+        guard !strings.isEmpty else { return }
         let context = AnalysisContext()
         context.contextualStrings[.general] = strings
         do {
             try await analyzer.setContext(context)
-            OnDeviceSpeechLog.log("contextualStrings", "module=\(module.name) terms=\(strings.count) accepted=true")
+            OnDeviceSpeechLog.log("contextualStrings", "terms=\(strings.count) accepted=true")
         } catch {
-            OnDeviceSpeechLog.log("contextualStrings", "module=\(module.name) terms=\(strings.count) accepted=false error=\(error.localizedDescription)")
+            OnDeviceSpeechLog.log("contextualStrings", "terms=\(strings.count) accepted=false error=\(error.localizedDescription)")
         }
     }
 
-    /// The transcriber for one locale, with the names the log uses.
+    /// The transcriber for one locale.
     private struct Module {
         let transcriber: SpeechTranscriber
         let locale: Locale
-
-        var speechModule: any SpeechModule { transcriber }
-        var name: String { "speechtranscriber" }
     }
 
     private static func module(for languageCode: String) async -> Module? {
-        let requested = Locale(identifier: InKeyboardDictationRoute.speechLocaleIdentifier(
+        let requested = Locale(identifier: AppleSpeechLanguage.localeIdentifier(
             languageCode: languageCode,
             deviceLocaleIdentifier: Locale.current.identifier
         ))
@@ -273,12 +299,12 @@ public final class AppleSpeechRecognizer: OnDeviceRecognizer {
 /// Simulator-only test harness, compiled out of every device and Release build.
 ///
 /// The simulator cannot run `SpeechAnalyzer` (no model, no download), so this recognizer
-/// hands the finished WAV to a helper on the Mac running the simulator, which transcribes
-/// it with the same `SpeechAnalyzer` + `SpeechTranscriber` code on the Mac's own on-device
-/// model and answers with the text. It exists to show the rest of the path (capture in the
-/// keyboard, the recognizer seam, insertion into the host app) on a machine where the
-/// recognizer cannot run; it is not a design for devices, where the connection does not
-/// exist. The helper only listens on 127.0.0.1.
+/// asks a helper on the Mac running the simulator, which answers with the same
+/// `SpeechAnalyzer` + `SpeechTranscriber` code on the Mac's own on-device model. It exists
+/// to show the rest of the path (the Models screen card, the engine seam, the app's
+/// pipeline after it) on a machine where the recognizer cannot run; it is not a design
+/// for devices, where the connection does not exist. The helper only listens on 127.0.0.1;
+/// with no helper running, the card reads as an iPhone without `SpeechTranscriber`.
 @MainActor
 public final class SimulatorHostRecognizer: OnDeviceRecognizer {
     public init() {}
@@ -286,22 +312,39 @@ public final class SimulatorHostRecognizer: OnDeviceRecognizer {
     public let engineName = "simulator-host-speechanalyzer"
     private let base = URL(string: "http://127.0.0.1:47811")
 
-    /// Asks the host whether ITS `SpeechTranscriber` supports and has installed the
-    /// locale, so a language Apple does not cover falls back here as it would on a device.
-    public func isReadyOnDevice(languageCode: String) async -> Bool {
-        let locale = InKeyboardDictationRoute.speechLocaleIdentifier(
+    /// The host's `SpeechTranscriber.supportedLocales`, one per line. Nil when no helper
+    /// answers, which greys the card as `SpeechTranscriber.isAvailable == false` would.
+    public func supportedLocaleIdentifiers() async -> [String]? {
+        guard let url = base?.appendingPathComponent("locales") else { return nil }
+        guard let (data, response) = try? await URLSession.shared.data(for: URLRequest(url: url, timeoutInterval: 3)),
+              (response as? HTTPURLResponse)?.statusCode == 200 else {
+            OnDeviceSpeechLog.log("hostLocales", "host=unreachable")
+            return nil
+        }
+        let lines = (String(bytes: data, encoding: .utf8) ?? "").split(separator: "\n").map(String.init)
+        OnDeviceSpeechLog.log("hostLocales", "count=\(lines.count)")
+        return lines
+    }
+
+    /// Asks the host whether ITS `SpeechTranscriber` has installed the locale.
+    public func hasModelInstalled(languageCode: String) async -> Bool {
+        let locale = AppleSpeechLanguage.localeIdentifier(
             languageCode: languageCode, deviceLocaleIdentifier: Locale.current.identifier
         )
         guard var components = base.flatMap({ URLComponents(url: $0.appendingPathComponent("ready"), resolvingAgainstBaseURL: false) })
         else { return false }
         components.queryItems = [URLQueryItem(name: "locale", value: locale)]
         guard let url = components.url else { return false }
-        let request = URLRequest(url: url, timeoutInterval: 3)
-        let response = try? await URLSession.shared.data(for: request)
+        let response = try? await URLSession.shared.data(for: URLRequest(url: url, timeoutInterval: 3))
         let status = (response?.1 as? HTTPURLResponse)?.statusCode ?? 0
-        let detail = response.flatMap { String(bytes: $0.0, encoding: .utf8) } ?? "unreachable"
-        OnDeviceSpeechLog.log("assetCheck", "module=simulator-host locale=\(locale) ready=\(status == 200) host=\(detail)")
+        OnDeviceSpeechLog.log("assetCheck", "module=simulator-host locale=\(locale) ready=\(status == 200)")
         return status == 200
+    }
+
+    /// The keyboard's question (#992): the host has no reservation to make, so it is the
+    /// same as `hasModelInstalled`.
+    public func isReadyOnDevice(languageCode: String) async -> Bool {
+        await hasModelInstalled(languageCode: languageCode)
     }
 
     public func transcribe(_ recording: OnDeviceRecording, languageCode: String, contextualStrings: [String]) async throws -> String {
@@ -309,6 +352,8 @@ public final class SimulatorHostRecognizer: OnDeviceRecognizer {
         var request = URLRequest(url: url, timeoutInterval: 30)
         request.httpMethod = "POST"
         request.setValue(languageCode, forHTTPHeaderField: "X-Dictus-Language")
+        // The vocabulary study (#80 follow-up, #992): the host offers the terms to its own
+        // `SpeechAnalyzer` and says whether it accepted them.
         request.setValue(
             contextualStrings.joined(separator: "|").addingPercentEncoding(withAllowedCharacters: .alphanumerics) ?? "",
             forHTTPHeaderField: "X-Dictus-Context"
@@ -334,13 +379,15 @@ public final class SimulatorHostRecognizer: OnDeviceRecognizer {
 }
 #endif
 
-/// Where the on-device recognizer's lines go. The component is the process's own name in
-/// the log, so the keyboard keeps writing `InKeyboardDictation` lines as before and the
-/// share extension writes `VoiceNoteShare` ones.
+/// Where the on-device recognizer's lines go.
 public enum OnDeviceSpeechLog {
-    nonisolated(unsafe) public static var component = "InKeyboardDictation"
+    /// The process's own name in the log (#992): the app writes `AppleSpeechRecognizer`
+    /// lines, the keyboard keeps writing `InKeyboardDictation` ones, the share extension
+    /// `VoiceNoteShare` ones. Set once, before the first line.
+    nonisolated(unsafe) public static var component = "AppleSpeechRecognizer"
+    nonisolated(unsafe) public static var instanceID = "app"
 
     public static func log(_ action: String, _ details: String) {
-        PersistentLog.log(.diagnosticProbe(component: component, instanceID: "shared", action: action, details: details))
+        PersistentLog.log(.diagnosticProbe(component: component, instanceID: instanceID, action: action, details: details))
     }
 }
