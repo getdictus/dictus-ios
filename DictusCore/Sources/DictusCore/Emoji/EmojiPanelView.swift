@@ -336,7 +336,8 @@ public final class EmojiPanelView: UIView, UICollectionViewDataSource, UICollect
     /// The bar's keys take the whole band under the grid: the gap above them and the margin
     /// down to the keyboard's edge, where a thumb aiming at a small icon often lands. Between
     /// ABC and delete the bar takes it, each category the full width of its slot. This is what
-    /// fixes Dictus's old ABC and search keys, which answered only on their glyphs.
+    /// fixes Dictus's old ABC and search keys, which answered only on their glyphs; it only runs
+    /// for a touch iOS hands over, which is why the panel has a touch fill (#503, see `init`).
     override public func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
         guard !isHidden, isUserInteractionEnabled, alpha > 0.01, self.point(inside: point, with: event) else { return nil }
         // An open skin-tone picker waiting for its tap takes every touch.
