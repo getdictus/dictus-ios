@@ -172,17 +172,16 @@ final class KeyboardFeatureSettingsTests: XCTestCase {
     }
 
     /// End to end from the binary's facts to the page, through `BuildChannel.detect`:
-    /// Debug, a simulator, TestFlight (a `sandboxReceipt`) and the App Store (a `receipt`).
+    /// Debug, TestFlight (a `sandboxReceipt`) and the App Store (a `receipt`).
     func testThePageFollowsEachDistributionChannel() {
         let storeKit = URL(fileURLWithPath: "/var/mobile/Containers/Data/Application/X/StoreKit")
-        func visible(isDebug: Bool, isSimulator: Bool = false, receipt: String?) -> Bool {
-            let channel = BuildChannel.detect(isDebug: isDebug, isSimulator: isSimulator,
+        func visible(isDebug: Bool, receipt: String?) -> Bool {
+            let channel = BuildChannel.detect(isDebug: isDebug,
                                               receiptURL: receipt.map { storeKit.appendingPathComponent($0) })
             return settings(channel).isExperimentsPageVisible
         }
         XCTAssertTrue(visible(isDebug: true, receipt: nil), "Debug")
         XCTAssertTrue(visible(isDebug: true, receipt: "receipt"), "Debug, whatever its receipt")
-        XCTAssertTrue(visible(isDebug: false, isSimulator: true, receipt: "receipt"), "Release on a simulator")
         XCTAssertTrue(visible(isDebug: false, receipt: "sandboxReceipt"), "TestFlight")
         XCTAssertFalse(visible(isDebug: false, receipt: "receipt"), "App Store")
         XCTAssertFalse(visible(isDebug: false, receipt: nil), "no receipt URL: the side that shows nothing")

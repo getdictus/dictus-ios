@@ -25,15 +25,6 @@ final class BuildChannelTests: XCTestCase {
                        .appStore)
     }
 
-    /// A Release build on a simulator reports an App Store-named receipt (measured
-    /// 2026-11-24, iOS 26.5); a simulator is never an App Store install.
-    func testASimulatorBuildIsATestBuildWhateverItsReceipt() {
-        XCTAssertEqual(BuildChannel.detect(isDebug: false, isSimulator: true,
-                                           receiptURL: storeKit.appendingPathComponent("receipt")),
-                       .testBuild)
-        XCTAssertEqual(BuildChannel.detect(isDebug: false, isSimulator: true, receiptURL: nil), .testBuild)
-    }
-
     /// No receipt URL at all, which is what the deprecated API would return if it
     /// stopped answering: the side that writes no text.
     func testNoReceiptURLIsTheAppStore() {
