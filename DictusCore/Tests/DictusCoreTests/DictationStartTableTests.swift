@@ -243,6 +243,24 @@ final class DictationStartTableTests: XCTestCase {
                        .standDown("tap-ended"))
     }
 
+    /// Device, 2026-11-24 17:47 (iOS 27.0.1, build 39f6bdbc), 4 taps out of 4: the
+    /// keyboard's capture was still starting (no `captureStarted`, no failure) when the
+    /// net fired at 1579 ms, abandoned it and opened the app. Reproduced on the simulator
+    /// with the web content process slowed during `getUserMedia`: `stoppedBeforeStart
+    /// lastStep=requested`, then `gum-resolved` after the net. A capture still starting
+    /// gets until `startingDeadline`; its own 3 s start timeout fails it before that if it
+    /// hangs, and the net then fires at once.
+    func testSafetyNetWaitsForAKeyboardCaptureStillStarting() {
+        func reading(_ elapsed: TimeInterval, starting: Bool) -> DictationStartSafetyNet.Reading {
+            .init(elapsed: elapsed, keyboardHasAudio: false, appIsRecording: false, tapEnded: false,
+                  captureEndedWithoutAudio: false, keyboardCaptureStarting: starting)
+        }
+        XCTAssertEqual(DictationStartSafetyNet.evaluate(reading(1.579, starting: true)), .keepWaiting)
+        XCTAssertEqual(DictationStartSafetyNet.evaluate(reading(3.5, starting: true)), .fire("capture-start-too-slow"))
+        XCTAssertEqual(DictationStartSafetyNet.evaluate(reading(1.579, starting: false)), .fire("no-audio-by-deadline"))
+        XCTAssertGreaterThan(DictationStartSafetyNet.startingDeadline, 3.0, "after the capture's own 3 s start timeout")
+    }
+
     /// Device A as it was (the app claims, then never records): the net fires at 1.5 s
     /// and opens the app, instead of the 5 s watchdog and nothing.
     func testSafetyNetCatchesAnAppThatClaimedAndNeverRecorded() {

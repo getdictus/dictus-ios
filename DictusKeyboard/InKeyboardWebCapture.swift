@@ -54,6 +54,9 @@ final class InKeyboardWebCapture: NSObject {
     private var startWatchdog: Timer?
     private var lastStep = "none"
     private var didStart = false
+    /// Asked to start, and neither `started` nor a failure yet (the start safety net waits
+    /// for it, `DictationStartSafetyNet.startingDeadline`).
+    var isStarting: Bool { isCapturing && !didStart }
     static let startTimeout: TimeInterval = 3
     private let webView: WKWebView
 

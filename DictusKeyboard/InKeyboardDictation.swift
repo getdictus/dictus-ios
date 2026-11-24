@@ -682,7 +682,8 @@ final class InKeyboardDictation {
             keyboardHasAudio: firstSampleLogged,
             appIsRecording: !ownsKeyboardStatus && stored.map(appStatuses.contains) == true,
             tapEnded: tapLeftKeyboard || state.activeSessionID != session || status == .idle || status == .failed,
-            captureEndedWithoutAudio: captureEndedWithoutAudio
+            captureEndedWithoutAudio: captureEndedWithoutAudio,
+            keyboardCaptureStarting: capture?.isStarting ?? false
         )
         var verdict = DictationStartSafetyNet.evaluate(reading)
         // Never open the app for a tap the user can no longer see, or that a suspended
@@ -691,11 +692,23 @@ final class InKeyboardDictation {
         if case .fire = verdict {
             if !state.isKeyboardVisible {
                 verdict = .standDown("keyboard-hidden")
-            } else if elapsed > DictationStartSafetyNet.deadline + 2, !captureEndedWithoutAudio {
+            } else if elapsed > DictationStartSafetyNet.startingDeadline + 2, !captureEndedWithoutAudio {
                 verdict = .standDown("late-\(elapsedMs)ms")
             }
         }
-        if case .keepWaiting = verdict { return }
+        if case .keepWaiting = verdict {
+            // The deadline found the keyboard's capture still starting: look again when its
+            // own allowance runs out (`startingDeadline`), unless something settles it first.
+            if trigger == "deadline" {
+                Self.log("startSafetyNet", "fired=false reason=capture-starting elapsedMs=\(elapsedMs) session=\(session)")
+                let wait = max(0, DictationStartSafetyNet.startingDeadline - elapsed)
+                DispatchQueue.main.asyncAfter(deadline: .now() + wait) { [weak self] in
+                    guard let self, self.safetyNetSession == session else { return }
+                    self.evaluateSafetyNet(trigger: "starting-deadline")
+                }
+            }
+            return
+        }
         safetyNetSession = nil
         Self.log("startSafetyNet", "\(verdict.logFields) elapsedMs=\(elapsedMs) trigger=\(trigger) "
                  + "status=\(status.rawValue) appAnswer=\(appAnswer(since: tapPingSentAt).rawValue) session=\(session)")

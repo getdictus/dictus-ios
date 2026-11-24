@@ -269,6 +269,9 @@ public enum DictationStartTable {
 public enum DictationStartSafetyNet {
 
     public static let deadline: TimeInterval = 1.5
+    /// How long a keyboard capture that is still starting gets: the capture's own start
+    /// timeout (`InKeyboardWebCapture.startTimeout`, 3 s) and a margin.
+    public static let startingDeadline: TimeInterval = 3.5
 
     public enum Verdict: Equatable, Sendable {
         /// Nothing captured yet, deadline not reached.
@@ -300,14 +303,18 @@ public enum DictationStartSafetyNet {
         /// The keyboard's capture ended (interrupted, failed) before the dictation began:
         /// no sample, or less than `InKeyboardInterruptionPolicy.minimumSeconds` of them.
         public var captureEndedWithoutAudio: Bool
+        /// The keyboard's capture was asked to start and has not reported `started` or a
+        /// failure yet (`getUserMedia` or the page still on their way).
+        public var keyboardCaptureStarting: Bool
 
         public init(elapsed: TimeInterval, keyboardHasAudio: Bool, appIsRecording: Bool, tapEnded: Bool,
-                    captureEndedWithoutAudio: Bool) {
+                    captureEndedWithoutAudio: Bool, keyboardCaptureStarting: Bool = false) {
             self.elapsed = elapsed
             self.keyboardHasAudio = keyboardHasAudio
             self.appIsRecording = appIsRecording
             self.tapEnded = tapEnded
             self.captureEndedWithoutAudio = captureEndedWithoutAudio
+            self.keyboardCaptureStarting = keyboardCaptureStarting
         }
     }
 
@@ -318,6 +325,11 @@ public enum DictationStartSafetyNet {
         if reading.keyboardHasAudio { return .standDown("keyboard-audio") }
         if reading.appIsRecording { return .standDown("app-recording") }
         if reading.tapEnded { return .standDown("tap-ended") }
-        return reading.elapsed >= deadline ? .fire("no-audio-by-deadline") : .keepWaiting
+        guard reading.elapsed >= deadline else { return .keepWaiting }
+        // A capture still starting is not "nothing captured" (device, 2026-11-24 17:47):
+        // it gets until `startingDeadline`, and its own start timeout fails it first if it
+        // hangs, which fires the net through `captureEndedWithoutAudio`.
+        guard reading.keyboardCaptureStarting else { return .fire("no-audio-by-deadline") }
+        return reading.elapsed >= startingDeadline ? .fire("capture-start-too-slow") : .keepWaiting
     }
 }
