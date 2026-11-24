@@ -98,6 +98,12 @@ class SuggestionState: ObservableObject {
     /// all running to completion. With coalescing, only the latest keystroke runs.
     private var currentSuggestionWork: DispatchWorkItem?
 
+    /// Bumped by every request and by a swipe's bar (#948), main thread only. Each queued
+    /// publication carries the value its request took and publishes only while it is still
+    /// the latest: `currentSuggestionWork?.isCancelled` alone reads the newest request's
+    /// state, not its own, so an older result could still land after a newer request.
+    private var publication = 0
+
     /// The host field's policy for the proxy's current traits (#200, #1004).
     /// Returns it without storing it: callers compare it to `hostPolicy` first.
     ///
@@ -260,12 +266,14 @@ class SuggestionState: ObservableObject {
         // Read on the main thread, like the context: the memory is not thread-safe.
         let previewsCorrection = rejectionMemory.previewsCorrection(context: context)
 
+        publication += 1
+        let ticket = publication
         let work = DispatchWorkItem { [weak self] in
             guard let self = self else { return }
 
             let partial = self.extractLastWord(from: context)
             guard !partial.isEmpty else {
-                DispatchQueue.main.async { self.clearUnlessSuperseded() }
+                DispatchQueue.main.async { self.clearUnlessSuperseded(ticket) }
                 return
             }
 
@@ -278,7 +286,7 @@ class SuggestionState: ObservableObject {
                 DispatchQueue.main.async { [weak self] in
                     guard let self = self else { return }
                     // Superseded by a newer request or a swipe's bar (#948).
-                    guard !(self.currentSuggestionWork?.isCancelled ?? true) else { return }
+                    guard self.publication == ticket else { return }
                     self.currentWord = partial
                     self.suggestions = completions.isEmpty ? [] : completions
                     self.mode = completions.isEmpty ? .idle : .completions
@@ -317,6 +325,7 @@ class SuggestionState: ObservableObject {
                 guard let self = self else { return }
                 // Check cancellation before publishing stale results
                 guard !(self.currentSuggestionWork?.isCancelled ?? true) else { return }
+                guard self.publication == ticket else { return }
 
                 self.currentWord = partial
 
@@ -440,6 +449,7 @@ class SuggestionState: ObservableObject {
     /// still being computed for the word before the swipe is dropped.
     func showSwipePreview(_ word: String?) {
         currentSuggestionWork?.cancel()
+        publication += 1
         currentWord = ""
         suggestions = word.map { [$0] } ?? []
         mode = .swipePreview
@@ -448,6 +458,7 @@ class SuggestionState: ObservableObject {
     /// A swipe typed its word: the bar offers its other readings, already in slot order.
     func showSwipeAlternatives(_ words: [String]) {
         currentSuggestionWork?.cancel()
+        publication += 1
         currentWord = ""
         suggestions = words
         mode = words.isEmpty ? .idle : .swipeAlternatives
@@ -455,8 +466,8 @@ class SuggestionState: ObservableObject {
 
     /// A background computation found nothing to show: the bar empties, unless a newer
     /// request or a swipe's bar (#948) has replaced that computation since. Main thread.
-    private func clearUnlessSuperseded() {
-        guard !(currentSuggestionWork?.isCancelled ?? true) else { return }
+    private func clearUnlessSuperseded(_ ticket: Int) {
+        guard publication == ticket else { return }
         clear()
     }
 
@@ -508,13 +519,15 @@ class SuggestionState: ObservableObject {
         // Cancel any in-flight completion work
         currentSuggestionWork?.cancel()
 
+        publication += 1
+        let ticket = publication
         let work = DispatchWorkItem { [weak self] in
             guard let self = self else { return }
 
             // Extract last 1-2 complete words from context
             let words = self.extractLastWords(from: context, count: 2)
             guard !words.isEmpty else {
-                DispatchQueue.main.async { self.clearUnlessSuperseded() }
+                DispatchQueue.main.async { self.clearUnlessSuperseded(ticket) }
                 return
             }
 
@@ -524,6 +537,7 @@ class SuggestionState: ObservableObject {
             DispatchQueue.main.async { [weak self] in
                 guard let self = self else { return }
                 guard !(self.currentSuggestionWork?.isCancelled ?? true) else { return }
+                guard self.publication == ticket else { return }
 
                 if let undo = self.pendingUndo {
                     var undoSuggestions = [undo.originalWord]
