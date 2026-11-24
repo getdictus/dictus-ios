@@ -96,6 +96,11 @@ extension DictusKeyboardBridge: SwipeTypingOutput {
         observeMirror(before: mirrorBefore, inserted: record.inserted.count)
         noteSwipedWordInserted(record.word)
         swipedWord = record
+        // One tick per word the lift types, the key tap's own (`keyTapped` honours the
+        // Haptique setting): Pierre's device test, 2026-11-24. None while the finger moves,
+        // none for a swipe that read as nothing (the `guard` above), none for a tap that slid
+        // (its tick came on touch-down, like any tap's). Hex gives none on lift.
+        HapticFeedback.keyTapped()
 
         // Shift is one-shot, as after a typed letter.
         if keyboardView?.page == .shifted {
