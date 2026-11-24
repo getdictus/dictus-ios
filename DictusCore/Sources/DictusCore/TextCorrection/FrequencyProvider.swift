@@ -73,10 +73,22 @@ public extension FrequencyProvider {
     func knowsWord(_ word: String) -> Bool {
         let lowered = word.lowercased()
         guard let apostrophe = lowered.lastIndex(of: "'") else {
-            return wordExists(lowered)
+            return hasWord(lowered)
         }
         let afterApostrophe = String(lowered[lowered.index(after: apostrophe)...])
         guard !afterApostrophe.isEmpty else { return false }
-        return wordExists(afterApostrophe)
+        return hasWord(afterApostrophe)
+    }
+
+    /// Whether the dictionary has `word`, asked in its own spelling (#1042): a word typed
+    /// with a ligature is also looked up with it spelled out, so "cœur" is the dictionary's
+    /// "coeur". `word` is lowercase, as `wordExists` takes it.
+    ///
+    /// WHY a fallback and not a rewrite of the word: a dictionary that does store the
+    /// ligature is found by the first lookup, and the typed word is never changed, only
+    /// recognised. Only a word holding œ or æ can take the second lookup.
+    func hasWord(_ word: String) -> Bool {
+        if wordExists(word) { return true }
+        return Ligature.contains(word) && wordExists(Ligature.spelledOut(word))
     }
 }
