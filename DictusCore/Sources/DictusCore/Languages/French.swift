@@ -125,6 +125,8 @@ public let frenchProfile = LanguageProfile(
         ],
         endings: ["\u{00E9}", "\u{00E9}e", "\u{00E9}s", "\u{00E9}es"]  // é, ée, és, ées
     ),
+    // The only letters that are words on their own (#977): `problème z` is `problème a`.
+    loneLetterWords: ["a", "\u{00E0}", "y"],  // a, à, y
     contextualHomographs: [frenchAGrave],
     longPressAccents: LongPressAccents.french
 )

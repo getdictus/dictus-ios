@@ -75,6 +75,12 @@ public struct LanguageProfile: Sendable {
     /// that nobody has written the list for.
     public let participleContext: ParticipleContext?
 
+    /// The lowercase one-letter words of the language, French `a`, `à` and `y` (#977).
+    /// Any other lone letter is corrected to a neighbouring key that is one of them, or
+    /// kept (`LoneLetterCorrection`). nil for languages nobody has written them for,
+    /// which leaves every lone letter to the dictionary, as before.
+    public let loneLetterWords: Set<String>?
+
     /// Known misspellings, lowercase, with their correct form: the entries
     /// `tools/misspellings/` removed from the word list (`teh` → `the`). Read
     /// with `overrides`, and kept apart from it because it is generated from a
@@ -117,6 +123,7 @@ public struct LanguageProfile: Sendable {
         elisionOnset: ElisionOnset? = nil,
         collapseRules: [(from: String, to: String)] = [],
         participleContext: ParticipleContext? = nil,
+        loneLetterWords: Set<String>? = nil,
         misspellings: [String: String] = [:],
         contextualContractions: [ContextualContraction] = [],
         contextualHomographs: [ContextualHomograph] = [],
@@ -137,6 +144,7 @@ public struct LanguageProfile: Sendable {
         self.elisionOnset = elisionOnset
         self.collapseRules = collapseRules
         self.participleContext = participleContext
+        self.loneLetterWords = loneLetterWords
         self.misspellings = misspellings
         self.contextualContractions = contextualContractions
         self.contextualHomographs = contextualHomographs

@@ -345,10 +345,12 @@ class TextPredictionEngine {
 
     /// The body of `spellCheck(_:isAtSentenceStart:)`. `previousWord` is only read by
     /// the trie pass and the accent pass, which rank their candidates with it (#993).
+    /// `context`, the text before the cursor, only by the lone-letter rule (#977).
     private func checkWord(
         _ word: String,
         isAtSentenceStart: Bool,
-        previousWord: String?
+        previousWord: String?,
+        context: String? = nil
     ) -> CheckedWord? {
         guard !word.isEmpty else { return nil }
 
@@ -441,6 +443,11 @@ class TextPredictionEngine {
         case .restore, .ambiguous, .keepTyped:
             break
         }
+
+        // A lone letter that is not a word on its own (#977): `problème z` → `problème a`.
+        // Before the valid-word guard, which knows every letter of the alphabet; after the
+        // learned-word check, so a letter the user taught stays.
+        if let answer = loneLetterAnswer(for: word, previousWord: previousWord, context: context) { return answer }
 
         // Valid word guard: if the word exists in the trie dictionary, it's correct.
         // This prevents aggressive corrections like "fais" → "vais".
@@ -760,7 +767,7 @@ class TextPredictionEngine {
         // #1011: the taps, read by the spatial decoder. It comes after every authoritative
         // branch above (lexicon, overrides, contractions) and is weighed against the trie,
         // which only has the letters. When it keeps the word, the trie decides.
-        let trie = trieProposal(for: word, previousWord: previousWord, isAtSentenceStart: isAtSentenceStart)
+        let trie = trieProposal(for: word, previousWord: previousWord, isAtSentenceStart: isAtSentenceStart, context: context)
         guard let spatial else { return trie }
         return spatialProposal(for: word, previousWord: previousWord, spatial: spatial, trie: trie)
     }
@@ -768,11 +775,11 @@ class TextPredictionEngine {
     /// What the trie proposes for `word` from its letters: the spell check, then the
     /// bigram rerank. The tail of `correctionProposal`, apart since #1011 so the spatial
     /// decoder can be weighed against it.
-    private func trieProposal(for word: String, previousWord: String?, isAtSentenceStart: Bool) -> CorrectionProposal? {
+    private func trieProposal(for word: String, previousWord: String?, isAtSentenceStart: Bool, context: String?) -> CorrectionProposal? {
         let applied = { (result: (correction: String, alternatives: [String])?) -> CorrectionProposal? in
             result.map { .autocorrect($0.correction, alternatives: $0.alternatives) }
         }
-        let checked = checkWord(word, isAtSentenceStart: isAtSentenceStart, previousWord: previousWord)
+        let checked = checkWord(word, isAtSentenceStart: isAtSentenceStart, previousWord: previousWord, context: context)
         let result = checked?.proposal.autocorrection
 
         // If no previous word context or n-grams not loaded, return standard result.
@@ -1095,6 +1102,37 @@ class TextPredictionEngine {
         return winner
     }
 
+}
+
+// MARK: - Lone letters (#977)
+
+// WHY in an extension: the class body is at SwiftLint's 650-line budget (see below).
+extension TextPredictionEngine {
+    /// `LoneLetterCorrection`'s answer for `word`, in `checkWord`'s terms. A double
+    /// optional, because the rule has three answers: nil when the word is not the rule's
+    /// (the usual path goes on), `.some(nil)` to keep the letter, and `.some(word)` to
+    /// replace it. The correction counts as ranked in context, so the bigram rerank
+    /// cannot swap the `à` a homograph rule chose for a neighbour.
+    private func loneLetterAnswer(for word: String, previousWord: String?, context: String?) -> CheckedWord?? {
+        switch LoneLetterCorrection.decision(
+            for: word, words: profile?.loneLetterWords, layout: loadedLayout ?? LayoutType.active,
+            context: context, homographs: profile?.contextualHomographs ?? [],
+            isLearned: UserDictionary.shared.isLearned
+        ) {
+        case .correct(let letter):
+            #if DEBUG
+            AutocorrectDebugLog.autocorrectDecision(original: word, corrected: letter, branch: "lone-letter", prevWord: previousWord)
+            #endif
+            return .some(CheckedWord(correction: letter, alternatives: [], rankedInContext: true))
+        case .keep:
+            #if DEBUG
+            AutocorrectDebugLog.autocorrectSkipped(word: word, reason: "lone-letter")
+            #endif
+            return .some(nil)
+        case nil:
+            return nil
+        }
+    }
 }
 
 // MARK: - Spatial autocorrect (#1011)
