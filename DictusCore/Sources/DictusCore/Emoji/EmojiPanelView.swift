@@ -9,6 +9,8 @@
 // - It records your use itself, and the host only inserts text.
 // - A skin-tone picker released where it opened stays open for a tap, as iOS's does.
 // - Hex's experiments (ABC under the emoji key, the dictation bar's back key) are left out.
+// - Its background is Hex's invisible touch fill (pull 2547, #503), so the bands its `hitTest`
+//   hands to ABC and to the search button get their touches from iOS.
 #if canImport(UIKit)
 import UIKit
 
@@ -112,7 +114,8 @@ public final class EmojiPanelView: UIView, UICollectionViewDataSource, UICollect
         )
         searchKeys = EmojiSearchKeysView(rows: letterRows, space: strings.space, delete: strings.delete)
         super.init(frame: .zero)
-        backgroundColor = .clear
+        // Clear to the eye, but every point of the panel takes touches (`keyboardTouchFill`, #503).
+        backgroundColor = .keyboardTouchFill
         isOpaque = false
         accessibilityIdentifier = "emoji.panel"
 
