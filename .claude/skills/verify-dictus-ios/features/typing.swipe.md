@@ -20,7 +20,16 @@
 
 ## Driving it with axe + Argent
 
-Measured 2026-11-24 (iPhone 17, iOS 27.2, build `84ec0742`), Debug, in a `<textarea>` served from the Mac (`python3 -I -m http.server 8765 --bind 127.0.0.1`, then `simctl openurl <udid> http://127.0.0.1:8765/`): Safari's address bar and a slimmed device's Rappels are no use (see Gotchas).
+Measured 2026-11-24 (iPhone 17, iOS 27.2, build `84ec0742`), Debug, in a `<textarea>` served from the Mac: Safari's address bar and a slimmed device's Rappels are no use (see Gotchas). The page, in an empty folder of its own outside the repository:
+
+```bash
+mkdir -p "$SCRATCH/www" && cat > "$SCRATCH/www/index.html" <<'HTML'
+<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<textarea autofocus style="width:100%;height:160px;font:22px -apple-system"></textarea>
+HTML
+(cd "$SCRATCH/www" && python3 -I -m http.server 8765 --bind 127.0.0.1) &
+xcrun simctl openurl <udid> http://127.0.0.1:8765/   # then tap into the textarea (150, 160)
+```
 
 ```bash
 D=.claude/skills/verify-dictus-ios/scripts/drive.sh

@@ -59,18 +59,27 @@ public final class DeleteWordSwipe {
     ///   - step: how far one word is: a letter key's width. Floored at one point.
     ///   - touchDownDeletion: the one character the touch-down's own deletion removed, if
     ///     the caller knows it for certain.
+    ///   - touchDownWord: the whole word the touch-down removed, when it took back a word
+    ///     swipe typing had just typed (#948), with the space the swipe added. It counts as
+    ///     the slide's first word: the first step deletes nothing more, and sliding all the
+    ///     way back types it back.
     public init(
         editor: TextDocumentEditing,
         mirror: MirrorSyncState?,
         startX: Double,
         step: Double,
-        touchDownDeletion: String? = nil
+        touchDownDeletion: String? = nil,
+        touchDownWord: String? = nil
     ) {
         self.editor = editor
         self.mirror = mirror
         self.startX = startX
         self.step = max(1, step)
         self.touchDownDeletion = touchDownDeletion
+        if let word = touchDownWord, !word.isEmpty {
+            deleted = [word]
+            self.touchDownDeletion = nil
+        }
     }
 
     public var deletedWordCount: Int { deleted.count }
@@ -90,6 +99,9 @@ public final class DeleteWordSwipe {
     /// longer the one next to the cursor, so it is not typed back.
     public func forgetTouchDownDeletion() {
         touchDownDeletion = nil
+        // The same for a whole word the touch-down took back (#948): the cursor has moved
+        // on, so typing it back would put it in the wrong place.
+        if !isActive { deleted.removeAll() }
     }
 
     /// The finger moved: delete or restore words until their count matches how far left it

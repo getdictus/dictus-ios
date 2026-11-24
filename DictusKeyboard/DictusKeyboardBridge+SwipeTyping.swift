@@ -75,7 +75,7 @@ extension DictusKeyboardBridge: SwipeTypingOutput {
     /// the bar. Nothing goes in when it read as nothing.
     func swipeTypingDidEnd(readings: [String]) {
         guard let proxy = controller?.textDocumentProxy, !readings.isEmpty else {
-            suggestionState?.updateAsync(context: swipeTypingContextBefore())
+            restoreBarAfterDroppedSwipe()
             return
         }
         KeyboardState.shared.invalidateDictationUndo(reason: "swipe")
@@ -113,7 +113,25 @@ extension DictusKeyboardBridge: SwipeTypingOutput {
     }
 
     func swipeTypingDidCancel() {
-        suggestionState?.updateAsync(context: swipeTypingContextBefore())
+        restoreBarAfterDroppedSwipe()
+    }
+
+    /// A swipe that typed nothing gives the bar back: the readings of the word a swipe typed
+    /// before it, while that word is still before the cursor, else the usual suggestions.
+    private func restoreBarAfterDroppedSwipe() {
+        let before = swipeTypingContextBefore()
+        if let record = swipedWord, record.isBeforeCursor(before) {
+            suggestionState?.showSwipeAlternatives(SwipeTypingText.barOrder(record.alternatives))
+        } else {
+            suggestionState?.updateAsync(context: before)
+        }
+    }
+
+    /// Whether the host has text selected: an edit then replaces the selection, so nothing
+    /// that counts on the cursor sitting right after the swiped word applies.
+    private var hasSelection: Bool {
+        guard let selected = controller?.textDocumentProxy.selectedText else { return false }
+        return !selected.isEmpty
     }
 
     // MARK: - Right after a swiped word
@@ -122,8 +140,7 @@ extension DictusKeyboardBridge: SwipeTypingOutput {
     /// still ends with them and nothing is selected. Nil otherwise, and Delete deletes one
     /// character (or the selection).
     func swipedWordDeletionCount(before: String?) -> Int? {
-        guard let record = swipedWord else { return nil }
-        if let selected = controller?.textDocumentProxy.selectedText, !selected.isEmpty { return nil }
+        guard let record = swipedWord, !hasSelection else { return nil }
         return record.deletionCount(before: before)
     }
 
@@ -137,7 +154,8 @@ extension DictusKeyboardBridge: SwipeTypingOutput {
     /// "hello w"); punctuation that goes against a word ("hello,") does not.
     func spaceAfterSwipedWord(before character: String) {
         guard let record = swipedWord, SwipeTypingText.startsNextWord(character),
-              let proxy = controller?.textDocumentProxy, record.isBeforeCursor(proxy.documentContextBeforeInput)
+              let proxy = controller?.textDocumentProxy, !hasSelection,
+              record.isBeforeCursor(proxy.documentContextBeforeInput)
         else { return }
         swipedWord = nil
         let mirrorBefore = mirrorLength()
@@ -151,6 +169,7 @@ extension DictusKeyboardBridge: SwipeTypingOutput {
     /// and the word joins the readings offered.
     func replaceSwipedWord(with reading: String) {
         guard let proxy = controller?.textDocumentProxy, let record = swipedWord,
+              !hasSelection,
               let change = record.replacing(with: reading, before: proxy.documentContextBeforeInput) else {
             // The text moved under the bar: offer nothing rather than glue a word on.
             swipedWord = nil

@@ -197,8 +197,11 @@ final class SwipeTypingController {
         guard var stroke = pending[id] else { return false }
         for (point, time) in samples { stroke.add(point, at: time) }
         pending[id] = stroke
-        guard let first = stroke.points.first, let last = stroke.points.last, let keys = keys(),
-              SwipeTypingText.isSwipe(from: first, to: last, pitch: keys.pitch) else { return false }
+        // Any sample past the threshold, not only the last: a finger that went out and came
+        // back within one batch of coalesced touches is a swipe as much as one reported in two.
+        guard let first = stroke.points.first, let keys = keys(),
+              stroke.points.contains(where: { SwipeTypingText.isSwipe(from: first, to: $0, pitch: keys.pitch) })
+        else { return false }
         pending[id] = nil
         active = ActiveSwipe(touch: id, stroke: stroke, keys: keys)
         generation += 1

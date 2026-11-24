@@ -152,6 +152,10 @@ final class DictusKeyboardBridge: NSObject, // swiftlint:disable:this type_body_
     /// it say so for certain. The delete swipe types it back with its first word.
     private var lastBackspaceDeletion: String?
 
+    /// The whole word the last backspace tap took back right after a swipe typed it, with
+    /// the space the swipe added (#948). The delete swipe counts it as its first word.
+    private var lastBackspaceSwipedWord: String?
+
     // MARK: - Mirror trust (#530)
 
     /// Whether the proxy's mirror is still reflecting this keyboard's own edits.
@@ -440,6 +444,8 @@ final class DictusKeyboardBridge: NSObject, // swiftlint:disable:this type_body_
 
         state.hostPolicy = policy
         if !policy.suggestionsAllowed {
+            // A swipe under way in a field that now takes none ends with nothing typed (#948).
+            keyboardView?.swipeTyping?.cancelAll()
             // Empty the bar immediately — stale suggestions from the previous
             // field must not survive into a no-suggestions field.
             state.clear()
@@ -548,6 +554,7 @@ final class DictusKeyboardBridge: NSObject, // swiftlint:disable:this type_body_
         updateAccentKeyDisplay()
         let context = controller?.textDocumentProxy.documentContextBeforeInput
         lastBackspaceDeletion = DeleteWordSwipe.touchDownDeletion(before: contextBefore, after: context)
+        lastBackspaceSwipedWord = deleteCount > 1 ? contextBefore.map { String($0.suffix(deleteCount)) } : nil
         noteDeletion(before: contextBefore, after: context)
         noteSpatialDeletion(context: context)
         suggestionState?.updateAsync(context: context)
@@ -1554,9 +1561,11 @@ extension DictusKeyboardBridge {
             mirror: mirrorSync,
             startX: Double(x),
             step: Double(step),
-            touchDownDeletion: lastBackspaceDeletion
+            touchDownDeletion: lastBackspaceDeletion,
+            touchDownWord: lastBackspaceSwipedWord
         )
         lastBackspaceDeletion = nil
+        lastBackspaceSwipedWord = nil
     }
 
     /// The backspace finger moved. True once the slide owns the touch, which is the view's
