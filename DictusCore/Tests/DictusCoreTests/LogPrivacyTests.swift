@@ -127,6 +127,7 @@ final class LogPrivacyTests: XCTestCase {
             .keyboardTextInserted,
             .keyRepeatStarted,
             .keyRepeatStopped(ticks: 12, reason: "touch"),
+            .deleteSwipeEnded(words: 3, frozen: false),
             .appLaunched(version: "1.2"),
             .appLaunchState(state: "background"),
             // The background session's identifier, a constant of the app (#707).

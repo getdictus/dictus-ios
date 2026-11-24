@@ -21,5 +21,7 @@ public let spanishProfile = LanguageProfile(
         "n": ["\u{00F1}"]                  // ñ
     ],
     contractionPrefixes: [],
-    misspellings: spanishMisspellings
+    misspellings: spanishMisspellings,
+    longPressAccents: LongPressAccents.spanish,
+    lettersWithOwnKey: LongPressAccents.spanishLettersWithOwnKey
 )

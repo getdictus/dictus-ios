@@ -333,6 +333,10 @@ public enum LogEvent: Sendable {
     /// torn down. A `keyRepeatStarted` with no matching stop is a repeat that outlived
     /// its keyboard, which is the whole of #390 and was previously invisible.
     case keyRepeatStopped(ticks: Int, reason: String)
+    /// A delete swipe (#609) ended: the finger slid left from backspace and lifted.
+    /// `words` is how many words it left deleted, `frozen` whether an edit's mirror check
+    /// failed and stopped it (#530). Counts only, never the words.
+    case deleteSwipeEnded(words: Int, frozen: Bool)
 
     // MARK: Keyboard status message (#261)
     /// The toolbar message was assigned. `reason` names what asked for it.
@@ -809,7 +813,7 @@ public enum LogEvent: Sendable {
              .onboardingKeyboardRetry,
              .audioEngineStopped,
              .keyboardDidDisappear, .keyboardTextInserted,
-             .keyRepeatStarted, .keyRepeatStopped,
+             .keyRepeatStarted, .keyRepeatStopped, .deleteSwipeEnded,
              .appDidBecomeActive, .appWillResignActive, .appDidEnterBackground,
              .rapidTapRejected,
              .engineWarmUpAttempt, .engineWarmUpSuccess,
@@ -1010,6 +1014,8 @@ public enum LogEvent: Sendable {
             return ""
         case .keyRepeatStopped(let ticks, let reason):
             return "ticks=\(ticks) reason=\(reason)"
+        case .deleteSwipeEnded(let words, let frozen):
+            return "words=\(words) frozen=\(frozen)"
 
         // Engine Diagnostics
         case .engineWarmUpAttempt(let context):
@@ -1289,7 +1295,7 @@ extension LogEvent {
             return .model
         case .keyboardDidAppear, .keyboardDidDisappear, .keyboardMicTapped, .keyboardTextInserted,
              .hostReturn,
-             .keyRepeatStarted, .keyRepeatStopped,
+             .keyRepeatStarted, .keyRepeatStopped, .deleteSwipeEnded,
              .overlayShown, .overlayHidden, .rapidTapRejected,
              .dictationMessageSet, .dictationMessageDisplayed, .dictationMessageCleared,
              .waveformAppeared, .waveformDisappeared, .waveformHeartbeat, .waveformStall,
@@ -1394,6 +1400,7 @@ extension LogEvent {
         case .keyboardTextInserted: return "keyboardTextInserted"
         case .keyRepeatStarted: return "keyRepeatStarted"
         case .keyRepeatStopped: return "keyRepeatStopped"
+        case .deleteSwipeEnded: return "deleteSwipeEnded"
         case .engineWarmUpAttempt: return "engineWarmUpAttempt"
         case .engineWarmUpSuccess: return "engineWarmUpSuccess"
         case .engineWarmUpFailed: return "engineWarmUpFailed"

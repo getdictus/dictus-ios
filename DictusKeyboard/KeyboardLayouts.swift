@@ -79,9 +79,9 @@ enum KeyboardLayouts {
     /// Ten plain input keys, 10 units — the same unit total as every other row, so the
     /// renderer normalizes it to exactly the width of the letter rows below it.
     ///
-    /// No long-press alternates by construction: `longPressData` is built from
-    /// `AccentedCharacters.mappings`, which is keyed on letters, so a digit has nothing to
-    /// hold. Plain digits in v1 is a decision that needs no code to keep.
+    /// No long-press alternates by construction: each layout's long-press data comes from
+    /// `AccentedCharacters.mappings(for:layout:)`, which is keyed on letters, so a digit has
+    /// nothing to hold. Plain digits in v1 is a decision that needs no code to keep.
     private static func digitRow() -> [KeyDefinition] {
         inputRow("1", "2", "3", "4", "5", "6", "7", "8", "9", "0")
     }
@@ -107,7 +107,7 @@ enum KeyboardLayouts {
             locale: lang.rawValue,
             spaceName: lang.spaceName,
             returnName: lang.returnName,
-            longPress: longPressData,
+            longPress: AccentedCharacters.mappings(for: lang, layout: .azerty),
             layout: KeyboardDefinition.Layout(
                 normal: azertyNormal(lang: lang, needsGlobe: needsGlobe),
                 shifted: azertyShifted(lang: lang, needsGlobe: needsGlobe),
@@ -124,7 +124,7 @@ enum KeyboardLayouts {
             locale: lang.rawValue,
             spaceName: lang.spaceName,
             returnName: lang.returnName,
-            longPress: longPressData,
+            longPress: AccentedCharacters.mappings(for: lang, layout: .qwerty),
             layout: KeyboardDefinition.Layout(
                 normal: qwertyNormal(lang: lang, needsGlobe: needsGlobe),
                 shifted: qwertyShifted(lang: lang, needsGlobe: needsGlobe),
@@ -147,7 +147,7 @@ enum KeyboardLayouts {
             locale: lang.rawValue,
             spaceName: lang.spaceName,
             returnName: lang.returnName,
-            longPress: longPressData,
+            longPress: AccentedCharacters.mappings(for: lang, layout: .qwertz),
             layout: KeyboardDefinition.Layout(
                 normal: qwertzNormal(lang: lang, needsGlobe: needsGlobe),
                 shifted: qwertzShifted(lang: lang, needsGlobe: needsGlobe),
@@ -367,18 +367,6 @@ enum KeyboardLayouts {
         ])
         return row
     }
-
-    // MARK: - Long Press Accents
-
-    /// Long-press accent data shared across all languages.
-    /// Includes French accents (grave, circumflex, diaeresis) and Spanish accents (acute).
-    private static let longPressData: [String: [String]] = {
-        var longPress: [String: [String]] = [:]
-        for (baseKey, accents) in AccentedCharacters.mappings {
-            longPress[baseKey] = accents
-        }
-        return longPress
-    }()
 
     // MARK: - Helper Functions
 

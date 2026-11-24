@@ -178,6 +178,8 @@
 		AA0000F2 /* SoundFeedbackService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000F2 /* SoundFeedbackService.swift */; };
 		B565F0B1 /* FeedbackComposer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B565F0B2 /* FeedbackComposer.swift */; };
 		AA0000F3 /* SoundSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000F3 /* SoundSettingsView.swift */; };
+		KB5E7701 /* KeyboardSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = KB5E7711 /* KeyboardSettingsView.swift */; };
+		KB5E7702 /* KeyboardExperimentsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = KB5E7712 /* KeyboardExperimentsView.swift */; };
 		AA0000F4 /* Sounds in Resources */ = {isa = PBXBuildFile; fileRef = AA1000F4 /* Sounds */; };
 		AB097401 /* ReleaseNotes in Resources */ = {isa = PBXBuildFile; fileRef = AB097402 /* ReleaseNotes */; };
 		AA0000F5 /* LiveActivityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000F5 /* LiveActivityManager.swift */; };
@@ -206,6 +208,9 @@
 		EE000008 /* dictus_ngram.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EE100008A /* dictus_ngram.cpp */; };
 		EE000009 /* fr_ngrams.dict in Resources */ = {isa = PBXBuildFile; fileRef = EE100009A /* fr_ngrams.dict */; };
 		EE00000A /* en_ngrams.dict in Resources */ = {isa = PBXBuildFile; fileRef = EE10000AA /* en_ngrams.dict */; };
+		SD1011A1 /* SpatialAutocorrect.swift in Sources */ = {isa = PBXBuildFile; fileRef = SD1011B1 /* SpatialAutocorrect.swift */; };
+		SD1011A2 /* fr.hextm in Resources */ = {isa = PBXBuildFile; fileRef = SD1011B2 /* fr.hextm */; };
+		SD1011A3 /* en.hextm in Resources */ = {isa = PBXBuildFile; fileRef = SD1011B3 /* en.hextm */; };
 		EE0ES001 /* es_spellcheck.dict in Resources */ = {isa = PBXBuildFile; fileRef = EE1ES001 /* es_spellcheck.dict */; };
 		EE0ES002 /* es_ngrams.dict in Resources */ = {isa = PBXBuildFile; fileRef = EE1ES002 /* es_ngrams.dict */; };
 		EE0DE001 /* de_spellcheck.dict in Resources */ = {isa = PBXBuildFile; fileRef = EE1DE001 /* de_spellcheck.dict */; };
@@ -454,6 +459,8 @@
 		AA1000F2 /* SoundFeedbackService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoundFeedbackService.swift; sourceTree = "<group>"; };
 		B565F0B2 /* FeedbackComposer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedbackComposer.swift; sourceTree = "<group>"; };
 		AA1000F3 /* SoundSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoundSettingsView.swift; sourceTree = "<group>"; };
+		KB5E7711 /* KeyboardSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardSettingsView.swift; sourceTree = "<group>"; };
+		KB5E7712 /* KeyboardExperimentsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardExperimentsView.swift; sourceTree = "<group>"; };
 		AA1000F4 /* Sounds */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Sounds; path = Dictus/Sounds; sourceTree = SOURCE_ROOT; };
 		AB097402 /* ReleaseNotes */ = {isa = PBXFileReference; lastKnownFileType = folder; name = ReleaseNotes; path = ReleaseNotes; sourceTree = SOURCE_ROOT; };
 		AA1000F5 /* LiveActivityManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveActivityManager.swift; sourceTree = "<group>"; };
@@ -533,6 +540,9 @@
 		EE10000F /* dictus_ngram_format.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = dictus_ngram_format.h; sourceTree = "<group>"; };
 		EE100009A /* fr_ngrams.dict */ = {isa = PBXFileReference; lastKnownFileType = "compiled"; path = fr_ngrams.dict; sourceTree = "<group>"; };
 		EE10000AA /* en_ngrams.dict */ = {isa = PBXFileReference; lastKnownFileType = "compiled"; path = en_ngrams.dict; sourceTree = "<group>"; };
+		SD1011B1 /* SpatialAutocorrect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpatialAutocorrect.swift; sourceTree = "<group>"; };
+		SD1011B2 /* fr.hextm */ = {isa = PBXFileReference; lastKnownFileType = "compiled"; path = fr.hextm; sourceTree = "<group>"; };
+		SD1011B3 /* en.hextm */ = {isa = PBXFileReference; lastKnownFileType = "compiled"; path = en.hextm; sourceTree = "<group>"; };
 		EE1ES001 /* es_spellcheck.dict */ = {isa = PBXFileReference; lastKnownFileType = "compiled"; path = es_spellcheck.dict; sourceTree = "<group>"; };
 		EE1ES002 /* es_ngrams.dict */ = {isa = PBXFileReference; lastKnownFileType = "compiled"; path = es_ngrams.dict; sourceTree = "<group>"; };
 		EE1DE001 /* de_spellcheck.dict */ = {isa = PBXFileReference; lastKnownFileType = "compiled"; path = de_spellcheck.dict; sourceTree = "<group>"; };
@@ -820,6 +830,8 @@
 				AA100302 /* ModelLanguageDetailView.swift */,
 				AA1000E4 /* SwipeBackOverlayView.swift */,
 				AA1000F3 /* SoundSettingsView.swift */,
+				KB5E7711 /* KeyboardSettingsView.swift */,
+				KB5E7712 /* KeyboardExperimentsView.swift */,
 				AA100300 /* ModelPreparationParts.swift */,
 				AA100301 /* ModelLoadingOverlay.swift */,
 				AA100484 /* ModelPreparationPresentation.swift */,
@@ -930,6 +942,7 @@
 				AA1000D0 /* TextPredictionEngine.swift */,
 				AA1000D1 /* SuggestionState.swift */,
 				EE100005 /* AOSPTrieEngine.swift */,
+				SD1011B1 /* SpatialAutocorrect.swift */,
 			);
 			path = TextPrediction;
 			sourceTree = "<group>";
@@ -949,6 +962,8 @@
 				EE10000AA /* en_ngrams.dict */,
 				EE1ES002 /* es_ngrams.dict */,
 				EE1DE002 /* de_ngrams.dict */,
+				SD1011B2 /* fr.hextm */,
+				SD1011B3 /* en.hextm */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -1331,6 +1346,8 @@
 				EE0DE001 /* de_spellcheck.dict in Resources */,
 				EE000009 /* fr_ngrams.dict in Resources */,
 				EE00000A /* en_ngrams.dict in Resources */,
+				SD1011A2 /* fr.hextm in Resources */,
+				SD1011A3 /* en.hextm in Resources */,
 				EE0ES002 /* es_ngrams.dict in Resources */,
 				EE0DE002 /* de_ngrams.dict in Resources */,
 			);
@@ -1537,6 +1554,8 @@
 				AA0000F2 /* SoundFeedbackService.swift in Sources */,
 				B565F0B1 /* FeedbackComposer.swift in Sources */,
 				AA0000F3 /* SoundSettingsView.swift in Sources */,
+				KB5E7701 /* KeyboardSettingsView.swift in Sources */,
+				KB5E7702 /* KeyboardExperimentsView.swift in Sources */,
 				AA0000F6 /* StopStandbyIntent.swift in Sources */,
 				AA0000L0 /* ModelInfo+Localized.swift in Sources */,
 				SS000001 /* SubscriptionManager.swift in Sources */,
@@ -1609,6 +1628,7 @@
 				AA0000B4 /* EmojiSearchFR.swift in Sources */,
 				AA0000D0 /* TextPredictionEngine.swift in Sources */,
 				AA0000D1 /* SuggestionState.swift in Sources */,
+				SD1011A1 /* SpatialAutocorrect.swift in Sources */,
 				AA0000D4 /* SuggestionBarView.swift in Sources */,
 				AA0000G0 /* KeyTapSignposter.swift in Sources */,
 				CC000030 /* KeyboardMetrics.swift in Sources */,

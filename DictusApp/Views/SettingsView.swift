@@ -4,7 +4,7 @@ import SwiftUI
 import UIKit
 import DictusCore
 
-/// Settings screen: Dictus Pro, Transcription, Keyboard, About.
+/// Settings screen: Dictus Pro, Transcription, Keyboard (its own page), About.
 ///
 /// WHY @AppStorage with App Group store:
 /// Preferences need to be readable by both the main app AND the keyboard extension.
@@ -23,9 +23,6 @@ struct SettingsView: View {
 
     // MARK: - Preferences (App Group persisted)
 
-    @AppStorage(SharedKeys.language, store: UserDefaults(suiteName: AppGroup.identifier))
-    private var language = "fr"
-
     /// Transcription (STT) language mode, decoupled from the keyboard language (#226).
     /// Stored as its raw App Group encoding: "follow" (default), "auto", or an
     /// explicit code ("fr"/"en"/"es"/"de"). "follow" preserves the historical
@@ -33,31 +30,8 @@ struct SettingsView: View {
     @AppStorage(SharedKeys.transcriptionLanguage, store: UserDefaults(suiteName: AppGroup.identifier))
     private var transcriptionLanguage = TranscriptionLanguageMode.followStoredValue
 
-    /// Bumped whenever the Layout picker writes, to re-evaluate the body.
-    ///
-    /// WHY not @AppStorage like every other preference here: since #272 the layout is
-    /// stored per keyboard language (`KeyboardLayoutPreference`), so there is no single
-    /// key for @AppStorage to observe — the value the picker shows depends on the
-    /// language selected in the row above it.
-    @State private var layoutRevision = 0
-
-    @AppStorage(SharedKeys.hapticsEnabled, store: UserDefaults(suiteName: AppGroup.identifier))
-    private var hapticsEnabled = true
-
-    /// Persistent digit row above the letter rows (#331). Off by default: it makes the
-    /// keyboard a fifth taller, and nobody's keyboard may change shape on update.
-    /// Portrait only — the keyboard reads this through `NumberRowPreference` and never draws
-    /// the row in landscape, where it would take 72% of the screen.
-    @AppStorage(SharedKeys.numberRowEnabled, store: UserDefaults(suiteName: AppGroup.identifier))
-    private var numberRowEnabled = false
-
     @AppStorage(SharedKeys.activeModel, store: UserDefaults(suiteName: AppGroup.identifier))
     private var activeModel = "openai_whisper-small"
-
-    /// WHY default true: Most users expect autocorrect to be active by default.
-    /// Power users who find it annoying can toggle it off here.
-    @AppStorage(SharedKeys.autocorrectEnabled, store: UserDefaults(suiteName: AppGroup.identifier))
-    private var autocorrectEnabled = true
 
     @AppStorage(SharedKeys.liveActivityEnabled, store: UserDefaults(suiteName: AppGroup.identifier))
     private var liveActivityEnabled = true
@@ -100,42 +74,22 @@ struct SettingsView: View {
     private var appleIntelligenceUnsupported = false
     #endif
 
-    /// Spike: when the app is cold, the keyboard dictates by itself instead of opening
-    /// the app. On by default in this spike build. Read by `InKeyboardDictationRoute`.
+    /// When the app is cold, the keyboard dictates by itself instead of opening the app
+    /// (#992). On by default. Read by `InKeyboardDictationRoute`.
     @AppStorage(SharedKeys.inKeyboardDictationEnabled, store: UserDefaults(suiteName: AppGroup.identifier))
     private var inKeyboardDictationEnabled = InKeyboardDictationRoute.defaultEnabled
+
+    /// The keyboard language, read here only so a change re-reads Apple's coverage for
+    /// "Dictate in the keyboard" (in "follow the keyboard" mode the dictation follows it).
+    /// Its picker lives in `KeyboardSettingsView`.
+    @AppStorage(SharedKeys.language, store: UserDefaults(suiteName: AppGroup.identifier))
+    private var language = "fr"
 
     /// Whether Apple covers the chosen dictation language (nil until read, and before
     /// iOS 26). Not covered: the toggle shows off and is greyed, while the user's own
     /// choice above stays stored, so a covered language later brings it back only if
     /// they had not turned it off.
     @State private var inKeyboardEligibility: AppleSpeechLanguage?
-
-    /// The keyboard language the pickers below operate on.
-    private var keyboardLanguage: SupportedLanguage {
-        SupportedLanguage(rawValue: language) ?? .french
-    }
-
-    /// The Layout picker's selection: the layout of whichever keyboard language is
-    /// currently selected above it (#272).
-    ///
-    /// The getter reads `layoutRevision` so a write re-renders the picker; the setter is
-    /// the only thing that records an explicit layout from this screen. Changing the
-    /// *language* runs neither — which is the whole point, the language no longer
-    /// overwrites the layout.
-    private var layoutSelection: Binding<LayoutType> {
-        let selectedLanguage = keyboardLanguage
-        return Binding(
-            get: {
-                _ = layoutRevision
-                return KeyboardLayoutPreference.layout(for: selectedLanguage)
-            },
-            set: { newLayout in
-                KeyboardLayoutPreference.setLayout(newLayout, for: selectedLanguage)
-                layoutRevision += 1
-            }
-        )
-    }
 
     /// Whether the currently active model uses the Parakeet engine (CTC/TDT).
     /// Parakeet auto-detects language — the language picker has no effect on it.
@@ -165,9 +119,6 @@ struct SettingsView: View {
 
     /// Hidden polish debug screen (#141). Reached via long-press 3s on the Version row.
     @State private var showPolishDebug = false
-
-    /// Confirmation dialog for resetting the learned-words dictionary (#222).
-    @State private var showResetDictionaryConfirmation = false
 
     /// Confirmation dialog for emptying the transcription history (#70).
     @State private var showClearHistoryConfirmation = false
@@ -224,7 +175,7 @@ struct SettingsView: View {
 
     #if DEBUG
     /// Redraw trigger for the forced-entitlement switch below, the same shape
-    /// `layoutRevision` uses above and for the same reason.
+    /// `KeyboardSettingsView.layoutRevision` uses and for the same reason.
     @State private var proEntitlementRevision = 0
 
     /// The Developer section's forced-entitlement switch (#460).
@@ -334,6 +285,49 @@ struct SettingsView: View {
                     polishStateFooter
                 }
 
+                // Dictation in the keyboard with the app closed (#992): dictation, for
+                // everyone, so here and not on the TestFlight-only Experiments page.
+                // Turning it on also asks iOS for Apple's on-device speech model for the
+                // dictation language, which only the app may download: the keyboard checks
+                // it is installed and never fetches it.
+                Toggle("Dictate in the keyboard", isOn: inKeyboardDictationToggle)
+                    .disabled(inKeyboardEligibility.map { !$0.isCovered } ?? false)
+                    .onChange(of: inKeyboardDictationEnabled) { _, enabled in
+                        if enabled { InKeyboardSpeechAssets.prepareForDictationLanguage(reason: "setting") }
+                    }
+                    .task(id: "\(language)|\(transcriptionLanguage)") {
+                        guard #available(iOS 26.0, *) else {
+                            // No SpeechTranscriber before iOS 26 (Pierre, 2026-11-21).
+                            inKeyboardEligibility = .speechTranscriberUnavailable
+                            InKeyboardSpeechAssets.prepareForDictationLanguage(reason: "settings-language")
+                            return
+                        }
+                        inKeyboardEligibility = await InKeyboardSpeechAssets.refreshLanguageEligibility(reason: "settings-language")
+                    }
+                NavigationLink("How dictation works") {
+                    InKeyboardDictationInfoView()
+                }
+
+                // Dictation rows, here since the keyboard got its own page: both decide
+                // how long Dictus stays ready to dictate, not how the keyboard types.
+                Toggle("Live Activity", isOn: $liveActivityEnabled)
+                    .onChange(of: liveActivityEnabled) { _, enabled in
+                        if !enabled {
+                            LiveActivityManager.shared.stopStandbyActivity()
+                        }
+                    }
+
+                // Beside the Live Activity toggle because it decides how long the standby
+                // pill lasts (#380). Applied at once: a warm engine re-arms on the new value.
+                Picker("Inactivity timeout", selection: $warmEngineTimeout) {
+                    ForEach(WarmEngineTimeoutOption.allCases, id: \.self) { option in
+                        Text(warmEngineTimeoutLabel(for: option)).tag(option)
+                    }
+                }
+                .onChange(of: warmEngineTimeout) { _, _ in
+                    DictationCoordinator.shared.warmEngineTimeoutDidChange()
+                }
+
                 // Visible for a subscriber, and for anyone who still has dictated
                 // text on the device: saved transcriptions after an entitlement
                 // went away (#70), or the polish journal, which every dictation
@@ -353,130 +347,29 @@ struct SettingsView: View {
                 // (the caveat above already says the setting has no effect
                 // there), but the per-model language pointer stays useful for
                 // both engines.
-                if transcriptionLanguage == TranscriptionLanguageMode.autoStoredValue {
-                    VStack(alignment: .leading, spacing: 4) {
+                VStack(alignment: .leading, spacing: 4) {
+                    if transcriptionLanguage == TranscriptionLanguageMode.autoStoredValue {
                         if describesWhisperAutoDetect {
                             Text("Auto-detect lets you dictate in any language Whisper supports. Polish adapts to the language you speak.")
                         }
                         Text("Language support varies by model. Tap ⓘ on a model card in Models for details.")
                     }
+                    if !liveActivityEnabled {
+                        Text("Dynamic Island and Lock Screen notification are disabled.")
+                    }
+                    // No exact timing promised: iOS can end a background app earlier, and
+                    // Unlimited means exactly that, not "forever".
+                    Text("The inactivity timeout is how long Dictus stays ready after your last dictation. A shorter one saves battery and ends the Dynamic Island sooner. A longer one starts your next keyboard dictation faster. Unlimited lasts until iOS ends it.")
                 }
             }
 
-            // Section 2: Clavier
-            // All toggles are always visible — there's only one keyboard type now.
+            // Section 2: Keyboard. One row since the page split: its settings, grouped
+            // by kind, live in `KeyboardSettingsView`.
             Section {
-                // Keyboard language: drives layout, key labels, and
-                // autocorrect/prediction dictionaries. Moved here from the
-                // Transcription section in #226 — it no longer drives STT by
-                // itself (only when the transcription language is "Follow
-                // keyboard language").
-                Picker("Keyboard language", selection: $language) {
-                    // Iterate over SupportedLanguage so adding a new language
-                    // (German PR2, future onboardings) only requires the enum case.
-                    ForEach(SupportedLanguage.allCases, id: \.rawValue) { lang in
-                        Text(lang.displayName).tag(lang.rawValue)
-                    }
+                NavigationLink("Keyboard") {
+                    KeyboardSettingsView()
                 }
-                .onChange(of: language) { _, newLang in
-                    // The layout is NOT touched here anymore (#272): it belongs to the
-                    // language being selected, and overwriting it is what made "English
-                    // autocorrect on an AZERTY keyboard" unreachable. The Layout picker
-                    // below now shows the new language's own layout instead.
-                    //
-                    // Routing through activate() keeps the legacy mirror in step — the
-                    // @AppStorage write above has already stored the language, so this
-                    // only adds the mirror.
-                    if let lang = SupportedLanguage(rawValue: newLang) {
-                        SupportedLanguage.activate(lang)
-                    }
-                }
-
-                Picker("Layout", selection: layoutSelection) {
-                    // Iterate over LayoutType so adding a layout (QWERTZ in #151,
-                    // any future one) only requires the enum case — the entries used
-                    // to be hardcoded here and in the keyboard panel separately.
-                    ForEach(LayoutType.allCases, id: \.self) { layout in
-                        Text(layout.displayName).tag(layout)
-                    }
-                }
-
-                // Sits under the Layout picker because it changes the same thing: the shape
-                // of the key grid. It applies to every layout and every keyboard language —
-                // a number row is a hardware habit, not a language one (#331).
-                Toggle("Number row", isOn: $numberRowEnabled)
-
-                Toggle("Haptic feedback", isOn: $hapticsEnabled)
-
-                NavigationLink("Sounds") {
-                    SoundSettingsView()
-                }
-
-                Toggle("Autocorrect", isOn: $autocorrectEnabled)
-
-                // Reset the learned-words dictionary (#222). Words learned by
-                // the keyboard bypass autocorrect forever, so users need a way
-                // to recover from accidental learning (e.g. typos recorded
-                // before the search-field learning gate existed).
-                Button("Reset learned words", role: .destructive) {
-                    // Sync from App Group first: words learned by the keyboard
-                    // process since app launch aren't in this process's cache.
-                    UserDictionary.shared.reload()
-                    showResetDictionaryConfirmation = true
-                }
-                .confirmationDialog(
-                    "Reset learned words?",
-                    isPresented: $showResetDictionaryConfirmation,
-                    titleVisibility: .visible
-                ) {
-                    Button("Forget \(UserDictionary.shared.count) learned words", role: .destructive) {
-                        UserDictionary.shared.resetAll()
-                    }
-                    Button("Cancel", role: .cancel) {}
-                } message: {
-                    Text("Words the keyboard learned from your typing will be forgotten and autocorrect will apply to them again.")
-                }
-
-                Toggle("Live Activity", isOn: $liveActivityEnabled)
-                    .onChange(of: liveActivityEnabled) { _, enabled in
-                        if !enabled {
-                            LiveActivityManager.shared.stopStandbyActivity()
-                        }
-                    }
-
-                // Beside the Live Activity toggle because it decides how long the standby
-                // pill lasts (#380). Applied at once: a warm engine re-arms on the new value.
-                Picker("Inactivity timeout", selection: $warmEngineTimeout) {
-                    ForEach(WarmEngineTimeoutOption.allCases, id: \.self) { option in
-                        Text(warmEngineTimeoutLabel(for: option)).tag(option)
-                    }
-                }
-                .onChange(of: warmEngineTimeout) { _, _ in
-                    DictationCoordinator.shared.warmEngineTimeoutDidChange()
-                }
-            } header: {
-                Text("Keyboard")
-            } footer: {
-                // Only shown once the row is on: the keyboard drops it in landscape by
-                // design (#331) and on iPad by design (#336), and without a word here either
-                // one reads as a bug to the person who just turned it on.
-                //
-                // WHY one sentence covering both rather than a device-aware one, and why the
-                // toggle stays visible on an iPad where it now does nothing: this target has
-                // no device detection at all — `DeviceContext` and DeviceKit are linked to the
-                // keyboard, not here, and `UIDevice.userInterfaceIdiom` reports `.phone` in
-                // compatibility mode, which is the only way an iPad reaches this app. A second
-                // copy of device detection in a second target, for a device class Dictus does
-                // not target, costs more than a sentence that is simply true on both.
-                if numberRowEnabled {
-                    Text("The number row is shown on iPhone in portrait only.")
-                }
-                if !liveActivityEnabled {
-                    Text("Dynamic Island and Lock Screen notification are disabled.")
-                }
-                // No exact timing promised: iOS can end a background app earlier, and
-                // Unlimited means exactly that, not "forever".
-                Text("The inactivity timeout is how long Dictus stays ready after your last dictation. A shorter one saves battery and ends the Dynamic Island sooner. A longer one starts your next keyboard dictation faster. Unlimited lasts until iOS ends it.")
+                .accessibilityIdentifier("settings.keyboard")
             }
 
             #if DEBUG
@@ -552,31 +445,6 @@ struct SettingsView: View {
                 Text(verbatim: "Smart Modes read as unsupported (deviceNotEligible), as on an iPhone 15. The paywall, the Pro hub and the keyboard follow at once; relaunch the app for Home and the trial. To replay the trial, use \"Forget the trial\" above, then relaunch. Debug builds only.")
             }
             #endif
-
-            // Spike: in-keyboard dictation on a cold start. Turning it on also asks iOS for
-            // Apple's on-device speech model for the dictation language, which only the
-            // app may download: the keyboard checks it is installed and never fetches it.
-            Section {
-                Toggle("Dictate in the keyboard", isOn: inKeyboardDictationToggle)
-                    .disabled(inKeyboardEligibility.map { !$0.isCovered } ?? false)
-                    .onChange(of: inKeyboardDictationEnabled) { _, enabled in
-                        if enabled { InKeyboardSpeechAssets.prepareForDictationLanguage(reason: "setting") }
-                    }
-                    .task(id: "\(language)|\(transcriptionLanguage)") {
-                        guard #available(iOS 26.0, *) else {
-                            // No SpeechTranscriber before iOS 26 (Pierre, 2026-11-21).
-                            inKeyboardEligibility = .speechTranscriberUnavailable
-                            InKeyboardSpeechAssets.prepareForDictationLanguage(reason: "settings-language")
-                            return
-                        }
-                        inKeyboardEligibility = await InKeyboardSpeechAssets.refreshLanguageEligibility(reason: "settings-language")
-                    }
-                NavigationLink("How dictation works") {
-                    InKeyboardDictationInfoView()
-                }
-            } header: {
-                Text("Experiments")
-            }
 
             // Section 4: A propos
             Section("About") {

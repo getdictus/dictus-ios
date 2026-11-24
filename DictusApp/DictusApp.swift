@@ -378,7 +378,26 @@ struct DictusApp: App {
             ))
         }
         refreshOnboardingFlag()
+        #if DEBUG
+        Self.applySpatialAutocorrectArgument()
+        #endif
     }
+
+    #if DEBUG
+    /// `-DictusDebugSpatialAutocorrect YES` (or `NO`) on the launch line turns the keyboard's
+    /// spatial decoder on or off (#1011), for a device test of a Debug build:
+    /// `xcrun devicectl device process launch --device <id> com.pivi.dictus -DictusDebugSpatialAutocorrect YES`.
+    ///
+    /// WHY a launch argument: the switch has no row in the app's settings yet (#992 owns
+    /// SettingsView), and the keyboard, which reads it, gets no launch arguments. Written
+    /// here, with the launch's other App Group writes, once protected data is available.
+    private static func applySpatialAutocorrectArgument() {
+        let argument = "DictusDebugSpatialAutocorrect"
+        guard ProcessInfo.processInfo.arguments.contains("-\(argument)") else { return }
+        // The key is `SpatialAutocorrect.switchKey` in DictusKeyboard, where it is read.
+        AppGroup.defaults.set(UserDefaults.standard.bool(forKey: argument), forKey: "debug.spatialAutocorrect")
+    }
+    #endif
 
     /// Read the onboarding flag from the App Group again: from the file when this
     /// process's view of it is stale (#868).

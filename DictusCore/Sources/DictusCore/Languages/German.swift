@@ -24,7 +24,7 @@ public let germanProfile = LanguageProfile(
         // ß is reached via the collapseRules ss→ß below, not single-char
         // substitution — it would require deleting a position, which the
         // single-char accent substitution algorithm doesn't model. Long-press
-        // on `s` is still wired via AccentedCharacters.mappings.
+        // on `s` is still wired via AccentedCharacters.mappings(for:layout:).
     ],
     contractionPrefixes: [],
     collapseRules: [
@@ -45,5 +45,7 @@ public let germanProfile = LanguageProfile(
         // `muss` (valid post-1996-reform 1st/3rd-person form) stays: archaic
         // `muß` is 0.02x as frequent (`AccentRestoration.typedWordOdds`).
         ("ss", "\u{00DF}")
-    ]
+    ],
+    longPressAccents: LongPressAccents.german,
+    lettersWithOwnKey: LongPressAccents.germanLettersWithOwnKey
 )

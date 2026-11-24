@@ -386,10 +386,12 @@ class SuggestionState: ObservableObject {
         _ word: String,
         previousWord: String?,
         isAtSentenceStart: Bool,
+        spatial: SpatialCorrection.Input? = nil,
         context: String
     ) -> CorrectionProposal? {
         engine.correctionProposal(
-            for: word, previousWord: previousWord, isAtSentenceStart: isAtSentenceStart, context: context
+            for: word, previousWord: previousWord, isAtSentenceStart: isAtSentenceStart, spatial: spatial,
+            context: context
         )
     }
 

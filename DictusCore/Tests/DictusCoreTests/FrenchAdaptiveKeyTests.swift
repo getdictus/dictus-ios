@@ -78,4 +78,40 @@ final class FrenchAdaptiveKeyTests: XCTestCase {
         defaults?.set(SupportedLanguage.english.rawValue, forKey: SharedKeys.language)
         XCTAssertEqual(FrenchAdaptiveKey.label(afterTyping: "e"), "'")
     }
+
+    // MARK: - Unchanged by the per-language long-press lists (#1042)
+
+    /// #1042 gave each language its own long-press lists, and French's held o now opens on
+    /// ö, not ô. The adaptive key must not follow: it keeps its own table, and every
+    /// keystroke gives what it gave before. The expected values are spelled out here, not
+    /// read from `FrenchAdaptiveKey.defaults`, so a change to that table fails too.
+    func testTheAdaptiveKeyIsUnchangedByThePerLanguageLongPressLists() {
+        XCTAssertEqual(FrenchAdaptiveKey.defaults, [
+            "e": "\u{00E9}", "a": "\u{00E0}", "u": "\u{00F9}", "i": "\u{00EE}", "o": "\u{00F4}"
+        ])
+
+        let accentAfter: [String: String] = [
+            "e": "\u{00E9}", "a": "\u{00E0}", "u": "\u{00F9}", "i": "\u{00EE}", "o": "\u{00F4}"
+        ]
+        let letters = "abcdefghijklmnopqrstuvwxyz".map(String.init)
+        for layout in LayoutType.allCases {
+            // The French long-press lists exist on every layout; the key must ignore them.
+            XCTAssertNotNil(AccentedCharacters.accents(for: "o", language: .french, layout: layout))
+            for letter in letters + letters.map { $0.uppercased() } {
+                let lower = letter.lowercased()
+                let expected = accentAfter[lower].map { letter == lower ? $0 : $0.uppercased() } ?? "'"
+                XCTAssertEqual(FrenchAdaptiveKey.label(afterTyping: letter, language: .french), expected, letter)
+                XCTAssertEqual(FrenchAdaptiveKey.shouldReplace(afterTyping: letter, language: .french),
+                               accentAfter[lower] != nil, letter)
+                XCTAssertEqual(FrenchAdaptiveKey.vowel(afterTyping: letter, language: .french),
+                               accentAfter[lower] != nil ? lower : nil, letter)
+            }
+        }
+        // Not œ after o, not æ after a: those are held, never on the key.
+        XCTAssertEqual(FrenchAdaptiveKey.label(afterTyping: "o", language: .french), "\u{00F4}")
+        XCTAssertEqual(FrenchAdaptiveKey.label(afterTyping: "a", language: .french), "\u{00E0}")
+        // qu still gives the apostrophe, and the apostrophe key itself still holds nothing.
+        XCTAssertEqual(FrenchAdaptiveKey.label(afterTyping: "u", precedingChar: "q", language: .french), "'")
+        XCTAssertNil(AccentedCharacters.accents(for: "'", language: .french, layout: .azerty))
+    }
 }
