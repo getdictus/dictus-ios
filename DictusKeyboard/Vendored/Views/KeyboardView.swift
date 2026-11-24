@@ -537,12 +537,15 @@ final internal class GiellaKeyboardView: UIView,
             case .spacebar(name: _):
                 break
             default:
+                lastTriggerPoint = nil
                 delegate?.didTriggerKey(activeKey.key)
             }
         }
     }
 
     func longpress(didSelectKey key: KeyDefinition) {
+        // A key picked in a popup was not tapped where it is drawn (#1011).
+        lastTriggerPoint = nil
         delegate?.didTriggerKey(key)
         longpressController = nil
         currentlyLongpressedKey = nil
@@ -662,6 +665,55 @@ final internal class GiellaKeyboardView: UIView,
 
         let key: KeyDefinition
         let indexPath: IndexPath
+        /// Where the finger is, in the collection view, clamped as the hit test clamps it (#1011).
+        var point: CGPoint = .zero
+    }
+
+    // MARK: - Spatial autocorrect (#1011)
+
+    /// Where the key the delegate is being told about was touched, in the collection
+    /// view's coordinates, clamped as the hit test clamps it. Set right before every
+    /// `didTriggerKey`; nil for a key picked in a long-press popup. Only the spatial
+    /// decoder reads it, through `DictusKeyboardBridge`.
+    private(set) var lastTriggerPoint: CGPoint?
+
+    private var spatialKeysCache: (size: CGSize, rows: Int, keys: SpatialDecoder.Keys)?
+
+    /// The letter keys of the letter page, where the collection view draws them: what the
+    /// spatial decoder scores each tap against. Nil off the letter pages. The normal and
+    /// shifted pages put every letter in the same cell, so one geometry serves both.
+    func spatialKeys() -> SpatialDecoder.Keys? {
+        guard page == .normal || page == .shifted || page == .capslock else { return nil }
+        let size = collectionView.bounds.size
+        // The rows are part of the key: the number row (#331) moves every letter down.
+        if let cache = spatialKeysCache, cache.size == size, cache.rows == currentPage.count { return cache.keys }
+        var centres: [Character: CGPoint] = [:]
+        var pitch = CGSize.zero
+        var bottom: CGFloat = 0
+        var space: CGRect?
+        for (section, row) in currentPage.enumerated() {
+            for (item, key) in row.enumerated() {
+                guard let frame = collectionView.layoutAttributesForItem(at: IndexPath(item: item, section: section))?.frame
+                else { continue }
+                switch key.type {
+                case .spacebar:
+                    space = frame
+                case .input(let character, let alternate) where alternate != "accent":
+                    guard character.count == 1, let letter = character.lowercased().first, letter.isLetter else { continue }
+                    centres[letter] = CGPoint(x: frame.midX, y: frame.midY)
+                    bottom = max(bottom, frame.midY)
+                    if pitch == .zero, key.size.width > 0 {
+                        pitch = CGSize(width: frame.width / key.size.width, height: frame.height)
+                    }
+                default:
+                    continue
+                }
+            }
+        }
+        guard !centres.isEmpty, pitch.width > 0, pitch.height > 0 else { return nil }
+        let keys = SpatialDecoder.Keys(centres: centres, pitch: pitch, bottomRowY: bottom, space: space)
+        spatialKeysCache = (size, currentPage.count, keys)
+        return keys
     }
 
     var activeKey: ActiveKey? {
@@ -805,9 +857,11 @@ final internal class GiellaKeyboardView: UIView,
             return
         }
 
-        if let key = activeKey?.key {
+        if let active = activeKey {
+            let key = active.key
             if key.type.triggersOnTouchUp {
                 if let delegate = delegate {
+                    lastTriggerPoint = active.point
                     delegate.didTriggerKey(key)
                 }
             }
@@ -860,6 +914,7 @@ final internal class GiellaKeyboardView: UIView,
 
                 if key.type.triggersOnTouchDown {
                     if let delegate = delegate {
+                        lastTriggerPoint = touchPoint
                         delegate.didTriggerKey(key)
                     }
                 }
@@ -870,7 +925,7 @@ final internal class GiellaKeyboardView: UIView,
                                          key.type.triggersOnTouchDown) && !isSymbolsKey
 
                 if shouldSetActiveKey {
-                    activeKey = ActiveKey(key: key, indexPath: indexPath)
+                    activeKey = ActiveKey(key: key, indexPath: indexPath, point: touchPoint)
                 }
                 if case .backspace = key.type {
                     beginDeleteSwipe(touch, atX: touchPoint.x)
@@ -987,7 +1042,7 @@ final internal class GiellaKeyboardView: UIView,
                 let movePoint = clampedPoint(touch.location(in: collectionView))
                 if let indexPath = collectionView.indexPathForItem(at: movePoint) {
                     let key = currentPage[indexPath.section][indexPath.row]
-                    activeKey = ActiveKey(key: key, indexPath: indexPath)
+                    activeKey = ActiveKey(key: key, indexPath: indexPath, point: movePoint)
                 } else {
                     activeKey = nil
                 }
@@ -1017,8 +1072,11 @@ final internal class GiellaKeyboardView: UIView,
                     let swipeKeyView = cell.keyView,
                     swipeKeyView.isSwipeKey,
                     swipeKeyView.percentageAlternative > 0.5 {
+                    // A swiped key is not read from where it was touched (#1011).
+                    lastTriggerPoint = nil
                     delegate?.didSwipeKey(activeKey.key)
                 } else {
+                    lastTriggerPoint = activeKey.point
                     delegate?.didTriggerKey(activeKey.key)
                 }
             }
