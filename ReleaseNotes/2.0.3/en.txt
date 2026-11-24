@@ -2,14 +2,14 @@ What's new in 2.0.3
 
 ## Highlights
 
-A redesigned keyboard
-Keys sit where Apple's keyboard puts them, and a long press on the space bar moves the cursor.
+A better keyboard
+Keys like Apple's, space-bar cursor, emoji and autocorrect.
 
-Simpler emoji
-Search, skin tones, and the full keyboard height for emoji.
+Apple's dictation model
+Pick it in the Models screen.
 
-Better French autocorrect
-« il m'a », « à », accents and words typed together.
+Translate into 25 languages
+With Dictus Pro, in Smart Modes.
 
 ## All changes
 
