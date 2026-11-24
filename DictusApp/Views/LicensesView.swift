@@ -30,7 +30,8 @@ import DictusCore
 /// condition.
 ///
 /// Hex is listed for the keyboard's key geometry (`KeyPlaneGeometry`): no code is copied,
-/// but the approach is Hex's (MIT), and the entry says so.
+/// but the approach is Hex's (MIT), and the entry says so. Its emoji panel (#1027) and its
+/// delete swipe (`DeleteWordSwipe`, #609) are ported code, and the entry names them too.
 struct LicensesView: View {
     var body: some View {
         ScrollView {
@@ -79,6 +80,8 @@ struct LicensesView: View {
                         + "Apple's key plane measured per iPhone size, and touch targets that tile the keyboard.\n\n"
                         + "The keyboard's emoji panel is Hex's, ported (#1027): its views, search, "
                         + "suggestions, shortcodes, skin tones and the builder of its emoji index.\n\n"
+                        + "Sliding left from the delete key to delete word by word, and back right to get "
+                        + "the words back, is Hex's delete swipe, ported (#609).\n\n"
                         + mitLicense(copyright: "Copyright (c) 2026 Christopher Langton")
                 )
 
