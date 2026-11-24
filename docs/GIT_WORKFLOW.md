@@ -83,7 +83,7 @@ scripts/promote-to-appstore.sh 18
 The script:
 1. Resolves `build/18` → commit X and marketing version `1.8.0`.
 2. Creates an ephemeral `release/1.8.0` branch at X and opens a PR → `main`.
-3. Waits for required checks (`Build`, `SwiftLint`), then merges with `--admin`
+3. Waits for required checks (`SwiftLint`, `iOS (build + DictusCore + App Tests)`), then merges with `--admin`
    (you are in main's bypass list; you cannot self-approve, so `--admin` is how
    the merge lands).
 4. Tags `v1.8.0` (annotated) on main + pushes, creates the GitHub Release.

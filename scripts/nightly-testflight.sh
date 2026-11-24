@@ -11,7 +11,7 @@
 #    1. lock; skip if another nightly, a cut/upload/promote script or an archive is running
 #    2. git fetch; HEAD = origin/develop
 #    3. skip if a build/NN tag already points to HEAD
-#    4. skip unless the CI run of HEAD on develop has its four jobs green (read only)
+#    4. skip unless the CI run of HEAD on develop has every job of CI_JOBS green (read only)
 #    5. skip if HEAD's marketing version is the one on main (closed train, ASC refuses it)
 #    6. NN = max(highest build number in App Store Connect, highest build/NN tag) + 1
 #    7. detached worktree at HEAD; CFBundleVersion = NN in the four plists, never committed
@@ -36,7 +36,7 @@ set -Eeuo pipefail
 ASC_APP_ID="6761262378"
 GH_REPO="getdictus/dictus-ios"
 CI_WORKFLOW="ci.yml"
-CI_JOBS="Build (iOS Simulator)|SwiftLint|DictusCore Tests|App Tests (iOS Simulator)"
+CI_JOBS="SwiftLint|iOS (build + DictusCore + App Tests)"
 PLISTS="DictusApp/Info.plist DictusKeyboard/Info.plist DictusShare/Info.plist DictusWidgets/Info.plist"
 PB=/usr/libexec/PlistBuddy
 
@@ -300,7 +300,7 @@ fi
 log "   PRs since ${PREV_TAG:-?}: $(printf '%s\n' "$PR_LINES" | grep -c . || true)"
 printf '%s\n' "$PR_LINES" | sed '/^$/d; s/^/     - /'
 
-# --- 4. CI of HEAD on develop: four jobs, all green --------------------------
+# --- 4. CI of HEAD on develop: every job of CI_JOBS green -------------------
 # Read only. A red or unfinished run is a skip, never a re-run.
 RUNS=$(run_timeout "$T_READ" "gh run list" gh run list --repo "$GH_REPO" --workflow "$CI_WORKFLOW" \
   --branch develop --event push --commit "$SHA" --limit 1 \
@@ -314,10 +314,11 @@ else
   JOBS=$(run_timeout "$T_READ" "gh run view" gh run view "$RUN_ID" --repo "$GH_REPO" --json jobs \
     --jq '.jobs[] | "\(.name)=\(.status)/\(.conclusion)"') || fail "gh run view $RUN_ID failed"
   CI_RED=""
-  IFS='|' read -r J1 J2 J3 J4 <<EOF
-$CI_JOBS
-EOF
-  for j in "$J1" "$J2" "$J3" "$J4"; do
+  # Every |-separated name of CI_JOBS, however many: no array, for bash 3.2 under set -u.
+  CI_REST="$CI_JOBS|"
+  while [ -n "$CI_REST" ]; do
+    j=${CI_REST%%|*}
+    CI_REST=${CI_REST#*|}
     st=$(printf '%s\n' "$JOBS" | awk -v n="$j" 'index($0, n "=") == 1 { print substr($0, length(n) + 2) }' | tail -1)
     [ "$st" = "completed/success" ] || CI_RED="${CI_RED}${j}=${st:-missing}; "
   done
