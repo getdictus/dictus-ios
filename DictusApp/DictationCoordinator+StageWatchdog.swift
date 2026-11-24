@@ -76,10 +76,15 @@ extension DictationCoordinator {
                     source: self.stageWatchdogSource(for: status),
                     staleState: status.rawValue
                 ))
-                self.cancelDictation()
+                self.endStuckStage()
             }
         }
         stageWatchdogStageStart = stageStartedAt
+    }
+
+    /// End a stage that never handed over.
+    func endStuckStage() {
+        cancelDictation()
     }
 
     func stopStageWatchdog() {
@@ -113,3 +118,42 @@ extension DictationCoordinator {
         startStageWatchdog(for: status, stageStartedAt: stageWatchdogStageStart)
     }
 }
+
+#if DEBUG
+extension DictationCoordinator {
+
+    private static var injectedFailureApplied = false
+
+    /// `-DictusDebugInjectDictationFailure engineError` (or `stuckTranscription`) on the
+    /// launch line plays out the end of a keyboard dictation that failed, for a
+    /// simulator run of #933 that records nothing and downloads no model:
+    /// `xcrun simctl launch <udid> com.pivi.dictus -DictusDebugInjectDictationFailure engineError`.
+    ///
+    /// - `engineError`: the transcription threw, as Whisper Turbo does on the iPad Pro M4
+    ///   (#931), through the same `handleError` the catch in `stopDictation` calls.
+    /// - `stuckTranscription`: a 19 s recording whose transcription never came back,
+    ///   ended by the stage watchdog's own ending, `endStuckStage`.
+    ///
+    /// Debug only: nothing of it is compiled into a TestFlight or App Store build.
+    func applyInjectedFailureArgument() {
+        let argument = "DictusDebugInjectDictationFailure"
+        // Called at every activation: once per launch is the injection.
+        guard !Self.injectedFailureApplied,
+              let mode = UserDefaults.standard.string(forKey: argument) else { return }
+        Self.injectedFailureApplied = true
+        PersistentLog.log(.dictationFailed(error: "injected \(mode) (\(argument))"))
+        switch mode {
+        case "engineError":
+            let coreML = NSError(domain: "com.apple.CoreML", code: 0, userInfo: [
+                NSLocalizedDescriptionKey: "Unable to compute the asynchronous prediction using ML Program"
+            ])
+            handleError(DictationFailureMessage.userFacing(for: coreML))
+        case "stuckTranscription":
+            enterTranscription(audioSeconds: 19)
+            endStuckStage()
+        default:
+            break
+        }
+    }
+}
+#endif
