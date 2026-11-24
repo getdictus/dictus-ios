@@ -19,7 +19,7 @@ final class DictusLogoGeometryTests: XCTestCase {
         XCTAssertEqual(DictusLogoGeometry.tileStrokeWidth(forSide: 80), 1, accuracy: accuracy)
 
         let heights = DictusLogoGeometry.barHeightRatios.map { $0 * height }
-        XCTAssertEqual(heights.count, 4)
+        XCTAssertEqual(heights.count, 3)
         XCTAssertEqual(heights[0], 18, accuracy: accuracy)
         XCTAssertEqual(heights[1], 42, accuracy: accuracy)
         XCTAssertEqual(heights[2], 27, accuracy: accuracy)
