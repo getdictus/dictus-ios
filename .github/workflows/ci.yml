@@ -182,6 +182,11 @@ jobs:
       # So fetch the asset for every `SupportedLanguage` before testing, and fail HERE,
       # with a message, if it cannot be had — a missing asset must not read as a
       # grounding regression in the test step below.
+      #
+      # Up to three attempts, 15 s then 45 s apart: runs 45423568221 and 45479875511
+      # failed on this download alone (45479875511: `fr: requestAssets -> timed out`,
+      # the other three available). The error annotation is written only once the
+      # last attempt has failed, so a recovered download leaves no red mark.
       - name: "DictusCore: Install Natural Language name-tagging assets"
         id: core-nl-assets
         if: ${{ !cancelled() && steps.core-toolchain.outcome == 'success' }}
@@ -216,11 +221,24 @@ jobs:
               if !ready { missing.append(code) }
           }
           if !missing.isEmpty {
-              print("::error::NLTagger nameType asset missing for \(missing). DictusCore grounding tests would fail for an environment reason, not a code one.")
+              print("nameType asset missing for \(missing)")
               exit(1)
           }
           SWIFT
-          swift "$RUNNER_TEMP/nl-assets.swift"
+          for attempt in 1 2 3; do
+            echo "NL assets: attempt $attempt/3"
+            if swift "$RUNNER_TEMP/nl-assets.swift"; then
+              echo "NL assets: attempt $attempt/3 succeeded"
+              exit 0
+            fi
+            echo "NL assets: attempt $attempt/3 failed"
+            case $attempt in
+              1) sleep 15 ;;
+              2) sleep 45 ;;
+            esac
+          done
+          echo "::error::NLTagger nameType asset still missing after 3 attempts. DictusCore grounding tests would fail for an environment reason, not a code one."
+          exit 1
 
       # No SwiftPM cache for this group, deliberately. DictusCore/Package.swift declares
       # no package dependencies, so `swift test` fetches nothing — there is nothing a
