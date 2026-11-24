@@ -130,6 +130,7 @@ final class LogPrivacyTests: XCTestCase {
             // Swipe typing (#948): counts and names, never the word the finger wrote.
             .swipeTypingConfigured(on: true, channel: "testFlight", reason: "on"),
             .swipeEnded(points: 84, decodeMs: 2.41, readings: 4, outcome: "word"),
+            .deleteSwipeEnded(words: 3, frozen: false),
             .appLaunched(version: "1.2"),
             .appLaunchState(state: "background"),
             // The background session's identifier, a constant of the app (#707).

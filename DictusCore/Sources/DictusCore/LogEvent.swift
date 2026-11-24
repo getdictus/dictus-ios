@@ -333,6 +333,10 @@ public enum LogEvent: Sendable {
     /// torn down. A `keyRepeatStarted` with no matching stop is a repeat that outlived
     /// its keyboard, which is the whole of #390 and was previously invisible.
     case keyRepeatStopped(ticks: Int, reason: String)
+    /// A delete swipe (#609) ended: the finger slid left from backspace and lifted.
+    /// `words` is how many words it left deleted, `frozen` whether an edit's mirror check
+    /// failed and stopped it (#530). Counts only, never the words.
+    case deleteSwipeEnded(words: Int, frozen: Bool)
 
     // MARK: Swipe typing (#948)
     // Counts and names only, never a word: what the finger wrote is what the user typed.
@@ -820,7 +824,7 @@ public enum LogEvent: Sendable {
              .onboardingKeyboardRetry,
              .audioEngineStopped,
              .keyboardDidDisappear, .keyboardTextInserted,
-             .keyRepeatStarted, .keyRepeatStopped,
+             .keyRepeatStarted, .keyRepeatStopped, .deleteSwipeEnded,
              .swipeTypingConfigured, .swipeEnded,
              .appDidBecomeActive, .appWillResignActive, .appDidEnterBackground,
              .rapidTapRejected,
@@ -1026,6 +1030,8 @@ public enum LogEvent: Sendable {
             return "on=\(on) channel=\(channel) reason=\(reason)"
         case .swipeEnded(let points, let decodeMs, let readings, let outcome):
             return "points=\(points) decodeMs=\(String(format: "%.2f", decodeMs)) readings=\(readings) outcome=\(outcome)"
+        case .deleteSwipeEnded(let words, let frozen):
+            return "words=\(words) frozen=\(frozen)"
 
         // Engine Diagnostics
         case .engineWarmUpAttempt(let context):
@@ -1305,7 +1311,7 @@ extension LogEvent {
             return .model
         case .keyboardDidAppear, .keyboardDidDisappear, .keyboardMicTapped, .keyboardTextInserted,
              .hostReturn,
-             .keyRepeatStarted, .keyRepeatStopped,
+             .keyRepeatStarted, .keyRepeatStopped, .deleteSwipeEnded,
              .swipeTypingConfigured, .swipeEnded,
              .overlayShown, .overlayHidden, .rapidTapRejected,
              .dictationMessageSet, .dictationMessageDisplayed, .dictationMessageCleared,
@@ -1413,6 +1419,7 @@ extension LogEvent {
         case .keyRepeatStopped: return "keyRepeatStopped"
         case .swipeTypingConfigured: return "swipeTypingConfigured"
         case .swipeEnded: return "swipeEnded"
+        case .deleteSwipeEnded: return "deleteSwipeEnded"
         case .engineWarmUpAttempt: return "engineWarmUpAttempt"
         case .engineWarmUpSuccess: return "engineWarmUpSuccess"
         case .engineWarmUpFailed: return "engineWarmUpFailed"

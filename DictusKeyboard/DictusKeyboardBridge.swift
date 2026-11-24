@@ -142,6 +142,16 @@ final class DictusKeyboardBridge: NSObject, // swiftlint:disable:this type_body_
     /// `DictusKeyboardBridge+SwipeTyping.swift`. Always nil while swipe typing is off.
     var swipedWord: SwipedWord?
 
+    // MARK: - Delete swipe (#609)
+
+    /// The slide from backspace under way, from touch-down to lift. See the extension at
+    /// the end of this file.
+    private var deleteSwipe: DeleteWordSwipe?
+
+    /// The one character the last backspace tap deleted, when the context before and after
+    /// it say so for certain. The delete swipe types it back with its first word.
+    private var lastBackspaceDeletion: String?
+
     // MARK: - Mirror trust (#530)
 
     /// Whether the proxy's mirror is still reflecting this keyboard's own edits.
@@ -338,6 +348,9 @@ final class DictusKeyboardBridge: NSObject, // swiftlint:disable:this type_body_
         guard let proxy = controller?.textDocumentProxy else { return .unavailable }
         guard !hasNothingToDelete(proxy) else { return .nothingToDelete }
 
+        // The repeat deleted past the touch-down's character: a slide starting now must not
+        // type it back (#609).
+        deleteSwipe?.forgetTouchDownDeletion()
         if wordMode {
             didTriggerHoldKey(key)
         } else {
@@ -534,6 +547,7 @@ final class DictusKeyboardBridge: NSObject, // swiftlint:disable:this type_body_
         updateCapitalization()
         updateAccentKeyDisplay()
         let context = controller?.textDocumentProxy.documentContextBeforeInput
+        lastBackspaceDeletion = DeleteWordSwipe.touchDownDeletion(before: contextBefore, after: context)
         noteDeletion(before: contextBefore, after: context)
         noteSpatialDeletion(context: context)
         suggestionState?.updateAsync(context: context)
@@ -1517,5 +1531,87 @@ extension DictusKeyboardBridge {
         guard SpatialAutocorrect.isOn, let keys = spatialTouches.keys,
               let taps = spatialTouches.taps(for: word) else { return nil }
         return SpatialCorrection.Input(taps: taps, keys: keys)
+    }
+}
+
+// MARK: - Delete swipe (#609)
+
+/// Press backspace and slide left to delete word by word, slide back right to get the words
+/// back, lift to keep what is deleted (`DeleteWordSwipe`, ported from Hex). The keyboard view
+/// reports the finger; this side owns the edits and keeps the suggestion bar, the shift and
+/// the undo chip in step with them.
+///
+/// The tap is untouched: backspace still deletes one character on touch-down and repeats on
+/// a stationary hold at the cadence #419 measured. The slide takes over only once the finger
+/// is a letter key's width left of where it went down, and the view stops the repeat then.
+extension DictusKeyboardBridge {
+
+    /// Backspace went down at `x`, after its touch-down deletion. `step` is a letter key's
+    /// width: one word per key width, as in Hex.
+    func deleteSwipeBegan(atX x: CGFloat, step: CGFloat) {
+        deleteSwipe = DeleteWordSwipe(
+            editor: documentEditor,
+            mirror: mirrorSync,
+            startX: Double(x),
+            step: Double(step),
+            touchDownDeletion: lastBackspaceDeletion
+        )
+        lastBackspaceDeletion = nil
+    }
+
+    /// The backspace finger moved. True once the slide owns the touch, which is the view's
+    /// cue to stop the repeat.
+    func deleteSwipeMoved(toX x: CGFloat) -> Bool {
+        guard let swipe = deleteSwipe else { return false }
+        let wasActive = swipe.isActive
+        guard let change = swipe.move(toX: Double(x)) else { return false }
+        if !wasActive {
+            // The chip offers to undo a correction this slide may be about to delete, and
+            // a word typed back is plain text, not that correction any more. The held word
+            // delete drops it for the same reason.
+            suggestionState?.pendingUndo = nil
+        }
+        // One tick per word, deleted or typed back, as Hex gives it. No click: Hex gives none,
+        // and a click per word at a finger's speed is a rattle. `keyTapped` honours the
+        // haptics setting.
+        for _ in 0..<change.steps {
+            HapticFeedback.keyTapped()
+        }
+        if change.steps > 0 { deleteSwipeEdited() }
+        return true
+    }
+
+    /// The backspace finger lifted, or its touch ended any other way (a second finger, the
+    /// keyboard torn down mid-slide, #390): what is deleted stays deleted.
+    func deleteSwipeEnded() {
+        guard let swipe = deleteSwipe else { return }
+        deleteSwipe = nil
+        let words = swipe.deletedWordCount
+        swipe.finish()
+        guard swipe.isActive else { return }
+        PersistentLog.log(.deleteSwipeEnded(words: words, frozen: swipe.isFrozen))
+        // Taken as one deletion from where the slide began to where it ended, as the held
+        // word delete is: a correction it erased counts as refused, and the rejection
+        // memory forgets positions past the cursor.
+        noteDeletion(before: swipe.contextAtActivation, after: controller?.textDocumentProxy.documentContextBeforeInput)
+        deleteSwipeEdited()
+    }
+
+    /// The text before the cursor changed under the slide: what reads it is refreshed, as
+    /// after any deletion.
+    private func deleteSwipeEdited() {
+        secondToLastInsertedCharacter = nil
+        lastInsertedCharacter = nil
+        updateCapitalization()
+        updateAccentKeyDisplay()
+        // `updateAsync` keeps the undo chip on screen while the text ends in a space, and
+        // the slide has dropped the correction that chip offers to undo: left alone, the
+        // bar would show "↶ bonjoru" with nothing behind it (seen in the simulator).
+        if let state = suggestionState, state.pendingUndo == nil, state.mode == .undoAvailable {
+            state.clear()
+        }
+        let context = controller?.textDocumentProxy.documentContextBeforeInput
+        noteSpatialDeletion(context: context)
+        suggestionState?.updateAsync(context: context)
     }
 }
