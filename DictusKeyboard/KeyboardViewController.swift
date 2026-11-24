@@ -354,7 +354,7 @@ class KeyboardViewController: UIInputViewController {
         // dictation, with nothing half-typed to suggest for.
         KeyboardState.shared.onDictationUndone = { [weak self] in
             guard let self = self else { return }
-            self.suggestionState.clear()
+            self.suggestionState.clearDroppingPending()
             self.bridge?.updateCapitalization()
         }
 
@@ -463,6 +463,10 @@ class KeyboardViewController: UIInputViewController {
         // ~200 ms UICollectionView teardown, so it only runs when the answer actually moved.
         // With the setting off the value is false in both orientations and this never fires.
         reloadIfNumberRowChanged(trigger: "viewWillAppear")
+
+        // Swipe typing (#948): its switches live in the app, so an appearance is the first
+        // moment a change can be seen. Off, this leaves the view with no swipe controller.
+        bridge?.refreshSwipeTyping(trigger: "viewWillAppear")
 
         // (Re)subscribe to the keyboard area mode here, not in viewDidLoad.
         // WHY: iOS caches UIInputViewController instances across app-switches and
