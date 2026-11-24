@@ -227,6 +227,9 @@
 		CC00000E /* Audio.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC10000E /* Audio.swift */; };
 		CC00000F /* DeviceKit in Frameworks */ = {isa = PBXBuildFile; productRef = CC900001 /* DeviceKit */; };
 		CC000020 /* DictusKeyboardBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC100020 /* DictusKeyboardBridge.swift */; };
+		SW0948A1 /* DictusKeyboardBridge+SwipeTyping.swift in Sources */ = {isa = PBXBuildFile; fileRef = SW0948B1 /* DictusKeyboardBridge+SwipeTyping.swift */; };
+		SW0948A2 /* SwipeTypingController.swift in Sources */ = {isa = PBXBuildFile; fileRef = SW0948B2 /* SwipeTypingController.swift */; };
+		SW0948A3 /* SwipeTrailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = SW0948B3 /* SwipeTrailView.swift */; };
 		CC000040 /* HostInputTraits.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC100040 /* HostInputTraits.swift */; };
 		VN6200000001 /* VoiceNoteProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = VN6201000001 /* VoiceNoteProcessor.swift */; };
 		VN6200000002 /* VoiceNoteCopy.swift in Sources */ = {isa = PBXBuildFile; fileRef = VN6201000002 /* VoiceNoteCopy.swift */; };
@@ -492,6 +495,9 @@
 		CC100050 /* KeySoundPolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeySoundPolicy.swift; sourceTree = "<group>"; };
 		CC100010 /* KeyboardLayouts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardLayouts.swift; sourceTree = "<group>"; };
 		CC100020 /* DictusKeyboardBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DictusKeyboardBridge.swift; sourceTree = "<group>"; };
+		SW0948B1 /* DictusKeyboardBridge+SwipeTyping.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DictusKeyboardBridge+SwipeTyping.swift"; sourceTree = "<group>"; };
+		SW0948B2 /* SwipeTypingController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwipeTypingController.swift; sourceTree = "<group>"; };
+		SW0948B3 /* SwipeTrailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwipeTrailView.swift; sourceTree = "<group>"; };
 		CC100040 /* HostInputTraits.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HostInputTraits.swift; sourceTree = "<group>"; };
 		CC100001 /* GiellaUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GiellaUtils.swift; sourceTree = "<group>"; };
 		CC100002 /* KeyDefinition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyDefinition.swift; sourceTree = "<group>"; };
@@ -687,6 +693,7 @@
 				CC100050 /* KeySoundPolicy.swift */,
 				CC100010 /* KeyboardLayouts.swift */,
 				CC100020 /* DictusKeyboardBridge.swift */,
+				SW0948B1 /* DictusKeyboardBridge+SwipeTyping.swift */,
 				CC100040 /* HostInputTraits.swift */,
 				CC400001 /* Vendored */,
 				AA400005 /* Views */,
@@ -736,6 +743,7 @@
 				AA1000B2 /* EmojiPickerView.swift */,
 				AA1000B3 /* EmojiCategoryBar.swift */,
 				AA1000D4 /* SuggestionBarView.swift */,
+				SW0948B3 /* SwipeTrailView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -958,6 +966,7 @@
 			isa = PBXGroup;
 			children = (
 				AA1000G0 /* KeyTapSignposter.swift */,
+				SW0948B2 /* SwipeTypingController.swift */,
 			);
 			path = TouchHandling;
 			sourceTree = "<group>";
@@ -1604,6 +1613,9 @@
 				CC000050 /* KeySoundPolicy.swift in Sources */,
 				CC000010 /* KeyboardLayouts.swift in Sources */,
 				CC000020 /* DictusKeyboardBridge.swift in Sources */,
+				SW0948A1 /* DictusKeyboardBridge+SwipeTyping.swift in Sources */,
+				SW0948A2 /* SwipeTypingController.swift in Sources */,
+				SW0948A3 /* SwipeTrailView.swift in Sources */,
 				CC000040 /* HostInputTraits.swift in Sources */,
 				CC000001 /* GiellaUtils.swift in Sources */,
 				CC000002 /* KeyDefinition.swift in Sources */,

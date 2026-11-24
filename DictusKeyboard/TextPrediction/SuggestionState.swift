@@ -18,6 +18,8 @@ enum SuggestionMode {
     case candidates       // Typed word kept: candidates offered for a tap, none applied on space (#993)
     case predictions      // After space: showing n-gram predicted next words
     case undoAvailable    // After autocorrect: showing undo option for previous correction
+    case swipePreview     // While swiping: what the path reads as so far (#948)
+    case swipeAlternatives // After a swipe: its other readings, a tap replaces the word (#948)
 }
 
 /// Tracks the last autocorrection so the user can undo it.
@@ -428,6 +430,25 @@ class SuggestionState: ObservableObject {
     /// can apply a casing-only replacement (`zofiak` -> "Zofiak").
     func isInSupplementaryLexicon(_ word: String) -> Bool {
         engine.lexiconDecision(for: word) != nil
+    }
+
+    // MARK: - Swipe typing (#948)
+
+    /// The swipe under way reads as `word` so far: the bar shows it alone. Any completion
+    /// still being computed for the word before the swipe is dropped.
+    func showSwipePreview(_ word: String?) {
+        currentSuggestionWork?.cancel()
+        currentWord = ""
+        suggestions = word.map { [$0] } ?? []
+        mode = .swipePreview
+    }
+
+    /// A swipe typed its word: the bar offers its other readings, already in slot order.
+    func showSwipeAlternatives(_ words: [String]) {
+        currentSuggestionWork?.cancel()
+        currentWord = ""
+        suggestions = words
+        mode = words.isEmpty ? .idle : .swipeAlternatives
     }
 
     /// Resets the suggestion state to idle.

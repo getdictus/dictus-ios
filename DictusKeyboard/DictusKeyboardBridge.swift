@@ -88,7 +88,11 @@ final class DictusKeyboardBridge: NSObject, // swiftlint:disable:this type_body_
     /// A new view (the controller rebuilds it on a layout or language change) gets the
     /// return key of the field already focused at once, not at the next keystroke (#1023).
     weak var keyboardView: GiellaKeyboardView? {
-        didSet { refreshReturnKey() }
+        didSet {
+            refreshReturnKey()
+            // A new view starts without swipe typing; it gets it back here when it acts (#948).
+            refreshSwipeTyping(trigger: "newView")
+        }
     }
 
     /// Reference to the suggestion state for triggering prediction updates.
@@ -112,7 +116,7 @@ final class DictusKeyboardBridge: NSObject, // swiftlint:disable:this type_body_
     /// - Manual shift: returns to .normal after ONE character typed (one-shot shift)
     /// - Autocap shift: also returns to .normal after one character, but updateCapitalization
     ///   may re-apply shift if conditions still hold (e.g., still at start of sentence)
-    private var isManualShift = false
+    var isManualShift = false
 
     /// Whether a character was typed since the symbols pages opened (#504). The space
     /// bar returns to letters only after one, as Apple's keyboard does: `123` then
@@ -125,12 +129,18 @@ final class DictusKeyboardBridge: NSObject, // swiftlint:disable:this type_body_
 
     /// Last character inserted by the keyboard, tracked locally to avoid IPC latency.
     /// Used by adaptive accent key (Phase 19 Plan 03) and as supplement to proxy reads.
-    private(set) var lastInsertedCharacter: String?
+    var lastInsertedCharacter: String?
 
     /// Second-to-last character, used for 2-char context (e.g., "qu" detection).
     /// When the user types "qu", lastInsertedCharacter="u" and secondToLastInsertedCharacter="q",
     /// allowing AccentedCharacters to detect the bigram and show apostrophe instead of u-grave.
-    private var secondToLastInsertedCharacter: String?
+    var secondToLastInsertedCharacter: String?
+
+    // MARK: - Swipe typing (#948)
+
+    /// The word a swipe just typed, until a key edits the text. See
+    /// `DictusKeyboardBridge+SwipeTyping.swift`. Always nil while swipe typing is off.
+    var swipedWord: SwipedWord?
 
     // MARK: - Mirror trust (#530)
 
@@ -178,6 +188,9 @@ final class DictusKeyboardBridge: NSObject, // swiftlint:disable:this type_body_
     // MARK: - GiellaKeyboardViewDelegate
 
     func didTriggerKey(_ key: KeyDefinition) {
+        // Read by this key's handler, then gone: only the very next edit acts on the word a
+        // swipe typed (#948).
+        defer { if Self.editsDocument(key) { swipedWord = nil } }
         // An off return key does nothing, as Apple's does (#1023): the host asked for it to
         // be off while the field is empty. Read again here rather than trusting the drawn
         // state, which can be one event behind the document.
@@ -428,6 +441,7 @@ final class DictusKeyboardBridge: NSObject, // swiftlint:disable:this type_body_
     /// NOTE: Haptic and click fire in GiellaKeyboardView.touchesBegan() for ALL keys
     /// on touchDown, so neither is emitted here.
     private func handleInputKey(_ character: String) {
+        spaceAfterSwipedWord(before: character)
         revertCorrectionInsideAddress(before: character)
         learnWordMovedPast()
 
@@ -485,9 +499,13 @@ final class DictusKeyboardBridge: NSObject, // swiftlint:disable:this type_body_
         // mirror stayed at 49 — and every character count taken off the mirror after
         // that over-counted. Bracketing the call is what catches it.
         let contextBefore = controller?.textDocumentProxy.documentContextBeforeInput
+        // Right after a swipe, Delete takes back its whole word and the space it added (#948).
+        let deleteCount = swipedWordDeletionCount(before: contextBefore) ?? 1
         let mirrorBefore = mirrorLength()
-        controller?.textDocumentProxy.deleteBackward()
-        observeMirror(before: mirrorBefore, deleted: 1)
+        for _ in 0..<deleteCount {
+            controller?.textDocumentProxy.deleteBackward()
+        }
+        observeMirror(before: mirrorBefore, deleted: deleteCount)
         secondToLastInsertedCharacter = nil
         lastInsertedCharacter = nil
 
@@ -826,7 +844,7 @@ final class DictusKeyboardBridge: NSObject, // swiftlint:disable:this type_body_
     /// Update the accent key's displayed label based on lastInsertedCharacter.
     /// Called after every keystroke so the accent key always shows the correct symbol:
     /// an accent character after a vowel, or apostrophe otherwise.
-    private func updateAccentKeyDisplay() {
+    func updateAccentKeyDisplay() {
         let label = FrenchAdaptiveKey.label(
             afterTyping: lastInsertedCharacter,
             precedingChar: secondToLastInsertedCharacter
@@ -941,6 +959,9 @@ final class DictusKeyboardBridge: NSObject, // swiftlint:disable:this type_body_
     /// the key that commits the word.
     @discardableResult
     private func autocorrectBeforeCursor(trailing: String, committedBy key: String) -> Bool {
+        // A swiped word is a word the decoder read in the dictionary, and the bar holds its
+        // other readings: space and punctuation never correct it (#948).
+        guard !isSwipedWordBeforeCursor() else { return false }
         guard let state = suggestionState, let memory = rejectionMemory,
               let context = controller?.textDocumentProxy.documentContextBeforeInput,
               let (prefix, freshWord) = AutocorrectRejectionMemory.wordAtCursor(context: context)
@@ -1341,7 +1362,7 @@ extension DictusKeyboardBridge {
 
     /// Learns a word restored by Undo once the user moves on past it unchanged.
     /// Called before anything is inserted after a word boundary.
-    private func learnWordMovedPast() {
+    func learnWordMovedPast() {
         guard let state = suggestionState, let memory = rejectionMemory,
               let word = memory.movingOn(context: controller?.textDocumentProxy.documentContextBeforeInput)
         else { return }
