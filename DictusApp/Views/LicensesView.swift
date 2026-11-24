@@ -30,7 +30,8 @@ import DictusCore
 /// condition.
 ///
 /// Hex is listed for the keyboard's key geometry (`KeyPlaneGeometry`): no code is copied,
-/// but the approach is Hex's (MIT), and the entry says so.
+/// but the approach is Hex's (MIT), and the entry says so. Its per-language long-press
+/// accent lists are copied as data (`LongPressAccents`, #1042), under the same MIT notice.
 struct LicensesView: View {
     var body: some View {
         ScrollView {
@@ -79,6 +80,8 @@ struct LicensesView: View {
                         + "Apple's key plane measured per iPhone size, and touch targets that tile the keyboard.\n\n"
                         + "The keyboard's emoji panel is Hex's, ported (#1027): its views, search, "
                         + "suggestions, shortcodes, skin tones and the builder of its emoji index.\n\n"
+                        + "The long-press accents of each keyboard language are Hex's lists (#1042), "
+                        + "in the order Apple's keyboard shows them.\n\n"
                         + mitLicense(copyright: "Copyright (c) 2026 Christopher Langton")
                 )
 
