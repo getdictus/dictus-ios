@@ -40,7 +40,7 @@ enum ShareOnDeviceTranscription {
         let route = VoiceNoteRoute.decide(
             appTookIt: false,
             settingEnabled: InKeyboardDictationRoute.isSettingEnabled(in: AppGroup.defaults),
-            systemMajorVersion: InKeyboardDictationRoute.majorVersion(of: UIDevice.current.systemVersion),
+            systemMajorVersion: AppleEngineAvailability.majorVersion(of: UIDevice.current.systemVersion),
             localeInstalled: installed
         )
         log("route", "route=\(route.rawValue) engine=\(recognizer?.engineName ?? "none") lang=\(code ?? "auto") installed=\(installed.map(String.init) ?? "unknown") \(memory())")
@@ -153,7 +153,7 @@ enum ShareOnDeviceTranscription {
             keyboardLanguage: SupportedLanguage.active
         )
         // Automatic detection: nil, as in the keyboard.
-        return policy.sttLanguageCode ?? InKeyboardDictationRoute.activeDictationLanguageCode()
+        return policy.sttLanguageCode ?? AppleSpeechLanguage.activeDictationLanguageCode()
     }
 
     private static func vocabularyTerms() -> [String] {

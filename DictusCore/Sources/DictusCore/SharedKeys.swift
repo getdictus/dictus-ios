@@ -450,7 +450,7 @@ public enum SharedKeys {
     /// Bool: the one-time explanation of in-keyboard dictation has been shown in the
     /// keyboard. See `InKeyboardFirstUse`.
     public static let inKeyboardFirstUseShown = "dictus.inKeyboardFirstUseShown"
-    /// String: the app's last reading of `InKeyboardLanguageEligibility` for the chosen
+    /// String: the app's last reading of `AppleSpeechLanguage` for the chosen
     /// dictation language ("covered" / "notCovered" / "autoDetect"), for the greyed
     /// setting and its explanation line. The keyboard checks the language itself.
     public static let inKeyboardLanguageEligibility = "dictus.inKeyboardLanguageEligibility"

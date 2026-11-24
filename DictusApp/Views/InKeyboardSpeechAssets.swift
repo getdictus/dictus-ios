@@ -18,7 +18,7 @@ enum InKeyboardSpeechAssets {
     /// off or before iOS 26.
     static func prepareForDictationLanguage(reason: String = "setting") {
         guard #available(iOS 26.0, *) else {
-            AppGroup.defaults.set(InKeyboardLanguageEligibility.speechTranscriberUnavailable.storedValue,
+            AppGroup.defaults.set(AppleSpeechLanguage.speechTranscriberUnavailable.storedValue,
                                   forKey: SharedKeys.inKeyboardLanguageEligibility)
             return
         }
@@ -45,10 +45,10 @@ enum InKeyboardSpeechAssets {
     /// Activation follows the language the user chose, never the one they speak
     /// (Pierre, 2026-11-21). Called by Settings whenever either language changes.
     @available(iOS 26.0, *)
-    static func refreshLanguageEligibility(reason: String) async -> InKeyboardLanguageEligibility {
+    static func refreshLanguageEligibility(reason: String) async -> AppleSpeechLanguage {
         let available = SpeechTranscriber.isAvailable
         let locales = available ? await SpeechTranscriber.supportedLocales : []
-        let eligibility = InKeyboardLanguageEligibility.evaluate(
+        let eligibility = AppleSpeechLanguage.evaluate(
             mode: TranscriptionLanguageMode.active,
             keyboardLanguageCode: SupportedLanguage.active.rawValue,
             speechTranscriberAvailable: available,
@@ -125,39 +125,17 @@ enum InKeyboardSpeechAssets {
         DictationSessionClaim.prune(in: directory)
     }
 
-    /// The same module as the keyboard's `AppleSpeechRecognizer`: `SpeechTranscriber`
-    /// only, and nothing where it is unavailable.
+    /// The Models screen's install (`AppleEngineAssets.install`, #1036): reserve the locale,
+    /// then ask iOS for Apple's model. Here without a progress bar: it runs at launch and
+    /// when a language changes, ahead of the keyboard's first cold tap. A model already
+    /// installed costs one `AssetInventory` question.
     @available(iOS 26.0, *)
     private static func install(languageCode: String) async {
-        // Already a regional identifier (`speechLocalesToReserve`), e.g. "fr-FR".
-        let requested = Locale(identifier: languageCode)
-        guard SpeechTranscriber.isAvailable else {
-            log("unsupported", "lang=\(languageCode) speechTranscriberAvailable=false")
-            return
-        }
-        guard let locale = await SpeechTranscriber.supportedLocale(equivalentTo: requested) else {
-            log("unsupported", "lang=\(languageCode) speechTranscriberAvailable=true")
-            return
-        }
-        let module = SpeechTranscriber(locale: locale, preset: .transcription)
-        let name = "speechtranscriber-\(locale.identifier)"
-        let before = await AssetInventory.status(forModules: [module])
-        let installed = await SpeechTranscriber.installedLocales.map(\.identifier).sorted()
-        log("status", "module=\(name) status=\(before) installedLocales=\(installed) reserved=\(await AssetInventory.reservedLocales.map(\.identifier))")
-        guard before != .installed else { return }
         do {
-            // The app has to hold a reservation on the locale before iOS installs its
-            // assets ("not subscribed to assistant.<locale>" otherwise, measured on the
-            // simulator).
-            let reserved = try await AssetInventory.reserve(locale: locale)
-            log("reserve", "locale=\(locale.identifier) reserved=\(reserved) max=\(AssetInventory.maximumReservedLocales)")
-            if let request = try await AssetInventory.assetInstallationRequest(supporting: [module]) {
-                try await request.downloadAndInstall()
-            }
-            let after = await AssetInventory.status(forModules: [module])
-            log("installed", "module=\(name) status=\(after)")
+            try await AppleEngineAssets.install(languageCode: languageCode) { _ in }
+            log("installed", "locale=\(languageCode)")
         } catch {
-            log("installFailed", "module=\(name) error=\(error.localizedDescription)")
+            log("installFailed", "locale=\(languageCode) error=\(error.localizedDescription)")
         }
     }
 

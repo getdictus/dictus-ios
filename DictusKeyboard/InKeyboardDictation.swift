@@ -91,7 +91,7 @@ final class InKeyboardDictation {
     /// the wait ends. Costs nothing when the setting is off.
     func prepare(for state: KeyboardState) {
         guard InKeyboardDictationRoute.isSettingEnabled(in: AppGroup.defaults),
-              Self.systemMajorVersion >= InKeyboardDictationRoute.minimumSystemMajorVersion,
+              Self.systemMajorVersion >= AppleEngineAvailability.minimumSystemMajorVersion,
               let recognizer
         else { return }
         self.state = state
@@ -171,7 +171,7 @@ final class InKeyboardDictation {
     /// tap's path, and ask DictusApp whether it is running. The microphone stays closed.
     func prewarm(in view: UIView) {
         guard InKeyboardDictationRoute.isSettingEnabled(in: AppGroup.defaults),
-              Self.systemMajorVersion >= InKeyboardDictationRoute.minimumSystemMajorVersion,
+              Self.systemMajorVersion >= AppleEngineAvailability.minimumSystemMajorVersion,
               recognizer != nil else { return }
         observeAudioSessionIfNeeded()
         DarwinNotificationCenter.post(DarwinNotificationName.inKeyboardPing)
@@ -225,7 +225,7 @@ final class InKeyboardDictation {
     /// an engine, and no known "model missing" answer for the current language.
     var mayTakeColdTap: Bool {
         guard InKeyboardDictationRoute.isSettingEnabled(in: AppGroup.defaults),
-              Self.systemMajorVersion >= InKeyboardDictationRoute.minimumSystemMajorVersion,
+              Self.systemMajorVersion >= AppleEngineAvailability.minimumSystemMajorVersion,
               recognizer != nil,
               state?.controller?.hasFullAccess ?? true,
               Self.microphonePermission == .granted,
@@ -237,7 +237,7 @@ final class InKeyboardDictation {
     /// The setting would apply but the microphone is refused for Dictus.
     var wouldRefuseForMicrophone: Bool {
         InKeyboardDictationRoute.isSettingEnabled(in: AppGroup.defaults)
-            && Self.systemMajorVersion >= InKeyboardDictationRoute.minimumSystemMajorVersion
+            && Self.systemMajorVersion >= AppleEngineAvailability.minimumSystemMajorVersion
             && Self.microphonePermission == .denied
     }
 
@@ -733,13 +733,13 @@ final class InKeyboardDictation {
     // MARK: - Inputs
 
     private static var systemMajorVersion: Int {
-        InKeyboardDictationRoute.majorVersion(of: UIDevice.current.systemVersion)
+        AppleEngineAvailability.majorVersion(of: UIDevice.current.systemVersion)
     }
 
-    /// The dictation language the user chose (`InKeyboardDictationRoute.dictationLanguageCode`);
+    /// The dictation language the user chose (`AppleSpeechLanguage.activeDictationLanguageCode`);
     /// nil under automatic detection, where the keyboard keeps today's path.
     private static func languageCode() -> String? {
-        InKeyboardDictationRoute.activeDictationLanguageCode()
+        AppleSpeechLanguage.activeDictationLanguageCode()
     }
 
     /// The Pro vocabulary's enabled terms, the strings offered to the recognizer. Empty

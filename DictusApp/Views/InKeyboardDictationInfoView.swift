@@ -8,7 +8,7 @@ import SwiftUI
 /// the keyboard's mic, and the user cannot see that. This screen says it once, in plain
 /// words: what each case uses, what works in both, and what only the app can do.
 struct InKeyboardDictationInfoView: View {
-    /// `InKeyboardLanguageEligibility.storedValue`, written by the app when either
+    /// `AppleSpeechLanguage.storedValue`, written by the app when either
     /// language changes. Absent reads as covered: no line.
     @AppStorage(SharedKeys.inKeyboardLanguageEligibility, store: UserDefaults(suiteName: AppGroup.identifier))
     private var eligibility = "covered"
