@@ -129,6 +129,18 @@ final class DeleteWordSwipeTests: XCTestCase {
         XCTAssertEqual(document.text, "one two world")
     }
 
+    /// Only a deletion the context proves complete is handed to the slide: typing back text
+    /// the host never deleted would double it.
+    func testTheTouchDownWordIsReadOffTheContext() {
+        XCTAssertEqual(DeleteWordSwipe.touchDownWord(before: "one two world", after: "one two", count: 6), " world")
+        XCTAssertEqual(DeleteWordSwipe.touchDownWord(before: "Bonjour", after: nil, count: 7), "Bonjour")
+        XCTAssertNil(DeleteWordSwipe.touchDownWord(before: "one two world", after: "one two world", count: 6), "nothing deleted")
+        XCTAssertNil(DeleteWordSwipe.touchDownWord(before: "one two world", after: "one two w", count: 6), "deleted in part")
+        XCTAssertNil(DeleteWordSwipe.touchDownWord(before: "one two world", after: "xne two", count: 6), "not the same text")
+        XCTAssertNil(DeleteWordSwipe.touchDownWord(before: "one two world", after: "one two worl", count: 1), "one character is touchDownDeletion's")
+        XCTAssertNil(DeleteWordSwipe.touchDownWord(before: nil, after: nil, count: 6))
+    }
+
     func testARepeatBeforeTheSlideDropsTheTouchDownWord() {
         let document = HostDocument("one tw")
         let slide = DeleteWordSwipe(editor: document, mirror: nil, startX: start, step: key, touchDownWord: " world")

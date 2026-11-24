@@ -95,6 +95,17 @@ public final class DeleteWordSwipe {
         return String(last)
     }
 
+    /// The text the touch-down removed when it took back `count` characters at once (a
+    /// swiped word and its space, #948), when the context before and after it say so for
+    /// certain; nil otherwise, so a deletion the host did not make, or made only in part, is
+    /// never typed back.
+    public static func touchDownWord(before: String?, after: String?, count: Int) -> String? {
+        guard count > 1, let before, before.count >= count else { return nil }
+        let after = after ?? ""
+        guard before.count == after.count + count, before.hasPrefix(after) else { return nil }
+        return String(before.suffix(count))
+    }
+
     /// The held backspace repeated before the slide began: the touch-down's character is no
     /// longer the one next to the cursor, so it is not typed back.
     public func forgetTouchDownDeletion() {

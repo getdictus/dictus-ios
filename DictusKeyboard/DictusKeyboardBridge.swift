@@ -554,7 +554,7 @@ final class DictusKeyboardBridge: NSObject, // swiftlint:disable:this type_body_
         updateAccentKeyDisplay()
         let context = controller?.textDocumentProxy.documentContextBeforeInput
         lastBackspaceDeletion = DeleteWordSwipe.touchDownDeletion(before: contextBefore, after: context)
-        lastBackspaceSwipedWord = deleteCount > 1 ? contextBefore.map { String($0.suffix(deleteCount)) } : nil
+        lastBackspaceSwipedWord = DeleteWordSwipe.touchDownWord(before: contextBefore, after: context, count: deleteCount)
         noteDeletion(before: contextBefore, after: context)
         noteSpatialDeletion(context: context)
         suggestionState?.updateAsync(context: context)
