@@ -136,6 +136,25 @@ if ! $PB -c "Print :Entitlements:get-task-allow" "$WORK/pp.plist" 2>/dev/null | 
   exit 1
 fi
 
+# --- 4b. Refuse to upload an IPA that names another commit -------------------
+# The `Generate build info` phase writes `git rev-parse --short HEAD` into
+# DictusBuildInfo.plist, in the app and in the keyboard. A tester's debug log reports
+# that sha; if it is not this checkout's HEAD, every log points at the wrong code.
+HEAD_SHORT=$(git rev-parse --short HEAD)
+for BI in Payload/DictusApp.app/DictusBuildInfo.plist \
+          Payload/DictusApp.app/PlugIns/DictusKeyboard.appex/DictusBuildInfo.plist; do
+  if ! unzip -q -o "$IPA" "$BI" -d "$WORK" 2>/dev/null; then
+    echo "error: $IPA has no $BI. Not uploading." >&2
+    exit 1
+  fi
+  GOT=$($PB -c "Print :GitCommitSHA" "$WORK/$BI" 2>/dev/null || echo "unreadable")
+  if [ "$GOT" != "$HEAD_SHORT" ]; then
+    echo "error: $BI names commit $GOT, HEAD is $HEAD_SHORT. Not uploading." >&2
+    exit 1
+  fi
+done
+echo "→ build info: $HEAD_SHORT in the app and the keyboard"
+
 # --- 5. Upload and wait for processing --------------------------------------
 asc builds upload --app "$ASC_APP_ID" --ipa "$IPA" --wait
 
