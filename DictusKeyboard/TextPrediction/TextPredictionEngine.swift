@@ -710,10 +710,6 @@ class TextPredictionEngine {
         spatial: SpatialCorrection.Input? = nil,
         context: String? = nil
     ) -> CorrectionProposal? {
-        let applied = { (result: (correction: String, alternatives: [String])?) -> CorrectionProposal? in
-            result.map { .autocorrect($0.correction, alternatives: $0.alternatives) }
-        }
-
         // The space bar replaces both words with the elision (#1006). A correction of
         // this word alone would be wrong: `ce st` made `s't`.
         if let previousWord, elisionAcrossSpace(previousWord: previousWord, word: word) != nil {
@@ -727,42 +723,12 @@ class TextPredictionEngine {
             return proposal(for: early, word: word, previousWord: previousWord)
         }
 
-        // Language overrides are authoritative — return before the bigram
-        // rerank can replace them. Concrete failure this prevents (#222):
-        // "je lai" → override "l'ai", but the corpus tokenizes "j'ai" as ONE
-        // token so bigram("ai" after "je") = 0, while bigram("lui" after "je")
-        // is huge and "lui" sits at edit distance 1 of "lai" — the rerank
-        // replaced the override with "lui" ("je lai fais" → "je lui fais").
-        if let override = aospTrieEngine.languageOverride(for: word) {
-            #if DEBUG
-            AutocorrectDebugLog.autocorrectDecision(
-                original: word, corrected: override.correction,
-                branch: "language-override", prevWord: previousWord
-            )
-            #endif
-            return applied(override)
-        }
-        // A contraction that is also a word (`ill` for `I'll`, #995) needs the
-        // previous word, which only this entry point has.
-        if let profile = profile,
-           let contraction = contextualContraction(
-               profile: profile, word: word, previousWord: previousWord, isAtSentenceStart: isAtSentenceStart
-           ) {
-            #if DEBUG
-            AutocorrectDebugLog.autocorrectDecision(
-                original: word, corrected: contraction,
-                branch: "contextual-contraction", prevWord: previousWord
-            )
-            #endif
-            return .autocorrect(contraction, alternatives: [])
-        }
-
-        // #1011: the taps, read by the spatial decoder. It comes after every authoritative
-        // branch above (lexicon, overrides, contractions) and is weighed against the trie,
-        // which only has the letters. When it keeps the word, the trie decides.
-        let trie = trieProposal(for: word, previousWord: previousWord, isAtSentenceStart: isAtSentenceStart)
-        guard let spatial else { return trie }
-        return spatialProposal(for: word, previousWord: previousWord, spatial: spatial, trie: trie)
+        // The dictionary writes every word lowercase (`tools/dict_builder.py`), so a
+        // curated name it proposes for a misspelling takes its casing here, in the one
+        // place every dictionary branch returns through: `whatsap` -> "WhatsApp".
+        return dictionaryProposal(
+            for: word, previousWord: previousWord, isAtSentenceStart: isAtSentenceStart, spatial: spatial
+        )?.inCuratedCasing
     }
 
     /// What the trie proposes for `word` from its letters: the spell check, then the
@@ -1095,6 +1061,62 @@ class TextPredictionEngine {
         return winner
     }
 
+}
+
+// MARK: - Dictionary proposal
+
+// WHY an extension: the class body is at SwiftLint's 650-line budget (see below).
+extension TextPredictionEngine {
+    /// What `correctionProposal` proposes once neither the lexicon nor a context rule
+    /// answered: a language override, a contextual contraction, or the trie and the
+    /// spatial decoder.
+    fileprivate func dictionaryProposal(
+        for word: String,
+        previousWord: String?,
+        isAtSentenceStart: Bool,
+        spatial: SpatialCorrection.Input?
+    ) -> CorrectionProposal? {
+        let applied = { (result: (correction: String, alternatives: [String])?) -> CorrectionProposal? in
+            result.map { .autocorrect($0.correction, alternatives: $0.alternatives) }
+        }
+
+        // Language overrides are authoritative — return before the bigram
+        // rerank can replace them. Concrete failure this prevents (#222):
+        // "je lai" → override "l'ai", but the corpus tokenizes "j'ai" as ONE
+        // token so bigram("ai" after "je") = 0, while bigram("lui" after "je")
+        // is huge and "lui" sits at edit distance 1 of "lai" — the rerank
+        // replaced the override with "lui" ("je lai fais" → "je lui fais").
+        if let override = aospTrieEngine.languageOverride(for: word) {
+            #if DEBUG
+            AutocorrectDebugLog.autocorrectDecision(
+                original: word, corrected: override.correction,
+                branch: "language-override", prevWord: previousWord
+            )
+            #endif
+            return applied(override)
+        }
+        // A contraction that is also a word (`ill` for `I'll`, #995) needs the
+        // previous word, which only this entry point has.
+        if let profile = profile,
+           let contraction = contextualContraction(
+               profile: profile, word: word, previousWord: previousWord, isAtSentenceStart: isAtSentenceStart
+           ) {
+            #if DEBUG
+            AutocorrectDebugLog.autocorrectDecision(
+                original: word, corrected: contraction,
+                branch: "contextual-contraction", prevWord: previousWord
+            )
+            #endif
+            return .autocorrect(contraction, alternatives: [])
+        }
+
+        // #1011: the taps, read by the spatial decoder. It comes after every authoritative
+        // branch above (lexicon, overrides, contractions) and is weighed against the trie,
+        // which only has the letters. When it keeps the word, the trie decides.
+        let trie = trieProposal(for: word, previousWord: previousWord, isAtSentenceStart: isAtSentenceStart)
+        guard let spatial else { return trie }
+        return spatialProposal(for: word, previousWord: previousWord, spatial: spatial, trie: trie)
+    }
 }
 
 // MARK: - Spatial autocorrect (#1011)
