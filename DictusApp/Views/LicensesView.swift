@@ -33,7 +33,8 @@ import DictusCore
 ///
 /// Hex is listed for the keyboard's key geometry (`KeyPlaneGeometry`): no code is copied,
 /// but the approach is Hex's (MIT), and the entry says so. Its entry also covers the spatial
-/// decoder (#1011) and the swipe decoder (#948), which are ported Hex code. The decoder adds three entries for where its
+/// decoder (#1011), the swipe decoder (#948), the emoji panel (#1027) and the delete swipe
+/// (`DeleteWordSwipe`, #609), which are ported Hex code. The decoder adds three entries for where its
 /// models come from: word and word-pair counts from Google Books Ngram (CC BY 3.0, which
 /// asks for the attribution), and the word lists that filter them, SCOWL for English (its
 /// notice asks to travel with the output) and Grammalecte's French dictionary (MPL 2.0,
@@ -106,6 +107,8 @@ struct LicensesView: View {
                         + "The swipe typing decoder (SwipeDecoder) is ported from Hex's SwipeDecoder.\n\n"
                         + "The long-press accents of each keyboard language are Hex's lists (#1042), "
                         + "in the order Apple's keyboard shows them.\n\n"
+                        + "Sliding left from the delete key to delete word by word, and back right to get "
+                        + "the words back, is Hex's delete swipe, ported (#609).\n\n"
                         + mitLicense(copyright: "Copyright (c) 2026 Christopher Langton")
                 )
 

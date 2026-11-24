@@ -31,6 +31,12 @@ protocol GiellaKeyboardViewDelegate: AnyObject {
     func didMoveCursor(_ movement: Int)
     /// The text the host shares around its cursor, for the space-bar trackpad (#950).
     func trackpadTextContext() -> (before: String, after: String)
+    /// Delete swipe (#609): backspace went down at `x`; `step` is one word's slide.
+    func deleteSwipeBegan(atX x: CGFloat, step: CGFloat)
+    /// The backspace finger moved; true once the slide owns it, which stops the repeat.
+    func deleteSwipeMoved(toX x: CGFloat) -> Bool
+    /// The backspace finger's touch ended, however it ended.
+    func deleteSwipeEnded()
 }
 
 @objc protocol GiellaKeyboardViewKeyboardKeyDelegate {
@@ -735,6 +741,7 @@ final internal class GiellaKeyboardView: UIView,
                 cell.keyView?.active = false
             }
             if newValue == nil, let activeKey = activeKey {
+                endDeleteSwipe()
                 dismissOverlayTimer = Timer.scheduledTimer(withTimeInterval: Self.overlayDismissDelay, repeats: false, block: { [weak self] _ in
                     self?.removeOverlay(forKey: activeKey.key)
                 })
@@ -806,6 +813,38 @@ final internal class GiellaKeyboardView: UIView,
         // anything reschedules. `stopKeyRepeat` already ran, so the `willSet` below
         // finds no timer and logs nothing a second time.
         activeKey = nil
+    }
+
+    // MARK: - Delete swipe (#609)
+
+    /// The finger that went down on backspace. It stays on backspace for its whole touch:
+    /// slid left it deletes word by word, and it never moves on to the key under it, so a
+    /// slide that wanders over a letter does not type it on lift.
+    private var deleteSwipeTouch: UITouch?
+
+    private func beginDeleteSwipe(_ touch: UITouch, atX x: CGFloat) {
+        deleteSwipeTouch = touch
+        // One word per letter key's width, as in Hex: every layout has ten letters on its
+        // top row, edge to edge.
+        delegate?.deleteSwipeBegan(atX: x, step: collectionView.bounds.width / 10)
+    }
+
+    /// Feeds the backspace finger's move to the slide. True when the touch is the slide's.
+    private func moveDeleteSwipe(_ touches: Set<UITouch>) -> Bool {
+        guard let swipeTouch = deleteSwipeTouch else { return false }
+        if let touch = touches.first(where: { $0 === swipeTouch }),
+           delegate?.deleteSwipeMoved(toX: touch.location(in: collectionView).x) == true {
+            // The slide owns delete now: no repeat tick may race it.
+            stopKeyRepeat(reason: "deleteSwipe")
+        }
+        return true
+    }
+
+    /// Called whenever the active key is cleared, which every end of a touch does (#390).
+    private func endDeleteSwipe() {
+        guard deleteSwipeTouch != nil else { return }
+        deleteSwipeTouch = nil
+        delegate?.deleteSwipeEnded()
     }
 
     /// Leaving the window is the one teardown signal this view gets on every path that
@@ -902,6 +941,9 @@ final internal class GiellaKeyboardView: UIView,
                 if shouldSetActiveKey {
                     activeKey = ActiveKey(key: key, indexPath: indexPath, point: touchPoint)
                 }
+                if case .backspace = key.type {
+                    beginDeleteSwipe(touch, atX: touchPoint.x)
+                }
             }
         }
     }
@@ -986,6 +1028,7 @@ final internal class GiellaKeyboardView: UIView,
             longpressController.touchesMoved(touch.location(in: collectionView))
             return
         }
+        if moveDeleteSwipe(touches) { return }
 
         if let activeKey = activeKey,
             let cell = collectionView.cellForItem(at: activeKey.indexPath) as? KeyCell,

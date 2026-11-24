@@ -173,6 +173,8 @@
 		AA0000F2 /* SoundFeedbackService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000F2 /* SoundFeedbackService.swift */; };
 		B565F0B1 /* FeedbackComposer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B565F0B2 /* FeedbackComposer.swift */; };
 		AA0000F3 /* SoundSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000F3 /* SoundSettingsView.swift */; };
+		KB5E7701 /* KeyboardSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = KB5E7711 /* KeyboardSettingsView.swift */; };
+		KB5E7702 /* KeyboardExperimentsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = KB5E7712 /* KeyboardExperimentsView.swift */; };
 		AA0000F4 /* Sounds in Resources */ = {isa = PBXBuildFile; fileRef = AA1000F4 /* Sounds */; };
 		AB097401 /* ReleaseNotes in Resources */ = {isa = PBXBuildFile; fileRef = AB097402 /* ReleaseNotes */; };
 		AA0000F5 /* LiveActivityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000F5 /* LiveActivityManager.swift */; };
@@ -446,6 +448,8 @@
 		AA1000F2 /* SoundFeedbackService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoundFeedbackService.swift; sourceTree = "<group>"; };
 		B565F0B2 /* FeedbackComposer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedbackComposer.swift; sourceTree = "<group>"; };
 		AA1000F3 /* SoundSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoundSettingsView.swift; sourceTree = "<group>"; };
+		KB5E7711 /* KeyboardSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardSettingsView.swift; sourceTree = "<group>"; };
+		KB5E7712 /* KeyboardExperimentsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardExperimentsView.swift; sourceTree = "<group>"; };
 		AA1000F4 /* Sounds */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Sounds; path = Dictus/Sounds; sourceTree = SOURCE_ROOT; };
 		AB097402 /* ReleaseNotes */ = {isa = PBXFileReference; lastKnownFileType = folder; name = ReleaseNotes; path = ReleaseNotes; sourceTree = SOURCE_ROOT; };
 		AA1000F5 /* LiveActivityManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveActivityManager.swift; sourceTree = "<group>"; };
@@ -809,6 +813,8 @@
 				AA100302 /* ModelLanguageDetailView.swift */,
 				AA1000E4 /* SwipeBackOverlayView.swift */,
 				AA1000F3 /* SoundSettingsView.swift */,
+				KB5E7711 /* KeyboardSettingsView.swift */,
+				KB5E7712 /* KeyboardExperimentsView.swift */,
 				AA100300 /* ModelPreparationParts.swift */,
 				AA100301 /* ModelLoadingOverlay.swift */,
 				AA100484 /* ModelPreparationPresentation.swift */,
@@ -1528,6 +1534,8 @@
 				AA0000F2 /* SoundFeedbackService.swift in Sources */,
 				B565F0B1 /* FeedbackComposer.swift in Sources */,
 				AA0000F3 /* SoundSettingsView.swift in Sources */,
+				KB5E7701 /* KeyboardSettingsView.swift in Sources */,
+				KB5E7702 /* KeyboardExperimentsView.swift in Sources */,
 				AA0000F6 /* StopStandbyIntent.swift in Sources */,
 				AA0000L0 /* ModelInfo+Localized.swift in Sources */,
 				SS000001 /* SubscriptionManager.swift in Sources */,
