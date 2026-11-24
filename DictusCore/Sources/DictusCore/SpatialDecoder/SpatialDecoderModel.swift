@@ -102,6 +102,13 @@ public final class SpatialDecoderModel: @unchecked Sendable {
         return Int(base.load(fromByteOffset: blobAt + s + depth, as: UInt8.self))
     }
 
+    /// The word's letter codes in place, in the mapped file: no copy, nothing kept. Ported
+    /// from Hex's `TypingDecoderModel.withCodes` for the swipe decoder (#948).
+    @inline(__always) func withCodes<R>(_ i: Int, _ body: (UnsafeRawBufferPointer) -> R) -> R {
+        let s = start(i)
+        return body(UnsafeRawBufferPointer(start: base.advanced(by: blobAt + s), count: start(i + 1) - s))
+    }
+
     func word(_ i: Int) -> String {
         let s = start(i)
         return String((s..<start(i + 1)).map { characters[Int(base.load(fromByteOffset: blobAt + $0, as: UInt8.self))] })

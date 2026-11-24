@@ -33,7 +33,7 @@ import DictusCore
 ///
 /// Hex is listed for the keyboard's key geometry (`KeyPlaneGeometry`): no code is copied,
 /// but the approach is Hex's (MIT), and the entry says so. Its entry also covers the spatial
-/// decoder (#1011), which is ported Hex code. The decoder adds three entries for where its
+/// decoder (#1011) and the swipe decoder (#948), which are ported Hex code. The decoder adds three entries for where its
 /// models come from: word and word-pair counts from Google Books Ngram (CC BY 3.0, which
 /// asks for the attribution), and the word lists that filter them, SCOWL for English (its
 /// notice asks to travel with the output) and Grammalecte's French dictionary (MPL 2.0,
@@ -101,6 +101,7 @@ struct LicensesView: View {
                         + "The keyboard's emoji panel is Hex's, ported (#1027): its views, search, "
                         + "suggestions, shortcodes, skin tones and the builder of its emoji index.\n\n"
                         + "The spatial autocorrect decoder (SpatialDecoder) is ported from Hex's TypingDecoder.\n\n"
+                        + "The swipe typing decoder (SwipeDecoder) is ported from Hex's SwipeDecoder.\n\n"
                         + mitLicense(copyright: "Copyright (c) 2026 Christopher Langton")
                 )
 
