@@ -1,26 +1,7 @@
 // DictusKeyboard/Models/RecentEmojis.swift
-import Foundation
-import DictusCore
-
-/// Manages recently used emojis, persisted via App Group UserDefaults.
-/// Cap at 30 emojis to keep the "Recents" section manageable.
-enum RecentEmojis {
-    private static let key = "recentEmojis"
-    private static let maxCount = 30
-
-    static func load() -> [String] {
-        AppGroup.defaults.stringArray(forKey: key) ?? []
-    }
-
-    static func add(_ emoji: String) {
-        var recents = load()
-        // Remove duplicate if already present, then prepend
-        recents.removeAll { $0 == emoji }
-        recents.insert(emoji, at: 0)
-        // Cap to max count
-        if recents.count > maxCount {
-            recents = Array(recents.prefix(maxCount))
-        }
-        AppGroup.defaults.set(recents, forKey: key)
-    }
-}
+//
+// Emptied by #1027: recents are now `EmojiUsageStore` (DictusCore), which counts use, fades it over
+// ten days, keeps skin tones, and imports this file's old "recentEmojis" list once.
+//
+// The file stays, empty, only so that #1027 does not touch Dictus.xcodeproj/project.pbxproj
+// while #992 has changes in it. Delete it with its project reference: #1029.

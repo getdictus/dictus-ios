@@ -35,7 +35,7 @@ final class AppleEngineCardModel: ObservableObject {
         case .ready:
             modelManager.selectAppleEngine()
         case .needsAsset:
-            guard let code = InKeyboardDictationRoute.activeDictationLanguageCode() else { return }
+            guard let code = AppleSpeechLanguage.activeDictationLanguageCode() else { return }
             installState = .installing(fraction: nil)
             Task {
                 do {

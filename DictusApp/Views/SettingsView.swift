@@ -109,7 +109,7 @@ struct SettingsView: View {
     /// iOS 26). Not covered: the toggle shows off and is greyed, while the user's own
     /// choice above stays stored, so a covered language later brings it back only if
     /// they had not turned it off.
-    @State private var inKeyboardEligibility: InKeyboardLanguageEligibility?
+    @State private var inKeyboardEligibility: AppleSpeechLanguage?
 
     /// The keyboard language the pickers below operate on.
     private var keyboardLanguage: SupportedLanguage {
@@ -258,7 +258,7 @@ struct SettingsView: View {
 
     // MARK: - Body
 
-    /// The toggle as `InKeyboardLanguageEligibility.isEffectivelyOn` sees it; writing it
+    /// The toggle as `InKeyboardDictationRoute.isEffectivelyOn` sees it; writing it
     /// stores the user's choice.
     private var inKeyboardDictationToggle: Binding<Bool> {
         Binding(

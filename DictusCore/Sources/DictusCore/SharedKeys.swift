@@ -428,6 +428,12 @@ public enum SharedKeys {
     /// `DictationTally`.
     public static let dictationTally = "dictus.dictationTally"
 
+    // MARK: - Speech engine choice
+    /// String: which engine the app dictates with, "model" (the downloaded
+    /// `activeModel`) or "apple" (Apple's on-device recognizer). Absent = "model", so
+    /// nothing changes for a user who never picks Apple. `activeModel` keeps naming the
+    /// downloaded model either way. See `SpeechEngineChoice`.
+    public static let speechEngineChoice = "dictus.speechEngineChoice"
     // MARK: - Experiments
     /// Bool, absent = `InKeyboardDictationRoute.defaultEnabled` (on for the spike):
     /// "Experiments > Dictate in the keyboard". When the app
@@ -444,17 +450,10 @@ public enum SharedKeys {
     /// Bool: the one-time explanation of in-keyboard dictation has been shown in the
     /// keyboard. See `InKeyboardFirstUse`.
     public static let inKeyboardFirstUseShown = "dictus.inKeyboardFirstUseShown"
-    /// String: the app's last reading of `InKeyboardLanguageEligibility` for the chosen
+    /// String: the app's last reading of `AppleSpeechLanguage` for the chosen
     /// dictation language ("covered" / "notCovered" / "autoDetect"), for the greyed
     /// setting and its explanation line. The keyboard checks the language itself.
     public static let inKeyboardLanguageEligibility = "dictus.inKeyboardLanguageEligibility"
-
-    // MARK: - Speech engine choice
-    /// String: which engine the app dictates with, "model" (the downloaded
-    /// `activeModel`) or "apple" (Apple's on-device recognizer). Absent = "model", so
-    /// nothing changes for a user who never picks Apple. `activeModel` keeps naming the
-    /// downloaded model either way. See `SpeechEngineChoice`.
-    public static let speechEngineChoice = "dictus.speechEngineChoice"
 
     // MARK: - Retired keys
     /// The #357 probe's arming flag, removed with the probe in #361. Kept as a

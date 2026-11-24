@@ -47,7 +47,8 @@ public func expandContractions(
         let candidatePrefix = String(lowered.prefix(letterCount)) + "'"
         let suffix = String(lowered.dropFirst(letterCount))
 
-        if candidatePrefix == prefix, !suffix.isEmpty {
+        // French never elides before a consonant: `dvotre` is not `d'votre`.
+        if candidatePrefix == prefix, !suffix.isEmpty, profile.allowsElided(suffix, after: candidatePrefix) {
             if provider.wordExists(suffix) {
                 return candidatePrefix + suffix
             }

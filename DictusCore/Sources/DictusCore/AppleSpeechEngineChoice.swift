@@ -43,14 +43,83 @@ public enum AppleEngineAssetState: Equatable, Sendable {
     case failed
 }
 
+/// The chosen dictation language read against Apple's `SpeechTranscriber`.
+///
+/// Activation by the language the user CHOSE, checked against Apple's
+/// `supportedLocales`, never by detecting what they speak (Pierre, 2026-11-21).
+public enum AppleSpeechLanguage: Equatable, Sendable {
+    /// Apple lists the chosen language.
+    case covered(String)
+    /// Apple does not list it.
+    case notCovered(String)
+    /// Automatic detection: no single language to give a recognizer that takes one locale.
+    case autoDetect
+    /// The iPhone or its iOS has no `SpeechTranscriber` (`isAvailable == false`, or before
+    /// iOS 26), whatever the language. No fallback to `DictationTranscriber` (Pierre,
+    /// 2026-11-21).
+    case speechTranscriberUnavailable
+
+    /// - Parameters:
+    ///   - speechTranscriberAvailable: `SpeechTranscriber.isAvailable` on iOS 26 and
+    ///     later, false before. Checked first: without it no language is covered.
+    ///   - supportedLocales: `SpeechTranscriber.supportedLocales`, BCP 47 identifiers.
+    public static func evaluate(mode: TranscriptionLanguageMode, keyboardLanguageCode: String,
+                                speechTranscriberAvailable: Bool,
+                                supportedLocales: [String]) -> AppleSpeechLanguage {
+        guard speechTranscriberAvailable else { return .speechTranscriberUnavailable }
+        guard let code = mode.resolvedLanguageCode(keyboardLanguageCode: keyboardLanguageCode) else {
+            return .autoDetect
+        }
+        return isLanguageCovered(code, bySupportedLocales: supportedLocales) ? .covered(code) : .notCovered(code)
+    }
+
+    /// The dictation language Apple's recognizer is given, read from the App Group: an
+    /// explicit transcription language, or the keyboard language in "follow the keyboard"
+    /// mode. Nil under automatic detection.
+    public static func activeDictationLanguageCode() -> String? {
+        TranscriptionLanguageMode.active.resolvedLanguageCode(keyboardLanguageCode: SupportedLanguage.active.rawValue)
+    }
+
+    /// Whether Apple's recognizer lists the language at all, from its `supportedLocales`
+    /// identifiers ("zh-CN", "fr-CA", …). Only the language subtag counts; the region is
+    /// chosen by `localeIdentifier`.
+    public static func isLanguageCovered(_ languageCode: String, bySupportedLocales identifiers: [String]) -> Bool {
+        identifiers.contains { identifier in
+            identifier.split(whereSeparator: { $0 == "-" || $0 == "_" }).first.map(String.init) == languageCode
+        }
+    }
+
+    /// The full locale to ask the speech model for, from a bare dictation language.
+    ///
+    /// WHY not `Locale(identifier: "fr")`: `supportedLocale(equivalentTo:)` resolves a bare
+    /// language to an arbitrary region (measured 2026-11-19 on the iOS 26.5 simulator:
+    /// "fr" gave `fr_BE`), and the installed model is per region. The device's own region
+    /// wins when it speaks that language; otherwise the language's main region.
+    public static func localeIdentifier(languageCode: String, deviceLocaleIdentifier: String) -> String {
+        let device = Locale(identifier: deviceLocaleIdentifier)
+        if device.language.languageCode?.identifier == languageCode,
+           let region = device.region?.identifier {
+            return "\(languageCode)-\(region)"
+        }
+        // The region Apple's SpeechTranscriber lists first for each language it supports
+        // (`supportedLocales`, macOS 26 / iOS 26). Chinese: mainland by default; a device
+        // set to zh-TW or zh-HK gets its own region from the branch above.
+        let mainRegion = ["fr": "FR", "en": "US", "es": "ES", "de": "DE", "it": "IT", "pt": "BR",
+                          "ja": "JP", "ko": "KR", "zh": "CN", "yue": "CN", "hi": "IN", "bn": "IN",
+                          "gu": "IN", "kn": "IN", "ml": "IN", "mr": "IN", "ne": "IN", "pa": "IN",
+                          "ta": "IN", "te": "IN", "ur": "IN"]
+        guard let region = mainRegion[languageCode] else { return languageCode }
+        return "\(languageCode)-\(region)"
+    }
+}
+
 /// Whether "Apple (on-device)" can be picked, and in what state its card is.
 ///
 /// The whole rule, as a pure function so every combination is tested: iOS 26 or later
 /// (`SpeechAnalyzer`, `SpeechTranscriber` and `AssetInventory` start there), Apple's
 /// `SpeechTranscriber` available on this iPhone (no fallback to `DictationTranscriber`,
 /// Pierre, 2026-11-21), and the dictation language the user CHOSE listed in its
-/// `supportedLocales` — the same rule as in-keyboard dictation (#992), never a language
-/// detected from speech.
+/// `supportedLocales`.
 public enum AppleEngineAvailability: Equatable, Sendable {
     /// Greyed, with one explanation line.
     case unavailable(Reason)
@@ -71,6 +140,10 @@ public enum AppleEngineAvailability: Equatable, Sendable {
         case languageNotCovered(String)
     }
 
+    /// First iOS major version with `SpeechAnalyzer`, `SpeechTranscriber` and
+    /// `AssetInventory`.
+    public static let minimumSystemMajorVersion = 26
+
     public var isSelectable: Bool {
         if case .unavailable = self { return false }
         return true
@@ -83,15 +156,12 @@ public enum AppleEngineAvailability: Equatable, Sendable {
 
     /// - Parameters:
     ///   - systemMajorVersion: the running iOS major version.
-    ///   - language: #992's reading of the chosen dictation language against Apple's
-    ///     `SpeechTranscriber` (`InKeyboardLanguageEligibility.evaluate`: is it available,
-    ///     is the language one, is it in `supportedLocales`). Taken whole, so the Models
-    ///     screen and in-keyboard dictation can never disagree about a language.
+    ///   - language: the chosen dictation language read against Apple's `SpeechTranscriber`.
     ///   - assetState: the model for the resolved locale.
     public static func evaluate(systemMajorVersion: Int,
-                                language: InKeyboardLanguageEligibility,
+                                language: AppleSpeechLanguage,
                                 assetState: AppleEngineAssetState) -> AppleEngineAvailability {
-        guard systemMajorVersion >= InKeyboardDictationRoute.minimumSystemMajorVersion else {
+        guard systemMajorVersion >= minimumSystemMajorVersion else {
             return .unavailable(.systemTooOld)
         }
         switch language {
@@ -104,6 +174,12 @@ public enum AppleEngineAvailability: Equatable, Sendable {
         case .covered(let code):
             return assetState == .installed ? .ready(languageCode: code) : .needsAsset(assetState)
         }
+    }
+
+    /// The major component of `UIDevice.current.systemVersion` ("26.5" → 26).
+    /// An unreadable string gives 0, which greys the card.
+    public static func majorVersion(of systemVersion: String) -> Int {
+        Int(systemVersion.split(separator: ".").first ?? "") ?? 0
     }
 }
 

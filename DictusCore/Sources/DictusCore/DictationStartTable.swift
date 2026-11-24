@@ -242,7 +242,7 @@ public enum DictationStartTable {
     /// The first reason the keyboard cannot take the tap, in `InKeyboardDictationRoute`'s order.
     static func keyboardCannotReason(_ inputs: Inputs) -> String {
         if !inputs.settingEnabled { return "setting-off" }
-        if inputs.systemMajorVersion < InKeyboardDictationRoute.minimumSystemMajorVersion { return "ios-too-old" }
+        if inputs.systemMajorVersion < AppleEngineAvailability.minimumSystemMajorVersion { return "ios-too-old" }
         if inputs.languageCode == nil { return "auto-detect" }
         if inputs.localeInstalled != true { return "locale-not-installed" }
         if !inputs.hasFullAccess { return "full-access-off" }

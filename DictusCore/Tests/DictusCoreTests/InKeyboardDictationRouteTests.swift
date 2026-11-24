@@ -128,24 +128,8 @@ final class InKeyboardDictationRouteTests: XCTestCase {
         XCTAssertTrue(InKeyboardDictationRoute.isSettingEnabled(in: defaults))
     }
 
-    func testMajorVersionParsing() {
-        XCTAssertEqual(InKeyboardDictationRoute.majorVersion(of: "26.5"), 26)
-        XCTAssertEqual(InKeyboardDictationRoute.majorVersion(of: "17.0.1"), 17)
-        XCTAssertEqual(InKeyboardDictationRoute.majorVersion(of: "27"), 27)
-        XCTAssertEqual(InKeyboardDictationRoute.majorVersion(of: ""), 0)
-        XCTAssertEqual(InKeyboardDictationRoute.majorVersion(of: "garbage"), 0)
-    }
-
-    func testSpeechLocaleUsesTheDeviceRegionWhenItSpeaksTheLanguage() {
-        XCTAssertEqual(InKeyboardDictationRoute.speechLocaleIdentifier(languageCode: "fr", deviceLocaleIdentifier: "fr_CA"), "fr-CA")
-        XCTAssertEqual(InKeyboardDictationRoute.speechLocaleIdentifier(languageCode: "en", deviceLocaleIdentifier: "en_GB"), "en-GB")
-    }
-
-    func testSpeechLocaleFallsBackToTheMainRegion() {
-        XCTAssertEqual(InKeyboardDictationRoute.speechLocaleIdentifier(languageCode: "fr", deviceLocaleIdentifier: "en_US"), "fr-FR")
-        XCTAssertEqual(InKeyboardDictationRoute.speechLocaleIdentifier(languageCode: "de", deviceLocaleIdentifier: "fr_FR"), "de-DE")
-        XCTAssertEqual(InKeyboardDictationRoute.speechLocaleIdentifier(languageCode: "zz", deviceLocaleIdentifier: "fr_FR"), "zz")
-    }
+    // `majorVersion(of:)` and the speech locale's region moved to `AppleEngineAvailability`
+    // and `AppleSpeechLanguage` with #1036; their tests are in `AppleSpeechEngineChoiceTests`.
 
     // MARK: - Locales reserved ahead of the first cold tap
 

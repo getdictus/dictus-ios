@@ -1,477 +1,122 @@
 // DictusKeyboard/Views/EmojiPickerView.swift
-import SwiftUI
 import AudioToolbox
 import DictusCore
+import SwiftUI
+import UIKit
 
-/// Shared model for category bar items (recents + standard categories).
-struct CategoryInfo: Identifiable {
-    let id: String
-    let name: String
-    let icon: String
-    let representativeEmoji: String?  // nil for recents (uses SF Symbol clock icon)
-}
-
-/// Full emoji picker matching Apple/SuperWhisper style:
-/// - Search bar at top (pill shape)
-/// - Single continuous horizontal LazyHGrid (4 rows, swipe left/right)
-/// - Category bar at bottom as bookmarks into the grid
+/// The emoji picker under the toolbar: Hex's emoji panel (DictusCore/Emoji, ported from
+/// github.com/anomalyco/hex, MIT; #1027), hosted in SwiftUI.
+///
+/// WHY a thin wrapper with the old initializer: `KeyboardRootView` builds this view with the
+/// same five arguments it always passed, so replacing the picker leaves that file — and the
+/// view controller's geometry for `.emoji` — exactly as they were.
+///
+/// WHAT THE PANEL FIXES over the picker it replaces: ABC and search answer in their whole band
+/// (they answered only on their glyphs); emoji are drawn into a bounded bitmap cache instead
+/// of as text, whose glyphs iOS never released (110 MB after scrolling every category on the
+/// simulator, still held after closing); skin tones; every category in one grid; recents that
+/// do not move under the finger; and a search index in French, English, Spanish and German.
 struct EmojiPickerView: View {
     let onEmojiInsert: (String) -> Void
     let onDelete: () -> Void
     let onDismiss: () -> Void
-    /// Actual available width passed from the parent GeometryReader.
-    /// WHY a parameter: In keyboard extensions, UIHostingController may not give
-    /// SwiftUI content the full screen width due to safe area or layout margins.
-    /// Using the measured parent width guarantees the grid fits without clipping.
+    /// The measured area. WHY parameters: in a keyboard extension the hosting controller may
+    /// not give SwiftUI the full width, so the parent measures it and the panel takes exactly that.
     let availableWidth: CGFloat
-    /// Actual available height for the picker (excludes the toolbar).
     let availableHeight: CGFloat
 
-    @State private var recentEmojis: [String] = []
-    @State private var selectedCategoryID: String = "smileys"
-    @State private var isSearchActive: Bool = false
-    @State private var searchText: String = ""
-    @State private var showCursor: Bool = true
-    @State private var filteredEmojis: [String] = []
-    @State private var searchTask: Task<Void, Never>?
-
-    private let categories = EmojiStore.categories
-
-    // Grid sizing constants
-    private let headerHeight: CGFloat = 20
-    private let categoryBarHeight: CGFloat = 36
-    private let rowSpacing: CGFloat = 1
-
-    /// Number of rows that fit in available height after subtracting header + category bar.
-    private var rowCount: Int {
-        let gridSpace = availableHeight - headerHeight - categoryBarHeight
-        let rowWithSpacing: CGFloat = rowHeight + rowSpacing
-        return max(3, Int(gridSpace / rowWithSpacing))
-    }
-
-    /// Height per emoji row, computed to fill available space evenly.
-    private var rowHeight: CGFloat { 42 }
-
-    private var gridRows: [GridItem] {
-        Array(repeating: GridItem(.fixed(rowHeight), spacing: rowSpacing), count: rowCount)
-    }
-
-    /// Columns for vertical grid: 8 emojis per row filling the full width.
-    private var gridColumns: [GridItem] {
-        Array(repeating: GridItem(.fixed(emojiCellWidth), spacing: 0), count: 8)
-    }
-
-    /// Dynamic cell width: exactly 8 emojis per row based on actual available width.
-    private var emojiCellWidth: CGFloat {
-        (availableWidth - 4) / 8
-    }
-
-    // MARK: - Computed data
-
-    /// Returns only the emojis for the currently selected category.
-    /// WHY category pagination: The previous flat grid rendered ALL ~1800 emojis at once,
-    /// causing CoreText to cache every glyph (~65KB each) = 139 MiB. By showing only one
-    /// category at a time (max ~230 emojis), peak memory stays under ~15 MiB.
-    private var currentCategoryEmojis: [EmojiGridItem] {
-        if selectedCategoryID == "recents" {
-            return recentEmojis.enumerated().map { i, emoji in
-                EmojiGridItem(id: "recents_\(i)", emoji: emoji, categoryID: "recents")
-            }
-        }
-        guard let cat = categories.first(where: { $0.id == selectedCategoryID }) else {
-            return []
-        }
-        return cat.emojis.enumerated().map { i, emoji in
-            EmojiGridItem(id: "\(cat.id)_\(i)", emoji: emoji, categoryID: cat.id)
-        }
-    }
-
-    private var sectionInfos: [CategoryInfo] {
-        var infos: [CategoryInfo] = []
-        if !recentEmojis.isEmpty {
-            let recents = String(localized: "Recents", comment: "Emoji picker section header for recently used emoji (issue #418).")
-            infos.append(CategoryInfo(id: "recents", name: recents, icon: "clock", representativeEmoji: nil))
-        }
-        for cat in categories {
-            infos.append(CategoryInfo(id: cat.id, name: cat.name, icon: cat.icon, representativeEmoji: cat.representativeEmoji))
-        }
-        return infos
-    }
-
-    /// Display name for the currently selected category.
-    private var selectedCategoryName: String {
-        sectionInfos.first(where: { $0.id == selectedCategoryID })?.name.uppercased() ?? ""
-    }
-
-    // MARK: - Body
-
     var body: some View {
-        VStack(spacing: 0) {
-            if isSearchActive {
-                searchMode
-            } else {
-                normalMode
-            }
-        }
-        .frame(width: availableWidth, height: availableHeight)
-        .clipped()
-        .onAppear {
-            recentEmojis = RecentEmojis.load()
-            if !recentEmojis.isEmpty {
-                selectedCategoryID = "recents"
-            }
-        }
-    }
-
-    // MARK: - Normal mode
-
-    @ViewBuilder
-    private var normalMode: some View {
-        // Category name label (e.g. "SMILEYS & PEOPLE")
-        HStack {
-            Text(selectedCategoryName)
-                .font(.system(size: 13, weight: .medium))
-                .foregroundColor(.secondary)
-            Spacer()
-        }
-        .padding(.horizontal, 8)
-        .padding(.top, 4)
-        .padding(.bottom, 1)
-
-        // Vertical emoji grid — fills width first, scrolls down for more.
-        // .id(selectedCategoryID) forces SwiftUI to destroy and recreate the grid when
-        // the user switches categories, which releases the old Text views and their
-        // CoreText glyph caches -- this is the key to keeping memory under 50 MiB.
-        ScrollView(.vertical, showsIndicators: false) {
-            LazyVGrid(columns: gridColumns, spacing: 0) {
-                ForEach(currentCategoryEmojis) { item in
-                    Button {
-                        HapticFeedback.keyTapped()
-                        onEmojiInsert(item.emoji)
-                        RecentEmojis.add(item.emoji)
-                        recentEmojis = RecentEmojis.load()
-                    } label: {
-                        Text(item.emoji)
-                            .font(.system(size: 32))
-                            .frame(width: emojiCellWidth, height: rowHeight)
-                    }
-                    .id(item.id)
-                }
-            }
-            .padding(.horizontal, 2)
-            .id(selectedCategoryID)
-        }
-
-        EmojiCategoryBar(
-            sections: sectionInfos,
-            selectedCategoryID: selectedCategoryID,
-            onSelectCategory: { id in
-                selectedCategoryID = id
-            },
-            onSearch: { isSearchActive = true },
-            onDelete: onDelete,
-            onDismiss: onDismiss
-        )
-    }
-
-    // MARK: - Search mode
-
-    @ViewBuilder
-    private var searchMode: some View {
-        // Search input bar
-        searchInputBar
-            .padding(.horizontal, 8)
-            .padding(.top, 2)
-            .padding(.bottom, 1)
-
-        // Emoji row: recents when empty, results when searching.
-        let emojiRow = searchModeEmojis
-        if emojiRow.isEmpty {
-            Text("No results")
-                .foregroundColor(.secondary)
-                .font(.system(size: 14))
-                .frame(height: 38)
-        } else {
-            ScrollView(.horizontal, showsIndicators: false) {
-                LazyHStack(spacing: 2) {
-                    ForEach(Array(emojiRow.enumerated()), id: \.offset) { _, emoji in
-                        Button {
-                            HapticFeedback.keyTapped()
-                            onEmojiInsert(emoji)
-                            RecentEmojis.add(emoji)
-                        } label: {
-                            Text(emoji)
-                                .font(.system(size: 30))
-                                .frame(width: emojiCellWidth, height: 38)
-                        }
-                    }
-                }
-                .padding(.horizontal, 4)
-            }
-            .frame(height: 38)
-        }
-
-        Spacer(minLength: 0)
-
-        EquatableView(content: MiniSearchKeyboard(
-            onCharacter: { searchText.append($0) },
-            onDelete: { if !searchText.isEmpty { searchText.removeLast() } },
-            onSpace: { searchText.append(" ") }
-        ))
-        .onChange(of: searchText) { newValue in
-            searchTask?.cancel()
-            if newValue.isEmpty {
-                filteredEmojis = []
-                return
-            }
-            searchTask = Task {
-                try? await Task.sleep(nanoseconds: 100_000_000) // 100ms debounce
-                guard !Task.isCancelled else { return }
-                let results = performSearch(query: newValue)
-                guard !Task.isCancelled else { return }
-                filteredEmojis = results
-            }
-        }
-    }
-
-    /// Search bar for search mode with cursor.
-    private var searchInputBar: some View {
-        let barWidth = availableWidth - 16 // 8pt margin each side
-        return HStack(spacing: 0) {
-            Image(systemName: "magnifyingglass")
-                .foregroundColor(.secondary)
-                .padding(.trailing, 6)
-
-            // Cursor at the start, then text or placeholder
-            if searchText.isEmpty {
-                blinkingCursor
-                Text("Search Emoji")
-                    .foregroundColor(.secondary)
-            } else {
-                Text(searchText)
-                    .foregroundColor(.primary)
-                blinkingCursor
-            }
-
-            Spacer(minLength: 0)
-
-            // × button: clears text if any, closes search if empty
-            Button {
-                if searchText.isEmpty {
-                    isSearchActive = false
-                } else {
-                    searchText = ""
-                }
-            } label: {
-                Image(systemName: "xmark.circle.fill")
-                    .foregroundColor(.secondary)
-            }
-        }
-        .lineLimit(1)
-        .padding(.horizontal, 12)
-        .padding(.vertical, 5)
-        .frame(width: barWidth)
-        .background(
-            RoundedRectangle(cornerRadius: 10, style: .continuous)
-                .fill(Color(.systemGray6))
-        )
-    }
-
-    private var blinkingCursor: some View {
-        Rectangle()
-            .fill(Color.accentColor)
-            .frame(width: 2, height: 18)
-            .opacity(showCursor ? 1 : 0)
-            .animation(.easeInOut(duration: 0.5).repeatForever(autoreverses: true), value: showCursor)
-            .onAppear { showCursor.toggle() }
-    }
-
-    /// Emojis to show in search mode row.
-    /// When nothing typed: recents (or first emojis from catalog if no recents).
-    /// When searching: debounced filtered results.
-    private var searchModeEmojis: [String] {
-        if searchText.isEmpty {
-            if recentEmojis.isEmpty {
-                return Array(EmojiStore.allEmojis.prefix(30))
-            }
-            return recentEmojis
-        }
-        return filteredEmojis
-    }
-
-    // MARK: - Search logic (debounced, pre-computed names)
-
-    private func performSearch(query: String) -> [String] {
-        let q = query.lowercased()
-        let language = AppGroup.defaults.string(forKey: SharedKeys.language) ?? "fr"
-
-        if language == "fr" {
-            return searchFrench(query: q)
-        } else {
-            return searchUnicodeName(query: q)
-        }
-    }
-
-    private let maxSearchResults = 30
-
-    private func searchFrench(query: String) -> [String] {
-        var results: [String] = []
-        var seen = Set<String>()
-
-        for (keyword, emojis) in EmojiSearchFR.keywords where keyword.contains(query) {
-            for emoji in emojis where !seen.contains(emoji) {
-                results.append(emoji)
-                seen.insert(emoji)
-                if results.count >= maxSearchResults { return results }
-            }
-        }
-
-        // Fallback to pre-computed Unicode names
-        for entry in EmojiStore.allEmojiNames where !seen.contains(entry.emoji) {
-            if entry.name.contains(query) {
-                results.append(entry.emoji)
-                seen.insert(entry.emoji)
-                if results.count >= maxSearchResults { return results }
-            }
-        }
-        return results
-    }
-
-    private func searchUnicodeName(query: String) -> [String] {
-        var results: [String] = []
-        for entry in EmojiStore.allEmojiNames where entry.name.contains(query) {
-            results.append(entry.emoji)
-            if results.count >= maxSearchResults { return results }
-        }
-        return results
+        EmojiPanelHost(onEmojiInsert: onEmojiInsert, onDelete: onDelete, onDismiss: onDismiss)
+            .frame(width: availableWidth, height: availableHeight)
+            .clipped()
     }
 }
 
-// MARK: - Supporting types
-
-private struct EmojiGridItem: Identifiable {
-    let id: String
-    let emoji: String
-    let categoryID: String
-}
-
-/// Mini keyboard for emoji search with key popups and haptic feedback.
-/// Uses 40pt key height to fit within the emoji picker without clipping.
-/// Equatable to prevent re-renders when search text changes (layout is static).
-private struct MiniSearchKeyboard: View, Equatable {
-    let onCharacter: (String) -> Void
+/// `UIViewRepresentable` is SwiftUI's door to a UIKit view: SwiftUI calls `makeUIView` once,
+/// `updateUIView` on every redraw (here only to refresh the closures), and `dismantleUIView`
+/// when the picker goes, which is where the panel lets go of its bitmaps and timers.
+private struct EmojiPanelHost: UIViewRepresentable {
+    let onEmojiInsert: (String) -> Void
     let onDelete: () -> Void
-    let onSpace: () -> Void
+    let onDismiss: () -> Void
 
-    static func == (lhs: MiniSearchKeyboard, rhs: MiniSearchKeyboard) -> Bool {
-        true // Layout never changes, only closures differ
-    }
+    final class Coordinator {
+        var host: EmojiPanelHost
 
-    private let keyHeight: CGFloat = 34
-
-    private var rows: [[String]] {
-        switch LayoutType.active {
-        case .azerty:
-            return [
-                ["a", "z", "e", "r", "t", "y", "u", "i", "o", "p"],
-                ["q", "s", "d", "f", "g", "h", "j", "k", "l", "m"],
-                ["w", "x", "c", "v", "b", "n"]
-            ]
-        case .qwerty:
-            return [
-                ["q", "w", "e", "r", "t", "y", "u", "i", "o", "p"],
-                ["a", "s", "d", "f", "g", "h", "j", "k", "l"],
-                ["z", "x", "c", "v", "b", "n", "m"]
-            ]
-        case .qwertz:
-            // Read from the shared layout data rather than re-typed here, so the
-            // search keyboard cannot drift from the real one (#151).
-            return QWERTZLayout.lowercasedLettersRows
+        init(host: EmojiPanelHost) {
+            self.host = host
         }
     }
 
-    var body: some View {
-        VStack(spacing: 3) {
-            ForEach(Array(rows.enumerated()), id: \.offset) { rowIndex, row in
-                HStack(spacing: 4) {
-                    ForEach(row, id: \.self) { letter in
-                        MiniKeyButton(label: letter, height: keyHeight) {
-                            HapticFeedback.keyTapped()
-                            AudioServicesPlaySystemSound(1104)
-                            onCharacter(letter)
-                        }
-                    }
-                    if rowIndex == 2 {
-                        Button {
-                            HapticFeedback.keyTapped()
-                            AudioServicesPlaySystemSound(1155)
-                            onDelete()
-                        } label: {
-                            Image(systemName: "delete.backward")
-                                .font(.system(size: 18))
-                                .frame(maxWidth: .infinity)
-                                .frame(height: keyHeight)
-                                .background(KeyMetrics.letterKeyColor)
-                                .cornerRadius(KeyMetrics.keyCornerRadius)
-                        }
-                        .foregroundColor(Color(.label))
-                    }
-                }
-            }
-            Button {
-                HapticFeedback.keyTapped()
-                AudioServicesPlaySystemSound(1156)
-                onSpace()
-            } label: {
-                Text("space")
-                    .font(.system(size: 16))
-                    .frame(maxWidth: .infinity)
-                    .frame(height: keyHeight)
-                    .background(KeyMetrics.letterKeyColor)
-                    .cornerRadius(KeyMetrics.keyCornerRadius)
-            }
-            .foregroundColor(Color(.label))
-        }
-        .padding(.horizontal, KeyMetrics.rowSidePadding)
-        .padding(.bottom, 2)
+    func makeCoordinator() -> Coordinator {
+        Coordinator(host: self)
     }
-}
 
-/// A single key in the mini search keyboard with press popup.
-/// Uses a lightweight ButtonStyle instead of DragGesture for better performance.
-private struct MiniKeyButton: View {
-    let label: String
-    let height: CGFloat
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            Text(label)
-                .font(.system(size: 22))
-                .foregroundColor(Color(.label))
-                .frame(maxWidth: .infinity)
-                .frame(height: height)
-                .background(KeyMetrics.letterKeyColor)
-                .cornerRadius(KeyMetrics.keyCornerRadius)
+    func makeUIView(context: Context) -> UIView {
+        let coordinator = context.coordinator
+        // One index per process (EmojiLibrary.bundled), not one per presentation: Hex #2352.
+        guard let library = EmojiLibrary.bundled(language: SupportedLanguage.active.rawValue) else {
+            return Self.unavailableView(onDismiss: { coordinator.host.onDismiss() })
         }
-        .buttonStyle(MiniKeyButtonStyle(label: label, height: height))
+        let panel = EmojiPanelView(
+            library: library,
+            usage: EmojiUsageStore(),
+            strings: Self.strings,
+            letterRows: EmojiPanelView.letterRows(for: LayoutType.active)
+        )
+        panel.onInsert = { coordinator.host.onEmojiInsert($0) }
+        panel.onDelete = { coordinator.host.onDelete() }
+        panel.onLetters = { coordinator.host.onDismiss() }
+        panel.onKeyClick = { category in
+            // Inserting and deleting already give their haptic in `KeyboardRootView`'s
+            // closures; the panel's other keys (categories, search, ABC, search letters)
+            // give theirs here, with the click the main keys make (`KeySoundCategory`).
+            if category != .delete { HapticFeedback.keyTapped() }
+            AudioServicesPlaySystemSound(category.systemSoundID)
+        }
+        panel.textBefore = { KeyboardState.shared.controller?.textDocumentProxy.documentContextBeforeInput }
+        panel.fill()
+        return panel
     }
-}
 
-private struct MiniKeyButtonStyle: ButtonStyle {
-    let label: String
-    let height: CGFloat
+    func updateUIView(_ uiView: UIView, context: Context) {
+        context.coordinator.host = self
+    }
 
-    func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .overlay(
-                Group {
-                    if configuration.isPressed {
-                        KeyPopup(label: label)
-                            .offset(y: -(height + 8))
-                    }
-                },
-                alignment: .top
-            )
+    static func dismantleUIView(_ uiView: UIView, coordinator: Coordinator) {
+        (uiView as? EmojiPanelView)?.tearDown()
+    }
+
+    /// The keyboard's own words for the panel: the keys its old picker already had.
+    private static var strings: EmojiPanelStrings {
+        EmojiPanelStrings(
+            recents: String(localized: "Recents", comment: "Emoji picker section header for recently used emoji (issue #418)."),
+            categories: [
+                .smileys: String(localized: "Smileys", comment: "Emoji picker section header, shown uppercased above the grid."),
+                .people: String(localized: "People", comment: "Emoji picker section header, shown uppercased above the grid."),
+                .animalsNature: String(localized: "Animals & Nature", comment: "Emoji picker section header, shown uppercased above the grid."),
+                .foodDrink: String(localized: "Food & Drink", comment: "Emoji picker section header, shown uppercased above the grid."),
+                .activity: String(localized: "Activities", comment: "Emoji picker section header, shown uppercased above the grid."),
+                .travelPlaces: String(localized: "Travel", comment: "Emoji picker section header, shown uppercased above the grid."),
+                .objects: String(localized: "Objects", comment: "Emoji picker section header, shown uppercased above the grid."),
+                .symbols: String(localized: "Symbols", comment: "Emoji picker section header, shown uppercased above the grid."),
+                .flags: String(localized: "Flags", comment: "Emoji picker section header, shown uppercased above the grid.")
+            ],
+            searchPlaceholder: String(localized: "Search Emoji"),
+            noResults: String(localized: "No results"),
+            lettersTitle: String(localized: "ABC", comment: "The text for the \"ABC\" button in the emoji category bar."),
+            lettersLabel: NSLocalizedString("accessibility.moreLetters", comment: ""),
+            delete: NSLocalizedString("accessibility.backspace", comment: ""),
+            space: String(localized: "space"),
+            closeSearch: String(localized: "Close", comment: "Accessibility label of the keyboard voice note reader's close button (#637).")
+        )
+    }
+
+    /// The index could not be read (it ships in DictusCore's bundle, so this means a broken
+    /// build): an ABC key back to the letters rather than an empty keyboard.
+    private static func unavailableView(onDismiss: @escaping () -> Void) -> UIView {
+        let button = UIButton(type: .system, primaryAction: UIAction { _ in onDismiss() })
+        button.setTitle(String(localized: "ABC", comment: "The text for the \"ABC\" button in the emoji category bar."), for: .normal)
+        return button
     }
 }

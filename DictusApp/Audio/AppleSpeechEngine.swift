@@ -6,11 +6,9 @@ import Speech
 
 /// Apple's on-device recognizer, as one of the app's engines.
 ///
-/// WHY AN ADAPTER and not a second implementation: in-keyboard dictation (#992) already
-/// transcribes with Apple's `SpeechAnalyzer` + `SpeechTranscriber` behind the
-/// `OnDeviceRecognizer` protocol, and the share extension uses the same one. This class
-/// only reshapes the app's recording (Float32 samples) into that protocol's 16 kHz PCM,
-/// so the three places that use Apple's recognizer run one copy of it. Everything after
+/// WHY AN ADAPTER: Apple's `SpeechAnalyzer` + `SpeechTranscriber` live in DictusCore behind
+/// the `OnDeviceRecognizer` protocol, which takes a finished 16 kHz Int16 recording. This
+/// class only reshapes the app's recording (Float32 samples) into it. Everything after
 /// `transcribe` (vocabulary, polish, Smart Modes, History) is the app's usual pipeline:
 /// `TranscriptionService` does not know which engine answered.
 ///
@@ -57,8 +55,8 @@ final class AppleSpeechEngine: SpeechModelProtocol {
         }
     }
 
-    /// The user's Pro vocabulary terms as recognition hints, as the keyboard offers them.
-    /// The vocabulary pass on the text runs afterwards either way.
+    /// The user's Pro vocabulary terms as recognition hints. The vocabulary pass on the
+    /// text runs afterwards either way.
     private static func vocabularyTerms() -> [String] {
         guard VocabularyAvailability.isEntitled else { return [] }
         return VocabularyStore.loadEntries().filter(\.isEnabled).map(\.term)
@@ -67,8 +65,7 @@ final class AppleSpeechEngine: SpeechModelProtocol {
     #if DEBUG && targetEnvironment(simulator)
     /// Simulator test harness, compiled out of every device and Release build: a 16 kHz
     /// mono Int16 WAV at the App Group root (`app-test-audio.wav`) replaces what the
-    /// simulator recorded, whose microphone is the Mac's room. The same idea as the
-    /// keyboard's `in-keyboard-test-audio.wav` (#992).
+    /// simulator recorded, whose microphone is a mock with no speech in it.
     private static func debugTestRecording() -> OnDeviceRecording? {
         guard let url = AppGroup.containerURL?.appendingPathComponent("app-test-audio.wav"),
               let data = try? Data(contentsOf: url),
@@ -97,17 +94,18 @@ enum AppleEngineAssets {
             return AppleEngineAvailability.evaluate(systemMajorVersion: major, language: .speechTranscriberUnavailable,
                                                     assetState: .unknown)
         }
-        // The same reading as in-keyboard dictation's eligibility (#992): `SpeechTranscriber`
-        // only. Where it reports itself unavailable (older hardware, every iOS Simulator)
-        // the card is greyed; no fallback to `DictationTranscriber` (Pierre, 2026-11-21).
-        let available = SpeechTranscriber.isAvailable
-        let locales = available ? await SpeechTranscriber.supportedLocales : []
-        let identifiers = locales.map { $0.identifier(.bcp47) }
-        let language = InKeyboardLanguageEligibility.evaluate(mode: mode, keyboardLanguageCode: keyboard,
-                                                              speechTranscriberAvailable: available,
-                                                              supportedLocales: identifiers)
+        // `SpeechTranscriber` only: where it reports itself unavailable (older hardware,
+        // every iOS Simulator) there is no recognizer and the card is greyed; no fallback to
+        // `DictationTranscriber` (Pierre, 2026-11-21).
+        let recognizer = OnDeviceRecognizerFactory.make()
+        let supported = await recognizer?.supportedLocaleIdentifiers()
+        let identifiers = supported ?? []
+        let available = supported != nil
+        let language = AppleSpeechLanguage.evaluate(mode: mode, keyboardLanguageCode: keyboard,
+                                                    speechTranscriberAvailable: available,
+                                                    supportedLocales: identifiers)
         var asset = AppleEngineAssetState.unknown
-        if case .covered(let code) = language, let recognizer = OnDeviceRecognizerFactory.make() {
+        if case .covered(let code) = language, let recognizer {
             asset = await recognizer.hasModelInstalled(languageCode: code) ? .installed : .notInstalled
         }
         let result = AppleEngineAvailability.evaluate(systemMajorVersion: major, language: language, assetState: asset)
@@ -130,16 +128,16 @@ enum AppleEngineAssets {
     /// one Dictus never makes itself; transcription stays on the device.
     static func install(languageCode: String, onProgress: @escaping @MainActor (Double?) -> Void) async throws {
         guard #available(iOS 26.0, *) else { throw OnDeviceRecognizerError.unavailable }
-        let requested = Locale(identifier: InKeyboardDictationRoute.speechLocaleIdentifier(
+        let requested = Locale(identifier: AppleSpeechLanguage.localeIdentifier(
             languageCode: languageCode, deviceLocaleIdentifier: Locale.current.identifier))
-        // `SpeechTranscriber` only, as everywhere (#992, Pierre 2026-11-21).
+        // `SpeechTranscriber` only (Pierre, 2026-11-21).
         guard SpeechTranscriber.isAvailable else { throw OnDeviceRecognizerError.unavailable }
         guard let locale = await SpeechTranscriber.supportedLocale(equivalentTo: requested) else {
             throw OnDeviceRecognizerError.localeNotInstalled(languageCode)
         }
         let module = SpeechTranscriber(locale: locale, preset: .transcription)
         // iOS installs nothing for a locale the app holds no reservation on ("not
-        // subscribed to assistant.<locale>", measured in #992).
+        // subscribed to assistant.<locale>", measured on 2026-11-19).
         let reserved = try await AssetInventory.reserve(locale: locale)
         log("reserve", "locale=\(locale.identifier) reserved=\(reserved)")
         guard let request = try await AssetInventory.assetInstallationRequest(supporting: [module]) else {

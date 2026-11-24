@@ -31,7 +31,7 @@ final class AppleSpeechEngineChoiceTests: XCTestCase {
                           speechTranscriber: Bool = true,
                           locales: [String]? = nil,
                           asset: AppleEngineAssetState = .installed) -> AppleEngineAvailability {
-        let language = InKeyboardLanguageEligibility.evaluate(mode: mode, keyboardLanguageCode: keyboard,
+        let language = AppleSpeechLanguage.evaluate(mode: mode, keyboardLanguageCode: keyboard,
                                                               speechTranscriberAvailable: speechTranscriber,
                                                               supportedLocales: locales ?? supported)
         return AppleEngineAvailability.evaluate(systemMajorVersion: ios, language: language, assetState: asset)
@@ -54,7 +54,7 @@ final class AppleSpeechEngineChoiceTests: XCTestCase {
     }
 
     func testAnUnreadableSystemVersionIsGreyed() {
-        XCTAssertEqual(evaluate(ios: InKeyboardDictationRoute.majorVersion(of: "")), .unavailable(.systemTooOld))
+        XCTAssertEqual(evaluate(ios: AppleEngineAvailability.majorVersion(of: "")), .unavailable(.systemTooOld))
     }
 
     // MARK: - Availability: SpeechTranscriber on this iPhone
@@ -234,5 +234,24 @@ final class AppleSpeechEngineChoiceTests: XCTestCase {
         let values = recording.pcm16.withUnsafeBytes { Array($0.bindMemory(to: Int16.self)) }.map { Int16(littleEndian: $0) }
         XCTAssertEqual(values, [0, 32_767, -32_767, 32_767, -32_767, 16_383])
         XCTAssertEqual(recording.seconds, 6.0 / 16_000, accuracy: 1e-9)
+    }
+
+    // MARK: - Locale and system version
+
+    func testSpeechLocaleUsesTheDeviceRegionWhenItSpeaksTheLanguage() {
+        XCTAssertEqual(AppleSpeechLanguage.localeIdentifier(languageCode: "fr", deviceLocaleIdentifier: "fr_CA"), "fr-CA")
+        XCTAssertEqual(AppleSpeechLanguage.localeIdentifier(languageCode: "en", deviceLocaleIdentifier: "en_GB"), "en-GB")
+    }
+
+    func testSpeechLocaleFallsBackToTheMainRegion() {
+        XCTAssertEqual(AppleSpeechLanguage.localeIdentifier(languageCode: "fr", deviceLocaleIdentifier: "en_US"), "fr-FR")
+        XCTAssertEqual(AppleSpeechLanguage.localeIdentifier(languageCode: "de", deviceLocaleIdentifier: "fr_FR"), "de-DE")
+        XCTAssertEqual(AppleSpeechLanguage.localeIdentifier(languageCode: "zz", deviceLocaleIdentifier: "fr_FR"), "zz")
+    }
+
+    func testMajorVersionReadsTheFirstComponent() {
+        XCTAssertEqual(AppleEngineAvailability.majorVersion(of: "26.5"), 26)
+        XCTAssertEqual(AppleEngineAvailability.majorVersion(of: "18"), 18)
+        XCTAssertEqual(AppleEngineAvailability.majorVersion(of: "garbage"), 0)
     }
 }

@@ -63,32 +63,23 @@ public enum InKeyboardFirstUse {
     }
 }
 
-/// Whether the chosen dictation language lets the keyboard dictate with the app closed
-/// (Pierre, 2026-11-21): activation by the language the user chose, checked against
-/// Apple's `SpeechTranscriber.supportedLocales`, never by detecting what they speak.
+/// The language side of "Dictate in the keyboard" (Pierre, 2026-11-21): activation by
+/// the language the user CHOSE, read against Apple's `SpeechTranscriber.supportedLocales`
+/// (`AppleSpeechLanguage`, shared with the app's Apple engine since #1036), never by
+/// detecting what they speak.
 ///
-/// The user's own choice (the "Dictate in the keyboard" toggle, absent = on) is stored
-/// apart from this. The setting is ON in effect only when both hold, so changing to a
-/// language Apple does not cover turns it off, and changing back turns it on again only
-/// if the user had not turned it off themselves.
-public enum InKeyboardLanguageEligibility: Equatable, Sendable {
-    /// Apple lists the chosen language.
-    case covered(String)
-    /// Apple does not list it: the setting is off in effect and shown greyed.
-    case notCovered(String)
-    /// Automatic detection: no single language to dictate in, so off in effect.
-    case autoDetect
-    /// The iPhone or its iOS has no `SpeechTranscriber` (`isAvailable == false`, or before
-    /// iOS 26): off in effect whatever the language. No fallback to `DictationTranscriber`
-    /// (Pierre, 2026-11-21).
-    case speechTranscriberUnavailable
-
+/// The user's own choice (the toggle, absent = on) is stored apart from this. The setting
+/// is ON in effect only when both hold, so changing to a language Apple does not cover
+/// turns it off, and changing back turns it on again only if the user had not turned it
+/// off themselves.
+extension AppleSpeechLanguage {
     public var isCovered: Bool {
         if case .covered = self { return true }
         return false
     }
 
-    /// The value the app writes to the App Group for its UI.
+    /// The value the app writes to the App Group (`SharedKeys.inKeyboardLanguageEligibility`)
+    /// for the greyed setting and its explanation line.
     public var storedValue: String {
         switch self {
         case .covered: return "covered"
@@ -97,23 +88,11 @@ public enum InKeyboardLanguageEligibility: Equatable, Sendable {
         case .speechTranscriberUnavailable: return "speechTranscriberUnavailable"
         }
     }
+}
 
-    /// - Parameters:
-    ///   - speechTranscriberAvailable: `SpeechTranscriber.isAvailable` on iOS 26 and
-    ///     later, false before. Checked first: without it no language is covered.
-    ///   - supportedLocales: `SpeechTranscriber.supportedLocales`, BCP 47 identifiers.
-    public static func evaluate(mode: TranscriptionLanguageMode, keyboardLanguageCode: String,
-                                speechTranscriberAvailable: Bool,
-                                supportedLocales: [String]) -> InKeyboardLanguageEligibility {
-        guard speechTranscriberAvailable else { return .speechTranscriberUnavailable }
-        guard let code = InKeyboardDictationRoute.dictationLanguageCode(mode: mode, keyboardLanguageCode: keyboardLanguageCode)
-        else { return .autoDetect }
-        return InKeyboardDictationRoute.isLanguageCovered(code, bySupportedLocales: supportedLocales)
-            ? .covered(code) : .notCovered(code)
-    }
-
+extension InKeyboardDictationRoute {
     /// The setting as the user sees it and the keyboard applies it.
-    public static func isEffectivelyOn(userChoice: Bool?, eligibility: InKeyboardLanguageEligibility) -> Bool {
-        (userChoice ?? InKeyboardDictationRoute.defaultEnabled) && eligibility.isCovered
+    public static func isEffectivelyOn(userChoice: Bool?, language: AppleSpeechLanguage) -> Bool {
+        (userChoice ?? defaultEnabled) && language.isCovered
     }
 }

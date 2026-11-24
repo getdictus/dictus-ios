@@ -1517,7 +1517,7 @@ extension ModelManager {
     /// falls back to whenever Apple cannot run.
     func selectAppleEngine() {
         speechEngineChoice = .apple
-        SpeechEngineChoice.write(.apple, to: AppGroup.defaults)
+        SpeechEngineChoice.write(.apple, to: defaults)
         PersistentLog.log(.modelSelected(name: AppleSpeechEngineIdentity.identifier))
         DictationCoordinator.shared.adoptAppleEngine()
     }

@@ -33,10 +33,6 @@ public enum InKeyboardDictationRoute: String, Equatable, Sendable {
         case undetermined
     }
 
-    /// First iOS major version with `SpeechAnalyzer`, `SpeechTranscriber` and
-    /// `AssetInventory`.
-    public static let minimumSystemMajorVersion = 26
-
     /// The whole rule, as a pure function so every combination is tested.
     ///
     /// - Parameters:
@@ -66,7 +62,7 @@ public enum InKeyboardDictationRoute: String, Equatable, Sendable {
     ) -> InKeyboardDictationRoute {
         if appAnswered || sessionOwner == .app { return .appIsRecording }
         guard settingEnabled,
-              systemMajorVersion >= minimumSystemMajorVersion,
+              systemMajorVersion >= AppleEngineAvailability.minimumSystemMajorVersion,
               localeInstalled == true,
               hasFullAccess
         else { return .openAppURL }
@@ -105,48 +101,6 @@ public enum InKeyboardDictationRoute: String, Equatable, Sendable {
         return defaults.bool(forKey: SharedKeys.inKeyboardDictationEnabled)
     }
 
-    /// The full locale to ask the speech model for, from a bare dictation language.
-    ///
-    /// WHY not `Locale(identifier: "fr")`: `supportedLocale(equivalentTo:)` resolves a bare
-    /// language to an arbitrary region (measured 2026-11-19 on the iOS 26.5 simulator:
-    /// "fr" gave `fr_BE`), and the installed model is per region. The device's own region
-    /// wins when it speaks that language; otherwise the language's main region.
-    public static func speechLocaleIdentifier(languageCode: String, deviceLocaleIdentifier: String) -> String {
-        let device = Locale(identifier: deviceLocaleIdentifier)
-        if device.language.languageCode?.identifier == languageCode,
-           let region = device.region?.identifier {
-            return "\(languageCode)-\(region)"
-        }
-        // The region Apple's SpeechTranscriber lists first for each language it supports
-        // (`supportedLocales`, macOS 26 / iOS 26). Chinese: mainland by default; a device
-        // set to zh-TW or zh-HK gets its own region from the branch above.
-        let mainRegion = ["fr": "FR", "en": "US", "es": "ES", "de": "DE", "it": "IT", "pt": "BR",
-                          "ja": "JP", "ko": "KR", "zh": "CN", "yue": "CN", "hi": "IN", "bn": "IN",
-                          "gu": "IN", "kn": "IN", "ml": "IN", "mr": "IN", "ne": "IN", "pa": "IN",
-                          "ta": "IN", "te": "IN", "ur": "IN"]
-        guard let region = mainRegion[languageCode] else { return languageCode }
-        return "\(languageCode)-\(region)"
-    }
-
-    /// The language the keyboard dictates in when the app is closed: the dictation
-    /// language the user CHOSE, never one detected from speech (Pierre, 2026-11-21).
-    ///
-    /// - an explicit transcription language: that language;
-    /// - "follow the keyboard": the keyboard language of the moment, so a user who
-    ///   switches keyboards on the toolbar dictates in each one in turn;
-    /// - automatic detection: nil. Apple's transcriber takes one locale and cannot follow
-    ///   a speaker who changes language, which is what auto-detect is for; the keyboard
-    ///   keeps today's path and the app's model detects the language.
-    public static func dictationLanguageCode(mode: TranscriptionLanguageMode,
-                                             keyboardLanguageCode: String) -> String? {
-        mode.resolvedLanguageCode(keyboardLanguageCode: keyboardLanguageCode)
-    }
-
-    /// `dictationLanguageCode` read from the App Group.
-    public static func activeDictationLanguageCode() -> String? {
-        dictationLanguageCode(mode: .active, keyboardLanguageCode: SupportedLanguage.active.rawValue)
-    }
-
     /// The speech locales the app reserves and installs ahead of the keyboard's first
     /// cold tap, in priority order: the dictation language, then the keyboard language
     /// when it differs (the toolbar switches it, and in follow mode the dictation follows).
@@ -154,28 +108,14 @@ public enum InKeyboardDictationRoute: String, Equatable, Sendable {
     public static func speechLocalesToReserve(transcriptionMode: TranscriptionLanguageMode,
                                               keyboardLanguageCode: String,
                                               deviceLocaleIdentifier: String) -> [String] {
-        guard let dictation = dictationLanguageCode(mode: transcriptionMode,
-                                                    keyboardLanguageCode: keyboardLanguageCode) else { return [] }
+        // The dictation language the user CHOSE, never one detected from speech (Pierre,
+        // 2026-11-21); nil under automatic detection.
+        guard let dictation = transcriptionMode.resolvedLanguageCode(keyboardLanguageCode: keyboardLanguageCode) else { return [] }
         var result: [String] = []
         for code in [dictation, keyboardLanguageCode] {
-            let identifier = speechLocaleIdentifier(languageCode: code, deviceLocaleIdentifier: deviceLocaleIdentifier)
+            let identifier = AppleSpeechLanguage.localeIdentifier(languageCode: code, deviceLocaleIdentifier: deviceLocaleIdentifier)
             if !result.contains(identifier) { result.append(identifier) }
         }
         return result
-    }
-
-    /// The major component of `UIDevice.current.systemVersion` ("26.5" → 26).
-    /// An unreadable string gives 0, which routes to the fallback.
-    public static func majorVersion(of systemVersion: String) -> Int {
-        Int(systemVersion.split(separator: ".").first ?? "") ?? 0
-    }
-
-    /// Whether Apple's recognizer lists the language at all, from its `supportedLocales`
-    /// identifiers ("zh-CN", "fr-CA", …). Only the language subtag counts; the region is
-    /// chosen by `speechLocaleIdentifier`. Used to document coverage, and by the tests.
-    public static func isLanguageCovered(_ languageCode: String, bySupportedLocales identifiers: [String]) -> Bool {
-        identifiers.contains { identifier in
-            identifier.split(whereSeparator: { $0 == "-" || $0 == "_" }).first.map(String.init) == languageCode
-        }
     }
 }
