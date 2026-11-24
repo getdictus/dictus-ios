@@ -98,10 +98,11 @@ public final class DeleteWordSwipe {
     /// The text the touch-down removed when it took back `count` characters at once (a
     /// swiped word and its space, #948), when the context before and after it say so for
     /// certain; nil otherwise, so a deletion the host did not make, or made only in part, is
-    /// never typed back.
+    /// never typed back. A host that shares no context after it (nil) proves nothing: an
+    /// emptied field and a withheld context read the same, so the word is not handed over
+    /// (stricter than `touchDownDeletion`'s single character, whose double is one letter).
     public static func touchDownWord(before: String?, after: String?, count: Int) -> String? {
-        guard count > 1, let before, before.count >= count else { return nil }
-        let after = after ?? ""
+        guard count > 1, let before, let after, before.count >= count else { return nil }
         guard before.count == after.count + count, before.hasPrefix(after) else { return nil }
         return String(before.suffix(count))
     }

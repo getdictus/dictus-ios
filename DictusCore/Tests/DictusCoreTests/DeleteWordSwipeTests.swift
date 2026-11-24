@@ -133,7 +133,8 @@ final class DeleteWordSwipeTests: XCTestCase {
     /// the host never deleted would double it.
     func testTheTouchDownWordIsReadOffTheContext() {
         XCTAssertEqual(DeleteWordSwipe.touchDownWord(before: "one two world", after: "one two", count: 6), " world")
-        XCTAssertEqual(DeleteWordSwipe.touchDownWord(before: "Bonjour", after: nil, count: 7), "Bonjour")
+        XCTAssertNil(DeleteWordSwipe.touchDownWord(before: "Bonjour", after: nil, count: 7),
+                     "no context after: an emptied field and a withheld one read the same")
         XCTAssertNil(DeleteWordSwipe.touchDownWord(before: "one two world", after: "one two world", count: 6), "nothing deleted")
         XCTAssertNil(DeleteWordSwipe.touchDownWord(before: "one two world", after: "one two w", count: 6), "deleted in part")
         XCTAssertNil(DeleteWordSwipe.touchDownWord(before: "one two world", after: "xne two", count: 6), "not the same text")
