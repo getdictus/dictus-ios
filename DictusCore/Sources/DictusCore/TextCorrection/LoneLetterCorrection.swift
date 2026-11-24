@@ -18,6 +18,9 @@ import Foundation
 /// neighbour (`b`, `c`, `l`...) is kept as typed, as before: nothing says which word it
 /// stands for.
 ///
+/// A letter the word before names as a letter is kept: a determiner or `lettre` in French
+/// (`le h aspiré`, `un z`, `la lettre b`), which never comes before `a`, `à` or `y`.
+///
 /// A capital letter is kept everywhere (`plan B`, `vitamine C`, `H. Dupont`). At the
 /// start of a sentence the capital may be the keyboard's, but the engine does not know
 /// which key committed the word, and a full stop after it reads as an initial as often
@@ -53,6 +56,8 @@ public enum LoneLetterCorrection {
     ///   - layout: the letter layout the word was typed on, which decides the neighbours.
     ///   - context: the text before the cursor, ending with `word`. With it, a homograph
     ///     rule may choose the accented spelling of the correction (`je vais z` → `à`).
+    ///   - markers: lowercase words after which a lone letter is the letter itself
+    ///     (French `le`, `un`, `lettre`), read from `context`.
     ///   - homographs: the language's contextual homographs (#501).
     ///   - isLearned: whether the user dictionary holds a lowercase word.
     public static func decision(
@@ -60,6 +65,7 @@ public enum LoneLetterCorrection {
         words: Set<String>?,
         layout: LayoutType,
         context: String? = nil,
+        markers: Set<String> = [],
         homographs: [ContextualHomograph] = [],
         isLearned: (String) -> Bool
     ) -> Decision? {
@@ -73,13 +79,25 @@ public enum LoneLetterCorrection {
         }
         guard word.count == 1, let letter = word.first, letter.isLetter,
               !words.contains(word.lowercased()) else { return nil }
-        guard !letter.isUppercase, !isLearned(word.lowercased()), let neighbour = nearestWord(to: letter, among: words, on: layout) else {
+        guard !letter.isUppercase, !isLearned(word.lowercased()),
+              !isNamedAsLetter(word, context: context, markers: markers),
+              let neighbour = nearestWord(to: letter, among: words, on: layout) else {
             return .keep
         }
         guard let context, context.hasSuffix(word) else { return .correct(neighbour) }
         let corrected = String(context.dropLast(word.count)) + neighbour
         let spelling = homographs.lazy.compactMap { $0.accentedForm(of: neighbour, context: corrected) }.first
         return .correct(spelling ?? neighbour)
+    }
+
+    /// Whether the word right before `word` in `context` is one of `markers`: `le` in
+    /// `le h`. Read from the text, not from the keyboard's previous word, so that an
+    /// elided marker keeps its apostrophe (`d' z`), typed straight or curly.
+    static func isNamedAsLetter(_ word: String, context: String?, markers: Set<String>) -> Bool {
+        guard !markers.isEmpty, let context, context.hasSuffix(word) else { return false }
+        let before = context.dropLast(word.count)
+        guard let previous = before.split(whereSeparator: \.isWhitespace).last else { return false }
+        return markers.contains(previous.lowercased().replacingOccurrences(of: "\u{2019}", with: "'"))
     }
 
     /// The one-letter word whose key is nearest `letter`'s, among those within

@@ -127,6 +127,13 @@ public let frenchProfile = LanguageProfile(
     ),
     // The only letters that are words on their own (#977): `problème z` is `problème a`.
     loneLetterWords: ["a", "\u{00E0}", "y"],  // a, à, y
+    // After a determiner or `lettre` a lone letter is the letter (`le h aspiré`, `un z`):
+    // none of them can come before `a`, `à` or `y`. `les` is left out, being also the
+    // pronoun of `il les a vus`.
+    loneLetterMarkers: [
+        "le", "la", "l'", "un", "une", "du", "des", "de", "d'",
+        "ce", "cet", "cette", "chaque", "lettre", "lettres"
+    ],
     contextualHomographs: [frenchAGrave],
     longPressAccents: LongPressAccents.french
 )

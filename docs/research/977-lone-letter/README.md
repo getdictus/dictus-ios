@@ -8,8 +8,9 @@ The fix is `LoneLetterCorrection` (DictusCore), asked by `TextPredictionEngine.c
 after the learned-word check and before the valid-word guard. In French only `a`, `à` and
 `y` stand alone (`LanguageProfile.loneLetterWords`); any other lone letter becomes the
 one of them on a neighbouring key of the layout in use, then goes through the `a`/`à`
-rule of #501. A letter with no such neighbour, a capital, a letter after an apostrophe
-and a learned letter are kept. The other languages have no list, so nothing changes
+rule of #501. A letter with no such neighbour, a capital, a letter after an apostrophe,
+a letter after a word that names it as a letter (a determiner or `lettre`,
+`LanguageProfile.loneLetterMarkers`) and a learned letter are kept. The other languages have no list, so nothing changes
 there.
 
 Measured 2026-11-24 with the keyboard bench (#954), iPhone 17 simulator, iOS 26.5,
@@ -81,13 +82,19 @@ Limits): typed key by key on Apple's AZERTY, `vas avoir des probleme z je vais z
 t a la lettre b plan B ` stayed exactly as typed, `probleme` included. What Apple's
 keyboard does with a lone `z` needs a device.
 
-## Known limit
+## A letter named as a letter (review of #1061)
 
-A lowercase letter meant as a letter, next to `a` or `y`, is corrected: `le h aspiré`
-becomes `le y aspiré`, `la lettre z` becomes `la lettre a`. The issue's rule has no
-exception for it, and the bar previews the correction, which Undo or a backspace refuses
-at that place. A determiner before the letter (`le`, `la`, `un`) would catch most of
-them; that is a word list the issue does not ask for, so it is left to a device test.
+The first version corrected a lowercase letter meant as a letter when it sat next to `a`
+or `y`: `le h aspiré` became `le y aspiré` (develop also writes a lone `h` as `y`,
+through the trie, the `h` being missing from the dictionary: measured after `problème`),
+`un z` became `un a`. A letter is now kept when the word
+right before it is one of `le la l' un une du des de d' ce cet cette chaque lettre
+lettres`: none of them can come before `a`, `à` or `y`. `les` is left out, being also
+the pronoun of `il les a vus`, so `il les z` still gives `il les a`. Only the word right
+before counts: `le problème z` still gives `a`.
+
+The bench (fr, en, en-typos) gives the same report as the first version, timings aside:
+its corpora hold no lone letter after one of these words.
 
 ## Reproduce
 

@@ -1116,7 +1116,7 @@ extension TextPredictionEngine {
     private func loneLetterAnswer(for word: String, previousWord: String?, context: String?) -> CheckedWord?? {
         switch LoneLetterCorrection.decision(
             for: word, words: profile?.loneLetterWords, layout: loadedLayout ?? LayoutType.active,
-            context: context, homographs: profile?.contextualHomographs ?? [],
+            context: context, markers: profile?.loneLetterMarkers ?? [], homographs: profile?.contextualHomographs ?? [],
             isLearned: UserDictionary.shared.isLearned
         ) {
         case .correct(let letter):

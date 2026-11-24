@@ -81,6 +81,11 @@ public struct LanguageProfile: Sendable {
     /// which leaves every lone letter to the dictionary, as before.
     public let loneLetterWords: Set<String>?
 
+    /// Lowercase words after which a lone letter is the letter itself, never a slip:
+    /// French determiners and `lettre` (`le h aspiré`, `un z`, `la lettre b`, #977).
+    /// Read by `LoneLetterCorrection` only. Empty where `loneLetterWords` is nil.
+    public let loneLetterMarkers: Set<String>
+
     /// Known misspellings, lowercase, with their correct form: the entries
     /// `tools/misspellings/` removed from the word list (`teh` → `the`). Read
     /// with `overrides`, and kept apart from it because it is generated from a
@@ -124,6 +129,7 @@ public struct LanguageProfile: Sendable {
         collapseRules: [(from: String, to: String)] = [],
         participleContext: ParticipleContext? = nil,
         loneLetterWords: Set<String>? = nil,
+        loneLetterMarkers: Set<String> = [],
         misspellings: [String: String] = [:],
         contextualContractions: [ContextualContraction] = [],
         contextualHomographs: [ContextualHomograph] = [],
@@ -145,6 +151,7 @@ public struct LanguageProfile: Sendable {
         self.collapseRules = collapseRules
         self.participleContext = participleContext
         self.loneLetterWords = loneLetterWords
+        self.loneLetterMarkers = loneLetterMarkers
         self.misspellings = misspellings
         self.contextualContractions = contextualContractions
         self.contextualHomographs = contextualHomographs

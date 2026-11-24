@@ -15,7 +15,8 @@ final class LoneLetterCorrectionTests: XCTestCase {
     ) -> LoneLetterCorrection.Decision? {
         LoneLetterCorrection.decision(
             for: word, words: french.loneLetterWords, layout: layout, context: context,
-            homographs: french.contextualHomographs, isLearned: learned.contains
+            markers: french.loneLetterMarkers, homographs: french.contextualHomographs,
+            isLearned: learned.contains
         )
     }
 
@@ -75,6 +76,30 @@ final class LoneLetterCorrectionTests: XCTestCase {
         XCTAssertEqual(decide("Z", context: "la lettre Z"), .keep)
         XCTAssertEqual(decide("T", context: "T"), .keep)
         XCTAssertEqual(decide("H", context: "Merci. H"), .keep)
+    }
+
+    /// Titus's review of #1061: after a determiner or `lettre` the letter is the letter.
+    /// `le h aspiré` was `le y aspiré` on develop too, through the trie.
+    func testALetterNamedAsALetterIsKept() {
+        XCTAssertEqual(decide("h", context: "le h"), .keep)
+        XCTAssertEqual(decide("z", context: "un z"), .keep)
+        XCTAssertEqual(decide("b", context: "la lettre b"), .keep)
+        XCTAssertEqual(decide("z", context: "la lettre z"), .keep)
+        XCTAssertEqual(decide("p", context: "du p"), .keep)
+        XCTAssertEqual(decide("t", context: "Le t"), .keep)
+        XCTAssertEqual(decide("q", context: "avec une q"), .keep)
+        XCTAssertEqual(decide("u", context: "des u"), .keep)
+        XCTAssertEqual(decide("z", context: "le mot d\u{2019} z"), .keep)
+    }
+
+    /// A marker counts only right before the letter, and `les` is not one: it is also the
+    /// pronoun of `il les a vus`.
+    func testOnlyTheWordRightBeforeMarksALetter() {
+        XCTAssertEqual(decide("z", context: "le problème z"), .correct("a"))
+        XCTAssertEqual(decide("t", context: "il t"), .correct("y"))
+        XCTAssertEqual(decide("z", context: "il les z"), .correct("a"))
+        // Nothing before it: the start of a sentence, where #501 writes `à` (`À demain`).
+        XCTAssertEqual(decide("z", context: "z"), .correct("\u{00E0}"))
     }
 
     func testALearnedLetterIsKept() {
@@ -159,6 +184,12 @@ final class LoneLetterCorrectionTests: XCTestCase {
 
     func testTheSpaceBarCorrectsTheReportedSentence() {
         XCTAssertEqual(type("vas avoir des problème z "), "vas avoir des problème a ")
+        XCTAssertEqual(type("il t a "), "il y a ")
+    }
+
+    func testTheSpaceBarKeepsALetterNamedAsALetter() {
+        XCTAssertEqual(type("le h aspiré "), "le h aspiré ")
+        XCTAssertEqual(type("un z et la lettre b du p "), "un z et la lettre b du p ")
     }
 
     /// A closing parenthesis does not commit a word, and the space after it finds none.
