@@ -114,6 +114,44 @@ final class DeleteWordSwipeTests: XCTestCase {
         XCTAssertEqual(document.text, "comme je parle")
     }
 
+    /// Delete right after a swiped word took back " world" on touch-down (#948): that is the
+    /// slide's first word, so the first step deletes nothing more, the second deletes "two",
+    /// and sliding all the way back gives the text exactly as it was before the touch.
+    func testAWordTheTouchDownTookBackIsTheSlidesFirstWord() {
+        let document = HostDocument("one two")
+        let slide = DeleteWordSwipe(editor: document, mirror: nil, startX: start, step: key, touchDownWord: " world")
+        XCTAssertEqual(slide.move(toX: x(words: 1)), DeleteWordSwipe.Change())
+        XCTAssertTrue(slide.isActive)
+        XCTAssertEqual(document.text, "one two")
+        slide.move(toX: x(words: 2))
+        XCTAssertEqual(document.text, "one ")
+        slide.move(toX: start)
+        XCTAssertEqual(document.text, "one two world")
+    }
+
+    /// Only a deletion the context proves complete is handed to the slide: typing back text
+    /// the host never deleted would double it.
+    func testTheTouchDownWordIsReadOffTheContext() {
+        XCTAssertEqual(DeleteWordSwipe.touchDownWord(before: "one two world", after: "one two", count: 6), " world")
+        XCTAssertNil(DeleteWordSwipe.touchDownWord(before: "Bonjour", after: nil, count: 7),
+                     "no context after: an emptied field and a withheld one read the same")
+        XCTAssertNil(DeleteWordSwipe.touchDownWord(before: "one two world", after: "one two world", count: 6), "nothing deleted")
+        XCTAssertNil(DeleteWordSwipe.touchDownWord(before: "one two world", after: "one two w", count: 6), "deleted in part")
+        XCTAssertNil(DeleteWordSwipe.touchDownWord(before: "one two world", after: "xne two", count: 6), "not the same text")
+        XCTAssertNil(DeleteWordSwipe.touchDownWord(before: "one two world", after: "one two worl", count: 1), "one character is touchDownDeletion's")
+        XCTAssertNil(DeleteWordSwipe.touchDownWord(before: nil, after: nil, count: 6))
+    }
+
+    func testARepeatBeforeTheSlideDropsTheTouchDownWord() {
+        let document = HostDocument("one tw")
+        let slide = DeleteWordSwipe(editor: document, mirror: nil, startX: start, step: key, touchDownWord: " world")
+        slide.forgetTouchDownDeletion()
+        slide.move(toX: x(words: 1))
+        XCTAssertEqual(document.text, "one ")
+        slide.move(toX: start)
+        XCTAssertEqual(document.text, "one tw")
+    }
+
     func testARepeatBeforeTheSlideDropsTheTouchDownCharacter() {
         let document = HostDocument("comme je pa")
         let slide = swipe(document, touchDown: "e")

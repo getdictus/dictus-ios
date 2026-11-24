@@ -376,9 +376,20 @@ struct DictusApp: App {
             ))
         }
         refreshOnboardingFlag()
+        Self.recordDistribution()
         #if DEBUG
         Self.applySpatialAutocorrectArgument()
         #endif
+    }
+
+    /// Tells the keyboard where this app was installed from (#948). The keyboard cannot
+    /// read it itself (`AppDistribution`), and it decides whether an Experiments switch acts
+    /// there. A constant write, skipped when the value is already stored, and only once
+    /// protected data is available: a write into a store that reads empty before the first
+    /// unlock is what #868 is about.
+    private static func recordDistribution() {
+        guard protectedData.isProtectedDataAvailable else { return }
+        AppDistribution.record()
     }
 
     #if DEBUG

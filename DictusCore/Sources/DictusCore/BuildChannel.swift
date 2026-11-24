@@ -23,13 +23,15 @@ public enum BuildChannel: Equatable, Sendable {
     /// extension `Bundle.main` is the extension's bundle, whose receipt URL Apple does
     /// not document, so an extension may read `.appStore` from a TestFlight install.
     /// Both failures land on the side that writes no text.
-    public static let current: BuildChannel = {
+    public static let current: BuildChannel = detect(isDebug: isDebugBuild, receiptURL: Bundle.main.appStoreReceiptURL)
+
+    /// Whether this binary was compiled for Debug. Shared with `AppDistribution.current`.
+    static let isDebugBuild: Bool = {
         #if DEBUG
-        let isDebug = true
+        return true
         #else
-        let isDebug = false
+        return false
         #endif
-        return detect(isDebug: isDebug, receiptURL: Bundle.main.appStoreReceiptURL)
     }()
 
     /// The rule behind `current`, with its two inputs passed in so tests can drive it.

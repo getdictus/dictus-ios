@@ -150,6 +150,9 @@ struct SuggestionBarView: View {
         switch mode {
         case .predictions, .candidates:
             return .regular
+        case .swipePreview:
+            // The word so far, alone in the bar (#948).
+            return .semibold
         case .undoAvailable:
             return index == 0 ? .semibold : .regular
         default:

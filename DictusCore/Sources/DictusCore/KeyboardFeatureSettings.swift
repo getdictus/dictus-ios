@@ -120,6 +120,33 @@ public struct KeyboardFeatureSettings {
         }
     }
 
+    // MARK: - Experiments as the keyboard applies them
+
+    /// The settings as the keyboard extension reads them: the channel is the one the app
+    /// wrote (`AppDistribution.recordedChannel`), since the extension cannot read its own.
+    public static func forKeyboard(store: UserDefaults = AppGroup.defaults) -> KeyboardFeatureSettings {
+        KeyboardFeatureSettings(store: store, channel: AppDistribution.recordedChannel(in: store))
+    }
+
+    /// Swipe typing as it acts: the stored switch on a test build, its default in the App
+    /// Store build, where the Experiments page that set it does not exist (Pierre,
+    /// 2026-11-24). A tester who switched it on in TestFlight and then installs the App
+    /// Store build gets the App Store's behaviour.
+    public var isSwipeTypingEffective: Bool {
+        Self.experiment(swipeTyping, default: Defaults.swipeTyping, on: channel)
+    }
+
+    /// The trail, by the same rule. Meaningful only while `isSwipeTypingEffective`.
+    public var isSwipeTrailEffective: Bool {
+        Self.experiment(swipeTrail, default: Defaults.swipeTrail, on: channel)
+    }
+
+    /// An Experiments switch as it acts: `stored` where the page exists, `fallback` where it
+    /// does not.
+    public static func experiment(_ stored: Bool, default fallback: Bool, on channel: BuildChannel) -> Bool {
+        isExperimentsPageVisible(on: channel) ? stored : fallback
+    }
+
     // MARK: - Partner language
 
     /// The second language the bilingual check types alongside `keyboard`: the user's
