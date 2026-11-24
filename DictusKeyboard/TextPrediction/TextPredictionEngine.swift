@@ -518,6 +518,13 @@ class TextPredictionEngine {
             return CheckedWord(correction: corrected, alternatives: [])
         }
 
+        // A close typo of an app or brand name the dictionary does not hold: `iphon`.
+        // Same place as a learned word, for the same reasons. Decided here: the rerank
+        // must not swap it for a neighbour.
+        if let name = curatedNameCorrection(for: word, wordToCheck: wordToCheck, apostrophePrefix: apostrophePrefix) {
+            return CheckedWord(.autocorrect(name, alternatives: []))
+        }
+
         // Word splitting + single-word correction comparison.
         //
         // Strategy (informed by real user feedback + debug log analysis):
@@ -1116,6 +1123,26 @@ extension TextPredictionEngine {
         let trie = trieProposal(for: word, previousWord: previousWord, isAtSentenceStart: isAtSentenceStart)
         guard let spatial else { return trie }
         return spatialProposal(for: word, previousWord: previousWord, spatial: spatial, trie: trie)
+    }
+}
+
+// MARK: - Curated names as targets
+
+extension TextPredictionEngine {
+    /// `word` corrected to a curated app or brand name (`CuratedNameCorrection`), in
+    /// the name's casing, its apostrophe prefix kept: `l'iphon` -> "l'iPhone". Only
+    /// the prefix takes a sentence-start capital, never the name: "L'iPhone", "iPhone".
+    fileprivate func curatedNameCorrection(for word: String, wordToCheck: String, apostrophePrefix: String?) -> String? {
+        guard let name = CuratedNameCorrection.target(for: wordToCheck, dictionaryKnows: aospTrieEngine.wordExists),
+              allowsElided(name.lowercased(), after: apostrophePrefix)
+        else { return nil }
+        let corrected = apostrophePrefix.map { Self.capitalized($0, like: word) + name } ?? name
+        #if DEBUG
+        AutocorrectDebugLog.autocorrectDecision(
+            original: word, corrected: corrected, branch: "curated-name", prevWord: nil
+        )
+        #endif
+        return corrected
     }
 }
 
