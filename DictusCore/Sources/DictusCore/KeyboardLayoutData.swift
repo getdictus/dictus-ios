@@ -71,7 +71,7 @@ public enum QWERTYLayout {
 /// that variant — if it is ever wanted it is a separate layout, not a change to this one.
 ///
 /// There is no dedicated ß on either platform. It stays a long-press on `s`
-/// (`AccentedCharacters.mappings`).
+/// (`AccentedCharacters.mappings(for:layout:)`).
 ///
 /// WHY the rows live here and not only in `KeyboardLayouts` (DictusKeyboard):
 /// the keyboard extension has no test target — `swift test` builds this package alone —

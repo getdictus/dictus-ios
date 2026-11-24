@@ -1171,6 +1171,29 @@
         }
       }
     },
+    "Adaptive touch" : {
+      "comment" : "Settings › Keyboard › Experiments: toggle for personal key centres (#1014).",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adaptive Berührung"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toque adaptativo"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toucher adaptatif"
+          }
+        }
+      }
+    },
     "Add" : {
       "comment" : "Vocabulary suggestion row: opens the new-term sheet prefilled with the word as a variant (#512).",
       "localizations" : {
@@ -2740,6 +2763,29 @@
         }
       }
     },
+    "Bilingual autocorrect" : {
+      "comment" : "Settings › Keyboard › Experiments: toggle for correcting in two languages at once (#1015).",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zweisprachige Autokorrektur"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Autocorrección bilingüe"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Correction bilingue"
+          }
+        }
+      }
+    },
     "Bug" : {
       "comment" : "Feedback form (#565).",
       "localizations" : {
@@ -3323,6 +3369,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Corrigez vos mots dans le clavier Dictus : il les apprend. Touchez Analyser mes transcriptions : Dictus les compare à vos dictées et vous propose des termes à accepter, modifier ou ignorer. Rien n’est ajouté sans vous, et tout reste sur votre iPhone. Vos termes corrigent ensuite vos dictées automatiquement."
+          }
+        }
+      }
+    },
+    "Corrects a word from where your fingers landed on the keys, not only from the letters typed. French and English only." : {
+      "comment" : "Settings › Keyboard › Experiments: footer under Spatial autocorrect.",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Korrigiert ein Wort danach, wo deine Finger die Tasten getroffen haben, nicht nur nach den getippten Buchstaben. Nur Französisch und Englisch."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Corrige una palabra según dónde tocaron tus dedos las teclas, no solo según las letras escritas. Solo francés e inglés."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Corrige un mot d’après l’endroit où vos doigts ont touché les touches, pas seulement d’après les lettres tapées. Français et anglais uniquement."
+          }
+        }
+      }
+    },
+    "Corrects and suggests in your keyboard language and a second one at the same time, without switching keyboards. French and English only for now." : {
+      "comment" : "Settings › Keyboard › Experiments: footer under Bilingual autocorrect.",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Korrigiert und schlägt gleichzeitig in deiner Tastatursprache und einer zweiten vor, ohne die Tastatur zu wechseln. Vorerst nur Französisch und Englisch."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Corrige y sugiere en el idioma del teclado y en un segundo a la vez, sin cambiar de teclado. Solo francés e inglés por ahora."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Corrige et suggère dans la langue du clavier et dans une deuxième en même temps, sans changer de clavier. Français et anglais uniquement pour l’instant."
           }
         }
       }
@@ -4376,6 +4468,52 @@
         }
       }
     },
+    "Experiments" : {
+      "comment" : "Settings › Keyboard: the row and page title for keyboard features under test (TestFlight and Debug only).",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Experimente"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Experimentos"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Expériences"
+          }
+        }
+      }
+    },
+    "Feedback" : {
+      "comment" : "Settings › Keyboard: section header for haptics and sounds of key presses. Not the feedback form.",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rückmeldung"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Respuesta"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Retour"
+          }
+        }
+      }
+    },
     "Feedback is unavailable right now. Your message is kept." : {
       "comment" : "Feedback form (#565).",
       "localizations" : {
@@ -4629,6 +4767,98 @@
         }
       }
     },
+    "Inactive: turn on spatial autocorrect for adaptive touch to work." : {
+      "comment" : "Settings › Keyboard › Experiments: adaptive touch is on but has no effect because spatial autocorrect is off.",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inaktiv: Schalte die räumliche Autokorrektur ein, damit die adaptive Berührung wirkt."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inactivo: activa la autocorrección espacial para que funcione el toque adaptativo."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inactif : activez la correction spatiale pour que le toucher adaptatif fonctionne."
+          }
+        }
+      }
+    },
+    "Keyboard features still being tested, off by default. Only in test versions of Dictus." : {
+      "comment" : "Settings › Keyboard: footer under the Experiments row.",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tastaturfunktionen, die noch getestet werden, standardmäßig aus. Nur in Testversionen von Dictus."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Funciones del teclado aún en pruebas, desactivadas por defecto. Solo en las versiones de prueba de Dictus."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fonctions du clavier encore en test, désactivées par défaut. Uniquement dans les versions de test de Dictus."
+          }
+        }
+      }
+    },
+    "Learned words" : {
+      "comment" : "Settings › Keyboard: section header for the learned-words dictionary.",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gelernte Wörter"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Palabras aprendidas"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mots appris"
+          }
+        }
+      }
+    },
+    "Learns where you actually tap each key, and reads your taps with those positions. Stays on this iPhone." : {
+      "comment" : "Settings › Keyboard › Experiments: footer under Adaptive touch.",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lernt, wo du jede Taste tatsächlich triffst, und liest deine Eingaben mit diesen Positionen. Bleibt auf diesem iPhone."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aprende dónde tocas realmente cada tecla y lee tus toques con esas posiciones. Se queda en este iPhone."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apprend où vous touchez réellement chaque touche, et lit vos frappes avec ces positions. Reste sur cet iPhone."
+          }
+        }
+      }
+    },
     "Needs a transcription language, not automatic detection." : {
       "comment" : "Greyed Apple engine card: the transcription language is set to automatic detection.",
       "localizations" : {
@@ -4721,6 +4951,29 @@
         }
       }
     },
+    "Off by default. These features can change or disappear." : {
+      "comment" : "Settings › Keyboard › Experiments: header above the first switch.",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Standardmäßig aus. Diese Funktionen können sich ändern oder wegfallen."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Desactivadas por defecto. Estas funciones pueden cambiar o desaparecer."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Désactivées par défaut. Ces fonctions peuvent changer ou disparaître."
+          }
+        }
+      }
+    },
     "Preparing…" : {
       "comment" : "Apple engine card: iOS is installing Apple's speech model after the user picked it.",
       "localizations" : {
@@ -4809,6 +5062,213 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Idée"
+          }
+        }
+      }
+    },
+    "Second language" : {
+      "comment" : "Settings › Keyboard › Experiments: picker for the bilingual partner language.",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zweite Sprache"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Segundo idioma"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deuxième langue"
+          }
+        }
+      }
+    },
+    "Show swipe trail" : {
+      "comment" : "Settings › Keyboard › Experiments: toggle for drawing the finger's path while swipe typing.",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wischspur anzeigen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mostrar el trazo"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Afficher la trace"
+          }
+        }
+      }
+    },
+    "Slide left from the delete key to erase word by word. Slide back to bring the words back before lifting your finger." : {
+      "comment" : "Settings › Keyboard › Typing: footer explaining the delete-word swipe.",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wische von der Löschtaste nach links, um Wort für Wort zu löschen. Wische zurück, um die Wörter zurückzuholen, bevor du den Finger hebst."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Desliza a la izquierda desde la tecla de borrar para borrar palabra por palabra. Vuelve a la derecha para recuperar las palabras antes de levantar el dedo."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Glissez vers la gauche depuis la touche Supprimer pour effacer mot par mot. Revenez vers la droite pour rendre les mots avant de lever le doigt."
+          }
+        }
+      }
+    },
+    "Slide your finger from letter to letter to type a word, then lift it. The trail draws the path under your finger." : {
+      "comment" : "Settings › Keyboard › Experiments: footer under Swipe typing.",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wische mit dem Finger von Buchstabe zu Buchstabe, um ein Wort zu tippen, und heb ihn dann an. Die Spur zeigt den Weg unter deinem Finger."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Desliza el dedo de letra en letra para escribir una palabra y luego levántalo. El trazo dibuja el recorrido bajo tu dedo."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Faites glisser votre doigt de lettre en lettre pour taper un mot, puis levez-le. La trace dessine le chemin sous votre doigt."
+          }
+        }
+      }
+    },
+    "Spatial autocorrect" : {
+      "comment" : "Settings › Keyboard › Experiments: toggle for the spatial decoder (#1011).",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Räumliche Autokorrektur"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Autocorrección espacial"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Correction spatiale"
+          }
+        }
+      }
+    },
+    "Swipe to delete words" : {
+      "comment" : "Settings › Keyboard › Typing: toggle for sliding left from the delete key to erase word by word (#609).",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wischen zum Löschen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Borrar deslizando"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Effacer en glissant"
+          }
+        }
+      }
+    },
+    "Swipe typing" : {
+      "comment" : "Settings › Keyboard › Experiments: toggle for typing a word by sliding across its letters.",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tippen durch Wischen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escritura deslizante"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saisie par glissement"
+          }
+        }
+      }
+    },
+    "Turn on spatial autocorrect first." : {
+      "comment" : "Settings › Keyboard › Experiments: why Adaptive touch is greyed out.",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schalte zuerst die räumliche Autokorrektur ein."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Activa primero la autocorrección espacial."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Activez d’abord la correction spatiale."
+          }
+        }
+      }
+    },
+    "Typing" : {
+      "comment" : "Settings › Keyboard: section header for what typing does (autocorrect, delete-word swipe).",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tippen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escritura"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Frappe"
           }
         }
       }

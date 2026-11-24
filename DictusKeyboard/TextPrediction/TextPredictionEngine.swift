@@ -445,7 +445,9 @@ class TextPredictionEngine {
         // Valid word guard: if the word exists in the trie dictionary, it's correct.
         // This prevents aggressive corrections like "fais" → "vais".
         // Runs AFTER accent expansion so "tres" → "très" still works.
-        if aospTrieEngine.wordExists(wordToCheck) {
+        // Asked in the dictionary's spelling (#1042): "cœur" typed with its ligature is
+        // the trie's "coeur", and was corrected to "cour" while it was looked up as typed.
+        if aospTrieEngine.hasWord(wordToCheck) {
             #if DEBUG
             AutocorrectDebugLog.autocorrectSkipped(word: word, reason: "already-valid")
             #endif
