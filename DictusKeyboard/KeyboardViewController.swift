@@ -354,7 +354,7 @@ class KeyboardViewController: UIInputViewController {
         // dictation, with nothing half-typed to suggest for.
         KeyboardState.shared.onDictationUndone = { [weak self] in
             guard let self = self else { return }
-            self.suggestionState.clear()
+            self.suggestionState.clearDroppingPending()
             self.bridge?.updateCapitalization()
         }
 

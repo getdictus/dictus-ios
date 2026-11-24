@@ -240,12 +240,12 @@ class SuggestionState: ObservableObject {
         // Host field traits gate (#200): reads the cached policy — this method
         // dispatches to a background queue and cannot touch the proxy itself.
         guard hostPolicy.suggestionsAllowed else {
-            clear()
+            clearDroppingPending()
             return
         }
 
         guard let context = context, !context.isEmpty else {
-            clear()
+            clearDroppingPending()
             return
         }
 
@@ -471,6 +471,15 @@ class SuggestionState: ObservableObject {
         clear()
     }
 
+    /// Empties the bar for good: a result still being computed for an earlier request is
+    /// dropped instead of landing after it (review of #948). Not for the whitespace path of
+    /// `updateAsync`, which leaves a pending prediction to arrive.
+    func clearDroppingPending() {
+        currentSuggestionWork?.cancel()
+        publication += 1
+        clear()
+    }
+
     /// Resets the suggestion state to idle.
     func clear() {
         suggestions = []
@@ -507,12 +516,12 @@ class SuggestionState: ObservableObject {
     func updatePredictions(context: String?) {
         // Host field traits gate (#200): no next-word predictions in search/URL fields.
         guard hostPolicy.suggestionsAllowed else {
-            clear()
+            clearDroppingPending()
             return
         }
 
         guard let context = context, !context.isEmpty else {
-            clear()
+            clearDroppingPending()
             return
         }
 
