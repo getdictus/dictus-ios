@@ -319,8 +319,10 @@ jobs:
           echo "Simulator: $NAME, iOS $RUNTIME, $UDID"
           echo "SIM_UDID=$UDID" >> "$GITHUB_ENV"
 
-      # Raw xcodebuild output in a file, filtered on screen: xcbeautify would rewrite
-      # the "Test Case ... passed" lines the next step looks for.
+      # Raw xcodebuild output in a file, filtered on screen, for the failure artifact.
+      # The verdict is read from the result bundle, not from this log: the host app's
+      # stderr can land inside a "Test Case ... passed" line (run 45421212981, attempt 1:
+      # the test passed and a grep on the log still missed it).
       - name: "App Tests: Run DictusAppTests (xcodebuild test)"
         id: app-test
         if: ${{ !cancelled() && steps.app-pick.outcome == 'success' }}
@@ -336,16 +338,47 @@ jobs:
             -test-timeouts-enabled YES \
             -default-test-execution-time-allowance 120 \
             -maximum-test-execution-time-allowance 180 \
+            -resultBundlePath "$RUNNER_TEMP/AppTests.xcresult" \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGNING_IDENTITY="" \
             2>&1 | tee "$RUNNER_TEMP/app-tests.log" \
             | grep -E --line-buffered "error:|Test Case|Executed|\*\* |Testing failed|hung"
 
+      # Every SubscriptionForegroundRefreshTests case in the result bundle must have
+      # passed, and there must be at least one: a bundle where the class did not run
+      # fails here by name.
       - name: "App Tests: Show the SubscriptionForegroundRefreshTests result"
         id: app-result
         if: ${{ !cancelled() && steps.app-test.outcome == 'success' }}
-        run: grep -E "Test Case .*SubscriptionForegroundRefreshTests.* passed" "$RUNNER_TEMP/app-tests.log"
+        run: |
+          xcrun xcresulttool get test-results tests \
+            --path "$RUNNER_TEMP/AppTests.xcresult" > "$RUNNER_TEMP/app-tests.json"
+          python3 - "$RUNNER_TEMP/app-tests.json" <<'PY'
+          import json, sys
+          SUITE = "SubscriptionForegroundRefreshTests/"
+          def walk(nodes):
+              for node in nodes:
+                  yield node
+                  yield from walk(node.get("children", []))
+          nodes = list(walk(json.load(open(sys.argv[1]))["testNodes"]))
+          cases = [n for n in nodes
+                   if n.get("nodeType") == "Test Case" and n.get("nodeIdentifier", "").startswith(SUITE)]
+          if not cases:
+              print("::error::No SubscriptionForegroundRefreshTests case in the result bundle")
+              sys.exit(1)
+          failed = False
+          for case in cases:
+              print(f"{case['nodeIdentifier']}: {case.get('result')} ({case.get('duration', '?')})")
+              if case.get("result") != "Passed":
+                  failed = True
+                  for message in walk(case.get("children", [])):
+                      if message.get("nodeType") == "Failure Message":
+                          print(f"  {message.get('name')}")
+          if failed:
+              print("::error::SubscriptionForegroundRefreshTests did not pass")
+              sys.exit(1)
+          PY
 
       # The old job's `if: failure()`, scoped to this group: the last App Tests step did
       # not pass, so one before it, or it, failed. A Build or DictusCore failure alone
