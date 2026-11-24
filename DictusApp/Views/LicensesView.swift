@@ -10,9 +10,11 @@ import DictusCore
 /// Placing them in Settings > A propos > Licences follows the standard iOS
 /// convention (e.g., Settings > General > Legal & Regulatory).
 ///
-/// All 9 entries are listed alphabetically: DeviceKit, Dictus, DM Sans, FluidAudio,
-/// giellakbd-ios, Hex, Nemotron 3.5 ASR, VivaDicta, WhisperKit. FluidAudio uses Apache 2.0,
-/// Nemotron 3.5 ASR uses OpenMDW-1.1, DM Sans the SIL Open Font License; all others use MIT.
+/// All 13 entries are listed alphabetically: DeviceKit, Dictus, DM Sans, FluidAudio,
+/// giellakbd-ios, Google Books Ngram, Grammalecte, Hex, Nemotron 3.5 ASR, SCOWL, Unicode emoji
+/// data and CLDR, VivaDicta, WhisperKit. FluidAudio uses Apache 2.0, Nemotron 3.5 ASR
+/// OpenMDW-1.1, DM Sans the SIL Open Font License, Google Books Ngram CC BY 3.0, Grammalecte
+/// MPL 2.0, SCOWL its own notice, the Unicode data the Unicode licence; all others use MIT.
 ///
 /// Nemotron 3.5 ASR is a MODEL, not code (#558): NVIDIA's weights, converted to Core ML by
 /// FluidInference and downloaded by the user from HuggingFace. It is listed because its
@@ -30,8 +32,14 @@ import DictusCore
 /// condition.
 ///
 /// Hex is listed for the keyboard's key geometry (`KeyPlaneGeometry`): no code is copied,
-/// but the approach is Hex's (MIT), and the entry says so. Its per-language long-press
-/// accent lists are copied as data (`LongPressAccents`, #1042), under the same MIT notice.
+/// but the approach is Hex's (MIT), and the entry says so. Its entry also covers the spatial
+/// decoder (#1011), which is ported Hex code. The decoder adds three entries for where its
+/// models come from: word and word-pair counts from Google Books Ngram (CC BY 3.0, which
+/// asks for the attribution), and the word lists that filter them, SCOWL for English (its
+/// notice asks to travel with the output) and Grammalecte's French dictionary (MPL 2.0,
+/// whose notice and source location travel with a derived file). Hex's per-language
+/// long-press accent lists are copied as data (`LongPressAccents`, #1042), under the same
+/// MIT notice.
 struct LicensesView: View {
     var body: some View {
         ScrollView {
@@ -73,6 +81,20 @@ struct LicensesView: View {
                 )
 
                 licenseBlock(
+                    name: "Google Books Ngram",
+                    author: "Google",
+                    url: "https://storage.googleapis.com/books/ngrams/books/datasetsv3.html",
+                    license: Self.googleBooksNgramNotice
+                )
+
+                licenseBlock(
+                    name: "Grammalecte (dictionnaire français)",
+                    author: "Olivier R. and contributors",
+                    url: "https://grammalecte.net",
+                    license: Self.grammalecteNotice
+                )
+
+                licenseBlock(
                     name: "Hex",
                     author: "Christopher Langton",
                     url: "https://github.com/anomalyco/hex",
@@ -80,6 +102,7 @@ struct LicensesView: View {
                         + "Apple's key plane measured per iPhone size, and touch targets that tile the keyboard.\n\n"
                         + "The keyboard's emoji panel is Hex's, ported (#1027): its views, search, "
                         + "suggestions, shortcodes, skin tones and the builder of its emoji index.\n\n"
+                        + "The spatial autocorrect decoder (SpatialDecoder) is ported from Hex's TypingDecoder.\n\n"
                         + "The long-press accents of each keyboard language are Hex's lists (#1042), "
                         + "in the order Apple's keyboard shows them.\n\n"
                         + mitLicense(copyright: "Copyright (c) 2026 Christopher Langton")
@@ -94,6 +117,13 @@ struct LicensesView: View {
                             + "Core ML conversion by FluidInference "
                             + "(huggingface.co/FluidInference/Nemotron-3.5-ASR-Streaming-Multilingual-0.6b-CoreML)."
                     )
+                )
+
+                licenseBlock(
+                    name: "SCOWL",
+                    author: "Kevin Atkinson",
+                    url: "http://wordlist.aspell.net",
+                    license: Self.scowlNotice
                 )
 
                 licenseBlock(
@@ -127,6 +157,45 @@ struct LicensesView: View {
     }
 
     // MARK: - Private
+
+    /// Legal notices, so they stay in English like the other licences on this screen.
+    private static let googleBooksNgramNotice = """
+        The keyboard's spatial autocorrect models (fr.hextm, en.hextm) are built from the \
+        Google Books Ngram Viewer data, version 3 (2020-02-17), by Google, licensed under \
+        the Creative Commons Attribution 3.0 Unported License \
+        (https://creativecommons.org/licenses/by/3.0/). Word and word-pair counts are \
+        summed over 1980-2019 and kept only for words in the word lists below; the \
+        English model is Hex's, the French one Dictus's, built with Hex's script.
+        """
+
+    private static let grammalecteNotice = """
+        The French spatial autocorrect model (fr.hextm) keeps only the words the \
+        "Classique" French dictionary of Grammalecte accepts (LibreOffice's fr_FR \
+        dictionary, version 7.7). That dictionary is licensed under the Mozilla Public \
+        License, version 2.0 (https://mozilla.org/MPL/2.0/). Its source form is \
+        available at https://github.com/LibreOffice/dictionaries/tree/master/fr_FR. \
+        The model file fr.hextm, derived from it, is offered under the same licence.
+        """
+
+    private static let scowlNotice = """
+        The English spatial autocorrect model (en.hextm) keeps only the words of SCOWL \
+        (Spell Checker Oriented Word Lists) and VarCon, sizes up to 70.
+
+        Copyright 2000-2018 by Kevin Atkinson
+
+        Permission to use, copy, modify, distribute and sell these word lists, the \
+        associated scripts, the output created from the scripts, and its documentation \
+        for any purpose is hereby granted without fee, provided that the above copyright \
+        notice appears in all copies and that both that copyright notice and this \
+        permission notice appear in supporting documentation. Kevin Atkinson makes no \
+        representations about the suitability of this array for any purpose. It is \
+        provided "as is" without express or implied warranty.
+
+        SCOWL's inflections come from WordNet 1.6, Copyright 1997 by Princeton \
+        University. All rights reserved. THIS SOFTWARE AND DATABASE IS PROVIDED "AS IS" \
+        AND PRINCETON UNIVERSITY MAKES NO REPRESENTATIONS OR WARRANTIES, EXPRESS OR \
+        IMPLIED.
+        """
 
     /// The SIL Open Font License shipped with the DM Sans files (#913), read from the
     /// bundle so the text shown is the one distributed. OFL 1.1 asks for the license
