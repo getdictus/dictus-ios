@@ -10,6 +10,7 @@
 // - anomalyco/hex, branch dev, `ios/HEXKeyboard/KeyboardLocalDictation.swift` (MIT License):
 //   reporting `webViewWebContentProcessDidTerminate` as a capture failure, and transcribing
 //   the finished recording from a PCM file.
+import DictusCore
 import UIKit
 import WebKit
 
@@ -46,6 +47,14 @@ final class InKeyboardWebCapture: NSObject {
     private(set) var isCapturing = false
     private var startWhenLoaded: String?
     private var heartbeat: Timer?
+    /// Device, 2026-11-24 (iOS 27.0.1, build 39f6bdbc): four taps where the capture neither
+    /// started nor failed, and nothing in the log said where it stopped. A start that has
+    /// not reported `started` within `startTimeout` now fails, naming the last step reached,
+    /// so the start safety net and the log both know.
+    private var startWatchdog: Timer?
+    private var lastStep = "none"
+    private var didStart = false
+    static let startTimeout: TimeInterval = 3
     private let webView: WKWebView
 
     override init() {
@@ -82,6 +91,16 @@ final class InKeyboardWebCapture: NSObject {
     func start(testAudioBase64: String? = nil) {
         guard !isCapturing else { return }
         isCapturing = true
+        didStart = false
+        lastStep = isLoaded ? "requested" : "queued-until-loaded"
+        Self.log("start", "loaded=\(isLoaded) inWindow=\(webView.window != nil) testAudio=\(testAudioBase64 != nil)")
+        startWatchdog?.invalidate()
+        startWatchdog = Timer.scheduledTimer(withTimeInterval: Self.startTimeout, repeats: false) { [weak self] _ in
+            MainActor.assumeIsolated {
+                guard let self, self.isCapturing else { return }
+                self.fail("start-timeout lastStep=\(self.lastStep) loaded=\(self.isLoaded) inWindow=\(self.webView.window != nil)")
+            }
+        }
         let call: String
         if let testAudioBase64 {
             call = "startTestAudio('\(testAudioBase64)'); 0"
@@ -100,6 +119,13 @@ final class InKeyboardWebCapture: NSObject {
 
     func stop() {
         startWhenLoaded = nil
+        startWatchdog?.invalidate()
+        startWatchdog = nil
+        if isCapturing, !didStart {
+            // Stopped (by the start safety net, a cancel, a failure) before the page said
+            // `started`: where it was is the whole diagnosis.
+            Self.log("stoppedBeforeStart", "lastStep=\(lastStep) loaded=\(isLoaded) inWindow=\(webView.window != nil)")
+        }
         heartbeat?.invalidate()
         heartbeat = nil
         guard isCapturing else { return }
@@ -123,7 +149,16 @@ final class InKeyboardWebCapture: NSObject {
     fileprivate func handle(_ body: Any) {
         guard let message = body as? [String: Any], let type = message["type"] as? String else { return }
         switch type {
+        case "step":
+            // The page's progress through one start (`gum-called`, `gum-resolved`,
+            // `context-running`): the last one names where a silent start stopped.
+            let step = message["step"] as? String ?? "unknown"
+            lastStep = step
+            Self.log("step", "step=\(step) ms=\((message["ms"] as? NSNumber)?.intValue ?? -1)")
         case "started":
+            didStart = true
+            startWatchdog?.invalidate()
+            startWatchdog = nil
             let rate = (message["sampleRate"] as? NSNumber)?.doubleValue ?? 0
             onEvent?(.started(contextSampleRate: rate, device: message["device"] as? String ?? "unknown"))
         case "audio":
@@ -146,6 +181,10 @@ final class InKeyboardWebCapture: NSObject {
         default:
             break
         }
+    }
+
+    nonisolated static func log(_ action: String, _ details: String) {
+        PersistentLog.log(.diagnosticProbe(component: "InKeyboardWebCapture", instanceID: "shared", action: action, details: details))
     }
 
     /// Never fetched: it only makes the inline page a secure context, which
@@ -206,14 +245,17 @@ final class InKeyboardWebCapture: NSObject {
         // running AudioContext is an audio client WebKit has to configure a session for.
         context = new AudioContext({ latencyHint: 'interactive' });
         const contextReady = context.resume().then(() => performance.now() - t0);
+        post({ type: 'step', step: 'gum-called', ms: 0 });
         stream = await navigator.mediaDevices.getUserMedia({
           audio: { channelCount: 1, echoCancellation: true, noiseSuppression: true, autoGainControl: true }
         });
         const gumMs = performance.now() - t0;
+        post({ type: 'step', step: 'gum-resolved', ms: Math.round(gumMs) });
         if (stopping) { stream.getTracks().forEach(t => t.stop()); return; }
         const track = stream.getAudioTracks()[0];
         track.onended = () => interrupted('track-ended');
         const contextMs = await contextReady;
+        post({ type: 'step', step: 'context-running', ms: Math.round(contextMs) });
         // 1024 frames (≈ 21 ms at 48 kHz) instead of 4096 (≈ 85 ms): the first callback,
         // and so the first sample the keyboard receives, comes four times sooner.
         processor = context.createScriptProcessor(1024, 1, 1);
@@ -320,11 +362,16 @@ extension InKeyboardWebCapture: WKUIDelegate, WKNavigationDelegate {
         type: WKMediaCaptureType,
         decisionHandler: @escaping @MainActor (WKPermissionDecision) -> Void
     ) {
-        decisionHandler(type == .microphone ? .grant : .deny)
+        let decision: WKPermissionDecision = type == .microphone ? .grant : .deny
+        lastStep = "permission-asked"
+        Self.log("permission", "type=\(type.rawValue) origin=\(origin.host) decision=\(decision == .grant ? "grant" : "deny")")
+        decisionHandler(decision)
     }
 
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         isLoaded = true
+        Self.log("loaded", "inWindow=\(webView.window != nil) pendingStart=\(startWhenLoaded != nil)")
+        if startWhenLoaded != nil { lastStep = "loaded" }
         onLoaded?()
         if let call = startWhenLoaded {
             startWhenLoaded = nil
@@ -334,7 +381,19 @@ extension InKeyboardWebCapture: WKUIDelegate, WKNavigationDelegate {
 
     /// WebKit's content process can be killed under memory pressure. The capture dies
     /// with it; reload so the next dictation finds a page.
+    /// A page that never loads leaves a queued start waiting for ever: say so.
+    func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
+        Self.log("navigationFailed", "error=\(error.localizedDescription)")
+        fail("navigation failed: \(error.localizedDescription)")
+    }
+
+    func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
+        Self.log("navigationFailed", "provisional=true error=\(error.localizedDescription)")
+        fail("navigation failed: \(error.localizedDescription)")
+    }
+
     func webViewWebContentProcessDidTerminate(_ webView: WKWebView) {
+        Self.log("contentProcessTerminated", "capturing=\(isCapturing) lastStep=\(lastStep)")
         isLoaded = false
         fail("web content process terminated")
         webView.loadHTMLString(Self.page, baseURL: Self.baseURL)
