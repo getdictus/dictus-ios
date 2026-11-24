@@ -379,6 +379,7 @@ struct DictusApp: App {
         Self.recordDistribution()
         #if DEBUG
         Self.applySpatialAutocorrectArgument()
+        DictationCoordinator.shared.applyInjectedFailureArgument()
         #endif
     }
 
