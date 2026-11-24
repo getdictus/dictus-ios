@@ -114,9 +114,12 @@ extension DictusKeyboardBridge: SwipeTypingOutput {
     // MARK: - Right after a swiped word
 
     /// Delete's count right after a swipe: the word and the space it added, when the text
-    /// still ends with them. Nil otherwise, and Delete deletes one character.
+    /// still ends with them and nothing is selected. Nil otherwise, and Delete deletes one
+    /// character (or the selection).
     func swipedWordDeletionCount(before: String?) -> Int? {
-        swipedWord?.deletionCount(before: before)
+        guard let record = swipedWord else { return nil }
+        if let selected = controller?.textDocumentProxy.selectedText, !selected.isEmpty { return nil }
+        return record.deletionCount(before: before)
     }
 
     /// Whether the word before the cursor is the one a swipe just typed.

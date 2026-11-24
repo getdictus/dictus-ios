@@ -265,7 +265,7 @@ class SuggestionState: ObservableObject {
 
             let partial = self.extractLastWord(from: context)
             guard !partial.isEmpty else {
-                DispatchQueue.main.async { self.clear() }
+                DispatchQueue.main.async { self.clearUnlessSuperseded() }
                 return
             }
 
@@ -277,6 +277,8 @@ class SuggestionState: ObservableObject {
                 let completions = self.engine.suggestions(for: partial)
                 DispatchQueue.main.async { [weak self] in
                     guard let self = self else { return }
+                    // Superseded by a newer request or a swipe's bar (#948).
+                    guard !(self.currentSuggestionWork?.isCancelled ?? true) else { return }
                     self.currentWord = partial
                     self.suggestions = completions.isEmpty ? [] : completions
                     self.mode = completions.isEmpty ? .idle : .completions
@@ -451,6 +453,13 @@ class SuggestionState: ObservableObject {
         mode = words.isEmpty ? .idle : .swipeAlternatives
     }
 
+    /// A background computation found nothing to show: the bar empties, unless a newer
+    /// request or a swipe's bar (#948) has replaced that computation since. Main thread.
+    private func clearUnlessSuperseded() {
+        guard !(currentSuggestionWork?.isCancelled ?? true) else { return }
+        clear()
+    }
+
     /// Resets the suggestion state to idle.
     func clear() {
         suggestions = []
@@ -505,7 +514,7 @@ class SuggestionState: ObservableObject {
             // Extract last 1-2 complete words from context
             let words = self.extractLastWords(from: context, count: 2)
             guard !words.isEmpty else {
-                DispatchQueue.main.async { self.clear() }
+                DispatchQueue.main.async { self.clearUnlessSuperseded() }
                 return
             }
 

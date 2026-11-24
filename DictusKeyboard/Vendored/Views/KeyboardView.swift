@@ -856,8 +856,12 @@ final internal class GiellaKeyboardView: UIView,
             return
         }
 
-        // A swipe under way types its word before this key's letter (#948).
-        swipeTyping?.touchWillBegin()
+        // A swipe under way types its word before this key's letter (#948), or its key when
+        // it was a tap that slid.
+        if let tap = swipeTyping?.touchWillBegin() {
+            lastTriggerPoint = tap.point
+            delegate?.didTriggerKey(tap.key)
+        }
 
         if let active = activeKey {
             let key = active.key

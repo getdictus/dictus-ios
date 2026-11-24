@@ -46,9 +46,10 @@ public struct SwipedWord: Equatable, Sendable {
         public let record: SwipedWord
     }
 
-    /// `reading` in the word's place; nil when the text no longer ends with the word.
+    /// `reading` in the word's place; nil when the text no longer ends with what the swipe
+    /// put in (the word, and the space it added).
     public func replacing(with reading: String, before: String?) -> Replacement? {
-        guard let before, before.hasSuffix(word), reading != word else { return nil }
+        guard isBeforeCursor(before), reading != word else { return nil }
         var record = self
         record.inserted = String(inserted.dropLast(word.count)) + reading
         record.alternatives = Array(([word] + alternatives.filter { $0 != reading }).prefix(3))

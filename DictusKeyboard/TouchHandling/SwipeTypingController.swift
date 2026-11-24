@@ -53,7 +53,7 @@ protocol SwipeTypingOutput: AnyObject {
 /// word goes in, as with Apple's QuickPath.
 ///
 /// A touch on a letter key becomes a swipe once it travels more than a key's pitch from
-/// where it went down (`SwipeTypingText.isSwipe`): the key no longer types, a light trail
+/// where it went down, in any direction (`SwipeTypingText.isSwipe`): the key no longer types, a light trail
 /// follows the finger, and the bar shows what the path reads as so far. Lifting the finger
 /// types the best reading and offers the next three in the bar. Taps, holds for accents and
 /// slides of a key or less keep working as before, and so do delete, the space bar's
@@ -151,12 +151,13 @@ final class SwipeTypingController {
     /// A new finger is going down: the swipe under way types its word first, so it lands
     /// before the new key's letter. Letter touches still pending were committed by the new
     /// finger (the view types the previous key on the next touch-down), so they can no
-    /// longer become swipes.
-    func touchWillBegin() {
+    /// longer become swipes. Returns the key to type first when that swipe was a tap that
+    /// slid, with the point it went down at.
+    func touchWillBegin() -> (key: KeyDefinition, point: CGPoint)? {
         pending.removeAll()
-        guard let swipe = active else { return }
+        guard let swipe = active else { return nil }
         spent.insert(swipe.touch)
-        finish(swipe.stroke, keys: swipe.keys)
+        return finish(swipe.stroke, keys: swipe.keys)
     }
 
     /// A touch went down on `key` at `point`: a letter's may become a swipe.
@@ -197,7 +198,7 @@ final class SwipeTypingController {
         for (point, time) in samples { stroke.add(point, at: time) }
         pending[id] = stroke
         guard let first = stroke.points.first, let last = stroke.points.last, let keys = keys(),
-              SwipeTypingText.isSwipe(from: first, to: last, pitch: keys.pitch.width) else { return false }
+              SwipeTypingText.isSwipe(from: first, to: last, pitch: keys.pitch) else { return false }
         pending[id] = nil
         active = ActiveSwipe(touch: id, stroke: stroke, keys: keys)
         generation += 1
@@ -268,7 +269,7 @@ final class SwipeTypingController {
     /// unless the best reading starts and ends on that key ("pop").
     private func slidTap(_ stroke: Stroke, keys: SpatialDecoder.Keys, best: String?) -> (key: KeyDefinition, point: CGPoint)? {
         guard let first = stroke.points.first, let last = stroke.points.last,
-              SwipeTypingText.staysNearStart(stroke.points, pitch: keys.pitch.width),
+              SwipeTypingText.staysNearStart(stroke.points, pitch: keys.pitch),
               keyAt(last)?.type == stroke.key.type,
               case let .input(letter, _) = stroke.key.type else { return nil }
         if let best, SwipeTypingText.word(best, startsAndEndsWith: letter) { return nil }

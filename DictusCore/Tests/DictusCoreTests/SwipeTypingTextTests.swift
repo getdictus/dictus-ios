@@ -10,22 +10,30 @@ final class SwipeTypingTextTests: XCTestCase {
 
     // MARK: - The gesture
 
-    func testATouchBecomesASwipeOnlyPastOneKeyPitch() {
+    /// A key 40 pt across and a row 54 pt down, as an iPhone's letter page roughly is.
+    private let pitch = CGSize(width: 40, height: 54)
+
+    func testATouchBecomesASwipeOnlyPastTheNextKey() {
         let start = CGPoint(x: 100, y: 50)
-        XCTAssertFalse(SwipeTypingText.isSwipe(from: start, to: start, pitch: 40), "a tap")
-        XCTAssertFalse(SwipeTypingText.isSwipe(from: start, to: CGPoint(x: 140, y: 50), pitch: 40),
+        XCTAssertFalse(SwipeTypingText.isSwipe(from: start, to: start, pitch: pitch), "a tap")
+        XCTAssertFalse(SwipeTypingText.isSwipe(from: start, to: CGPoint(x: 140, y: 50), pitch: pitch),
                        "a slide to the next key's centre stays a slide")
-        XCTAssertFalse(SwipeTypingText.isSwipe(from: start, to: CGPoint(x: 124, y: 74), pitch: 40))
-        XCTAssertTrue(SwipeTypingText.isSwipe(from: start, to: CGPoint(x: 141, y: 50), pitch: 40))
-        XCTAssertTrue(SwipeTypingText.isSwipe(from: start, to: CGPoint(x: 100, y: 91), pitch: 40))
-        XCTAssertFalse(SwipeTypingText.isSwipe(from: start, to: CGPoint(x: 900, y: 50), pitch: 0), "no geometry, no swipe")
+        XCTAssertFalse(SwipeTypingText.isSwipe(from: start, to: CGPoint(x: 100, y: 104), pitch: pitch),
+                       "a slide to the key just below, a row (taller than a key is wide) down, stays a slide")
+        XCTAssertFalse(SwipeTypingText.isSwipe(from: start, to: CGPoint(x: 120, y: 104), pitch: pitch),
+                       "the staggered row's diagonal neighbour stays a slide")
+        XCTAssertTrue(SwipeTypingText.isSwipe(from: start, to: CGPoint(x: 149, y: 50), pitch: pitch))
+        XCTAssertTrue(SwipeTypingText.isSwipe(from: start, to: CGPoint(x: 100, y: 116), pitch: pitch))
+        XCTAssertFalse(SwipeTypingText.isSwipe(from: start, to: CGPoint(x: 900, y: 50), pitch: .zero), "no geometry, no swipe")
     }
 
     func testATapThatSlidStaysNearItsStart() {
         let start = CGPoint(x: 100, y: 50)
-        XCTAssertTrue(SwipeTypingText.staysNearStart([start, CGPoint(x: 150, y: 50), CGPoint(x: 102, y: 52)], pitch: 40))
-        XCTAssertFalse(SwipeTypingText.staysNearStart([start, CGPoint(x: 170, y: 50), start], pitch: 40))
-        XCTAssertFalse(SwipeTypingText.staysNearStart([], pitch: 40))
+        XCTAssertTrue(SwipeTypingText.staysNearStart([start, CGPoint(x: 150, y: 50), CGPoint(x: 102, y: 52)], pitch: pitch))
+        XCTAssertTrue(SwipeTypingText.staysNearStart([start, CGPoint(x: 100, y: 130), start], pitch: pitch),
+                      "measured in rows down, not key widths")
+        XCTAssertFalse(SwipeTypingText.staysNearStart([start, CGPoint(x: 170, y: 50), start], pitch: pitch))
+        XCTAssertFalse(SwipeTypingText.staysNearStart([], pitch: pitch))
     }
 
     func testAWordCanStartAndEndOnTheSameKey() {
@@ -144,6 +152,7 @@ final class SwipeTypingTextTests: XCTestCase {
         XCTAssertEqual(replaced.record.alternatives, ["two", "tip", "typo"], "the word it replaced is offered back")
         XCTAssertEqual(replaced.record.deletionCount(before: "ok yep"), 4)
         XCTAssertNil(swiped.replacing(with: "yep", before: "ok tw"), "the word is no longer there")
+        XCTAssertNil(swiped.replacing(with: "yep", before: "oktwo"), "the space the swipe added is gone")
         XCTAssertNil(swiped.replacing(with: "two", before: "ok two"), "the same word changes nothing")
     }
 

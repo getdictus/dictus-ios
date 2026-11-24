@@ -70,23 +70,38 @@ public enum SwipeTypingText {
     // MARK: - The gesture
 
     /// Whether a letter touch that went down at `start` and is now at `point` is a swipe: it
-    /// travelled more than one key pitch (`pitch`, a letter key's width and gap). Taps, holds
-    /// and slides to the next key stay under it.
-    public static func isSwipe(from start: CGPoint, to point: CGPoint, pitch: CGFloat) -> Bool {
-        guard pitch > 0 else { return false }
-        return hypot(point.x - start.x, point.y - start.y) > pitch
+    /// travelled further than the next key in any direction. `pitch` is a letter key's width
+    /// and gap across, a row's height down.
+    ///
+    /// WHY in key units on each axis rather than Hex's one key width: a row is taller than a
+    /// key is wide, so a slide to the key just below would pass a width-only threshold and
+    /// become a swipe. Measured in key units, the next key is 1 away straight across or
+    /// down, and 1.12 away on the staggered row's diagonal (half a key across, a row down):
+    /// `swipeReach` clears both.
+    public static func isSwipe(from start: CGPoint, to point: CGPoint, pitch: CGSize) -> Bool {
+        keyDistance(from: start, to: point, pitch: pitch).map { $0 > swipeReach } ?? false
     }
 
-    /// How far (key pitches) a swipe may go from where it went down and still be a tap that
+    /// How far (key units) a letter touch goes before it is a swipe.
+    public static let swipeReach: CGFloat = 1.2
+
+    /// The distance between two points in key units (a key pitch across, a row down); nil
+    /// without a geometry.
+    static func keyDistance(from start: CGPoint, to point: CGPoint, pitch: CGSize) -> CGFloat? {
+        guard pitch.width > 0, pitch.height > 0 else { return nil }
+        return hypot((point.x - start.x) / pitch.width, (point.y - start.y) / pitch.height)
+    }
+
+    /// How far (key units) a swipe may go from where it went down and still be a tap that
     /// slid, when it lifts on the key it started on.
     public static let slidTapReach: CGFloat = 1.6
 
-    /// Whether every point of a stroke stays within `slidTapReach` pitches of its first: with
-    /// a lift on the starting key, a tap dragged a little too far and back ("a" read as "as").
-    public static func staysNearStart(_ points: [CGPoint], pitch: CGFloat) -> Bool {
-        guard let first = points.first, pitch > 0 else { return false }
-        let reach = pitch * slidTapReach
-        return points.allSatisfy { hypot($0.x - first.x, $0.y - first.y) <= reach }
+    /// Whether every point of a stroke stays within `slidTapReach` key units of its first:
+    /// with a lift on the starting key, a tap dragged a little too far and back ("a" read as
+    /// "as").
+    public static func staysNearStart(_ points: [CGPoint], pitch: CGSize) -> Bool {
+        guard let first = points.first else { return false }
+        return points.allSatisfy { keyDistance(from: first, to: $0, pitch: pitch).map { $0 <= slidTapReach } ?? false }
     }
 
     /// Whether `word` begins and ends on `letter`'s key ("lol" on l, "pop" on p): a word a
