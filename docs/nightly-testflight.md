@@ -76,9 +76,9 @@ rm ~/Library/LaunchAgents/solutions.pivi.dictus.nightly-testflight.plist
 - another nightly holds the lock, an `xcodebuild` is running, or an `asc` has been running
   for over a minute (an upload or a processing wait);
 - a `build/NN` tag already points to `develop`'s tip;
-- the CI run of that commit on `develop` does not have its four jobs green (`Build (iOS
-  Simulator)`, `SwiftLint`, `DictusCore Tests`, `App Tests (iOS Simulator)`). It reads the
-  run and never re-runs it;
+- the CI run of that commit on `develop` does not have its two jobs green (`SwiftLint`,
+  `iOS (build + DictusCore + App Tests)`, the names in `CI_JOBS`). It reads the run and
+  never re-runs it;
 - `develop`'s marketing version is the one on `main`: App Store Connect refuses new builds
   for a version that is already released.
 
