@@ -364,7 +364,7 @@ class KeyboardViewController: UIInputViewController {
         // dictation, with nothing half-typed to suggest for.
         KeyboardState.shared.onDictationUndone = { [weak self] in
             guard let self = self else { return }
-            self.suggestionState.clear()
+            self.suggestionState.clearDroppingPending()
             self.bridge?.updateCapitalization()
         }
 
@@ -483,6 +483,10 @@ class KeyboardViewController: UIInputViewController {
         // window scene now gives (iPhone Duo inner panel). Checked after the number row, whose
         // rebuild, if it ran, already refreshed the marker, so this never rebuilds twice.
         reloadIfOrientationChanged()
+
+        // Swipe typing (#948): its switches live in the app, so an appearance is the first
+        // moment a change can be seen. Off, this leaves the view with no swipe controller.
+        bridge?.refreshSwipeTyping(trigger: "viewWillAppear")
 
         // (Re)subscribe to the keyboard area mode here, not in viewDidLoad.
         // WHY: iOS caches UIInputViewController instances across app-switches and

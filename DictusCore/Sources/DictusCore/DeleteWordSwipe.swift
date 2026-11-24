@@ -59,18 +59,27 @@ public final class DeleteWordSwipe {
     ///   - step: how far one word is: a letter key's width. Floored at one point.
     ///   - touchDownDeletion: the one character the touch-down's own deletion removed, if
     ///     the caller knows it for certain.
+    ///   - touchDownWord: the whole word the touch-down removed, when it took back a word
+    ///     swipe typing had just typed (#948), with the space the swipe added. It counts as
+    ///     the slide's first word: the first step deletes nothing more, and sliding all the
+    ///     way back types it back.
     public init(
         editor: TextDocumentEditing,
         mirror: MirrorSyncState?,
         startX: Double,
         step: Double,
-        touchDownDeletion: String? = nil
+        touchDownDeletion: String? = nil,
+        touchDownWord: String? = nil
     ) {
         self.editor = editor
         self.mirror = mirror
         self.startX = startX
         self.step = max(1, step)
         self.touchDownDeletion = touchDownDeletion
+        if let word = touchDownWord, !word.isEmpty {
+            deleted = [word]
+            self.touchDownDeletion = nil
+        }
     }
 
     public var deletedWordCount: Int { deleted.count }
@@ -86,10 +95,25 @@ public final class DeleteWordSwipe {
         return String(last)
     }
 
+    /// The text the touch-down removed when it took back `count` characters at once (a
+    /// swiped word and its space, #948), when the context before and after it say so for
+    /// certain; nil otherwise, so a deletion the host did not make, or made only in part, is
+    /// never typed back. A host that shares no context after it (nil) proves nothing: an
+    /// emptied field and a withheld context read the same, so the word is not handed over
+    /// (stricter than `touchDownDeletion`'s single character, whose double is one letter).
+    public static func touchDownWord(before: String?, after: String?, count: Int) -> String? {
+        guard count > 1, let before, let after, before.count >= count else { return nil }
+        guard before.count == after.count + count, before.hasPrefix(after) else { return nil }
+        return String(before.suffix(count))
+    }
+
     /// The held backspace repeated before the slide began: the touch-down's character is no
     /// longer the one next to the cursor, so it is not typed back.
     public func forgetTouchDownDeletion() {
         touchDownDeletion = nil
+        // The same for a whole word the touch-down took back (#948): the cursor has moved
+        // on, so typing it back would put it in the wrong place.
+        if !isActive { deleted.removeAll() }
     }
 
     /// The finger moved: delete or restore words until their count matches how far left it
