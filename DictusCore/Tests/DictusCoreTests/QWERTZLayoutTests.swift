@@ -69,7 +69,7 @@ final class QWERTZLayoutTests: XCTestCase {
     }
 
     /// Neither iOS nor the AOSP-derived keyboards give ß a key; it is a long-press
-    /// on `s`, wired through `AccentedCharacters.mappings`.
+    /// on `s`, wired through `AccentedCharacters.mappings(for:layout:)`.
     func testNoDedicatedEszettKey() {
         let allKeys = QWERTZLayout.lettersRows.flatMap { $0 }
             + QWERTZLayout.lowercasedLettersRows.flatMap { $0 }
@@ -77,7 +77,7 @@ final class QWERTZLayoutTests: XCTestCase {
     }
 
     func testEszettIsReachableByLongPressOnS() {
-        XCTAssertEqual(AccentedCharacters.mappings["s"], ["\u{00DF}"])
+        XCTAssertEqual(AccentedCharacters.accents(for: "s", language: .german, layout: .qwertz)?.first, "\u{00DF}")
     }
 
     // MARK: - Data conventions

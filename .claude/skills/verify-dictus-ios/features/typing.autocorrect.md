@@ -3,7 +3,7 @@
 - **ID:** `typing.autocorrect`
 - **Tier:** Gratuit (Free)
 - **Targets:** DictusKeyboard + DictusCore
-- **Screens:** `kbd.keys`, `kbd.suggestions` (not captured) — see [screens.md](screens.md)
+- **Screens:** `kbd.keys`, `kbd.accent-popup`, `kbd.suggestions` (not captured) — see [screens.md](screens.md)
 
 ## Sub-features
 
@@ -14,7 +14,7 @@
 - `typing.undo-correction`: The suggestion bar offers to undo the last correction.
 - `typing.refused-correction`: Erasing into a correction, Undo, or tapping the quoted typed word refuses it: the word committed at that place next is kept and learned (#872). A text replacement shortcut is the exception: typed again at that place, it expands again (#1022).
 - `typing.auto-full-stop`: Double space inserts a full stop.
-- `typing.accents`: Long-press a letter for its accents.
+- `typing.accents`: Long-press a letter for its accents. Each keyboard language has its own list, in the order Apple's keyboard for it shows them (#1042): French holds œ on `o` (`o ö ô œ ò ó õ ø ō º`) and æ on `a` (`a à â æ á ä ã å ā ª`), so `cœur` types by hand; shift or caps lock capitalizes them (Œ, Æ, ẞ). German on QWERTY or AZERTY holds ä ö ü first on a o u (QWERTZ has keys for them), Spanish holds ñ first on n. The French adaptive key (AZERTY row 3) is unchanged and holds nothing. A word typed with œ or æ is kept on space, capitals included (`cœur`, `Œil`, `vitæ`, `ex æquo`): the dictionaries spell the ligatures out (`coeur`), and the corrector looks a typed one up that way (`Ligature`, #1042). `coeur` typed with two letters is kept too, as before.
 - `typing.dead-keys`: Dead keys compose accented letters.
 - `typing.autocorrect-toggle`: « Correction automatique » switch in Réglages → Clavier.
 - `typing.spatial-autocorrect`: Debug builds only, off by default (#1011). With the App Group switch `debug.spatialAutocorrect` on, the space bar reads where the finger landed on each key of the word (Hex's noisy-channel decoder, models `fr.hextm` and `en.hextm`) before the trie reads its letters: `trouce` with the `c` tapped on the edge of `v` becomes `trouve`, `jusge` becomes `juste`, a missed space splits (`donnequoi` → `donne quoi`). It runs after the lexicon, the overrides and the contractions, never on a learned word, and leaves the word to the trie when it keeps it. The Debug log prints `AUTOCORRECT branch=spatial`. No row in Réglages yet (#992 owns SettingsView).
@@ -58,6 +58,8 @@ Measured 2026-11-13 (iPhone 17, iOS 26.5, builds `fd92aaa0` and `bbaa7b36`, #919
 
 Measured 2026-11-17 (iPhone 17, iOS 26.5, build `c9361321`, #501), same recipe: `je vais a elle a ` typed on the Dictus keys in a Rappels title reads `Je vais à elle a `, with `APPLIED orig="a" → "à" prev="vais"` then `AUTOCORRECT-SKIP word="a" reason=already-valid` in the log.
 
+Measured 2026-11-24 (iPhone 17, iOS 26.5, #1042), Rappels title field: holding `o` on the French Dictus keys shows `o ö ô œ ò ó õ ø ō º` (`kbd.accent-popup`), `a` shows `a à â æ á ä ã å ā ª`, shifted `O Ö Ô Œ …` and `A À Â Æ …`. `c`, then `axe drag --start-x 340 --start-y 612 --end-x 144 --end-y 552 --hold 1.2 --duration 0.8` (from `o` onto `œ`), then `u`, `r` give `Cœur` in the field. To switch the Dictus language for a run, write `dictus.language` (`fr` `en` `es` `de`) into the App Group plist and reopen the host. Apple's own popups, the reference for the order, are read the same way with Apple's keyboard selected.
+
 ## Gotchas
 
 - `typing.spatial-autocorrect`: turn it on by launching the Debug app with `-DictusDebugSpatialAutocorrect YES` (`xcrun simctl launch <udid> com.pivi.dictus -DictusDebugSpatialAutocorrect YES`, or `xcrun devicectl device process launch … com.pivi.dictus -DictusDebugSpatialAutocorrect YES` on the iPhone), or with `drive.sh set-default debug.spatialAutocorrect -bool YES`, then make the keyboard reappear. Measured 2026-11-21 (iPhone 17, iOS 26.5): the key reads `1` in the group's plist after the launch with `YES`, `0` after `NO`. `simctl spawn defaults write group.solutions.pivi.dictus …` does not reach it: that domain is not the group container's plist. `drive.sh type` taps the key centres, which tells the decoder nothing the letters do not: its measure is `tools/keyboard-bench/run.sh --spatial` (synthetic and device-journal taps) and, for real fingers, the iPhone (Physical test shortlist).
@@ -69,5 +71,6 @@ Measured 2026-11-17 (iPhone 17, iOS 26.5, build `c9361321`, #501), same recipe: 
 - `axe type` does not exercise autocorrect: it sends hardware keyboard events that reach the field without going through the extension. `drive.sh type` taps the Dictus keys instead (lowercase a–z, AZERTY letters page, offsets measured on iPhone 17).
 - `typing.contacts-and-replacements`: create the contact in Contacts and the replacement in Réglages → Général → Clavier → Remplacement, then make the keyboard reappear: the lexicon is read in `viewWillAppear`. The Debug log prints `NOTE lexicon loaded: <n> shortcuts, <n> words`, then `AUTOCORRECT-SKIP ... reason=lexicon` or `AUTOCORRECT branch=lexicon`. Measured 2026-10-30 on iOS 27.0 (#873).
 - `typing.contacts-and-replacements` with autocorrect off: write `dictus.autocorrectEnabled -bool NO` and `dictus.autocorrectDebugLogging -bool YES` into the App Group plist, type the shortcut and space. The log carries `AUTOCORRECT branch=text-replacement`, a line written only when autocorrect did not run. Measured 2026-11-21 (iPhone 17, iOS 26.5, #1022) in a Rappels title, without Full Access: `jrv` + space → `J’arrive ! `. `jrv` → « J’arrive ! » is iOS's own French replacement, present on a fresh device. On that runtime Réglages → Général → Clavier stayed blank, slimmed or not (Settings logs `PreferencesPluginError`), so no replacement could be added by hand that day.
+- `typing.accents`: the popup selects only once the finger moves onto an option; a hold released where it started types nothing (vendored behaviour). `axe batch` touch down / up therefore never inserts: use `axe drag --hold`. The first hold after the keyboard reappears or a language switch sometimes shows the key preview without a popup (seen twice on 2026-11-24); hold again. The feel of a long row of narrowed options under a real finger is iPhone-only.
 - Host spell-check underlines are not a usable probe in the simulator (`docs/agents/simulator.md` §8).
 - A refusal is remembered per place in the current document, in RAM, until the text before it is erased. Clearing a field by backspace forgets it; the field emptied by the host (a sent message) may not, if the host keeps the same `documentIdentifier`.

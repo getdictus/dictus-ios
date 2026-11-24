@@ -1,13 +1,19 @@
 // DictusCore/Sources/DictusCore/AccentedCharacters.swift
-// Long-press accent variants (multilingual) and the French-specific adaptive
+// Long-press accent variants (per language, #1042) and the French-specific adaptive
 // accent key (AZERTY row 3) namespace.
 import Foundation
 
-/// Accented character variants for keyboard long-press popups.
+/// Accented character variants for keyboard long-press popups, per language (#1042).
 ///
-/// Currently shared across all languages — French AZERTY variants plus Spanish
-/// acute/n-tilde added in #82/#83. Migration to per-language `LanguageProfile.longPressAccents`
-/// is tracked in CONTEXT.md.
+/// Each language declares its own list in `LanguageProfile.longPressAccents`, in the order
+/// Apple's keyboard for it shows them (`LongPressAccents`). This namespace turns that data
+/// into what the popup of a given layout offers, and gives the shifted form of a variant.
+///
+/// WHY the layout matters: the layout is not the language since #272. A language whose
+/// Apple layout has a key for a letter (German ä ö ü, Spanish ñ) leaves it out of its held
+/// lists, and a layout without that key would then lose the letter entirely. Apple's
+/// keyboard holds it right after its base letter there (German on QWERTY: a → ä à á…), so
+/// `mappings(for:layout:)` does the same.
 ///
 /// WHY precomposed Unicode characters (e.g., \u{00E9}) instead of combining characters:
 /// Combining characters (e.g., "e" + combining acute \u{0301}) can cause string comparison
@@ -15,37 +21,71 @@ import Foundation
 /// identically everywhere. This is how iOS system keyboards store accented characters.
 public enum AccentedCharacters {
 
-    /// Maps a base letter (lowercase) to its accented variants. Currently a union
-    /// of French AZERTY accents and Spanish acute/n-tilde variants.
-    public static let mappings: [String: [String]] = [
-        "e": ["\u{00E9}", "\u{00E8}", "\u{00EA}", "\u{00EB}"],          // e acute, grave, circumflex, diaeresis
-        "a": ["\u{00E0}", "\u{00E2}", "\u{00E4}", "\u{00E1}"],          // a grave, circumflex, diaeresis, acute
-        "u": ["\u{00F9}", "\u{00FB}", "\u{00FC}", "\u{00FA}"],          // u grave, circumflex, diaeresis, acute
-        "i": ["\u{00EE}", "\u{00EF}", "\u{00ED}"],                      // i circumflex, diaeresis, acute
-        "o": ["\u{00F4}", "\u{00F6}", "\u{00F3}"],                      // o circumflex, diaeresis, acute
-        "c": ["\u{00E7}"],                                              // c cedilla
-        "y": ["\u{00FF}"],                                              // y diaeresis
-        "n": ["\u{00F1}"],                                              // n tilde
-        "s": ["\u{00DF}"]                                               // ß (German eszett, added with #109)
-    ]
-
-    /// Returns accented variants for a given key, or nil if no accents exist.
-    /// Lookup is case-insensitive: "E" and "e" return the same result.
+    /// What a held letter offers in `language` on `layout`, keyed by lowercase base letter,
+    /// variants only (the popup adds the base itself), lowercase.
     ///
-    /// WHY case-insensitive:
-    /// The keyboard layout stores uppercase labels ("E") but the user may be typing
-    /// in either case. The accented variants are always lowercase — the keyboard target
-    /// applies case transformation based on shift state.
-    public static func accents(for key: String) -> [String]? {
-        return mappings[key.lowercased()]
+    /// The language's own list, plus each of its `lettersWithOwnKey` that `layout` has no
+    /// key for, placed first on its base letter.
+    public static func mappings(for language: SupportedLanguage, layout: LayoutType) -> [String: [String]] {
+        let profile = language.profile
+        var mappings = profile.longPressAccents
+        let onKeys = lettersOnTheirOwnKeys(layout)
+        // Reversed so that, of two letters on the same base, the first listed ends up first.
+        for letter in profile.lettersWithOwnKey.reversed() where !onKeys.contains(letter) {
+            guard let base = baseLetter(of: letter) else { continue }
+            var variants = mappings[base] ?? []
+            variants.removeAll { $0 == letter }
+            variants.insert(letter, at: 0)
+            mappings[base] = variants
+        }
+        return mappings
     }
 
+    /// The variants a held `key` offers in `language` on `layout`, or nil when it holds
+    /// nothing. Lookup is case-insensitive: "E" and "e" return the same lowercase list;
+    /// the keyboard capitalizes it on shifted pages with `shifted(_:)`.
+    public static func accents(for key: String, language: SupportedLanguage, layout: LayoutType) -> [String]? {
+        mappings(for: language, layout: layout)[key.lowercased()]
+    }
+
+    /// The form a variant takes on a shifted or caps-lock page: one key in, one key out.
+    ///
+    /// `KeyCaseTransform` already turns ß into ẞ rather than "SS" (#322). The dotless ı
+    /// (English's held i) is the other exception: its Unicode capital is plain I, the key's
+    /// own letter, so the popup would show I twice. Apple's shows İ there, and so does this.
+    public static func shifted(_ variant: String) -> String {
+        if variant == "\u{0131}" { return "\u{0130}" }  // ı → İ
+        return KeyCaseTransform.uppercased(variant)
+    }
+
+    /// Accented letters `layout` draws on keys of their own, lowercase.
+    ///
+    /// WHY a switch and not a set kept by hand next to each layout: a new layout then fails
+    /// to compile here until someone says which accented keys it has.
+    private static func lettersOnTheirOwnKeys(_ layout: LayoutType) -> Set<String> {
+        switch layout {
+        case .qwertz:
+            return Set(QWERTZLayout.lowercasedLettersRows.joined().filter { key in
+                !key.unicodeScalars.allSatisfy(\.isASCII)
+            })
+        case .azerty, .qwerty:
+            return []
+        }
+    }
+
+    /// The unaccented letter an accented one is written on ("ä" → "a"), nil for a letter
+    /// that decomposes to nothing else.
+    private static func baseLetter(of letter: String) -> String? {
+        guard let first = letter.decomposedStringWithCanonicalMapping.unicodeScalars.first else { return nil }
+        let base = String(first)
+        return base == letter ? nil : base
+    }
 }
 
 /// French-specific adaptive accent key (AZERTY row 3) behaviour.
 ///
 /// The data and rules in this namespace apply ONLY to French. Other languages
-/// reach accents via standard long-press popups (`AccentedCharacters.mappings`)
+/// reach accents via standard long-press popups (`AccentedCharacters.mappings(for:layout:)`)
 /// — they do not get an adaptive key at all. This namespace exists as its own
 /// type so future readers cannot mistake the contents for a multilingual API.
 ///

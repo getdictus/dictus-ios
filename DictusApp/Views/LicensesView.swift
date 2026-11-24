@@ -38,7 +38,9 @@ import DictusCore
 /// models come from: word and word-pair counts from Google Books Ngram (CC BY 3.0, which
 /// asks for the attribution), and the word lists that filter them, SCOWL for English (its
 /// notice asks to travel with the output) and Grammalecte's French dictionary (MPL 2.0,
-/// whose notice and source location travel with a derived file).
+/// whose notice and source location travel with a derived file). Hex's per-language
+/// long-press accent lists are copied as data (`LongPressAccents`, #1042), under the same
+/// MIT notice.
 struct LicensesView: View {
     var body: some View {
         ScrollView {
@@ -103,6 +105,8 @@ struct LicensesView: View {
                         + "suggestions, shortcodes, skin tones and the builder of its emoji index.\n\n"
                         + "The spatial autocorrect decoder (SpatialDecoder) is ported from Hex's TypingDecoder.\n\n"
                         + "The swipe typing decoder (SwipeDecoder) is ported from Hex's SwipeDecoder.\n\n"
+                        + "The long-press accents of each keyboard language are Hex's lists (#1042), "
+                        + "in the order Apple's keyboard shows them.\n\n"
                         + "Sliding left from the delete key to delete word by word, and back right to get "
                         + "the words back, is Hex's delete swipe, ported (#609).\n\n"
                         + mitLicense(copyright: "Copyright (c) 2026 Christopher Langton")

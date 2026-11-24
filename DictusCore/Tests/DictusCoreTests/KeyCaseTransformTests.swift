@@ -30,20 +30,30 @@ final class KeyCaseTransformTests: XCTestCase {
     /// `AccentedCharacterTests` and `QWERTZLayoutTests` pin the mapping itself; this
     /// restates it here so the unshifted half of #322 is visible in one place.
     func testUnshiftedSharpSComesStraightFromTheMapping() {
-        XCTAssertEqual(AccentedCharacters.accents(for: "s"), ["\u{00DF}"])
+        XCTAssertEqual(AccentedCharacters.accents(for: "s", language: .german, layout: .qwertz)?.first, "\u{00DF}")
     }
 
     // MARK: - The general rule
 
     /// Every long-press candidate the keyboard can show, whatever the layout or language:
-    /// its uppercase form is exactly one character. This is the invariant the popup depends
-    /// on, and the one `uppercased()` alone breaks for ß.
-    func testEveryAccentCandidateUppercasesToASingleCharacter() {
-        for (baseKey, candidates) in AccentedCharacters.mappings {
+    /// its uppercase form is exactly as long as it is — one character for every candidate
+    /// but Spanish's `l·l` (#1042). This is the invariant the popup depends on, and the one
+    /// `uppercased()` alone breaks for ß.
+    func testEveryAccentCandidateUppercasesToTheSameLength() {
+        for (baseKey, candidates) in allLongPressMappings() {
             for candidate in candidates {
                 let uppercased = KeyCaseTransform.uppercased(candidate)
-                XCTAssertEqual(uppercased.count, 1,
+                XCTAssertEqual(uppercased.count, candidate.count,
                                "long-press \(baseKey): '\(candidate)' uppercased to '\(uppercased)'")
+            }
+        }
+    }
+
+    /// Every (base, candidates) pair the keyboard can show, across languages and layouts.
+    private func allLongPressMappings() -> [(String, [String])] {
+        SupportedLanguage.allCases.flatMap { language in
+            LayoutType.allCases.flatMap { layout in
+                AccentedCharacters.mappings(for: language, layout: layout).map { ($0.key, $0.value) }
             }
         }
     }
@@ -80,7 +90,7 @@ final class KeyCaseTransformTests: XCTestCase {
     /// Anything with a one-to-one mapping still matches plain `uppercased()`, so no accent
     /// candidate changed behaviour except ß.
     func testMatchesPlainUppercasedForEveryOneToOneCandidate() {
-        for candidates in AccentedCharacters.mappings.values {
+        for (_, candidates) in allLongPressMappings() {
             for candidate in candidates where candidate.uppercased().count == 1 {
                 XCTAssertEqual(KeyCaseTransform.uppercased(candidate), candidate.uppercased())
             }

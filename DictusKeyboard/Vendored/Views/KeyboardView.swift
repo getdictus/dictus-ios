@@ -565,7 +565,21 @@ final internal class GiellaKeyboardView: UIView,
             break
         }
 
-        let width = bounds.size.width / CGFloat(popupSizingRow?.count ?? 10)
+        var width = bounds.size.width / CGFloat(popupSizingRow?.count ?? 10)
+        // A list too long for one row of key-wide options narrows them so the row still fits
+        // the keyboard (#1042): see `AccentPopupFit`. Only a single-row popup is narrowed; a
+        // popup that wraps (iPad) keeps its key-wide options.
+        if let count = (longpressController as? LongPressOverlayController)?.longpressValues.count,
+           count <= theme.popupLongpressKeysPerRow {
+            width = CGFloat(AccentPopupFit.optionWidth(
+                keyWidth: Double(width),
+                // The bubble insets its options by its corner radius on each side (KeyOverlayView)
+                // and cannot be wider than the keyboard.
+                availableWidth: Double(bounds.size.width - theme.popupCornerRadius * 2),
+                margin: Double(theme.keyHorizontalMargin),
+                count: count
+            ))
+        }
         // Reduce height to 60% so first-row popups stay within keyboard bounds (#69).
         var height = ((bounds.size.height / CGFloat(currentPage.count)) - theme.popupCornerRadius * 2) * 0.6
         height = max(24.0, height)
@@ -1233,7 +1247,7 @@ final internal class GiellaKeyboardView: UIView,
     }
 
     private func longpressKeys(for key: String) -> [KeyDefinition]? {
-        // Case-insensitive lookup: AccentedCharacters.mappings uses lowercase keys,
+        // Case-insensitive lookup: AccentedCharacters.mappings(for:layout:) uses lowercase keys,
         // but on shifted/capslock pages the key string is uppercase ("E" not "e").
         let longpressKeys = self.definition
         .longPress[key.lowercased()]?
@@ -1247,14 +1261,15 @@ final internal class GiellaKeyboardView: UIView,
 
         // Apply case transformation for shifted/capslock pages
         // so that long-pressing "E" shows uppercase accents (E, E, E, E)
-        // KeyCaseTransform rather than uppercased(): Unicode's full case mapping turns
-        // ß into the two characters "SS", which this popup drew as one key and inserted
-        // as two letters (#322). The candidate is inserted verbatim by the bridge, so the
-        // transformation has to be one character in, one character out.
+        // AccentedCharacters.shifted rather than uppercased(): Unicode's full case mapping
+        // turns ß into the two characters "SS", which this popup drew as one key and
+        // inserted as two letters (#322), and the dotless ı into the key's own I (#1042).
+        // The candidate is inserted verbatim by the bridge, so the transformation has to
+        // be one character in, one character out.
         if page == .shifted || page == .capslock {
             keys = keys.map { keyDef in
                 if case let .input(char, alt) = keyDef.type {
-                    return KeyDefinition(type: .input(key: KeyCaseTransform.uppercased(char), alternate: alt))
+                    return KeyDefinition(type: .input(key: AccentedCharacters.shifted(char), alternate: alt))
                 }
                 return keyDef
             }
