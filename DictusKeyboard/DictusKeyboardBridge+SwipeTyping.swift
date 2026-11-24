@@ -120,7 +120,7 @@ extension DictusKeyboardBridge: SwipeTypingOutput {
     /// before it, while that word is still before the cursor, else the usual suggestions.
     private func restoreBarAfterDroppedSwipe() {
         let before = swipeTypingContextBefore()
-        if let record = swipedWord, record.isBeforeCursor(before) {
+        if let record = swipedWord, !hasSelection, record.isBeforeCursor(before) {
             suggestionState?.showSwipeAlternatives(SwipeTypingText.barOrder(record.alternatives))
         } else {
             suggestionState?.updateAsync(context: before)
