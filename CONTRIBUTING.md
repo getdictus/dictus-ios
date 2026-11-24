@@ -49,11 +49,13 @@ swift test
 
 ## Continuous Integration
 
-Every pull request runs through GitHub Actions. Three checks run, each reported separately, and all three must pass before a PR can be merged:
+Every pull request runs through GitHub Actions. Two checks run, each reported separately, and both must pass before a PR can be merged:
 
 - **SwiftLint** -- enforces style rules defined in `.swiftlint.yml`. Runs on Linux, completes in under a minute.
-- **Build (iOS Simulator)** -- compiles the `DictusApp` scheme (which embeds `DictusKeyboard`, `DictusWidgets`, and depends on `DictusCore`) for iOS Simulator. Runs on macOS, takes 5-10 minutes.
-- **DictusCore Tests** -- runs the command above, `cd DictusCore && swift test`, on the pull request's head commit. Runs on macOS with the same Xcode as the build, no simulator.
+- **iOS (build + DictusCore + App Tests)** -- one macOS job in three step groups, each step named after its group, so the step that fails says which part failed. A failure in one group does not stop the next ones:
+  - **Build** -- compiles the `DictusApp` scheme (which embeds `DictusKeyboard`, `DictusWidgets`, and depends on `DictusCore`) for iOS Simulator.
+  - **DictusCore** -- runs the command above, `cd DictusCore && swift test`, on the pull request's head commit, with the same Xcode as the build, no simulator.
+  - **App Tests** -- runs `DictusAppTests` with `xcodebuild test` on an iOS Simulator.
 
 To check locally before pushing:
 
