@@ -66,8 +66,42 @@ public struct StatusMessageLifetime: Equatable, Sendable {
     /// Token of the message currently holding the toolbar.
     public private(set) var current: Int
 
+    /// Whether the current message stays until the user acts rather than for
+    /// `displayDuration` (#933).
+    ///
+    /// ### Why a failure is not timed
+    ///
+    /// A dictation that failed has lost the user's words, and the toolbar line is the
+    /// only thing telling them so. Measured on an iPad Pro M4 (#933, 2026-11-11): a
+    /// 19 s and a 28 s dictation failed on Whisper Turbo, and the log shows
+    /// `dictationMessageSet reason=appError` then `dictationMessageCleared
+    /// reason=appError-timeout` three seconds later. The tester reported "no text and
+    /// no error". Three seconds is long enough for a notice someone is looking at and
+    /// too short for a failure that lands while they look at the document, waiting
+    /// for text that is not coming.
+    ///
+    /// So a failure holds the toolbar until the user does something: types, taps the
+    /// message, or starts the next dictation. Every route out of a dictation that
+    /// already clears the toolbar (an insertion, a cancel, a reconcile, the next
+    /// message replacing it) still does.
+    ///
+    /// Reset by every `advance`: a hold belongs to one message, never to the slot.
+    public private(set) var holdsUntilUserAction = false
+
     public init(current: Int = 0) {
         self.current = current
+    }
+
+    /// Mark the current message as one that stays until the user acts (#933).
+    public mutating func holdCurrentUntilUserAction() {
+        holdsUntilUserAction = true
+    }
+
+    /// Whether a user action (a keystroke, a tap on the message, a new dictation)
+    /// takes the current message down. Only a held message is: a timed one is left
+    /// to its own clear, so typing during a three-second notice changes nothing.
+    public var clearsOnUserAction: Bool {
+        holdsUntilUserAction
     }
 
     /// A message was assigned. Whatever was on the toolbar before no longer owns it,
@@ -79,6 +113,7 @@ public struct StatusMessageLifetime: Equatable, Sendable {
     @discardableResult
     public mutating func advance() -> Int {
         current += 1
+        holdsUntilUserAction = false
         return current
     }
 
@@ -112,6 +147,9 @@ public struct StatusMessageLifetime: Equatable, Sendable {
     /// an insertion, a cancel, a reconcile, or the next message replacing it.
     public func clearDecision(_ token: Int, dictationIsActive: Bool) -> ClearDecision {
         guard mayClear(token) else { return .superseded }
+        // A held message has no timer (#933); a clear that reaches it anyway is
+        // stale and must not take down what is waiting for the user.
+        guard !holdsUntilUserAction else { return .superseded }
         return dictationIsActive ? .waitForIdle : .clear
     }
 

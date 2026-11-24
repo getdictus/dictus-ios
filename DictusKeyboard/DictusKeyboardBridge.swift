@@ -202,6 +202,9 @@ final class DictusKeyboardBridge: NSObject, // swiftlint:disable:this type_body_
         // tapped. Ending it at the source does not depend on the host's timing.
         if Self.editsDocument(key) {
             KeyboardState.shared.invalidateDictationUndo(reason: "keystroke")
+            // Typing is the user moving on from a failed dictation (#933): its held
+            // message gives the slot back to the suggestions.
+            KeyboardState.shared.clearStatusMessageOnUserAction(reason: "keystroke")
         }
 
         switch key.type {

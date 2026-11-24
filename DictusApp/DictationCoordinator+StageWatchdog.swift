@@ -82,9 +82,17 @@ extension DictationCoordinator {
         stageWatchdogStageStart = stageStartedAt
     }
 
-    /// End a stage that never handed over.
+    /// End a stage that never handed over, and say so (#933).
+    ///
+    /// It used to end on `cancelDictation()` alone, which writes `idle`: the keyboard
+    /// took the overlay down with nothing in the field and nothing on the toolbar,
+    /// the "no text and no error" of #933, and the transcript arriving later is
+    /// dropped by `mayReport`. The teardown is the same; only the ending changes, to
+    /// the failure every other lost dictation already reports, which the keyboard
+    /// holds until the user acts.
     func endStuckStage() {
         cancelDictation()
+        handleError(DictationFailureMessage.unexplainedFailure)
     }
 
     func stopStageWatchdog() {
