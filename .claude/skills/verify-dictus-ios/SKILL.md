@@ -11,6 +11,8 @@ Read first: `docs/agents/simulator.md` is the authority on what a simulator can 
 
 **Headless, always.** Never `open -a Simulator`. Xcode 27 (installed here) has no Simulator.app and `axe` needs nothing; on an Xcode 26 machine `launch.sh` starts it with `open -g -a Simulator`, which does not take the focus. Doctor fails if Simulator or DeviceHub ends up frontmost.
 
+**No macOS permission prompt, ever.** Verification scripts must never trigger a macOS permission prompt (Automation, Accessibility, Screen Recording or any other TCC dialog): no `osascript`, AppleScript or System Events; the frontmost app is read with `lsappinfo`.
+
 ## Launch
 
 ```bash

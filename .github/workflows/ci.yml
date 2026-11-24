@@ -32,12 +32,28 @@ jobs:
       - name: Run SwiftLint (strict)
         run: swiftlint lint --strict --reporter github-actions-logging
 
-  build:
-    name: Build (iOS Simulator)
+  # Everything that needs a Mac, on one Mac: a run used to take three macOS runners
+  # (Build, DictusCore Tests, App Tests), each paying its own boot, checkout and Xcode
+  # setup. The three are now step groups of this job, in the same order, and every
+  # step name starts with its group ("Build:", "DictusCore:", "App Tests:"), so the
+  # step that turns the job red says which part failed.
+  #
+  # The groups stay independent, as the three jobs were: a failure ends its own group
+  # only. Inside a group each step runs if the step before it succeeded
+  # (`steps.<previous>.outcome == 'success'`); the first step of the next group runs
+  # on `!cancelled()`, so a broken build still reports the DictusCore and App Tests
+  # verdicts. The job is red if any group is.
+  #
+  # Timeout: the sum of the three old jobs' (25 + 20 + 30 minutes).
+  ios:
+    name: iOS (build + DictusCore + App Tests)
     runs-on: macos-26
-    timeout-minutes: 25
+    timeout-minutes: 75
     steps:
-      - uses: actions/checkout@v4
+      # ---------------------------------------------------------------- Build ----
+
+      - name: "Build: Checkout"
+        uses: actions/checkout@v4
 
       # Xcode 26.4.1, the local development toolchain, as the original 26.3 pin intended
       # ("match the local development environment"). It also became load-bearing with
@@ -47,19 +63,22 @@ jobs:
       # half of this generic simulator build fails to link. 26.4.1 honours the key, which
       # is also what the device and TestFlight builds are made with. The macos-26 image
       # ships 26.0.1 through 26.6 (actions/runner-images, image 20260907).
-      - name: Select Xcode 26.4.1
+      - name: "Build: Select Xcode 26.4.1"
         run: sudo xcode-select -s /Applications/Xcode_26.4.1.app
 
-      - name: Show Xcode version
+      - name: "Build: Show Xcode version"
         run: xcodebuild -version
 
-      - name: Install xcbeautify (if missing)
+      - name: "Build: Install xcbeautify (if missing)"
         run: |
           if ! command -v xcbeautify >/dev/null 2>&1; then
             brew install xcbeautify
           fi
 
-      - name: Cache SwiftPM
+      # One cache step for the job. The App Tests job restored the same paths under
+      # the same keys; on one machine the second restore would download the same
+      # archive again into the same place.
+      - name: "Build: Cache SwiftPM"
         uses: actions/cache@v4
         with:
           path: |
@@ -73,13 +92,13 @@ jobs:
           restore-keys: |
             spm-fa015-${{ runner.os }}-
 
-      - name: Resolve SwiftPM dependencies
+      - name: "Build: Resolve SwiftPM dependencies"
         run: |
           xcodebuild -resolvePackageDependencies \
             -project Dictus.xcodeproj \
             -scheme DictusApp
 
-      - name: Build DictusApp (and embedded Keyboard, Widgets, Core)
+      - name: "Build: Build DictusApp (and embedded Keyboard, Widgets, Core)"
         run: |
           set -o pipefail
           xcodebuild build \
@@ -93,7 +112,8 @@ jobs:
             CODE_SIGNING_IDENTITY="" \
             | xcbeautify --renderer github-actions
 
-      - name: Upload build logs on failure
+      # Only Build steps run before this one, so `failure()` is a Build failure.
+      - name: "Build: Upload build logs on failure"
         if: failure()
         uses: actions/upload-artifact@v4
         with:
@@ -103,36 +123,50 @@ jobs:
           retention-days: 7
           if-no-files-found: ignore
 
-  # The DictusCore suite, run with the repository's one canonical test command (#534).
-  # PR descriptions — increasingly written by agents — report `swift test` results;
-  # this job replays that claim instead of trusting it. It is its own job, not a step
-  # of `build`, so a red test is reported as a test failure rather than folded into a
-  # compilation failure, and a green build or lint cannot mask it.
-  test:
-    name: DictusCore Tests
-    # macOS, no simulator: the suite runs on the Mac directly. The iOS Simulator
-    # destination passes too since #301 but executes exactly the same tests while
-    # paying for a simulator boot (CLAUDE.md, "Build, test, lint").
-    runs-on: macos-26
-    timeout-minutes: 20
-    steps:
+      # ----------------------------------------------------------- DictusCore ----
+      #
+      # The DictusCore suite, run with the repository's one canonical test command (#534).
+      # PR descriptions — increasingly written by agents — report `swift test` results;
+      # this group replays that claim instead of trusting it. Its steps are separate from
+      # the Build ones, so a red test is reported as a test failure rather than folded
+      # into a compilation failure, and a green build or lint cannot mask it.
+      #
+      # macOS, no simulator: the suite runs on the Mac directly. The iOS Simulator
+      # destination passes too since #301 but executes exactly the same tests while
+      # paying for a simulator boot (CLAUDE.md, "Build, test, lint").
+
       # On a pull request, test the PR's head commit itself rather than the
       # `refs/pull/N/merge` commit checkout defaults to, so the result reported on
       # that SHA is a result FOR that SHA. Branch protection is strict (the branch
       # must be up to date with its base before merging), so the merge-ref check
       # would add nothing the head-SHA check does not already cover at merge time.
-      - uses: actions/checkout@v4
+      #
+      # Its own checkout, in a subdirectory: the Build and App Tests groups keep the
+      # default ref, as their jobs did, and share `build/DerivedData` in the root one.
+      # On a push the two refs are the same commit.
+      - name: "DictusCore: Checkout the head commit"
+        id: core-checkout
+        if: ${{ !cancelled() }}
+        uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          path: dictuscore-head
 
-      - name: Show tested commit
+      - name: "DictusCore: Show tested commit"
+        id: core-commit
+        if: ${{ !cancelled() && steps.core-checkout.outcome == 'success' }}
+        working-directory: dictuscore-head
         run: git rev-parse HEAD
 
-      # Same toolchain as the build job, for the same reasons (see its comment).
-      - name: Select Xcode 26.4.1
+      # Same toolchain as the Build group, for the same reasons (see its comment).
+      - name: "DictusCore: Select Xcode 26.4.1"
+        id: core-xcode
+        if: ${{ !cancelled() && steps.core-commit.outcome == 'success' }}
         run: sudo xcode-select -s /Applications/Xcode_26.4.1.app
 
-      - name: Show toolchain
+      - name: "DictusCore: Show toolchain"
+        id: core-toolchain
+        if: ${{ !cancelled() && steps.core-xcode.outcome == 'success' }}
         run: |
           xcodebuild -version
           swift --version
@@ -148,7 +182,9 @@ jobs:
       # So fetch the asset for every `SupportedLanguage` before testing, and fail HERE,
       # with a message, if it cannot be had — a missing asset must not read as a
       # grounding regression in the test step below.
-      - name: Install Natural Language name-tagging assets
+      - name: "DictusCore: Install Natural Language name-tagging assets"
+        id: core-nl-assets
+        if: ${{ !cancelled() && steps.core-toolchain.outcome == 'success' }}
         run: |
           cat > "$RUNNER_TEMP/nl-assets.swift" <<'SWIFT'
           import Foundation
@@ -186,8 +222,8 @@ jobs:
           SWIFT
           swift "$RUNNER_TEMP/nl-assets.swift"
 
-      # No SwiftPM cache here, deliberately. DictusCore/Package.swift declares no
-      # package dependencies, so `swift test` fetches nothing — there is nothing a
+      # No SwiftPM cache for this group, deliberately. DictusCore/Package.swift declares
+      # no package dependencies, so `swift test` fetches nothing — there is nothing a
       # dependency cache could save. Caching `.build` instead would trade a minute of
       # compilation for the risk of testing stale artifacts, which is the one thing
       # this check exists to rule out.
@@ -195,47 +231,43 @@ jobs:
       # #560: on a Mac, `AppGroup.containerURL` is nil for an unentitled process like
       # the test host, so nothing here touches a Group Container — on the runner or
       # on a developer machine.
-      - name: Run DictusCore tests (swift test)
-        working-directory: DictusCore
+      - name: "DictusCore: Run DictusCore tests (swift test)"
+        id: core-test
+        if: ${{ !cancelled() && steps.core-nl-assets.outcome == 'success' }}
+        working-directory: dictuscore-head/DictusCore
         run: swift test
 
-  # The DictusApp unit tests (#900), today the SKTestSession test of a lifetime bought
-  # outside the app. Its own job, like `test`, so a red test reads as a test failure.
-  # It cannot live in `test`: under `swift test` on macOS SKTestSession refuses the
-  # purchase with `notEntitled`, so it needs an app host on a simulator.
-  app-tests:
-    name: App Tests (iOS Simulator)
-    runs-on: macos-26
-    timeout-minutes: 30
-    steps:
-      - uses: actions/checkout@v4
+      # ------------------------------------------------------------ App Tests ----
+      #
+      # The DictusApp unit tests (#900), today the SKTestSession test of a lifetime bought
+      # outside the app. Their own group, like DictusCore's, so a red test reads as a test
+      # failure. They cannot run with `swift test`: under it on macOS SKTestSession refuses
+      # the purchase with `notEntitled`, so they need an app host on a simulator. They use
+      # the root checkout and the SwiftPM cache the Build group restored.
 
-      # Same toolchain as the build job, for the same reasons (see its comment).
-      - name: Select Xcode 26.4.1
+      # Same toolchain as the Build group, for the same reasons (see its comment).
+      - name: "App Tests: Select Xcode 26.4.1"
+        id: app-xcode
+        if: ${{ !cancelled() }}
         run: sudo xcode-select -s /Applications/Xcode_26.4.1.app
 
-      - name: Show Xcode version
+      - name: "App Tests: Show Xcode version"
+        id: app-xcode-version
+        if: ${{ !cancelled() && steps.app-xcode.outcome == 'success' }}
         run: xcodebuild -version
 
-      - name: Cache SwiftPM
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/Library/Developer/Xcode/DerivedData/**/SourcePackages
-            ~/Library/Caches/org.swift.swiftpm
-          # Same keys as the build job (see its comment on `fa015`).
-          key: spm-fa015-${{ runner.os }}-${{ hashFiles('Dictus.xcodeproj/project.pbxproj', 'DictusCore/Package.swift') }}
-          restore-keys: |
-            spm-fa015-${{ runner.os }}-
-
-      - name: Resolve SwiftPM dependencies
+      - name: "App Tests: Resolve SwiftPM dependencies"
+        id: app-resolve
+        if: ${{ !cancelled() && steps.app-xcode-version.outcome == 'success' }}
         run: |
           xcodebuild -resolvePackageDependencies \
             -project Dictus.xcodeproj \
             -scheme DictusApp
 
       # What the image offers, so the log shows why the next step chose what it chose.
-      - name: Show installed Xcodes and iOS runtimes
+      - name: "App Tests: Show installed Xcodes and iOS runtimes"
+        id: app-runtimes
+        if: ${{ !cancelled() && steps.app-resolve.outcome == 'success' }}
         run: |
           ls -d /Applications/Xcode*.app
           xcrun simctl list runtimes
@@ -244,10 +276,12 @@ jobs:
       # fails with SKInternalErrorDomain 3 and `buyProduct` throws `notEntitled`
       # (FB22237318 and public reports; measured here on 26.4.1 in CI and on 26.5
       # locally, while 27.2 passes locally). So:
-      # - B: an Xcode 27 with an iOS 27 runtime on the image, used for this job only;
+      # - B: an Xcode 27 with an iOS 27 runtime on the image, used for this group only;
       # - A, otherwise: Xcode 26.4.1 kept, an iPhone on the iOS 26.2 runtime the image
       #   ships. Nothing is installed; no such iPhone fails here, by name.
-      - name: Pick Xcode and simulator for SKTestSession
+      - name: "App Tests: Pick Xcode and simulator for SKTestSession"
+        id: app-pick
+        if: ${{ !cancelled() && steps.app-runtimes.outcome == 'success' }}
         run: |
           XCODE27=$(ls -d /Applications/Xcode_27*.app 2>/dev/null | tail -1 || true)
           if [ -n "$XCODE27" ] && xcrun simctl list runtimes available | grep -q "^iOS 27\."; then
@@ -287,7 +321,9 @@ jobs:
 
       # Raw xcodebuild output in a file, filtered on screen: xcbeautify would rewrite
       # the "Test Case ... passed" lines the next step looks for.
-      - name: Run DictusAppTests (xcodebuild test)
+      - name: "App Tests: Run DictusAppTests (xcodebuild test)"
+        id: app-test
+        if: ${{ !cancelled() && steps.app-pick.outcome == 'success' }}
         run: |
           set -o pipefail
           xcodebuild test \
@@ -306,11 +342,16 @@ jobs:
             2>&1 | tee "$RUNNER_TEMP/app-tests.log" \
             | grep -E --line-buffered "error:|Test Case|Executed|\*\* |Testing failed|hung"
 
-      - name: Show the SubscriptionForegroundRefreshTests result
+      - name: "App Tests: Show the SubscriptionForegroundRefreshTests result"
+        id: app-result
+        if: ${{ !cancelled() && steps.app-test.outcome == 'success' }}
         run: grep -E "Test Case .*SubscriptionForegroundRefreshTests.* passed" "$RUNNER_TEMP/app-tests.log"
 
-      - name: Upload test log on failure
-        if: failure()
+      # The old job's `if: failure()`, scoped to this group: the last App Tests step did
+      # not pass, so one before it, or it, failed. A Build or DictusCore failure alone
+      # does not upload this log.
+      - name: "App Tests: Upload test log on failure"
+        if: ${{ !cancelled() && steps.app-result.outcome != 'success' }}
         uses: actions/upload-artifact@v4
         with:
           name: app-tests-log
