@@ -1,0 +1,28 @@
+== a-pre1047
+commit d727fd82 udid 4B603494-CDF4-4500-8AB5-76DEB895B3DA
+before: [un deux trois quatre ]
+after:  [un deux trois quatreb]
+log after the press:
+
+== b-develop
+commit 2746316d udid 0513A057-B17D-4C71-AC19-5E53B86C2D1E
+before: [un deux trois quatre ]
+after:  [un ]
+log after the press:
+  <KBD> deleteSwipeEnded words=3 frozen=false
+
+== c-pr-off
+commit 5f2a9786 udid AC0B0C3E-3F75-4652-8AD5-13493BFA3C36
+before: [un deux trois quatre ]
+after:  [un deux trois qu]
+log after the press:
+  <KBD> keyRepeatStarted
+  <KBD> keyRepeatStopped ticks=4 reason=touch
+
+== d-pr-on
+commit 5f2a9786 udid AC0B0C3E-3F75-4652-8AD5-13493BFA3C36
+before: [un deux trois quatre ]
+after:  [un ]
+log after the press:
+  <KBD> deleteSwipeEnded words=3 frozen=false
+
