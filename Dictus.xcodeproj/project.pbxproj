@@ -241,6 +241,7 @@
 		VN6200000005 /* VoiceNoteStackView.swift in Sources */ = {isa = PBXBuildFile; fileRef = VN6201000005 /* VoiceNoteStackView.swift */; };
 		DS6200000001 /* ShareViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DS6201000001 /* ShareViewController.swift */; };
 		DS6200000002 /* ShareStatusView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DS6201000002 /* ShareStatusView.swift */; };
+		DS6200000005 /* ShareOnDeviceTranscription.swift in Sources */ = {isa = PBXBuildFile; fileRef = DS6201000007 /* ShareOnDeviceTranscription.swift */; };
 		DS6200000003 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = DS6201000005 /* Localizable.xcstrings */; };
 		DS6200000004 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = DS6201000006 /* PrivacyInfo.xcprivacy */; };
 		DS6200000010 /* DictusCore in Frameworks */ = {isa = PBXBuildFile; productRef = DS6209000010 /* DictusCore */; };
@@ -553,6 +554,7 @@
 		VN6201000005 /* VoiceNoteStackView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceNoteStackView.swift; sourceTree = "<group>"; };
 		DS6201000001 /* ShareViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareViewController.swift; sourceTree = "<group>"; };
 		DS6201000002 /* ShareStatusView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareStatusView.swift; sourceTree = "<group>"; };
+		DS6201000007 /* ShareOnDeviceTranscription.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareOnDeviceTranscription.swift; sourceTree = "<group>"; };
 		DS6201000003 /* DictusShare.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = DictusShare.entitlements; sourceTree = "<group>"; };
 		DS6201000004 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		DS6201000005 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
@@ -1114,6 +1116,7 @@
 			children = (
 				DS6201000001 /* ShareViewController.swift */,
 				DS6201000002 /* ShareStatusView.swift */,
+				DS6201000007 /* ShareOnDeviceTranscription.swift */,
 				DS6201000005 /* Localizable.xcstrings */,
 				DS6201000006 /* PrivacyInfo.xcprivacy */,
 				DS6201000003 /* DictusShare.entitlements */,
@@ -1674,6 +1677,7 @@
 			files = (
 				DS6200000001 /* ShareViewController.swift in Sources */,
 				DS6200000002 /* ShareStatusView.swift in Sources */,
+				DS6200000005 /* ShareOnDeviceTranscription.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
