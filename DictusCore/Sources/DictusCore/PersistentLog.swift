@@ -258,6 +258,7 @@ public enum PersistentLog {
         let appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "?"
         let buildNumber = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "?"
         let activeModel = AppGroup.defaults.string(forKey: SharedKeys.activeModel) ?? "none"
+        let engineChoice = SpeechEngineChoice.read(from: AppGroup.defaults)
 
         let content = read()
         let header = buildExportHeader(
@@ -266,6 +267,7 @@ public enum PersistentLog {
             buildNumber: buildNumber,
             deviceModel: deviceModel,
             activeModel: activeModel,
+            engineChoice: engineChoice,
             codeRevision: codeRevision,
             retainedWindow: retainedWindow(of: content),
             launch: launchSummary.value
@@ -281,12 +283,17 @@ public enum PersistentLog {
         buildNumber: String,
         deviceModel: String,
         activeModel: String,
+        engineChoice: SpeechEngineChoice = .downloadedModel,
         codeRevision: String = PersistentLog.codeRevision,
         retainedWindow: String = "unknown",
         launch: String? = nil
     ) -> String {
         "Dictus Debug Log\n"
-            + "iOS \(iosVersion) | App \(appVersion) (\(buildNumber)) | rev \(codeRevision) | \(deviceModel) | Model: \(activeModel)\n"
+            + "iOS \(iosVersion) | App \(appVersion) (\(buildNumber)) | rev \(codeRevision) | \(deviceModel) | Model: \(activeModel)"
+            // Apple's engine dictates without being `activeModel`, which is "none" on an
+            // iPhone that dictates with Apple only (#1057). Absent for the default choice,
+            // so the header of everyone else is unchanged.
+            + (engineChoice == .apple ? " | Engine: apple" : "") + "\n"
             + "Window: \(retainedWindow)\n"
             + (launch.map { "Launch: \($0)\n" } ?? "")
             + "---\n"
