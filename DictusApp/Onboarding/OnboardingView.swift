@@ -56,6 +56,15 @@ struct OnboardingView: View {
     /// the preparation step is shown at all.
     @StateObject private var modelManager = ModelManager()
 
+    /// The engine route the language step decided, and Apple's install on the Apple route
+    /// (#1057). Owned here for the same reason as `modelManager`: the install starts on
+    /// the language step and is watched by the preparation step.
+    @StateObject private var appleSetup = OnboardingAppleEngineSetup()
+
+    /// Set while the language step reads Apple's availability to decide the route, so a
+    /// second tap on Confirm does not decide it twice.
+    @State private var isDecidingRoute = false
+
     /// The model whose download the language screen just started, while the keep-open
     /// popup is up (`keepOpenWarning`). nil otherwise.
     @State private var keepOpenWarningModel: String?
@@ -156,11 +165,18 @@ struct OnboardingView: View {
                             onNext: advance
                         )
                     case .modelPreparation:
-                        ModelDownloadPage(
-                            modelManager: modelManager,
-                            modelIdentifier: onboardingModel,
-                            onNext: advance
-                        )
+                        // Apple's route waits for Apple's model; an install that failed
+                        // has already turned the route into today's, so the Dictus
+                        // download page takes this place with its progress and retry.
+                        if appleSetup.isAppleRoute {
+                            AppleModelPreparationPage(setup: appleSetup, onNext: advance)
+                        } else {
+                            ModelDownloadPage(
+                                modelManager: modelManager,
+                                modelIdentifier: onboardingModel,
+                                onNext: advance
+                            )
+                        }
                     case .microphone:
                         MicPermissionPage(onNext: advance)
                     case .firstDictation:
@@ -190,6 +206,8 @@ struct OnboardingView: View {
         } message: {
             keepOpenWarningMessage
         }
+        // A run iOS killed mid-onboarding (Full Access) picks the Apple route back up.
+        .onAppear(perform: resumeAppleRouteIfNeeded)
         // Prevent interactive dismiss (swipe down) on the fullScreenCover
         .interactiveDismissDisabled()
         .animation(.easeInOut(duration: 0.3), value: step)
@@ -275,7 +293,8 @@ struct OnboardingView: View {
     ///   #649 decision 7). Read when the keyboard step moves on, so a user who turned it on
     ///   earlier, or an iPhone that can never run it, never sees the step.
     /// - The preparation: shown only while there is something to wait for (#649 decision
-    ///   1.6). A download that finished while the user was in Settings goes straight on.
+    ///   1.6). A download that finished while the user was in Settings goes straight on,
+    ///   and so does Apple's model once it is installed and picked (#1057).
     /// - The microphone: already granted on a second run, or by an install that went
     ///   through the order before #675, where the microphone came first. A denied
     ///   microphone is still shown, because that page says where to turn it back on.
@@ -286,7 +305,7 @@ struct OnboardingView: View {
         if !AppleIntelligenceOnboarding.isStepNeeded {
             satisfied.insert(.appleIntelligence)
         }
-        if isReady(onboardingModel) {
+        if isReady(onboardingModel) || appleSetup.phase == .ready {
             satisfied.insert(.modelPreparation)
         }
         if AVAudioApplication.shared.recordPermission == .granted {
@@ -338,7 +357,13 @@ struct OnboardingView: View {
         }
     }
 
-    /// Writes the language setup and starts the model download, then moves on (#649).
+    /// Writes the language setup, decides the engine route, and moves on (#649, #1057).
+    ///
+    /// THE ROUTE (#1057, `OnboardingEngineRoute`): where Apple's on-device model covers the
+    /// confirmed language on this iPhone, confirming asks iOS for that model and Dictus
+    /// downloads nothing, so there is no keep-open popup either. Anywhere else, today's
+    /// route below, unchanged. If Apple's install fails, the route falls back to the
+    /// download without stopping the user (`OnboardingAppleEngineSetup.start`).
     ///
     /// WHY THE DOWNLOAD STARTS HERE: the microphone and keyboard steps take the user a
     /// minute or two, much of it in iOS Settings. Starting the transfer now spends that
@@ -347,8 +372,26 @@ struct OnboardingView: View {
     /// survives the trip to Settings and the kill that enabling Full Access causes, and
     /// its compile waits for the foreground (`ModelManager.waitForForegroundToCompile`).
     private func confirmLanguage(_ setup: LanguageSetup) {
+        guard !isDecidingRoute else { return }
         setup.apply()
         let model = setup.recommendedModel(on: DeviceCapabilities.current())
+        isDecidingRoute = true
+        Task {
+            let route = await appleSetup.decide(for: setup, recommendedModelReady: isReady(model),
+                                                modelManager: modelManager)
+            isDecidingRoute = false
+            if case .apple(let code, _) = route {
+                appleSetup.start(languageCode: code, modelManager: modelManager, onFallback: startRecommendedDownload)
+                advance()
+            } else {
+                startTodaysRoute(model)
+            }
+        }
+    }
+
+    /// Today's route: the recommended model's download, and the keep-open popup while its
+    /// bytes transfer.
+    private func startTodaysRoute(_ model: String) {
         if startDownloadIfNeeded(model) {
             // The download is already running; the popup only asks the user to stay. Its
             // button moves on (`keepOpenWarning`), so the flow continues as before.
@@ -356,6 +399,21 @@ struct OnboardingView: View {
         } else {
             advance()
         }
+    }
+
+    /// The fallback when Apple's install fails (#1057): the recommended model's download,
+    /// started where the user is, without the popup. The preparation step shows it.
+    private func startRecommendedDownload() {
+        PersistentLog.log(.diagnosticProbe(component: "AppleEngine", instanceID: "app", action: "onboardingFallback",
+                                           details: "model=\(onboardingModel) step=\(step.rawValue)"))
+        startDownloadIfNeeded(onboardingModel)
+    }
+
+    /// After a kill past the language step, the Apple route's install starts again if it
+    /// had not finished (#1057). Nothing for today's route, or before the language step.
+    private func resumeAppleRouteIfNeeded() {
+        guard step.position > OnboardingStep.language.position else { return }
+        appleSetup.resume(modelManager: modelManager, onFallback: startRecommendedDownload)
     }
 
     /// Starts the download of `identifier` unless it is already ready or already moving.

@@ -145,6 +145,14 @@ enum AppleEngineAssets {
     /// one Dictus never makes itself; transcription stays on the device.
     static func install(languageCode: String, onProgress: @escaping @MainActor (Double?) -> Void) async throws {
         guard #available(iOS 26.0, *) else { throw OnDeviceRecognizerError.unavailable }
+        #if DEBUG && targetEnvironment(simulator)
+        // No simulator runtime can install Apple's model: the Debug harness's host answers
+        // for `AssetInventory` (#1057), as it answers for the recognizer.
+        log("install", "lang=\(languageCode) step=downloading host=simulator")
+        try await SimulatorHostRecognizer().install(languageCode: languageCode, onProgress: onProgress)
+        log("install", "lang=\(languageCode) step=done host=simulator")
+        return
+        #else
         let requested = Locale(identifier: AppleSpeechLanguage.localeIdentifier(
             languageCode: languageCode, deviceLocaleIdentifier: Locale.current.identifier))
         // `SpeechTranscriber` only (Pierre, 2026-11-21).
@@ -173,6 +181,7 @@ enum AppleEngineAssets {
         log("install", "locale=\(locale.identifier) step=downloading")
         try await request.downloadAndInstall()
         log("install", "locale=\(locale.identifier) step=done status=\(await AssetInventory.status(forModules: [module]))")
+        #endif
     }
 
     static func log(_ action: String, _ details: String) {

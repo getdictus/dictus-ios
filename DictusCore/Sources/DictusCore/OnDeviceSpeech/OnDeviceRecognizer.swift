@@ -272,6 +272,44 @@ public final class SimulatorHostRecognizer: OnDeviceRecognizer {
         return status == 200
     }
 
+    /// Stands in for `AssetInventory`'s install of Apple's model (#1057): asks the host to
+    /// start installing the locale, then polls it for a fraction until it answers `done`
+    /// or `failed`. The host decides how long it takes and whether it fails, so a run can
+    /// show the onboarding's progress and its fallback to the download.
+    public func install(languageCode: String, onProgress: @escaping @MainActor (Double?) -> Void) async throws {
+        let locale = AppleSpeechLanguage.localeIdentifier(
+            languageCode: languageCode, deviceLocaleIdentifier: Locale.current.identifier
+        )
+        guard var components = base.flatMap({ URLComponents(url: $0.appendingPathComponent("install"), resolvingAgainstBaseURL: false) })
+        else { throw OnDeviceRecognizerError.unavailable }
+        components.queryItems = [URLQueryItem(name: "locale", value: locale)]
+        guard let url = components.url else { throw OnDeviceRecognizerError.unavailable }
+        var start = URLRequest(url: url, timeoutInterval: 3)
+        start.httpMethod = "POST"
+        guard let (_, response) = try? await URLSession.shared.data(for: start),
+              let status = (response as? HTTPURLResponse)?.statusCode, status == 200 || status == 202 else {
+            OnDeviceSpeechLog.log("hostInstall", "locale=\(locale) step=refused")
+            throw OnDeviceRecognizerError.unavailable
+        }
+        onProgress(nil)
+        while true {
+            try await Task.sleep(nanoseconds: 250_000_000)
+            guard let (data, _) = try? await URLSession.shared.data(for: URLRequest(url: url, timeoutInterval: 3)) else {
+                throw OnDeviceRecognizerError.unavailable
+            }
+            let answer = (String(bytes: data, encoding: .utf8) ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+            if answer == "done" {
+                OnDeviceSpeechLog.log("hostInstall", "locale=\(locale) step=done")
+                return
+            }
+            guard let fraction = Double(answer) else {
+                OnDeviceSpeechLog.log("hostInstall", "locale=\(locale) step=failed answer=\(answer)")
+                throw OnDeviceRecognizerError.localeNotInstalled(languageCode)
+            }
+            onProgress(fraction)
+        }
+    }
+
     public func transcribe(_ recording: OnDeviceRecording, languageCode: String, contextualStrings: [String]) async throws -> String {
         guard let url = base?.appendingPathComponent("transcribe") else { throw OnDeviceRecognizerError.unavailable }
         var request = URLRequest(url: url, timeoutInterval: 30)

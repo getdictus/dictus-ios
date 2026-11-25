@@ -1529,6 +1529,16 @@ extension ModelManager {
         DictationCoordinator.shared.adoptAppleEngine()
     }
 
+    /// Stores the engine the onboarding's route decided (#1057), without picking a model
+    /// or adopting an engine: Apple's install has not finished when the route is decided,
+    /// and on today's route no model is downloaded yet. The choice is what lets a run
+    /// killed by iOS mid-onboarding resume on the same route
+    /// (`OnboardingAppleEngineSetup.resume`).
+    func chooseEngineDuringOnboarding(_ choice: SpeechEngineChoice) {
+        speechEngineChoice = choice
+        SpeechEngineChoice.write(choice, to: defaults)
+    }
+
     /// Whether the user can dictate now: a downloaded model, or Apple's engine picked and
     /// ready for the dictation language (#1057). What Home's mic reads.
     var canDictate: Bool {
