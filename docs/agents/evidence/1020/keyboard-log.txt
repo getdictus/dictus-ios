@@ -1,0 +1,11 @@
+[2026-11-25T19:38:26Z] DEBUG   [keyboard] <KBD> TJ SWITCHES spatial=off adaptive=off bilingual=off source=default
+[2026-11-25T19:44:14Z] DEBUG   [keyboard] <KBD> TJ SWITCHES spatial=off adaptive=off bilingual=off source=default
+[2026-11-25T19:44:31Z] DEBUG   [keyboard] <KBD> TJ WHY #1 APPLIED orig="Its" → "Ils" prev=nil
+[2026-11-25T19:45:27Z] DEBUG   [keyboard] <KBD> TJ SWITCHES spatial=off adaptive=off bilingual=on source=appGroup
+[2026-11-25T19:45:40Z] DEBUG   [keyboard] <KBD> TJ WHY #3 APPLIED orig="Its" → "Ils" prev=nil
+[2026-11-25T19:46:51Z] DEBUG   [keyboard] <KBD> TJ WHY #5 APPLIED orig="franchement" → "fra cement" prev="raining"
+[2026-11-25T19:47:09Z] DEBUG   [keyboard] <KBD> TJ WHY #7 APPLIED orig="its a" → "it's a" prev=nil
+[2026-11-25T19:48:04Z] DEBUG   [keyboard] <KBD> TJ SWITCHES spatial=off adaptive=off bilingual=off source=appGroup
+[2026-11-25T19:48:17Z] DEBUG   [keyboard] <KBD> TJ WHY #10 APPLIED orig="Its" → "Ils" prev=nil
+[2026-11-25T19:49:14Z] DEBUG   [keyboard] <KBD> TJ WHY #13 APPLIED orig="its" → "ils" prev="franchement"
+[2026-11-25T19:49:48Z] DEBUG   [keyboard] <KBD> TJ WHY #16 APPLIED orig="idea" → "idée" prev="good"
