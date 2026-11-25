@@ -31,8 +31,9 @@ protocol GiellaKeyboardViewDelegate: AnyObject {
     func didMoveCursor(_ movement: Int)
     /// The text the host shares around its cursor, for the space-bar trackpad (#950).
     func trackpadTextContext() -> (before: String, after: String)
-    /// Delete swipe (#609): backspace went down at `x`; `step` is one word's slide.
-    func deleteSwipeBegan(atX x: CGFloat, step: CGFloat)
+    /// Delete swipe (#609): backspace went down at `x`; `step` is one word's slide. False
+    /// when the setting is off: the touch is then a plain backspace.
+    func deleteSwipeBegan(atX x: CGFloat, step: CGFloat) -> Bool
     /// The backspace finger moved; true once the slide owns it, which stops the repeat.
     func deleteSwipeMoved(toX x: CGFloat) -> Bool
     /// The backspace finger's touch ended, however it ended.
@@ -866,10 +867,12 @@ final internal class GiellaKeyboardView: UIView,
     private var deleteSwipeTouch: UITouch?
 
     private func beginDeleteSwipe(_ touch: UITouch, atX x: CGFloat) {
-        deleteSwipeTouch = touch
         // One word per letter key's width, as in Hex: every layout has ten letters on its
-        // top row, edge to edge.
-        delegate?.deleteSwipeBegan(atX: x, step: collectionView.bounds.width / 10)
+        // top row, edge to edge. With "Swipe to delete words" off the delegate starts no
+        // slide, and the touch is left as backspace was before #1047: its moves reach the
+        // key handling below, and the repeat runs.
+        guard delegate?.deleteSwipeBegan(atX: x, step: collectionView.bounds.width / 10) == true else { return }
+        deleteSwipeTouch = touch
     }
 
     /// Feeds the backspace finger's move to the slide. True when the touch is the slide's.
