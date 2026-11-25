@@ -34,7 +34,10 @@
 # the space bar reads each word's taps before the trie reads its letters. --spatial-tune
 # changes Hex's parameters for a sweep (`validMargin=inf`); see main.swift. --layout replays
 # every language on that layout, for a device journal typed on another layout than the
-# language's default; the bench puts the App Group's layouts back when it ends.
+# language's default; the bench puts the App Group's layouts back when it ends. With
+# --pair, --spatial reads the taps in every policy (#1015: the pair replay runs the
+# spatial decoder, so #1010's refusal of --pair with --spatial is lifted); each pair run
+# still names its layout in --langs.
 # #1009: --pair replays a bilingual keyboard (primary,secondary): every run under the
 # primary alone, the secondary alone, and language detection. --langs then takes corpus
 # names with an optional layout (`en:qwerty`; default the primary's), and defaults to
