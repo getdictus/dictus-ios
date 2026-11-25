@@ -26,7 +26,7 @@ struct MicPermissionPage: View {
     var body: some View {
         OnboardingCenteredPage(
             title: Text("Dictus needs the microphone"),
-            message: Text("To hear you while you dictate. The sound is transcribed on your iPhone and never leaves it.")
+            message: Text("To hear you while you dictate. The sound is transcribed on your \(DeviceNoun.current) and never leaves it.")
         ) {
             VStack(spacing: 24) {
                 MicHalo()

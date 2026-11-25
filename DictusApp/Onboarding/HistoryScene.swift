@@ -39,7 +39,7 @@ struct HistorySceneCard: View {
 
     /// The line under the title, shared the same way.
     static var line: Text {
-        Text("Every dictation stays on your iPhone. Search for a word, find the text.",
+        Text("Every dictation stays on your \(DeviceNoun.current). Search for a word, find the text.",
              comment: "Onboarding history scene: the line under the title (#680).")
     }
 

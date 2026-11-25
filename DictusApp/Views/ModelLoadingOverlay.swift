@@ -277,8 +277,8 @@ struct ModelLoadingOverlay: View {
     private func subtitle(for phase: Phase) -> Text {
         if phase == .ready {
             return Text(
-                "\(modelName) runs on your iPhone. Dictation works even without a network.",
-                comment: "Model preparation screen subtitle, once ready. The placeholder is the model's name (Parakeet v3) (#708)."
+                "\(modelName) runs on your \(DeviceNoun.current). Dictation works even without a network.",
+                comment: "Model preparation screen subtitle, once ready. First placeholder: the model's name (Parakeet v3). Second: the device, iPhone or iPad (#708, #984)."
             )
         }
         guard context == .onboarding else {
@@ -289,13 +289,13 @@ struct ModelLoadingOverlay: View {
         }
         if let language = spokenLanguagePhrase {
             return Text(
-                "\(modelName), picked for \(language) and this iPhone. After that, everything runs offline.",
-                comment: "Onboarding model preparation subtitle (#708). First placeholder: the model's name (Parakeet v3). Second: the spoken language with its article in French (le français, l'anglais)."
+                "\(modelName), picked for \(language) and this \(DeviceNoun.current). After that, everything runs offline.",
+                comment: "Onboarding model preparation subtitle (#708). First placeholder: the model's name (Parakeet v3). Second: the spoken language with its article in French (le français, l'anglais). Third: the device, iPhone or iPad (#984)."
             )
         }
         return Text(
-            "\(modelName), picked for your language and this iPhone. After that, everything runs offline.",
-            comment: "Onboarding model preparation subtitle when the language cannot be named in the sentence (#708). The placeholder is the model's name."
+            "\(modelName), picked for your language and this \(DeviceNoun.current). After that, everything runs offline.",
+            comment: "Onboarding model preparation subtitle when the language cannot be named in the sentence (#708). First placeholder: the model's name. Second: the device, iPhone or iPad (#984)."
         )
     }
 
@@ -361,11 +361,11 @@ struct ModelLoadingOverlay: View {
     private func secondLabel(_ step: ModelPreparationSecondStep) -> Text {
         switch step {
         case .optimizing:
-            return Text("Optimizing for this iPhone", comment: "Model preparation step: the Core ML compile, pending or running (#708).")
+            return Text("Optimizing for this \(DeviceNoun.current)", comment: "Model preparation step: the Core ML compile, pending or running (#708).")
         case .loading:
             return Text("Loading the model", comment: "Model preparation step: the model loading into memory (#708).")
         case .optimized:
-            return Text("Optimized for this iPhone", comment: "Model preparation step, done (#708).")
+            return Text("Optimized for this \(DeviceNoun.current)", comment: "Model preparation step, done (#708).")
         }
     }
 

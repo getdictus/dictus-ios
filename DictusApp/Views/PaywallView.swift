@@ -597,7 +597,7 @@ struct PaywallView: View {
             Image(systemName: "exclamationmark.triangle.fill")
                 .font(.system(size: 10))
 
-            Text("iPhone with Apple Intelligence")
+            Text("\(DeviceNoun.current) with Apple Intelligence")
                 .font(.dictusCaption)
                 .lineLimit(2)
         }

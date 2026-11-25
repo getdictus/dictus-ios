@@ -1417,25 +1417,25 @@
         }
       }
     },
-    "Smart Modes need Apple Intelligence, which this iPhone does not support." : {
+    "Smart Modes need Apple Intelligence, which this %@ does not support." : {
       "comment" : "Shown in the Smart Mode fan on hardware that cannot run Apple Foundation Models.",
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Smart Modes brauchen Apple Intelligence, das dieses iPhone nicht unterstützt."
+            "value" : "Smart Modes brauchen Apple Intelligence, das dieses %@ nicht unterstützt."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Los Smart Modes necesitan Apple Intelligence, que este iPhone no admite."
+            "value" : "Los Smart Modes necesitan Apple Intelligence, que este %@ no admite."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Les modes exigent Apple Intelligence, que cet iPhone ne gère pas."
+            "value" : "Les modes exigent Apple Intelligence, que cet %@ ne gère pas."
           }
         }
       }
