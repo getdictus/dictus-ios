@@ -1,0 +1,46 @@
+# #1018 — App Group log (dictus_debug.log), selected lines in order. Head 3b20e02d, Debug build.
+# Simulator: iPhone 17, iOS 26.5 (Dictus Verify 20261125-200212-3b20e02d), French UI.
+
+## Step 3 — spatial ON, Adaptive touch OFF (Safari address bar)
+[2026-11-25T19:08:05Z] DEBUG   [keyboard] <KBD> spatialAutocorrectConfigured on=true channel=debug trigger=newView
+[2026-11-25T19:08:05Z] DEBUG   [keyboard] <KBD> adaptiveTouchConfigured on=false trigger=newView
+[2026-11-25T19:08:06Z] INFO    [keyboard] <KBD> keyboardDidAppear
+[2026-11-25T19:08:06Z] DEBUG   [keyboard] <KBD> spatialAutocorrectConfigured on=true channel=debug trigger=viewWillAppear
+[2026-11-25T19:08:06Z] DEBUG   [keyboard] <KBD> adaptiveTouchConfigured on=false trigger=viewWillAppear
+[2026-11-25T19:08:06Z] DEBUG   [keyboard] <KBD> diagnosticProbe component=KeyboardViewController instanceID=4707C032 action=inputContext_settled details=fullAccess=true kbAppear=2 live=1
+
+## Step 4 — spatial ON, Adaptive touch ON (written to the App Group, app relaunched)
+[2026-11-25T19:08:24Z] INFO    [lifecycle] <APP> appLaunched version=2.1.0 protectedData=true activePrewarm=false appGroup=healthy
+[2026-11-25T19:08:27Z] DEBUG   [keyboard] <KBD> spatialAutocorrectConfigured on=true channel=debug trigger=newView
+[2026-11-25T19:08:27Z] DEBUG   [keyboard] <KBD> adaptiveTouchConfigured on=true trigger=newView
+[2026-11-25T19:08:27Z] INFO    [keyboard] <KBD> keyboardDidAppear
+[2026-11-25T19:08:27Z] DEBUG   [keyboard] <KBD> spatialAutocorrectConfigured on=true channel=debug trigger=viewWillAppear
+[2026-11-25T19:08:27Z] DEBUG   [keyboard] <KBD> adaptiveTouchConfigured on=true trigger=viewWillAppear
+
+## Step 4 (learning) — Rappels note, « La maison est belle et grande » typed on the Dictus keys, keyboard dismissed
+[2026-11-25T19:09:05Z] DEBUG   [keyboard] <KBD> spatialAutocorrectConfigured on=true channel=debug trigger=newView
+[2026-11-25T19:09:05Z] DEBUG   [keyboard] <KBD> adaptiveTouchConfigured on=true trigger=newView
+[2026-11-25T19:09:05Z] INFO    [keyboard] <KBD> keyboardDidAppear
+[2026-11-25T19:09:05Z] DEBUG   [keyboard] <KBD> spatialAutocorrectConfigured on=true channel=debug trigger=viewWillAppear
+[2026-11-25T19:09:05Z] DEBUG   [keyboard] <KBD> adaptiveTouchConfigured on=true trigger=viewWillAppear
+[2026-11-25T19:09:05Z] DEBUG   [keyboard] <KBD> diagnosticProbe component=KeyboardViewController instanceID=AED5A003 action=inputContext_settled details=fullAccess=true kbAppear=2 live=1
+[2026-11-25T19:10:40Z] DEBUG   [keyboard] <KBD> diagnosticProbe component=KeyboardViewController instanceID=AED5A003 action=viewDidDisappear details=animated=true memMB=39 live=1 beingDismissed=false movingFromParent=true hasParent=true hasWindow=false hasInputWindow=false fullAccess=true kbAppear=0 appPhase=background appPhaseAgeMs=132050 coldStart=false
+[2026-11-25T19:10:40Z] DEBUG   [keyboard] <KBD> keyboardDidDisappear
+# then, from the host (simulator App Group container, AdaptiveTouch/):
+-rw-r--r--@ 1 23588 Nov 25 20:10 <AppGroup>/AdaptiveTouch/adaptive-touch.bin
+
+## Step 5 — spatial OFF, Adaptive touch still stored ON (effective rule: off)
+# App Group plist at this point: dictus.keyboard.adaptiveTouch = true, dictus.keyboard.spatialAutocorrect = false, dictus.appDistribution = debug
+[2026-11-25T19:10:55Z] INFO    [lifecycle] <APP> appLaunched version=2.1.0 protectedData=true activePrewarm=false appGroup=healthy
+[2026-11-25T19:10:58Z] DEBUG   [keyboard] <KBD> spatialAutocorrectConfigured on=false channel=debug trigger=newView
+[2026-11-25T19:10:58Z] DEBUG   [keyboard] <KBD> adaptiveTouchConfigured on=false trigger=newView
+[2026-11-25T19:10:58Z] INFO    [keyboard] <KBD> keyboardDidAppear
+[2026-11-25T19:10:58Z] DEBUG   [keyboard] <KBD> spatialAutocorrectConfigured on=false channel=debug trigger=viewWillAppear
+[2026-11-25T19:10:58Z] DEBUG   [keyboard] <KBD> adaptiveTouchConfigured on=false trigger=viewWillAppear
+
+## Reset confirmed (« Oublier ce qu’il a appris »), from the host:
+# <AppGroup>/AdaptiveTouch/ after the reset:
+# total 0
+# drwxr-xr-x@ 2 64 Nov 25 20:11 .
+# drwxr-xr-x@ 7 224 Nov 25 20:10 ..
+# App Group plist: adaptiveTouch.resetAt = 1795633908.434939 (2026-11-25T19:11:48Z)
