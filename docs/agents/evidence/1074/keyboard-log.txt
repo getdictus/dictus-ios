@@ -1,0 +1,8 @@
+# Dictus keyboard log, App Group dictus_debug.log, simulator run of 2026-11-25 (PR #1074, 3d4050a4).
+# Excerpt: the swipe typing lines only, copied as printed during the run (the simulator,
+# and its log with it, was deleted at cleanup). Times are UTC.
+[2026-11-25T20:20:28Z] DEBUG   [keyboard] <KBD> swipeTypingConfigured on=true channel=debug reason=viewWillAppear:on
+[2026-11-25T20:20:50Z] DEBUG   [keyboard] <KBD> swipeTypingConfigured on=true channel=debug reason=newView:on
+[2026-11-25T20:20:50Z] DEBUG   [keyboard] <KBD> swipeTypingConfigured on=true channel=debug reason=viewWillAppear:on
+[2026-11-25T20:21:31Z] DEBUG   [keyboard] <KBD> swipeEnded points=20 decodeMs=67.47 readings=8 outcome=word
+[2026-11-25T20:22:03Z] DEBUG   [keyboard] <KBD> swipeEnded points=49 decodeMs=37.30 readings=8 outcome=word
