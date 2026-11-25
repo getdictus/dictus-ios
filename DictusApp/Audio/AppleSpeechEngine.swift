@@ -109,6 +109,8 @@ enum AppleEngineAssets {
             asset = await recognizer.hasModelInstalled(languageCode: code) ? .installed : .notInstalled
         }
         let result = AppleEngineAvailability.evaluate(systemMajorVersion: major, language: language, assetState: asset)
+        // Kept for the gates that cannot await this (#1057): the keyboard, Home, `startDictation`.
+        AppleEngineReadinessRecord.write(result, to: AppGroup.defaults)
         log("availability", "result=\(result) mode=\(mode.telemetryDescription) keyboard=\(keyboard) "
             + "supportedCount=\(identifiers.count) speechTranscriberAvailable=\(available)")
         return result
@@ -121,6 +123,21 @@ enum AppleEngineAssets {
         let resolved = EffectiveSpeechEngine.resolve(choice: choice, availability: await availability())
         if resolved == .downloadedModel { log("fallback", "choice=apple reason=notReady") }
         return resolved
+    }
+
+    /// Whether Apple's engine is the only one there is and can dictate now (#1057): no
+    /// downloaded model, Apple picked, and ready on a fresh reading. For the gates that can
+    /// await (launch preload, foreground warm-up, voice notes); a user with a downloaded
+    /// model never reaches it, and one who did not pick Apple returns at once.
+    static func dictatesWithAppleOnly(context: String) async -> Bool {
+        let defaults = AppGroup.defaults
+        let choice = SpeechEngineChoice.read(from: defaults)
+        let modelReady = defaults.bool(forKey: SharedKeys.modelReady)
+        guard choice == .apple, !modelReady else { return false }
+        let result = DictationReadiness.dictatesWithAppleOnly(modelReady: modelReady, choice: choice,
+                                                              appleAvailability: await availability())
+        log("appleOnlyGate", "context=\(context) modelReady=false canDictate=\(result)")
+        return result
     }
 
     /// Ask iOS for Apple's model for `languageCode`: reserve the locale, then download and

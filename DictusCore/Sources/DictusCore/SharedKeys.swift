@@ -474,6 +474,12 @@ public enum SharedKeys {
     /// nothing changes for a user who never picks Apple. `activeModel` keeps naming the
     /// downloaded model either way. See `SpeechEngineChoice`.
     public static let speechEngineChoice = "dictus.speechEngineChoice"
+    /// String: the dictation language Apple's engine was last found READY for
+    /// (`AppleEngineAvailability.ready`), written by DictusApp each time it reads that
+    /// availability. Absent = not known ready. Lets the gates that cannot await Apple's
+    /// framework (the keyboard, Home, `startDictation`) ask whether a user with no
+    /// downloaded model can dictate. See `AppleEngineReadinessRecord` (#1057).
+    public static let appleEngineReadyLanguage = "dictus.appleEngineReadyLanguage"
 
     // MARK: - Retired keys
     /// The #357 probe's arming flag, removed with the probe in #361. Kept as a

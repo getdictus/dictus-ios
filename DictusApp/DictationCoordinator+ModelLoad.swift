@@ -216,7 +216,9 @@ extension DictationCoordinator {
             PersistentLog.log(.engineWarmUpSuccess(context: "didBecomeActive-already-running"))
             return
         }
-        guard defaults.bool(forKey: SharedKeys.modelReady) else {
+        // Apple's engine, picked with no downloaded model, is warmed like a model (#1057).
+        if !defaults.bool(forKey: SharedKeys.modelReady),
+           !(await AppleEngineAssets.dictatesWithAppleOnly(context: "didBecomeActive")) {
             PersistentLog.log(.engineWarmUpFailed(context: "didBecomeActive", error: "modelReady=false"))
             return
         }
