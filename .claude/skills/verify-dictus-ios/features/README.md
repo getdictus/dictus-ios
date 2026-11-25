@@ -19,6 +19,7 @@ Each file has the same four sections: **Sub-features** (each with its own stable
 | [`voice-notes`](voice-notes.md) | Voice notes transcription | Pro | Keyboard reader and settings; no share sheet |
 | [`typing.autocorrect`](typing.autocorrect.md) | Autocorrect and suggestions | Gratuit | Yes, keys by coordinate |
 | [`typing.learned-words`](typing.learned-words.md) | Learned words | Gratuit | Yes |
+| [`typing.swipe`](typing.swipe.md) | Swipe typing (Experiments, test builds) | Gratuit | Yes, `axe` strokes; timing and memory are device figures |
 | [`keyboard.languages`](keyboard.languages.md) | Keyboard languages and layouts | Gratuit | Yes |
 | [`keyboard.emoji`](keyboard.emoji.md) | Emoji | Gratuit | Yes |
 | [`feedback.sounds-haptics`](feedback.sounds-haptics.md) | Sounds and haptics | Gratuit | Settings only; no sound, no haptic |
@@ -31,7 +32,7 @@ Out of the map on purpose: the "Developer" section of Réglages (Debug builds on
 
 ## All IDs
 
-Every ID in this map, in one table: the 18 features first, then their 126 sub-features (in the order of the feature files), then the 58 screens of [screens.md](screens.md) — 202 IDs in all. **Gratuit/Pro** is the tier of the feature the ID belongs to. **Spécifique iOS** is « oui » when the ID has no Android equivalent to compare against: the keyboard-to-app hand-off and Full Access (an iOS keyboard extension cannot record and must ask for Full Access), return to the host app, Apple Intelligence (polish), the Dynamic Island (Live Activity, stopping standby), and the App Group check.
+Every ID in this map, in one table: the 19 features first, then their 132 sub-features (in the order of the feature files), then the 58 screens of [screens.md](screens.md) — 209 IDs in all. **Gratuit/Pro** is the tier of the feature the ID belongs to. **Spécifique iOS** is « oui » when the ID has no Android equivalent to compare against: the keyboard-to-app hand-off and Full Access (an iOS keyboard extension cannot record and must ask for Full Access), return to the host app, Apple Intelligence (polish), the Dynamic Island (Live Activity, stopping standby), and the App Group check.
 
 | ID | Gratuit/Pro | Spécifique iOS |
 | --- | --- | --- |
@@ -46,6 +47,7 @@ Every ID in this map, in one table: the 18 features first, then their 126 sub-fe
 | [`voice-notes`](voice-notes.md) | Pro | non |
 | [`typing.autocorrect`](typing.autocorrect.md) | Gratuit | non |
 | [`typing.learned-words`](typing.learned-words.md) | Gratuit | non |
+| [`typing.swipe`](typing.swipe.md) | Gratuit | non |
 | [`keyboard.languages`](keyboard.languages.md) | Gratuit | non |
 | [`keyboard.emoji`](keyboard.emoji.md) | Gratuit | non |
 | [`feedback.sounds-haptics`](feedback.sounds-haptics.md) | Gratuit | non |
@@ -125,11 +127,18 @@ Every ID in this map, in one table: the 18 features first, then their 126 sub-fe
 | `typing.dead-keys` | Gratuit | non |
 | `typing.autocorrect-toggle` | Gratuit | non |
 | `typing.contacts-and-replacements` | Gratuit | non |
+| `typing.curated-names` | Gratuit | non |
 | `typing.spatial-autocorrect` | Gratuit | non |
 | `typing.bilingual-autocorrect` | Gratuit | non |
 | `typing.cursor-trackpad` | Gratuit | non |
+| `typing.delete-swipe` | Gratuit | non |
 | `learned-words.learn` | Gratuit | non |
 | `learned-words.reset` | Gratuit | non |
+| `typing.swipe-gesture` | Gratuit | non |
+| `typing.swipe-trail` | Gratuit | non |
+| `typing.swipe-readings` | Gratuit | non |
+| `typing.swipe-take-back` | Gratuit | non |
+| `typing.swipe-toggle` | Gratuit | non |
 | `keyboard.language-switch` | Gratuit | non |
 | `keyboard.layout` | Gratuit | non |
 | `keyboard.number-row` | Gratuit | non |

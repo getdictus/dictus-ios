@@ -94,8 +94,8 @@ The two tables the C++ trie scorer consults when it substitutes one character fo
 
 The accent relation covers every accented character of every language Dictus ships: French since it shipped, German since #321, Spanish (`á í ñ ó ú`) since #327. Several Spanish pairs are two valid words (`si`/`sí`, `mas`/`más`, `ano`/`año`); relating them here is safe because the valid-word guard in `TextPredictionEngine.autocorrect` returns before the scorer that reads this table runs. Disambiguating two valid spellings needs the preceding words and belongs to #114.
 
-### Long-press accents (`AccentedCharacters.mappings`)
-Pop-up accent variants shown when a key is long-pressed. Currently merged across languages (French + Spanish ñ + acute variants), keyed by base letter. To be migrated into `LanguageProfile.longPressAccents` so each language declares its own popups.
+### Long-press accents (`LanguageProfile.longPressAccents`)
+Pop-up accent variants shown when a key is long-pressed, declared per language since #1042 (`Languages/LongPressAccents.swift`, Hex's lists, MIT), in the order Apple's keyboard for that language shows them, keyed by base letter. French holds œ on `o` and æ on `a`. `LanguageProfile.lettersWithOwnKey` names the letters the language's Apple layout gives keys of their own (German ä ö ü, Spanish ñ); on a layout without that key, `AccentedCharacters.mappings(for:layout:)` holds the letter first on its base, as Apple's keyboard does. Distinct from the French adaptive key, which keeps its own one-accent-per-vowel table and does not read these lists. The dictionaries spell œ and æ out (Lexique writes `coeur`), so a word typed with a ligature is looked up spelled out (`Ligature`, `FrequencyProvider.hasWord`); `coeur` stays a valid word of its own.
 
 ## Suggestions and learning
 

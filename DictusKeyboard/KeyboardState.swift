@@ -764,11 +764,10 @@ class KeyboardState: ObservableObject {
                        let errorMsg = DictationErrorChannel.current,
                        errorMsg != presentedErrorMessage {
                         presentedErrorMessage = errorMsg
-                        presentStatusMessage(
-                            errorMsg,
-                            reason: "appError",
-                            timeoutReason: "appError-timeout"
-                        )
+                        // Held, not timed (#933): a failed dictation's words are
+                        // gone and this line is all that says so. It stays until the
+                        // user types, taps it or dictates again.
+                        presentHeldStatusMessage(errorMsg, reason: "appError")
                     }
                 }
             }
@@ -1443,6 +1442,8 @@ class KeyboardState: ObservableObject {
         invalidateDictationUndo(reason: "new-dictation")
         // And the previous one's "text is in the Dictus app" banner (#860).
         clearRecoveredTranscriptionForNewDictation()
+        // And the previous one's failure, held until the user acts (#933).
+        clearStatusMessageOnUserAction(reason: "new-dictation")
 
         // And gives up on a polish still running for the previous one (#361
         // decision 15): N+1 cancels N and takes its place.
@@ -1694,10 +1695,11 @@ private extension KeyboardState {
         // wording is "interrupted", not "crashed": from the user's side that is both
         // truer and less alarming, and it is what they need to know -- the recording
         // is gone and the next tap starts fresh.
-        presentStatusMessage(
+        // Held for the reason `presentHeldStatusMessage` gives (#933): the recording
+        // is lost.
+        presentHeldStatusMessage(
             String(localized: "Recording interrupted. Please try again."),
-            reason: "reconciled-\(source)",
-            timeoutReason: "reconciled-timeout"
+            reason: "reconciled-\(source)"
         )
     }
 }
@@ -1785,6 +1787,25 @@ extension KeyboardState {
     func presentStatusMessage(_ message: String, reason: String, timeoutReason: String) {
         assignStatusMessage(message, reason: reason)
         scheduleStatusMessageClear(token: messageLifetime.current, timeoutReason: timeoutReason)
+    }
+
+    /// Put a failure on the toolbar and leave it there until the user acts (#933).
+    ///
+    /// No timer: `StatusMessageLifetime.holdsUntilUserAction` says why three seconds
+    /// lost the message on device. It comes down on a keystroke, a tap on the
+    /// message, or the next dictation (`clearStatusMessageOnUserAction`), and on every
+    /// route that already clears the toolbar: an insertion, a cancel, a reset, or the
+    /// next message replacing it.
+    func presentHeldStatusMessage(_ message: String, reason: String) {
+        assignStatusMessage(message, reason: reason)
+        messageLifetime.holdCurrentUntilUserAction()
+    }
+
+    /// The user acted: take down a failure held for them (#933). A timed notice is
+    /// left to its own clear.
+    func clearStatusMessageOnUserAction(reason: String) {
+        guard statusMessage != nil, messageLifetime.clearsOnUserAction else { return }
+        assignStatusMessage(nil, reason: reason)
     }
 
     /// Arm the clear for the message holding `token`, and re-arm it for as long as

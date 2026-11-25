@@ -82,5 +82,36 @@ final class EmojiPanelLettersKeyTests: XCTestCase {
         XCTAssertEqual(letters, 1)
         XCTAssertEqual(clicks, [.modifier])
     }
+
+    /// #503: `hitTest` gives ABC and the search button whole bands, but iOS hands a keyboard
+    /// extension only the touches that land on something its layers draw, so on a clear panel
+    /// the band around ABC's key and the search chip's corners never reached `hitTest` at all
+    /// (simulator, before this: 0 of 5 taps in ABC's band, 8 of 13 on the magnifier's band
+    /// missed). Every point of the panel, open and searching, is drawn on, if invisibly.
+    /// Ported from Hex's `testEveryPointOfThePanelAndTheSearchResultsTakesTouches` (pull 2547).
+    func testEveryPointOfThePanelTakesTouches() throws {
+        let panel = try panel()
+        assertDrawnEverywhere(panel, "the open panel")
+        panel.beginSearch()
+        panel.layoutIfNeeded()
+        assertDrawnEverywhere(panel, "the panel in search")
+    }
+
+    /// Every point 4 pt apart in `view` lies on a layer that draws (a fill or contents), as iOS
+    /// needs before it routes a touch there to the keyboard.
+    private func assertDrawnEverywhere(_ view: UIView, _ what: String, file: StaticString = #filePath, line: UInt = #line) {
+        func draws(_ layer: CALayer, at point: CGPoint) -> Bool {
+            guard !layer.isHidden, layer.opacity > 0, layer.bounds.contains(point) else { return false }
+            if (layer.backgroundColor?.alpha ?? 0) > 0 || layer.contents != nil { return true }
+            return (layer.sublayers ?? []).contains { draws($0, at: $0.convert(point, from: layer)) }
+        }
+        var missed: [CGPoint] = []
+        for x in stride(from: CGFloat(1), to: view.bounds.width, by: 4) {
+            for y in stride(from: CGFloat(1), to: view.bounds.height, by: 4) where !draws(view.layer, at: CGPoint(x: x, y: y)) {
+                missed.append(CGPoint(x: x, y: y))
+            }
+        }
+        XCTAssertTrue(missed.isEmpty, "\(what): \(missed.count) points draw nothing, as \(missed.prefix(3))", file: file, line: line)
+    }
 }
 #endif

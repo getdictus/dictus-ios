@@ -307,7 +307,12 @@ struct DictusApp: App {
         // may start, so a reinstall finds its old trial instead of a fresh one.
         proStatus.reconcileTrial()
         _proStatus = StateObject(wrappedValue: proStatus)
-        _subscriptionManager = StateObject(wrappedValue: SubscriptionManager(proStatus: proStatus))
+        // No StoreKit call at launch under the unit-test host: see `isUnitTestHost`.
+        _subscriptionManager = StateObject(wrappedValue: SubscriptionManager(
+            proStatus: proStatus,
+            listensForUpdates: !Self.isUnitTestHost,
+            scansAtLaunch: !Self.isUnitTestHost
+        ))
         _trialCoordinator = StateObject(wrappedValue: ProTrialCoordinator(proStatus: proStatus))
 
         // Warm up the polish engine for the current target language (#141).
@@ -371,10 +376,22 @@ struct DictusApp: App {
             ))
         }
         refreshOnboardingFlag()
+        Self.recordDistribution()
         #if DEBUG
         Self.applyKeyboardDebugArgument("DictusDebugSpatialAutocorrect", key: "debug.spatialAutocorrect")
         Self.applyKeyboardDebugArgument("DictusDebugBilingualAutocorrect", key: "debug.bilingualAutocorrect")
+        DictationCoordinator.shared.applyInjectedFailureArgument()
         #endif
+    }
+
+    /// Tells the keyboard where this app was installed from (#948). The keyboard cannot
+    /// read it itself (`AppDistribution`), and it decides whether an Experiments switch acts
+    /// there. A constant write, skipped when the value is already stored, and only once
+    /// protected data is available: a write into a store that reads empty before the first
+    /// unlock is what #868 is about.
+    private static func recordDistribution() {
+        guard protectedData.isProtectedDataAvailable else { return }
+        AppDistribution.record()
     }
 
     #if DEBUG
@@ -425,6 +442,16 @@ struct DictusApp: App {
         )
     }
 
+    /// Whether XCTest launched this process to host the unit tests. XCTest sets this
+    /// variable only in a process it hosts, so it is never set in Debug, TestFlight or
+    /// App Store launches.
+    ///
+    /// WHY the app's own subscription manager makes no StoreKit call then: StoreKit binds
+    /// a process to its environment at its first call. Made at launch, before the test's
+    /// `SKTestSession` exists, that call binds the process to Sandbox on a freshly erased
+    /// simulator, for the life of the process, and the StoreKit test then reads nothing.
+    static let isUnitTestHost = ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil
+
     @Environment(\.scenePhase) private var scenePhase
 
     var body: some Scene {
@@ -460,10 +487,15 @@ struct DictusApp: App {
                     switch phase {
                     case .active:
                         PersistentLog.log(.appDidBecomeActive)
+                        // #1056: another process may have written History while this
+                        // app was closed or suspended; this copy is from before that.
+                        TranscriptionHistoryStore.shared.reloadFromDisk()
                         catchUpOnProtectedData(trigger: "didBecomeActive")
                         // A purchase made outside the app while it was in the
                         // background unlocks Pro on return (#900).
-                        Task { await subscriptionManager.refreshEntitlements() }
+                        if !Self.isUnitTestHost {
+                            Task { await subscriptionManager.refreshEntitlements() }
+                        }
                         // #620's cold path: a voice note shared while the app was not
                         // running starts now, with the list on screen.
                         VoiceNoteProcessor.shared.appBecameActive()

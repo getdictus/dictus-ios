@@ -448,7 +448,9 @@ class TextPredictionEngine {
         // Valid word guard: if the word exists in the trie dictionary, it's correct.
         // This prevents aggressive corrections like "fais" → "vais".
         // Runs AFTER accent expansion so "tres" → "très" still works.
-        if aospTrieEngine.wordExists(wordToCheck) {
+        // Asked in the dictionary's spelling (#1042): "cœur" typed with its ligature is
+        // the trie's "coeur", and was corrected to "cour" while it was looked up as typed.
+        if aospTrieEngine.hasWord(wordToCheck) {
             #if DEBUG
             AutocorrectDebugLog.autocorrectSkipped(word: word, reason: "already-valid")
             #endif
@@ -517,6 +519,13 @@ class TextPredictionEngine {
             )
             #endif
             return CheckedWord(correction: corrected, alternatives: [])
+        }
+
+        // A close typo of an app or brand name the dictionary does not hold: `iphon`.
+        // Same place as a learned word, for the same reasons. Decided here: the rerank
+        // must not swap it for a neighbour.
+        if let name = curatedNameCorrection(for: word, wordToCheck: wordToCheck, apostrophePrefix: apostrophePrefix) {
+            return CheckedWord(.autocorrect(name, alternatives: []))
         }
 
         // Word splitting + single-word correction comparison.
@@ -717,10 +726,6 @@ class TextPredictionEngine {
         otherLanguageKnowsWord: Bool = false,
         context: String? = nil
     ) -> CorrectionProposal? {
-        let applied = { (result: (correction: String, alternatives: [String])?) -> CorrectionProposal? in
-            result.map { .autocorrect($0.correction, alternatives: $0.alternatives) }
-        }
-
         // The space bar replaces both words with the elision (#1006). A correction of
         // this word alone would be wrong: `ce st` made `s't`.
         if let previousWord, elisionAcrossSpace(previousWord: previousWord, word: word) != nil {
@@ -734,43 +739,13 @@ class TextPredictionEngine {
             return proposal(for: early, word: word, previousWord: previousWord)
         }
 
-        // Language overrides are authoritative — return before the bigram
-        // rerank can replace them. Concrete failure this prevents (#222):
-        // "je lai" → override "l'ai", but the corpus tokenizes "j'ai" as ONE
-        // token so bigram("ai" after "je") = 0, while bigram("lui" after "je")
-        // is huge and "lui" sits at edit distance 1 of "lai" — the rerank
-        // replaced the override with "lui" ("je lai fais" → "je lui fais").
-        if let override = aospTrieEngine.languageOverride(for: word) {
-            #if DEBUG
-            AutocorrectDebugLog.autocorrectDecision(
-                original: word, corrected: override.correction,
-                branch: "language-override", prevWord: previousWord
-            )
-            #endif
-            return applied(override)
-        }
-        // A contraction that is also a word (`ill` for `I'll`, #995) needs the
-        // previous word, which only this entry point has.
-        if let profile = profile,
-           let contraction = contextualContraction(
-               profile: profile, word: word, previousWord: previousWord, isAtSentenceStart: isAtSentenceStart
-           ) {
-            #if DEBUG
-            AutocorrectDebugLog.autocorrectDecision(
-                original: word, corrected: contraction,
-                branch: "contextual-contraction", prevWord: previousWord
-            )
-            #endif
-            return .autocorrect(contraction, alternatives: [])
-        }
-
-        // #1011: the taps, read by the spatial decoder. It comes after every authoritative
-        // branch above (lexicon, overrides, contractions) and is weighed against the trie,
-        // which only has the letters. When it keeps the word, the trie decides.
-        let trie = trieProposal(for: word, previousWord: previousWord, isAtSentenceStart: isAtSentenceStart)
-        guard let spatial else { return trie }
-        return spatialProposal(for: word, previousWord: previousWord, spatial: spatial,
-                               otherLanguageKnowsWord: otherLanguageKnowsWord, trie: trie)
+        // The dictionary writes every word lowercase (`tools/dict_builder.py`), so a
+        // curated name it proposes for a misspelling takes its casing here, in the one
+        // place every dictionary branch returns through: `whatsap` -> "WhatsApp".
+        return dictionaryProposal(
+            for: word, previousWord: previousWord, isAtSentenceStart: isAtSentenceStart, spatial: spatial,
+            otherLanguageKnowsWord: otherLanguageKnowsWord
+        )?.inCuratedCasing
     }
 
     /// What the trie proposes for `word` from its letters: the spell check, then the
@@ -1121,6 +1096,84 @@ extension TextPredictionEngine {
               frequencyDict.topCount > 0 else { return nil }
         return TrieLanguageEvidence(language: supported, trie: aospTrieEngine,
                                     scale: TrieFrequencyScale(topCount: Double(frequencyDict.topCount)))
+    }
+}
+
+// MARK: - Dictionary proposal
+
+// WHY an extension: the class body is at SwiftLint's 650-line budget (see below).
+extension TextPredictionEngine {
+    /// What `correctionProposal` proposes once neither the lexicon nor a context rule
+    /// answered: a language override, a contextual contraction, or the trie and the
+    /// spatial decoder.
+    fileprivate func dictionaryProposal(
+        for word: String,
+        previousWord: String?,
+        isAtSentenceStart: Bool,
+        spatial: SpatialCorrection.Input?,
+        otherLanguageKnowsWord: Bool
+    ) -> CorrectionProposal? {
+        let applied = { (result: (correction: String, alternatives: [String])?) -> CorrectionProposal? in
+            result.map { .autocorrect($0.correction, alternatives: $0.alternatives) }
+        }
+
+        // Language overrides are authoritative — return before the bigram
+        // rerank can replace them. Concrete failure this prevents (#222):
+        // "je lai" → override "l'ai", but the corpus tokenizes "j'ai" as ONE
+        // token so bigram("ai" after "je") = 0, while bigram("lui" after "je")
+        // is huge and "lui" sits at edit distance 1 of "lai" — the rerank
+        // replaced the override with "lui" ("je lai fais" → "je lui fais").
+        if let override = aospTrieEngine.languageOverride(for: word) {
+            #if DEBUG
+            AutocorrectDebugLog.autocorrectDecision(
+                original: word, corrected: override.correction,
+                branch: "language-override", prevWord: previousWord
+            )
+            #endif
+            return applied(override)
+        }
+        // A contraction that is also a word (`ill` for `I'll`, #995) needs the
+        // previous word, which only this entry point has.
+        if let profile = profile,
+           let contraction = contextualContraction(
+               profile: profile, word: word, previousWord: previousWord, isAtSentenceStart: isAtSentenceStart
+           ) {
+            #if DEBUG
+            AutocorrectDebugLog.autocorrectDecision(
+                original: word, corrected: contraction,
+                branch: "contextual-contraction", prevWord: previousWord
+            )
+            #endif
+            return .autocorrect(contraction, alternatives: [])
+        }
+
+        // #1011: the taps, read by the spatial decoder. It comes after every authoritative
+        // branch above (lexicon, overrides, contractions) and is weighed against the trie,
+        // which only has the letters. When it keeps the word, the trie decides.
+        let trie = trieProposal(for: word, previousWord: previousWord, isAtSentenceStart: isAtSentenceStart)
+        guard let spatial else { return trie }
+        return spatialProposal(for: word, previousWord: previousWord, spatial: spatial,
+                               otherLanguageKnowsWord: otherLanguageKnowsWord, trie: trie)
+    }
+}
+
+// MARK: - Curated names as targets
+
+extension TextPredictionEngine {
+    /// `word` corrected to a curated app or brand name (`CuratedNameCorrection`), in
+    /// the name's casing, its apostrophe prefix kept: `l'iphon` -> "l'iPhone". Only
+    /// the prefix takes a sentence-start capital, never the name: "L'iPhone", "iPhone".
+    fileprivate func curatedNameCorrection(for word: String, wordToCheck: String, apostrophePrefix: String?) -> String? {
+        guard let name = CuratedNameCorrection.target(for: wordToCheck, dictionaryKnows: aospTrieEngine.wordExists),
+              allowsElided(name.lowercased(), after: apostrophePrefix)
+        else { return nil }
+        let corrected = apostrophePrefix.map { Self.capitalized($0, like: word) + name } ?? name
+        #if DEBUG
+        AutocorrectDebugLog.autocorrectDecision(
+            original: word, corrected: corrected, branch: "curated-name", prevWord: nil
+        )
+        #endif
+        return corrected
     }
 }
 

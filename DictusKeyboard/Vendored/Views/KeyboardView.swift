@@ -31,6 +31,12 @@ protocol GiellaKeyboardViewDelegate: AnyObject {
     func didMoveCursor(_ movement: Int)
     /// The text the host shares around its cursor, for the space-bar trackpad (#950).
     func trackpadTextContext() -> (before: String, after: String)
+    /// Delete swipe (#609): backspace went down at `x`; `step` is one word's slide.
+    func deleteSwipeBegan(atX x: CGFloat, step: CGFloat)
+    /// The backspace finger moved; true once the slide owns it, which stops the repeat.
+    func deleteSwipeMoved(toX x: CGFloat) -> Bool
+    /// The backspace finger's touch ended, however it ended.
+    func deleteSwipeEnded()
 }
 
 @objc protocol GiellaKeyboardViewKeyboardKeyDelegate {
@@ -559,7 +565,21 @@ final internal class GiellaKeyboardView: UIView,
             break
         }
 
-        let width = bounds.size.width / CGFloat(popupSizingRow?.count ?? 10)
+        var width = bounds.size.width / CGFloat(popupSizingRow?.count ?? 10)
+        // A list too long for one row of key-wide options narrows them so the row still fits
+        // the keyboard (#1042): see `AccentPopupFit`. Only a single-row popup is narrowed; a
+        // popup that wraps (iPad) keeps its key-wide options.
+        if let count = (longpressController as? LongPressOverlayController)?.longpressValues.count,
+           count <= theme.popupLongpressKeysPerRow {
+            width = CGFloat(AccentPopupFit.optionWidth(
+                keyWidth: Double(width),
+                // The bubble insets its options by its corner radius on each side (KeyOverlayView)
+                // and cannot be wider than the keyboard.
+                availableWidth: Double(bounds.size.width - theme.popupCornerRadius * 2),
+                margin: Double(theme.keyHorizontalMargin),
+                count: count
+            ))
+        }
         // Reduce height to 60% so first-row popups stay within keyboard bounds (#69).
         var height = ((bounds.size.height / CGFloat(currentPage.count)) - theme.popupCornerRadius * 2) * 0.6
         height = max(24.0, height)
@@ -710,6 +730,42 @@ final internal class GiellaKeyboardView: UIView,
         return keys
     }
 
+    // MARK: - Swipe typing (#948)
+
+    /// Swipe typing's touch side, set by the bridge only while it acts
+    /// (`SwipeTypingText.availability` is `.on`). Nil otherwise, which is every install
+    /// that never switched it on: each hook below is then `swipeTyping?.…`, which does
+    /// nothing, and a drag stays a slide to another key.
+    var swipeTyping: SwipeTypingController? {
+        didSet {
+            guard swipeTyping !== oldValue else { return }
+            oldValue?.cancelAll()
+            oldValue?.trail?.removeFromSuperview()
+            guard let swipe = swipeTyping else { return }
+            // Read against the keys as they are drawn now: the page, the number row and the
+            // bounds all move them. Nil off the letter pages, where no swipe starts.
+            swipe.keys = { [weak self] in self?.spatialKeys() }
+            swipe.keyAt = { [weak self] point in self?.key(at: point) }
+            if let trail = swipe.trail {
+                // The collection view fills this view, so its coordinates are the trail's.
+                trail.frame = bounds
+                trail.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+                addSubview(trail)
+            }
+        }
+    }
+
+    /// The key under `point` of the collection view, clamped as the hit test clamps it.
+    private func key(at point: CGPoint) -> KeyDefinition? {
+        collectionView.indexPathForItem(at: clampedPoint(point)).map { currentPage[$0.section][$0.row] }
+    }
+
+    /// A letter touch became a swipe: its key types nothing on lift and its popup goes.
+    private func swipeDidBegin() {
+        activeKey = nil
+        removeAllOverlays()
+    }
+
     var activeKey: ActiveKey? {
         willSet {
             dismissOverlayTimer?.invalidate()
@@ -721,6 +777,7 @@ final internal class GiellaKeyboardView: UIView,
                 cell.keyView?.active = false
             }
             if newValue == nil, let activeKey = activeKey {
+                endDeleteSwipe()
                 dismissOverlayTimer = Timer.scheduledTimer(withTimeInterval: Self.overlayDismissDelay, repeats: false, block: { [weak self] _ in
                     self?.removeOverlay(forKey: activeKey.key)
                 })
@@ -787,11 +844,45 @@ final internal class GiellaKeyboardView: UIView,
     /// it for every other path that detaches us.
     func cancelKeyRepeat(reason: String) {
         stopKeyRepeat(reason: reason)
+        // A swipe torn down with the view types nothing (#948).
+        swipeTyping?.cancelAll()
         // Clearing the active key is what `touchesCancelled` does, and it is what stops
         // the tick's own `activeKey != nil` guard from letting a stale hold resume if
         // anything reschedules. `stopKeyRepeat` already ran, so the `willSet` below
         // finds no timer and logs nothing a second time.
         activeKey = nil
+    }
+
+    // MARK: - Delete swipe (#609)
+
+    /// The finger that went down on backspace. It stays on backspace for its whole touch:
+    /// slid left it deletes word by word, and it never moves on to the key under it, so a
+    /// slide that wanders over a letter does not type it on lift.
+    private var deleteSwipeTouch: UITouch?
+
+    private func beginDeleteSwipe(_ touch: UITouch, atX x: CGFloat) {
+        deleteSwipeTouch = touch
+        // One word per letter key's width, as in Hex: every layout has ten letters on its
+        // top row, edge to edge.
+        delegate?.deleteSwipeBegan(atX: x, step: collectionView.bounds.width / 10)
+    }
+
+    /// Feeds the backspace finger's move to the slide. True when the touch is the slide's.
+    private func moveDeleteSwipe(_ touches: Set<UITouch>) -> Bool {
+        guard let swipeTouch = deleteSwipeTouch else { return false }
+        if let touch = touches.first(where: { $0 === swipeTouch }),
+           delegate?.deleteSwipeMoved(toX: touch.location(in: collectionView).x) == true {
+            // The slide owns delete now: no repeat tick may race it.
+            stopKeyRepeat(reason: "deleteSwipe")
+        }
+        return true
+    }
+
+    /// Called whenever the active key is cleared, which every end of a touch does (#390).
+    private func endDeleteSwipe() {
+        guard deleteSwipeTouch != nil else { return }
+        deleteSwipeTouch = nil
+        delegate?.deleteSwipeEnded()
     }
 
     /// Leaving the window is the one teardown signal this view gets on every path that
@@ -816,6 +907,13 @@ final internal class GiellaKeyboardView: UIView,
         if let longpressController = self.longpressController, let touch = touches.first {
             longpressController.touchesBegan(touch.location(in: collectionView))
             return
+        }
+
+        // A swipe under way types its word before this key's letter (#948), or its key when
+        // it was a tap that slid.
+        if let tap = swipeTyping?.touchWillBegin() {
+            lastTriggerPoint = tap.point
+            delegate?.didTriggerKey(tap.key)
         }
 
         if let active = activeKey {
@@ -887,6 +985,11 @@ final internal class GiellaKeyboardView: UIView,
 
                 if shouldSetActiveKey {
                     activeKey = ActiveKey(key: key, indexPath: indexPath, point: touchPoint)
+                }
+                // A letter's touch may become a swipe (#948); any other key's never does.
+                swipeTyping?.began(touch, at: touchPoint, key: key)
+                if case .backspace = key.type {
+                    beginDeleteSwipe(touch, atX: touchPoint.x)
                 }
             }
         }
@@ -972,6 +1075,15 @@ final internal class GiellaKeyboardView: UIView,
             longpressController.touchesMoved(touch.location(in: collectionView))
             return
         }
+        if moveDeleteSwipe(touches) { return }
+
+        // A letter touch that went a key's pitch is a swipe (#948): it moves the trail, not
+        // the keys. What it does not own goes on below as before.
+        var touches = touches
+        if let swipe = swipeTyping {
+            touches = swipe.moved(touches, with: event, in: collectionView, onBegin: swipeDidBegin)
+            if touches.isEmpty { return }
+        }
 
         if let activeKey = activeKey,
             let cell = collectionView.cellForItem(at: activeKey.indexPath) as? KeyCell,
@@ -1008,6 +1120,7 @@ final internal class GiellaKeyboardView: UIView,
     }
 
     override func touchesCancelled(_: Set<UITouch>, with _: UIEvent?) {
+        swipeTyping?.cancelAll()
         (longpressController as? LongPressCursorMovementController)?.cancel()
         longpressController = nil
         activeKey = nil
@@ -1017,10 +1130,25 @@ final internal class GiellaKeyboardView: UIView,
         // Another finger lifting leaves the trackpad on (#950).
         if let trackpad = longpressController as? LongPressCursorMovementController, !trackpad.owns(touches) { return }
         if let longpressController = self.longpressController, let touch = touches.first {
+            swipeTyping?.forget(touches)
             longpressController.touchesEnded(touch.location(in: collectionView))
             removeAllOverlays()
             activeKey = nil
             return
+        }
+
+        // The swipe's finger lifted: its word goes in (#948). A tap that slid types its key.
+        var touches = touches
+        if let swipe = swipeTyping {
+            for touch in touches where swipe.owns(touch) {
+                touches.remove(touch)
+                if let tap = swipe.ended(touch, in: collectionView) {
+                    lastTriggerPoint = tap.point
+                    delegate?.didTriggerKey(tap.key)
+                }
+            }
+            if touches.isEmpty { return }
+            swipe.forget(touches)
         }
 
         if let activeKey = activeKey {
@@ -1072,6 +1200,8 @@ final internal class GiellaKeyboardView: UIView,
     }
 
     @objc func touchesFoundLongpress(_ longpressGestureRecognizer: UILongPressGestureRecognizer) {
+        // A swipe that slows on a key is still a swipe: no accent popup under it (#948).
+        if swipeTyping?.isSwiping == true { return }
         let longpressPoint = clampedPoint(longpressGestureRecognizer.location(in: collectionView))
         if let indexPath = collectionView.indexPathForItem(at: longpressPoint),
             longpressController == nil {
@@ -1190,7 +1320,7 @@ final internal class GiellaKeyboardView: UIView,
     }
 
     private func longpressKeys(for key: String) -> [KeyDefinition]? {
-        // Case-insensitive lookup: AccentedCharacters.mappings uses lowercase keys,
+        // Case-insensitive lookup: AccentedCharacters.mappings(for:layout:) uses lowercase keys,
         // but on shifted/capslock pages the key string is uppercase ("E" not "e").
         let longpressKeys = self.definition
         .longPress[key.lowercased()]?
@@ -1204,14 +1334,15 @@ final internal class GiellaKeyboardView: UIView,
 
         // Apply case transformation for shifted/capslock pages
         // so that long-pressing "E" shows uppercase accents (E, E, E, E)
-        // KeyCaseTransform rather than uppercased(): Unicode's full case mapping turns
-        // ß into the two characters "SS", which this popup drew as one key and inserted
-        // as two letters (#322). The candidate is inserted verbatim by the bridge, so the
-        // transformation has to be one character in, one character out.
+        // AccentedCharacters.shifted rather than uppercased(): Unicode's full case mapping
+        // turns ß into the two characters "SS", which this popup drew as one key and
+        // inserted as two letters (#322), and the dotless ı into the key's own I (#1042).
+        // The candidate is inserted verbatim by the bridge, so the transformation has to
+        // be one character in, one character out.
         if page == .shifted || page == .capslock {
             keys = keys.map { keyDef in
                 if case let .input(char, alt) = keyDef.type {
-                    return KeyDefinition(type: .input(key: KeyCaseTransform.uppercased(char), alternate: alt))
+                    return KeyDefinition(type: .input(key: AccentedCharacters.shifted(char), alternate: alt))
                 }
                 return keyDef
             }

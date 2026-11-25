@@ -515,7 +515,7 @@ final class KeyboardSmartModeState: ObservableObject {
             )
         case .deviceNotEligible:
             return String(
-                localized: "Smart Modes need Apple Intelligence, which this iPhone does not support.",
+                localized: "Smart Modes need Apple Intelligence, which this \(DeviceNoun.current) does not support.",
                 comment: "Shown in the Smart Mode fan on hardware that cannot run Apple Foundation Models."
             )
         case .osTooOld:

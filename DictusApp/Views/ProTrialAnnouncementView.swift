@@ -31,7 +31,7 @@ import DictusCore
 ///
 /// Every iPhone gets the trial since #922, and on one that can never run Smart Modes
 /// this sheet must not sell them as part of the gift: their row is dimmed and labelled
-/// "iPhone with Apple Intelligence", "everything in Pro" becomes "Dictus Pro", and the
+/// "\(DeviceNoun.current) with Apple Intelligence", "everything in Pro" becomes "Dictus Pro", and the
 /// line about what a subscription keeps names only what this iPhone can keep.
 struct ProTrialAnnouncementView: View {
     let announcement: ProTrialCoordinator.Announcement
@@ -165,7 +165,7 @@ struct ProTrialAnnouncementView: View {
             // Smart Modes, and the row says so in the paywall's words. Checked before
             // the engine state, which only speaks to a capable iPhone.
             Label {
-                Text("iPhone with Apple Intelligence")
+                Text("\(DeviceNoun.current) with Apple Intelligence")
             } icon: {
                 Image(systemName: "iphone")
             }
@@ -191,7 +191,7 @@ struct ProTrialAnnouncementView: View {
                 .font(.dictusCaption)
                 .foregroundColor(.dictusAccentHighlight)
                 .fixedSize(horizontal: false, vertical: true)
-            Text("If Smart Modes stay unavailable, check that Siri speaks your iPhone's language.")
+            Text("If Smart Modes stay unavailable, check that Siri speaks your \(DeviceNoun.current)'s language.")
                 .font(.dictusCaption)
                 .foregroundColor(.secondary)
                 .fixedSize(horizontal: false, vertical: true)

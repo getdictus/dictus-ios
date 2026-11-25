@@ -173,6 +173,8 @@
 		AA0000F2 /* SoundFeedbackService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000F2 /* SoundFeedbackService.swift */; };
 		B565F0B1 /* FeedbackComposer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B565F0B2 /* FeedbackComposer.swift */; };
 		AA0000F3 /* SoundSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000F3 /* SoundSettingsView.swift */; };
+		KB5E7701 /* KeyboardSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = KB5E7711 /* KeyboardSettingsView.swift */; };
+		KB5E7702 /* KeyboardExperimentsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = KB5E7712 /* KeyboardExperimentsView.swift */; };
 		AA0000F4 /* Sounds in Resources */ = {isa = PBXBuildFile; fileRef = AA1000F4 /* Sounds */; };
 		AB097401 /* ReleaseNotes in Resources */ = {isa = PBXBuildFile; fileRef = AB097402 /* ReleaseNotes */; };
 		AA0000F5 /* LiveActivityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000F5 /* LiveActivityManager.swift */; };
@@ -229,6 +231,9 @@
 		CC00000E /* Audio.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC10000E /* Audio.swift */; };
 		CC00000F /* DeviceKit in Frameworks */ = {isa = PBXBuildFile; productRef = CC900001 /* DeviceKit */; };
 		CC000020 /* DictusKeyboardBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC100020 /* DictusKeyboardBridge.swift */; };
+		SW0948A1 /* DictusKeyboardBridge+SwipeTyping.swift in Sources */ = {isa = PBXBuildFile; fileRef = SW0948B1 /* DictusKeyboardBridge+SwipeTyping.swift */; };
+		SW0948A2 /* SwipeTypingController.swift in Sources */ = {isa = PBXBuildFile; fileRef = SW0948B2 /* SwipeTypingController.swift */; };
+		SW0948A3 /* SwipeTrailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = SW0948B3 /* SwipeTrailView.swift */; };
 		CC000040 /* HostInputTraits.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC100040 /* HostInputTraits.swift */; };
 		VN6200000001 /* VoiceNoteProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = VN6201000001 /* VoiceNoteProcessor.swift */; };
 		VN6200000002 /* VoiceNoteCopy.swift in Sources */ = {isa = PBXBuildFile; fileRef = VN6201000002 /* VoiceNoteCopy.swift */; };
@@ -244,6 +249,8 @@
 		VN6200000006 /* VoiceNoteCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = VN6201000006 /* VoiceNoteCardView.swift */; };
 		VN6200000007 /* VoiceNoteIslandDriver.swift in Sources */ = {isa = PBXBuildFile; fileRef = VN6201000007 /* VoiceNoteIslandDriver.swift */; };
 		TF9000000001 /* SubscriptionForegroundRefreshTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = TF9100000001 /* SubscriptionForegroundRefreshTests.swift */; };
+		TF9000000933 /* StuckStageEndingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = TF9100000933 /* StuckStageEndingTests.swift */; };
+		TF9000000003 /* UnitTestHostGuardTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = TF9100000003 /* UnitTestHostGuardTests.swift */; };
 		TF9000000002 /* StoreKitConfig.storekit in Resources */ = {isa = PBXBuildFile; fileRef = SS100004 /* StoreKitConfig.storekit */; };
 /* End PBXBuildFile section */
 
@@ -448,6 +455,8 @@
 		AA1000F2 /* SoundFeedbackService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoundFeedbackService.swift; sourceTree = "<group>"; };
 		B565F0B2 /* FeedbackComposer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedbackComposer.swift; sourceTree = "<group>"; };
 		AA1000F3 /* SoundSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoundSettingsView.swift; sourceTree = "<group>"; };
+		KB5E7711 /* KeyboardSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardSettingsView.swift; sourceTree = "<group>"; };
+		KB5E7712 /* KeyboardExperimentsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardExperimentsView.swift; sourceTree = "<group>"; };
 		AA1000F4 /* Sounds */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Sounds; path = Dictus/Sounds; sourceTree = SOURCE_ROOT; };
 		AB097402 /* ReleaseNotes */ = {isa = PBXFileReference; lastKnownFileType = folder; name = ReleaseNotes; path = ReleaseNotes; sourceTree = SOURCE_ROOT; };
 		AA1000F5 /* LiveActivityManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveActivityManager.swift; sourceTree = "<group>"; };
@@ -494,6 +503,9 @@
 		CC100050 /* KeySoundPolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeySoundPolicy.swift; sourceTree = "<group>"; };
 		CC100010 /* KeyboardLayouts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardLayouts.swift; sourceTree = "<group>"; };
 		CC100020 /* DictusKeyboardBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DictusKeyboardBridge.swift; sourceTree = "<group>"; };
+		SW0948B1 /* DictusKeyboardBridge+SwipeTyping.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DictusKeyboardBridge+SwipeTyping.swift"; sourceTree = "<group>"; };
+		SW0948B2 /* SwipeTypingController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwipeTypingController.swift; sourceTree = "<group>"; };
+		SW0948B3 /* SwipeTrailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwipeTrailView.swift; sourceTree = "<group>"; };
 		CC100040 /* HostInputTraits.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HostInputTraits.swift; sourceTree = "<group>"; };
 		CC100001 /* GiellaUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GiellaUtils.swift; sourceTree = "<group>"; };
 		CC100002 /* KeyDefinition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyDefinition.swift; sourceTree = "<group>"; };
@@ -551,6 +563,8 @@
 		VN6201000006 /* VoiceNoteCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceNoteCardView.swift; sourceTree = "<group>"; };
 		VN6201000007 /* VoiceNoteIslandDriver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceNoteIslandDriver.swift; sourceTree = "<group>"; };
 		TF9100000001 /* SubscriptionForegroundRefreshTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionForegroundRefreshTests.swift; sourceTree = "<group>"; };
+		TF9100000933 /* StuckStageEndingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StuckStageEndingTests.swift; sourceTree = "<group>"; };
+		TF9100000003 /* UnitTestHostGuardTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnitTestHostGuardTests.swift; sourceTree = "<group>"; };
 		TF9200000001 /* DictusAppTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DictusAppTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -691,6 +705,7 @@
 				CC100050 /* KeySoundPolicy.swift */,
 				CC100010 /* KeyboardLayouts.swift */,
 				CC100020 /* DictusKeyboardBridge.swift */,
+				SW0948B1 /* DictusKeyboardBridge+SwipeTyping.swift */,
 				CC100040 /* HostInputTraits.swift */,
 				CC400001 /* Vendored */,
 				AA400005 /* Views */,
@@ -740,6 +755,7 @@
 				AA1000B2 /* EmojiPickerView.swift */,
 				AA1000B3 /* EmojiCategoryBar.swift */,
 				AA1000D4 /* SuggestionBarView.swift */,
+				SW0948B3 /* SwipeTrailView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -813,6 +829,8 @@
 				AA100302 /* ModelLanguageDetailView.swift */,
 				AA1000E4 /* SwipeBackOverlayView.swift */,
 				AA1000F3 /* SoundSettingsView.swift */,
+				KB5E7711 /* KeyboardSettingsView.swift */,
+				KB5E7712 /* KeyboardExperimentsView.swift */,
 				AA100300 /* ModelPreparationParts.swift */,
 				AA100301 /* ModelLoadingOverlay.swift */,
 				AA100484 /* ModelPreparationPresentation.swift */,
@@ -964,6 +982,7 @@
 			isa = PBXGroup;
 			children = (
 				AA1000G0 /* KeyTapSignposter.swift */,
+				SW0948B2 /* SwipeTypingController.swift */,
 			);
 			path = TouchHandling;
 			sourceTree = "<group>";
@@ -1110,6 +1129,8 @@
 			isa = PBXGroup;
 			children = (
 				TF9100000001 /* SubscriptionForegroundRefreshTests.swift */,
+				TF9100000933 /* StuckStageEndingTests.swift */,
+				TF9100000003 /* UnitTestHostGuardTests.swift */,
 			);
 			path = DictusAppTests;
 			sourceTree = "<group>";
@@ -1534,6 +1555,8 @@
 				AA0000F2 /* SoundFeedbackService.swift in Sources */,
 				B565F0B1 /* FeedbackComposer.swift in Sources */,
 				AA0000F3 /* SoundSettingsView.swift in Sources */,
+				KB5E7701 /* KeyboardSettingsView.swift in Sources */,
+				KB5E7702 /* KeyboardExperimentsView.swift in Sources */,
 				AA0000F6 /* StopStandbyIntent.swift in Sources */,
 				AA0000L0 /* ModelInfo+Localized.swift in Sources */,
 				SS000001 /* SubscriptionManager.swift in Sources */,
@@ -1612,6 +1635,9 @@
 				CC000050 /* KeySoundPolicy.swift in Sources */,
 				CC000010 /* KeyboardLayouts.swift in Sources */,
 				CC000020 /* DictusKeyboardBridge.swift in Sources */,
+				SW0948A1 /* DictusKeyboardBridge+SwipeTyping.swift in Sources */,
+				SW0948A2 /* SwipeTypingController.swift in Sources */,
+				SW0948A3 /* SwipeTrailView.swift in Sources */,
 				CC000040 /* HostInputTraits.swift in Sources */,
 				CC000001 /* GiellaUtils.swift in Sources */,
 				CC000002 /* KeyDefinition.swift in Sources */,
@@ -1660,6 +1686,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				TF9000000001 /* SubscriptionForegroundRefreshTests.swift in Sources */,
+				TF9000000933 /* StuckStageEndingTests.swift in Sources */,
+				TF9000000003 /* UnitTestHostGuardTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

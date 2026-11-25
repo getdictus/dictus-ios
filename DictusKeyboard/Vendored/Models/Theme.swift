@@ -215,7 +215,11 @@ private struct ThemeFactory {
             bannerHeight: bannerHeight,
             altLabelTop: 0.0,
             altLabelBottom: 0.0,
-            popupLongpressKeysPerRow: 10,
+            // Never a second row on iPhone (#1042): a top-row key's popup would put it above
+            // the keyboard's frame, where an extension cannot draw, and the first row of
+            // English u (u ū ǔ û ù ú) vanished there. Long lists narrow their options instead
+            // (`AccentPopupFit`), as Apple's keyboard does.
+            popupLongpressKeysPerRow: .max,
             sfSymbolConfiguration: sfSymbolConfiguration
         )
     }

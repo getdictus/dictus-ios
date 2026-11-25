@@ -505,7 +505,7 @@ enum HomeSmartModeCopy {
                 comment: "Shown in the Smart Mode fan while the on-device model is downloading."
             )
         case .deviceNotEligible:
-            return String(localized: "Smart Modes need Apple Intelligence, which this iPhone does not support. Your choices are saved for a device that does.")
+            return String(localized: "Smart Modes need Apple Intelligence, which this \(DeviceNoun.current) does not support. Your choices are saved for a device that does.")
         case .osTooOld:
             return String(
                 localized: "Smart Modes need iOS 26 or later.",

@@ -49,6 +49,46 @@ public enum SharedKeys {
     /// Read and written only through `NumberRowPreference`, except for the Settings toggle's
     /// @AppStorage binding — the same split every other preference on that screen uses.
     public static let numberRowEnabled = "dictus.numberRowEnabled"
+
+    // MARK: - Keyboard features
+    // One on/off per keyboard feature, written by the app's "Clavier" and "Expériences"
+    // screens and read by the keyboard. Defaults and the rules that combine them live in
+    // `KeyboardFeatureSettings`, and every read and write goes through it, except the
+    // screens' @AppStorage bindings, which take their default from it.
+    //
+    // WHY no stage in the names ("debug", "experiment"): a feature moves from the
+    // Experiments page to the Keyboard page when it earns it, and a key that named the
+    // page would have to be migrated on that move, or lie.
+    //
+    // `autocorrectEnabled`, `hapticsEnabled` and `numberRowEnabled` are keyboard settings
+    // too and keep their older names: renaming them would reset every install's choice.
+
+    /// Bool, default false: the space bar reads where the finger landed on each key (#1011).
+    public static let keyboardSpatialAutocorrect = "dictus.keyboard.spatialAutocorrect"
+    /// Bool, default false: personal key centres for the spatial decoder (#1014). Has an
+    /// effect only with `keyboardSpatialAutocorrect` on — see
+    /// `KeyboardFeatureSettings.isAdaptiveTouchEffective`.
+    public static let keyboardAdaptiveTouch = "dictus.keyboard.adaptiveTouch"
+    /// Bool, default false: the keyboard also corrects its partner language (#1015).
+    public static let keyboardBilingualAutocorrect = "dictus.keyboard.bilingualAutocorrect"
+    /// String, a `SupportedLanguage` raw value: the second language the bilingual check
+    /// types alongside the keyboard's. Absent, or equal to the keyboard's own language,
+    /// means `KeyboardFeatureSettings.defaultPartnerLanguage(for:)`.
+    public static let keyboardPartnerLanguage = "dictus.keyboard.partnerLanguage"
+    /// Bool, default TRUE: sliding left from Delete erases word by word (#609).
+    public static let keyboardDeleteWordSwipe = "dictus.keyboard.deleteWordSwipe"
+    /// Bool, default false: typing a word by sliding across the letters.
+    public static let keyboardSwipeTyping = "dictus.keyboard.swipeTyping"
+    /// Bool, default true: draws the finger's trail while swipe typing.
+    public static let keyboardSwipeTrail = "dictus.keyboard.swipeTrail"
+    /// String, an `AppDistribution` raw value (`debug`, `testFlight`, `appStore`): where the
+    /// app says it was installed from, written by the app at each activation. The keyboard
+    /// reads it to know whether the Experiments page exists, which its own receipt cannot
+    /// tell (`BuildChannel.current`'s limits). Absent or unknown reads as the App Store.
+    /// Read and written only through `AppDistribution`.
+    public static let appDistribution = "dictus.appDistribution"
+
+    // Keyboard-App cross-process contracts (Plan 3.1, continued)
     /// JSON-encoded [Float] waveform energy data written by app during recording
     public static let waveformEnergy = "dictus.waveformEnergy"
     /// Bool flag set by keyboard to request recording stop
@@ -434,6 +474,12 @@ public enum SharedKeys {
     /// nothing changes for a user who never picks Apple. `activeModel` keeps naming the
     /// downloaded model either way. See `SpeechEngineChoice`.
     public static let speechEngineChoice = "dictus.speechEngineChoice"
+    /// String: the dictation language Apple's engine was last found READY for
+    /// (`AppleEngineAvailability.ready`), written by DictusApp each time it reads that
+    /// availability. Absent = not known ready. Lets the gates that cannot await Apple's
+    /// framework (the keyboard, Home, `startDictation`) ask whether a user with no
+    /// downloaded model can dictate. See `AppleEngineReadinessRecord` (#1057).
+    public static let appleEngineReadyLanguage = "dictus.appleEngineReadyLanguage"
 
     // MARK: - Retired keys
     /// The #357 probe's arming flag, removed with the probe in #361. Kept as a

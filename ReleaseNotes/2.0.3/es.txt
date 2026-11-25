@@ -2,14 +2,14 @@ Novedades de la 2.0.3
 
 ## Highlights
 
-Un teclado renovado
-Las teclas están donde las pone el teclado de Apple, y al mantener pulsada la barra espaciadora mueves el cursor.
+Un teclado mejorado
+Teclas como en Apple, cursor en la barra espaciadora, emojis y autocorrección.
 
-Emojis más sencillos
-Búsqueda, tonos de piel y toda la altura del teclado para los emojis.
+El modelo de dictado de Apple
+Elígelo en la pantalla Modelos.
 
-Mejor autocorrección en francés
-«il m'a», «à», los acentos y las palabras pegadas.
+Traduce a 25 idiomas
+Con Dictus Pro, en los Smart Modes.
 
 ## All changes
 
