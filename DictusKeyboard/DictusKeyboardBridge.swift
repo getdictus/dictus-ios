@@ -1571,10 +1571,11 @@ extension DictusKeyboardBridge {
     /// Backspace went down at `x`, after its touch-down deletion. `step` is a letter key's
     /// width: one word per key width, as in Hex.
     ///
-    /// Returns false, and starts nothing, when "Swipe to delete words" is off in the app's
-    /// Keyboard settings: backspace is then the plain key, its repeat untouched. Read here, at
-    /// each touch-down, so a change in the app holds from the next press.
-    func deleteSwipeBegan(atX x: CGFloat, step: CGFloat) -> Bool {
+    /// Starts nothing when "Effacer en glissant" is off in the app's Keyboard settings: the
+    /// moves then delete nothing and leave the repeat running, so backspace is a plain held
+    /// key; the view still keeps the finger on it, so no other key is typed on lift. Read
+    /// here, at each touch-down, so a change in the app holds from the next press.
+    func deleteSwipeBegan(atX x: CGFloat, step: CGFloat) {
         deleteSwipe = DeleteWordSwipe.begin(
             .forKeyboard(),
             editor: documentEditor,
@@ -1586,7 +1587,6 @@ extension DictusKeyboardBridge {
         )
         lastBackspaceDeletion = nil
         lastBackspaceSwipedWord = nil
-        return deleteSwipe != nil
     }
 
     /// The backspace finger moved. True once the slide owns the touch, which is the view's
