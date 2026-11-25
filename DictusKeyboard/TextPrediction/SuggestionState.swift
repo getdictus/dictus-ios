@@ -511,7 +511,7 @@ class SuggestionState: ObservableObject {
         engine.setLanguage(lang)
         BilingualAutocorrect.follow(primary: lang, engine: engine)
         #if DEBUG
-        AutocorrectDebugLog.switches(BilingualAutocorrect.debugSwitches)
+        AutocorrectDebugLog.switches(BilingualAutocorrect.debugSwitches(.forKeyboard()))
         #endif
     }
 

@@ -12,41 +12,62 @@ import Foundation
 
 /// Whether the bilingual check runs, and the partner engine it holds.
 enum BilingualAutocorrect {
-    /// App Group key of the switch. Debug builds only: a Release build never reads it.
+    /// Whether the check runs: the Experiments page's "Bilingual autocorrect" switch
+    /// (`SharedKeys.keyboardBilingualAutocorrect`) as it acts,
+    /// `KeyboardFeatureSettings.isBilingualAutocorrectEffective` — the switch on a test build
+    /// (Debug, TestFlight), off in the App Store build whatever the store holds.
     ///
-    /// WHY here and not in `SharedKeys`: like `SpatialAutocorrect.switchKey` (#1011), an
-    /// experiment of the keyboard's that nothing else reads, until PR 4 gives it a
-    /// setting after #992.
+    /// WHY a value set at each appearance (`refresh`) rather than a read of the store on
+    /// every tap: as for `SpatialAutocorrect.isOn`, the switch lives in the app, where the
+    /// keyboard is not on screen, so an appearance is the first moment a change can be
+    /// seen. Off, `current` is nil and every caller takes the monolingual path.
     ///
-    /// Turn it on with the Debug app's launch argument, then make the keyboard reappear:
-    /// `xcrun devicectl device process launch --device <id> com.pivi.dictus -DictusDebugBilingualAutocorrect YES`
-    /// (`xcrun simctl launch <udid> com.pivi.dictus -DictusDebugBilingualAutocorrect YES` on a simulator).
-    static let switchKey = "debug.bilingualAutocorrect"
+    /// The Debug app's launch argument `-DictusDebugBilingualAutocorrect YES` (or `NO`)
+    /// writes the same switch (`DictusApp`, `applyKeyboardDebugArgument`), then make the
+    /// keyboard reappear.
+    ///
+    /// Main thread only: set by the bridge's refresh, read by the keystroke handlers.
+    private(set) static var isOn = KeyboardFeatureSettings.Defaults.bilingualAutocorrect
 
-    static var isOn: Bool {
-        #if DEBUG
-        return AppGroup.defaults.bool(forKey: switchKey)
-        #else
-        return false
-        #endif
+    /// The partner of each keyboard language, from the Experiments page's "Second language"
+    /// (`KeyboardFeatureSettings.bilingualPair(for:)`), read with the switch. Empty while
+    /// the switch is off.
+    private static var pairs: [SupportedLanguage: KeyboardLanguagePair] = [:]
+
+    /// Reads the switch and the partner language from `settings`, the keyboard's view of
+    /// the App Group (`KeyboardFeatureSettings.forKeyboard()`), at the same moments as the
+    /// spatial switch (`DictusKeyboardBridge.refreshExperiments`). The partner engine is
+    /// built or dropped by the next `follow`, which `SuggestionState.setLanguage` runs right
+    /// after on every appearance. Returns the value now in force.
+    @discardableResult
+    static func refresh(_ settings: KeyboardFeatureSettings) -> Bool {
+        isOn = settings.isBilingualAutocorrectEffective
+        var read: [SupportedLanguage: KeyboardLanguagePair] = [:]
+        for language in SupportedLanguage.allCases {
+            read[language] = settings.bilingualPair(for: language)
+        }
+        pairs = read
+        if !isOn {
+            lock.lock()
+            keyboard = nil
+            lock.unlock()
+        }
+        return isOn
     }
 
     #if DEBUG
-    /// The App Group key of Adaptive touch's switch (#1014, `AdaptiveTouchSwitch.switchKey`).
-    static let adaptiveSwitchKey = "debug.adaptiveTouch"
-
-    /// The three Debug switches, for the journal's `TJ SWITCHES` line.
+    /// The three experiments as the keyboard applies them, for the journal's `TJ SWITCHES`
+    /// line: the values in force (`SpatialAutocorrect.isOn`, `isOn`) and Adaptive touch's
+    /// rule, `KeyboardFeatureSettings.isAdaptiveTouchEffective`.
     ///
-    /// WHY Adaptive touch's rule restated: `AdaptiveTouchSwitch` is #1018's, not on this
-    /// branch. Its `isOn` is the decoder's switch and its own; once both PRs are in, this
-    /// reads `AdaptiveTouchSwitch.isOn`.
-    static var debugSwitches: DebugSwitches {
-        let keys = [SpatialAutocorrect.switchKey, adaptiveSwitchKey, switchKey]
-        return DebugSwitches(
+    /// WHY Adaptive touch from the settings: its keyboard code (`AdaptiveTouchSwitch`) is
+    /// #1018's, not on this branch; the line reports what its rule gives on these switches.
+    static func debugSwitches(_ settings: KeyboardFeatureSettings) -> DebugSwitches {
+        DebugSwitches(
             spatial: SpatialAutocorrect.isOn,
-            adaptive: SpatialAutocorrect.isOn && AppGroup.defaults.bool(forKey: adaptiveSwitchKey),
+            adaptive: settings.isAdaptiveTouchEffective,
             bilingual: isOn,
-            source: DebugSwitches.source(of: keys, in: AppGroup.defaults)
+            source: DebugSwitches.source(of: DebugSwitches.keys, in: AppGroup.defaults)
         )
     }
     #endif
@@ -67,18 +88,19 @@ enum BilingualAutocorrect {
     /// Follows the keyboard's language: `primary` is the one `engine`, the shared engine,
     /// was just set to. Main thread, from `SuggestionState.setLanguage`.
     ///
-    /// The partner is the other of French and English (`KeyboardLanguagePair`). Its
-    /// engine loads for the primary's layout, the grid both languages are typed on, and
-    /// follows it when it changes. Turning the switch off releases it.
+    /// The partner is the one `refresh` read for `primary` (`KeyboardFeatureSettings
+    /// .bilingualPair(for:)`; French and English pair only). Its engine loads for the
+    /// primary's layout, the grid both languages are typed on, and follows it when it
+    /// changes. Turning the switch off releases it.
     static func follow(primary: String, engine: TextPredictionEngine) {
         guard isOn, let language = SupportedLanguage(rawValue: primary),
-              let secondary = KeyboardLanguagePair.secondaries(for: language).first,
-              let pair = KeyboardLanguagePair(primary: language, secondary: secondary) else {
+              let pair = pairs[language] else {
             lock.lock()
             keyboard = nil
             lock.unlock()
             return
         }
+        let secondary = pair.secondary
         lock.lock()
         let existing = keyboard
         lock.unlock()
@@ -177,22 +199,10 @@ final class BilingualKeyboard {
         return decision.proposal
     }
 
-    /// The contraction the previous word was, now that `word` follows it, with `word`:
-    /// `its a` is `it's a` (`contextualContraction(profile:word:before:)`). The space bar
-    /// writes both words; nil leaves them. Either language of the pair may have the rule,
-    /// whatever the window says: `its` is no French word. Never a learned word (ADR 0004).
-    ///
-    /// WHY on the bilingual keyboard: Pierre's device test of #1015 (2026-11-23) found that
-    /// `its` never became `it's`. The English keyboard alone restores it at a sentence's
-    /// start only (#995), and a French window keeps it as a word of English.
+    /// The contraction the previous word was, now that `word` follows it, with `word`
+    /// (`KeyboardLanguagePair.contractionAcrossSpace`, DictusCore): `its a` is `it's a`.
     func contractionAcrossSpace(previousWord: String, word: String) -> String? {
-        guard !UserDictionary.shared.isLearned(previousWord.lowercased()) else { return nil }
-        for language in [pair.primary, pair.secondary] {
-            if let contraction = contextualContraction(profile: language.profile, word: previousWord, before: word) {
-                return "\(contraction) \(word)"
-            }
-        }
-        return nil
+        pair.contractionAcrossSpace(previousWord: previousWord, word: word, isLearned: UserDictionary.shared.isLearned)
     }
 
     /// What the bar previews for the word being typed: the bar's language's correction,

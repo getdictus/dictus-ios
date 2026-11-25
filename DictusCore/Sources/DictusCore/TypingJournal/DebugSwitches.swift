@@ -1,5 +1,5 @@
 // DictusCore/Sources/DictusCore/TypingJournal/DebugSwitches.swift
-// The state of the keyboard's Debug-only typing switches, as one journal line.
+// The state of the keyboard's experiments (spatial, adaptive, bilingual), as one journal line.
 //
 // Debug builds only, like the journal: a Release build has no such switches.
 #if DEBUG
@@ -15,8 +15,8 @@ import Foundation
 /// again whenever the state differs from the last line it wrote.
 public struct DebugSwitches: Equatable, Sendable {
     /// Where the values come from: `appGroup` when at least one switch was written to the
-    /// App Group (by the Debug app's launch arguments), `default` when none was and every
-    /// switch reads its default, off.
+    /// App Group (by the Experiments page or the Debug app's launch arguments), `default`
+    /// when none was and every switch reads its default, off.
     public enum Source: String, Sendable {
         case `default`
         case appGroup
@@ -33,6 +33,12 @@ public struct DebugSwitches: Equatable, Sendable {
         self.bilingual = bilingual
         self.source = source
     }
+
+    /// The App Group keys of the three switches, the Experiments page's
+    /// (`KeyboardFeatureSettings`).
+    public static let keys = [
+        SharedKeys.keyboardSpatialAutocorrect, SharedKeys.keyboardAdaptiveTouch, SharedKeys.keyboardBilingualAutocorrect
+    ]
 
     /// `appGroup` when `defaults` holds any of `keys`, else `default`.
     public static func source(of keys: [String], in defaults: UserDefaults) -> Source {

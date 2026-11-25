@@ -7,7 +7,7 @@ import XCTest
 final class DebugSwitchesTests: XCTestCase {
     private let suiteName = "dictus.tests.debugSwitches"
     private var defaults: UserDefaults!  // swiftlint:disable:this implicitly_unwrapped_optional
-    private let keys = ["debug.spatialAutocorrect", "debug.adaptiveTouch", "debug.bilingualAutocorrect"]
+    private let keys = DebugSwitches.keys
 
     override func setUpWithError() throws {
         defaults = try XCTUnwrap(UserDefaults(suiteName: suiteName))
@@ -30,7 +30,7 @@ final class DebugSwitchesTests: XCTestCase {
     func testTheSourceIsTheAppGroupOnceAnySwitchWasWritten() {
         XCTAssertEqual(DebugSwitches.source(of: keys, in: defaults), .default)
         // Written off still counts: the value read is the App Group's, not the default.
-        defaults.set(false, forKey: "debug.adaptiveTouch")
+        defaults.set(false, forKey: SharedKeys.keyboardAdaptiveTouch)
         XCTAssertEqual(DebugSwitches.source(of: keys, in: defaults), .appGroup)
     }
 

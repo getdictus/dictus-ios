@@ -1543,11 +1543,14 @@ extension DictusKeyboardBridge {
     }
 
     /// Reads the Experiments switches the app may have changed while the keyboard was away:
-    /// spatial autocorrect here, then swipe typing. Called for every new keyboard view and
-    /// at every appearance.
+    /// spatial autocorrect and the bilingual check here, then swipe typing. Called for every
+    /// new keyboard view and at every appearance.
     func refreshExperiments(trigger: String) {
+        let settings = KeyboardFeatureSettings.forKeyboard()
         let wasOn = SpatialAutocorrect.isOn
-        let isOn = SpatialAutocorrect.refresh(.forKeyboard())
+        let isOn = SpatialAutocorrect.refresh(settings)
+        // The partner engine follows at the next `SuggestionState.setLanguage` (#1015).
+        BilingualAutocorrect.refresh(settings)
         // Taps recorded under the other answer belong to no decode now.
         if isOn != wasOn { spatialTouches.clear() }
         let channel = AppDistribution.recorded()?.rawValue ?? "none"

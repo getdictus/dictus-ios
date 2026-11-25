@@ -95,3 +95,29 @@ public func contextualContraction(profile: LanguageProfile, word: String, before
     guard word.first?.isUppercase == true, let first = rule.contraction.first else { return rule.contraction }
     return first.uppercased() + rule.contraction.dropFirst()
 }
+
+extension KeyboardLanguagePair {
+    /// The two words the space bar writes on this bilingual keyboard (#1015) in place of
+    /// `previousWord` and `word`, when `previousWord` was a contraction `word` now shows:
+    /// `its raining` -> "it's raining". Either language of the pair may have the rule,
+    /// whatever the window says: `its` is no French word. Nil leaves both words.
+    ///
+    /// `isLearned`: whether the user taught `previousWord` (ADR 0004), which is never
+    /// rewritten. The keyboard passes `UserDictionary.shared.isLearned`.
+    ///
+    /// WHY on the pair: Pierre's device test of #1015 (2026-11-23) found that `its` never
+    /// became `it's`. The English keyboard alone restores it at a sentence's start only
+    /// (#995), and a French window keeps it as a word of English. Only a bilingual keyboard
+    /// has a pair, so the monolingual keyboards are unchanged.
+    public func contractionAcrossSpace(
+        previousWord: String, word: String, isLearned: (String) -> Bool
+    ) -> String? {
+        guard !isLearned(previousWord.lowercased()) else { return nil }
+        for language in [primary, secondary] {
+            if let contraction = contextualContraction(profile: language.profile, word: previousWord, before: word) {
+                return "\(contraction) \(word)"
+            }
+        }
+        return nil
+    }
+}
