@@ -29,48 +29,48 @@
         }
       }
     },
-    "%@ model, the best for your language on this iPhone. %@, downloaded as soon as you continue. You can change it in Models." : {
+    "%@ model, the best for your language on this %@. %@, downloaded as soon as you continue. You can change it in Models." : {
       "comment" : "Onboarding language screen, small type (#675). First argument: the model's name (Parakeet v3). Second: its size (~483 MB).",
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Modell %1$@, das beste für deine Sprache auf diesem iPhone. %2$@, geladen, sobald du fortfährst. Änderbar unter „Modelle“."
+            "value" : "Modell %1$@, das beste für deine Sprache auf diesem %2$@. %3$@, geladen, sobald du fortfährst. Änderbar unter „Modelle“."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Modelo %1$@, el mejor para tu idioma en este iPhone. %2$@, se descargan en cuanto continúes. Puedes cambiarlo en Modelos."
+            "value" : "Modelo %1$@, el mejor para tu idioma en este %2$@. %3$@, se descargan en cuanto continúes. Puedes cambiarlo en Modelos."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Modèle %1$@, le meilleur pour votre langue sur cet iPhone. %2$@, téléchargés dès que vous continuez. Modifiable dans Modèles."
+            "value" : "Modèle %1$@, le meilleur pour votre langue sur cet %2$@. %3$@, téléchargés dès que vous continuez. Modifiable dans Modèles."
           }
         }
       }
     },
-    "%@ runs on your iPhone. Dictation works even without a network." : {
-      "comment" : "Model preparation screen subtitle, once ready. The placeholder is the model's name (Parakeet v3) (#708).",
+    "%@ runs on your %@. Dictation works even without a network." : {
+      "comment" : "Model preparation screen subtitle, once ready. First placeholder: the model's name (Parakeet v3). Second: the device, iPhone or iPad (#708, #984).",
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@ läuft auf deinem iPhone. Das Diktat funktioniert auch ohne Netz."
+            "value" : "%1$@ läuft auf deinem %2$@. Das Diktat funktioniert auch ohne Netz."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@ funciona en tu iPhone. El dictado funciona incluso sin conexión."
+            "value" : "%1$@ funciona en tu %2$@. El dictado funciona incluso sin conexión."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@ tourne sur votre iPhone. La dictée marche même sans réseau."
+            "value" : "%1$@ tourne sur votre %2$@. La dictée marche même sans réseau."
           }
         }
       }
@@ -167,48 +167,48 @@
         }
       }
     },
-    "%@, picked for %@ and this iPhone. After that, everything runs offline." : {
-      "comment" : "Onboarding model preparation subtitle (#708). First placeholder: the model's name (Parakeet v3). Second: the spoken language with its article in French (le français, l'anglais).",
+    "%@, picked for %@ and this %@. After that, everything runs offline." : {
+      "comment" : "Onboarding model preparation subtitle (#708). First placeholder: the model's name (Parakeet v3). Second: the spoken language with its article in French (le français, l'anglais). Third: the device, iPhone or iPad (#984).",
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%1$@, ausgewählt für %2$@ und dieses iPhone. Danach läuft alles offline."
+            "value" : "%1$@, ausgewählt für %2$@ und dieses %3$@. Danach läuft alles offline."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%1$@, elegido para %2$@ y este iPhone. Después, todo funciona sin conexión."
+            "value" : "%1$@, elegido para %2$@ y este %3$@. Después, todo funciona sin conexión."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%1$@, choisi pour %2$@ et cet iPhone. Ensuite, tout se passe hors ligne."
+            "value" : "%1$@, choisi pour %2$@ et cet %3$@. Ensuite, tout se passe hors ligne."
           }
         }
       }
     },
-    "%@, picked for your language and this iPhone. After that, everything runs offline." : {
-      "comment" : "Onboarding model preparation subtitle when the language cannot be named in the sentence (#708). The placeholder is the model's name.",
+    "%@, picked for your language and this %@. After that, everything runs offline." : {
+      "comment" : "Onboarding model preparation subtitle when the language cannot be named in the sentence (#708). First placeholder: the model's name. Second: the device, iPhone or iPad (#984).",
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@, ausgewählt für deine Sprache und dieses iPhone. Danach läuft alles offline."
+            "value" : "%1$@, ausgewählt für deine Sprache und dieses %2$@. Danach läuft alles offline."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@, elegido para tu idioma y este iPhone. Después, todo funciona sin conexión."
+            "value" : "%1$@, elegido para tu idioma y este %2$@. Después, todo funciona sin conexión."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@, choisi pour votre langue et cet iPhone. Ensuite, tout se passe hors ligne."
+            "value" : "%1$@, choisi pour votre langue et cet %2$@. Ensuite, tout se passe hors ligne."
           }
         }
       }
@@ -1171,6 +1171,29 @@
         }
       }
     },
+    "Adaptive touch" : {
+      "comment" : "Settings › Keyboard › Experiments: toggle for personal key centres (#1014).",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adaptive Berührung"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toque adaptativo"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toucher adaptatif"
+          }
+        }
+      }
+    },
     "Add" : {
       "comment" : "Vocabulary suggestion row: opens the new-term sheet prefilled with the word as a variant (#512).",
       "localizations" : {
@@ -1739,24 +1762,24 @@
         }
       }
     },
-    "Apple Intelligence is required for polish. Enable it in iPhone Settings → Apple Intelligence & Siri. Apple requires Siri and your iPhone to use the same language — if Siri is in English and your iPhone is in French (or vice versa), Apple Intelligence stays off." : {
+    "Apple Intelligence is required for polish. Enable it in %@ Settings → Apple Intelligence & Siri. Apple requires Siri and your %@ to use the same language — if Siri is in English and your %@ is in French (or vice versa), Apple Intelligence stays off." : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Apple Intelligence ist zum Verfeinern des Transkripts erforderlich. Aktiviere es in den iPhone-Einstellungen → Apple Intelligence & Siri. Apple verlangt, dass Siri und dein iPhone dieselbe Sprache verwenden: Ist Siri auf Englisch und dein iPhone auf Französisch (oder umgekehrt), bleibt Apple Intelligence deaktiviert."
+            "value" : "Apple Intelligence ist zum Verfeinern des Transkripts erforderlich. Aktiviere es in den %@-Einstellungen → Apple Intelligence & Siri. Apple verlangt, dass Siri und dein %@ dieselbe Sprache verwenden: Ist Siri auf Englisch und dein %@ auf Französisch (oder umgekehrt), bleibt Apple Intelligence deaktiviert."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Apple Intelligence es necesario para pulir la transcripción. Actívalo en Ajustes del iPhone → Apple Intelligence y Siri. Apple exige que Siri y tu iPhone usen el mismo idioma: si Siri está en inglés y tu iPhone en francés (o al revés), Apple Intelligence permanece desactivado."
+            "value" : "Apple Intelligence es necesario para pulir la transcripción. Actívalo en Ajustes del %@ → Apple Intelligence y Siri. Apple exige que Siri y tu %@ usen el mismo idioma: si Siri está en inglés y tu %@ en francés (o al revés), Apple Intelligence permanece desactivado."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Apple Intelligence est nécessaire pour polir la transcription. Activez-la dans Réglages → Apple Intelligence et Siri. Apple exige que Siri et votre iPhone utilisent la même langue : si Siri est en anglais et votre iPhone en français (ou l’inverse), Apple Intelligence reste désactivée."
+            "value" : "Apple Intelligence est nécessaire pour polir la transcription. Activez-la dans Réglages → Apple Intelligence et Siri. Apple exige que Siri et votre %@ utilisent la même langue : si Siri est en anglais et votre %@ en français (ou l’inverse), Apple Intelligence reste désactivée."
           }
         }
       }
@@ -2740,6 +2763,29 @@
         }
       }
     },
+    "Bilingual autocorrect" : {
+      "comment" : "Settings › Keyboard › Experiments: toggle for correcting in two languages at once (#1015).",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zweisprachige Autokorrektur"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Autocorrección bilingüe"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Correction bilingue"
+          }
+        }
+      }
+    },
     "Bug" : {
       "comment" : "Feedback form (#565).",
       "localizations" : {
@@ -3281,48 +3327,94 @@
         }
       }
     },
-    "Correct your words in the Dictus keyboard: it learns them. Dictus suggests them for your vocabulary, on your iPhone, and adds nothing without you. After that, your dictations write them your way." : {
+    "Correct your words in the Dictus keyboard: it learns them. Dictus suggests them for your vocabulary, on your %@, and adds nothing without you. After that, your dictations write them your way." : {
       "comment" : "Onboarding vocabulary scene: the line under the title, also shown in What's New and the \"See the demo\" sheet. Explains the loop: corrections typed in the keyboard are learned, suggested as vocabulary terms (never added automatically), then applied to dictations (#680, #829).",
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Korrigiere deine Wörter in der Dictus-Tastatur: Sie lernt sie. Dictus schlägt sie für dein Vokabular vor, auf deinem iPhone, und fügt nichts ohne dich hinzu. Danach schreiben deine Diktate sie so, wie du sie schreibst."
+            "value" : "Korrigiere deine Wörter in der Dictus-Tastatur: Sie lernt sie. Dictus schlägt sie für dein Vokabular vor, auf deinem %@, und fügt nichts ohne dich hinzu. Danach schreiben deine Diktate sie so, wie du sie schreibst."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Corrige tus palabras en el teclado Dictus: las aprende. Dictus te las sugiere para tu vocabulario, en tu iPhone, y no añade nada sin ti. Después, tus dictados las escriben a tu manera."
+            "value" : "Corrige tus palabras en el teclado Dictus: las aprende. Dictus te las sugiere para tu vocabulario, en tu %@, y no añade nada sin ti. Después, tus dictados las escriben a tu manera."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Corrigez vos mots dans le clavier Dictus : il les apprend. Dictus vous les propose pour votre vocabulaire, sur votre iPhone, et n’ajoute rien sans vous. Ensuite, vos dictées les écrivent à votre façon."
+            "value" : "Corrigez vos mots dans le clavier Dictus : il les apprend. Dictus vous les propose pour votre vocabulaire, sur votre %@, et n’ajoute rien sans vous. Ensuite, vos dictées les écrivent à votre façon."
           }
         }
       }
     },
-    "Correct your words in the Dictus keyboard: it learns them. Tap Analyze my transcriptions: Dictus compares them with your dictations and suggests terms to accept, edit or ignore. Nothing is added without you, and everything stays on your iPhone. Your terms then correct your dictations automatically." : {
+    "Correct your words in the Dictus keyboard: it learns them. Tap Analyze my transcriptions: Dictus compares them with your dictations and suggests terms to accept, edit or ignore. Nothing is added without you, and everything stays on your %@. Your terms then correct your dictations automatically." : {
       "comment" : "Vocabulary screen: the paragraph of the \"How it works\" card. 'Analyze my transcriptions' is the button further down the same screen (#829).",
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Korrigiere deine Wörter in der Dictus-Tastatur: Sie lernt sie. Tippe auf „Meine Transkriptionen analysieren“: Dictus vergleicht sie mit deinen Diktaten und schlägt Begriffe vor, die du übernehmen, bearbeiten oder ignorieren kannst. Ohne dich wird nichts hinzugefügt, und alles bleibt auf deinem iPhone. Deine Begriffe korrigieren danach deine Diktate automatisch."
+            "value" : "Korrigiere deine Wörter in der Dictus-Tastatur: Sie lernt sie. Tippe auf „Meine Transkriptionen analysieren“: Dictus vergleicht sie mit deinen Diktaten und schlägt Begriffe vor, die du übernehmen, bearbeiten oder ignorieren kannst. Ohne dich wird nichts hinzugefügt, und alles bleibt auf deinem %@. Deine Begriffe korrigieren danach deine Diktate automatisch."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Corrige tus palabras en el teclado Dictus: las aprende. Toca “Analizar mis transcripciones”: Dictus las compara con tus dictados y te sugiere términos para aceptar, editar o ignorar. No se añade nada sin ti, y todo se queda en tu iPhone. Después, tus términos corrigen tus dictados automáticamente."
+            "value" : "Corrige tus palabras en el teclado Dictus: las aprende. Toca “Analizar mis transcripciones”: Dictus las compara con tus dictados y te sugiere términos para aceptar, editar o ignorar. No se añade nada sin ti, y todo se queda en tu %@. Después, tus términos corrigen tus dictados automáticamente."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Corrigez vos mots dans le clavier Dictus : il les apprend. Touchez Analyser mes transcriptions : Dictus les compare à vos dictées et vous propose des termes à accepter, modifier ou ignorer. Rien n’est ajouté sans vous, et tout reste sur votre iPhone. Vos termes corrigent ensuite vos dictées automatiquement."
+            "value" : "Corrigez vos mots dans le clavier Dictus : il les apprend. Touchez Analyser mes transcriptions : Dictus les compare à vos dictées et vous propose des termes à accepter, modifier ou ignorer. Rien n’est ajouté sans vous, et tout reste sur votre %@. Vos termes corrigent ensuite vos dictées automatiquement."
+          }
+        }
+      }
+    },
+    "Corrects a word from where your fingers landed on the keys, not only from the letters typed. French and English only." : {
+      "comment" : "Settings › Keyboard › Experiments: footer under Spatial autocorrect.",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Korrigiert ein Wort danach, wo deine Finger die Tasten getroffen haben, nicht nur nach den getippten Buchstaben. Nur Französisch und Englisch."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Corrige una palabra según dónde tocaron tus dedos las teclas, no solo según las letras escritas. Solo francés e inglés."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Corrige un mot d’après l’endroit où vos doigts ont touché les touches, pas seulement d’après les lettres tapées. Français et anglais uniquement."
+          }
+        }
+      }
+    },
+    "Corrects and suggests in your keyboard language and a second one at the same time, without switching keyboards. French and English only for now." : {
+      "comment" : "Settings › Keyboard › Experiments: footer under Bilingual autocorrect.",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Korrigiert und schlägt gleichzeitig in deiner Tastatursprache und einer zweiten vor, ohne die Tastatur zu wechseln. Vorerst nur Französisch und Englisch."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Corrige y sugiere en el idioma del teclado y en un segundo a la vez, sin cambiar de teclado. Solo francés e inglés por ahora."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Corrige et suggère dans la langue du clavier et dans une deuxième en même temps, sans changer de clavier. Français et anglais uniquement pour l’instant."
           }
         }
       }
@@ -4100,25 +4192,25 @@
         }
       }
     },
-    "Dictus needs microphone access. Turn it on in iPhone Settings." : {
+    "Dictus needs microphone access. Turn it on in %@ Settings." : {
       "comment" : "Shown when microphone permission is denied or has not been granted (issue #313).",
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dictus braucht Zugriff auf das Mikrofon. Aktiviere ihn in den iPhone-Einstellungen."
+            "value" : "Dictus braucht Zugriff auf das Mikrofon. Aktiviere ihn in den %@-Einstellungen."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dictus necesita acceso al micrófono. Actívalo en los Ajustes del iPhone."
+            "value" : "Dictus necesita acceso al micrófono. Actívalo en los Ajustes del %@."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dictus a besoin d’accéder au micro. Activez-le dans les Réglages de l’iPhone."
+            "value" : "Dictus a besoin d’accéder au micro. Activez-le dans les Réglages de l’%@."
           }
         }
       }
@@ -4376,6 +4468,52 @@
         }
       }
     },
+    "Experiments" : {
+      "comment" : "Settings › Keyboard: the row and page title for keyboard features under test (TestFlight and Debug only).",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Experimente"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Experimentos"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Expériences"
+          }
+        }
+      }
+    },
+    "Feedback" : {
+      "comment" : "Settings › Keyboard: section header for haptics and sounds of key presses. Not the feedback form.",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rückmeldung"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Respuesta"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Retour"
+          }
+        }
+      }
+    },
     "Feedback is unavailable right now. Your message is kept." : {
       "comment" : "Feedback form (#565).",
       "localizations" : {
@@ -4491,25 +4629,25 @@
         }
       }
     },
-    "Every dictation stays on your iPhone. Search for a word, find the text." : {
+    "Every dictation stays on your %@. Search for a word, find the text." : {
       "comment" : "Onboarding history scene: the line under the title (#680).",
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Jedes Diktat bleibt auf deinem iPhone. Such nach einem Wort, finde den Text."
+            "value" : "Jedes Diktat bleibt auf deinem %@. Such nach einem Wort, finde den Text."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Cada dictado se queda en tu iPhone. Busca una palabra y encuentra el texto."
+            "value" : "Cada dictado se queda en tu %@. Busca una palabra y encuentra el texto."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Chaque dictée reste sur votre iPhone. Cherchez un mot, retrouvez le texte."
+            "value" : "Chaque dictée reste sur votre %@. Cherchez un mot, retrouvez le texte."
           }
         }
       }
@@ -4629,6 +4767,98 @@
         }
       }
     },
+    "Inactive: turn on spatial autocorrect for adaptive touch to work." : {
+      "comment" : "Settings › Keyboard › Experiments: adaptive touch is on but has no effect because spatial autocorrect is off.",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inaktiv: Schalte die räumliche Autokorrektur ein, damit die adaptive Berührung wirkt."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inactivo: activa la autocorrección espacial para que funcione el toque adaptativo."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inactif : activez la correction spatiale pour que le toucher adaptatif fonctionne."
+          }
+        }
+      }
+    },
+    "Keyboard features still being tested, off by default. Only in test versions of Dictus." : {
+      "comment" : "Settings › Keyboard: footer under the Experiments row.",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tastaturfunktionen, die noch getestet werden, standardmäßig aus. Nur in Testversionen von Dictus."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Funciones del teclado aún en pruebas, desactivadas por defecto. Solo en las versiones de prueba de Dictus."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fonctions du clavier encore en test, désactivées par défaut. Uniquement dans les versions de test de Dictus."
+          }
+        }
+      }
+    },
+    "Learned words" : {
+      "comment" : "Settings › Keyboard: section header for the learned-words dictionary.",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gelernte Wörter"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Palabras aprendidas"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mots appris"
+          }
+        }
+      }
+    },
+    "Learns where you actually tap each key, and reads your taps with those positions. Stays on this %@." : {
+      "comment" : "Settings › Keyboard › Experiments: footer under Adaptive touch.",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lernt, wo du jede Taste tatsächlich triffst, und liest deine Eingaben mit diesen Positionen. Bleibt auf diesem %@."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aprende dónde tocas realmente cada tecla y lee tus toques con esas posiciones. Se queda en este %@."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apprend où vous touchez réellement chaque touche, et lit vos frappes avec ces positions. Reste sur cet %@."
+          }
+        }
+      }
+    },
     "Needs a transcription language, not automatic detection." : {
       "comment" : "Greyed Apple engine card: the transcription language is set to automatic detection.",
       "localizations" : {
@@ -4698,25 +4928,48 @@
         }
       }
     },
-    "Not available on this iPhone or for this dictation language." : {
+    "Not available on this %@ or for this dictation language." : {
       "comment" : "Greyed Apple engine card: Apple's SpeechTranscriber is not available on this iPhone.",
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Auf diesem iPhone oder für diese Diktiersprache nicht verfügbar."
+            "value" : "Auf diesem %@ oder für diese Diktiersprache nicht verfügbar."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "No disponible en este iPhone o para este idioma de dictado."
+            "value" : "No disponible en este %@ o para este idioma de dictado."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Indisponible sur cet iPhone ou pour cette langue de dictée."
+            "value" : "Indisponible sur cet %@ ou pour cette langue de dictée."
+          }
+        }
+      }
+    },
+    "Off by default. These features can change or disappear." : {
+      "comment" : "Settings › Keyboard › Experiments: header above the first switch.",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Standardmäßig aus. Diese Funktionen können sich ändern oder wegfallen."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Desactivadas por defecto. Estas funciones pueden cambiar o desaparecer."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Désactivées par défaut. Ces fonctions peuvent changer ou disparaître."
           }
         }
       }
@@ -4813,25 +5066,232 @@
         }
       }
     },
-    "iPhone with Apple Intelligence" : {
-      "comment" : "Label on the Smart Modes line of the paywall, the Pro hub and the trial announcement, on an iPhone that cannot run them (#922). Replaces the iPhone model list.",
+    "Second language" : {
+      "comment" : "Settings › Keyboard › Experiments: picker for the bilingual partner language.",
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "iPhone mit Apple Intelligence"
+            "value" : "Zweite Sprache"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "iPhone con Apple Intelligence"
+            "value" : "Segundo idioma"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "iPhone avec Apple Intelligence"
+            "value" : "Deuxième langue"
+          }
+        }
+      }
+    },
+    "Show swipe trail" : {
+      "comment" : "Settings › Keyboard › Experiments: toggle for drawing the finger's path while swipe typing.",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wischspur anzeigen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mostrar el trazo"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Afficher la trace"
+          }
+        }
+      }
+    },
+    "Slide left from the delete key to erase word by word. Slide back to bring the words back before lifting your finger." : {
+      "comment" : "Settings › Keyboard › Typing: footer explaining the delete-word swipe.",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wische von der Löschtaste nach links, um Wort für Wort zu löschen. Wische zurück, um die Wörter zurückzuholen, bevor du den Finger hebst."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Desliza a la izquierda desde la tecla de borrar para borrar palabra por palabra. Vuelve a la derecha para recuperar las palabras antes de levantar el dedo."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Glissez vers la gauche depuis la touche Supprimer pour effacer mot par mot. Revenez vers la droite pour rendre les mots avant de lever le doigt."
+          }
+        }
+      }
+    },
+    "Slide your finger from letter to letter to type a word, then lift it. The trail draws the path under your finger." : {
+      "comment" : "Settings › Keyboard › Experiments: footer under Swipe typing.",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wische mit dem Finger von Buchstabe zu Buchstabe, um ein Wort zu tippen, und heb ihn dann an. Die Spur zeigt den Weg unter deinem Finger."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Desliza el dedo de letra en letra para escribir una palabra y luego levántalo. El trazo dibuja el recorrido bajo tu dedo."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Faites glisser votre doigt de lettre en lettre pour taper un mot, puis levez-le. La trace dessine le chemin sous votre doigt."
+          }
+        }
+      }
+    },
+    "Spatial autocorrect" : {
+      "comment" : "Settings › Keyboard › Experiments: toggle for the spatial decoder (#1011).",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Räumliche Autokorrektur"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Autocorrección espacial"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Correction spatiale"
+          }
+        }
+      }
+    },
+    "Swipe to delete words" : {
+      "comment" : "Settings › Keyboard › Typing: toggle for sliding left from the delete key to erase word by word (#609).",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wischen zum Löschen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Borrar deslizando"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Effacer en glissant"
+          }
+        }
+      }
+    },
+    "Swipe typing" : {
+      "comment" : "Settings › Keyboard › Experiments: toggle for typing a word by sliding across its letters.",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tippen durch Wischen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escritura deslizante"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saisie par glissement"
+          }
+        }
+      }
+    },
+    "Turn on spatial autocorrect first." : {
+      "comment" : "Settings › Keyboard › Experiments: why Adaptive touch is greyed out.",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schalte zuerst die räumliche Autokorrektur ein."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Activa primero la autocorrección espacial."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Activez d’abord la correction spatiale."
+          }
+        }
+      }
+    },
+    "Typing" : {
+      "comment" : "Settings › Keyboard: section header for what typing does (autocorrect, delete-word swipe).",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tippen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escritura"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Frappe"
+          }
+        }
+      }
+    },
+    "%@ with Apple Intelligence" : {
+      "comment" : "Label on the Smart Modes line of the paywall, the Pro hub and the trial announcement, on an iPhone that cannot run them (#922). Replaces the iPhone model list.",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ mit Apple Intelligence"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ con Apple Intelligence"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ avec Apple Intelligence"
           }
         }
       }
@@ -5303,25 +5763,25 @@
         }
       }
     },
-    "No location, no contacts, and your dictations never leave your iPhone: transcription happens on the device." : {
+    "No location, no contacts, and your dictations never leave your %@: transcription happens on the device." : {
       "comment" : "Full Access explainer sheet, second point, detail. A public promise, verified on #704 against what the keyboard links.",
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Kein Standort, keine Kontakte, und deine Diktate verlassen nie dein iPhone: Die Transkription erfolgt auf dem Gerät."
+            "value" : "Kein Standort, keine Kontakte, und deine Diktate verlassen nie dein %@: Die Transkription erfolgt auf dem Gerät."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sin ubicación, sin contactos, y tus dictados nunca salen de tu iPhone: la transcripción se hace en el dispositivo."
+            "value" : "Sin ubicación, sin contactos, y tus dictados nunca salen de tu %@: la transcripción se hace en el dispositivo."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Pas de position, pas de contacts, et vos dictées ne quittent pas votre iPhone : la transcription se fait sur l’appareil."
+            "value" : "Pas de position, pas de contacts, et vos dictées ne quittent pas votre %@ : la transcription se fait sur l’appareil."
           }
         }
       }
@@ -6585,25 +7045,25 @@
         }
       }
     },
-    "Smart Modes, AI on your iPhone" : {
+    "Smart Modes, AI on your %@" : {
       "comment" : "Paywall feature line (#913).",
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Smart Modes, KI auf dem iPhone"
+            "value" : "Smart Modes, KI auf dem %@"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Smart Modes, IA en el iPhone"
+            "value" : "Smart Modes, IA en el %@"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Modes intelligents, IA sur l’iPhone"
+            "value" : "Modes intelligents, IA sur l’%@"
           }
         }
       }
@@ -8522,25 +8982,25 @@
         }
       }
     },
-    "If Smart Modes stay unavailable, check that Siri speaks your iPhone's language." : {
+    "If Smart Modes stay unavailable, check that Siri speaks your %@'s language." : {
       "comment" : "Onboarding Apple Intelligence step (#683). Footnote of the getting-ready screen.",
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Wenn die Smart Modes nicht verfügbar bleiben, prüfe, ob Siri die Sprache deines iPhone spricht."
+            "value" : "Wenn die Smart Modes nicht verfügbar bleiben, prüfe, ob Siri die Sprache deines %@ spricht."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Si los Smart Modes siguen sin estar disponibles, comprueba que Siri hable el idioma de tu iPhone."
+            "value" : "Si los Smart Modes siguen sin estar disponibles, comprueba que Siri hable el idioma de tu %@."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Si les Smart Modes restent indisponibles, vérifiez que Siri parle la langue de votre iPhone."
+            "value" : "Si les Smart Modes restent indisponibles, vérifiez que Siri parle la langue de votre %@."
           }
         }
       }
@@ -8591,25 +9051,25 @@
         }
       }
     },
-    "In Settings, open Apple Intelligence & Siri, then Language, and choose your iPhone's language." : {
+    "In Settings, open Apple Intelligence & Siri, then Language, and choose your %@'s language." : {
       "comment" : "Onboarding Apple Intelligence step (#683). VoiceOver label of the drawn Settings page, iOS 26.",
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Öffne in den Einstellungen „Apple Intelligence & Siri“, dann „Sprache“, und wähle die Sprache deines iPhone."
+            "value" : "Öffne in den Einstellungen „Apple Intelligence & Siri“, dann „Sprache“, und wähle die Sprache deines %@."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "En Ajustes, abre Apple Intelligence y Siri, luego Idioma, y elige el idioma de tu iPhone."
+            "value" : "En Ajustes, abre Apple Intelligence y Siri, luego Idioma, y elige el idioma de tu %@."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dans Réglages, ouvrez Apple Intelligence et Siri, puis Langue, et choisissez la langue de votre iPhone."
+            "value" : "Dans Réglages, ouvrez Apple Intelligence et Siri, puis Langue, et choisissez la langue de votre %@."
           }
         }
       }
@@ -8660,25 +9120,25 @@
         }
       }
     },
-    "In Settings, open Siri, then Language, and choose your iPhone's language." : {
+    "In Settings, open Siri, then Language, and choose your %@'s language." : {
       "comment" : "Onboarding Apple Intelligence step (#683). VoiceOver label of the drawn Settings page, iOS 27.",
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Öffne in den Einstellungen „Siri“, dann „Sprache“, und wähle die Sprache deines iPhone."
+            "value" : "Öffne in den Einstellungen „Siri“, dann „Sprache“, und wähle die Sprache deines %@."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "En Ajustes, abre Siri, luego Idioma, y elige el idioma de tu iPhone."
+            "value" : "En Ajustes, abre Siri, luego Idioma, y elige el idioma de tu %@."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dans Réglages, ouvrez Siri, puis Langue, et choisissez la langue de votre iPhone."
+            "value" : "Dans Réglages, ouvrez Siri, puis Langue, et choisissez la langue de votre %@."
           }
         }
       }
@@ -10012,25 +10472,25 @@
         }
       }
     },
-    "Nothing you type leaves your iPhone." : {
+    "Nothing you type leaves your %@." : {
       "comment" : "Onboarding keyboard step, above the Open Settings button: reassurance about Full Access (#675).",
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Nichts, was du tippst, verlässt dein iPhone."
+            "value" : "Nichts, was du tippst, verlässt dein %@."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Nada de lo que escribes sale de tu iPhone."
+            "value" : "Nada de lo que escribes sale de tu %@."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Rien de ce que vous tapez ne quitte votre iPhone."
+            "value" : "Rien de ce que vous tapez ne quitte votre %@."
           }
         }
       }
@@ -10132,25 +10592,25 @@
         }
       }
     },
-    "On the metro or on a plane, Dictus still writes. Everything happens on your iPhone." : {
+    "On the metro or on a plane, Dictus still writes. Everything happens on your %@." : {
       "comment" : "Onboarding intro carousel, subtitle of the second page: transcription runs on the device, with no network (#676).",
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "In der U-Bahn oder im Flugzeug schreibt Dictus trotzdem. Alles passiert auf deinem iPhone."
+            "value" : "In der U-Bahn oder im Flugzeug schreibt Dictus trotzdem. Alles passiert auf deinem %@."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "En el metro o en el avión, Dictus sigue escribiendo. Todo ocurre en tu iPhone."
+            "value" : "En el metro o en el avión, Dictus sigue escribiendo. Todo ocurre en tu %@."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dans le métro ou en avion, Dictus écrit quand même. Tout se passe sur votre iPhone."
+            "value" : "Dans le métro ou en avion, Dictus écrit quand même. Tout se passe sur votre %@."
           }
         }
       }
@@ -10199,20 +10659,20 @@
         }
       }
     },
-    "Open iPhone Settings" : {
+    "Open %@ Settings" : {
       "comment" : "A button label that, when tapped, opens the user's iPhone settings.",
       "isCommentAutoGenerated" : true,
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "iPhone-Einstellungen öffnen"
+            "value" : "%@-Einstellungen öffnen"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Abrir Ajustes del iPhone"
+            "value" : "Abrir Ajustes del %@"
           }
         },
         "fr" : {
@@ -10269,48 +10729,48 @@
         }
       }
     },
-    "Optimized for this iPhone" : {
+    "Optimized for this %@" : {
       "comment" : "Model preparation step, done (#708).",
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Für dieses iPhone optimiert"
+            "value" : "Für dieses %@ optimiert"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Optimizado para este iPhone"
+            "value" : "Optimizado para este %@"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Optimisé pour cet iPhone"
+            "value" : "Optimisé pour cet %@"
           }
         }
       }
     },
-    "Optimizing for this iPhone" : {
+    "Optimizing for this %@" : {
       "comment" : "Model preparation step: the Core ML compile, pending or running (#708).",
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Optimierung für dieses iPhone"
+            "value" : "Optimierung für dieses %@"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Optimizando para este iPhone"
+            "value" : "Optimizando para este %@"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Optimisation pour cet iPhone"
+            "value" : "Optimisation pour cet %@"
           }
         }
       }
@@ -10963,25 +11423,25 @@
         }
       }
     },
-    "Recommended for your language and iPhone" : {
+    "Recommended for your language and %@" : {
       "comment" : "Onboarding model preparation step, under the model card: the model was chosen for the user's language and device (#649).",
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Empfohlen für deine Sprache und dein iPhone"
+            "value" : "Empfohlen für deine Sprache und dein %@"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Recomendado para tu idioma y tu iPhone"
+            "value" : "Recomendado para tu idioma y tu %@"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Recommandé pour votre langue et votre iPhone"
+            "value" : "Recommandé pour votre langue et votre %@"
           }
         }
       }
@@ -11660,25 +12120,25 @@
         }
       }
     },
-    "Shown above the transcript when you open the voice note. It uses Apple Intelligence, on this iPhone, and runs when you open the result." : {
+    "Shown above the transcript when you open the voice note. It uses Apple Intelligence, on this %@, and runs when you open the result." : {
       "extractionState" : "manual",
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Wird über dem Transkript angezeigt, wenn du die Sprachnachricht öffnest. Nutzt Apple Intelligence auf diesem iPhone und läuft, sobald du das Ergebnis öffnest."
+            "value" : "Wird über dem Transkript angezeigt, wenn du die Sprachnachricht öffnest. Nutzt Apple Intelligence auf diesem %@ und läuft, sobald du das Ergebnis öffnest."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Se muestra encima de la transcripción cuando abres el mensaje de voz. Usa Apple Intelligence en este iPhone y se genera cuando abres el resultado."
+            "value" : "Se muestra encima de la transcripción cuando abres el mensaje de voz. Usa Apple Intelligence en este %@ y se genera cuando abres el resultado."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Affiché au-dessus de la transcription quand vous ouvrez le message vocal. Utilise Apple Intelligence, sur cet iPhone, au moment où vous ouvrez le résultat."
+            "value" : "Affiché au-dessus de la transcription quand vous ouvrez le message vocal. Utilise Apple Intelligence, sur cet %@, au moment où vous ouvrez le résultat."
           }
         }
       }
@@ -11867,48 +12327,48 @@
         }
       }
     },
-    "Smart Modes need Apple Intelligence, which this iPhone does not support. Your choices are saved for a device that does." : {
+    "Smart Modes need Apple Intelligence, which this %@ does not support. Your choices are saved for a device that does." : {
       "comment" : "Shown at the top of the Smart Mode list on hardware that cannot run Apple Foundation Models.",
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Smart Modes brauchen Apple Intelligence, das dieses iPhone nicht unterstützt. Deine Auswahl bleibt für ein kompatibles Gerät erhalten."
+            "value" : "Smart Modes brauchen Apple Intelligence, das dieses %@ nicht unterstützt. Deine Auswahl bleibt für ein kompatibles Gerät erhalten."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Los Smart Modes necesitan Apple Intelligence, que este iPhone no admite. Tus elecciones se guardan para un dispositivo compatible."
+            "value" : "Los Smart Modes necesitan Apple Intelligence, que este %@ no admite. Tus elecciones se guardan para un dispositivo compatible."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Les modes exigent Apple Intelligence, que cet iPhone ne gère pas. Vos choix sont conservés pour un appareil compatible."
+            "value" : "Les modes exigent Apple Intelligence, que cet %@ ne gère pas. Vos choix sont conservés pour un appareil compatible."
           }
         }
       }
     },
-    "Smart Modes run on Apple Intelligence, which turns on only when Siri speaks your iPhone's language. Dictation already works without it." : {
+    "Smart Modes run on Apple Intelligence, which turns on only when Siri speaks your %@'s language. Dictation already works without it." : {
       "comment" : "Onboarding Apple Intelligence step (#683). Subtitle under the title.",
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Smart Modes laufen mit Apple Intelligence, das sich nur einschaltet, wenn Siri die Sprache deines iPhone spricht. Das Diktat funktioniert auch ohne."
+            "value" : "Smart Modes laufen mit Apple Intelligence, das sich nur einschaltet, wenn Siri die Sprache deines %@ spricht. Das Diktat funktioniert auch ohne."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Los Smart Modes usan Apple Intelligence, que solo se activa si Siri habla el idioma de tu iPhone. El dictado ya funciona sin ella."
+            "value" : "Los Smart Modes usan Apple Intelligence, que solo se activa si Siri habla el idioma de tu %@. El dictado ya funciona sin ella."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Les Smart Modes s’appuient sur Apple Intelligence, qui ne s’active que si Siri parle la langue de votre iPhone. La dictée marche déjà sans elle."
+            "value" : "Les Smart Modes s’appuient sur Apple Intelligence, qui ne s’active que si Siri parle la langue de votre %@. La dictée marche déjà sans elle."
           }
         }
       }
@@ -12293,26 +12753,26 @@
         }
       }
     },
-    "Summaries need Apple Intelligence, which this iPhone does not support. The transcript is below." : {
+    "Summaries need Apple Intelligence, which this %@ does not support. The transcript is below." : {
       "comment" : "Voice note result: summary unavailable on this device for good (#620).",
       "extractionState" : "manual",
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Zusammenfassungen brauchen Apple Intelligence, das dieses iPhone nicht unterstützt. Das Transkript steht unten."
+            "value" : "Zusammenfassungen brauchen Apple Intelligence, das dieses %@ nicht unterstützt. Das Transkript steht unten."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Los resúmenes requieren Apple Intelligence, que este iPhone no admite. La transcripción está abajo."
+            "value" : "Los resúmenes requieren Apple Intelligence, que este %@ no admite. La transcripción está abajo."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Les résumés nécessitent Apple Intelligence, que cet iPhone ne prend pas en charge. La transcription est ci-dessous."
+            "value" : "Les résumés nécessitent Apple Intelligence, que cet %@ ne prend pas en charge. La transcription est ci-dessous."
           }
         }
       }
@@ -12717,25 +13177,25 @@
         }
       }
     },
-    "The best voice model for your language and iPhone. It downloads while you finish setting up, and you can change it in Models." : {
+    "The best voice model for your language and %@. It downloads while you finish setting up, and you can change it in Models." : {
       "comment" : "Onboarding language screen, small print under the model name and size: the model is chosen for the user, downloads in the background, and can be changed in the Models tab (#649).",
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Das beste Sprachmodell für deine Sprache und dein iPhone. Es wird geladen, während du die Einrichtung abschließt, und du kannst es unter „Modelle“ ändern."
+            "value" : "Das beste Sprachmodell für deine Sprache und dein %@. Es wird geladen, während du die Einrichtung abschließt, und du kannst es unter „Modelle“ ändern."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "El mejor modelo de voz para tu idioma y tu iPhone. Se descarga mientras terminas la configuración, y puedes cambiarlo en Modelos."
+            "value" : "El mejor modelo de voz para tu idioma y tu %@. Se descarga mientras terminas la configuración, y puedes cambiarlo en Modelos."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Le meilleur modèle vocal pour votre langue et votre iPhone. Il se télécharge pendant que vous terminez la configuration, et vous pourrez le changer dans Modèles."
+            "value" : "Le meilleur modèle vocal pour votre langue et votre %@. Il se télécharge pendant que vous terminez la configuration, et vous pourrez le changer dans Modèles."
           }
         }
       }
@@ -13571,25 +14031,25 @@
         }
       }
     },
-    "To hear you while you dictate. The sound is transcribed on your iPhone and never leaves it." : {
+    "To hear you while you dictate. The sound is transcribed on your %@ and never leaves it." : {
       "comment" : "Onboarding microphone pre-permission screen: why the microphone is needed, shown before the system prompt (#675, #649 decision 17).",
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Damit Dictus dich beim Diktieren hören kann. Der Ton wird auf deinem iPhone transkribiert und verlässt es nie."
+            "value" : "Damit Dictus dich beim Diktieren hören kann. Der Ton wird auf deinem %@ transkribiert und verlässt es nie."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Para oírte mientras dictas. El sonido se transcribe en tu iPhone y nunca sale de él."
+            "value" : "Para oírte mientras dictas. El sonido se transcribe en tu %@ y nunca sale de él."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Pour vous entendre pendant la dictée. Le son est transcrit sur votre iPhone et n’en sort jamais."
+            "value" : "Pour vous entendre pendant la dictée. Le son est transcrit sur votre %@ et n’en sort jamais."
           }
         }
       }
@@ -14035,7 +14495,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Activez Apple Intelligence dans les Réglages de l’iPhone pour utiliser les modes intelligents."
+            "value" : "Activez Apple Intelligence dans les Réglages pour utiliser les modes intelligents."
           }
         }
       }
@@ -14551,25 +15011,25 @@
         }
       }
     },
-    "Voice notes up to 10 minutes. The audio is deleted as soon as it is transcribed, and everything stays on this iPhone." : {
+    "Voice notes up to 10 minutes. The audio is deleted as soon as it is transcribed, and everything stays on this %@." : {
       "extractionState" : "manual",
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sprachnachrichten bis 10 Minuten. Das Audio wird gelöscht, sobald es transkribiert ist, und alles bleibt auf diesem iPhone."
+            "value" : "Sprachnachrichten bis 10 Minuten. Das Audio wird gelöscht, sobald es transkribiert ist, und alles bleibt auf diesem %@."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mensajes de voz de hasta 10 minutos. El audio se elimina en cuanto se transcribe, y todo se queda en este iPhone."
+            "value" : "Mensajes de voz de hasta 10 minutos. El audio se elimina en cuanto se transcribe, y todo se queda en este %@."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Messages vocaux jusqu’à 10 minutes. L’audio est supprimé dès qu’il est transcrit, et tout reste sur cet iPhone."
+            "value" : "Messages vocaux jusqu’à 10 minutes. L’audio est supprimé dès qu’il est transcrit, et tout reste sur cet %@."
           }
         }
       }
@@ -15193,25 +15653,25 @@
         }
       }
     },
-    "Your iPhone's language, already selected. You can change it later in Settings." : {
+    "Your %@'s language, already selected. You can change it later in Settings." : {
       "comment" : "Onboarding language screen subtitle (#675).",
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Die Sprache deines iPhone, bereits ausgewählt. Du kannst sie später in den Einstellungen ändern."
+            "value" : "Die Sprache deines %@, bereits ausgewählt. Du kannst sie später in den Einstellungen ändern."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "El idioma de tu iPhone, ya seleccionado. Puedes cambiarlo más tarde en Ajustes."
+            "value" : "El idioma de tu %@, ya seleccionado. Puedes cambiarlo más tarde en Ajustes."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Celle de votre iPhone, déjà choisie. Vous pourrez la changer plus tard dans Réglages."
+            "value" : "Celle de votre %@, déjà choisie. Vous pourrez la changer plus tard dans Réglages."
           }
         }
       }

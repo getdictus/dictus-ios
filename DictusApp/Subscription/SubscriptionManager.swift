@@ -65,8 +65,13 @@ final class SubscriptionManager: ObservableObject {
 
     /// - Parameter listensForUpdates: `false` only in tests (#900), so that the
     ///   `Transaction.updates` and subscription status listeners cannot unlock Pro and
-    ///   only an explicit scan can. The app always uses the default.
-    init(proStatus: ProStatusManager, listensForUpdates: Bool = true) {
+    ///   only an explicit scan can. The app uses the default on every normal launch,
+    ///   and `false` only as the unit-test host (`DictusApp.isUnitTestHost`).
+    /// - Parameter scansAtLaunch: `false` only for the app's own manager when the app
+    ///   is the unit-test host (`DictusApp.isUnitTestHost`), so that nothing calls
+    ///   StoreKit before the test's `SKTestSession` exists. A normal launch always uses
+    ///   the default.
+    init(proStatus: ProStatusManager, listensForUpdates: Bool = true, scansAtLaunch: Bool = true) {
         self.proStatus = proStatus
         // Start listening IMMEDIATELY at init — before any view renders.
         // WHY: If user purchased on another device or subscription renewed
@@ -81,6 +86,7 @@ final class SubscriptionManager: ObservableObject {
         // status through a loaded product, and run in parallel it could find none
         // and leave a subscriber in grace period unpaid until the next event.
         // `loadProducts()` never throws, so the scan runs even when the fetch fails.
+        guard scansAtLaunch else { return }
         launchScan = Task {
             await loadProducts()
             await updateProStatus()

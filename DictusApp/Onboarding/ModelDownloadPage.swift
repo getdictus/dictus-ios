@@ -272,7 +272,7 @@ struct ModelDownloadPage: View {
                     .foregroundStyle(.secondary)
             }
 
-            Text("Recommended for your language and iPhone")
+            Text("Recommended for your language and \(DeviceNoun.current)")
                 .font(.dictusCaption)
                 .foregroundColor(.dictusAccent)
         }

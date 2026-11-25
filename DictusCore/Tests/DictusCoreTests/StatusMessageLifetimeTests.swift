@@ -184,4 +184,53 @@ final class StatusMessageLifetimeTests: XCTestCase {
         XCTAssertEqual(lifetime.clearDecision(first, dictationIsActive: true), .superseded)
         XCTAssertEqual(lifetime.clearDecision(first, dictationIsActive: false), .superseded)
     }
+
+    // MARK: - A failure stays until the user acts (#933)
+
+    /// The device sequence of #933 (iPad Pro M4, 2026-11-11): a long dictation fails,
+    /// `dictationMessageSet reason=appError`, and three seconds later
+    /// `dictationMessageCleared reason=appError-timeout` takes it down while the user
+    /// is still waiting for text. A held failure must outlive that clear.
+    func testAHeldFailureIsNotTakenDownByTheThreeSecondClear() {
+        var lifetime = StatusMessageLifetime()
+        let failure = lifetime.advance()
+        lifetime.holdCurrentUntilUserAction()
+
+        XCTAssertNotEqual(
+            lifetime.clearDecision(failure, dictationIsActive: false), .clear,
+            "appError-timeout cleared a failure the user had not acted on"
+        )
+    }
+
+    /// The user acting is what takes a held failure down.
+    func testAUserActionClearsAHeldFailure() {
+        var lifetime = StatusMessageLifetime()
+        lifetime.advance()
+        lifetime.holdCurrentUntilUserAction()
+
+        XCTAssertTrue(lifetime.clearsOnUserAction)
+    }
+
+    /// A timed notice is left to its own clear: typing during "No words detected"'s
+    /// sibling notices (a Smart Mode skip, say) changes nothing.
+    func testAUserActionLeavesATimedNoticeAlone() {
+        var lifetime = StatusMessageLifetime()
+        let notice = lifetime.advance()
+
+        XCTAssertFalse(lifetime.clearsOnUserAction)
+        XCTAssertEqual(lifetime.clearDecision(notice, dictationIsActive: false), .clear)
+    }
+
+    /// The hold belongs to one message. The next one, timed, gets its three seconds
+    /// back, and taking the held message down (an insertion, a cancel) ends the hold.
+    func testTheHoldEndsWithItsMessage() {
+        var lifetime = StatusMessageLifetime()
+        lifetime.advance()
+        lifetime.holdCurrentUntilUserAction()
+
+        let next = lifetime.advance()
+
+        XCTAssertFalse(lifetime.clearsOnUserAction)
+        XCTAssertEqual(lifetime.clearDecision(next, dictationIsActive: false), .clear)
+    }
 }

@@ -663,6 +663,15 @@ struct KeyboardRootView: View {
         )
         #endif
 
+        // Swipe typing (#948): a reading after a swipe takes the swiped word's place; the
+        // word so far, shown while the finger is still down, is not a choice.
+        if suggestionState.mode == .swipeAlternatives {
+            bridge?.replaceSwipedWord(with: suggestion)
+            HapticFeedback.keyTapped()
+            return
+        }
+        if suggestionState.mode == .swipePreview { return }
+
         // Prediction mode: insert word + trailing space, bypass autocorrect, chain predictions.
         if suggestionState.mode == .predictions {
             bridge?.handlePredictionTap(word: suggestion)

@@ -31,15 +31,16 @@ import DictusCore
 /// package. A provenance comment in the source file is honest but does not discharge the
 /// condition.
 ///
-/// Hex is listed for the keyboard's key geometry (`KeyPlaneGeometry`) too: no code is copied
-/// there, but the approach is Hex's (MIT), and the entry says so.
-///
-/// The spatial decoder (#1011) adds four entries. Hex is ported code (MIT). The other three
-/// are where its models come from: word and word-pair counts from Google Books Ngram
-/// (CC BY 3.0, which asks for the attribution), and the word lists that filter them,
-/// SCOWL for English (its notice asks to travel with the output) and Grammalecte's French
-/// dictionary (MPL 2.0, whose notice and source location travel with a derived file).
-/// Adaptive touch (#1014) is ported from Hex too: its entry names both.
+/// Hex is listed for the keyboard's key geometry (`KeyPlaneGeometry`): no code is copied,
+/// but the approach is Hex's (MIT), and the entry says so. Its entry also covers the spatial
+/// decoder (#1011), the swipe decoder (#948), the emoji panel (#1027) and the delete swipe
+/// (`DeleteWordSwipe`, #609), which are ported Hex code. The decoder adds three entries for where its
+/// models come from: word and word-pair counts from Google Books Ngram (CC BY 3.0, which
+/// asks for the attribution), and the word lists that filter them, SCOWL for English (its
+/// notice asks to travel with the output) and Grammalecte's French dictionary (MPL 2.0,
+/// whose notice and source location travel with a derived file). Hex's per-language
+/// long-press accent lists are copied as data (`LongPressAccents`, #1042), under the same
+/// MIT notice. Adaptive touch (#1014) is ported Hex code too, and the entry names it.
 struct LicensesView: View {
     var body: some View {
         ScrollView {
@@ -98,7 +99,19 @@ struct LicensesView: View {
                     name: "Hex",
                     author: "Christopher Langton",
                     url: "https://github.com/anomalyco/hex",
-                    license: Self.hexNotice + mitLicense(copyright: "Copyright (c) 2026 Christopher Langton")
+                    license: "The keyboard's key geometry (KeyPlaneGeometry) follows Hex's approach: "
+                        + "Apple's key plane measured per iPhone size, and touch targets that tile the keyboard.\n\n"
+                        + "The keyboard's emoji panel is Hex's, ported (#1027): its views, search, "
+                        + "suggestions, shortcodes, skin tones and the builder of its emoji index.\n\n"
+                        + "The spatial autocorrect decoder (SpatialDecoder) is ported from Hex's TypingDecoder.\n\n"
+                        + "Adaptive touch, which learns where you tap each key (#1014), is ported from Hex's AdaptiveTouch.\n\n"
+                        + "The swipe typing decoder (SwipeDecoder) is ported from Hex's SwipeDecoder; "
+                        + "the swipe gesture, its trail and its text rules from Hex's SwipeTyping.\n\n"
+                        + "The long-press accents of each keyboard language are Hex's lists (#1042), "
+                        + "in the order Apple's keyboard shows them.\n\n"
+                        + "Sliding left from the delete key to delete word by word, and back right to get "
+                        + "the words back, is Hex's delete swipe, ported (#609).\n\n"
+                        + mitLicense(copyright: "Copyright (c) 2026 Christopher Langton")
                 )
 
                 licenseBlock(
@@ -159,19 +172,6 @@ struct LicensesView: View {
         (https://creativecommons.org/licenses/by/3.0/). Word and word-pair counts are \
         summed over 1980-2019 and kept only for words in the word lists below; the \
         English model is Hex's, the French one Dictus's, built with Hex's script.
-        """
-
-    /// What Dictus took from Hex, so the entry says which code the MIT notice covers (#1014).
-    private static let hexNotice = """
-        The keyboard's key geometry (KeyPlaneGeometry) follows Hex's approach: Apple's key \
-        plane measured per iPhone size, and touch targets that tile the keyboard. \
-        The keyboard's emoji panel is Hex's, ported (#1027): its views, search, suggestions, \
-        shortcodes, skin tones and the builder of its emoji index. \
-        The keyboard's spatial autocorrect decoder and its model format and build script \
-        (#1011), and Adaptive touch, which learns where you tap each key (#1014), are \
-        ported from Hex.
-
-
         """
 
     private static let grammalecteNotice = """
