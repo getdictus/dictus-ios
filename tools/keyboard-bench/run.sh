@@ -35,9 +35,10 @@
 # changes Hex's parameters for a sweep (`validMargin=inf`); see main.swift. --layout replays
 # every language on that layout, for a device journal typed on another layout than the
 # language's default; the bench puts the App Group's layouts back when it ends. With
-# --pair, --spatial reads the taps in every policy (#1015: the pair replay runs the
-# spatial decoder, so #1010's refusal of --pair with --spatial is lifted); each pair run
-# still names its layout in --langs.
+# --pair, --spatial makes `mono-*` and `check` read the taps (#1015: the pair replay runs
+# the spatial decoder, so #1010's refusal of --pair with --spatial is lifted); `detect`,
+# #1010's policy, still reads the letters only and ignores the taps. Each pair run still
+# names its layout in --langs.
 # #1009: --pair replays a bilingual keyboard (primary,secondary): every run under the
 # primary alone, the secondary alone, and language detection. --langs then takes corpus
 # names with an optional layout (`en:qwerty`; default the primary's), and defaults to
@@ -46,7 +47,7 @@
 # words instead of replaying.
 #
 # #1015: --pair also replays the bilingual check (policy `check`), and with --spatial
-# every policy reads the taps. --bilingual types the monolingual runs on the bilingual
+# `mono-*` and `check` read the taps (`detect` reads the letters only). --bilingual types the monolingual runs on the bilingual
 # check, the run's language primary and the other of French and English its partner.
 set -euo pipefail
 
