@@ -8,7 +8,7 @@ final class LoneLetterCorrectionTests: XCTestCase {
 
     private let french = frenchProfile
 
-    /// The rule as `TextPredictionEngine.checkWord` asks it, on AZERTY unless told.
+    /// The rule alone, as `SupplementaryLexicon.earlyAnswer` asks it, on AZERTY unless told.
     private func decide(
         _ word: String, context: String? = nil, layout: LayoutType = .azerty,
         learned: Set<String> = []
@@ -141,6 +141,64 @@ final class LoneLetterCorrectionTests: XCTestCase {
         }
     }
 
+    // MARK: - The user's lexicon, as on a real iPhone
+
+    /// What a device lexicon holds next to names (`FrenchAGraveTests.deviceLexicon`):
+    /// `a` and `ma`, and here a contact's initial `T`. Device test of #1061
+    /// (2026-11-25): `il t a` stayed `il t`, then became `il t à`.
+    private let deviceLexicon = SupplementaryLexicon(entries: [
+        (userInput: "a", documentText: "a"),
+        (userInput: "ma", documentText: "ma"),
+        (userInput: "T", documentText: "T"),
+        (userInput: "Zofiak", documentText: "Zofiak")
+    ])
+
+    /// The French dictionary holds every letter but `h`, `p` and `r`; a longer word is
+    /// taken as known, which is all the lexicon asks.
+    private static func frenchDictionaryKnows(_ word: String) -> Bool {
+        !["h", "p", "r"].contains(word.lowercased())
+    }
+
+    /// `earlyAnswer` as `TextPredictionEngine` asks it on space: the previous word
+    /// and the text before the cursor both come from `context`.
+    private func early(
+        _ word: String, _ context: String, lexicon: SupplementaryLexicon? = nil
+    ) -> SupplementaryLexicon.EarlyAnswer? {
+        let words = context.split(separator: " ").map(String.init)
+        return (lexicon ?? deviceLexicon).earlyAnswer(
+            for: word, previousWord: words.dropLast().last, context: context,
+            rules: .init(profile: french, layout: .azerty, isLearned: { _ in false }),
+            isDictionaryWord: Self.frenchDictionaryKnows(word)
+        )
+    }
+
+    /// The `T` of a contact kept the `t` before the rule could see it: a lexicon word the
+    /// dictionary knows yields to the rule, as it yields to the context rules (#501).
+    func testALexiconLetterTheDictionaryKnowsYieldsToTheRule() {
+        XCTAssertEqual(early("t", "il t"), .loneLetter(.correct("y")))
+        XCTAssertEqual(early("t", "il t", lexicon: .empty), .loneLetter(.correct("y")))
+        XCTAssertEqual(early("z", "problème z"), .loneLetter(.correct("a")))
+    }
+
+    /// A name the dictionary lacks, and a shortcut, still come first.
+    func testALexiconNameOrShortcutStillComesFirst() {
+        let contactH = SupplementaryLexicon(entries: [(userInput: "H", documentText: "H")])
+        XCTAssertEqual(early("h", "il h", lexicon: contactH), .lexicon(.keep))
+        XCTAssertEqual(early("h", "il h", lexicon: .empty), .loneLetter(.correct("y")))
+        let shortcut = SupplementaryLexicon(entries: [(userInput: "t", documentText: "toi")])
+        XCTAssertEqual(early("t", "il t", lexicon: shortcut), .lexicon(.replace(with: "toi")))
+    }
+
+    /// The a/à rule reads the text before the cursor, which holds the corrected `y`
+    /// once the space after `t` has replaced it: `il y a` keeps the verb. Left as `t`,
+    /// the letter read as a noun and `il t a` took the accent.
+    func testTheARuleReadsTheCorrectedLetter() {
+        XCTAssertEqual(early("a", "il y a"), .lexicon(.keep))
+        XCTAssertNil(early("a", "il y a", lexicon: .empty))
+        XCTAssertEqual(early("a", "il y en a"), .lexicon(.keep))
+        XCTAssertEqual(early("a", "il t a"), .homograph("\u{00E0}"))
+    }
+
     // MARK: - Lists, e-mail addresses and URLs, typed key by key
 
     /// A document whose mirror always agrees with it.
@@ -154,8 +212,9 @@ final class LoneLetterCorrectionTests: XCTestCase {
     /// What the keyboard does for each key, in `DictusKeyboardBridge`'s order: put back a
     /// correction the key shows was inside an address, then correct the word before the
     /// space or a committing mark unless the token is an address, then insert the key.
-    /// The lone-letter rule stands in for the spell checker.
-    private func type(_ keys: String) -> String {
+    /// `earlyAnswer`, with the device lexicon, stands in for the spell checker: the
+    /// lexicon, the lone-letter rule and both context rules, the a/à rule included.
+    private func type(_ keys: String, lexicon: SupplementaryLexicon? = nil) -> String {
         let document = Document()
         let mirror = MirrorSyncState()
         var pendingUndo: (original: String, corrected: String)?
@@ -170,7 +229,7 @@ final class LoneLetterCorrectionTests: XCTestCase {
                 pendingUndo = nil
                 if !AddressLikeToken.atCursor(document.text, followedBy: key),
                    let (_, word) = AutocorrectRejectionMemory.wordAtCursor(context: document.contextBeforeInput),
-                   case .correct(let correction) = decide(word, context: document.text),
+                   let correction = correction(of: word, context: document.text, lexicon: lexicon),
                    case .applied = AutocorrectCountingSite.apply(
                        editor: document, word: word, correction: correction, trailing: "", mirror: mirror
                    ) {
@@ -182,9 +241,54 @@ final class LoneLetterCorrectionTests: XCTestCase {
         return document.text
     }
 
+    /// The spelling `earlyAnswer` writes for `word`, or nil where it keeps it.
+    private func correction(of word: String, context: String, lexicon: SupplementaryLexicon?) -> String? {
+        switch early(word, context, lexicon: lexicon) {
+        case .loneLetter(.correct(let spelling)), .homograph(let spelling), .contextOverride(let spelling),
+             .lexicon(.replace(let spelling)):
+            return spelling
+        case .loneLetter(.keep), .lexicon(.keep), nil:
+            return nil
+        }
+    }
+
     func testTheSpaceBarCorrectsTheReportedSentence() {
         XCTAssertEqual(type("vas avoir des problème z "), "vas avoir des problème a ")
         XCTAssertEqual(type("il t a "), "il y a ")
+    }
+
+    /// Pierre's device test of #1061 (2026-11-25), with a `T` in the lexicon:
+    /// `il t a` gave `il t à`.
+    func testIlTAGivesIlYAWithALetterInTheLexicon() {
+        XCTAssertEqual(type("il t a "), "il y a ")
+        XCTAssertEqual(type("il t avait "), "il y avait ")
+        XCTAssertEqual(type("il t en a "), "il y en a ")
+        XCTAssertEqual(type("Il t a "), "Il y a ")
+        XCTAssertEqual(type("il t a ", lexicon: .empty), "il y a ")
+    }
+
+    func testAYTypedRightStays() {
+        XCTAssertEqual(type("il y a "), "il y a ")
+        XCTAssertEqual(type("il y avait "), "il y avait ")
+        XCTAssertEqual(type("il y en a "), "il y en a ")
+    }
+
+    /// An elided `t'` is the usual path's, and a letter named as a letter is kept.
+    func testAnElidedTAndANamedTAreKept() {
+        XCTAssertEqual(type("je t'aime "), "je t'aime ")
+        XCTAssertEqual(type("t'as vu "), "t'as vu ")
+        XCTAssertEqual(type("je t\u{2019}aime "), "je t\u{2019}aime ")
+        XCTAssertEqual(type("la lettre t "), "la lettre t ")
+        XCTAssertEqual(type("le t de "), "le t de ")
+    }
+
+    /// `problème z` gives what a typed `problème a` gives: the corrected letter goes
+    /// through the a/à rule, which keeps the verb after a noun (`le problème a été`).
+    func testTheCorrectedLetterTakesTheSameARuleAsATypedOne() {
+        XCTAssertEqual(type("problème z "), "problème a ")
+        XCTAssertEqual(type("problème a "), "problème a ")
+        XCTAssertEqual(type("je vais z "), "je vais \u{00E0} ")
+        XCTAssertEqual(type("je vais a "), "je vais \u{00E0} ")
     }
 
     func testTheSpaceBarKeepsALetterNamedAsALetter() {
