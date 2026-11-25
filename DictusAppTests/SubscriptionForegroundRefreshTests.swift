@@ -49,7 +49,7 @@ final class SubscriptionForegroundRefreshTests: XCTestCase {
         let proStatus = ProStatusManager()
         let manager = SubscriptionManager(proStatus: proStatus, listensForUpdates: false)
         await manager.launchScan?.value
-        XCTAssertTrue(proStatus.isPaid)
+        XCTAssertFalse(proStatus.isPaid)
         XCTAssertEqual(manager.ownership?.ownsLifetime, false)
 
         // Bought off-device, as an offer code redeemed in the App Store would be.
