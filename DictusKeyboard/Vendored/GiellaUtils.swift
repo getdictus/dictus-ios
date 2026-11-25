@@ -82,12 +82,3 @@ extension NSLayoutConstraint {
         return self
     }
 }
-
-// MARK: - UIScreen Extension
-
-extension UIScreen {
-    var isDeviceLandscape: Bool {
-        let size = self.bounds.size
-        return size.width > size.height
-    }
-}
