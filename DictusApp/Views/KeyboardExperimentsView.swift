@@ -109,7 +109,7 @@ struct KeyboardExperimentsView: View {
                 } else if !spatialAutocorrect {
                     Text("Turn on spatial autocorrect first.")
                 }
-                Text("Learns where you actually tap each key, and reads your taps with those positions. Stays on this iPhone.")
+                Text("Learns where you actually tap each key, and reads your taps with those positions. Stays on this \(DeviceNoun.current).")
             }
         }
     }

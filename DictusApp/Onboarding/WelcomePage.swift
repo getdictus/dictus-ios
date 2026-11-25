@@ -250,7 +250,7 @@ private extension OnboardingIntroScene {
         case .walking:
             return Text("In all your apps, from the keyboard.")
         case .metro:
-            return Text("On the metro or on a plane, Dictus still writes. Everything happens on your iPhone.")
+            return Text("On the metro or on a plane, Dictus still writes. Everything happens on your \(DeviceNoun.current).")
         case .keyboard:
             return Text("In Notes, Messages or Mail: tap the mic, speak, and the text appears.")
         }

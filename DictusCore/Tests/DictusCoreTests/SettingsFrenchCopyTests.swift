@@ -19,13 +19,14 @@ final class SettingsFrenchCopyTests: XCTestCase {
     /// here: the simulator shows only one of them, so the catalogue is the only place
     /// the other five can be checked.
     private static let keys = [
-        "Apple Intelligence is required for polish. Enable it in iPhone Settings → Apple Intelligence & Siri. Apple requires Siri and your iPhone to use the same language — if Siri is in English and your iPhone is in French (or vice versa), Apple Intelligence stays off.",
+        // #984: the device noun (iPhone or iPad) is a placeholder.
+        "Apple Intelligence is required for polish. Enable it in %@ Settings → Apple Intelligence & Siri. Apple requires Siri and your %@ to use the same language — if Siri is in English and your %@ is in French (or vice versa), Apple Intelligence stays off.",
         "The Apple Intelligence model is downloading on your device. Try again in a few minutes.",
         "Apple Intelligence isn't supported on this device. Polish requires an iPhone 15 Pro / 15 Pro Max or newer.",
         "Polish requires iOS 26 or later.",
         "Polish isn't available in this build of Dictus.",
         "Apple Intelligence is unavailable (%@).",
-        "Open iPhone Settings",
+        "Open %@ Settings",
         "Reset learned words",
         "Reset learned words?",
         "Forget %lld learned words",
@@ -57,7 +58,10 @@ final class SettingsFrenchCopyTests: XCTestCase {
     /// shows Apple's reason and the word count.
     func testTranslatedValuesKeepTheirPlaceholders() throws {
         let strings = try catalogueStrings()
-        for key in Self.keys {
+        // #984: "Open %@ Settings" carries only the device noun, and French names the
+        // screen as iOS does, « Ouvrir les Réglages », without it. No information lost.
+        let deviceNounOnly: Set<String> = ["Open %@ Settings"]
+        for key in Self.keys where !deviceNounOnly.contains(key) {
             let entry = try XCTUnwrap(strings[key])
             for placeholder in ["%@", "%lld"] where key.contains(placeholder) {
                 for language in Self.languages {

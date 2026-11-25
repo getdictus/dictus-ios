@@ -71,7 +71,7 @@ enum VoiceNoteCopy {
             return String(localized: "Apple Intelligence is still getting ready. Try again in a few minutes.",
                           comment: "Voice note result: summary unavailable because the on-device model is downloading (#620).")
         case .deviceNotEligible, .osTooOld, .sdkMissing:
-            return String(localized: "Summaries need Apple Intelligence, which this iPhone does not support. The transcript is below.",
+            return String(localized: "Summaries need Apple Intelligence, which this \(DeviceNoun.current) does not support. The transcript is below.",
                           comment: "Voice note result: summary unavailable on this device for good (#620).")
         case .engineRefusing, .other, .notSubscribed, .switchedOff:
             return String(localized: "The summary is not available right now.",

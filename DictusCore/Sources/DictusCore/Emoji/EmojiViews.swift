@@ -1,8 +1,21 @@
 // Ported from Hex (github.com/anomalyco/hex, branch dev @ 492d8c2,
 // ios/HEXShared/FullKeyboard/Emoji/EmojiViews.swift), MIT, Copyright (c) 2026 Christopher Langton.
 // Dictus's changes (#1027): Dictus's palette, and the search field's words passed in.
+// `UIColor.keyboardTouchFill` is Hex's later fix (github.com/anomalyco/hex pull 2547, merged as
+// 7b81931), MIT, same copyright, brought over for #503.
 #if canImport(UIKit)
 import UIKit
+
+extension UIColor {
+    /// A fill no one can see (0.1% black) that makes the area under it take touches. iOS hands a
+    /// keyboard extension only the touches that land on something its layers draw; a touch on a
+    /// clear pixel never reaches the extension, so no `hitTest` or `point(inside:)` of ours runs.
+    /// On the emoji panel's clear background that dropped the touches in the band that
+    /// `EmojiPanelView.hitTest` gives ABC (the gaps around its key) and the search button (the
+    /// chip's rounded corners and the margin around it): the "ABC and the magnifier need two or
+    /// three taps" of #503. Any fill at all is enough.
+    static let keyboardTouchFill = UIColor(white: 0, alpha: 0.001)
+}
 
 extension UIScrollView {
     /// iOS 26 softens and blurs a scroll view's edges where it meets the keyboard's glass.
