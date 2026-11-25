@@ -1,0 +1,18 @@
+== Spatial autocorrect OFF (default)
+'Correction spatiale' 'settings.keyboard.experiments.spatialAutocorrect' CheckBox 16 178 370 52 0
+<KBD> spatialAutocorrectConfigured on=false channel=debug trigger=newView
+<KBD> spatialAutocorrectConfigured on=false channel=debug trigger=viewWillAppear
+== Spatial autocorrect ON
+'Correction spatiale' 'settings.keyboard.experiments.spatialAutocorrect' CheckBox 16 178 370 52 1
+<KBD> spatialAutocorrectConfigured on=true channel=debug trigger=newView
+<KBD> spatialAutocorrectConfigured on=true channel=debug trigger=viewWillAppear
+== Delete swipe ON (default)
+'Effacer en glissant' 'settings.keyboard.deleteWordSwipe' CheckBox 16 275 370 52 1
+before: [un un deux trois quatre ]
+after:  [un un ]
+log: <KBD> deleteSwipeEnded words=3 frozen=false
+== Delete swipe OFF
+'Effacer en glissant' 'settings.keyboard.deleteWordSwipe' CheckBox 16 275 370 52 0
+before: [un un deux trois quatre ]
+after:  [un un deux trois quatreb]
+log (deleteSwipe lines): []
