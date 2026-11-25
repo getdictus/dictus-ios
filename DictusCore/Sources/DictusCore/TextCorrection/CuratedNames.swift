@@ -37,10 +37,45 @@ public enum CuratedNames {
         let key = word.lowercased()
         if keptKeys.contains(key) { return .keep }
         guard let casing = recasedByKey[key] else { return nil }
+        return decision(for: word, casing: casing)
+    }
+
+    /// `word`, a curated name as typed, against `casing`, the way it is written.
+    /// Apart from the list so a name written all lowercase can be tested: none is yet.
+    static func decision(for word: String, casing: String) -> SupplementaryLexicon.Decision {
+        let key = casing.lowercased()
         let autocapitalized = key.prefix(1).uppercased() + key.dropFirst()
-        if word != casing, word == key || word == autocapitalized {
-            return .replace(with: casing)
-        }
-        return .keep
+        // A name written all lowercase keeps a sentence-start capital, as any word does.
+        let recasable = word == key || (word == autocapitalized && casing != key)
+        return word != casing && recasable ? .replace(with: casing) : .keep
+    }
+
+    /// `correction` with each of its words that is a curated name in that name's
+    /// casing: the trie's `whatsapp` for a typed `whatsap` is "WhatsApp" (Titus,
+    /// 2026-11-24). `decision(for:)` only ever saw the typed word.
+    ///
+    /// WHY by word: a split correction (`thewhatsap` -> "the whatsapp") holds the
+    /// name next to another word. The casing rules are the typed word's: lowercase
+    /// and sentence-start forms take the name's casing, all caps stays all caps,
+    /// and a name that is also a word ("telegram") stays as the corrector wrote it.
+    public static func casing(of correction: String) -> String {
+        correction
+            .split(separator: " ", omittingEmptySubsequences: false)
+            .map { word -> String in
+                let word = String(word)
+                guard case .replace(let casing)? = decision(for: word) else { return word }
+                return casing
+            }
+            .joined(separator: " ")
+    }
+}
+
+extension CorrectionProposal {
+    /// The same proposal with every curated name in it written in its casing
+    /// (`CuratedNames.casing(of:)`). The keyboard applies it to what the dictionary
+    /// proposes, never to the lexicon's answer: a user's text replacement is kept as
+    /// the user wrote it.
+    public var inCuratedCasing: CorrectionProposal {
+        mapWords(CuratedNames.casing(of:))
     }
 }
