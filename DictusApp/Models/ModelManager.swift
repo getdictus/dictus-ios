@@ -65,6 +65,10 @@ class ModelManager: ObservableObject {
     /// on-device recognizer. `activeModel` keeps naming the downloaded model either way.
     @Published private(set) var speechEngineChoice: SpeechEngineChoice = .downloadedModel
 
+    /// The dictation language Apple's engine was last found ready for
+    /// (`AppleEngineReadinessRecord`), published so Home redraws when it changes (#1057).
+    @Published private(set) var appleEngineReadyLanguage: String?
+
     /// Per-model download progress (0.0 to 1.0). Only populated during active downloads.
     @Published var downloadProgress: [String: Float] = [:]
 
@@ -265,6 +269,7 @@ class ModelManager: ObservableObject {
         }
         activeModel = defaults.string(forKey: SharedKeys.activeModel)
         speechEngineChoice = SpeechEngineChoice.read(from: defaults)
+        appleEngineReadyLanguage = AppleEngineReadinessRecord.readyLanguage(in: defaults)
 
         // Resync modelStates with loaded downloadedModels so models downloaded
         // by onboarding's separate ModelManager instance show as .ready here.
@@ -1517,9 +1522,38 @@ extension ModelManager {
     /// falls back to whenever Apple cannot run.
     func selectAppleEngine() {
         speechEngineChoice = .apple
+        // The card has just read Apple's availability, which wrote the record.
+        appleEngineReadyLanguage = AppleEngineReadinessRecord.readyLanguage(in: defaults)
         SpeechEngineChoice.write(.apple, to: defaults)
         PersistentLog.log(.modelSelected(name: AppleSpeechEngineIdentity.identifier))
         DictationCoordinator.shared.adoptAppleEngine()
+    }
+
+    /// Whether the user can dictate now: a downloaded model, or Apple's engine picked and
+    /// ready for the dictation language (#1057). What Home's mic reads.
+    var canDictate: Bool {
+        DictationReadiness.canDictate(modelReady: isModelReady, choice: speechEngineChoice,
+                                      appleAvailability: appleEngineRecordedAvailability)
+    }
+
+    /// No downloaded model, and Apple's engine is the one that dictates (#1057).
+    var dictatesWithAppleOnly: Bool {
+        DictationReadiness.dictatesWithAppleOnly(modelReady: isModelReady, choice: speechEngineChoice,
+                                                 appleAvailability: appleEngineRecordedAvailability)
+    }
+
+    private var appleEngineRecordedAvailability: AppleEngineAvailability {
+        AppleEngineReadinessRecord.availability(readyLanguage: appleEngineReadyLanguage,
+                                                dictationLanguageCode: AppleSpeechLanguage.activeDictationLanguageCode())
+    }
+
+    /// Read Apple's availability again, for a user who picked it: the language or the
+    /// installed model may have changed since the last reading. A user who did not pick
+    /// Apple is not asked, so nothing changes for them.
+    func refreshAppleEngineReadiness() async {
+        guard speechEngineChoice == .apple else { return }
+        _ = await AppleEngineAssets.availability()
+        appleEngineReadyLanguage = AppleEngineReadinessRecord.readyLanguage(in: defaults)
     }
 }
 

@@ -433,8 +433,11 @@ class DictationCoordinator: ObservableObject {
         try? audioEngine.configureAudioSession()
 
         Task {
-            let modelReady = defaults.bool(forKey: SharedKeys.modelReady)
-            guard modelReady else {
+            // Apple's engine, picked with no downloaded model, also dictates (#1057). The
+            // preload then installs it (`ensureEngineReady`) and warms the audio path.
+            var canDictate = defaults.bool(forKey: SharedKeys.modelReady)
+            if !canDictate { canDictate = await AppleEngineAssets.dictatesWithAppleOnly(context: "init-preload") }
+            guard canDictate else {
                 self.setModelLoadState(.idle, reason: "init-preload-no-model")
                 return
             }
@@ -668,13 +671,17 @@ class DictationCoordinator: ObservableObject {
         // the App Group defaults can return a stale `false`, producing a bogus
         // "no model downloaded" error on the first attempt (observed in #102).
         defaults.synchronize()
-        let modelReady = defaults.bool(forKey: SharedKeys.modelReady)
-        guard modelReady else {
+        // A downloaded model, or Apple's engine picked and ready (#1057, `DictationReadiness`).
+        // Apple's side is the app's last reading; `ensureEngineReady` reads it fresh.
+        guard DictationReadiness.canDictate(defaults: defaults) else {
             PersistentLog.log(.dictationFailed(error: "No model downloaded"))
             // Localised since #249 — this sibling of the model-availability failure
             // reached the keyboard banner in English regardless of device language.
             handleError(String(localized: "No model downloaded. Open Dictus to download a model."))
             return
+        }
+        if !defaults.bool(forKey: SharedKeys.modelReady) {
+            AppleEngineAssets.log("appleOnlyGate", "context=startDictation modelReady=false canDictate=true")
         }
 
         // Refuse new dictation if an explicit model swap is in flight.
