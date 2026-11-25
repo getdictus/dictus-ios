@@ -275,6 +275,11 @@ final class KeyboardPolishCoordinator {
         guard PendingDictationChannel.current == pending else {
             PersistentLog.log(.polishInsertionRefused(reason: "record-gone", ageMs: pending.ageMs))
             KeyboardState.shared.endLocalProcessingStage()
+            // Withdrawn by DictusApp's hand-off timer or its launch sweep, the raw
+            // is in its history and on its card, and nothing here said so (#933,
+            // #942's third hypothesis). Point at it with the #860 banner.
+            RecoveredTranscriptionChannel.note(.refused(pending.raw))
+            KeyboardState.shared.refreshRecoveredTranscription()
             return
         }
         PendingDictationChannel.clear()
@@ -651,9 +656,21 @@ final class KeyboardPolishCoordinator {
         activePolish = nil
         stageWatchdog = nil
         PendingDictationChannel.clear()
-        // The generation was cancelled a line above, so there is nothing to report and
-        // nothing to type. DictusApp concludes on the raw it handed over.
-        finish(reporting: nil, inserting: nil)
+        // The generation was cancelled a line above, but the raw is still here, and
+        // ending on nothing threw the user's words away in silence (#933, #942's
+        // second hypothesis). A Normal dictation types its raw, exactly as the
+        // recovery path does. A Smart Mode one may not (#391: raw French under
+        // "→ EN"), and neither may a dictation whose document is gone, so those are
+        // reported as refused: the text waits in DictusApp and the banner says so
+        // (#860).
+        let current = KeyboardState.shared.currentDocumentIdentifier
+        let attached = KeyboardState.shared.keyboardIsAttached
+        if pending.smartMode == nil, pending.mayInsert(into: current, keyboardIsAttached: attached) {
+            let tailed = DictationTail.apply(pending.raw, policy: pending.policy)
+            finish(reporting: tailed, inserting: tailed)
+        } else {
+            finish(reporting: pending.raw, inserting: nil)
+        }
     }
 
     /// Tell DictusApp the dictation is over for display purposes, without touching the

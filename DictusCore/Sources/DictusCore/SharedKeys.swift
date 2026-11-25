@@ -81,6 +81,12 @@ public enum SharedKeys {
     public static let keyboardSwipeTyping = "dictus.keyboard.swipeTyping"
     /// Bool, default true: draws the finger's trail while swipe typing.
     public static let keyboardSwipeTrail = "dictus.keyboard.swipeTrail"
+    /// String, an `AppDistribution` raw value (`debug`, `testFlight`, `appStore`): where the
+    /// app says it was installed from, written by the app at each activation. The keyboard
+    /// reads it to know whether the Experiments page exists, which its own receipt cannot
+    /// tell (`BuildChannel.current`'s limits). Absent or unknown reads as the App Store.
+    /// Read and written only through `AppDistribution`.
+    public static let appDistribution = "dictus.appDistribution"
 
     // Keyboard-App cross-process contracts (Plan 3.1, continued)
     /// JSON-encoded [Float] waveform energy data written by app during recording
