@@ -365,10 +365,11 @@ jobs:
 
       # Every SubscriptionForegroundRefreshTests case in the result bundle must have
       # passed, and there must be at least one: a bundle where the class did not run
-      # fails here by name.
+      # fails here by name. Also runs when the test step failed, so a red test shows
+      # its failure messages here and not only in the raw log.
       - name: "App Tests: Show the SubscriptionForegroundRefreshTests result"
         id: app-result
-        if: ${{ !cancelled() && steps.app-test.outcome == 'success' }}
+        if: ${{ !cancelled() && (steps.app-test.outcome == 'success' || steps.app-test.outcome == 'failure') }}
         run: |
           xcrun xcresulttool get test-results tests \
             --path "$RUNNER_TEMP/AppTests.xcresult" > "$RUNNER_TEMP/app-tests.json"
