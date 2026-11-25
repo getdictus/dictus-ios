@@ -1,7 +1,7 @@
 # Swipe decoder bench (#948)
 
 Measures DictusCore's `SwipeDecoder` (swipe typing, ported from Hex) on synthetic swipes,
-for English and French, with four kinds of finger. Measurement only: nothing in the
+for English, French and German, with four kinds of finger. Measurement only: nothing in the
 keyboard calls the decoder yet (the gesture is PR B, the setting PR C).
 
 ```bash
@@ -33,10 +33,10 @@ of a common contraction, since Google Books splits "don't" and the model barely 
 
 | File | What it is |
 |---|---|
-| `sentences/<lang>-test.tsv`, `-dev.tsv` | 2,000 test and 500 dev sentences per language from [Tatoeba](https://tatoeba.org) (CC BY 2.0 FR; each row has its sentence id and author), written by self-declared native speakers. The bench reports on the test split; nothing is tuned on it or on the dev split, which is there for whoever tunes the decoder later. |
+| `sentences/<lang>-test.tsv`, `-dev.tsv` | 2,000 test and 500 dev sentences per language from [Tatoeba](https://tatoeba.org) (CC BY 2.0 FR; each row has its sentence id and author), written by self-declared native speakers (en, fr and de, `deu`, all from the exports of 2026-11-21). The bench reports on the test split; nothing is tuned on it or on the dev split, which is there for whoever tunes the decoder later. |
 | `make_sentences.py` | Picks them from the Tatoeba exports of 2026-11-21, deterministically. Its header says how. |
 | `Sources/swipe-bench/SwipePaths.swift` | The path generator, ported from Hex's `swipe_paths.py` (MIT): via points around each key, rounded corners, an overshoot or a stop short, a wobble, minimum-jerk timing at 120 Hz. Hex's four presets are the four styles: `clean` (Hex's `none`: through the centres, unrounded, even speed), `neat`, `typical`, `sloppy`. Same random numbers in the same order as Hex's, seed 1. |
-| `Sources/swipe-bench/LetterPage.swift` | Dictus's letter page: QWERTY for en, AZERTY for fr, an iPhone 17 held upright (402 x 216 pt), laid out by `KeyPlaneGeometry`. The finger aims at the keycaps; the decoder gets the keys as #1011's `spatialKeys` reads them (`--keys` for the alternatives). |
+| `Sources/swipe-bench/LetterPage.swift` | Dictus's letter page: QWERTY for en, AZERTY for fr, QWERTZ for de (keys for ä ö ü; ß swiped through s), an iPhone 17 held upright (402 x 216 pt), laid out by `KeyPlaneGeometry`. The finger aims at the keycaps; the decoder gets the keys as #1011's `spatialKeys` reads them (`--keys` for the alternatives). |
 | `Sources/swipe-bench/main.swift` | The runs, the scoring, the memory mode and the cross-check against Hex's own paths. |
 
 ## Results (2026-11-24, develop fda23bcb + this branch, M1 Pro)
@@ -51,6 +51,28 @@ of a common contraction, since Google Books splits "don't" and the model barely 
 | fr | neat | 12,543 | 97.1% | 99.8% | 0.70 / 2.57 ms |
 | fr | typical | 12,543 | 95.5% | 99.3% | 0.68 / 2.53 ms |
 | fr | sloppy | 12,543 | 82.6% | 92.2% | 0.65 / 2.44 ms |
+| de | clean | 13,028 | 98.9% | 100.0% | 0.66 / 1.83 ms |
+| de | neat | 13,028 | 98.7% | 100.0% | 0.60 / 1.73 ms |
+| de | typical | 13,028 | 96.7% | 99.6% | 0.57 / 1.69 ms |
+| de | sloppy | 13,028 | 82.9% | 93.2% | 0.55 / 1.67 ms |
+
+German added 2026-11-26 (develop aaa7c06d + feature/swipe-de, M1, shared), with Dictus's
+`de.hextm` (`DictusKeyboard/Resources/README.md`); en and fr rerun the same day, first word
+and top 4 unchanged to the tenth. Of the 13,823 German words, 2 are one key and 793 can't
+be read: names (« tom » 301, « maria » 73, « boston ») and the pre-1996 spellings the word
+list leaves out (« daß », « muß », « wußte »). Typical fingers:
+
+- **Words with ß: 94.4% first, 100% in the top 4** (125), swiped through s.
+- **Words with ä, ö or ü: 98.1% first, 99.6% top 4** (856), on QWERTZ's own keys.
+- **12 letters or more: 97.1% first, 99.6% top 4** (239), 1.6 ms median from 15 letters.
+- **The misses** are one path for two words: « dass » read « das » (91 of the 427 misses;
+  a double letter draws nothing more), « sie »/« die », « dir »/« die », « uns »/« und ».
+- **Capitals** (not the decoder's, but what goes in): on the same sentences with their
+  original casing, `de.capitals` writes 96.7% of the 11,297 mid-sentence model words as
+  Tatoeba does, and gives 83.1% of the capitalised ones their capital. The misses are words
+  left lowercase, mostly the formal « Sie »/« Ihnen » (left out on purpose, as in Hex) and
+  the language names (« Französisch » is an adjective too). Hex publishes no German swipe
+  figures to compare against: Hex's iOS keyboard does not swipe German.
 
 Of the 14,131 English words, 752 are one key and 644 can't be read; of the 13,567 French
 ones, 447 and 577. The times are the Mac's, one core, with other work on the machine: an
@@ -117,13 +139,15 @@ So:
 dropped before the next, and reports the process's footprint (what jetsam counts against
 the keyboard extension) and the live heap.
 
-| | en typical | fr typical |
-|---|---:|---:|
-| Model, mapped read-only | 3.43 MB | 3.43 MB |
-| Footprint, model loaded | 2.69 MB | 2.64 MB |
-| Peak footprint during 12,500 swipes | 6.80 MB | 8.83 MB |
-| Most words scored by one swipe | 13,412 | 26,036 |
-| Live heap kept after all the swipes | 0 | 0 |
+| | en typical | fr typical | de typical (2026-11-26) |
+|---|---:|---:|---:|
+| Model, mapped read-only | 3.43 MB | 3.43 MB | 3.43 MB |
+| Footprint, model loaded | 2.69 MB | 2.64 MB | 1.81 MB |
+| Peak footprint during 12,500 swipes | 6.80 MB | 8.83 MB | 2.17 MB (13,028) |
+| Most words scored by one swipe | 13,412 | 26,036 | 11,811 |
+| Live heap kept after all the swipes | 0 | 0 | 0 |
+
+German's capitals table adds 95 KB in the keyboard (one byte per model word), read once.
 
 - **Nothing is kept between swipes.** `read` is a non-mutating method of a struct whose only
   reference is the immutable model, so it cannot store anything; the live heap after
@@ -149,6 +173,8 @@ device while swiping (Xcode's memory gauge).
 - `SwipePaths.swift` is Hex code (MIT, Copyright (c) 2026 Christopher Langton), ported
   from `android/benchmark/typing/swipe_paths.py` at anomalyco/hex@b3a95517; the full notice
   is at its top. `main.swift`, `LetterPage.swift` and `make_sentences.py` are Dictus's.
-- The sentences are Tatoeba's, CC BY 2.0 FR, credited per row (id and author).
+- The sentences are Tatoeba's (https://tatoeba.org), CC BY 2.0 FR
+  (https://creativecommons.org/licenses/by/2.0/fr/), credited per row (id and author), in
+  English, French and German.
 - No Hex data is in this folder: not its models, word lists, held-out sentences or paths.
   The cross-check above reads them from a local clone of Hex.

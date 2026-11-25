@@ -50,13 +50,16 @@ public enum SwipeTypingText {
         /// The switch is on, but this is the App Store build, or the app recorded no
         /// distribution: the Experiments page that set it does not exist here.
         case appStore
-        /// No swipe model for the keyboard's language: only en and fr ship one (#1013).
+        /// No swipe model for the keyboard's language: en, fr and de ship one (#1013; de is
+        /// Dictus's, #948).
         case language
         case on
     }
 
-    /// The languages with a swipe model in the keyboard's bundle (`en.hextm`, `fr.hextm`).
-    public static let languages: Set<SupportedLanguage> = [.english, .french]
+    /// The languages with a swipe model in the keyboard's bundle (`en.hextm`, `fr.hextm`,
+    /// `de.hextm`). German's model is lowercase: its nouns take their capital from
+    /// `GermanCapitals`, and ß is read on the s key, which no Dictus layout lacks.
+    public static let languages: Set<SupportedLanguage> = [.english, .french, .german]
 
     /// Whether swipe typing acts, from the switches as the keyboard reads them and the
     /// keyboard's language.

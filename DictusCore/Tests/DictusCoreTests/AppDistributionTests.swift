@@ -114,7 +114,7 @@ final class AppDistributionTests: XCTestCase {
 
     /// The keyboard builds its swipe controller only on `.on`: every other answer is the
     /// keyboard without swipe typing.
-    func testTheKeyboardSwipesOnlyWithTheSwitchOnATestBuildInEnglishOrFrench() {
+    func testTheKeyboardSwipesOnlyWithTheSwitchOnATestBuildInEnglishFrenchOrGerman() {
         func availability(_ language: SupportedLanguage) -> SwipeTypingText.Availability {
             SwipeTypingText.availability(keyboard(), language: language)
         }
@@ -126,7 +126,7 @@ final class AppDistributionTests: XCTestCase {
         XCTAssertEqual(availability(.english), .on)
         XCTAssertEqual(availability(.french), .on)
         XCTAssertEqual(availability(.spanish), .language)
-        XCTAssertEqual(availability(.german), .language)
+        XCTAssertEqual(availability(.german), .on)
         AppDistribution.record(.appStore, in: defaults)
         XCTAssertEqual(availability(.english), .appStore)
         defaults.removeObject(forKey: SharedKeys.appDistribution)

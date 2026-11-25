@@ -3,8 +3,8 @@
 
   python3 -I tools/swipe-bench/make_sentences.py LANG SENTENCES.tsv.bz2 user_languages.csv OUTDIR
 
-LANG is en or fr. The exports are
-https://downloads.tatoeba.org/exports/per_language/{eng,fra}/{eng,fra}_sentences_detailed.tsv.bz2
+LANG is en, fr or de. The exports are
+https://downloads.tatoeba.org/exports/per_language/{eng,fra,deu}/{eng,fra,deu}_sentences_detailed.tsv.bz2
 and https://downloads.tatoeba.org/exports/user_languages.tar.bz2 (CC BY 2.0 FR). Writes
 OUTDIR/LANG-dev.tsv (500 sentences) and OUTDIR/LANG-test.tsv (2,000). Deterministic for the
 same exports.
@@ -28,8 +28,10 @@ import unicodedata
 ALPHABET = {
     "en": set("abcdefghijklmnopqrstuvwxyz'"),
     "fr": set("abcdefghijklmnopqrstuvwxyz'àâæçèéêëîïôùûüœ"),
+    # de.hextm's letters: no apostrophe, so "geht's" and "gibt's" leave their sentence out.
+    "de": set("abcdefghijklmnopqrstuvwxyzäöüß"),
 }
-TATOEBA = {"en": "eng", "fr": "fra"}
+TATOEBA = {"en": "eng", "fr": "fra", "de": "deu"}
 DROP = dict.fromkeys(map(ord, '.,!?;:"«»()…–—'), " ")
 DEV, TEST, SEED = 500, 2000, 948
 
