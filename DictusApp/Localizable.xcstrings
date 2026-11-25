@@ -1927,6 +1927,29 @@
         }
       }
     },
+    "Apple's speech recognition for your language, built into iOS: Dictus downloads nothing. You can change it in Models." : {
+      "comment" : "Onboarding language screen, small type, when Apple's on-device model covers the language (#1057): confirming downloads no Dictus model.",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apples Spracherkennung für deine Sprache, in iOS integriert: Dictus lädt nichts herunter. Änderbar unter „Modelle“."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El reconocimiento de voz de Apple para tu idioma, integrado en iOS: Dictus no descarga nada. Puedes cambiarlo en Modelos."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La reconnaissance vocale d’Apple pour votre langue, intégrée à iOS : Dictus ne télécharge rien. Modifiable dans Modèles."
+          }
+        }
+      }
+    },
     "Apple's speech recognition, built into iOS. Dictus downloads nothing." : {
       "comment" : "Models screen: description of the Apple engine card.",
       "localizations" : {

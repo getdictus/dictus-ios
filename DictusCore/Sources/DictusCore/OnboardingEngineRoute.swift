@@ -72,6 +72,29 @@ public enum OnboardingEngineRoute: Equatable, Sendable {
         return .apple(languageCode: code, needsInstall: false)
     }
 
+    /// Whether confirming `setup` would take Apple's route, for the language step to say
+    /// what will happen before the user confirms: Apple's model, or the download.
+    ///
+    /// Same rule as `decide`, applied to the setup on screen rather than the one stored:
+    /// nothing is written before Confirm. Whether Apple's model is installed does not
+    /// change the route (only whether it waits), so it is not asked here.
+    /// `supportedLocales` is Apple's list as read on the iPhone, nil where
+    /// `SpeechTranscriber` is unavailable (or not read yet: the download line stays).
+    public static func expectsApple(for setup: LanguageSetup, systemMajorVersion: Int,
+                                    supportedLocales: [String]?, keyboardDictatesWithApple: Bool) -> Bool {
+        let language = AppleSpeechLanguage.evaluate(
+            mode: setup.transcriptionMode, keyboardLanguageCode: setup.keyboardLanguage.rawValue,
+            speechTranscriberAvailable: supportedLocales != nil, supportedLocales: supportedLocales ?? []
+        )
+        let availability = AppleEngineAvailability.evaluate(systemMajorVersion: systemMajorVersion,
+                                                            language: language, assetState: .unknown)
+        return decide(spokenLanguageHasDictusKeyboard: setup.spokenLanguageHasDictusKeyboard,
+                      keyboardDictatesWithApple: keyboardDictatesWithApple,
+                      recommendedModelReady: false,
+                      dictationLanguageCode: setup.keyboardLanguage.rawValue,
+                      appleAvailability: availability).isApple
+    }
+
     /// Whether this route dictates with Apple's model.
     public var isApple: Bool {
         if case .apple = self { return true }

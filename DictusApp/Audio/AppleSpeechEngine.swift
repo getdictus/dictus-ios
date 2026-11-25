@@ -116,6 +116,14 @@ enum AppleEngineAssets {
         return result
     }
 
+    /// Apple's `supportedLocales` on this iPhone, nil where `SpeechTranscriber` is not
+    /// available (or before iOS 26). Reads nothing else and writes nothing: the onboarding's
+    /// language step asks it to say which route Confirm will take (#1057).
+    static func supportedLocaleIdentifiers() async -> [String]? {
+        guard #available(iOS 26.0, *) else { return nil }
+        return await OnDeviceRecognizerFactory.make()?.supportedLocaleIdentifiers()
+    }
+
     /// The engine a dictation runs now, from the stored choice and a fresh availability.
     static func effectiveEngine() async -> EffectiveSpeechEngine {
         let choice = SpeechEngineChoice.read(from: AppGroup.defaults)

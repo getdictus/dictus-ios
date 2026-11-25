@@ -122,6 +122,36 @@ final class OnboardingEngineRouteTests: XCTestCase {
                        .downloadedModel)
     }
 
+    // MARK: - The language step's line
+
+    private func setup(_ spoken: String) -> LanguageSetup {
+        LanguageSetup(spokenLanguage: spoken, preferredLanguages: ["fr-FR"])
+    }
+
+    func testLanguageStepExpectsAppleForCoveredKeyboardLanguage() {
+        for code in ["fr", "en", "es", "de"] {
+            XCTAssertTrue(OnboardingEngineRoute.expectsApple(for: setup(code), systemMajorVersion: 26,
+                                                             supportedLocales: supported,
+                                                             keyboardDictatesWithApple: true), code)
+        }
+    }
+
+    func testLanguageStepExpectsDownloadOtherwise() {
+        // Italian: listed by Apple, no Dictus keyboard.
+        XCTAssertFalse(OnboardingEngineRoute.expectsApple(for: setup("it"), systemMajorVersion: 26,
+                                                          supportedLocales: supported, keyboardDictatesWithApple: true))
+        // Not read yet, or no SpeechTranscriber.
+        XCTAssertFalse(OnboardingEngineRoute.expectsApple(for: setup("fr"), systemMajorVersion: 26,
+                                                          supportedLocales: nil, keyboardDictatesWithApple: true))
+        // Not listed on this iPhone.
+        XCTAssertFalse(OnboardingEngineRoute.expectsApple(for: setup("fr"), systemMajorVersion: 26,
+                                                          supportedLocales: ["en-US"], keyboardDictatesWithApple: true))
+        XCTAssertFalse(OnboardingEngineRoute.expectsApple(for: setup("fr"), systemMajorVersion: 18,
+                                                          supportedLocales: supported, keyboardDictatesWithApple: true))
+        XCTAssertFalse(OnboardingEngineRoute.expectsApple(for: setup("fr"), systemMajorVersion: 26,
+                                                          supportedLocales: supported, keyboardDictatesWithApple: false))
+    }
+
     func testIsApple() {
         XCTAssertTrue(OnboardingEngineRoute.apple(languageCode: "fr", needsInstall: true).isApple)
         XCTAssertFalse(OnboardingEngineRoute.downloadedModel.isApple)
