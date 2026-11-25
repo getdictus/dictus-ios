@@ -6545,6 +6545,29 @@
         }
       }
     },
+    "You're dictating with Apple's model, already on your %@. Another model, like %@, can be more accurate, but it takes up space (%@)." : {
+      "comment" : "Home card body (#1057). First placeholder: the device, iPhone or iPad. Second: the recommended model's name (Parakeet v3, Small). Third: its download size with the unit (483 MB).",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Du diktierst mit dem Modell von Apple, das schon auf deinem %1$@ ist. Ein anderes Modell, wie %2$@, kann genauer sein, braucht aber Speicherplatz (%3$@)."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Estás dictando con el modelo de Apple, que ya está en tu %1$@. Otro modelo, como %2$@, puede ser más preciso, pero ocupa espacio (%3$@)."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vous dictez avec le modèle d'Apple, déjà sur votre %1$@. Un autre modèle, comme %2$@, peut être plus précis, mais il prend de la place (%3$@)."
+          }
+        }
+      }
+    },
     "iOS" : {
       "comment" : "Feedback form (#565).",
       "localizations" : {
@@ -10820,6 +10843,29 @@
         }
       }
     },
+    "Other transcription models" : {
+      "comment" : "Home card title, shown to someone who dictates with Apple's model and has no Dictus model (#1057).",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Weitere Transkriptionsmodelle"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Otros modelos de transcripción"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "D'autres modèles de transcription"
+          }
+        }
+      }
+    },
     "Other modes" : {
       "comment" : "Header of the section listing Smart Modes that are not pinned.",
       "localizations" : {
@@ -11889,6 +11935,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Voir toutes les formules"
+          }
+        }
+      }
+    },
+    "See models" : {
+      "comment" : "Home card button: opens the Models tab (#1057).",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Modelle ansehen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ver modelos"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voir les modèles"
           }
         }
       }

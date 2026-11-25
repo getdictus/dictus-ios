@@ -1542,6 +1542,14 @@ extension ModelManager {
                                                  appleAvailability: appleEngineRecordedAvailability)
     }
 
+    /// Whether Home presents the other models (#1057): Apple dictates, no Dictus model is
+    /// on disk, and the user has not closed the card. See `OtherModelsCardRule`.
+    func showsOtherModelsCard(dismissed: Bool) -> Bool {
+        OtherModelsCardRule.shows(modelReady: isModelReady, choice: speechEngineChoice,
+                                  appleAvailability: appleEngineRecordedAvailability,
+                                  downloadedModelCount: downloadedModels.count, dismissed: dismissed)
+    }
+
     private var appleEngineRecordedAvailability: AppleEngineAvailability {
         AppleEngineReadinessRecord.availability(readyLanguage: appleEngineReadyLanguage,
                                                 dictationLanguageCode: AppleSpeechLanguage.activeDictationLanguageCode())

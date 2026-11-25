@@ -55,6 +55,16 @@ public struct ModelInfo: Identifiable {
     /// `sizeLabel` rendered for an explicit locale. Tests pin the locale through
     /// this, since `swift test` runs in whatever locale the Mac is set to.
     public func sizeLabel(locale: Locale) -> String {
+        "~" + megabytesLabel(locale: locale)
+    }
+
+    /// The same figure and unit as `sizeLabel`, without its "~": for a sentence that
+    /// already says how much room the model takes, such as Home's "Other transcription
+    /// models" card ("it takes up space (483 MB)", #1057).
+    public var megabytesLabel: String { megabytesLabel(locale: .autoupdatingCurrent) }
+
+    /// `megabytesLabel` rendered for an explicit locale.
+    public func megabytesLabel(locale: Locale) -> String {
         let formatter = MeasurementFormatter()
         formatter.locale = locale
         // `.providedUnit` keeps megabytes even where the formatter would pick GB.
@@ -64,7 +74,7 @@ public struct ModelInfo: Identifiable {
         // No grouping, to match the "%lld MB of %lld MB" download counter.
         formatter.numberFormatter.usesGroupingSeparator = false
         let megabytes = Measurement(value: Double(sizeBytes / 1_000_000), unit: UnitInformationStorage.megabytes)
-        return "~" + formatter.string(from: megabytes)
+        return formatter.string(from: megabytes)
     }
 
     /// Speech-to-text engine this model uses (WhisperKit or Parakeet).

@@ -14,11 +14,16 @@ struct HomeView: View {
     @EnvironmentObject var proStatus: ProStatusManager
     @EnvironmentObject var history: TranscriptionHistoryStore
     @ObservedObject var modelManager: ModelManager
+    /// Brings the Models tab forward (#1057, the "Other transcription models" card).
+    var onShowModels: () -> Void = {}
 
     /// Raises the model preparation screen when a tap arrives during a load (#484).
     @Environment(\.presentModelPreparation) private var presentModelPreparation
 
     @State private var showCopiedFeedback = false
+    /// The user closed the "Other transcription models" card (#1057). Read from the App
+    /// Group at init, written there on close, so a relaunch keeps it closed.
+    @State private var otherModelsCardDismissed = OtherModelsCardRule.isDismissed(in: AppGroup.defaults)
 
     /// Drives the history sheet (#70).
     @State private var showHistory = false
@@ -242,6 +247,21 @@ struct HomeView: View {
             // Model status card
             modelStatusCard
 
+            // Apple dictates and no Dictus model is on disk (#1057): say once that the
+            // other models exist. `OtherModelsCardRule` decides.
+            if modelManager.showsOtherModelsCard(dismissed: otherModelsCardDismissed),
+               let recommended = ModelInfo.forIdentifier(ModelInfo.recommendedIdentifier()) {
+                OtherModelsCard(recommended: recommended, onShowModels: {
+                    logOtherModelsCard("seeModels", recommended: recommended)
+                    onShowModels()
+                }, onClose: {
+                    OtherModelsCardRule.dismiss(in: AppGroup.defaults)
+                    logOtherModelsCard("closed", recommended: recommended)
+                    withAnimation(.easeOut(duration: 0.2)) { otherModelsCardDismissed = true }
+                })
+                .transition(.opacity)
+            }
+
             // Last transcription preview
             if let result = coordinator.lastResult {
                 transcriptionCard(result: result)
@@ -255,6 +275,11 @@ struct HomeView: View {
                 ProBannerView { showPaywall = true }
             }
         }
+    }
+
+    private func logOtherModelsCard(_ action: String, recommended: ModelInfo) {
+        PersistentLog.log(.diagnosticProbe(component: "OtherModelsCard", instanceID: "app", action: action,
+                                           details: "recommended=\(recommended.identifier)"))
     }
 
     // MARK: - Logo Section

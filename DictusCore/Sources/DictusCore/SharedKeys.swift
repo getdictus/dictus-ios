@@ -480,6 +480,10 @@ public enum SharedKeys {
     /// framework (the keyboard, Home, `startDictation`) ask whether a user with no
     /// downloaded model can dictate. See `AppleEngineReadinessRecord` (#1057).
     public static let appleEngineReadyLanguage = "dictus.appleEngineReadyLanguage"
+    /// Bool: the user closed Home's "Other transcription models" card (#1057). Set once,
+    /// never cleared: closed means gone for good. Absent = never closed. See
+    /// `OtherModelsCardRule`.
+    public static let otherModelsCardDismissed = "dictus.otherModelsCardDismissed"
 
     // MARK: - Retired keys
     /// The #357 probe's arming flag, removed with the probe in #361. Kept as a
