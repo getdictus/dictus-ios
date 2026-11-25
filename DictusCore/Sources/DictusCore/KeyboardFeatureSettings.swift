@@ -22,8 +22,8 @@ import Foundation
 /// Reading "absent means default" needs nobody to remember anything, and changing a
 /// default later reaches every install that never touched the switch.
 ///
-/// The keyboard reads swipe typing, spatial autocorrect and the delete swipe from here.
-/// Adaptive touch and the bilingual check have no keyboard code reading a switch yet.
+/// The keyboard reads swipe typing, spatial autocorrect, Adaptive touch and the delete
+/// swipe from here. The bilingual check has no keyboard code reading a switch yet.
 public struct KeyboardFeatureSettings {
 
     /// The value of each switch on an install that never touched it. The single source of
@@ -90,14 +90,18 @@ public struct KeyboardFeatureSettings {
 
     // MARK: - Rules
 
-    /// Whether Adaptive touch changes anything: it moves the key centres the spatial
-    /// decoder reads, so without the decoder it has nothing to act on.
+    /// Whether Adaptive touch acts: its Experiments switch on a test build (Debug,
+    /// TestFlight), its default (off) in the App Store build, and only while spatial
+    /// autocorrect acts too — it moves the key centres the spatial decoder reads, so
+    /// without the decoder it has nothing to act on. The keyboard reads it at each
+    /// appearance (`AdaptiveTouchRuntime.refresh`).
     public var isAdaptiveTouchEffective: Bool {
-        Self.isAdaptiveTouchEffective(adaptiveTouch: adaptiveTouch, spatialAutocorrect: spatialAutocorrect)
+        Self.experiment(adaptiveTouch, default: Defaults.adaptiveTouch, on: channel) && isSpatialAutocorrectEffective
     }
 
     /// The same rule on values the caller already holds — the screen's `@AppStorage`
-    /// bindings, which redraw on change where a read of the store would not.
+    /// bindings, which redraw on change where a read of the store would not. The channel
+    /// is left out: the screen exists only where the stored switches act.
     public static func isAdaptiveTouchEffective(adaptiveTouch: Bool, spatialAutocorrect: Bool) -> Bool {
         adaptiveTouch && spatialAutocorrect
     }

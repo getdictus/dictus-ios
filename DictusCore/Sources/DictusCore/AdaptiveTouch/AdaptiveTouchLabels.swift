@@ -70,6 +70,10 @@ public struct AdaptiveTouchSpans: Equatable {
         public var labels: [Character]
         /// The correction's letters when autocorrect replaced it.
         public var correction: [Character] = []
+        /// The letters of the last word the document shows for it when a text replacement
+        /// expanded it (`qqc` → `Quelque chose`: `chose`), which is what shows it stood.
+        /// Empty otherwise: the document shows `labels`.
+        public var shown: [Character] = []
         public var outcome: Outcome
         public var geometry: UInt64
         public var at: TimeInterval
@@ -188,12 +192,14 @@ public struct AdaptiveTouchSpans: Equatable {
     /// The word being typed ended as `token` (the text after the last space; nil when it
     /// isn't a word) and, when autocorrect replaced it, `corrected`; or, with `picked`, a
     /// suggestion went in its place (`overCorrection`: you tapped what you typed over the fix
-    /// space would apply). Returns the earlier word this one shows stood: `before`, the text
+    /// space would apply); or, with `expanded`, a text replacement shortcut became its
+    /// phrase. A shortcut is typed on purpose, so its taps teach like a word left as typed
+    /// (#1031); only the check that it stood reads the phrase. Returns the earlier word this one shows stood: `before`, the text
     /// before the cursor still ending in this word, has it just before; none when autocorrect
     /// is revising the word before now (`previousRevised`, an elision across the space).
     public mutating func finish(
         token: String?, corrected: String? = nil, picked: String? = nil, overCorrection: Bool = false,
-        previousRevised: Bool = false, before: String?, now: TimeInterval
+        expanded: String? = nil, previousRevised: Bool = false, before: String?, now: TimeInterval
     ) -> [Span] {
         guard !word.isEmpty else {
             // Nothing typed with taps here: the word before it no longer stands next to it.
@@ -203,11 +209,12 @@ public struct AdaptiveTouchSpans: Equatable {
         let previous = Self.withoutLastWord(before ?? "")
         var stood: [Span] = []
         for span in pending where !previousRevised && now - span.at <= Self.timeout
-            && Self.endsWithWord(previous, span.labels) {
+            && Self.endsWithWord(previous, span.shown.isEmpty ? span.labels : span.shown) {
             stood.append(span)
         }
         pending.removeAll(keepingCapacity: true)
-        if let span = span(token: token, corrected: corrected, picked: picked, overCorrection: overCorrection, now: now) {
+        if var span = span(token: token, corrected: corrected, picked: picked, overCorrection: overCorrection, now: now) {
+            if corrected == nil, picked == nil, let expanded { span.shown = Self.lastWordLetters(expanded) }
             pending.append(span)
         }
         word.removeAll(keepingCapacity: true)
@@ -223,7 +230,8 @@ public struct AdaptiveTouchSpans: Equatable {
         } else if let span = pending.last {
             // Dictus hears its own edits here too: a word it just corrected stands as corrected.
             let text = Self.trailingSeparatorsRemoved(Substring(before ?? ""))
-            if !Self.endsWithWord(text, span.labels), !Self.endsWithWord(text, span.correction) { forget() }
+            if !Self.endsWithWord(text, span.labels), !Self.endsWithWord(text, span.correction),
+               !Self.endsWithWord(text, span.shown) { forget() }
         }
     }
 
@@ -275,6 +283,11 @@ public struct AdaptiveTouchSpans: Equatable {
         var s = text
         while let last = s.last, !last.isLetter { s = s.dropLast() }
         return s
+    }
+
+    /// The letters of `text`'s last space-separated token.
+    static func lastWordLetters(_ text: String) -> [Character] {
+        letters(text.split(whereSeparator: \.isWhitespace).last.map(String.init) ?? "")
     }
 
     /// Whether the last space-separated token of `text` is the word `letters`.

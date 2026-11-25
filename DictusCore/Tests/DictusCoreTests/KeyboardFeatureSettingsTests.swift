@@ -123,6 +123,14 @@ final class KeyboardFeatureSettingsTests: XCTestCase {
         XCTAssertTrue(stored.isAdaptiveTouchEffective)
     }
 
+    func testAdaptiveTouchActsOnlyWhereTheExperimentsPageExists() {
+        let appStore = settings(.appStore)
+        appStore.adaptiveTouch = true
+        appStore.spatialAutocorrect = true
+        XCTAssertFalse(appStore.isAdaptiveTouchEffective, "the App Store build ignores a stored true")
+        XCTAssertTrue(settings(.testBuild).isAdaptiveTouchEffective)
+    }
+
     // MARK: - Partner language
 
     func testEachKeyboardLanguageHasADefaultPartnerOtherThanItself() {

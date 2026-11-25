@@ -4,7 +4,10 @@ import SwiftUI
 import Combine
 import DictusCore
 
-class KeyboardViewController: UIInputViewController {
+// type_body_length: the class is the extension's one UIInputViewController, so every
+// lifecycle and host-document callback lands in its body; Adaptive touch's hooks (#1014)
+// took it from 646 to 654 lines, under its own one-line calls into the bridge.
+class KeyboardViewController: UIInputViewController { // swiftlint:disable:this type_body_length
     let controllerID = String(UUID().uuidString.prefix(8))
 
     private var hostingController: UIHostingController<KeyboardRootView>?

@@ -288,12 +288,15 @@ public final class AdaptiveTouch {
     }
 
     /// The word being typed ended (space, return, a mark); `corrected` when autocorrect
-    /// replaced it, `previousRevised` when it is changing the word before too. `before` is
-    /// the text before the cursor, still ending in the word. Words before it that stood
-    /// teach now; this one waits for the next.
-    public func finish(corrected: String? = nil, previousRevised: Bool = false, before: String?) {
+    /// replaced it, `expanded` when a text replacement shortcut became its phrase (not a
+    /// correction: the shortcut teaches as typed, #1031), `previousRevised` when it is
+    /// changing the word before too. `before` is the text before the cursor, still ending
+    /// in the word. Words before it that stood teach now; this one waits for the next.
+    public func finish(corrected: String? = nil, expanded: String? = nil, previousRevised: Bool = false,
+                       before: String?) {
         let token = SpatialTouchBuffer.token(before: before)
-        admit(spans.finish(token: token, corrected: corrected, previousRevised: previousRevised, before: before, now: clock()))
+        admit(spans.finish(token: token, corrected: corrected, expanded: expanded, previousRevised: previousRevised,
+                           before: before, now: clock()))
     }
 
     /// A suggestion is about to replace the word being typed (`before` ends in it).

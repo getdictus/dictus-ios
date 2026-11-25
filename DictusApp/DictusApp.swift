@@ -413,14 +413,15 @@ struct DictusApp: App {
 
     /// `-DictusDebugAdaptiveTouch YES` (or `NO`) turns Adaptive touch on or off (#1014): the
     /// keyboard learns where this user lands on each key, for the spatial decoder, which
-    /// must be on too. `-DictusDebugAdaptiveTouchReset YES` forgets what it learned, as
-    /// Reset learned words does. Same launch line and same reason as the decoder's switch.
+    /// must be on too. It writes the Experiments page's own switch
+    /// (`SharedKeys.keyboardAdaptiveTouch`), like the decoder's argument.
+    /// `-DictusDebugAdaptiveTouchReset YES` forgets what it learned, as the page's reset
+    /// and Reset learned words do.
     private static func applyAdaptiveTouchArguments() {
         let arguments = ProcessInfo.processInfo.arguments
         let toggle = "DictusDebugAdaptiveTouch"
         if arguments.contains("-\(toggle)") {
-            // The key is `AdaptiveTouchSwitch.switchKey` in DictusKeyboard, where it is read.
-            AppGroup.defaults.set(UserDefaults.standard.bool(forKey: toggle), forKey: "debug.adaptiveTouch")
+            KeyboardFeatureSettings().adaptiveTouch = UserDefaults.standard.bool(forKey: toggle)
         }
         let reset = "DictusDebugAdaptiveTouchReset"
         if arguments.contains("-\(reset)"), UserDefaults.standard.bool(forKey: reset) {

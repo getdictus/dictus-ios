@@ -164,6 +164,40 @@ final class AdaptiveTouchTests: XCTestCase {
         XCTAssertEqual(touch.model.contexts.map(\.accepted).max(), 3)
     }
 
+    /// #1031: `qqc` → `Quelque chose` is a shortcut typed on purpose, not a mistyped word
+    /// autocorrect fixed, so its taps teach like a word left as typed.
+    func testAnExpandedTextReplacementIsLearnedLikeAWordTypedRight() {
+        let touch = AdaptiveTouch(storage: .memory, defaults: nil)
+        touch.beginSession()
+        var text = ""
+        for c in "qqc" {
+            text.append(c)
+            touch.typed(String(c), at: Self.keys.centres[c], slid: false, keys: Self.keys)
+        }
+        touch.finish(expanded: "Quelque chose", before: text)
+        text.removeLast(3)
+        text += "Quelque chose "
+        // The keyboard hears its own expansion as a host change.
+        touch.hostChanged(before: text)
+        type("dog", bias: .zero, into: &text, with: touch)
+        XCTAssertEqual(touch.model.contexts.map(\.accepted).max(), 3, "the shortcut's three taps teach")
+    }
+
+    func testAnExpansionTheDocumentNoLongerShowsTeachesNothing() {
+        let touch = AdaptiveTouch(storage: .memory, defaults: nil)
+        touch.beginSession()
+        var text = ""
+        for c in "qqc" {
+            text.append(c)
+            touch.typed(String(c), at: Self.keys.centres[c], slid: false, keys: Self.keys)
+        }
+        touch.finish(expanded: "Quelque chose", before: text)
+        // Something else ended up there (the expansion undone, the host's own edit).
+        text = "autre "
+        type("dog", bias: .zero, into: &text, with: touch)
+        XCTAssertEqual(touch.model.contexts.map(\.accepted).max(), 0)
+    }
+
     func testASlideAndAPopupTeachNothing() {
         let touch = AdaptiveTouch(storage: .memory, defaults: nil)
         touch.beginSession()

@@ -166,7 +166,7 @@ final class DictusKeyboardBridge: NSObject, // swiftlint:disable:this type_body_
 
     /// Where the finger landed for each character of the word being typed, for the
     /// spatial decoder (#1011). Filled only while its Debug switch is on.
-    fileprivate var spatialTouches = SpatialTouchBuffer()
+    var spatialTouches = SpatialTouchBuffer()
 
     /// The document, behind the seam the counting sites are tested through (#530).
     /// Rebuilt on demand because `controller` is weak and may be swapped out.
@@ -1132,7 +1132,12 @@ final class DictusKeyboardBridge: NSObject, // swiftlint:disable:this type_body_
             ) {
             case .applied:
                 memory.correctionApplied(prefix: prefix, corrected: correction)
-                adaptiveEnd.correction = correction
+                // #1031: a shortcut the user typed on purpose is no correction of a mistyped word.
+                if expansion != nil {
+                    adaptiveEnd.expansion = correction
+                } else {
+                    adaptiveEnd.correction = correction
+                }
                 #if DEBUG
                 journalFinal = correction
                 #endif
@@ -1525,132 +1530,6 @@ extension DictusKeyboardBridge {
 }
 #endif
 
-// MARK: - Spatial autocorrect (#1011)
-
-extension DictusKeyboardBridge {
-    /// Records where `typed` was tapped, for the spatial decoder. `context` is the
-    /// document after the keystroke: the buffer keeps the tap only while it agrees with
-    /// the token there.
-    fileprivate func noteSpatialTap(_ typed: String, context: String?, replacing: Bool = false) {
-        guard SpatialAutocorrect.isOn else { return }
-        spatialTouches.typed(
-            typed, at: keyboardView?.lastTriggerPoint, keys: keyboardView?.spatialKeys(),
-            token: SpatialTouchBuffer.token(before: context), replacing: replacing
-        )
-        // #1014: a letter key's letter. The accent key's vowel keeps the vowel key's tap, and
-        // its apostrophe is no letter.
-        guard !replacing, typed.count == 1, typed.first?.isLetter == true, let adaptive = adaptiveLearner else { return }
-        adaptive.typed(typed, at: keyboardView?.lastTriggerPoint, slid: keyboardView?.lastTriggerSlid ?? false,
-                       keys: keyboardView?.spatialKeys())
-    }
-
-    /// A backspace, which deleted the last character of `before`; the document now reads
-    /// `after`.
-    fileprivate func noteSpatialDeletion(before: String?, after: String?) {
-        guard SpatialAutocorrect.isOn else { return }
-        spatialTouches.deleted(token: SpatialTouchBuffer.token(before: after))
-        noteAdaptiveDeletion(before: before)
-    }
-
-    /// The taps of `word` and the keys they were made on, when the buffer holds them and
-    /// the switch is on. Nil otherwise, and the engine then never consults the decoder.
-    fileprivate func spatialInput(for word: String) -> SpatialCorrection.Input? {
-        guard let input = spatialTouches.decoderInput(for: word, isOn: SpatialAutocorrect.isOn) else { return nil }
-        // #1014: with a profile in use, the taps are read with this user's centres, and the
-        // stock ones are the baseline no correction may go past.
-        guard let personal = AdaptiveTouchSwitch.current?.personalKeys(for: input.keys) else { return input }
-        return SpatialCorrection.Input(taps: input.taps, keys: personal, baseline: input.keys)
-    }
-
-    /// Reads the Experiments switches the app may have changed while the keyboard was away:
-    /// spatial autocorrect here, then swipe typing. Called for every new keyboard view and
-    /// at every appearance.
-    func refreshExperiments(trigger: String) {
-        let wasOn = SpatialAutocorrect.isOn
-        let isOn = SpatialAutocorrect.refresh(.forKeyboard())
-        // Taps recorded under the other answer belong to no decode now.
-        if isOn != wasOn { spatialTouches.clear() }
-        let channel = AppDistribution.recorded()?.rawValue ?? "none"
-        PersistentLog.log(.spatialAutocorrectConfigured(on: isOn, channel: channel, trigger: trigger))
-        refreshSwipeTyping(trigger: trigger)
-    }
-}
-
-// MARK: - Adaptive touch (#1014)
-
-extension DictusKeyboardBridge {
-    /// The learner, where this field lets it learn: autocorrect runs here (the host policy
-    /// of #1004/#1005) and the field holds no secret (the typing journal's gate, #1002).
-    /// Elsewhere what it holds of the words being typed goes.
-    fileprivate var adaptiveLearner: AdaptiveTouch? {
-        guard let adaptive = AdaptiveTouchSwitch.current else { return nil }
-        guard let state = suggestionState, state.autocorrectEnabled, state.hostPolicy.autocorrectAllowed,
-              fieldHoldsNoSecret else {
-            adaptive.forget()
-            return nil
-        }
-        return adaptive
-    }
-
-    /// Secure entry, passwords, one-time codes and card numbers never teach.
-    private var fieldHoldsNoSecret: Bool {
-        guard let proxy = controller?.textDocumentProxy else { return false }
-        #if DEBUG
-        return TypingJournalFieldGate.skipReason(
-            isSecureEntry: proxy.isSecureTextEntry ?? false,
-            content: HostInputTraits.journalContent(proxy.textContentType)
-        ) == nil
-        #else
-        // The switch is Debug only; a Release build never learns.
-        return false
-        #endif
-    }
-
-    /// The text or the caret changed, maybe not by this keyboard: what the learner follows
-    /// of the words being typed goes unless the document still agrees with it.
-    func noteAdaptiveHostChange() {
-        AdaptiveTouchSwitch.current?.hostChanged(before: controller?.textDocumentProxy.documentContextBeforeInput)
-    }
-
-    /// The keyboard appeared, in a field: a new session for the profile's evidence.
-    func adaptiveTouchSessionBegan() {
-        AdaptiveTouchSwitch.current?.beginSession()
-    }
-
-    /// Backspace deleted the last character of `before`.
-    fileprivate func noteAdaptiveDeletion(before: String?) {
-        guard let adaptive = adaptiveLearner else { return }
-        adaptive.willDelete(before: before)
-    }
-
-    /// How a word ended, for Adaptive touch: what autocorrect put in its place, and whether
-    /// it revised the word before too (an elision across the space, #1006).
-    struct AdaptiveWordEnd {
-        var correction: String?
-        var revisesPrevious = false
-    }
-
-    /// A word ended in `before` (the text before the cursor, still ending in it).
-    fileprivate func noteAdaptiveFinish(before: String?, _ end: AdaptiveWordEnd) {
-        guard let adaptive = adaptiveLearner else { return }
-        adaptive.finish(corrected: end.correction, previousRevised: end.revisesPrevious, before: before)
-    }
-
-    /// Undo put `original` back over the autocorrection.
-    func noteAdaptiveUndo(original: String) {
-        guard let adaptive = adaptiveLearner else { return }
-        adaptive.undone(original: original)
-    }
-
-    /// A suggestion is about to replace the word being typed. `overCorrection`: the user
-    /// tapped what they typed while space would have corrected it.
-    func noteAdaptivePick(replacement: String, overCorrection: Bool) {
-        guard let adaptive = adaptiveLearner else { return }
-        adaptive.picked(replacement: replacement, overCorrection: overCorrection,
-                        before: controller?.textDocumentProxy.documentContextBeforeInput)
-    }
-}
-
 // MARK: - Delete swipe (#609)
 
 /// Press backspace and slide left to delete word by word, slide back right to get the words
@@ -1736,7 +1615,7 @@ extension DictusKeyboardBridge {
             state.clear()
         }
         let context = controller?.textDocumentProxy.documentContextBeforeInput
-        noteSpatialDeletion(context: context)
+        noteSpatialSlideEdit(after: context)
         suggestionState?.updateAsync(context: context)
     }
 }

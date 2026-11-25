@@ -4537,6 +4537,29 @@
         }
       }
     },
+    "Forget what it learned" : {
+      "comment" : "Settings › Keyboard › Experiments: destructive button of the Adaptive touch reset confirmation (#1014).",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gelerntes vergessen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Olvidar lo aprendido"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oublier ce qu’il a appris"
+          }
+        }
+      }
+    },
     "From" : {
       "comment" : "Feedback form (#565).",
       "localizations" : {
@@ -5066,6 +5089,52 @@
         }
       }
     },
+    "Reset adaptive touch" : {
+      "comment" : "Settings › Keyboard › Experiments: button that forgets what Adaptive touch learned (#1014).",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adaptive Berührung zurücksetzen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Restablecer el toque adaptativo"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Réinitialiser le toucher adaptatif"
+          }
+        }
+      }
+    },
+    "Reset adaptive touch?" : {
+      "comment" : "Settings › Keyboard › Experiments: title of the Adaptive touch reset confirmation (#1014).",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adaptive Berührung zurücksetzen?"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Restablecer el toque adaptativo?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Réinitialiser le toucher adaptatif ?"
+          }
+        }
+      }
+    },
     "Second language" : {
       "comment" : "Settings › Keyboard › Experiments: picker for the bilingual partner language.",
       "localizations" : {
@@ -5223,6 +5292,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Saisie par glissement"
+          }
+        }
+      }
+    },
+    "The keyboard forgets where you tap each key and starts learning again from your next words." : {
+      "comment" : "Settings › Keyboard › Experiments: message of the Adaptive touch reset confirmation (#1014).",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Tastatur vergisst, wo du jede Taste triffst, und lernt ab deinen nächsten Wörtern neu."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El teclado olvida dónde pulsas cada tecla y vuelve a aprender a partir de tus próximas palabras."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le clavier oublie où vous tapez sur chaque touche et recommence à apprendre à partir de vos prochains mots."
           }
         }
       }
