@@ -344,6 +344,10 @@ public enum LogEvent: Sendable {
     /// `channel` is the distribution the app recorded (`AppDistribution`, `none` when it
     /// recorded nothing); `reason` names what decided it (`off`, `appStore`, `language`, `on`).
     case swipeTypingConfigured(on: Bool, channel: String, reason: String)
+    /// The keyboard read whether the space bar consults the spatial decoder (#1011). `on` is
+    /// the effective value (`KeyboardFeatureSettings.isSpatialAutocorrectEffective`),
+    /// `channel` as above, `trigger` the moment it was read (`newView`, `viewWillAppear`).
+    case spatialAutocorrectConfigured(on: Bool, channel: String, trigger: String)
     /// A swipe ended. `points` is the stroke's touch count, `decodeMs` how long the decode on
     /// lift took, `readings` how many words it read, `outcome` what went in (`word`,
     /// `slidTap`, `none`, `cancelled`).
@@ -825,7 +829,7 @@ public enum LogEvent: Sendable {
              .audioEngineStopped,
              .keyboardDidDisappear, .keyboardTextInserted,
              .keyRepeatStarted, .keyRepeatStopped, .deleteSwipeEnded,
-             .swipeTypingConfigured, .swipeEnded,
+             .swipeTypingConfigured, .spatialAutocorrectConfigured, .swipeEnded,
              .appDidBecomeActive, .appWillResignActive, .appDidEnterBackground,
              .rapidTapRejected,
              .engineWarmUpAttempt, .engineWarmUpSuccess,
@@ -1028,6 +1032,8 @@ public enum LogEvent: Sendable {
             return "ticks=\(ticks) reason=\(reason)"
         case .swipeTypingConfigured(let on, let channel, let reason):
             return "on=\(on) channel=\(channel) reason=\(reason)"
+        case .spatialAutocorrectConfigured(let on, let channel, let trigger):
+            return "on=\(on) channel=\(channel) trigger=\(trigger)"
         case .swipeEnded(let points, let decodeMs, let readings, let outcome):
             return "points=\(points) decodeMs=\(String(format: "%.2f", decodeMs)) readings=\(readings) outcome=\(outcome)"
         case .deleteSwipeEnded(let words, let frozen):
@@ -1312,7 +1318,7 @@ extension LogEvent {
         case .keyboardDidAppear, .keyboardDidDisappear, .keyboardMicTapped, .keyboardTextInserted,
              .hostReturn,
              .keyRepeatStarted, .keyRepeatStopped, .deleteSwipeEnded,
-             .swipeTypingConfigured, .swipeEnded,
+             .swipeTypingConfigured, .spatialAutocorrectConfigured, .swipeEnded,
              .overlayShown, .overlayHidden, .rapidTapRejected,
              .dictationMessageSet, .dictationMessageDisplayed, .dictationMessageCleared,
              .waveformAppeared, .waveformDisappeared, .waveformHeartbeat, .waveformStall,
@@ -1418,6 +1424,7 @@ extension LogEvent {
         case .keyRepeatStarted: return "keyRepeatStarted"
         case .keyRepeatStopped: return "keyRepeatStopped"
         case .swipeTypingConfigured: return "swipeTypingConfigured"
+        case .spatialAutocorrectConfigured: return "spatialAutocorrectConfigured"
         case .swipeEnded: return "swipeEnded"
         case .deleteSwipeEnded: return "deleteSwipeEnded"
         case .engineWarmUpAttempt: return "engineWarmUpAttempt"

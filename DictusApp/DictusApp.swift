@@ -378,8 +378,8 @@ struct DictusApp: App {
         refreshOnboardingFlag()
         Self.recordDistribution()
         #if DEBUG
-        Self.applyKeyboardDebugArgument("DictusDebugSpatialAutocorrect", key: "debug.spatialAutocorrect")
-        Self.applyKeyboardDebugArgument("DictusDebugBilingualAutocorrect", key: "debug.bilingualAutocorrect")
+        Self.applyKeyboardDebugArgument("DictusDebugSpatialAutocorrect") { KeyboardFeatureSettings().spatialAutocorrect = $0 }
+        Self.applyKeyboardDebugArgument("DictusDebugBilingualAutocorrect") { KeyboardFeatureSettings().bilingualAutocorrect = $0 }
         DictationCoordinator.shared.applyInjectedFailureArgument()
         #endif
     }
@@ -395,21 +395,22 @@ struct DictusApp: App {
     }
 
     #if DEBUG
-    /// `-<argument> YES` (or `NO`) on the launch line turns one of the keyboard's Debug
-    /// experiments on or off, for a device test of a Debug build:
-    /// `xcrun devicectl device process launch --device <id> com.pivi.dictus -DictusDebugSpatialAutocorrect YES`.
+    /// `-<argument> YES` (or `NO`) on the launch line turns one of the keyboard's
+    /// Experiments on or off, for a scripted test of a Debug build:
+    /// `xcrun devicectl device process launch --device <id> com.pivi.dictus -DictusDebugSpatialAutocorrect YES`
+    /// (`xcrun simctl launch <udid> com.pivi.dictus -DictusDebugSpatialAutocorrect YES` on a simulator).
     ///
-    /// - `DictusDebugSpatialAutocorrect`: the spatial decoder (#1011), key
-    ///   `SpatialAutocorrect.switchKey` in DictusKeyboard;
-    /// - `DictusDebugBilingualAutocorrect`: the bilingual check (#1015), key
-    ///   `BilingualAutocorrect.switchKey`.
+    /// - `DictusDebugSpatialAutocorrect`: the spatial decoder (#1011);
+    /// - `DictusDebugBilingualAutocorrect`: the bilingual check (#1015).
     ///
-    /// WHY a launch argument: the switches have no row in the app's settings yet (#992 owns
-    /// SettingsView), and the keyboard, which reads them, gets no launch arguments. Written
-    /// here, with the launch's other App Group writes, once protected data is available.
-    private static func applyKeyboardDebugArgument(_ argument: String, key: String) {
+    /// It writes the Experiments page's own switch (`KeyboardFeatureSettings`), so the page
+    /// shows what the argument set and the keyboard reads it at its next appearance, like a
+    /// tap on the switch. WHY keep an argument at all: a script reaches the switch without
+    /// driving the Experiments page. Written with the launch's other App Group writes, once
+    /// protected data is available.
+    private static func applyKeyboardDebugArgument(_ argument: String, write: (Bool) -> Void) {
         guard ProcessInfo.processInfo.arguments.contains("-\(argument)") else { return }
-        AppGroup.defaults.set(UserDefaults.standard.bool(forKey: argument), forKey: key)
+        write(UserDefaults.standard.bool(forKey: argument))
     }
     #endif
 
