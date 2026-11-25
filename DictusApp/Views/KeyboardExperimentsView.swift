@@ -71,7 +71,7 @@ struct KeyboardExperimentsView: View {
                 Text("Off by default. These features can change or disappear.")
                     .textCase(nil)
             } footer: {
-                Text("Corrects a word from where your fingers landed on the keys, not only from the letters typed. French and English only.")
+                Text("Corrects a word from where your fingers landed on the keys, not only from the letters typed. French, English and Spanish only.")
             }
 
             adaptiveTouchSection

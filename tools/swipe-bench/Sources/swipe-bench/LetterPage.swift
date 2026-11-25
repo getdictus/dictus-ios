@@ -3,8 +3,8 @@
 import CoreGraphics
 import DictusCore
 
-/// The letter page of a language's default layout (`KeyboardLayouts.qwertyNormal` for en,
-/// `azertyNormal` for fr: the key widths restated here, since those builders live in the
+/// The letter page of a language's default layout (`KeyboardLayouts.qwertyNormal` for en
+/// and es, which has no ñ key, `azertyNormal` for fr: the key widths restated here, since those builders live in the
 /// keyboard target and import UIKit) on a `width` x `height` grid laid out by
 /// `KeyPlaneGeometry`, as `GiellaKeyboardView.keyPlaneSlots` does. The default grid is an
 /// iPhone 17 held upright, as `tools/keyboard-bench` uses.
