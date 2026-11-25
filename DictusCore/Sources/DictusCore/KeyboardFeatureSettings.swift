@@ -22,8 +22,8 @@ import Foundation
 /// Reading "absent means default" needs nobody to remember anything, and changing a
 /// default later reaches every install that never touched the switch.
 ///
-/// Nothing reads these settings yet: the keyboard's spatial, adaptive and bilingual code
-/// still reads its `debug.*` switches until a later PR moves it here.
+/// The keyboard reads swipe typing, spatial autocorrect and the delete swipe from here.
+/// Adaptive touch and the bilingual check have no keyboard code reading a switch yet.
 public struct KeyboardFeatureSettings {
 
     /// The value of each switch on an install that never touched it. The single source of
@@ -134,6 +134,13 @@ public struct KeyboardFeatureSettings {
     /// Store build gets the App Store's behaviour.
     public var isSwipeTypingEffective: Bool {
         Self.experiment(swipeTyping, default: Defaults.swipeTyping, on: channel)
+    }
+
+    /// Spatial autocorrect as it acts, by the same rule: the Experiments switch on a test
+    /// build (Debug, TestFlight), its default (off) in the App Store build, whatever the
+    /// store holds there. The keyboard reads it at each appearance (`SpatialAutocorrect`).
+    public var isSpatialAutocorrectEffective: Bool {
+        Self.experiment(spatialAutocorrect, default: Defaults.spatialAutocorrect, on: channel)
     }
 
     /// The trail, by the same rule. Meaningful only while `isSwipeTypingEffective`.

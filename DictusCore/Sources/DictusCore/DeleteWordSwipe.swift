@@ -54,6 +54,26 @@ public final class DeleteWordSwipe {
     /// The text before the cursor when the slide took over, for the caller's bookkeeping.
     public private(set) var contextAtActivation: String?
 
+    /// The slide a backspace touch starts, or nil when the user switched "Swipe to delete
+    /// words" off: backspace is then the plain key, one character on touch-down and the
+    /// repeat on a hold, as before #1047. A normal setting, not an experiment: its stored
+    /// value acts in every build, the App Store one included.
+    public static func begin(
+        _ settings: KeyboardFeatureSettings,
+        editor: TextDocumentEditing,
+        mirror: MirrorSyncState?,
+        startX: Double,
+        step: Double,
+        touchDownDeletion: String? = nil,
+        touchDownWord: String? = nil
+    ) -> DeleteWordSwipe? {
+        guard settings.deleteWordSwipe else { return nil }
+        return DeleteWordSwipe(
+            editor: editor, mirror: mirror, startX: startX, step: step,
+            touchDownDeletion: touchDownDeletion, touchDownWord: touchDownWord
+        )
+    }
+
     /// - Parameters:
     ///   - startX: where the finger went down, in the keyboard's coordinates.
     ///   - step: how far one word is: a letter key's width. Floored at one point.
