@@ -92,5 +92,6 @@ public let englishProfile = LanguageProfile(
                 "because", "cause", "if", "unless", "until", "maybe", "hopefully"
             ])
         )
-    ]
+    ],
+    longPressAccents: LongPressAccents.english
 )

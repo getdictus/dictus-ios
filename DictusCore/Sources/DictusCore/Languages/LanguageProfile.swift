@@ -90,6 +90,18 @@ public struct LanguageProfile: Sendable {
     /// so nothing of this kind fires outside French.
     public let contextualHomographs: [ContextualHomograph]
 
+    /// What a held letter key offers, keyed by lowercase base letter, as Apple's keyboard
+    /// for this language shows it (#1042). Variants only, lowercase, nearest the base
+    /// first: the popup puts the base itself in front, and shift or caps lock capitalizes
+    /// them (`AccentedCharacters.shifted`). A letter not listed holds nothing. Read
+    /// through `AccentedCharacters.mappings(for:layout:)`, which adds `lettersWithOwnKey`.
+    public let longPressAccents: [String: [String]]
+
+    /// Letters Apple's layout for this language gives keys of their own (German ä ö ü,
+    /// Spanish ñ), so `longPressAccents` leaves them out. On a layout without that key,
+    /// Apple's keyboard holds each one right after its base letter, and so does Dictus.
+    public let lettersWithOwnKey: [String]
+
     public init(
         code: String,
         displayName: String,
@@ -107,7 +119,9 @@ public struct LanguageProfile: Sendable {
         participleContext: ParticipleContext? = nil,
         misspellings: [String: String] = [:],
         contextualContractions: [ContextualContraction] = [],
-        contextualHomographs: [ContextualHomograph] = []
+        contextualHomographs: [ContextualHomograph] = [],
+        longPressAccents: [String: [String]],
+        lettersWithOwnKey: [String] = []
     ) {
         self.code = code
         self.displayName = displayName
@@ -126,6 +140,8 @@ public struct LanguageProfile: Sendable {
         self.misspellings = misspellings
         self.contextualContractions = contextualContractions
         self.contextualHomographs = contextualHomographs
+        self.longPressAccents = longPressAccents
+        self.lettersWithOwnKey = lettersWithOwnKey
     }
 }
 

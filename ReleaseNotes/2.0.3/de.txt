@@ -2,14 +2,14 @@ Neu in 2.0.3
 
 ## Highlights
 
-Eine neu gestaltete Tastatur
-Die Tasten sitzen dort, wo Apples Tastatur sie hat, und langes Drücken auf die Leertaste bewegt den Cursor.
+Eine bessere Tastatur
+Tasten wie bei Apple, Cursor auf der Leertaste, Emojis und Autokorrektur.
 
-Einfachere Emojis
-Suche, Hauttöne und die volle Tastaturhöhe für Emojis.
+Apples Diktiermodell
+Wähle es im Bildschirm „Modelle“.
 
-Bessere Autokorrektur auf Französisch
-„il m'a“, „à“, Akzente und zusammengeschriebene Wörter.
+Übersetzen in 25 Sprachen
+Mit Dictus Pro, in den Smart Modes.
 
 ## All changes
 

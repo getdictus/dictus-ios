@@ -333,6 +333,21 @@ public enum LogEvent: Sendable {
     /// torn down. A `keyRepeatStarted` with no matching stop is a repeat that outlived
     /// its keyboard, which is the whole of #390 and was previously invisible.
     case keyRepeatStopped(ticks: Int, reason: String)
+    /// A delete swipe (#609) ended: the finger slid left from backspace and lifted.
+    /// `words` is how many words it left deleted, `frozen` whether an edit's mirror check
+    /// failed and stopped it (#530). Counts only, never the words.
+    case deleteSwipeEnded(words: Int, frozen: Bool)
+
+    // MARK: Swipe typing (#948)
+    // Counts and names only, never a word: what the finger wrote is what the user typed.
+    /// The keyboard decided whether letter touches may become swipes. `on` is the outcome;
+    /// `channel` is the distribution the app recorded (`AppDistribution`, `none` when it
+    /// recorded nothing); `reason` names what decided it (`off`, `appStore`, `language`, `on`).
+    case swipeTypingConfigured(on: Bool, channel: String, reason: String)
+    /// A swipe ended. `points` is the stroke's touch count, `decodeMs` how long the decode on
+    /// lift took, `readings` how many words it read, `outcome` what went in (`word`,
+    /// `slidTap`, `none`, `cancelled`).
+    case swipeEnded(points: Int, decodeMs: Double, readings: Int, outcome: String)
 
     // MARK: Keyboard status message (#261)
     /// The toolbar message was assigned. `reason` names what asked for it.
@@ -809,7 +824,8 @@ public enum LogEvent: Sendable {
              .onboardingKeyboardRetry,
              .audioEngineStopped,
              .keyboardDidDisappear, .keyboardTextInserted,
-             .keyRepeatStarted, .keyRepeatStopped,
+             .keyRepeatStarted, .keyRepeatStopped, .deleteSwipeEnded,
+             .swipeTypingConfigured, .swipeEnded,
              .appDidBecomeActive, .appWillResignActive, .appDidEnterBackground,
              .rapidTapRejected,
              .engineWarmUpAttempt, .engineWarmUpSuccess,
@@ -1010,6 +1026,12 @@ public enum LogEvent: Sendable {
             return ""
         case .keyRepeatStopped(let ticks, let reason):
             return "ticks=\(ticks) reason=\(reason)"
+        case .swipeTypingConfigured(let on, let channel, let reason):
+            return "on=\(on) channel=\(channel) reason=\(reason)"
+        case .swipeEnded(let points, let decodeMs, let readings, let outcome):
+            return "points=\(points) decodeMs=\(String(format: "%.2f", decodeMs)) readings=\(readings) outcome=\(outcome)"
+        case .deleteSwipeEnded(let words, let frozen):
+            return "words=\(words) frozen=\(frozen)"
 
         // Engine Diagnostics
         case .engineWarmUpAttempt(let context):
@@ -1289,7 +1311,8 @@ extension LogEvent {
             return .model
         case .keyboardDidAppear, .keyboardDidDisappear, .keyboardMicTapped, .keyboardTextInserted,
              .hostReturn,
-             .keyRepeatStarted, .keyRepeatStopped,
+             .keyRepeatStarted, .keyRepeatStopped, .deleteSwipeEnded,
+             .swipeTypingConfigured, .swipeEnded,
              .overlayShown, .overlayHidden, .rapidTapRejected,
              .dictationMessageSet, .dictationMessageDisplayed, .dictationMessageCleared,
              .waveformAppeared, .waveformDisappeared, .waveformHeartbeat, .waveformStall,
@@ -1394,6 +1417,9 @@ extension LogEvent {
         case .keyboardTextInserted: return "keyboardTextInserted"
         case .keyRepeatStarted: return "keyRepeatStarted"
         case .keyRepeatStopped: return "keyRepeatStopped"
+        case .swipeTypingConfigured: return "swipeTypingConfigured"
+        case .swipeEnded: return "swipeEnded"
+        case .deleteSwipeEnded: return "deleteSwipeEnded"
         case .engineWarmUpAttempt: return "engineWarmUpAttempt"
         case .engineWarmUpSuccess: return "engineWarmUpSuccess"
         case .engineWarmUpFailed: return "engineWarmUpFailed"

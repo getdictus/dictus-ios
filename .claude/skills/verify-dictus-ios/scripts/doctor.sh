@@ -90,7 +90,7 @@ fi
 FRONT=$(frontmost_app)
 case "$FRONT" in
   Simulator | DeviceHub) bad "$FRONT is the frontmost app: a window stole focus" ;;
-  unknown) warn "frontmost app unreadable (no Automation permission for System Events)" ;;
+  unknown) warn "frontmost app unreadable (lsappinfo gave no name)" ;;
   *) ok "frontmost app: $FRONT" ;;
 esac
 

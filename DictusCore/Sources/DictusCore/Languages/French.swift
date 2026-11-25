@@ -125,7 +125,8 @@ public let frenchProfile = LanguageProfile(
         ],
         endings: ["\u{00E9}", "\u{00E9}e", "\u{00E9}s", "\u{00E9}es"]  // é, ée, és, ées
     ),
-    contextualHomographs: [frenchAGrave]
+    contextualHomographs: [frenchAGrave],
+    longPressAccents: LongPressAccents.french
 )
 
 /// `a` (avoir) or `à` (#501). The sets were tuned on Tatoeba's French sentences;

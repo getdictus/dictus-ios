@@ -105,6 +105,13 @@ PROPER_NOUNS = [
 FIELD_REPORTED_WORDS = [
     "vocaux",
     "stylé", "stylée", "stylés", "stylées",
+    # Halves of Latin locutions French writes as two words. Lexique lists
+    # "curriculum vitae" only as one two-word entry, which dict_builder.py drops for
+    # its space, and has no "ex aequo" at all, so the trie knew neither half: typed
+    # with its ligature, "vitæ" became "vite" and "æquo" "qui" (#1042). The
+    # dictionary spells them without the ligature, as it spells "coeur";
+    # `Ligature.spelledOut` is how the keyboard finds the typed form.
+    "vitae", "aequo",
 ]
 
 

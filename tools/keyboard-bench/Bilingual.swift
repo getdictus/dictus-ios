@@ -73,7 +73,11 @@ final class DetectingCorrector: Corrector {
     var language: SupportedLanguage { window.language }
     var typingEngine: TextPredictionEngine { engine(window.language) }
 
-    func proposal(for word: String, previous: String?, isAtSentenceStart: Bool, context: String) -> CorrectionProposal? {
+    func proposal(for word: String, previous: String?, isAtSentenceStart: Bool,
+                  spatial: SpatialCorrection.Input?, context: String) -> CorrectionProposal? {
+        // The bilingual replay runs the trie path only: `replayPair` never turns the
+        // spatial decoder (#1011) on, and run.sh refuses `--pair` with `--spatial`.
+        precondition(spatial == nil, "the bilingual replay does not run the spatial decoder")
         let pair = window.pair
         window.push(WordLanguageVote.vote(for: word, after: previous, primary: source(pair.primary),
                                           secondary: source(pair.secondary)))
@@ -194,7 +198,8 @@ func replayPair(_ pair: KeyboardLanguagePair, runs: [String], corpusDir: String,
                 let line = s % sentences.count
                 let intendedWords = sentences[line].components(separatedBy: " ")
                 let (_, commits) = replay(run.filter { $0.sentence == s }, cells: cells, width: width, height: height,
-                                          picker: nil, journal: nil, corrector: corrector) { _, resolved, _, us, _, _ in
+                                          picker: nil, journal: nil, corrector: corrector,
+                                          spatial: false) { _, resolved, _, us, _, _ in
                     switch resolved {
                     case "space": costOut.append("\(label)\t\(policy)\tspace\t\(us)")
                     case "none", "backspace", "shift", "return", "123", "spacer", "other": break

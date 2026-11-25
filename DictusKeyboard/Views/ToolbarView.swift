@@ -389,6 +389,12 @@ struct ToolbarView: View {
             .minimumScaleFactor(0.85)
             .multilineTextAlignment(.center)
             .frame(maxWidth: .infinity)
+            // A failure stays until the user acts (#933); tapping it is one way.
+            .contentShape(Rectangle())
+            .onTapGesture {
+                KeyboardState.shared.clearStatusMessageOnUserAction(reason: "tapped")
+            }
+            .accessibilityIdentifier("keyboard.statusMessage")
             // Instrumentation only (#261). "The message was assigned" and
             // "a live view put it on screen" are different facts, and only
             // the first was observable — iOS keeps several controllers
