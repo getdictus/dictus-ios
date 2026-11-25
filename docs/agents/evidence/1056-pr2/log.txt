@@ -1,0 +1,8 @@
+[2026-11-25T14:12:31Z] INFO    [lifecycle] <APP> appLaunched version=2.1.0 protectedData=true activePrewarm=false appGroup=healthy
+[2026-11-25T14:12:32Z] DEBUG   [keyboard] <APP> diagnosticProbe component=VoiceNoteSpeechAssets instanceID=app action=skipped details=reason=launch trigger=launch voiceNoteLanguage=auto keyboard=fr plan=speechTranscriberUnavailable ios=27 speechTranscriberAvailable=false supportedCount=0
+[2026-11-25T14:12:33Z] DEBUG   [lifecycle] <APP> appDidBecomeActive
+[2026-11-25T14:12:47Z] DEBUG   [lifecycle] <APP> appDidEnterBackground
+[2026-11-25T14:12:48Z] DEBUG   [lifecycle] <APP> appDidBecomeActive
+[2026-11-25T14:12:48Z] DEBUG   [keyboard] <APP> diagnosticProbe component=VoiceNoteSpeechAssets instanceID=app action=skipped details=reason=languageChanged trigger=didBecomeActive voiceNoteLanguage=auto keyboard=en plan=speechTranscriberUnavailable ios=27 speechTranscriberAvailable=false supportedCount=0
+[2026-11-25T14:12:53Z] DEBUG   [lifecycle] <APP> appDidEnterBackground
+[2026-11-25T14:12:55Z] DEBUG   [lifecycle] <APP> appDidBecomeActive
