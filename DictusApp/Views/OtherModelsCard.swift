@@ -53,6 +53,8 @@ struct OtherModelsCard: View {
         .padding()
         .frame(maxWidth: .infinity, alignment: .leading)
         .dictusGlass()
+        // `.contain` so the cross and the button keep their own identifiers.
+        .accessibilityElement(children: .contain)
         .accessibilityIdentifier("home.otherModels")
     }
 }

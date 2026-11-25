@@ -6563,7 +6563,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Vous dictez avec le modèle d'Apple, déjà sur votre %1$@. Un autre modèle, comme %2$@, peut être plus précis, mais il prend de la place (%3$@)."
+            "value" : "Vous dictez avec le modèle d’Apple, déjà sur votre %1$@. Un autre modèle, comme %2$@, peut être plus précis, mais il prend de la place (%3$@)."
           }
         }
       }
@@ -10861,7 +10861,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "D'autres modèles de transcription"
+            "value" : "D’autres modèles de transcription"
           }
         }
       }
