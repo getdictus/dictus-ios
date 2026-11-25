@@ -5,8 +5,9 @@ import Combine
 
 /// The persisted queue.
 ///
-/// Same shape as `TranscriptionHistoryStore`, for the same reasons: one small JSON
-/// file, read once, rewritten whole and atomically on every change, by one process.
+/// The shape `TranscriptionHistoryStore` had until it gained a second writer (#1056):
+/// one small JSON file, read once, rewritten whole and atomically on every change, by
+/// one process.
 /// The share extension never writes it — see `VoiceNoteInbox`.
 ///
 /// ### The queue survives the process

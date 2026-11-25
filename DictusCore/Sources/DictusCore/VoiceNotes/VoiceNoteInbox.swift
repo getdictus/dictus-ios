@@ -60,8 +60,8 @@ public struct VoiceNoteDrop: Codable, Equatable, Sendable {
 ///
 /// ### Why a drop box and not a shared queue file
 ///
-/// The queue has one writer, DictusApp — the same single-writer property that lets
-/// `TranscriptionHistoryStore` skip `NSFileCoordinator`. The extension never touches
+/// The queue has one writer, DictusApp, which is what lets `VoiceNoteQueueStore`
+/// skip `NSFileCoordinator` (History no longer can, since #1056). The extension never touches
 /// the queue: it leaves the audio and a small sidecar in `Inbox/`, and the app moves
 /// them into the queue when it next runs. Two processes, two directories, no file
 /// either of them shares for writing.

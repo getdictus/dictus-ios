@@ -8,11 +8,11 @@ import Foundation
 /// ### Why a copy of the transcript, and not a pointer into History
 ///
 /// `TranscriptionHistoryStore` and `VoiceNoteQueueStore` load their file once and
-/// treat that copy as the truth for the life of a process. A keyboard that
-/// instantiated either before the app finished a note would hold a stale snapshot,
-/// and a keyboard that wrote either would race DictusApp, their only writer. So the
-/// app publishes a small envelope the keyboard rereads from disk every time it asks
-/// (#637, Option A), and the stores stay single-writer.
+/// keep that copy for the life of a process (History re-reads it only when the app
+/// comes to the foreground, #1056). A keyboard that instantiated either before the
+/// app finished a note would hold a stale snapshot. So the app publishes a small
+/// envelope the keyboard rereads from disk every time it asks (#637, Option A), and
+/// the keyboard writes neither store.
 ///
 /// It is an envelope, not a second History: it leaves the keyboard `idleWindow` after
 /// its last use, when the user deletes it from the keyboard's reader, or when the

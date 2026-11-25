@@ -504,6 +504,9 @@ struct DictusApp: App {
                     switch phase {
                     case .active:
                         PersistentLog.log(.appDidBecomeActive)
+                        // #1056: another process may have written History while this
+                        // app was closed or suspended; this copy is from before that.
+                        TranscriptionHistoryStore.shared.reloadFromDisk()
                         catchUpOnProtectedData(trigger: "didBecomeActive")
                         // A purchase made outside the app while it was in the
                         // background unlocks Pro on return (#900).

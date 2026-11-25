@@ -239,7 +239,9 @@ final class VoiceNoteProcessor: ObservableObject {
         store.mutate { $0.update(note.id) { $0.state = .transcribing(progress: 0) } }
         DictationCoordinator.shared.extendWarmWindowForVoiceNote()
 
-        guard AppGroup.defaults.bool(forKey: SharedKeys.modelReady) else {
+        // Apple's engine, picked with no downloaded model, transcribes too (#1057, #1056).
+        if !AppGroup.defaults.bool(forKey: SharedKeys.modelReady),
+           !(await AppleEngineAssets.dictatesWithAppleOnly(context: "voiceNote")) {
             return fail(note, .transcriptionFailed, detail: "no model downloaded")
         }
         guard let url = store.audioURL(for: note) else {
