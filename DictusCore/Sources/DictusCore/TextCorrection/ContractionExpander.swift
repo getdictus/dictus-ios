@@ -47,7 +47,8 @@ public func expandContractions(
         let candidatePrefix = String(lowered.prefix(letterCount)) + "'"
         let suffix = String(lowered.dropFirst(letterCount))
 
-        if candidatePrefix == prefix, !suffix.isEmpty {
+        // French never elides before a consonant: `dvotre` is not `d'votre`.
+        if candidatePrefix == prefix, !suffix.isEmpty, profile.allowsElided(suffix, after: candidatePrefix) {
             if provider.wordExists(suffix) {
                 return candidatePrefix + suffix
             }
@@ -55,9 +56,9 @@ public func expandContractions(
             // "Cetait" → suffix "etait" → "était" → "c'était".
             // Without this fallback the expansion fails and the trie wins with
             // a destructive correction ("Cetait" → "Était", dropping the c).
-            // expandAccents only returns dictionary words (with the 5x
-            // dominance guard), so this cannot invent contractions.
-            if let accented = expandAccents(profile: profile, word: suffix, provider: provider) {
+            // restoreAccents only returns dictionary words, so this cannot
+            // invent contractions.
+            if case .restore(let accented) = restoreAccents(profile: profile, word: suffix, provider: provider) {
                 return candidatePrefix + accented
             }
         }

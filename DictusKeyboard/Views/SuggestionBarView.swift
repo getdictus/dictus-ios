@@ -88,7 +88,7 @@ struct SuggestionBarView: View {
             // In completion mode:
             //   index 1 = bold (best completion)
             //   others = regular weight
-            // In prediction mode:
+            // In prediction mode, and in candidates mode (typed word kept, #993):
             //   All equal weight -- no "auto-applied" word, all are suggestions
             // This matches standard iOS keyboard suggestion bar behavior.
             Text(displayText(suggestion, at: index))
@@ -148,7 +148,7 @@ struct SuggestionBarView: View {
     /// where the unquoted bold center word is the one that gets auto-applied.
     private func fontWeight(at index: Int) -> Font.Weight {
         switch mode {
-        case .predictions:
+        case .predictions, .candidates:
             return .regular
         case .undoAvailable:
             return index == 0 ? .semibold : .regular
@@ -158,7 +158,7 @@ struct SuggestionBarView: View {
     }
 
     private func displayText(_ suggestion: String, at index: Int) -> String {
-        if mode == .corrections && index == 0 {
+        if (mode == .corrections || mode == .candidates) && index == 0 {
             return "\u{201C}\(suggestion)\u{201D}"
         }
         return suggestion

@@ -29,6 +29,15 @@ final class SupplementaryLexiconTests: XCTestCase {
         )
     }
 
+    /// An all-caps `ST` entry turned the `st` of a mistyped `ce st` into "ST" (#1006).
+    func testTwoLetterLowercaseWordIsKeptButNotRecased() {
+        let initials = SupplementaryLexicon(entries: [(userInput: "ST", documentText: "ST")])
+        XCTAssertEqual(initials.decision(for: "st", isDictionaryWord: false), .keep)
+        XCTAssertEqual(initials.decision(for: "ST", isDictionaryWord: false), .keep)
+        let threeLetters = SupplementaryLexicon(entries: [(userInput: "STE", documentText: "STE")])
+        XCTAssertEqual(threeLetters.decision(for: "ste", isDictionaryWord: false), .replace(with: "STE"))
+    }
+
     func testAllCapsContactIsKeptAsTyped() {
         XCTAssertEqual(lexicon.decision(for: "ZOFIAK", isDictionaryWord: false), .keep)
     }
@@ -110,5 +119,24 @@ final class SupplementaryLexiconTests: XCTestCase {
             (userInput: "ZOFIAK", documentText: "ZOFIAK")
         ])
         XCTAssertEqual(duplicates.decision(for: "zofiak", isDictionaryWord: false), .replace(with: "Zofiak"))
+    }
+
+    // MARK: - Against the previous-word rules (#500)
+
+    func testShortcutOutranksContextRules() {
+        XCTAssertTrue(SupplementaryLexicon.Decision.replace(with: "quelque chose").outranksContextRules(isDictionaryWord: true))
+        XCTAssertTrue(SupplementaryLexicon.Decision.replace(with: "Zofiak").outranksContextRules(isDictionaryWord: false))
+    }
+
+    func testKeptNameOutranksContextRules() {
+        XCTAssertTrue(SupplementaryLexicon.Decision.keep.outranksContextRules(isDictionaryWord: false))
+    }
+
+    func testKeptDictionaryWordYieldsToContextRules() {
+        // Device test of PR #970: the lexicon held "ma", so "il ma" stayed "il ma".
+        let withMa = SupplementaryLexicon(entries: [(userInput: "ma", documentText: "ma")])
+        let decision = withMa.decision(for: "ma", isDictionaryWord: true)
+        XCTAssertEqual(decision, .keep)
+        XCTAssertEqual(decision?.outranksContextRules(isDictionaryWord: true), false)
     }
 }

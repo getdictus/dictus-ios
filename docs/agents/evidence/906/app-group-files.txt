@@ -1,0 +1,48 @@
+# #906 App Group files around « Effacer l'historique », simulator run 20261113-224453 (iPhone 17, iOS 26.5)
+# Seeded text is synthetic. Paths shortened to <AppGroup>.
+
+## before-fix-free.txt  (develop fd92aaa0)
+free BEFORE-fix: journal bytes      770, history []
+"AXLabel" : "Polir la transcription"
+"AXLabel" : "Polir la transcription"
+
+## before-fix-pro-after-clear.txt  (develop fd92aaa0)
+== develop fd92aaa0, Pro, AFTER Clear history 2026-11-13T21:50:44Z
+polish_events.jsonl bytes:      770
+transcription_history.json bytes:        2
+journal content still on disk:
+{"id":"28343F20-AC6E-4A45-A777-E3B836F37DA7","raw":"rendez-vous chez le dentiste jeudi à dix heures","timestamp":"2026-11-13T21:44:47Z","metrics":{"targetLanguage":"fr","latencyMs":412,"polishedCharCount":48,"engine":"apple-fm","rawCharCount":47,"detectedLanguage":"fr","outcome":"success","mode":"natural"},"writer":"<KBD>","polished":"rendez-vous chez le dentiste jeudi à dix heures."}
+{"id":"BE923B35-80E6-4752-A07A-885E95DFBFCE","raw":"rappelle-moi d'appeler Camille demain matin","timestamp":"2026-11-13T21:44:47Z","metrics":{"targetLanguage":"fr","latencyMs":412,"polishedCharCount":44,"engine":"apple-fm","rawCharCount":43,"detectedLanguage":"fr","outcome":"success","mode":"natural"},"writer":"<KBD>","polished":"rappelle-moi d'appeler Camille demain matin."}
+
+## journal-before.txt  (fix 0bde0227)
+== journal BEFORE Clear history (seeded) 2026-11-13T21:47:51Z
+-rw-r--r--@ 1 user staff  770 Nov 13 22:47 <AppGroup>/polish_events.jsonl
+     770
+{"id":"28343F20-AC6E-4A45-A777-E3B836F37DA7","raw":"rendez-vous chez le dentiste jeudi à dix heures","timestamp":"2026-11-13T21:44:47Z","metrics":{"targetLanguage":"fr","latencyMs":412,"polishedCharCount":48,"engine":"apple-fm","rawCharCount":47,"detectedLanguage":"fr","outcome":"success","mode":"natural"},"writer":"<KBD>","polished":"rendez-vous chez le dentiste jeudi à dix heures."}
+{"id":"BE923B35-80E6-4752-A07A-885E95DFBFCE","raw":"rappelle-moi d'appeler Camille demain matin","timestamp":"2026-11-13T21:44:47Z","metrics":{"targetLanguage":"fr","latencyMs":412,"polishedCharCount":44,"engine":"apple-fm","rawCharCount":43,"detectedLanguage":"fr","outcome":"success","mode":"natural"},"writer":"<KBD>","polished":"rappelle-moi d'appeler Camille demain matin."}
+ls: <AppGroup>/transcription_history.json: No such file or directory
+
+## journal-after.txt  (fix 0bde0227)
+== journal AFTER Clear history 2026-11-13T21:48:32Z
+-rw-r--r--@ 1 user staff  0 Nov 13 22:48 <AppGroup>/polish_events.jsonl
+bytes:        0
+content (between markers):
+>>>
+<<<
+
+## pro-before.txt  (fix 0bde0227)
+== Pro case BEFORE Clear history 2026-11-13T21:48:53Z
+polish_events.jsonl bytes:      770
+transcription_history.json bytes:      195
+[{"createdAt":"2026-11-13T21:44:47Z","durationSeconds":4,"sttProvider":"PK","text":"rendez-vous chez le dentiste jeudi à dix heures","language":"fr","id":"47FE2EF4-A33E-42E9-AC3E-8F87E6832A85"}]
+
+## pro-after.txt  (fix 0bde0227)
+== Pro case AFTER Clear history 2026-11-13T21:49:17Z
+polish_events.jsonl bytes:        0
+>>>
+
+<<<
+transcription_history.json bytes:        2
+>>>
+[]
+<<<

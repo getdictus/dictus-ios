@@ -127,7 +127,7 @@ final class SubscriptionManager: ObservableObject {
                 ))
             }
         } catch {
-            PersistentLog.log(.subscriptionError(action: "loadProducts", error: error.localizedDescription))
+            PersistentLog.log(.subscriptionError(action: "loadProducts", error: LoggedError.domainAndCode(error)))
         }
     }
 
@@ -162,7 +162,7 @@ final class SubscriptionManager: ObservableObject {
             let nsError = error as NSError
             PersistentLog.log(.subscriptionError(
                 action: "purchase",
-                error: error.localizedDescription,
+                error: LoggedError.domainAndCode(error),
                 product: product.id,
                 domain: nsError.domain,
                 code: nsError.code
@@ -186,7 +186,7 @@ final class SubscriptionManager: ObservableObject {
             purchaseState = proStatus.isPaid ? .success : .idle
         } catch {
             purchaseState = .failed(error.localizedDescription)
-            PersistentLog.log(.subscriptionError(action: "restore", error: error.localizedDescription))
+            PersistentLog.log(.subscriptionError(action: "restore", error: LoggedError.domainAndCode(error)))
         }
     }
 
@@ -212,7 +212,7 @@ final class SubscriptionManager: ObservableObject {
         } else if let failure {
             PersistentLog.log(.subscriptionError(
                 action: "offerCodeRedemption",
-                error: failure.localizedDescription,
+                error: LoggedError.domainAndCode(failure),
                 domain: failure.domain,
                 code: failure.code
             ))

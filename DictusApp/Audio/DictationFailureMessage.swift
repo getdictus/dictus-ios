@@ -94,12 +94,12 @@ enum DictationFailureMessage {
 
     /// English technical detail for the log. Never shown to the user.
     ///
-    /// Falls back to `localizedDescription` for a foreign error because that is what those
-    /// log lines carried before this type existed, and it is the readable form for an
-    /// `NSError`. The point of the funnel is what leaves the log, not what enters it.
+    /// A foreign error is reduced to its domain and code (#939): the log leaves the device
+    /// through the feedback form, and WhisperKit, FluidAudio and Core ML messages can name
+    /// files on the device.
     static func diagnostic(for error: Error) -> String {
         guard let diagnosable = error as? DiagnosableError else {
-            return error.localizedDescription
+            return LoggedError.domainAndCode(error)
         }
         return diagnosable.diagnosticDescription
     }

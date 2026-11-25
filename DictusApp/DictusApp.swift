@@ -323,12 +323,12 @@ struct DictusApp: App {
     /// unlock would turn into defaults written over the user's settings (#868). Runs once
     /// per process, through `appGroupLaunchWork`.
     private static func runAppGroupLaunchWork() {
-        // What's new's key (#685), before `MainTabView` asks whether it is due. A launch
-        // that has not completed onboarding is a new install: recorded as up to date now,
-        // so its onboarding is never followed by What's new. An existing user's first
-        // launch of 2.0.0 is left due, and recorded once What's new is on screen. A device
-        // that can never run Smart Modes has no scene to show, and is recorded now.
-        WhatsNew.recordLaunch(deviceCanRunSmartModes: SmartModeAvailability.deviceIsCapable)
+        // What's new's key (#685, #974), before `MainTabView` asks whether it is due. A
+        // launch that has not completed onboarding is a new install: recorded as up to date
+        // now, so its onboarding is never followed by What's new. An existing user's first
+        // launch of an update is left due, and recorded once the notes are on screen. A
+        // version without release notes has nothing to show, and is recorded now.
+        WhatsNew.recordLaunch(hasNotes: ReleaseNotes.current() != nil)
 
         // Retire App Group keys nothing reads any more (#361 removed the #357 probe's
         // arming flag, #888 the « open on 123 » setting). A device where one was set
@@ -444,6 +444,11 @@ struct DictusApp: App {
                         // #620's cold path: a voice note shared while the app was not
                         // running starts now, with the list on screen.
                         VoiceNoteProcessor.shared.appBecameActive()
+                        // Drop polish journal entries past 7 days (#946). The keyboard
+                        // writes most of them and only ever appends, so without this they
+                        // stay until the app happens to record a polish event itself.
+                        // Off the main actor: the file coordinator blocks its thread.
+                        Task.detached(priority: .utility) { PolishEventStore.pruneOldEntries() }
                     case .inactive:
                         PersistentLog.log(.appWillResignActive)
                     case .background:

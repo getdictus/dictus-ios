@@ -25,9 +25,23 @@ public struct FrequencyDictionary {
     /// Loads frequency data from raw JSON Data.
     /// Expected format: `{"word": count, ...}` where count is an Int (higher = more common).
     /// This is the testable entry point -- no Bundle dependency.
+    ///
+    /// WHY `JSONSerialization` and not `JSONDecoder` (#555): the shipped files hold
+    /// 40 000 to 50 000 words, and decoding one with `JSONDecoder` peaks 9.5 MB above
+    /// the baseline, against 3.5 MB here, for the same dictionary. The keyboard
+    /// extension runs this load inside its own memory budget, so it pays that peak.
     public mutating func load(from data: Data) {
         do {
-            let decoded = try JSONDecoder().decode([String: Int].self, from: data)
+            // The pool releases the parsed Foundation objects here rather than when
+            // the caller's pool drains: without it, 3 MB stayed alive after a load.
+            let parsed = try autoreleasepool {
+                try JSONSerialization.jsonObject(with: data) as? [String: Int]
+            }
+            guard let decoded = parsed else {
+                print("[FrequencyDictionary] Frequency data is not a {word: count} object")
+                counts = [:]
+                return
+            }
             // Keep only the top N most frequent words to save memory.
             // Words not in this dictionary get a count of 0 (lowest priority in
             // sorting), which is the correct behavior for rare words.
@@ -35,7 +49,11 @@ public struct FrequencyDictionary {
                 let top = decoded.sorted { $0.value > $1.value }.prefix(Self.maxWords)
                 counts = [:]
                 counts.reserveCapacity(Self.maxWords)
-                for (key, value) in top {
+                for (word, value) in top {
+                    // A native copy: the parsed key still points at its NSString,
+                    // which would keep 10 000 of them alive.
+                    var key = word
+                    key.makeContiguousUTF8()
                     counts[key] = value
                 }
             } else {

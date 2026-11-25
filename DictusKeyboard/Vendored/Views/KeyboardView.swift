@@ -29,6 +29,8 @@ protocol GiellaKeyboardViewDelegate: AnyObject {
     /// fires its haptic and its click on that answer (#390), and stops on it (#419).
     func didTriggerRepeat(_ key: KeyDefinition, wordMode: Bool) -> KeyRepeatOutcome
     func didMoveCursor(_ movement: Int)
+    /// The text the host shares around its cursor, for the space-bar trackpad (#950).
+    func trackpadTextContext() -> (before: String, after: String)
 }
 
 @objc protocol GiellaKeyboardViewKeyboardKeyDelegate {
@@ -51,7 +53,8 @@ final internal class GiellaKeyboardView: UIView,
     UICollectionViewDelegate,
     UICollectionViewDelegateFlowLayout,
     LongPressOverlayDelegate,
-    LongPressCursorMovementDelegate
+    LongPressCursorMovementDelegate,
+    UIGestureRecognizerDelegate
 {
     // The three cadences below are Apple's own, measured rather than guessed --
     // Apple documents none of this. See docs/research/419-backspace-cadence/ for the
@@ -135,6 +138,8 @@ final internal class GiellaKeyboardView: UIView,
 
     private var longpressController: LongPressBehaviorProvider?
     private var currentlyLongpressedKey: KeyDefinition?
+    /// The finger on the space bar whose hold may start the trackpad (#950).
+    private weak var spaceHoldTouch: UITouch?
 
     private var keyboardButtonFrame: CGRect? {
         didSet {
@@ -196,6 +201,8 @@ final internal class GiellaKeyboardView: UIView,
         // delivery at screen edges where system gesture disambiguation can add ~100ms.
         recognizer.delaysTouchesBegan = false
         recognizer.delaysTouchesEnded = false
+        // Picks the hold's length per touch: shorter on the space bar (#950).
+        recognizer.delegate = self
         return recognizer
     }()
 
@@ -261,10 +268,37 @@ final internal class GiellaKeyboardView: UIView,
                     let indexPath = IndexPath(row: row, section: section)
                     if let cell = collectionView.cellForItem(at: indexPath) as? KeyCell {
                         let key = KeyDefinition(type: .input(key: accentKeyLabel, alternate: nil))
-                        cell.configure(page: page, key: key, theme: theme, traits: self.traitCollection)
+                        cell.configure(page: page, key: key, theme: theme, traits: self.traitCollection,
+                                       capInsets: capInsets(at: indexPath))
                     }
                     return
                 }
+            }
+        }
+    }
+
+    /// What the return key draws for the focused field (#1023). Set by the bridge each time
+    /// it reads the host's traits; every page's return cell is built from it.
+    private(set) var returnKeyAppearance: ReturnKeyAppearance = .standard
+
+    /// Redraws the return key for the field's `returnKeyType` and its off state.
+    ///
+    /// The cell is reconfigured in place, for the reason `updateAccentKeyLabel` gives:
+    /// `reloadItems` runs a layout pass that makes iOS re-measure the keyboard height. And
+    /// only on a change, because the bridge calls this after every keystroke.
+    func updateReturnKey(_ appearance: ReturnKeyAppearance) {
+        guard appearance != returnKeyAppearance else { return }
+        returnKeyAppearance = appearance
+        for section in 0..<currentPage.count {
+            for row in 0..<currentPage[section].count {
+                let key = currentPage[section][row]
+                guard case .returnkey = key.type else { continue }
+                let indexPath = IndexPath(row: row, section: section)
+                guard let cell = collectionView.cellForItem(at: indexPath) as? KeyCell else { continue }
+                let isPressed = activeKey?.indexPath == indexPath
+                cell.configure(page: page, key: key, theme: theme, traits: traitCollection,
+                               returnKey: appearance, capInsets: capInsets(at: indexPath))
+                cell.keyView?.active = isPressed
             }
         }
     }
@@ -538,6 +572,33 @@ final internal class GiellaKeyboardView: UIView,
         delegate?.didMoveCursor(movedCursor)
     }
 
+    func longpressTextContext() -> (before: String, after: String) {
+        delegate?.trackpadTextContext() ?? ("", "")
+    }
+
+    // MARK: - UIGestureRecognizerDelegate
+
+    /// The space bar's hold starts the trackpad after `TrackpadCursor.holdDelay` (Apple's
+    /// 0.35 s), where the other keys keep UIKit's 0.5 s for their popups. Set here, before
+    /// the recognizer sees the touch, and only for the first finger down: changing it while a
+    /// press is being timed would retime that press. A touch that slides `holdSlop` (UIKit's
+    /// `allowableMovement`) before then fails the hold, so it stays a tap and types its space.
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
+        guard gestureRecognizer === longpressGestureRecognizer, longpressGestureRecognizer.numberOfTouches == 0 else { return true }
+        var onSpace = false
+        if let indexPath = collectionView.indexPathForItem(at: clampedPoint(touch.location(in: collectionView))),
+           case .spacebar = currentPage[indexPath.section][indexPath.row].type {
+            onSpace = true
+        }
+        longpressGestureRecognizer.minimumPressDuration = onSpace ? TrackpadCursor.holdDelay : Self.keyHoldDelay
+        longpressGestureRecognizer.allowableMovement = TrackpadCursor.holdSlop
+        spaceHoldTouch = onSpace ? touch : nil
+        return true
+    }
+
+    /// UIKit's default hold, which the key popups have always used.
+    private static let keyHoldDelay: TimeInterval = 0.5
+
     // MARK: - Input handling
 
     struct KeyTriggerTiming {
@@ -728,6 +789,9 @@ final internal class GiellaKeyboardView: UIView,
             let touchPoint = clampedPoint(touch.location(in: collectionView))
             if let indexPath = collectionView.indexPathForItem(at: touchPoint) {
                 let key = currentPage[indexPath.section][indexPath.row]
+                #if DEBUG
+                recordJournalTap(touch, key: key, at: indexPath)
+                #endif
 
                 // Click on finger contact, in step with the haptic fired above (#286).
                 // This is the only point where a touch resolves to a key, so it is also
@@ -773,6 +837,60 @@ final internal class GiellaKeyboardView: UIView,
         }
     }
 
+    #if DEBUG
+    /// The language and layout this grid was built for. The view is rebuilt when
+    /// either changes, so it is read once, at the first recorded tap.
+    private lazy var journalKeyboard = "\(SupportedLanguage.active.rawValue)-\(LayoutType.active.rawValue)"
+
+    /// Records the tap in the typing journal (#1001): the key, and where the finger
+    /// landed from its centre in key units, the unit of tools/keyboard-bench runs.
+    /// The point is the touch's own, before `clampedPoint`, so a replay that clamps
+    /// it again resolves the same key.
+    private func recordJournalTap(_ touch: UITouch, key: KeyDefinition, at indexPath: IndexPath) {
+        guard TypingJournal.isRecording,
+              let frame = collectionView.layoutAttributesForItem(at: indexPath)?.frame,
+              frame.width > 0, frame.height > 0 else { return }
+        let point = touch.location(in: collectionView)
+        var centre = CGPoint(x: frame.midX, y: frame.midY)
+        var unitWidth = frame.width / max(key.size.width, 0.01)
+        var rowHeight = frame.height
+        // On Apple's key plane an outer key's target runs to the screen edge and row 1's up
+        // to the toolbar, so the offsets are taken from the keycap and the row pitch, as the
+        // bench's runs are.
+        if let geometry = planeGeometry, let slots = planeSlots, indexPath.section < slots.count,
+           indexPath.row < slots[indexPath.section].count {
+            let cap = slots[indexPath.section][indexPath.row].cap
+            centre = CGPoint(x: cap.midX, y: cap.midY)
+            unitWidth = (cap.width + geometry.keyGap) / max(key.size.width, 0.01)
+            rowHeight = geometry.rowPitch
+        }
+        TypingJournal.tap(
+            Self.journalName(of: key.type),
+            dx: Double((point.x - centre.x) / unitWidth),
+            dy: Double((point.y - centre.y) / rowHeight),
+            time: touch.timestamp,
+            keyboard: journalKeyboard
+        )
+    }
+
+    /// A key as the journal and the bench's run files name it.
+    private static func journalName(of type: KeyType) -> String {
+        switch type {
+        case .input(let key, let alternate): return alternate == "accent" ? "accent" : key.lowercased()
+        case .spacebar: return "space"
+        case .backspace: return "backspace"
+        case .shift, .caps: return "shift"
+        case .returnkey: return "return"
+        case .symbols: return "123"
+        case .shiftSymbols: return "#+="
+        case .keyboard: return "globe"
+        case .comma: return ","
+        case .fullStop: return "."
+        default: return "other"
+        }
+    }
+    #endif
+
     /// Clamp a touch point into the collection view's content area.
     ///
     /// WHY: `indexPathForItem(at:)` returns nil if the point is even 1pt outside any
@@ -790,7 +908,11 @@ final internal class GiellaKeyboardView: UIView,
         )
     }
 
-    override func touchesMoved(_ touches: Set<UITouch>, with _: UIEvent?) {
+    override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
+        if let trackpad = longpressController as? LongPressCursorMovementController {
+            trackpad.touchesMoved(touches, with: event, in: collectionView)
+            return
+        }
         if let longpressController = self.longpressController, let touch = touches.first {
             longpressController.touchesMoved(touch.location(in: collectionView))
             return
@@ -831,11 +953,14 @@ final internal class GiellaKeyboardView: UIView,
     }
 
     override func touchesCancelled(_: Set<UITouch>, with _: UIEvent?) {
+        (longpressController as? LongPressCursorMovementController)?.cancel()
         longpressController = nil
         activeKey = nil
     }
 
     override func touchesEnded(_ touches: Set<UITouch>, with _: UIEvent?) {
+        // Another finger lifting leaves the trackpad on (#950).
+        if let trackpad = longpressController as? LongPressCursorMovementController, !trackpad.owns(touches) { return }
         if let longpressController = self.longpressController, let touch = touches.first {
             longpressController.touchesEnded(touch.location(in: collectionView))
             removeAllOverlays()
@@ -917,13 +1042,17 @@ final internal class GiellaKeyboardView: UIView,
 
             case .spacebar:
                 if longpressGestureRecognizer.state == .began {
-                    let longpressController = LongPressCursorMovementController()
-                    longpressController.delegate = self
-                    self.longpressController = longpressController
-                    collectionView.alpha = 0.4
-                    // Initialize baseline so touchesMoved can compute deltas
-                    let startPoint = longpressGestureRecognizer.location(in: collectionView)
-                    longpressController.touchesBegan(startPoint)
+                    let trackpad = LongPressCursorMovementController(touch: spaceHoldTouch, keyboardWidth: bounds.width)
+                    trackpad.delegate = self
+                    self.longpressController = trackpad
+                    // The space bar is a trackpad now, not a pressed key: it types nothing on
+                    // lift, and it goes blank with the others.
+                    activeKey = nil
+                    // The keys go blank, as Apple's do; `longpressDidCancel` brings them back.
+                    trackpad.showBlankKeys(over: collectionView)
+                    collectionView.alpha = 0
+                    // The trackpad starts where the finger is now.
+                    trackpad.touchesBegan(longpressGestureRecognizer.location(in: collectionView))
                 }
             case .backspace:
                 break
@@ -952,6 +1081,9 @@ final internal class GiellaKeyboardView: UIView,
 
         switch outcome {
         case .deleted:
+            #if DEBUG
+            if case .backspace = activeKey.key.type { TypingJournal.repeatDelete() }
+            #endif
             // The feedback follows the deletion, not the tick (#390). Both used to fire
             // unconditionally, which is what produced "haptics in a chain while nothing
             // is deleted". Still exactly one haptic and one click per deletion, as #286
@@ -1045,6 +1177,46 @@ final internal class GiellaKeyboardView: UIView,
 
     private var rowNumberOfUnits: [CGFloat]!
 
+    /// Apple's key plane for the current page and bounds (`KeyPlaneGeometry`), or nil where
+    /// the table does not apply and the even grid below stays: an iPad, the digit row's five
+    /// rows (#331), or a grid too short for Apple's rows.
+    ///
+    /// WHY here and not in the height: the grid's height is the declared keyboard height
+    /// (`KeyboardHeightProvider`, #166), which this does not touch. Only where the keys sit
+    /// inside it changes, so the keyboard is exactly as tall as before.
+    private var planeSlots: [[KeyPlaneSlot]]?
+    /// The table entry `planeSlots` was laid out from.
+    private var planeGeometry: KeyPlaneGeometry?
+
+    private func keyPlaneSlots() -> [[KeyPlaneSlot]]? {
+        let device = DeviceContext.current
+        guard device.isPhone, !shouldUseiPadLayout, bounds.width > 0, bounds.height > 0 else { return nil }
+        let geometry = KeyPlaneGeometry.apple(
+            .forScreen(UIScreen.main.bounds.size),
+            device.isLandscape ? .landscape : .portrait
+        )
+        planeGeometry = geometry
+        return geometry.layout(
+            rows: currentPage.map { row in row.map { $0.size.width } },
+            width: bounds.width,
+            height: bounds.height
+        )
+    }
+
+    /// Where the keycap sits inside its cell (the touch target), or nil for the theme's even
+    /// margins.
+    private func capInsets(at indexPath: IndexPath) -> UIEdgeInsets? {
+        guard let slots = planeSlots, indexPath.section < slots.count,
+              indexPath.row < slots[indexPath.section].count else { return nil }
+        let slot = slots[indexPath.section][indexPath.row]
+        return UIEdgeInsets(
+            top: slot.cap.minY - slot.hit.minY,
+            left: slot.cap.minX - slot.hit.minX,
+            bottom: slot.hit.maxY - slot.cap.maxY,
+            right: slot.hit.maxX - slot.cap.maxX
+        )
+    }
+
     private func calculateRows() {
         var mutableWidths = [CGFloat]()
 
@@ -1056,6 +1228,7 @@ final internal class GiellaKeyboardView: UIView,
         }
 
         rowNumberOfUnits = mutableWidths
+        planeSlots = keyPlaneSlots()
 
         collectionView.reloadData()
     }
@@ -1101,7 +1274,8 @@ final internal class GiellaKeyboardView: UIView,
             key = KeyDefinition(type: .input(key: accentKeyLabel, alternate: nil))
         }
 
-        cell.configure(page: page, key: key, theme: theme, traits: self.traitCollection)
+        cell.configure(page: page, key: key, theme: theme, traits: self.traitCollection,
+                       returnKey: returnKeyAppearance, capInsets: capInsets(at: indexPath))
 
         if let swipeKeyView = cell.keyView, swipeKeyView.isSwipeKey {
             swipeKeyView.percentageAlternative = 0.0
@@ -1111,6 +1285,15 @@ final internal class GiellaKeyboardView: UIView,
     }
 
     func collectionView(_: UICollectionView, layout _: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        if let slots = planeSlots, indexPath.section < slots.count, indexPath.row < slots[indexPath.section].count {
+            let row = slots[indexPath.section]
+            let hit = row[indexPath.row].hit
+            // The targets tile the full width; a hundredth of a point off the last one keeps
+            // rounding from pushing it onto a line of its own in the flow layout.
+            let width = indexPath.row == row.count - 1 ? hit.width - 0.01 : hit.width
+            return CGSize(width: width, height: hit.height)
+        }
+
         let key = currentPage[indexPath.section][indexPath.row]
 
         let width = key.size.width * ((bounds.size.width - 1) / rowNumberOfUnits[indexPath.section])
@@ -1138,7 +1321,8 @@ final internal class GiellaKeyboardView: UIView,
             contentView.fill(superview: self)
         }
 
-        func configure(page: KeyboardPage, key: KeyDefinition, theme: Theme, traits: UITraitCollection) {
+        func configure(page: KeyboardPage, key: KeyDefinition, theme: Theme, traits: UITraitCollection,
+                       returnKey: ReturnKeyAppearance = .standard, capInsets: UIEdgeInsets? = nil) {
             contentView.subviews.forEach { view in
                 view.removeFromSuperview()
             }
@@ -1151,10 +1335,18 @@ final internal class GiellaKeyboardView: UIView,
                 contentView.addSubview(emptyview)
                 emptyview.fill(superview: contentView)
             } else {
-                let keyView = KeyView(page: page, key: key, theme: theme, traits: traits)
+                let keyView = KeyView(
+                    page: page, key: key, theme: theme, traits: traits,
+                    returnKey: returnKey, capInsets: capInsets
+                )
                 if let accessibilityLabel = key.accessibilityLabel(for: page) {
                     keyView.isAccessibilityElement = true
                     keyView.accessibilityLabel = accessibilityLabel
+                } else if case .returnkey = key.type {
+                    // The key's name for its type, since the glyph has no words (#1023).
+                    keyView.isAccessibilityElement = true
+                    keyView.accessibilityLabel = returnKey.style.label(in: KeyView.labelLanguage)
+                    keyView.accessibilityTraits = returnKey.isEnabled ? .keyboardKey : [.keyboardKey, .notEnabled]
                 }
                 keyView.translatesAutoresizingMaskIntoConstraints = false
                 contentView.addSubview(keyView)

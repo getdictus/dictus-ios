@@ -162,6 +162,16 @@ public enum PolishGuardrail {
         matches(polished: polished, expectedCode: target.rawValue, raw: raw, thresholds: thresholds)
     }
 
+    /// Translation variant (#622): the output must read as the Translate target, in the
+    /// recogniser's own code for it (`TranslationTarget.recognizerCode`). Never handed
+    /// `raw`, for the reason `PolishPipeline` gives: a segment copied from the
+    /// transcript is the untranslated text the check exists to catch.
+    public static func detectedLanguageMatches(polished: String,
+                                               translationTarget target: TranslationTarget,
+                                               thresholds: PolishLanguageSegmentThresholds = .default) -> Bool {
+        matches(polished: polished, expectedCode: target.recognizerCode, raw: nil, thresholds: thresholds)
+    }
+
     /// Auto-mode variant (#239): there is no target language, but the INPUT's
     /// detected language is known — the polished output must be in the same
     /// one. This is the runtime enforcement of the auto prompt's

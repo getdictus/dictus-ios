@@ -101,10 +101,10 @@ extension DictationCoordinator {
             // are called "→ EN" and "→ EN could not transform this text" does not
             // read. The keyboard's `announce` uses the same shape, deliberately.
             //
-            // One refusal gets its own sentence here as it does there (#490): a
-            // language Apple Foundation Models does not read is the only cause this
-            // surface can name, and it is the only one where "Try again" would be an
-            // instruction to repeat a failure. Keyed on the outcome and not on the
+            // Two refusals get their own sentence here as they do there. #490: a
+            // language Apple Foundation Models does not read, where "Try again" would
+            // be an instruction to repeat a failure. #622, below: a Translate target
+            // the framework could not produce and no model can write. Keyed on the outcome and not on the
             // `unsupportedLanguageOrLocale` slug, which #518 measured arriving from
             // plain French — a language Apple does read.
             if let failure = outcome.smartModeFailure,
@@ -114,6 +114,16 @@ extension DictationCoordinator {
                 handleError(String(
                     localized: "\(name): Apple Intelligence does not support the dictated language (\(language)).",
                     comment: "Shown when an armed Smart Mode could not run because the language the user dictated is outside the set Apple Intelligence reads. First placeholder is the mode's name, second is the dictated language."
+                ))
+                return
+            }
+            // A Translate target Apple Intelligence cannot write, which the Translation
+            // framework could not produce either (#622). It names the cause, as the
+            // keyboard does, because "Try again" alone would read as a broken mode.
+            if let failure = outcome.smartModeFailure, failure.isTranslationUnavailable {
+                handleError(String(
+                    localized: "\(name): translation unavailable right now, nothing was inserted.",
+                    comment: "Shown when a Translate Smart Mode into a language Apple Intelligence cannot write could not be translated by the Translation framework, so nothing was inserted. The placeholder is the mode's name, e.g. \"→ RU\"."
                 ))
                 return
             }

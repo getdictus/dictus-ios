@@ -6,6 +6,7 @@ import UIKit
 import DictusCore
 import WhisperKit
 import FluidAudio
+import os
 
 /// Represents the current state of a model in the download/preparation lifecycle.
 ///
@@ -59,6 +60,10 @@ class ModelManager: ObservableObject {
 
     /// The currently selected model identifier for transcription.
     @Published var activeModel: String?
+
+    /// Whether the user dictates with the downloaded `activeModel` or with Apple's
+    /// on-device recognizer. `activeModel` keeps naming the downloaded model either way.
+    @Published private(set) var speechEngineChoice: SpeechEngineChoice = .downloadedModel
 
     /// Per-model download progress (0.0 to 1.0). Only populated during active downloads.
     @Published var downloadProgress: [String: Float] = [:]
@@ -259,6 +264,7 @@ class ModelManager: ObservableObject {
             downloadedModels = models
         }
         activeModel = defaults.string(forKey: SharedKeys.activeModel)
+        speechEngineChoice = SpeechEngineChoice.read(from: defaults)
 
         // Resync modelStates with loaded downloadedModels so models downloaded
         // by onboarding's separate ModelManager instance show as .ready here.
@@ -441,7 +447,7 @@ class ModelManager: ObservableObject {
         switch model.engine {
         case .parakeet, .nemotron:
             return !FluidAudioDownloadRoute(engine: model.engine).missingEntries().isEmpty
-        case .whisperKit:
+        case .whisperKit, .apple:
             return false
         }
     }
@@ -635,7 +641,7 @@ class ModelManager: ObservableObject {
             try await downloadFluidAudioModel(identifier, engine: .parakeet, cancellationToken: cancellationToken)
         case .nemotron:
             try await downloadFluidAudioModel(identifier, engine: .nemotron, cancellationToken: cancellationToken)
-        case .whisperKit, nil:
+        case .whisperKit, .apple, nil:
             try await downloadWhisperKitModel(identifier, cancellationToken: cancellationToken)
         }
     }
@@ -801,7 +807,10 @@ class ModelManager: ObservableObject {
                 // Issues #370/#612: pre-A14 chips need the audio encoder off the Neural Engine.
                 // This is the site the onboarding hang happens at (prewarm/compile).
                 computeOptions: WhisperComputeOptions.current(),
-                verbose: false,
+                // Debug level so `WhisperKitPrewarmTrace` receives the per-sub-model
+                // messages (#897). Its callback drops every other line.
+                verbose: true,
+                logLevel: .debug,
                 prewarm: true,
                 load: true,
                 download: false
@@ -892,7 +901,7 @@ class ModelManager: ObservableObject {
                 ?? ModelInfo.defaultPrewarmTimeoutSeconds
             do {
                 _ = try await withPrewarmTimeout(seconds: prewarmTimeoutSeconds) {
-                    try await WhisperKit(config)
+                    try await WhisperKitPrewarmTrace.run(identifier: identifier) { try await WhisperKit(config) }
                 } whenLateCompilationLands: { result in
                     // The compile the app gave up on has landed. Two things follow.
                     // The engine is free, and this is the only place that knows it.
@@ -1264,7 +1273,7 @@ class ModelManager: ObservableObject {
                     component: route.repairLogComponent,
                     instanceID: identifier,
                     action: "networkFetchFailed",
-                    details: "missing=\(route.missingEntries().joined(separator: ",")) error=\(error.localizedDescription)"
+                    details: "missing=\(route.missingEntries().joined(separator: ",")) error=\(LoggedError.domainAndCode(error))"
                 ))
             }
             throw error
@@ -1326,6 +1335,9 @@ class ModelManager: ObservableObject {
         guard downloadedModels.contains(identifier) else { return }
 
         activeModel = identifier
+        // Picking a downloaded model is also leaving Apple's engine, if it was the choice.
+        speechEngineChoice = .downloadedModel
+        SpeechEngineChoice.write(.downloadedModel, to: defaults)
         persistState()
         PersistentLog.log(.modelSelected(name: identifier))
         // Trigger an eager load so the model is in RAM before the next mic tap.
@@ -1369,7 +1381,7 @@ class ModelManager: ObservableObject {
         switch engine {
         case .parakeet, .nemotron:
             try FluidAudioDownloadRoute(engine: engine).removeCachedFiles()
-        case .whisperKit:
+        case .whisperKit, .apple:
             break
         }
 
@@ -1388,17 +1400,6 @@ class ModelManager: ObservableObject {
 
         persistState()
         PersistentLog.log(.modelDeleted(name: identifier, engine: engine.displayName))
-    }
-
-    /// Checks if a model is the variant recommended for this device and the user's
-    /// language (#649), the same one the onboarding installed.
-    ///
-    /// WHY delegate to ModelInfo:
-    /// The recommendation logic is catalogue-level and belongs in the catalog layer
-    /// (ModelInfo), not the state manager. This instance method preserves the
-    /// call-site signature so views don't need to change.
-    func isRecommended(_ identifier: String) -> Bool {
-        ModelInfo.isRecommended(identifier)
     }
 
     /// Cleans up a failed model's files and resets its state to not downloaded.
@@ -1430,7 +1431,7 @@ class ModelManager: ObservableObject {
             try? FluidAudioDownloadRoute(engine: .parakeet).removeCachedFiles()
         case .nemotron:
             try? FluidAudioDownloadRoute(engine: .nemotron).removeCachedFiles()
-        case .whisperKit, nil:
+        case .whisperKit, .apple, nil:
             break
         }
 
@@ -1450,11 +1451,6 @@ class ModelManager: ObservableObject {
         persistState()
     }
 
-    /// Whether at least one model is downloaded and ready for transcription.
-    var isModelReady: Bool {
-        !downloadedModels.isEmpty && activeModel != nil
-    }
-
     // MARK: - Private
 
     /// How a compile the app had already given up on eventually ended, for the debug
@@ -1468,7 +1464,7 @@ class ModelManager: ObservableObject {
         case .success:
             return "success"
         case .failure(let error):
-            return "failure:\(error.localizedDescription)"
+            return "failure:\(LoggedError.domainAndCode(error))"
         }
     }
 
@@ -1489,6 +1485,41 @@ class ModelManager: ObservableObject {
         // chooses it. The stricter definition is the one the flag has always claimed.
         defaults.set(isModelReady, forKey: SharedKeys.modelReady)
         defaults.synchronize()
+    }
+}
+
+// MARK: - Catalogue and readiness queries
+
+// Moved out of the class body unchanged: it sits at the `type_body_length` budget.
+extension ModelManager {
+    /// Checks if a model is the variant recommended for this device and the user's
+    /// language (#649), the same one the onboarding installed.
+    ///
+    /// WHY delegate to ModelInfo:
+    /// The recommendation logic is catalogue-level and belongs in the catalog layer
+    /// (ModelInfo), not the state manager. This instance method preserves the
+    /// call-site signature so views don't need to change.
+    func isRecommended(_ identifier: String) -> Bool {
+        ModelInfo.isRecommended(identifier)
+    }
+
+    /// Whether at least one model is downloaded and ready for transcription.
+    var isModelReady: Bool {
+        !downloadedModels.isEmpty && activeModel != nil
+    }
+}
+
+// MARK: - Apple's engine
+
+extension ModelManager {
+    /// Dictate with Apple's on-device recognizer. Called by the Apple card once its model
+    /// is installed for the chosen language. `activeModel` is kept, as the engine the app
+    /// falls back to whenever Apple cannot run.
+    func selectAppleEngine() {
+        speechEngineChoice = .apple
+        SpeechEngineChoice.write(.apple, to: defaults)
+        PersistentLog.log(.modelSelected(name: AppleSpeechEngineIdentity.identifier))
+        DictationCoordinator.shared.adoptAppleEngine()
     }
 }
 
@@ -1567,7 +1598,7 @@ extension ModelManager {
             return FluidAudioDownloadRoute(engine: .parakeet).missingEntries().isEmpty
         case .nemotron:
             return FluidAudioDownloadRoute(engine: .nemotron).missingEntries().isEmpty
-        case .whisperKit, nil:
+        case .whisperKit, .apple, nil:
             return WhisperModelRepository.hasCompleteDownload(identifier)
         }
     }
@@ -1675,6 +1706,94 @@ enum ModelManagerError: Error, DiagnosableError {
     var isPrewarmTimeout: Bool {
         if case .prewarmTimeout = self { return true }
         return false
+    }
+}
+
+/// Logs which WhisperKit sub-model a prewarm is compiling, and a heartbeat while it
+/// runs (#897). Diagnostic only: it changes what is logged, not what is loaded or when.
+///
+/// WHY: a Turbo preparation that hits its budget leaves `modelCompilationStarted`, then
+/// `modelPrewarmTimeout`, and nothing between. The stage lines name the sub-model Core ML
+/// is on. The heartbeat says whether the device is throttled, short of memory, or losing
+/// disk while it waits. Losing disk is what the ANE compiler bug in argmax-oss-swift#560
+/// looks like on an M6: about 3.5 GB a minute, on the Turbo audio encoder.
+///
+/// It wraps the compile itself, not the deadline, so it keeps logging after the deadline
+/// abandons the compile and ends only when the compile lands, which #897 has never seen.
+///
+/// WhisperKit's logger is one global. Another `WhisperKit(config)` created while a trace
+/// runs resets its level to `.none`, and the stage lines stop until the next prewarm.
+@MainActor
+final class WhisperKitPrewarmTrace {
+    static func run<T>(identifier: String, _ compile: @Sendable () async throws -> T) async throws -> T {
+        let trace = WhisperKitPrewarmTrace(identifier: identifier)
+        do {
+            let value = try await compile()
+            trace.finish(outcome: "success")
+            return value
+        } catch {
+            trace.finish(outcome: "failure:\(LoggedError.domainAndCode(error))")
+            throw error
+        }
+    }
+
+    private static let heartbeatSeconds: UInt64 = 30
+    /// 30 minutes. The M6 load in argmax-oss-swift#560 ran past 20.
+    private static let heartbeatLimit = 60
+
+    private let identifier: String
+    private let start = Date()
+    private let lastStage = OSAllocatedUnfairLock<WhisperKitLoadStage?>(initialState: nil)
+    private var heartbeat: Task<Void, Never>?
+
+    private init(identifier: String) {
+        self.identifier = identifier
+        let start = self.start
+        let lastStage = self.lastStage
+        // Called on WhisperKit's threads, hence no `self`.
+        Logging.shared.loggingCallback = { @Sendable message in
+            guard let stage = WhisperKitLoadStage(logMessage: message) else { return }
+            lastStage.withLock { $0 = stage }
+            PersistentLog.log(.diagnosticProbe(
+                component: "ModelPrewarm",
+                instanceID: identifier,
+                action: "stage",
+                details: "\(stage.rawValue) afterMs=\(Int(Date().timeIntervalSince(start) * 1000))"
+            ))
+        }
+        log("traceStarted")
+        heartbeat = Task { [weak self] in
+            for _ in 0..<Self.heartbeatLimit {
+                try? await Task.sleep(nanoseconds: Self.heartbeatSeconds * 1_000_000_000)
+                guard !Task.isCancelled, let self else { return }
+                self.log("heartbeat")
+            }
+        }
+    }
+
+    private func finish(outcome: String) {
+        heartbeat?.cancel()
+        Logging.shared.loggingCallback = nil
+        Logging.shared.logLevel = .none
+        log("traceEnded", "outcome=\(outcome) ")
+    }
+
+    private func log(_ action: String, _ prefix: String = "") {
+        let capabilities = DeviceCapabilities.current()
+        let diskFreeMB = (try? URL(fileURLWithPath: NSHomeDirectory())
+            .resourceValues(forKeys: [.volumeAvailableCapacityKey])
+            .volumeAvailableCapacity)
+            .map { String($0 / 1_048_576) } ?? "unknown"
+        let stage = lastStage.withLock { $0 }?.rawValue ?? "none"
+        PersistentLog.log(.diagnosticProbe(
+            component: "ModelPrewarm",
+            instanceID: identifier,
+            action: action,
+            details: prefix
+                + "afterS=\(Int(Date().timeIntervalSince(start))) lastStage=\(stage) "
+                + "thermal=\(capabilities.thermalState.logLabel) "
+                + "availableMB=\(capabilities.availableMemoryMB) diskFreeMB=\(diskFreeMB)"
+        ))
     }
 }
 

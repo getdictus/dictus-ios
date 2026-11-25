@@ -246,10 +246,10 @@ public enum PolishPipeline {
             return PolishGuardrail.detectedLanguageMatches(
                 polished: polished, target: job.promptLanguage, raw: preprocessed
             )
-        case .fixed(let language):
+        case .fixed(let target):
             // No `raw` (#861): in a translation a segment copied from the transcript is
             // the untranslated text this check exists to catch.
-            return PolishGuardrail.detectedLanguageMatches(polished: polished, target: language)
+            return PolishGuardrail.detectedLanguageMatches(polished: polished, translationTarget: target)
         case .sameAsInput:
             guard let inputCode = detectLanguageCode(in: preprocessed) else { return true }
             return PolishGuardrail.detectedLanguageMatches(
@@ -291,7 +291,9 @@ public enum PolishPipeline {
     private static func expectedOutputLanguageCode(preprocessed: String, job: PolishJob) -> String? {
         switch job.task.contract.outputLanguage {
         case .polishTarget: return job.promptLanguage.rawValue
-        case .fixed(let language): return language.rawValue
+        // The recogniser's code, not the identifier's (#622): `NLTagger` and the
+        // lexicon speak `NLLanguage`, which is where `zh-Hans` and `nb` come from.
+        case .fixed(let target): return target.recognizerCode
         case .sameAsInput: return detectLanguageCode(in: preprocessed)
         }
     }
@@ -553,11 +555,12 @@ public enum PolishPipeline {
     /// Choose the polish mode. Whisper respects the language picker upstream →
     /// always Natural. Parakeet auto-detects → Repair when detected ≠ target.
     /// Nemotron is forced to the language upstream, as Whisper is (#558) → Natural.
+    /// Apple's recognizer is given one locale, the chosen language → Natural.
     public static func mode(sttEngine: SpeechEngine,
                             detected: SupportedLanguage,
                             target: SupportedLanguage) -> PolishMode {
         switch sttEngine {
-        case .whisperKit, .nemotron:
+        case .whisperKit, .nemotron, .apple:
             return .natural
         case .parakeet:
             return detected == target ? .natural : .repair

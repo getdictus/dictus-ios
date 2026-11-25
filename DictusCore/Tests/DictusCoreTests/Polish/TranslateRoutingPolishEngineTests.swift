@@ -283,7 +283,7 @@ final class TranslationLanguagePairTests: XCTestCase {
     }
 
     func testOnlyTranslateModesHaveATarget() {
-        for language in SupportedLanguage.allCases {
+        for language in TranslationTarget.all {
             XCTAssertEqual(TranslationLanguagePair.translateTarget(of: SmartModeCatalogue.translate(to: language)),
                            language)
         }

@@ -6,17 +6,11 @@ import Foundation
 /// third slot in `.corrections`. These two are the only routes a learned word
 /// has into the bar, and both are tap-only.
 ///
-/// WHY tap-only is the whole of the L3 guarantee (ADR 0004). A learned word is
-/// **offered** (L1) and **immune** to autocorrect (L2), but it is never an
-/// autocorrect **target** (L3) — the keyboard must not rewrite another word
-/// into it. On space only `spellCheck` can apply anything, and `spellCheck`
-/// never sees this file. `.corrections` is the one mode that previews an
-/// automatic action, and it previews it in slot 1, which `correctionsRow` fills
-/// from the corrector and never from the learned set.
-///
-/// So the rule holds by construction, not by a gate: nothing here can reach the
-/// document without a tap. Re-check exactly that before letting a learned word
-/// reach `spellCheck`, the trie, or slot 1 of the corrections row.
+/// WHY tap-only. A learned word is **offered** (L1) and **immune** to
+/// autocorrect (L2). Since #498 it is also an autocorrect **target** (L3), but
+/// only through `LearnedWordCorrection`, which `spellCheck` calls under its own
+/// rule (ADR 0004). Nothing here can reach the document without a tap: what this
+/// file offers is a completion the user chooses, never a correction space applies.
 ///
 /// WHY it lives in DictusCore rather than beside its one caller in the keyboard
 /// extension: DictusCore is the only target `swift test` can see, and #287's
@@ -63,12 +57,11 @@ public enum LearnedWordCompletions {
     ///
     /// WHY the third slot and not the second, which is the one the user's eye
     /// goes to. Slot 1 is what space applies on its own; it is the preview of
-    /// the automatic action, and the whole of ADR 0004 rests on a learned word
-    /// never reaching it. Putting one there would be L3 — the keyboard deciding
-    /// on its own that the user meant a word it learned — and that is #114's to
-    /// grant, not this one's. Apple's keyboard does promote a learned word to
-    /// the applied slot once four characters are typed; Dictus deliberately
-    /// stops one slot short of that.
+    /// the automatic action, and it comes from the corrector alone. A learned word
+    /// reaches it only when `spellCheck` picked it under `LearnedWordCorrection`'s
+    /// rule (#498), and then the dedup below keeps it from appearing twice. A
+    /// learned word that merely extends the prefix is a completion, not a
+    /// correction, so it stays one slot short of the applied one.
     ///
     /// WHY the row is built here rather than at its two call sites: `update`
     /// and `updateAsync` both assemble it, and the sync and async paths showing
@@ -79,7 +72,7 @@ public enum LearnedWordCompletions {
     /// - Parameters:
     ///   - typedWord: the partial word as typed. Slot 0, and the prefix the
     ///     learned word must extend.
-    ///   - correction: what space would apply. Slot 1, never a learned word.
+    ///   - correction: what space would apply. Slot 1, from the corrector.
     ///   - alternative: the runner-up correction, kept in slot 2 when no
     ///     learned word claims it.
     ///   - learnedWords: `UserDictionary.learnedWordsByLastUsed`.

@@ -23,7 +23,7 @@ final class SplitPassCorpusTests: XCTestCase {
     private static let glued: Set<String> = ["missed-space", "neighbour-key", "observed"]
     private static let legitimate: Set<String> = ["legit-compound", "legit-rare"]
 
-    /// The spacebar neighbours `TextPredictionEngine.trySplitWithSignal` reads,
+    /// The spacebar neighbours `TextPredictionEngine.trySplit` reads,
     /// without the AZERTY comma: the comma key commits the word before it (#872),
     /// so a comma glue never reaches the split pass as one word.
     private static let neighbours: [String: Set<Character>] = [

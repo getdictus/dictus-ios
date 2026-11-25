@@ -105,9 +105,9 @@ public enum SharedKeys {
     /// this run, so the pick opens empty instead of reloading it.
     /// Read and written only through `SmartModePick`.
     public static let onboardingSmartModePickCommitted = "dictus.onboardingSmartModePickCommitted"
-    /// The app version this install is up to date with (#685), as a marketing version
-    /// string ("2.0.0"). It gates What's new: an install that completed onboarding and is
-    /// behind `WhatsNew.edition` sees it once. Absent on every install from before 2.0.0,
+    /// The app version this install is up to date with (#685, #974), as a marketing version
+    /// string ("2.0.2"). It gates What's new: an install that completed onboarding and is
+    /// behind the running version sees its release notes once. Absent on every install from before 2.0.0,
     /// which is how an existing user is told apart on the first launch that has the key.
     /// Read and written only through `WhatsNew`.
     public static let lastVersionSeen = "dictus.lastVersionSeen"
@@ -148,6 +148,14 @@ public enum SharedKeys {
     /// captures). It forces what the surfaces *show*: a generation still asks the real
     /// model and fails where it is missing. Inside the conditional for the reason above.
     public static let debugAppleIntelligenceForced = "dictus.debugAppleIntelligenceForced"
+
+    // Forced unsupported device (DEBUG builds only - see SmartModeAvailability.engineState).
+    /// Bool: when true, the Smart Mode surfaces read Apple Foundation Models as
+    /// `deviceNotEligible`, the iPhone 15 / iPhone 13 case. A simulator on a Mac reports
+    /// `appleIntelligenceNotEnabled`, which is *capable*, so without it the screens #922
+    /// changes for an iPhone without Apple Intelligence cannot be captured there.
+    /// `debugAppleIntelligenceForced` wins when both are set.
+    public static let debugAppleIntelligenceUnsupported = "dictus.debugAppleIntelligenceUnsupported"
 
     /// Bool: when true, the keyboard never opens the voice note reader on its own; it
     /// opens from a tap on ☰ only (#637 decision 3, #639). Absent reads false,
@@ -273,6 +281,12 @@ public enum SharedKeys {
     /// from `SmartModeCatalogue.defaultPinnedIdentifiers`; an empty array is a real
     /// choice and is honoured.
     public static let smartModePinned = "dictus.smartModePinned"
+    /// [String]: `TranslationTarget.code`s the user added through "Other language…",
+    /// most recently chosen first (#622). Each one is a `translate.<code>` mode in the
+    /// catalogue, and the order is the picker's "recent" order. Absent or empty means
+    /// the four built-in Translate modes only. Read and written only through
+    /// `TranslationTargetStore`.
+    public static let translationTargetsChosen = "dictus.translationTargetsChosen"
     /// Bool: whether the user has ever completed the long-press fan gesture.
     ///
     /// The only thing it does is retire the discovery hint from the toolbar's centre
@@ -413,6 +427,13 @@ public enum SharedKeys {
     /// not, from the first dictation on 2.0.0. Integers only, never text. See
     /// `DictationTally`.
     public static let dictationTally = "dictus.dictationTally"
+
+    // MARK: - Speech engine choice
+    /// String: which engine the app dictates with, "model" (the downloaded
+    /// `activeModel`) or "apple" (Apple's on-device recognizer). Absent = "model", so
+    /// nothing changes for a user who never picks Apple. `activeModel` keeps naming the
+    /// downloaded model either way. See `SpeechEngineChoice`.
+    public static let speechEngineChoice = "dictus.speechEngineChoice"
 
     // MARK: - Retired keys
     /// The #357 probe's arming flag, removed with the probe in #361. Kept as a

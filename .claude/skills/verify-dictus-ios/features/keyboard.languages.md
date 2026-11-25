@@ -14,6 +14,7 @@
 - `keyboard.reopen-letters`: the keyboard always opens on the letters, even when it was hidden on 123 or `#+=` (#889; Android uses the same ID, #291).
 - `keyboard.transcription-language`: Transcription language: « Suivre la langue du clavier » or fixed.
 - `keyboard.open-app`: The panel's gear opens Dictus.
+- `keyboard.return-key-type`: the return key follows the field's `returnKeyType`, as Apple's keyboard draws it (#1023): blue → in Safari's address bar (Go), blue magnifier in a search field, blue ↑ for Send, ✓ for Done, › for Next and Continue, plain ↵ elsewhere. Greyed, and a tap does nothing, while the field is empty and the host sets `enablesReturnKeyAutomatically` (Safari's address bar does). The words (« accéder », « rechercher »…) are VoiceOver labels in the keyboard's language, as on Apple's keyboard.
 
 ## How to get to it (user POV)
 
@@ -31,7 +32,7 @@
 
 The 123 and `#+=` pages: `drive.sh kbd abc` on the letters page presses the bottom-left key, which reads 123 there (`kbd.numbers`); `#+=` is the first key of the third row, at (+30, +187) pt from `inputView`'s origin (`kbd.symbols`); `kbd abc` goes back to the letters.
 
-The bottom row is the same on the letters, 123 and `#+=` pages, in units of a 10-unit row: 123/ABC 1.25, emoji 1.25, space 5.5, return 2.0 (#877). On a 402 pt wide keyboard that is 123/ABC 0 to 50.1 pt, emoji 50.1 to 100.25, space 100.25 to 320.8, return 320.8 to 401; `kbd abc` (+22), `kbd emoji` (+90) and `space` (+220) tap inside those cells. With the globe key (home-button iPhones) the row is globe 1.0, 123/ABC 1.5, emoji 1.5, space 4.0, return 2.0.
+The bottom row is the same on the letters, 123 and `#+=` pages, in units of a 10-unit row: 123/ABC 1.25, emoji 1.25, space 5.5, return 2.0 (#877). On a 402 pt wide keyboard held upright the keys are laid out on Apple's key plane (`KeyPlaneGeometry`): the keycaps start 6.5 pt in from each side with 6 pt between them, and the outer keys' touch targets run to the screen edges, so the targets are 123/ABC 0 to 52.9 pt, emoji 52.9 to 102.25, space 102.25 to 319.5, return 319.5 to 402; `kbd abc` (+22), `kbd emoji` (+90) and `space` (+220) tap inside those cells. Rows sit where Apple's do: the letters' keycaps start 8 pt below the toolbar on a 54 pt pitch (iPhone 17), and turned, the keys are Apple's smaller ones (27.3 pt on a 35.3 pt pitch) at the bottom of the same grid. With the globe key (home-button iPhones) the row is globe 1.0, 123/ABC 1.5, emoji 1.5, space 4.0, return 2.0.
 
 A space typed on either page after a digit or symbol also goes back to the letters, as Apple's keyboard does (#504). A space typed before any character stays on the page, and so does Return. To check it: `kbd abc`, tap `2` (second key of the first row), tap the space bar, and expect the letters page, its bottom-left key reading 123 again.
 
@@ -39,7 +40,11 @@ Reopen on letters (#889): `kbd abc` (123 page), then hide the keyboard with Safa
 
 App side: `.claude/skills/verify-dictus-ios/scripts/drive.sh tab Réglages`, `axe swipe --start-x 201 --start-y 600 --end-x 201 --end-y 350 --duration 0.4 --udid <udid>` (at rest the row sits under the floating tab bar, and a tap there switches to Modèles), then `.claude/skills/verify-dictus-ios/scripts/drive.sh tap-label "Disposition, AZERTY"`.
 
+Return key type (#1023): `drive.sh tap-id TabBarItemTitle` in Safari, select the Dictus keyboard, screenshot: the return key (bottom right) is grey with a faint →. Type one letter by coordinate: it turns blue with a white →. A field with the default type (Rappels, a new reminder's title) shows the plain grey ↵. The glyphs are drawn inside the keyboard's remote view, so `describe-ui` does not list them: the screenshot is the evidence.
+
 ## Gotchas
+
+- `keyboard.return-key-type` in third-party apps (WhatsApp, Telegram, Google search, a bank's form) is checked on the iPhone: the simulator has only Apple's apps. Messages uses the default type and sends from its own button, so its return key stays ↵ with Apple's keyboard too.
 
 - `keyboard.reopen-letters` cannot be told apart from the old behaviour in the simulator: there, iOS creates a new `KeyboardViewController` for every appearance (new `instanceID` at each `registeredAppearance`, measured on iOS 26.5 for a Safari hide/show and a Home round trip, #889), and a new controller starts on the letters anyway. The kept-controller case, where the page used to survive, is checked on the iPhone.
 - Panel rows are inside the keyboard: tap them by coordinate from the screenshot (`kbd.panel`), then check the log (`presentAreaMode`).

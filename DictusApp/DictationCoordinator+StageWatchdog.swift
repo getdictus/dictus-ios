@@ -10,12 +10,27 @@ import DictusCore
 
 extension DictationCoordinator {
 
+    /// Length of the recording being transcribed, read by the transcription watchdog
+    /// before A14 (#963). Static because the coordinator is a singleton (`shared`), and
+    /// an extension can only add stored properties that way; kept here, not in
+    /// DictationCoordinator.swift, which sits at the #146 file-length budget.
+    private static var transcriptionAudioSeconds: TimeInterval = 0
+
+    /// Enters `.transcribing` for a recording of `audioSeconds`, so the stage watchdog
+    /// armed by `updateStatus` is sized for it (#963).
+    func enterTranscription(audioSeconds: TimeInterval) {
+        Self.transcriptionAudioSeconds = audioSeconds
+        updateStatus(.transcribing)
+    }
+
     /// How long a post-recording stage may run before it is declared stuck.
     /// Nil for statuses no stage watchdog covers.
     ///
     /// WHY 30s for transcription: WhisperKit transcription of a typical dictation
     /// (<60s audio) should complete in under 10s even on older devices. 30s provides
-    /// generous margin while still catching genuinely stuck transcriptions.
+    /// generous margin while still catching genuinely stuck transcriptions. Before A14,
+    /// where Parakeet runs on the CPU, it grows with the recording (#963):
+    /// `DeviceCapabilities.transcriptionWatchdogTimeout(audioSeconds:)`.
     ///
     /// WHY 60s for the LLM stage (#267) and not the same 30s: generation time scales
     /// with the output, which is exactly why this stage was split out, and the cost
@@ -25,7 +40,8 @@ extension DictationCoordinator {
     func stageWatchdogTimeout(for status: DictationStatus) -> TimeInterval? {
         switch status {
         case .transcribing:
-            return 30
+            return DeviceCapabilities.current()
+                .transcriptionWatchdogTimeout(audioSeconds: Self.transcriptionAudioSeconds)
         case .processing:
             return 60
         case .idle, .requested, .recording, .ready, .failed:

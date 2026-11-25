@@ -1,6 +1,7 @@
 // DictusApp/Audio/TranscriptionService.swift
 // Encapsulates speech-to-text transcription with multi-engine routing.
 import Foundation
+import UIKit
 import WhisperKit
 import DictusCore
 
@@ -161,6 +162,12 @@ class TranscriptionService {
         let modelName = languagePolicy.modelIdentifier.isEmpty
             ? "unknown" : languagePolicy.modelIdentifier
         PersistentLog.log(.transcriptionStarted(modelName: modelName))
+        // The only log line carrying the length of a dictation that never completes
+        // (#933): `transcriptionPerformance` is written on success only.
+        PersistentLog.log(.diagnosticProbe(
+            component: "TranscriptionService", instanceID: "audio", action: "transcribing",
+            details: "audioSec=\(String(format: "%.1f", Double(audioSamples.count) / 16_000))"
+        ))
         // Trace the resolution so device tests (#226 acceptance: Mandarin via
         // Auto-detect, toolbar-switcher non-override) can verify it from logs.
         //
@@ -195,12 +202,14 @@ class TranscriptionService {
                     language: result.language, promptId: result.promptId,
                     detectedLanguage: result.detectedLanguage, retry: result.retry))
                 logPerformance(modelName: modelName, audioSamples: audioSamples, transcriptionDurationMs: durationMs)
+                await logResources(engine: activeEngine.engineName, outcome: "completed", start: transcriptionStart)
                 return text
             } catch {
                 // The diagnostic, not `localizedDescription`: since #313 the latter is the
                 // sentence written for the user, and a log line that carried it would say
                 // nothing about what actually failed.
                 PersistentLog.log(.transcriptionFailed(error: DictationFailureMessage.diagnostic(for: error)))
+                await logResources(engine: activeEngine.engineName, outcome: "failed", start: transcriptionStart)
                 throw error
             }
         }
@@ -232,8 +241,10 @@ class TranscriptionService {
         )
 
         do {
+            // Issue #932, as in WhisperKitEngine: no room tail for Whisper to fill.
+            let spokenSamples = TrailingSilence.trimmed(audioSamples)
             let results: [TranscriptionResult] = try await whisperKit.transcribe(
-                audioArray: audioSamples,
+                audioArray: spokenSamples,
                 decodeOptions: options
             )
 
@@ -246,16 +257,17 @@ class TranscriptionService {
             let totalCharCount = results.reduce(0) { $0 + $1.text.count }
             let lastSegmentEnd = results.flatMap { $0.segments }.map { $0.end }.max() ?? 0
             let audioDurationSec = Float(audioSamples.count) / 16_000.0
+            let sentSec = Float(spokenSamples.count) / 16_000.0
             PersistentLog.log(.diagnosticProbe(
                 component: "TranscriptionService",
                 instanceID: "transcribeLegacy",
                 action: "segmentsReturned",
-                details: "results=\(results.count) segments=\(totalSegments) chars=\(totalCharCount) audioSec=\(String(format: "%.2f", audioDurationSec)) lastSegmentEndSec=\(String(format: "%.2f", lastSegmentEnd))"
+                details: "results=\(results.count) segments=\(totalSegments) chars=\(totalCharCount) audioSec=\(String(format: "%.2f", audioDurationSec)) sentSec=\(String(format: "%.2f", sentSec)) lastSegmentEndSec=\(String(format: "%.2f", lastSegmentEnd))"
             ))
 
             // Join all segment texts into a single string.
             // Whisper may produce multiple segments for longer audio.
-            let text = results.map { $0.text }.joined(separator: " ")
+            let text = results.textWithinAudio(seconds: sentSec, component: "TranscriptionService", instanceID: "transcribeLegacy")
 
             // Trims, and drops non-speech markers such as "[Musique]" (#766).
             let trimmed = NonSpeechMarkers.spokenText(in: text)
@@ -273,8 +285,8 @@ class TranscriptionService {
             PersistentLog.log(.transcriptionFailed(error: error.diagnosticDescription))
             throw error
         } catch {
-            PersistentLog.log(.transcriptionFailed(error: error.localizedDescription))
-            throw TranscriptionError.transcriptionFailed(error.localizedDescription)
+            PersistentLog.log(.transcriptionFailed(error: LoggedError.domainAndCode(error)))
+            throw TranscriptionError.transcriptionFailed(LoggedError.domainAndCode(error))
         }
     }
 
@@ -288,6 +300,30 @@ class TranscriptionService {
             instanceID: "languageDetection",
             action: "detected",
             details: "detected=\(detected)"
+        ))
+    }
+
+    /// One `TranscriptionService resources` line per engine transcription (#963): whether
+    /// DictusApp was in the foreground or the background, the engine, how long it took,
+    /// and the process footprint with its peak since launch.
+    ///
+    /// WHY THE APP STATE: a keyboard dictation is transcribed by a backgrounded DictusApp,
+    /// and on an A12X that is exactly where Whisper failed 7/7 (#635). Without the state a
+    /// log cannot tell an in-app success from a keyboard one. Read on the main actor,
+    /// where `UIApplication` lives; this service is not isolated to it.
+    private func logResources(engine: String, outcome: String, start: Date) async {
+        let appState = await MainActor.run { UIApplication.shared.applicationState }
+        let stateLabel: String
+        switch appState {
+        case .active: stateLabel = "foreground"
+        case .inactive: stateLabel = "inactive"
+        case .background: stateLabel = "background"
+        @unknown default: stateLabel = "unknown"
+        }
+        let elapsedMs = Int(Date().timeIntervalSince(start) * 1000)
+        PersistentLog.log(.diagnosticProbe(
+            component: "TranscriptionService", instanceID: engine, action: "resources",
+            details: "outcome=\(outcome) appState=\(stateLabel) elapsedMs=\(elapsedMs) \(ProcessMemory.logFields())"
         ))
     }
 

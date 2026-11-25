@@ -155,7 +155,8 @@ enum SpeechModelError: DiagnosableError {
         case .modelNotInstalled(let identifier):
             return "model not installed locally: \(identifier)"
         case .engineLoadFailed(let identifier, let underlying):
-            return "engine load failed for \(identifier): \(underlying)"
+            // Domain and code only: `\(underlying)` printed the userInfo, file paths included (#939).
+            return "engine load failed for \(identifier): \(LoggedError.domainAndCode(underlying))"
         case .loadAbandoned(let identifier):
             return "load abandoned before it completed: \(identifier)"
         }
@@ -313,8 +314,11 @@ class WhisperKitEngine: SpeechModelProtocol {
             chunkingStrategy: .vad
         )
 
+        // Issue #932: the room after the last spoken word is a window Whisper fills
+        // with a closing line ("Vielen Dank.", "you"). See TrailingSilence.
+        let spokenSamples = TrailingSilence.trimmed(audioSamples)
         let results: [TranscriptionResult] = try await whisperKit.transcribe(
-            audioArray: audioSamples,
+            audioArray: spokenSamples,
             decodeOptions: options
         )
 
@@ -335,14 +339,15 @@ class WhisperKitEngine: SpeechModelProtocol {
         let totalCharCount = results.reduce(0) { $0 + $1.text.count }
         let lastSegmentEnd = results.flatMap { $0.segments }.map { $0.end }.max() ?? 0
         let audioDurationSec = Float(audioSamples.count) / 16_000.0
+        let sentSec = Float(spokenSamples.count) / 16_000.0
         PersistentLog.log(.diagnosticProbe(
             component: "WhisperKitEngine",
             instanceID: "transcribe",
             action: "segmentsReturned",
-            details: "results=\(results.count) segments=\(totalSegments) chars=\(totalCharCount) audioSec=\(String(format: "%.2f", audioDurationSec)) lastSegmentEndSec=\(String(format: "%.2f", lastSegmentEnd))"
+            details: "results=\(results.count) segments=\(totalSegments) chars=\(totalCharCount) audioSec=\(String(format: "%.2f", audioDurationSec)) sentSec=\(String(format: "%.2f", sentSec)) lastSegmentEndSec=\(String(format: "%.2f", lastSegmentEnd))"
         ))
 
-        let text = results.map { $0.text }.joined(separator: " ")
+        let text = results.textWithinAudio(seconds: sentSec, component: "WhisperKitEngine", instanceID: "transcribe")
         let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
 
         guard !trimmed.isEmpty else {
@@ -355,5 +360,30 @@ class WhisperKitEngine: SpeechModelProtocol {
         // the same measure as Parakeet's, and a log line mixing the two under one name
         // would be read as one distribution (#554).
         return SpeechTranscription(text: trimmed, confidence: nil)
+    }
+}
+
+extension Array where Element == TranscriptionResult {
+    /// The joined text without the segments timed after the end of the audio sent (#953),
+    /// logged by count and times, never by text.
+    func textWithinAudio(seconds: Float, component: String, instanceID: String) -> String {
+        let outcome = PastAudioSegments.text(
+            of: map { result in
+                PastAudioSegments.Result(text: result.text, segments: result.segments.map {
+                    PastAudioSegments.Segment(start: $0.start, end: $0.end, text: $0.text)
+                })
+            },
+            audioSeconds: seconds
+        )
+        if !outcome.dropped.isEmpty {
+            let times = outcome.dropped.map { String(format: "%.2f-%.2f", $0.start, $0.end) }.joined(separator: ",")
+            PersistentLog.log(.diagnosticProbe(
+                component: component,
+                instanceID: instanceID,
+                action: "segmentsPastAudioDropped",
+                details: "dropped=\(outcome.dropped.count) sentSec=\(String(format: "%.2f", seconds)) times=\(times)"
+            ))
+        }
+        return outcome.text
     }
 }

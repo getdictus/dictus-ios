@@ -91,6 +91,13 @@ struct SettingsView: View {
     /// keyboard and the app; off writes false, which is the same as the key's absence.
     @AppStorage(SharedKeys.debugPolishRefusalForced, store: UserDefaults(suiteName: AppGroup.identifier))
     private var polishRefusalForced = false
+
+    /// Debug-only: Smart Modes read as `deviceNotEligible`, so the screens an iPhone
+    /// without Apple Intelligence gets (#922) can be walked on a capable iPhone. Read
+    /// live by `SmartModeAvailability.engineState` in both processes; `ProStatusManager`
+    /// reads the capability once per launch, hence the relaunch the footer asks for.
+    @AppStorage(SharedKeys.debugAppleIntelligenceUnsupported, store: UserDefaults(suiteName: AppGroup.identifier))
+    private var appleIntelligenceUnsupported = false
     #endif
 
     /// The keyboard language the pickers below operate on.
@@ -136,7 +143,7 @@ struct SettingsView: View {
         switch ModelInfo.forIdentifier(activeModel)?.engine {
         case .whisperKit, nil:
             return true
-        case .parakeet, .nemotron:
+        case .parakeet, .nemotron, .apple:
             return false
         }
     }
@@ -153,6 +160,22 @@ struct SettingsView: View {
 
     /// Confirmation dialog for emptying the transcription history (#70).
     @State private var showClearHistoryConfirmation = false
+
+    /// Whether "Clear history" has anything to delete, polish journal included
+    /// (#906). Kept in state because nothing publishes a change to the journal:
+    /// refreshed when the screen appears, when the app comes back to the
+    /// foreground, and after the row runs.
+    @State private var hasSomethingToClear = false
+
+    @Environment(\.scenePhase) private var scenePhase
+
+    /// The feedback sheet (#565). Its content lives in `FeedbackComposer` so a
+    /// closed sheet keeps what the user typed.
+    @State private var showFeedback = false
+
+    /// The running version's release notes (#974), read once: the bundle does not change
+    /// while the app runs.
+    @State private var releaseNotes = ReleaseNotes.current()
 
     /// Drives the Dictus Pro hub's cover, opened by the one Dictus Pro row (#216).
     @State private var showPaywall = false
@@ -291,11 +314,12 @@ struct SettingsView: View {
                     polishStateFooter
                 }
 
-                // Visible for a subscriber, and for anyone who still has saved
-                // transcriptions after an entitlement went away (#70). See
-                // `HistoryAvailability.clearRowIsVisible`.
+                // Visible for a subscriber, and for anyone who still has dictated
+                // text on the device: saved transcriptions after an entitlement
+                // went away (#70), or the polish journal, which every dictation
+                // writes Pro or not (#906). See `HistoryAvailability.clearRowIsVisible`.
                 if HistoryAvailability.clearRowIsVisible(
-                    isEntitled: historyIsEntitled, hasSavedRecords: !history.isEmpty
+                    isEntitled: historyIsEntitled, hasSavedRecords: hasSomethingToClear
                 ) {
                     clearHistoryRow
                 }
@@ -496,6 +520,17 @@ struct SettingsView: View {
             } footer: {
                 Text(verbatim: "The keyboard treats every Smart Mode and polish call as refused by Apple Intelligence. Debug builds only.")
             }
+
+            // #922: the path of an iPhone without Apple Intelligence, on a phone that has
+            // it. Verbatim strings, like the section above.
+            Section {
+                Toggle(isOn: $appleIntelligenceUnsupported) {
+                    Text(verbatim: "Simulate no Apple Intelligence")
+                }
+                .accessibilityIdentifier("settings.debug.simulateNoAppleIntelligence")
+            } footer: {
+                Text(verbatim: "Smart Modes read as unsupported (deviceNotEligible), as on an iPhone 15. The paywall, the Pro hub and the keyboard follow at once; relaunch the app for Home and the trial. To replay the trial, use \"Forget the trial\" above, then relaunch. Debug builds only.")
+            }
             #endif
 
             // Section 4: A propos
@@ -510,6 +545,27 @@ struct SettingsView: View {
                         showPolishDebug = true
                     }
 
+                // Every change of the running version, the list App Store Connect gets;
+                // the sheet after the update shows only its highlights (#974). Absent on a
+                // version without notes.
+                if let releaseNotes {
+                    NavigationLink("What's new") {
+                        ReleaseNotesListView(notes: releaseNotes)
+                    }
+                    .accessibilityIdentifier("settings.whatsNew")
+                }
+
+                Button {
+                    showFeedback = true
+                } label: {
+                    HStack {
+                        Text("Send feedback")
+                        Spacer()
+                        listDisclosureIndicator
+                    }
+                }
+                .accessibilityIdentifier("settings.sendFeedback")
+
                 // WHY Button instead of Link:
                 // Link doesn't respond to ButtonStyle and gets no press highlight
                 // in a List with .scrollContentBackground(.hidden). Using Button
@@ -517,7 +573,7 @@ struct SettingsView: View {
                 Button {
                     // Force unwrap is safe: compile-time constant URL that cannot be malformed.
                     // swiftlint:disable:next force_unwrapping
-                    UIApplication.shared.open(URL(string: "https://github.com/Pivii/dictus")!)
+                    UIApplication.shared.open(URL(string: "https://github.com/getdictus/dictus-ios")!)
                 } label: {
                     HStack {
                         Text("GitHub")
@@ -561,10 +617,18 @@ struct SettingsView: View {
         .scrollContentBackground(.hidden)
         .background(Color.dictusBackground.ignoresSafeArea())
         .navigationTitle("Settings")
+        .onAppear(perform: refreshHasSomethingToClear)
+        .onChange(of: history.count) { _, _ in refreshHasSomethingToClear() }
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .active { refreshHasSomethingToClear() }
+        }
         .navigationDestination(isPresented: $showPolishDebug) {
             PolishDebugView()
         }
         .paywallCover(isPresented: $showPaywall)
+        .sheet(isPresented: $showFeedback) {
+            FeedbackView()
+        }
         .sheet(isPresented: Binding(
             get: { exportURL != nil },
             set: { isPresented in
@@ -590,7 +654,12 @@ struct SettingsView: View {
         return HistoryAvailability.isEntitled
     }
 
-    /// Empties the transcription history (#70, brief decision 3).
+    private func refreshHasSomethingToClear() {
+        hasSomethingToClear = ClearHistory.hasSomethingToDelete(history: history)
+    }
+
+    /// Empties the transcription history (#70, brief decision 3) and the polish
+    /// journal (#906), the two places that keep what the user dictated.
     ///
     /// WHY this row exists at all: the history is a local plaintext record of
     /// everything the user has ever dictated. A store like that needs a visible
@@ -611,11 +680,14 @@ struct SettingsView: View {
                 // `format:` rather than an interpolated literal: the latter would put
                 // a "%lld" key in the string catalogue for a number that has nothing
                 // to translate, and this way the digits group per the user's locale.
-                Text(history.count, format: .number)
-                    .foregroundStyle(.secondary)
+                // No "0" next to a row that still deletes the polish journal (#906).
+                if !history.isEmpty {
+                    Text(history.count, format: .number)
+                        .foregroundStyle(.secondary)
+                }
             }
         }
-        .disabled(history.isEmpty)
+        .disabled(!hasSomethingToClear)
         .confirmationDialog(
             "Clear history?",
             isPresented: $showClearHistoryConfirmation,
@@ -624,7 +696,8 @@ struct SettingsView: View {
             Button("Delete all", role: .destructive) {
                 // Shared voice notes among them leave the keyboard too (#639).
                 VoiceNoteProcessor.shared.withdrawKeyboardDeliveries(history.records.map(\.id), reason: "historyCleared")
-                history.clear()
+                ClearHistory.run(history: history)
+                refreshHasSomethingToClear()
             }
             Button("Cancel", role: .cancel) {}
         } message: {
@@ -756,7 +829,7 @@ struct SettingsView: View {
     }
 }
 
-private struct ShareSheet: UIViewControllerRepresentable {
+struct ShareSheet: UIViewControllerRepresentable {
     let items: [Any]
 
     func makeUIViewController(context: Context) -> UIActivityViewController {

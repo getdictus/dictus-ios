@@ -1,5 +1,6 @@
 // DictusKeyboard/Views/ToolbarView.swift
 import SwiftUI
+import UniformTypeIdentifiers
 import DictusCore
 
 /// Toolbar displayed above the keyboard with app shortcut and AnimatedMicButton.
@@ -63,6 +64,13 @@ struct ToolbarView: View {
     var suggestions: [String] = []
     var suggestionMode: SuggestionMode = .idle
     var onSuggestionTap: ((Int) -> Void)?
+
+    /// Whether a recent copy is waiting to be pasted (#634). The policy is
+    /// `ClipboardPasteOffer`'s; this is only the answer.
+    var offersPaste: Bool = false
+
+    /// Receives what the user chose to paste, after the tap on the system Paste control.
+    var onPaste: (([NSItemProvider]) -> Void)?
 
     /// Whether the last dictation insertion can still be undone (#266).
     /// Transient by construction: it is set for a few seconds after an insertion
@@ -293,6 +301,7 @@ struct ToolbarView: View {
             recoveredTranscriptionPending: showsRecoveredTranscription,
             offersDictationUndo: showsDictationUndo,
             hasSuggestions: !suggestions.isEmpty,
+            offersPaste: offersPaste,
             dictationUnavailable: !supportsDictation,
             polishUnavailable: showsPolishUnavailable,
             armedModeName: armedSmartMode?.localizedDisplayName,
@@ -320,6 +329,9 @@ struct ToolbarView: View {
                 mode: suggestionMode,
                 onTap: { index in onSuggestionTap?(index) }
             )
+        case .paste:
+            pasteButton
+            Spacer()
         case .dictationUnavailable:
             dictationUnavailableNotice
         case .polishUnavailable:
@@ -335,6 +347,25 @@ struct ToolbarView: View {
         case .empty:
             Spacer()
         }
+    }
+
+    /// The system Paste control (#634), `UIPasteControl`.
+    ///
+    /// WHY the system control and not a Dictus-drawn button: a tap on it is the user's
+    /// own paste, so iOS hands over the item without the "Allow Paste" banner a plain
+    /// `UIPasteboard` read can raise. It also brings its own localized title. The price
+    /// is that iOS owns its look; only colours, shape, label style and size are ours.
+    ///
+    /// WHY UIKit's control and not SwiftUI's `PasteButton` (#634 device feedback): the
+    /// pill has to be exactly as tall as the ☰ beside it, `iconDiameter`, and
+    /// `PasteButton` cannot be sized. It stays at 34 pt under `.frame(height:)` and
+    /// under `.controlSize(.large)` alike (measured on the simulator), 2 pt short of
+    /// the ☰'s capsule. `UIPasteControl` fills the height it is given.
+    private var pasteButton: some View {
+        ToolbarPasteControl(height: iconDiameter) { providers in
+            onPaste?(providers)
+        }
+        .accessibilityIdentifier("keyboard.paste")
     }
 
     /// WHY not red (#313, decided 2026-08-25): red is the recording overlay's colour in
@@ -728,18 +759,20 @@ struct ToolbarView: View {
             .opacity(0.4)
     }
 
-    /// Why the mic is greyed on a pre-A14 device (#635).
+    /// Why the mic is greyed on a pre-A14 device (#635, #963).
     ///
     /// The Full Access bar's footnote, secondary, minus its icon: this bar keeps the ☰
     /// on its left, so the sentence has the width between two pills and no more. One
     /// line that shrinks a little rather than wraps, so the bar keeps its 52 pt (#166).
     ///
-    /// The copy names the device, not the chip: the user cannot act on "A12", and the
-    /// onboarding already told them the reason when they added the keyboard.
+    /// Since #963 these devices dictate from the keyboard with Parakeet, and the mic is
+    /// greyed only while another model is active: a user who had Base before the update
+    /// keeps it until Parakeet is installed. So the copy says what to do, not that the
+    /// device cannot.
     private var dictationUnavailableNotice: some View {
         Text(
-            "Dictation unavailable on this device",
-            comment: "Keyboard toolbar note beside the disabled mic on a device whose chip is too old to dictate from the keyboard (#635)."
+            "Choose Parakeet to dictate",
+            comment: "Keyboard toolbar note beside the disabled mic on a pre-A14 device whose active model is not Parakeet; only Parakeet dictates from the keyboard there (#963)."
         )
         .font(.footnote)
         .foregroundStyle(.secondary)
@@ -1057,5 +1090,58 @@ struct ToolbarView: View {
             "Pro · \(daysLeft) days left",
             comment: "Keyboard panel pill in the last two days of the free Dictus Pro trial. The number is the days left, 1 or 2."
         )
+    }
+}
+
+/// `UIPasteControl` at a height the bar chooses, for `ToolbarView.pasteButton` (#634).
+///
+/// Lives here rather than in its own file because it has no other caller and a new
+/// file would mean editing `project.pbxproj`.
+private struct ToolbarPasteControl: UIViewRepresentable {
+    /// The pill's height. The width stays the control's own, which fits its title.
+    let height: CGFloat
+    let onPaste: ([NSItemProvider]) -> Void
+
+    func makeCoordinator() -> PasteTarget {
+        PasteTarget(onPaste: onPaste)
+    }
+
+    func makeUIView(context: Context) -> UIPasteControl {
+        let configuration = UIPasteControl.Configuration()
+        configuration.displayMode = .iconAndLabel
+        configuration.cornerStyle = .capsule
+        configuration.baseBackgroundColor = UIColor(Color.dictusAccent)
+        configuration.baseForegroundColor = .white
+        let control = UIPasteControl(configuration: configuration)
+        // `target` is weak; SwiftUI keeps the coordinator alive as long as the view.
+        control.target = context.coordinator
+        return control
+    }
+
+    func updateUIView(_ uiView: UIPasteControl, context: Context) {
+        context.coordinator.onPaste = onPaste
+    }
+
+    func sizeThatFits(_ proposal: ProposedViewSize, uiView: UIPasteControl, context: Context) -> CGSize? {
+        let natural = uiView.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize)
+        return CGSize(width: natural.width, height: height)
+    }
+
+    /// What the control pastes into. Text and URLs, the types `ClipboardPasteOffer`
+    /// offers Paste for.
+    final class PasteTarget: UIResponder {
+        var onPaste: ([NSItemProvider]) -> Void
+
+        init(onPaste: @escaping ([NSItemProvider]) -> Void) {
+            self.onPaste = onPaste
+            super.init()
+            pasteConfiguration = UIPasteConfiguration(
+                acceptableTypeIdentifiers: [UTType.plainText.identifier, UTType.url.identifier]
+            )
+        }
+
+        override func paste(itemProviders: [NSItemProvider]) {
+            onPaste(itemProviders)
+        }
     }
 }

@@ -1,0 +1,8 @@
+i pushed the fix to testflight this morning
+dictus now runs parakeet on the phone
+ask chatgpt to summarise the thread
+the kubernetes cluster restarted overnight
+open the project in xcode and build it
+thanks for testing dictus again
+the pipeline on gitlab failed twice
+send the invoice to xeroflow before friday

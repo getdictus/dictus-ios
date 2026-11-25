@@ -26,11 +26,22 @@ import DictusCore
 /// #494 teaches the features and starts the trial through
 /// `ProStatusManager.startTrialIfEligible()`. Once it does, the trial is already
 /// running when onboarding completes and this sheet no longer comes up for new users.
+///
+/// ### On an iPhone without Apple Intelligence (#922)
+///
+/// Every iPhone gets the trial since #922, and on one that can never run Smart Modes
+/// this sheet must not sell them as part of the gift: their row is dimmed and labelled
+/// "iPhone with Apple Intelligence", "everything in Pro" becomes "Dictus Pro", and the
+/// line about what a subscription keeps names only what this iPhone can keep.
 struct ProTrialAnnouncementView: View {
     let announcement: ProTrialCoordinator.Announcement
 
     @EnvironmentObject var trialCoordinator: ProTrialCoordinator
     @Environment(\.dismiss) private var dismiss
+
+    /// `ProFeature.smartMode.isSupportedByThisDevice`, read once: it asks
+    /// `SystemLanguageModel`, and hardware, OS and SDK do not change under a sheet.
+    private let runsSmartModes = ProFeature.smartMode.isSupportedByThisDevice
 
     var body: some View {
         ScrollView {
@@ -92,10 +103,16 @@ struct ProTrialAnnouncementView: View {
                 .font(.system(.title, design: .rounded, weight: .bold))
                 .multilineTextAlignment(.center)
 
-            Text("Everything in Pro is unlocked, free, starting today.")
-                .font(.dictusBody)
-                .foregroundColor(.secondary)
-                .multilineTextAlignment(.center)
+            Group {
+                if runsSmartModes {
+                    Text("Everything in Pro is unlocked, free, starting today.")
+                } else {
+                    Text("Dictus Pro is unlocked, free, starting today.")
+                }
+            }
+            .font(.dictusBody)
+            .foregroundColor(.secondary)
+            .multilineTextAlignment(.center)
         }
         .accessibilityElement(children: .combine)
     }
@@ -103,7 +120,8 @@ struct ProTrialAnnouncementView: View {
     // MARK: - Features
 
     private func featureRow(_ feature: ProFeature) -> some View {
-        HStack(spacing: 12) {
+        let isSupported = feature != .smartMode || runsSmartModes
+        return HStack(spacing: 12) {
             Image(systemName: feature.icon)
                 .font(.title3)
                 .foregroundColor(feature == .smartMode ? .dictusAccent : .dictusAccentHighlight)
@@ -129,6 +147,9 @@ struct ProTrialAnnouncementView: View {
         }
         .padding(12)
         .dictusGlass()
+        // Dimmed like the paywall's card for the same feature (#79), so the gift does
+        // not read as including it.
+        .opacity(isSupported ? 1 : 0.7)
         .accessibilityElement(children: .combine)
     }
 
@@ -139,6 +160,26 @@ struct ProTrialAnnouncementView: View {
     /// ones the keyboard fan and the onboarding already say.
     @ViewBuilder
     private var smartModeNote: some View {
+        if !runsSmartModes {
+            // The definitive reasons (#922): this iPhone gets the trial but never
+            // Smart Modes, and the row says so in the paywall's words. Checked before
+            // the engine state, which only speaks to a capable iPhone.
+            Label {
+                Text("iPhone with Apple Intelligence")
+            } icon: {
+                Image(systemName: "iphone")
+            }
+            .font(.dictusCaption)
+            .foregroundColor(.secondary)
+            .fixedSize(horizontal: false, vertical: true)
+        } else {
+            capableSmartModeNote
+        }
+    }
+
+    /// The note for a capable iPhone whose Apple Intelligence is not ready yet.
+    @ViewBuilder
+    private var capableSmartModeNote: some View {
         switch PolishAvailability.state {
         case .appleIntelligenceNotEnabled:
             Text("Turn on Apple Intelligence in iOS Settings to use Smart Modes.")
@@ -178,7 +219,9 @@ struct ProTrialAnnouncementView: View {
             )
             disclosureLine(
                 icon: "crown",
-                text: Text("To keep Smart Modes, History and Vocabulary afterwards, you will need a Dictus Pro subscription.")
+                text: runsSmartModes
+                    ? Text("To keep Smart Modes, History and Vocabulary afterwards, you will need a Dictus Pro subscription.")
+                    : Text("To keep History, Vocabulary and voice messages afterwards, you will need a Dictus Pro subscription.")
             )
         }
         .frame(maxWidth: .infinity, alignment: .leading)

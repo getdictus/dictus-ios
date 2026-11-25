@@ -558,8 +558,9 @@ class KeyboardViewController: UIInputViewController {
         bridge?.updateCapitalization()
 
         // Read the host field's input traits now that the connection exists (#200).
-        // Search/URL/email fields disable autocorrect and suggestions.
-        bridge?.refreshHostPolicy()
+        // Search/URL/email fields disable autocorrect and suggestions. This is the
+        // focus reading a mention cannot downgrade later (#1004).
+        bridge?.refreshHostPolicy(fieldFocused: true)
 
         // Re-sync the learned-words dictionary from the App Group (#222).
         // The singleton caches in memory per process; if the user reset the
@@ -575,14 +576,16 @@ class KeyboardViewController: UIInputViewController {
         // below and not after it. The engine is process-wide, so at this instant
         // the previous appearance's dictionary is still mmap'd, we are on the main
         // thread, and no load is in flight — the one moment in the cycle with no
-        // race in it. `setLanguage` on the next line unloads that dictionary
-        // synchronously, which is exactly what kept the prune from ever running
-        // off the load completion alone. Costs one boolean read once it has run.
+        // race in it. When the language or layout changed, `setLanguage` on the next
+        // line unloads that dictionary synchronously, which is what kept the prune
+        // from ever running off the load completion alone. Costs one boolean read
+        // once it has run.
         suggestionState.pruneUserDictionaryIfPossible(trigger: "keyboard-appeared")
 
         // Refresh prediction language from App Group on every keyboard appearance.
         // WHY here not viewDidLoad: The user can change language in the app between
-        // keyboard appearances. viewWillAppear fires each time, picking up the change.
+        // keyboard appearances. viewWillAppear fires each time, picking up the change;
+        // the engine reloads only when the language or the layout differs (#555).
         let lang = AppGroup.defaults.string(forKey: SharedKeys.language) ?? "fr"
         suggestionState.setLanguage(lang)
 
@@ -1266,6 +1269,7 @@ class KeyboardViewController: UIInputViewController {
         // The focused field may have changed (e.g. tapping another field in the
         // same app) — re-read its input traits (#200).
         bridge?.refreshHostPolicy()
+        NotificationCenter.default.post(name: .dictusHostDocumentDidChange, object: self)
     }
 
     override func selectionDidChange(_ textInput: UITextInput?) {
@@ -1285,6 +1289,9 @@ class KeyboardViewController: UIInputViewController {
         // Re-read the field's input traits so the autocorrect/suggestions policy
         // matches the newly-focused field (#200).
         bridge?.refreshHostPolicy()
+        // A copy in the host app changes neither, but the user selects before copying
+        // and taps back into the field after: the Paste offer re-reads here (#634).
+        NotificationCenter.default.post(name: .dictusHostDocumentDidChange, object: self)
     }
 
     // MARK: - Window Gesture Delay

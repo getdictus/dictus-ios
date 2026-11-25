@@ -62,7 +62,7 @@ final class SmartModeCatalogueTests: XCTestCase {
     }
 
     func testEachTranslateModeExpectsItsOwnTargetLanguage() {
-        for language in SupportedLanguage.allCases {
+        for language in TranslationTarget.all {
             let mode = SmartModeCatalogue.translate(to: language)
             XCTAssertEqual(mode.contract.outputLanguage, .fixed(language))
         }
@@ -107,7 +107,7 @@ final class SmartModeCatalogueTests: XCTestCase {
         ]
 
         for target in SupportedLanguage.allCases {
-            let instructions = SmartModeCatalogue.translate(to: target).prompt.instructions
+            let instructions = SmartModeCatalogue.translate(to: TranslationTarget(target)).prompt.instructions
 
             guard let expected = rightOutputs[target] else {
                 XCTFail("No expected RIGHT output recorded for \(target)")
@@ -169,13 +169,13 @@ final class SmartModeCatalogueTests: XCTestCase {
     /// its own language code — this is the assertion that fails the day someone gives
     /// Translate a shared badge again and → EN and → ES become the same mark.
     func testEveryTranslateModeCarriesItsOwnTargetCodeOnTheBadge() {
-        for language in SupportedLanguage.allCases {
+        for language in TranslationTarget.all {
             let mode = SmartModeCatalogue.translate(to: language)
-            XCTAssertEqual(mode.badge, .text(language.shortCode), "wrong badge for \(language.rawValue)")
+            XCTAssertEqual(mode.badge, .text(language.shortCode), "wrong badge for \(language.code)")
             XCTAssertEqual(mode.icon, "globe", "the fan row still uses the glyph")
         }
 
-        let badges = SupportedLanguage.allCases.map { SmartModeCatalogue.translate(to: $0).badge }
+        let badges = TranslationTarget.all.map { SmartModeCatalogue.translate(to: $0).badge }
         XCTAssertEqual(Set(badges.map(String.init(describing:))).count, badges.count)
     }
 

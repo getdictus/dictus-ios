@@ -99,18 +99,18 @@ public enum AutocorrectDebugLog {
             + "\"\(before.correction)\"(\(before.score)) → \"\(after.correction)\"(\(after.score))")
     }
 
-    /// Trie candidates returned by the spell check engine for a given word.
-    /// Logged when the trie produces corrections, so we can see the full candidate
-    /// list (not just the winner) and diagnose cases where the trie picks the
-    /// "wrong" candidate (e.g., ckavier → clapier when clavier exists).
-    public static func trieCandidates(word: String, correction: String,
-                                      correctionFreq: UInt16,
-                                      alternatives: [(String, UInt16)]) {
+    /// The trie's candidates for a word and what `CorrectionRanking` decided, so the
+    /// full list (not just the winner) is there to diagnose a wrong pick
+    /// (e.g., ckavier → clapier when clavier exists) or a word kept as typed (#993).
+    public static func trieCandidates(word: String, candidates: [CorrectionCandidate],
+                                      decision: CorrectionRanking.Decision) {
         guard enabled else { return }
-        let alts = alternatives
-            .map { "\"\($0.0)\"(freq=\($0.1))" }
+        let byWord = Dictionary(candidates.map { ($0.word, $0) }, uniquingKeysWith: { first, _ in first })
+        let ranked = decision.ranked.prefix(5).compactMap { byWord[$0] }
+            .map { "\"\($0.word)\"(cost=\(String(format: "%.2f", $0.cost)) freq=\($0.frequency) ctx=\($0.context))" }
             .joined(separator: ", ")
-        write("TRIE-CANDIDATES word=\"\(word)\" winner=\"\(correction)\"(freq=\(correctionFreq)) alts=[\(alts)]")
+        let outcome = decision.replacement.map { "winner=\"\($0)\"" } ?? "kept"
+        write("TRIE-CANDIDATES word=\"\(word)\" \(outcome) ranked=[\(ranked)]")
     }
 
     /// The autocorrect decision was actually applied to the text document
@@ -128,6 +128,13 @@ public enum AutocorrectDebugLog {
     public static func autocorrectUndone(original: String, rejected: String) {
         guard enabled else { return }
         write("UNDO orig=\"\(original)\" rejected=\"\(rejected)\"")
+    }
+
+    /// A correction made at a punctuation mark was put back because the key typed
+    /// right after the mark showed it sat inside an e-mail address or a URL (#919).
+    public static func autocorrectRevertedInAddress(original: String, corrected: String) {
+        guard enabled else { return }
+        write("ADDRESS-REVERT orig=\"\(original)\" undone=\"\(corrected)\"")
     }
 
     /// The user refused an autocorrection at its position (#872): `by` is
@@ -355,6 +362,9 @@ public enum AutocorrectDebugLog {
     // MARK: - Writing
 
     private static func write(_ body: String) {
+        // While the typing journal records, it takes every line, in order with the
+        // taps, and drops the bar's per-keystroke checks (#1001).
+        if TypingJournal.absorb(body) { return }
         let timestamp = isoFormatter.string(from: Date())
         let src = PersistentLog.source
         let line = "[\(timestamp)] DEBUG   [keyboard] <\(src)> \(body)\n"

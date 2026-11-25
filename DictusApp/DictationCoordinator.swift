@@ -346,7 +346,8 @@ class DictationCoordinator: ObservableObject {
     /// invisible to the keyboard by construction.
     func transcribeVoiceNoteChunk(_ samples: [Float], languagePolicy: TranscriptionLanguagePolicy) async throws -> String {
         try await ensureEngineReady()
-        let text = try await transcriptionService.transcribe(audioSamples: samples, languagePolicy: languagePolicy)
+        let text = try await transcriptionService.transcribe(audioSamples: samples,
+                                                             languagePolicy: languagePolicyForLoadedEngine(languagePolicy))
         return DictationTranscript.corrected(text).text
     }
 
@@ -946,7 +947,7 @@ class DictationCoordinator: ObservableObject {
                     DictusLogger.app.info("Recording stopped. Samples: \(samples.count, privacy: .public), Duration: \(String(format: "%.1f", audioDuration), privacy: .public)s")
                 }
 
-                updateStatus(.transcribing)
+                enterTranscription(audioSeconds: audioDuration)
                 stopTrace?.log("statusTranscribing")
                 LiveActivityManager.shared.transitionToTranscribing()
                 // Arm watchdog: if DI fails to leave .recording, force recovery after 10s.
@@ -995,7 +996,7 @@ class DictationCoordinator: ObservableObject {
                 // another. The policy is also engine-aware: with Parakeet
                 // active the setting is Whisper-only-effective, so every mode
                 // resolves to the historical follow behavior.
-                let languagePolicy = TranscriptionLanguagePolicy.snapshot()
+                let languagePolicy = languagePolicyForLoadedEngine(TranscriptionLanguagePolicy.snapshot())
 
                 // The armed Smart Mode is part of the same per-dictation snapshot
                 // (#79), taken here for the reason #226 introduced the language one:
@@ -1549,6 +1550,15 @@ private extension DictationCoordinator {
     ///
     /// Falls back to the active model from App Group, then to "openai_whisper-small".
     func ensureEngineReady(preferredModel: String? = nil) async throws {
+        // Apple's on-device recognizer first, when the user picked it on the Models screen
+        // and it is ready for the chosen language right now; otherwise the downloaded model,
+        // as before the choice existed (`EffectiveSpeechEngine`). A preferred model is an
+        // explicit request for that model, so it never resolves to Apple.
+        if preferredModel == nil, case .apple(let code) = await AppleEngineAssets.effectiveEngine() {
+            installAppleEngine(languageCode: code)
+            return
+        }
+
         let modelName = preferredModel
             ?? defaults.string(forKey: SharedKeys.activeModel)
             ?? "openai_whisper-small"
@@ -1563,9 +1573,26 @@ private extension DictationCoordinator {
             // No iOS 16 fallback to write: the app's floor is iOS 17, which is also
             // FluidAudio 0.15.7's, and the catalogue hides Nemotron below it (#558).
             try await ensureNemotronReady(modelName: modelName)
-        case .whisperKit:
+        case .whisperKit, .apple:
+            // `.apple` is unreachable here: no catalogue entry has that engine, and the
+            // Apple choice was resolved above, before any model name.
             try await ensureWhisperKitEngineReady(modelName: modelName)
         }
+    }
+
+    /// Make Apple's recognizer the engine `TranscriptionService` calls.
+    ///
+    /// No lock, no Neural Engine gate, no warm inference: nothing is compiled or loaded in
+    /// this process, the model runs in Apple's speech daemon. The downloaded model's engine
+    /// is released, as a switch to another model would release it, so its memory goes back.
+    func installAppleEngine(languageCode: String) {
+        guard currentModelName != AppleSpeechEngineIdentity.identifier else { return }
+        guard let recognizer = OnDeviceRecognizerFactory.make() else { return }
+        let engine = AppleSpeechEngine(recognizer: recognizer, languageCode: languageCode)
+        whisperKit = nil
+        currentModelName = AppleSpeechEngineIdentity.identifier
+        transcriptionService.prepare(engine: engine)
+        AppleEngineAssets.log("engineInstalled", "engine=\(engine.engineName) lang=\(languageCode)")
     }
 
     /// Initialize WhisperKit with the preferred model if not already loaded.
@@ -1883,6 +1910,36 @@ private extension DictationCoordinator {
     }
 }
 
+// MARK: - Apple's engine (Models screen)
+
+extension DictationCoordinator {
+    /// Load Apple's engine right after the user picks it, so the next dictation does not
+    /// have to. Unlike `preloadActiveModel` it leaves `modelLoadState` alone: there is no
+    /// model preparation to show, and a `.loading` state would put the downloaded model's
+    /// preparation screen over the Models screen for a load that is not happening.
+    func adoptAppleEngine() {
+        Task {
+            do {
+                try await ensureEngineReady()
+                AppleEngineAssets.log("adopted", "engine=\(self.currentModelName ?? "none")")
+            } catch {
+                AppleEngineAssets.log("adoptFailed", "error=\(DictationFailureMessage.diagnostic(for: error))")
+            }
+        }
+    }
+
+    /// The dictation's language policy with the engine that will actually transcribe it.
+    ///
+    /// `TranscriptionLanguagePolicy.snapshot()` names the engine of `activeModel`, which
+    /// stays the downloaded model when Apple is picked. Apple is told the chosen language
+    /// and is polished as a forced-language engine, so its dictations carry `.apple`.
+    func languagePolicyForLoadedEngine(_ policy: TranscriptionLanguagePolicy) -> TranscriptionLanguagePolicy {
+        guard currentModelName == AppleSpeechEngineIdentity.identifier else { return policy }
+        return TranscriptionLanguagePolicy(mode: policy.mode, keyboardLanguage: policy.keyboardLanguage,
+                                           engine: .apple, modelIdentifier: AppleSpeechEngineIdentity.identifier)
+    }
+}
+
 // MARK: - Inactivity timeout seams (#380)
 
 // WHY an extension in this file rather than members of the class: the class body sits
@@ -1904,71 +1961,6 @@ extension DictationCoordinator {
         if !DictationSessionLivenessPolicy.isActive(newStatus) {
             releaseWarmStateIfImmediate(after: "status-\(newStatus.rawValue)")
         }
-    }
-}
-
-// MARK: - Keyboard stop and cancel (#868)
-
-extension DictationCoordinator {
-
-    /// Decide a keyboard stop or cancel, clear its flag when it is acted on, and log it when
-    /// it is not acted on, or acted on with the flag reading false.
-    ///
-    /// WHY BOTH LOG LINES: before #868 an ignored stop left nothing in the log, and twelve
-    /// taps in a row read as the app never receiving them. `stopIgnored` / `cancelIgnored`
-    /// say a signal arrived and why nothing happened; `…HonoredWithoutFlag` says the App
-    /// Group read was stale, which is the evidence a launch before first unlock leaves.
-    func mayActOnKeyboardSignal(_ signal: KeyboardSignal, flagKey: String) -> Bool {
-        let requested = defaults.bool(forKey: flagKey)
-        let decision = KeyboardSignalPolicy.decide(signal, flagRequested: requested, status: status)
-        switch decision {
-        case .honor:
-            // Always, even when it read false: in a stale view the keyboard's `true` is on
-            // disk, and only this write can clear it for the next session.
-            defaults.set(false, forKey: flagKey)
-            defaults.synchronize()
-            if !requested {
-                PersistentLog.log(.diagnosticProbe(
-                    component: "KeyboardSignal",
-                    instanceID: signal.rawValue,
-                    action: "\(signal.rawValue)HonoredWithoutFlag",
-                    details: "status=\(status.rawValue)"
-                ))
-            }
-            return true
-        case .ignore(let reason):
-            PersistentLog.log(.diagnosticProbe(
-                component: "KeyboardSignal",
-                instanceID: signal.rawValue,
-                action: "\(signal.rawValue)Ignored",
-                details: "reason=\(reason)"
-            ))
-            return false
-        }
-    }
-}
-
-// MARK: - Onboarding gate (#827)
-
-extension DictationCoordinator {
-
-    /// Start the dictation the keyboard asked for over the Darwin notification, unless
-    /// onboarding is not done and the app is not in the foreground.
-    ///
-    /// Safety net for a keyboard built before #827, or one that read a stale app phase:
-    /// before onboarding there is no model, so a dictation started here would fail and
-    /// leave its error behind. The onboarding test dictation is unaffected — it runs with
-    /// the app active, which `KeyboardOnboardingGate.appMayStartKeyboardDictation` lets
-    /// through.
-    func startKeyboardDictationUnlessBeforeOnboarding(appState: UIApplication.State) {
-        guard KeyboardOnboardingGate.appMayStartKeyboardDictation(
-            onboardingCompleted: KeyboardOnboardingGate.isOnboardingCompleted(in: defaults),
-            appIsActive: appState == .active
-        ) else {
-            PersistentLog.log(.dictationDeferred(reason: "keyboard start before onboarding with app not active"))
-            return
-        }
-        startDictation(origin: .keyboard)
     }
 }
 

@@ -1,5 +1,6 @@
 // DictusApp/Audio/ParakeetEngine.swift
 // FluidAudio-based Parakeet STT engine, iOS 17+ only.
+import CoreML
 import Foundation
 import DictusCore
 import FluidAudio
@@ -96,7 +97,11 @@ class ParakeetEngine: SpeechModelProtocol {
         do {
             // Compile the cached Parakeet v3 CoreML models. `load` reads the bundles the
             // guard above verified; it does not resolve anything over the network.
-            let models = try await AsrModels.load(from: cacheDirectory, version: .v3)
+            // `nil` keeps FluidAudio's default units; pre-A14 chips load on the CPU (#963).
+            let configuration = Self.loadConfiguration(for: DeviceCapabilities.current())
+            let loadStart = Date()
+            let models = try await AsrModels.load(
+                from: cacheDirectory, configuration: configuration, version: .v3)
 
             // Initialize the ASR manager for transcription. `initialize(models:)` became
             // `loadModels(_:)` in FluidAudio 0.15 (#558); same work, new name.
@@ -114,6 +119,9 @@ class ParakeetEngine: SpeechModelProtocol {
 
             self.asrManager = manager
             self.isInitialized = true
+
+            Self.logComputeUnits(of: models, modelIdentifier: modelIdentifier,
+                                 loadMs: Int(Date().timeIntervalSince(loadStart) * 1000))
 
             DictusLogger.app.info("ParakeetEngine: v3 models loaded and ready")
         } catch {
@@ -209,8 +217,11 @@ class ParakeetEngine: SpeechModelProtocol {
 
             // Before the emptiness check, on purpose: a first pass that dropped every word
             // over audible speech is a gap region, the retry's second trigger (#623).
-            let (text, retry) = await retryDriftedSpans(
-                of: result, firstPassText: firstPassText, audioSamples: audioSamples, using: asrManager)
+            // Not before A14 (#963): on the CPU the retry outlasted the keyboard watchdog.
+            let (text, retry) = DeviceCapabilities.current().runsParakeetDriftRetry
+                ? await retryDriftedSpans(
+                    of: result, firstPassText: firstPassText, audioSamples: audioSamples, using: asrManager)
+                : (firstPassText, nil)
 
             guard !text.isEmpty else {
                 throw TranscriptionError.noSpeechDetected(context: "empty Parakeet transcription result")
@@ -223,7 +234,62 @@ class ParakeetEngine: SpeechModelProtocol {
         } catch let error as TranscriptionError {
             throw error
         } catch {
-            throw TranscriptionError.transcriptionFailed("Parakeet: \(error.localizedDescription)")
+            throw TranscriptionError.transcriptionFailed("Parakeet: \(LoggedError.domainAndCode(error))")
+        }
+    }
+}
+
+// MARK: - Compute units (#963)
+
+@available(iOS 17.0, *)
+extension ParakeetEngine {
+
+    /// The `MLModelConfiguration` `AsrModels.load` gets on this device, or `nil` for
+    /// FluidAudio's own default. The decision is `DeviceCapabilities.parakeetComputePolicy`,
+    /// in DictusCore where `swift test` covers it; this is the translation.
+    static func loadConfiguration(for capabilities: DeviceCapabilities) -> MLModelConfiguration? {
+        switch capabilities.parakeetComputePolicy {
+        case .fluidAudioDefault:
+            return nil
+        case .cpuOnly:
+            let configuration = AsrModels.defaultConfiguration()
+            configuration.computeUnits = .cpuOnly
+            return configuration
+        }
+    }
+
+    /// One `ParakeetLoad computeUnits` line per load: the units each component was loaded
+    /// with, the load time, and the process footprint with its peak since launch.
+    ///
+    /// WHY (#963): on a pre-A14 chip the default units were jetsammed at ~2.7 GB and the
+    /// CPU ones loaded at ~500 MB, so a field report has to say which ran and what it cost.
+    /// These are the units Core ML was ASKED for (`MLModel.configuration`); Core ML does
+    /// not report which ops it placed on the Neural Engine.
+    static func logComputeUnits(of models: AsrModels, modelIdentifier: String, loadMs: Int) {
+        let units = [
+            "preprocessor=\(models.preprocessor.configuration.computeUnits.logLabel)",
+            "encoder=\(models.encoder?.configuration.computeUnits.logLabel ?? "fused")",
+            "decoder=\(models.decoder.configuration.computeUnits.logLabel)",
+            "joint=\(models.joint.configuration.computeUnits.logLabel)"
+        ].joined(separator: " ")
+        PersistentLog.log(.diagnosticProbe(
+            component: "ParakeetLoad",
+            instanceID: modelIdentifier,
+            action: "computeUnits",
+            details: "\(units) loadMs=\(loadMs) \(ProcessMemory.logFields())"
+        ))
+    }
+}
+
+private extension MLComputeUnits {
+    /// The case name, as the log spells it.
+    var logLabel: String {
+        switch self {
+        case .cpuOnly: return "cpuOnly"
+        case .cpuAndGPU: return "cpuAndGPU"
+        case .cpuAndNeuralEngine: return "cpuAndNeuralEngine"
+        case .all: return "all"
+        @unknown default: return "unknown(\(rawValue))"
         }
     }
 }

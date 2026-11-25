@@ -45,6 +45,14 @@ final class ProxyDocumentEditor: TextDocumentEditing {
     }
 }
 
+// WHY the type_body_length exemption on the class below (#1025): once #1028's trackpad
+// landed, the return key's hooks (#1023) took the body to 654 lines of the 650-line budget.
+// Those hooks are seven lines that have to sit in it: a property observer, an early return
+// and two calls in existing methods. The threshold's rationale in .swiftlint.yml is to
+// catch a NEW type ballooning, not to police the large classes that already exist, as for
+// UnifiedAudioEngine (#417); moving tested methods out to an extension to make room is a
+// restructuring this PR does not owe. Scoped to this class, and only to it.
+
 /// Adapts GiellaKeyboardView delegate callbacks into Dictus keyboard actions.
 ///
 /// WHY a separate bridge class (not making KeyboardViewController the delegate):
@@ -64,7 +72,7 @@ final class ProxyDocumentEditor: TextDocumentEditing {
 /// sounding the click from here is what made typing feel out of sync with the
 /// haptic (#286). The haptics that remain here are the ones with no touchDown to
 /// attach to: the cursor-movement tick, and the emoji toggle's own feedback.
-final class DictusKeyboardBridge: NSObject,
+final class DictusKeyboardBridge: NSObject, // swiftlint:disable:this type_body_length
     GiellaKeyboardViewDelegate,
     GiellaKeyboardViewKeyboardKeyDelegate {
     // MARK: - Dependencies
@@ -76,7 +84,12 @@ final class DictusKeyboardBridge: NSObject,
 
     /// Reference to the keyboard view for page state management (shift/symbols).
     /// WHY weak: The keyboard view is owned by the controller's view hierarchy.
-    weak var keyboardView: GiellaKeyboardView?
+    ///
+    /// A new view (the controller rebuilds it on a layout or language change) gets the
+    /// return key of the field already focused at once, not at the next keystroke (#1023).
+    weak var keyboardView: GiellaKeyboardView? {
+        didSet { refreshReturnKey() }
+    }
 
     /// Reference to the suggestion state for triggering prediction updates.
     /// WHY weak: The controller owns SuggestionState. Bridge must not create a retain cycle.
@@ -161,6 +174,13 @@ final class DictusKeyboardBridge: NSObject,
     // MARK: - GiellaKeyboardViewDelegate
 
     func didTriggerKey(_ key: KeyDefinition) {
+        // An off return key does nothing, as Apple's does (#1023): the host asked for it to
+        // be off while the field is empty. Read again here rather than trusting the drawn
+        // state, which can be one event behind the document.
+        if case .returnkey = key.type, !refreshReturnKey().isEnabled {
+            return
+        }
+
         // The first keystroke after a dictation ends its undo offer (#266). The
         // safety check would refuse anyway once the typed character lands, but the
         // proxy's view of the document can lag the keystroke by an event, and an
@@ -339,9 +359,15 @@ final class DictusKeyboardBridge: NSObject,
         // here rather than wait for the host to report the selection change (#266).
         KeyboardState.shared.invalidateDictationUndo(reason: "cursor-moved")
 
-        // Spacebar trackpad cursor movement
+        // Spacebar trackpad cursor movement, in UTF-16 units. No haptic per move: Apple's
+        // keyboard asks for no feedback after the space bar's own (Hex's reading of iOS 27.2's
+        // log, #950), and at the new speeds a tick per move was a buzz.
         controller?.textDocumentProxy.adjustTextPosition(byCharacterOffset: movement)
-        HapticFeedback.cursorMoved()
+    }
+
+    func trackpadTextContext() -> (before: String, after: String) {
+        let proxy = controller?.textDocumentProxy
+        return (proxy?.documentContextBeforeInput ?? "", proxy?.documentContextAfterInput ?? "")
     }
 
     // MARK: - GiellaKeyboardViewKeyboardKeyDelegate
@@ -364,10 +390,15 @@ final class DictusKeyboardBridge: NSObject,
     ///
     /// WHY cached on SuggestionState: updateAsync/updatePredictions run on a
     /// background queue and cannot read UITextDocumentProxy (main-thread only).
-    func refreshHostPolicy() {
-        guard let proxy = controller?.textDocumentProxy else { return }
-        let policy = HostInputTraits.policy(for: proxy)
-        guard policy != suggestionState?.hostPolicy else { return }
+    ///
+    /// - Parameter fieldFocused: the keyboard is appearing, so this reading is the
+    ///   field's focus reading, the one a later mention cannot downgrade (#1004).
+    func refreshHostPolicy(fieldFocused: Bool = false) {
+        // Same moments as the field's return key type: focus, text and selection changes.
+        refreshReturnKey()
+        guard let proxy = controller?.textDocumentProxy, let state = suggestionState else { return }
+        let policy = state.readHostPolicy(from: proxy, fieldFocused: fieldFocused)
+        guard policy != state.hostPolicy else { return }
 
         #if DEBUG
         AutocorrectDebugLog.hostPolicy(
@@ -377,11 +408,11 @@ final class DictusKeyboardBridge: NSObject,
         )
         #endif
 
-        suggestionState?.hostPolicy = policy
+        state.hostPolicy = policy
         if !policy.suggestionsAllowed {
             // Empty the bar immediately — stale suggestions from the previous
             // field must not survive into a no-suggestions field.
-            suggestionState?.clear()
+            state.clear()
         }
     }
 
@@ -393,12 +424,13 @@ final class DictusKeyboardBridge: NSObject,
     /// NOTE: Haptic and click fire in GiellaKeyboardView.touchesBegan() for ALL keys
     /// on touchDown, so neither is emitted here.
     private func handleInputKey(_ character: String) {
+        revertCorrectionInsideAddress(before: character)
         learnWordMovedPast()
 
         // A comma, a full stop and the like end the word before them (#872): it is
         // corrected there, without a space, and the mark is inserted below.
         if AutocorrectTrigger.commitsWord(character) {
-            autocorrectBeforeCursor(trailing: "")
+            autocorrectBeforeCursor(trailing: "", committedBy: character)
         }
 
         // Insert the character. When on shifted/capslock page, the key definition
@@ -583,10 +615,12 @@ final class DictusKeyboardBridge: NSObject,
         // Guard: never autocorrect tokens containing digits (#74).
         // WHY CharacterSet.decimalDigits: covers all Unicode digits (0-9 plus other scripts).
         // Tokens like "test123", "h2o", "3pm" should be inserted as-is.
+        // A text replacement shortcut with a digit (`adr1`) goes on to
+        // `autocorrectBeforeCursor`, which expands it (#1022).
         let containsDigit = freshWord.unicodeScalars.contains {
             CharacterSet.decimalDigits.contains($0)
         }
-        if containsDigit {
+        if containsDigit, suggestionState?.textReplacement(for: freshWord) == nil {
             // Skip autocorrect — insert space normally
             let mirrorBefore = mirrorLength()
             controller?.textDocumentProxy.insertText(" ")
@@ -613,7 +647,7 @@ final class DictusKeyboardBridge: NSObject,
             mirrorSync.noteSpaceWhileSuspect()
         }
 
-        if autocorrectBeforeCursor(trailing: " ") {
+        if autocorrectBeforeCursor(trailing: " ", committedBy: " ") {
             return
         }
 
@@ -664,7 +698,7 @@ final class DictusKeyboardBridge: NSObject,
         learnWordMovedPast()
         suggestionState?.pendingUndo = nil
         // Return ends the word before it, like a punctuation mark (#872).
-        autocorrectBeforeCursor(trailing: "")
+        autocorrectBeforeCursor(trailing: "", committedBy: "\n")
         let mirrorBefore = mirrorLength()
         controller?.textDocumentProxy.insertText("\n")
         observeMirror(before: mirrorBefore, inserted: 1)
@@ -895,18 +929,27 @@ final class DictusKeyboardBridge: NSObject,
     /// correction was written, followed by `trailing`.
     ///
     /// `trailing` is " " for the space bar. It is empty for a punctuation mark or a
-    /// return (#872), whose caller inserts its own character afterwards.
+    /// return (#872), whose caller inserts its own character afterwards. `key` is
+    /// the key that commits the word.
     @discardableResult
-    private func autocorrectBeforeCursor(trailing: String) -> Bool {
+    private func autocorrectBeforeCursor(trailing: String, committedBy key: String) -> Bool {
         guard let state = suggestionState, let memory = rejectionMemory,
               let context = controller?.textDocumentProxy.documentContextBeforeInput,
               let (prefix, freshWord) = AutocorrectRejectionMemory.wordAtCursor(context: context)
         else { return false }
 
-        // Guard: never autocorrect tokens containing digits (#74). The space bar
-        // has its own branch for them; a punctuation mark just inserts itself.
-        guard !freshWord.unicodeScalars.contains(where: { CharacterSet.decimalDigits.contains($0) })
+        // The user's text replacement shortcut (#1022) is looked up first: on Apple's
+        // keyboard it expands where autocorrect never would, `adr1` included.
+        let shortcutPhrase = state.textReplacement(for: freshWord)
+
+        // Guard: never autocorrect tokens containing digits (#74), a shortcut aside.
+        // The space bar has its own branch for them; a punctuation mark just inserts itself.
+        guard shortcutPhrase != nil
+                || !freshWord.unicodeScalars.contains(where: { CharacterSet.decimalDigits.contains($0) })
         else { return false }
+        // An address is left alone even when it ends with a shortcut (#919). Whether
+        // Apple's keyboard does the same is still to be checked on a device (#1022, gap 5).
+        guard !endsInAddress(context, word: freshWord, committedBy: key) else { return false }
 
         // Extract previous word for n-gram context boost
         let previousWord: String? = {
@@ -922,6 +965,11 @@ final class DictusKeyboardBridge: NSObject,
         // Refresh the host-traits policy right before the apply decision (#200):
         // the proxy read is cheap and this is the freshest possible signal.
         refreshHostPolicy()
+
+        // A shortcut expands in every field but a secure or password one, with
+        // autocorrect on or off, as on Apple's keyboard (#1022). It is not an
+        // autocorrection, so neither switch below gates it.
+        let expansion = state.hostPolicy.textReplacementsAllowed ? shortcutPhrase : nil
 
         // Sentence position for the proper-noun guard (#199): an unknown
         // capitalized word mid-sentence is preserved; at sentence start the
@@ -957,16 +1005,48 @@ final class DictusKeyboardBridge: NSObject,
             wordWasEvaluated = false
         }
 
-        let proposal = autocorrectRuns
-            ? state.performSpellCheck(
-                freshWord, previousWord: previousWord, isAtSentenceStart: atSentenceStart
-            )?.correction
+        #if DEBUG
+        // Everything the decision logs between here and the return is the word's (#1001).
+        var journalFinal = freshWord
+        var journalOffered = false
+        beginJournalWord(freshWord, previous: previousWord, committedBy: key, bar: state)
+        defer {
+            TypingJournal.endWord(final: journalFinal, autocorrectRan: autocorrectRuns, offered: journalOffered)
+        }
+        #endif
+
+        if autocorrectRuns, let previousWord,
+           let elision = replaceElisionAcrossSpace(context: context, previousWord: previousWord,
+                                                   word: freshWord, trailing: trailing) {
+            #if DEBUG
+            journalFinal = elision
+            #endif
+            return true
+        }
+
+        let checked = autocorrectRuns
+            ? state.correctionProposal(
+                freshWord, previousWord: previousWord, isAtSentenceStart: atSentenceStart, context: context
+            )
             : nil
+        let proposal = expansion ?? checked?.autocorrection?.correction
+        let offersCorrections = checked?.suggestionRow(typedWord: freshWord) != nil
+        #if DEBUG
+        journalOffered = offersCorrections
+        if let expansion, !autocorrectRuns {
+            // With autocorrect on, the engine's lexicon branch has logged it already.
+            AutocorrectDebugLog.autocorrectDecision(
+                original: freshWord, corrected: expansion, branch: "text-replacement", prevWord: previousWord
+            )
+        }
+        #endif
 
         switch memory.commit(
             prefix: prefix, word: freshWord, proposedCorrection: proposal,
+            offersCorrections: offersCorrections,
             countable: wordWasEvaluated,
-            allowsCasingChange: proposal != nil && state.isInSupplementaryLexicon(freshWord)
+            allowsCasingChange: proposal != nil && state.isInSupplementaryLexicon(freshWord),
+            isTextReplacement: expansion != nil
         ) {
         case .correct:
             guard let correction = proposal else { return false }
@@ -990,6 +1070,9 @@ final class DictusKeyboardBridge: NSObject,
             ) {
             case .applied:
                 memory.correctionApplied(prefix: prefix, corrected: correction)
+                #if DEBUG
+                journalFinal = correction
+                #endif
                 return true
 
             case .refused(let reason):
@@ -1025,7 +1108,9 @@ final class DictusKeyboardBridge: NSObject,
             // correct it (user typed it as-is). Track usage — at the repetition
             // threshold, learn it. Skipped when autocorrect never ran (see
             // wordWasEvaluated above): those words were not vetted by the pipeline,
-            // and when this word was already counted at this place (#872).
+            // when this word was already counted at this place (#872), and when the
+            // bar was offering corrections for it (#993): keeping a word past
+            // `arrive | arrivé` says nothing, a tap on the typed word does.
             //
             // The dictionary check is the gate this site was missing (#287 decision 2).
             // Passive typing states nothing about intent, so the only word worth
@@ -1099,69 +1184,6 @@ final class DictusKeyboardBridge: NSObject,
         return outcome
     }
 
-    /// Last ~30 characters of a context string, for DEBUG replacement logs.
-    /// Keeps log lines short while showing the text around the replacement site.
-    static func contextTail(_ context: String?) -> String {
-        guard let context = context else { return "<nil>" }
-        return String(context.suffix(30))
-    }
-
-    // MARK: - Refused corrections (#872)
-
-    /// The refusal memory, pointed at the document being edited.
-    var rejectionMemory: AutocorrectRejectionMemory? {
-        guard let memory = suggestionState?.rejectionMemory else { return nil }
-        let document = controller.flatMap {
-            DictusTextProxyIdentity.documentIdentifier(of: $0.textDocumentProxy)?.uuidString
-        }
-        memory.enter(document: document)
-        return memory
-    }
-
-    /// The host changed the text. When it left the document empty, as Messages does
-    /// on sending without changing the documentIdentifier, nothing remembered is at
-    /// any position any more. `hasText` answers for the whole document, so a caret
-    /// at the start of a non-empty field does not count.
-    func hostTextChanged() {
-        guard let proxy = controller?.textDocumentProxy, !proxy.hasText else { return }
-        rejectionMemory?.documentEmptied()
-    }
-
-    /// Learns a word restored by Undo once the user moves on past it unchanged.
-    /// Called before anything is inserted after a word boundary.
-    private func learnWordMovedPast() {
-        guard let state = suggestionState, let memory = rejectionMemory,
-              let word = memory.movingOn(context: controller?.textDocumentProxy.documentContextBeforeInput)
-        else { return }
-        // Same gate as every other learning site: autocorrect ran, and the mirror
-        // can be trusted (#287 decision 8, #530).
-        guard state.autocorrectEnabled, state.hostPolicy.autocorrectAllowed, !mirrorSync.isSuspect
-        else { return }
-        UserDictionary.shared.learn(word)
-    }
-
-    /// Takes a backspace into a correction Dictus made as the user refusing it.
-    private func noteDeletion(before: String?, after: String?) {
-        guard let corrected = rejectionMemory?.textDeleted(before: before, after: after) else { return }
-        #if DEBUG
-        AutocorrectDebugLog.autocorrectRefused(corrected: corrected, by: "backspace")
-        #endif
-    }
-
-    /// The space closes the undo window of the correction before it, except the
-    /// space typed right after the punctuation mark that made a correction (#872):
-    /// `cuisinr,` + space keeps `cuisine`'s undo chip until the next space.
-    private func closeUndoWindowAtSpace() {
-        guard let undo = suggestionState?.pendingUndo else { return }
-        if !undo.insertedSpace,
-           let context = controller?.textDocumentProxy.documentContextBeforeInput,
-           let mark = context.last, AutocorrectTrigger.commitsWord(String(mark)),
-           context.dropLast().hasSuffix(undo.correctedWord) {
-            return
-        }
-        suggestionState?.pendingUndo = nil
-    }
-
     // MARK: - Auto-full-stop
 
     /// Replaces double-space with ". " (period + space).
@@ -1199,6 +1221,9 @@ final class DictusKeyboardBridge: NSObject,
     /// (via double-tap shift), autocapitalization must not interfere. The user
     /// explicitly wants ALL CAPS and tapping shift will deactivate it.
     func updateCapitalization() {
+        // Every keystroke ends here, and a keystroke is what fills or empties the field
+        // that turns the return key on or off (#1023).
+        refreshReturnKey()
         guard let proxy = controller?.textDocumentProxy else { return }
         guard let kbView = keyboardView else { return }
 
@@ -1257,3 +1282,182 @@ final class DictusKeyboardBridge: NSObject,
         }
     }
 }
+
+// MARK: - Return key type (#1023)
+
+extension DictusKeyboardBridge {
+
+    /// Reads the field's `returnKeyType`, `enablesReturnKeyAutomatically` and `hasText`,
+    /// and redraws the return key when they changed.
+    ///
+    /// Called from `refreshHostPolicy` (keyboard appearance, `textDidChange`,
+    /// `selectionDidChange`: the focused field can change under the keyboard) and from
+    /// `updateCapitalization` (after each keystroke, which can fill or empty the field).
+    /// Three property reads on the proxy; the view redraws only on a change.
+    @discardableResult
+    func refreshReturnKey() -> ReturnKeyAppearance {
+        guard let proxy = controller?.textDocumentProxy else { return .standard }
+        let appearance = ReturnKeyAppearance(
+            returnKeyTypeRawValue: proxy.returnKeyType?.rawValue,
+            enablesReturnKeyAutomatically: proxy.enablesReturnKeyAutomatically,
+            hasText: proxy.hasText
+        )
+        keyboardView?.updateReturnKey(appearance)
+        return appearance
+    }
+}
+
+// MARK: - Refused corrections (#872)
+
+extension DictusKeyboardBridge {
+
+    /// The refusal memory, pointed at the document being edited.
+    var rejectionMemory: AutocorrectRejectionMemory? {
+        guard let memory = suggestionState?.rejectionMemory else { return nil }
+        let document = controller.flatMap {
+            DictusTextProxyIdentity.documentIdentifier(of: $0.textDocumentProxy)?.uuidString
+        }
+        memory.enter(document: document)
+        return memory
+    }
+
+    /// The host changed the text. When it left the document empty, as Messages does
+    /// on sending without changing the documentIdentifier, nothing remembered is at
+    /// any position any more. `hasText` answers for the whole document, so a caret
+    /// at the start of a non-empty field does not count.
+    func hostTextChanged() {
+        guard let proxy = controller?.textDocumentProxy, !proxy.hasText else { return }
+        rejectionMemory?.documentEmptied()
+    }
+
+    /// Learns a word restored by Undo once the user moves on past it unchanged.
+    /// Called before anything is inserted after a word boundary.
+    private func learnWordMovedPast() {
+        guard let state = suggestionState, let memory = rejectionMemory,
+              let word = memory.movingOn(context: controller?.textDocumentProxy.documentContextBeforeInput)
+        else { return }
+        // Same gate as every other learning site: autocorrect ran, and the mirror
+        // can be trusted (#287 decision 8, #530).
+        guard state.autocorrectEnabled, state.hostPolicy.autocorrectAllowed, !mirrorSync.isSuspect
+        else { return }
+        UserDictionary.shared.learn(word)
+    }
+
+    /// Takes a backspace into a correction Dictus made as the user refusing it.
+    private func noteDeletion(before: String?, after: String?) {
+        guard let corrected = rejectionMemory?.textDeleted(before: before, after: after) else { return }
+        #if DEBUG
+        AutocorrectDebugLog.autocorrectRefused(corrected: corrected, by: "backspace")
+        #endif
+    }
+
+    /// The space closes the undo window of the correction before it, except the
+    /// space typed right after the punctuation mark that made a correction (#872):
+    /// `cuisinr,` + space keeps `cuisine`'s undo chip until the next space.
+    private func closeUndoWindowAtSpace() {
+        guard let undo = suggestionState?.pendingUndo else { return }
+        if !undo.insertedSpace,
+           let context = controller?.textDocumentProxy.documentContextBeforeInput,
+           let mark = context.last, AutocorrectTrigger.commitsWord(String(mark)),
+           context.dropLast().hasSuffix(undo.correctedWord) {
+            return
+        }
+        suggestionState?.pendingUndo = nil
+    }
+}
+
+// MARK: - Addresses (#919)
+
+extension DictusKeyboardBridge {
+
+    /// Whether the word before the cursor, committed by `key`, is part of an e-mail
+    /// address or a URL, which is never corrected whatever the field. The key counts:
+    /// `www` followed by `.` is already an address.
+    fileprivate func endsInAddress(_ context: String, word: String, committedBy key: String) -> Bool {
+        guard AddressLikeToken.atCursor(context, followedBy: key) else { return false }
+        #if DEBUG
+        AutocorrectDebugLog.autocorrectSkipped(word: word, reason: "address")
+        #endif
+        return true
+    }
+
+    /// Puts back the word a punctuation mark just corrected when `character`, glued
+    /// after the mark, shows the mark sat inside an address (#919): `helene.` became
+    /// `Hélène.`, and the `b` restores `helene.` before it is written.
+    fileprivate func revertCorrectionInsideAddress(before character: String) {
+        guard let undo = suggestionState?.pendingUndo, !undo.insertedSpace,
+              AddressCorrectionRevert.apply(
+                  editor: documentEditor,
+                  original: undo.originalWord,
+                  corrected: undo.correctedWord,
+                  next: character,
+                  mirror: mirrorSync
+              )
+        else { return }
+        suggestionState?.pendingUndo = nil
+    }
+}
+
+extension DictusKeyboardBridge {
+
+    /// `ce st` → `c'est`, `qu il` → `qu'il` (#1006): the space between the two words
+    /// stood for an apostrophe, so both are replaced, with the usual undo chip.
+    /// Returns the elision now in the text, which the typing journal records as the
+    /// word's final text (#1001). Nil when nothing was replaced: refused here before,
+    /// mirror suspect, or the context does not end with the two words. The caller then
+    /// commits the word alone.
+    fileprivate func replaceElisionAcrossSpace(
+        context: String,
+        previousWord: String,
+        word: String,
+        trailing: String
+    ) -> String? {
+        let span = "\(previousWord) \(word)"
+        guard let state = suggestionState, let memory = rejectionMemory,
+              let elision = state.elisionAcrossSpace(previousWord: previousWord, word: word),
+              context.hasSuffix(span) else { return nil }
+        let prefix = context.dropLast(span.count)
+        // Not countable: the two words are never learned as one.
+        guard case .correct = memory.commit(prefix: prefix, word: span, proposedCorrection: elision, countable: false)
+        else { return nil }
+        #if DEBUG
+        // The branch the journal records for the word (#1001).
+        AutocorrectDebugLog.autocorrectDecision(original: span, corrected: elision, branch: "elision-repair", prevWord: nil)
+        #endif
+        switch applyAutocorrect(state: state, freshWord: span, correction: elision, trailing: trailing, previousWord: nil) {
+        case .applied:
+            memory.correctionApplied(prefix: prefix, corrected: elision)
+            return elision
+        case .refused(let reason):
+            #if DEBUG
+            AutocorrectDebugLog.replacementAborted(
+                word: span, reason: reason,
+                contextTail: Self.contextTail(controller?.textDocumentProxy.documentContextBeforeInput)
+            )
+            #endif
+            return nil
+        }
+    }
+
+    /// Last ~30 characters of a context string, for DEBUG replacement logs.
+    /// Keeps log lines short while showing the text around the replacement site.
+    static func contextTail(_ context: String?) -> String {
+        guard let context = context else { return "<nil>" }
+        return String(context.suffix(30))
+    }
+}
+
+#if DEBUG
+// MARK: - Typing journal (#1001)
+
+extension DictusKeyboardBridge {
+    /// Opens the journal's record of the word being committed, with the bar as it
+    /// stands before the commit clears it.
+    func beginJournalWord(_ word: String, previous: String?, committedBy key: String, bar state: SuggestionState) {
+        TypingJournal.beginWord(
+            typed: word, previous: previous, committedBy: key,
+            bar: TypingJournalBar(mode: "\(state.mode)", words: state.suggestions)
+        )
+    }
+}
+#endif

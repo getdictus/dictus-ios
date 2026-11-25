@@ -10,9 +10,9 @@ import DictusCore
 /// Placing them in Settings > A propos > Licences follows the standard iOS
 /// convention (e.g., Settings > General > Legal & Regulatory).
 ///
-/// All 7 entries are listed alphabetically: DeviceKit, Dictus, FluidAudio,
-/// giellakbd-ios, Nemotron 3.5 ASR, VivaDicta, WhisperKit. FluidAudio uses Apache 2.0,
-/// Nemotron 3.5 ASR uses OpenMDW-1.1; all others use MIT.
+/// All 9 entries are listed alphabetically: DeviceKit, Dictus, DM Sans, FluidAudio,
+/// giellakbd-ios, Hex, Nemotron 3.5 ASR, VivaDicta, WhisperKit. FluidAudio uses Apache 2.0,
+/// Nemotron 3.5 ASR uses OpenMDW-1.1, DM Sans the SIL Open Font License; all others use MIT.
 ///
 /// Nemotron 3.5 ASR is a MODEL, not code (#558): NVIDIA's weights, converted to Core ML by
 /// FluidInference and downloaded by the user from HuggingFace. It is listed because its
@@ -20,13 +20,17 @@ import DictusCore
 /// because the brief asks for NVIDIA's attribution. The FluidAudio entry covers the SDK that
 /// runs it and stays as it was.
 ///
-/// "Dependency" is the loose sense here, and two entries are not packages at all.
-/// giellakbd-ios is vendored source, and VivaDicta is a ported data table — the host-app
-/// return catalogue in `KnownAppSchemes.swift`, copied with its annotations (#23). Both
+/// "Dependency" is the loose sense here, and three entries are not packages at all.
+/// giellakbd-ios is vendored source, Hex is the return key's glyph-and-colour table in
+/// `ReturnKeyStyle.swift` (#1023), and VivaDicta is a ported data table — the host-app
+/// return catalogue in `KnownAppSchemes.swift`, copied with its annotations (#23). All
 /// are redistribution of MIT-licensed work, and MIT requires the copyright notice and the
-/// licence text to travel with it, so both belong on this screen exactly like a linked
+/// licence text to travel with it, so all three belong on this screen exactly like a linked
 /// package. A provenance comment in the source file is honest but does not discharge the
 /// condition.
+///
+/// Hex is listed for the keyboard's key geometry (`KeyPlaneGeometry`): no code is copied,
+/// but the approach is Hex's (MIT), and the entry says so.
 struct LicensesView: View {
     var body: some View {
         ScrollView {
@@ -68,6 +72,17 @@ struct LicensesView: View {
                 )
 
                 licenseBlock(
+                    name: "Hex",
+                    author: "Christopher Langton",
+                    url: "https://github.com/anomalyco/hex",
+                    license: "The keyboard's key geometry (KeyPlaneGeometry) follows Hex's approach: "
+                        + "Apple's key plane measured per iPhone size, and touch targets that tile the keyboard.\n\n"
+                        + "The keyboard's emoji panel is Hex's, ported (#1027): its views, search, "
+                        + "suggestions, shortcodes, skin tones and the builder of its emoji index.\n\n"
+                        + mitLicense(copyright: "Copyright (c) 2026 Christopher Langton")
+                )
+
+                licenseBlock(
                     name: "Nemotron 3.5 ASR",
                     author: "NVIDIA Corporation",
                     url: "https://huggingface.co/nvidia/nemotron-3.5-asr-streaming-0.6b",
@@ -76,6 +91,15 @@ struct LicensesView: View {
                             + "Core ML conversion by FluidInference "
                             + "(huggingface.co/FluidInference/Nemotron-3.5-ASR-Streaming-Multilingual-0.6b-CoreML)."
                     )
+                )
+
+                licenseBlock(
+                    name: "Unicode emoji data and CLDR",
+                    author: "Unicode, Inc.",
+                    url: "https://cldr.unicode.org",
+                    license: "The emoji search index is built from Unicode's emoji-test.txt 18.0 and CLDR 49's "
+                        + "emoji names and keywords in French, English, Spanish and German.\n\n"
+                        + EmojiDataLicense.text
                 )
 
                 licenseBlock(

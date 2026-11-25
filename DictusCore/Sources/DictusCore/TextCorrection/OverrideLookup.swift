@@ -19,9 +19,30 @@ import Foundation
 ///      `dont` as a word, we still correct it.
 ///   3. It's checked before the trie loads, so corrections are available
 ///      during keyboard cold start.
+///
+/// `profile.misspellings` is read the same way: a word removed from the word
+/// list as a known misspelling (`teh`) goes to its listed target (`the`), not to
+/// whatever the trie finds nearby (`ten`, #995).
 public func applyOverride(profile: LanguageProfile, word: String) -> String? {
     let lowered = word.lowercased()
-    guard let override = profile.overrides[lowered] else { return nil }
+    guard let override = profile.overrides[lowered] ?? profile.misspellings[lowered] else { return nil }
     let isCapitalized = word.first?.isUppercase == true
     return isCapitalized ? override.capitalized : override
+}
+
+/// Looks up `word` in `profile.contextOverrides` for `previousWord` and returns the
+/// forced correction with case preserved, or `nil` when no override applies.
+///
+/// The previous word is matched on its part after the last apostrophe, so
+/// `qu'il ma` and `s'il ma` read as `il ma`.
+///
+/// WHY a table and not the n-grams: the bigram store keeps the 16 most frequent
+/// followers of each word, so a zero score says "rare", not "impossible". After
+/// `il`, `ma` and `la` both score zero, and only one of them is wrong (#500).
+public func applyContextOverride(profile: LanguageProfile, previousWord: String, word: String) -> String? {
+    let previous = previousWord.lowercased()
+    let key = previous.lastIndex(of: "'").map { String(previous[previous.index(after: $0)...]) } ?? previous
+    guard let override = profile.contextOverrides[key]?[word.lowercased()] else { return nil }
+    let isCapitalized = word.first?.isUppercase == true
+    return isCapitalized ? override.prefix(1).uppercased() + override.dropFirst() : override
 }

@@ -11,15 +11,17 @@ import Foundation
 /// which no production provider does. `AOSPTrieEngine.frequency(of:)` returns
 /// `Trie::getFrequency`, i.e. the stored normalized value. The compression is
 /// severe — a 1033x raw ratio becomes 2.06x — so a test written against raw
-/// counts wildly overstates how easily the 5x dominance rule in `expandAccents`
-/// fires. Any test whose point is to predict on-device behaviour of that rule
-/// must drive it through this provider, not `MockFrequencyProvider`.
+/// counts cannot catch a rule that compares stored values instead of the counts
+/// `FrequencyScale` recovers from them (#994). Any test whose point is to predict
+/// on-device behaviour of a frequency threshold must drive it through this
+/// provider, not `MockFrequencyProvider`.
 ///
 /// Use `MockFrequencyProvider` for algorithm shape (which candidate wins, does a
 /// rule fire at all); use this one when the *threshold* is what's under test.
 final class LogNormalizedFrequencyProvider: FrequencyProvider {
 
     var isReady: Bool = true
+    let frequencyScale: FrequencyScale
     private let normalized: [String: UInt16]
 
     /// - Parameters:
@@ -29,6 +31,7 @@ final class LogNormalizedFrequencyProvider: FrequencyProvider {
     ///     5 890 279 (`ich`); passing anything else changes every stored value.
     init(rawFrequencies: [String: Int], maxFrequency: Int, isReady: Bool = true) {
         self.isReady = isReady
+        frequencyScale = .logNormalized(maxCount: UInt32(maxFrequency))
         let logMax = maxFrequency > 0 ? log(1.0 + Double(maxFrequency)) : 1.0
         var table: [String: UInt16] = [:]
         table.reserveCapacity(rawFrequencies.count)

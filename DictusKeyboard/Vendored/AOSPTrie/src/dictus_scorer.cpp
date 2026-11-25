@@ -97,7 +97,16 @@ static uint32_t computeNodeSize(const TrieNode& node) {
 }
 
 // Insert candidate maintaining sorted order (descending by score).
+// The traversal reaches the same word along several edit paths ("boue" reaches "bone" by
+// one substitution and again by a deletion plus an insertion), so a word keeps only its
+// cheapest path: a duplicate would take a slot from a different word (#993).
 static void insertCandidate(std::vector<Candidate>& results, const Candidate& c, int maxResults) {
+    for (auto existing = results.begin(); existing != results.end(); ++existing) {
+        if (std::strcmp(existing->word, c.word) != 0) continue;
+        if (existing->score >= c.score) return;
+        results.erase(existing);
+        break;
+    }
     auto it = std::lower_bound(results.begin(), results.end(), c,
         [](const Candidate& a, const Candidate& b) { return a.score > b.score; });
     if (static_cast<int>(results.size()) >= maxResults && it == results.end()) return;
@@ -184,18 +193,38 @@ static void searchRecursive(const Trie& trie,
             }
         }
 
-        // 5. TRANSPOSITION: swap of adjacent chars in input
-        if (inputPos + 1 < inputLen && nodeCharPos + 1 < node.charCount) {
-            uint16_t nextTrieChar;
-            std::memcpy(&nextTrieChar, &node.chars[nodeCharPos + 1], 2);
-            if (input[inputPos] == nextTrieChar && input[inputPos + 1] == trieChar) {
-                float tc = 0.7f;
-                if (cost + tc <= maxEditDist) {
-                    wordBuf[wordLen] = trieChar;
-                    wordBuf[wordLen + 1] = nextTrieChar;
+        // 5. TRANSPOSITION: swap of adjacent chars in input.
+        // The second character is the next one of this node, or, when this is the node's
+        // last character, the first one of a child. Most nodes hold one character, so
+        // without the child case a swap almost never matched: "poeple" paid two
+        // substitutions for "people" and lost to "purple" (#993).
+        const float tc = 0.7f;
+        if (inputPos + 1 < inputLen && input[inputPos + 1] == trieChar
+            && input[inputPos] != trieChar && cost + tc <= maxEditDist) {
+            wordBuf[wordLen] = trieChar;
+            wordBuf[wordLen + 1] = input[inputPos];
+            if (nodeCharPos + 1 < node.charCount) {
+                uint16_t nextTrieChar;
+                std::memcpy(&nextTrieChar, &node.chars[nodeCharPos + 1], 2);
+                if (nextTrieChar == input[inputPos]) {
                     searchRecursive(trie, node, input, inputLen, inputPos + 2,
                                     wordBuf, wordLen + 2, cost + tc, maxEditDist,
                                     results, maxResults, costs, nodeCharPos + 2);
+                }
+            } else if (childrenPtrSize(node.flags) > 0 && node.childCount > 0) {
+                uint32_t childOff = node.childrenOffset;
+                for (int ci = 0; ci < node.childCount; ci++) {
+                    if (childOff >= trie.fileSize()) break;
+                    TrieNode child = trie.readNode(childOff);
+                    if (child.charCount == 0) break;
+                    uint16_t childFirst;
+                    std::memcpy(&childFirst, &child.chars[0], 2);
+                    if (childFirst == input[inputPos]) {
+                        searchRecursive(trie, child, input, inputLen, inputPos + 2,
+                                        wordBuf, wordLen + 2, cost + tc, maxEditDist,
+                                        results, maxResults, costs, 1);
+                    }
+                    childOff += computeNodeSize(child);
                 }
             }
         }
@@ -216,6 +245,7 @@ static void searchRecursive(const Trie& trie,
             Candidate c;
             utf16ToUtf8(wordBuf, wordLen, c.word, sizeof(c.word));
             c.score = score;
+            c.cost = remainCost;
             c.frequency = node.frequency;
             insertCandidate(results, c, maxResults);
         }

@@ -151,15 +151,34 @@ final class AOSPTrieEngine {
     ///    ("qu'il" -> checks "il", not the whole string).
     /// 3. Case restoration: if input starts with uppercase, correction is capitalized.
     func spellCheck(_ word: String) -> (correction: String, alternatives: [String])? {
+        guard case let .corrected(correction, alternatives) = check(word) else { return nil }
+        return (correction, alternatives)
+    }
+
+    /// What `spellCheck` decides for a word.
+    enum CheckOutcome {
+        /// The correction and up to two alternatives, prefix and case restored.
+        case corrected(String, alternatives: [String])
+        /// The trie had candidates, but each would put a consonant after an elision
+        /// (`d'cirre` → `votre`): the typed word stays, and it is the best reading.
+        case keepTyped
+        /// The word is correct, or the trie has nothing for it.
+        case noCandidate
+    }
+
+    /// `spellCheck`, telling a typed word kept by the elision rule from one the trie
+    /// has nothing for. The split pass reads the difference: only the second lets a
+    /// split that drops the prefix win (`d'bonbjour` must not become `bon jour`).
+    func check(_ word: String) -> CheckOutcome {
         let lowered = word.lowercased()
 
         // Check language-specific overrides first (works even before dictionary loads)
         if let profile = currentProfile,
            let corrected = applyOverride(profile: profile, word: word) {
-            return (corrected, [])
+            return .corrected(corrected, alternatives: [])
         }
 
-        guard bridge.isLoaded(), !word.isEmpty else { return nil }
+        guard bridge.isLoaded(), !word.isEmpty else { return .noCandidate }
 
         // Handle apostrophe words: "qu'il" -> check "il", "l'homme" -> check "homme"
         // French contractions split at the apostrophe; only the main word can be misspelled.
@@ -167,7 +186,7 @@ final class AOSPTrieEngine {
         let prefix: String?
         if let apoIndex = lowered.lastIndex(of: "'") {
             let afterApo = String(lowered[lowered.index(after: apoIndex)...])
-            if afterApo.isEmpty { return nil }
+            if afterApo.isEmpty { return .noCandidate }
             wordToCheck = afterApo
             prefix = String(lowered[...apoIndex])
         } else {
@@ -176,22 +195,41 @@ final class AOSPTrieEngine {
         }
 
         guard let result = bridge.spellCheck(wordToCheck, maxEditDistance: 2.0) else {
-            return nil
+            return .noCandidate
         }
+
+        // French never elides before a consonant: after `d'`, a candidate such as
+        // `votre` is dropped, and the typed word is kept when none is left.
+        let allowed = ([result.correction] + result.alternatives).filter {
+            currentProfile?.allowsElided($0, after: prefix) ?? true
+        }
+        guard let best = allowed.first else { return .keepTyped }
 
         // Restore case and reassemble with prefix if present
         let isCapitalized = word.first?.isUppercase == true
         // `prefix ?? ""` reproduces the nil branch exactly: prepending the empty
         // string is the identity, which is what the nil case returned before.
-        let correction = (prefix ?? "") + result.correction
+        let correction = (prefix ?? "") + best
         let fullCorrection = isCapitalized ? correction.capitalized : correction
 
-        let alts = result.alternatives.prefix(2).map { alt -> String in
+        let alts = allowed.dropFirst().prefix(2).map { alt -> String in
             let full = (prefix ?? "") + alt
             return isCapitalized ? full.capitalized : full
         }
 
-        return (fullCorrection, Array(alts))
+        return .corrected(fullCorrection, alternatives: Array(alts))
+    }
+
+    /// The dictionary words within two weighted edits of `word`, best scored first,
+    /// each with its cost and frequency, for `CorrectionRanking` to choose from (#993).
+    /// `word` is lowercased and has no apostrophe prefix. Ten rather than the five
+    /// `spellCheck` reads: the word that was meant can sit sixth, as `morning` does for
+    /// `irning`, and it has to be there for context to lift it.
+    func correctionCandidates(for word: String, maxResults: Int = 10) -> [CorrectionCandidate] {
+        guard bridge.isLoaded(), !word.isEmpty else { return [] }
+        return bridge.candidates(forWord: word, maxEditDistance: 2.0, maxResults: UInt(maxResults))
+            .filter { $0.word != word }
+            .map { CorrectionCandidate(word: $0.word, cost: Double($0.cost), frequency: $0.frequency) }
     }
 
     /// Whether a dictionary is loaded and ready for lookups.
@@ -220,14 +258,14 @@ final class AOSPTrieEngine {
         return expandContractions(profile: profile, word: word, provider: self)
     }
 
-    /// Try adding accents to an unaccented word and check if the result exists.
-    /// French: "deja" → "déjà", "apres" → "après", "tres" → "très".
-    /// Spanish: "espanol" → "español".
+    /// Whether a word typed without its accents gets them back, from the corpus counts
+    /// of its spellings and the previous word (#994).
+    /// French: "deja" → "déjà", "arrive" after "est" → "arrivé". Spanish: "manana" → "mañana".
     ///
-    /// Returns nil for languages whose `LanguageProfile.accentMap` is empty (English).
-    func accentExpansion(_ word: String) -> String? {
-        guard let profile = currentProfile else { return nil }
-        return expandAccents(profile: profile, word: word, provider: self)
+    /// Keeps the typed word for languages whose `LanguageProfile.accentMap` is empty (English).
+    func accentRestoration(_ word: String, previousWord: String?) -> AccentRestoration.Decision {
+        guard let profile = currentProfile else { return .keepTyped }
+        return restoreAccents(profile: profile, word: word, previousWord: previousWord, provider: self)
     }
 
     // MARK: - N-gram prediction
@@ -300,10 +338,11 @@ final class AOSPTrieEngine {
 
 // MARK: - FrequencyProvider conformance
 //
-// Lets DictusCore autocorrect helpers (`expandAccents`, `expandContractions`)
+// Lets DictusCore autocorrect helpers (`restoreAccents`, `expandContractions`)
 // query the trie via the protocol without importing the bridge. `wordExists(_:)`
 // is already defined on the class and matches the protocol signature.
 extension AOSPTrieEngine: FrequencyProvider {
     var isReady: Bool { isLoaded }
     func frequency(of word: String) -> UInt16 { wordFrequency(word) }
+    var frequencyScale: FrequencyScale { .logNormalized(maxCount: UInt32(clamping: bridge.maxFrequency())) }
 }

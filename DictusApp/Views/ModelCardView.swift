@@ -37,8 +37,9 @@ struct ModelCardView: View {
 
     /// Why this device cannot run the model, or nil when it can (issue #369).
     /// Non-nil greys the card out, drops its download control, and prints the
-    /// reason under the description. Defaults to nil so the Downloaded section
-    /// and the onboarding card keep their existing call sites untouched.
+    /// reason under the description. Defaults to nil for the onboarding card. The
+    /// Downloaded section passes one on pre-A14 devices only (#963); the overflow menu
+    /// sits outside the disabled button, so a greyed installed model stays deletable.
     var incompatibilityReason: ModelInfo.IncompatibilityReason?
 
     /// Called when the user asks to delete this model from the overflow menu
@@ -77,6 +78,15 @@ struct ModelCardView: View {
     /// Whether this model is the currently active one.
     private var isActive: Bool {
         modelManager.activeModel == model.identifier
+    }
+
+    /// The user dictates with Apple's engine, picked on the same screen, so the active
+    /// model is only the fallback: it keeps its delete protection, not its highlight.
+    var isSupersededByApple = false
+
+    /// The model dictations run with now.
+    private var isHighlighted: Bool {
+        isActive && !isSupersededByApple
     }
 
     /// Whether the card should be tappable (disabled during download/prewarming,
@@ -378,7 +388,7 @@ struct ModelCardView: View {
         .padding(16)
         .background(
             Group {
-                if isActive {
+                if isHighlighted {
                     RoundedRectangle(cornerRadius: 16)
                         .fill(Color.dictusAccent.opacity(0.10))
                 }
@@ -388,7 +398,7 @@ struct ModelCardView: View {
         .overlay(
             // Active model gets a dark blue border stroke on top of glass
             Group {
-                if isActive {
+                if isHighlighted {
                     RoundedRectangle(cornerRadius: 16)
                         .stroke(Color.dictusAccent.opacity(0.6), lineWidth: 2)
                 }
@@ -411,7 +421,7 @@ struct ModelCardView: View {
         guard incompatibilityReason == nil else { return }
         switch state {
         case .ready:
-            if !isActive {
+            if !isHighlighted {
                 modelManager.selectModel(model.identifier)
             }
         case .notDownloaded, .error:

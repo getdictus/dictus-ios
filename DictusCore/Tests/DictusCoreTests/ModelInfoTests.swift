@@ -126,21 +126,23 @@ final class ModelInfoTests: XCTestCase {
         }
     }
 
-    /// Parakeet's device gate: off the A12/A13 matrix like every non-Argmax model, and
-    /// no memory rule of its own.
+    /// Parakeet's device gate from A14 on, and no memory rule of its own. Before A14
+    /// Parakeet is the one model offered (#963), so Nemotron is greyed there.
     func testNemotronTakesParakeetsDeviceGate() {
         guard let nemotron = ModelInfo.forIdentifier("nemotron-3.5-asr-multilingual-2240ms"),
               let parakeet = ModelInfo.forIdentifier("parakeet-tdt-0.6b-v3") else {
             XCTFail("a FluidAudio entry is missing from the catalogue")
             return
         }
-        for device in [makeCapabilities(ramGB: 4, model: "iPhone12,1"),
-                       makeCapabilities(ramGB: 4, model: "iPhone13,2"),
+        for device in [makeCapabilities(ramGB: 4, model: "iPhone13,2"),
                        makeCapabilities(ramGB: 8, model: "iPhone16,2")] {
             XCTAssertEqual(nemotron.incompatibilityReason(on: device),
                            parakeet.incompatibilityReason(on: device),
                            "on \(device.deviceModelIdentifier)")
         }
+        let iphone11 = makeCapabilities(ramGB: 4, model: "iPhone12,1")
+        XCTAssertEqual(nemotron.incompatibilityReason(on: iphone11), .hardwareGeneration)
+        XCTAssertNil(parakeet.incompatibilityReason(on: iphone11))
     }
 
     // MARK: - Phase 37: per-device gating (issue #104)
@@ -231,12 +233,14 @@ final class ModelInfoTests: XCTestCase {
                        "parakeet-tdt-0.6b-v3")
     }
 
-    func testRecommendedIdentifierUsesBaseOnA12AndA13IPhones() {
+    /// #963: Parakeet on the CPU is the one model A12/A13 iPhones are offered.
+    func testRecommendedIdentifierUsesParakeetOnA12AndA13IPhones() {
         for identifier in ["iPhone11,2", "iPhone11,8", "iPhone12,1", "iPhone12,8"] {
-            let device = makeCapabilities(ramGB: 4, model: identifier)
-            XCTAssertEqual(ModelInfo.recommendedIdentifier(for: device),
-                           "openai_whisper-base",
-                           "\(identifier) must stay within Argmax's A12/A13 support matrix")
+            for ram in [3, 4] {
+                let device = makeCapabilities(ramGB: ram, model: identifier)
+                XCTAssertEqual(ModelInfo.recommendedIdentifier(for: device), "parakeet-tdt-0.6b-v3",
+                               "\(identifier) at \(ram) GB")
+            }
         }
     }
 
@@ -266,24 +270,25 @@ final class ModelInfoTests: XCTestCase {
 
     // MARK: - Issue #362: A12/A13 catalog gating
 
-    /// On an iPhone 11 only the Argmax-listed variants may be RUNNABLE. Before the
-    /// fix, Small/Medium/Parakeet were all downloadable and picking any of them
-    /// reproduced the Core ML optimization hang.
+    /// On an iPhone 11 only Parakeet may be RUNNABLE (#963). Before #362,
+    /// Small/Medium were downloadable and picking either reproduced the Core ML
+    /// optimization hang.
     ///
     /// Issue #369: they must still be LISTED. The row is what tells the user their
     /// phone is the limit; an empty section reads as Dictus being thin.
-    func testA12A13IPhonesCanRunOnlyArgmaxSupportedVariants() {
+    func testA12A13IPhonesCanRunOnlyParakeet() {
         for identifier in ["iPhone11,2", "iPhone11,8", "iPhone12,1", "iPhone12,8"] {
             let device = makeCapabilities(ramGB: 4, model: identifier)
             let rows = ModelInfo.available(on: device)
             let runnable = Set(rows.filter { $0.isSupported(on: device) }.map(\.identifier))
 
-            XCTAssertTrue(runnable.isSubset(of: ModelInfo.preA14SupportedIdentifiers),
-                          "\(identifier) can run \(runnable.subtracting(ModelInfo.preA14SupportedIdentifiers))")
+            XCTAssertTrue(runnable.isSubset(of: ModelInfo.preA14SelectableIdentifiers),
+                          "\(identifier) can run \(runnable.subtracting(ModelInfo.preA14SelectableIdentifiers))")
+            XCTAssertEqual(runnable, ["parakeet-tdt-0.6b-v3"], identifier)
             for unsupported in ["openai_whisper-small",
                                 "openai_whisper-small_216MB",
                                 "openai_whisper-medium",
-                                "parakeet-tdt-0.6b-v3",
+                                "nemotron-3.5-asr-multilingual-2240ms",
                                 "openai_whisper-large-v3-v20240930_turbo_632MB"] {
                 XCTAssertFalse(runnable.contains(unsupported),
                                "\(identifier) must not be able to run \(unsupported)")
@@ -300,13 +305,14 @@ final class ModelInfoTests: XCTestCase {
         let rows = ModelInfo.available(on: iphone11)
         let identifiers = Set(rows.map(\.identifier))
 
-        // Everything visible, plus Base via the #362 recommendation exception.
-        XCTAssertEqual(identifiers, Set(ModelInfo.all.map(\.identifier)).union(["openai_whisper-base"]))
+        // Everything visible. Since #963 the recommendation is Parakeet, which is
+        // visible anyway, so the #362 exception adds nothing.
+        XCTAssertEqual(identifiers, Set(ModelInfo.all.map(\.identifier)))
         XCTAssertEqual(rows.filter { $0.isSupported(on: iphone11) }.map(\.identifier),
-                       ["openai_whisper-base"])
-        // Tiny is deprecated AND not recommended: superseded, not unrunnable, so it
-        // has nothing to explain and stays out.
+                       ["parakeet-tdt-0.6b-v3"])
+        // Tiny and Base are deprecated AND not recommended: they stay out.
         XCTAssertFalse(identifiers.contains("openai_whisper-tiny"))
+        XCTAssertFalse(identifiers.contains("openai_whisper-base"))
     }
 
     /// Every disabled row must be able to say why. A row greyed with no sentence is
@@ -349,25 +355,26 @@ final class ModelInfoTests: XCTestCase {
         XCTAssertEqual(turbo.incompatibilityReason(on: a15), .insufficientMemory(requiredGB: 6))
     }
 
-    func testIsSupportedOnA12A13AcceptsOnlyTinyAndBase() {
+    func testIsSupportedOnA12A13AcceptsOnlyParakeet() {
         let iphone11 = makeCapabilities(ramGB: 4, model: "iPhone12,1")
         for model in ModelInfo.allIncludingDeprecated {
-            let expected = ModelInfo.preA14SupportedIdentifiers.contains(model.identifier)
+            let expected = ModelInfo.preA14SelectableIdentifiers.contains(model.identifier)
             XCTAssertEqual(model.isSupported(on: iphone11), expected,
                            "\(model.identifier) gating on iPhone 11")
         }
     }
 
-    /// The dead-end guard. Base is `.deprecated` and therefore absent from `all`, so
-    /// without the exception in `available(on:)` an iPhone 11 user who deleted Base
-    /// had no way to reinstall it and no usable model left.
-    func testRecommendedModelIsAlwaysOfferedEvenWhenDeprecated() {
+    /// The dead-end guard (#362). Until #963 an iPhone 11 was recommended Base, which is
+    /// `.deprecated` and absent from `all`, and only the exception in `available(on:)`
+    /// let a user who deleted it reinstall it. Its recommendation is now Parakeet, visible
+    /// in `all`, so a deleted model can always be reinstalled without the exception.
+    func testPreA14RecommendationIsReinstallableWithoutTheDeprecationException() {
         let iphone11 = makeCapabilities(ramGB: 4, model: "iPhone12,1")
 
-        XCTAssertEqual(ModelInfo.recommendedIdentifier(for: iphone11), "openai_whisper-base")
-        XCTAssertEqual(ModelInfo.forIdentifier("openai_whisper-base")?.visibility, .deprecated)
-        XCTAssertFalse(ModelInfo.all.map(\.identifier).contains("openai_whisper-base"))
-        XCTAssertTrue(ModelInfo.available(on: iphone11).map(\.identifier).contains("openai_whisper-base"))
+        XCTAssertEqual(ModelInfo.recommendedIdentifier(for: iphone11), "parakeet-tdt-0.6b-v3")
+        XCTAssertTrue(ModelInfo.all.map(\.identifier).contains("parakeet-tdt-0.6b-v3"))
+        XCTAssertTrue(ModelInfo.available(on: iphone11).map(\.identifier).contains("parakeet-tdt-0.6b-v3"))
+        XCTAssertFalse(ModelInfo.available(on: iphone11).map(\.identifier).contains("openai_whisper-base"))
     }
 
     /// The same invariant stated once for every tier: whatever the app tells a device
@@ -424,9 +431,9 @@ final class ModelInfoTests: XCTestCase {
     // MARK: - Issue #612: pre-A14 iPads
 
     /// The reported device: an iPad Pro 11" 2018 (A12X). At 4 GB the RAM rule handed
-    /// it Small; at 6 GB (1 TB 2018, every 2020 model) it handed it Parakeet. Neither
-    /// is in Argmax's matrix for that chip.
-    func testA12XAndA12ZIPadProsAreRecommendedBaseNotSmallOrParakeet() {
+    /// it Small (#612). Since #963 every A12X/A12Z iPad Pro, 4 or 6 GB, gets Parakeet on
+    /// the CPU, the chip rule and not the RAM one.
+    func testA12XAndA12ZIPadProsAreRecommendedParakeetNotSmall() {
         let devices = [
             makeCapabilities(ramGB: 4, model: "iPad8,1"),
             makeCapabilities(ramGB: 6, model: "iPad8,3"),
@@ -434,17 +441,17 @@ final class ModelInfoTests: XCTestCase {
             makeCapabilities(ramGB: 6, model: "iPad8,11")
         ]
         for device in devices {
-            XCTAssertEqual(ModelInfo.recommendedIdentifier(for: device), "openai_whisper-base",
+            XCTAssertEqual(ModelInfo.recommendedIdentifier(for: device), "parakeet-tdt-0.6b-v3",
                            "\(device.deviceModelIdentifier) at \(device.physicalMemoryGB) GB")
         }
     }
 
-    func testA12AndA13IPadsAreRecommendedBase() {
+    func testA12AndA13IPadsAreRecommendedParakeet() {
         // iPad11,3 = iPad Air 3 (A12), iPad12,1 = iPad 9th gen (A13), iPad7,5 = iPad
         // 6th gen (A10), the oldest iPad iPadOS 17 still installs on.
         for identifier in ["iPad11,1", "iPad11,3", "iPad11,6", "iPad12,1", "iPad12,2", "iPad7,5"] {
             let device = makeCapabilities(ramGB: 3, model: identifier)
-            XCTAssertEqual(ModelInfo.recommendedIdentifier(for: device), "openai_whisper-base", identifier)
+            XCTAssertEqual(ModelInfo.recommendedIdentifier(for: device), "parakeet-tdt-0.6b-v3", identifier)
         }
     }
 
@@ -468,11 +475,11 @@ final class ModelInfoTests: XCTestCase {
         }
     }
 
-    /// The iPhone side of the same rule must not move: A12/A13 keep Base, A14 keeps
+    /// The iPhone side of the same rule: A12/A13 get Parakeet (#963), A14 keeps
     /// Small at 4 GB and Parakeet at 6 GB (the iPhone 12 Pro / Pro Max).
     func testIPhoneRecommendationsAreUnchangedByTheFloor() {
         XCTAssertEqual(ModelInfo.recommendedIdentifier(for: makeCapabilities(ramGB: 4, model: "iPhone12,1")),
-                       "openai_whisper-base")
+                       "parakeet-tdt-0.6b-v3")
         for identifier in ["iPhone13,1", "iPhone13,2"] {
             XCTAssertEqual(ModelInfo.recommendedIdentifier(for: makeCapabilities(ramGB: 4, model: identifier)),
                            "openai_whisper-small", identifier)
@@ -484,9 +491,9 @@ final class ModelInfoTests: XCTestCase {
     }
 
     /// Settings on a pre-A14 iPad: the whole catalogue is listed (issue #369), only
-    /// Tiny/Base can run, and every other row says it is the hardware generation —
+    /// Parakeet can run (#963), and every other row says it is the hardware generation —
     /// not memory, even on a 6 GB iPad Pro where the RAM rule alone would pass.
-    func testPreA14IPadsGateEverythingButTinyAndBase() {
+    func testPreA14IPadsGateEverythingButParakeet() {
         for device in [makeCapabilities(ramGB: 4, model: "iPad8,1"),
                        makeCapabilities(ramGB: 6, model: "iPad8,3"),
                        makeCapabilities(ramGB: 3, model: "iPad11,3"),
@@ -494,15 +501,14 @@ final class ModelInfoTests: XCTestCase {
             let name = "\(device.deviceModelIdentifier) at \(device.physicalMemoryGB) GB"
             for model in ModelInfo.allIncludingDeprecated {
                 let expected: ModelInfo.IncompatibilityReason? =
-                    ModelInfo.preA14SupportedIdentifiers.contains(model.identifier) ? nil : .hardwareGeneration
+                    ModelInfo.preA14SelectableIdentifiers.contains(model.identifier) ? nil : .hardwareGeneration
                 XCTAssertEqual(model.incompatibilityReason(on: device), expected, "\(model.identifier) on \(name)")
             }
 
             let rows = ModelInfo.available(on: device)
-            XCTAssertEqual(Set(rows.map(\.identifier)),
-                           Set(ModelInfo.all.map(\.identifier)).union(["openai_whisper-base"]), name)
+            XCTAssertEqual(Set(rows.map(\.identifier)), Set(ModelInfo.all.map(\.identifier)), name)
             XCTAssertEqual(rows.filter { $0.isSupported(on: device) }.map(\.identifier),
-                           ["openai_whisper-base"], name)
+                           ["parakeet-tdt-0.6b-v3"], name)
         }
     }
 
@@ -623,7 +629,9 @@ final class ModelInfoTests: XCTestCase {
             makeCapabilities(ramGB: 8, model: "iPhone16,2"),   // iPhone 15 Pro Max
             makeCapabilities(ramGB: 8, model: "iPhone17,1"),   // iPhone 16 Pro
             makeCapabilities(ramGB: 12, model: "iPhone18,1"),  // iPhone 17 Pro
-            makeCapabilities(ramGB: 12, model: "iPhone19,1"),  // a family not released yet
+            makeCapabilities(ramGB: 12, model: "iPhone19,1"),  // a family Argmax does not list yet
+            makeCapabilities(ramGB: 12, model: "iPhone19,2"),  // iPhone 18 Pro (#897)
+            makeCapabilities(ramGB: 12, model: "iPhone19,3"),  // iPhone 18 Pro Max (#897)
             makeCapabilities(ramGB: 8, model: "iPad14,3")      // iPad Pro M2
         ]
         for identifier in turboVariants {
