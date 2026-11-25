@@ -66,7 +66,7 @@ struct VocabularyListView: View {
             // live, so it names the button that finds them (#829).
             ProFeatureHowItWorksSection(
                 feature: .vocabulary,
-                explanation: Text("Correct your words in the Dictus keyboard: it learns them. Tap Analyze my transcriptions: Dictus compares them with your dictations and suggests terms to accept, edit or ignore. Nothing is added without you, and everything stays on your iPhone. Your terms then correct your dictations automatically.",
+                explanation: Text("Correct your words in the Dictus keyboard: it learns them. Tap Analyze my transcriptions: Dictus compares them with your dictations and suggests terms to accept, edit or ignore. Nothing is added without you, and everything stays on your \(DeviceNoun.current). Your terms then correct your dictations automatically.",
                                   comment: "Vocabulary screen: the paragraph of the \"How it works\" card. 'Analyze my transcriptions' is the button further down the same screen (#829)."),
                 isAvailable: isAvailable
             )

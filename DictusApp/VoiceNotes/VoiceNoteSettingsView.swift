@@ -89,12 +89,12 @@ struct VoiceNoteSettingsSections: View {
                 }
             }
         } footer: {
-            Text("Shown above the transcript when you open the voice note. It uses Apple Intelligence, on this iPhone, and runs when you open the result.")
+            Text("Shown above the transcript when you open the voice note. It uses Apple Intelligence, on this \(DeviceNoun.current), and runs when you open the result.")
         }
         .proFeatureContent(isAvailable: isAvailable)
 
         Section {
-            Text("Voice notes up to 10 minutes. The audio is deleted as soon as it is transcribed, and everything stays on this iPhone.")
+            Text("Voice notes up to 10 minutes. The audio is deleted as soon as it is transcribed, and everything stays on this \(DeviceNoun.current).")
                 .font(.dictusCaption)
                 .foregroundColor(.secondary)
         }

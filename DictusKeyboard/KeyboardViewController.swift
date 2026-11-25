@@ -43,6 +43,16 @@ class KeyboardViewController: UIInputViewController {
     /// is the same shape `builtNeedsGlobe` uses for the 4.4.1 globe. nil = never built yet.
     private var builtNumberRow: Bool?
 
+    /// The orientation (`DeviceContext.current.isLandscape`) the grid was last built in (#982).
+    ///
+    /// The grid's own height constraint is set only when the grid is built, and the provider
+    /// gives it a different height in landscape even with the number row off. `viewDidLoad`
+    /// builds before the view is in a window, so it reads `UIScreen.main`; `viewWillAppear`
+    /// then reads the window scene. On an ordinary iPhone the two agree. On the iPhone Duo's
+    /// inner panel they do not, and without this marker the grid would keep its portrait
+    /// height inside a keyboard declared at the landscape height. nil = never built yet.
+    private var builtLandscape: Bool?
+
     /// Delegate adapter that translates giellakbd-ios key events into Dictus actions.
     private var bridge: DictusKeyboardBridge?
 
@@ -188,7 +198,7 @@ class KeyboardViewController: UIInputViewController {
         // is re-checked and the layout rebuilt if needed in viewWillAppear.
         let needsGlobe = needsInputModeSwitchKey
         builtNeedsGlobe = needsGlobe
-        builtNumberRow = KeyboardLayouts.drawsDigitRow
+        (builtNumberRow, builtLandscape) = (KeyboardLayouts.drawsDigitRow, DeviceContext.current.isLandscape)
         let definition = KeyboardLayouts.current(needsGlobe: needsGlobe)
         let theme = Theme.current(for: traitCollection)
         let keyboard = GiellaKeyboardView(definition: definition, theme: theme)
@@ -373,6 +383,11 @@ class KeyboardViewController: UIInputViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
 
+        // #982: orientation is read from this controller's window scene from now on,
+        // before anything below asks for it (number row, height). The last controller
+        // to appear is the one on screen; see `KeyboardSceneOrientation`.
+        KeyboardSceneOrientation.track(self)
+
         // #530: a new appearance is a new input context — iOS builds the proxy's
         // mirror afresh, so whatever it was over-reporting is gone and the surplus
         // accounting starts from zero. This is a reset, not the thing that makes the
@@ -463,6 +478,11 @@ class KeyboardViewController: UIInputViewController {
         // ~200 ms UICollectionView teardown, so it only runs when the answer actually moved.
         // With the setting off the value is false in both orientations and this never fires.
         reloadIfNumberRowChanged(trigger: "viewWillAppear")
+
+        // #982: the grid built in viewDidLoad may have read a different orientation than the
+        // window scene now gives (iPhone Duo inner panel). Checked after the number row, whose
+        // rebuild, if it ran, already refreshed the marker, so this never rebuilds twice.
+        reloadIfOrientationChanged()
 
         // Swipe typing (#948): its switches live in the app, so an appearance is the first
         // moment a change can be seen. Off, this leaves the view with no swipe controller.
@@ -869,9 +889,10 @@ class KeyboardViewController: UIInputViewController {
     /// how #202 happened (bounds change → rebuild → bounds change), and it reached App Review.
     /// `viewWillTransition` fires once per rotation and is not a layout callback.
     ///
-    /// WHY the completion block: `DeviceContext.isLandscape` compares `UIScreen.main.bounds`,
-    /// which has not turned yet when this method is entered. `size` here is the input view's,
-    /// not the screen's, so it cannot stand in for it either.
+    /// WHY the completion block: `DeviceContext.isLandscape` reads the window scene's
+    /// orientation (#982; `UIScreen.main.bounds` before that), and neither has turned yet
+    /// when this method is entered. `size` here is the input view's, not the screen's, so
+    /// it cannot stand in for it either.
     ///
     /// With the number row off, `drawsDigitRow` is false in both orientations, the guard
     /// inside never opens, and this override adds nothing but a `super` call.
@@ -980,8 +1001,10 @@ class KeyboardViewController: UIInputViewController {
             action: "computeKbHeight",
             // numberRow= is the composed predicate, not the preference: it is the value the
             // grid was built from, so a log where it disagrees with the height is the #331
-            // failure mode (five rows in a four-row box, or the reverse).
-            details: "grid=\(keyGridHeight) total=\(total) screen=\(Int(screen.width))x\(Int(screen.height)) landscape=\(deviceContext.isLandscape) numberRow=\(KeyboardLayouts.drawsDigitRow)"
+            // failure mode (five rows in a four-row box, or the reverse). screen= is still
+            // UIScreen.main; orientSource= says whether landscape= came from the window
+            // scene or fell back to that screen (#982).
+            details: "grid=\(keyGridHeight) total=\(total) screen=\(Int(screen.width))x\(Int(screen.height)) landscape=\(deviceContext.isLandscape) numberRow=\(KeyboardLayouts.drawsDigitRow) \(KeyboardSceneOrientation.probeDetails)"
         ))
         return total
     }
@@ -1423,7 +1446,7 @@ class KeyboardViewController: UIInputViewController {
         // and true on iPad / older iPhones, where we must supply a next-keyboard key (4.4.1).
         let needsGlobe = needsInputModeSwitchKey
         builtNeedsGlobe = needsGlobe
-        builtNumberRow = KeyboardLayouts.drawsDigitRow
+        (builtNumberRow, builtLandscape) = (KeyboardLayouts.drawsDigitRow, DeviceContext.current.isLandscape)
         let definition = KeyboardLayouts.current(needsGlobe: needsGlobe)
         let theme = Theme.current(for: traitCollection)
         let keyboard = GiellaKeyboardView(definition: definition, theme: theme)
@@ -1520,4 +1543,33 @@ extension Notification.Name {
     /// Posted by KeyboardViewController when text changes externally (paste, cursor move).
     /// KeyboardView listens for this to recheck autocapitalisation.
     static let dictusTextDidChange = Notification.Name("dictusTextDidChange")
+}
+
+// MARK: - Orientation source change (#982)
+
+// An extension so the class body stays under SwiftLint's type_body_length; same file, so it
+// still reaches the private `builtLandscape`, `controllerID` and `reloadKeyboardLayout()`.
+extension KeyboardViewController {
+
+    /// Rebuilds the grid when it was built in another orientation than the keyboard's window
+    /// scene now reports (#982), and only then.
+    ///
+    /// Called from `viewWillAppear` only. A live rotation is left to `viewWillTransition`, which
+    /// behaves as it did before #982; this covers the one moment the orientation source itself
+    /// changes, from `UIScreen.main` (no window yet) to the window scene. On an ordinary iPhone
+    /// both give the same answer and this never fires (measured: no `orientationMismatchReload`
+    /// in portrait, landscape or rotation runs on an iPhone 17 simulator).
+    private func reloadIfOrientationChanged() {
+        let orientation = KeyboardSceneOrientation.current
+        guard let builtLandscape, builtLandscape != orientation.isLandscape else { return }
+
+        PersistentLog.log(.diagnosticProbe(
+            component: "KeyboardViewController",
+            instanceID: controllerID,
+            action: "orientationMismatchReload",
+            details: "built=\(builtLandscape) current=\(orientation.isLandscape) source=\(orientation.source.rawValue) "
+                + "onScreen=\(isOnScreen)"
+        ))
+        reloadKeyboardLayout()
+    }
 }

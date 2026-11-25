@@ -95,7 +95,7 @@ struct ProHubFeatureCard: View {
                             // No line limit and a vertical fixed size (#846): beside the
                             // state value the line has little width, and the French takes
                             // three lines there. Any limit truncated it.
-                            Text("iPhone with Apple Intelligence")
+                            Text("\(DeviceNoun.current) with Apple Intelligence")
                                 .font(.dictusCaption)
                                 .multilineTextAlignment(.leading)
                                 .fixedSize(horizontal: false, vertical: true)

@@ -158,7 +158,7 @@ struct AppleIntelligencePage: View {
     private var instructionsPage: some View {
         OnboardingPage(
             title: Text("Set Siri's language"),
-            subtitle: Text("Smart Modes run on Apple Intelligence, which turns on only when Siri speaks your iPhone's language. Dictation already works without it.")
+            subtitle: Text("Smart Modes run on Apple Intelligence, which turns on only when Siri speaks your \(DeviceNoun.current)'s language. Dictation already works without it.")
         ) {
             VStack(alignment: .leading, spacing: 16) {
                 settingsIllustration
@@ -212,7 +212,7 @@ struct AppleIntelligencePage: View {
         ) {
             SettingUpHalo()
         } bottom: {
-            Text("If Smart Modes stay unavailable, check that Siri speaks your iPhone's language.")
+            Text("If Smart Modes stay unavailable, check that Siri speaks your \(DeviceNoun.current)'s language.")
                 .font(.footnote)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
@@ -475,9 +475,9 @@ struct AppleIntelligencePage: View {
     private var accessibilitySummary: Text {
         switch route {
         case .siri:
-            return Text("In Settings, open Siri, then Language, and choose your iPhone's language.")
+            return Text("In Settings, open Siri, then Language, and choose your \(DeviceNoun.current)'s language.")
         case .appleIntelligenceAndSiri:
-            return Text("In Settings, open Apple Intelligence & Siri, then Language, and choose your iPhone's language.")
+            return Text("In Settings, open Apple Intelligence & Siri, then Language, and choose your \(DeviceNoun.current)'s language.")
         }
     }
 

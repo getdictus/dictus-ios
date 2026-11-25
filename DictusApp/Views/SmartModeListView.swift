@@ -244,7 +244,7 @@ struct SmartModeListView: View {
             Image(systemName: "exclamationmark.triangle.fill")
                 .foregroundColor(.secondary)
 
-            Text("Smart Modes need Apple Intelligence, which this iPhone does not support. Your choices are saved for a device that does.")
+            Text("Smart Modes need Apple Intelligence, which this \(DeviceNoun.current) does not support. Your choices are saved for a device that does.")
                 .font(.dictusCaption)
                 .foregroundColor(.secondary)
         }
