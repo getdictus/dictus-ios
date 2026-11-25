@@ -57,7 +57,7 @@ struct LanguageSetupPage: View {
     var body: some View {
         OnboardingPage(
             title: Text("Your language"),
-            subtitle: Text("Your iPhone's language, already selected. You can change it later in Settings.")
+            subtitle: Text("Your \(DeviceNoun.current)'s language, already selected. You can change it later in Settings.")
         ) {
             VStack(alignment: .leading, spacing: 0) {
                 languageCard
@@ -249,9 +249,9 @@ struct LanguageSetupPage: View {
                 if let info {
                     // Both arguments arrive already localized (name qualifier #665, size
                     // unit #661).
-                    Text("\(info.localizedDisplayName) model, the best for your language on this iPhone. \(info.sizeLabel), downloaded as soon as you continue. You can change it in Models.")
+                    Text("\(info.localizedDisplayName) model, the best for your language on this \(DeviceNoun.current). \(info.sizeLabel), downloaded as soon as you continue. You can change it in Models.")
                 } else {
-                    Text("The best voice model for your language and iPhone. It downloads while you finish setting up, and you can change it in Models.")
+                    Text("The best voice model for your language and \(DeviceNoun.current). It downloads while you finish setting up, and you can change it in Models.")
                 }
             }
             .font(.footnote)

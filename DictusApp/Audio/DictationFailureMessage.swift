@@ -59,7 +59,7 @@ enum DictationFailureMessage {
     /// The microphone was refused, or never granted. Shared by the engine's own error and
     /// by the two coordinator paths that see the refusal as a `false` rather than a throw.
     static var microphonePermissionDenied: String {
-        String(localized: "Dictus needs microphone access. Turn it on in iPhone Settings.",
+        String(localized: "Dictus needs microphone access. Turn it on in \(DeviceNoun.current) Settings.",
                comment: "Shown when microphone permission is denied or has not been granted (issue #313).")
     }
 

@@ -58,7 +58,7 @@ struct FullAccessExplainerPage: View {
             ExplainerPoint(
                 systemImage: "lock.shield",
                 lead: Text("The rest, Dictus does not use."),
-                detail: Text("No location, no contacts, and your dictations never leave your iPhone: transcription happens on the device.")
+                detail: Text("No location, no contacts, and your dictations never leave your \(DeviceNoun.current): transcription happens on the device.")
             )
             Divider()
                 .padding(.leading, ExplainerPoint.textLeading)

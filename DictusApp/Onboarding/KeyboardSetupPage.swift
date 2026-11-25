@@ -88,7 +88,7 @@ struct KeyboardSetupPage: View {
         } bottom: {
             fullAccessWarning
 
-            Text("Nothing you type leaves your iPhone.")
+            Text("Nothing you type leaves your \(DeviceNoun.current).")
                 .font(.footnote)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)

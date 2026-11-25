@@ -48,6 +48,64 @@ final class CuratedNamesTests: XCTestCase {
         XCTAssertTrue(recasedKeys.allSatisfy { !$0.contains(" ") })
     }
 
+    /// A name written all lowercase keeps a sentence-start capital. No shipped name is
+    /// written that way yet, so the rule is asked with its casing.
+    func testANameWrittenLowercaseKeepsTheSentenceStartCapital() {
+        XCTAssertEqual(CuratedNames.decision(for: "Gitlab", casing: "gitlab"), .keep)
+        XCTAssertEqual(CuratedNames.decision(for: "gitlab", casing: "gitlab"), .keep)
+        XCTAssertEqual(CuratedNames.decision(for: "Gitlab", casing: "GitLab"), .replace(with: "GitLab"))
+    }
+
+    // MARK: - After a correction (Titus, 2026-11-24)
+
+    // The dictionary holds every word lowercase, so these are what the trie proposes
+    // for the misspelling, capitalized at a sentence start as `AOSPTrieEngine.check` does.
+
+    func testAMisspelledNameIsCorrectedToItsCasing() {
+        XCTAssertEqual(CuratedNames.casing(of: "whatsapp"), "WhatsApp", "whatsap")
+        XCTAssertEqual(CuratedNames.casing(of: "iphone"), "iPhone", "iphon")
+        XCTAssertEqual(CuratedNames.casing(of: "youtube"), "YouTube", "youtub")
+    }
+
+    func testAMisspelledNameAtASentenceStartTakesItsCasing() {
+        XCTAssertEqual(CuratedNames.casing(of: "Whatsapp"), "WhatsApp", "Whatsap")
+        XCTAssertEqual(CuratedNames.casing(of: "Iphone"), "iPhone", "Iphon")
+        XCTAssertEqual(CuratedNames.casing(of: "Youtube"), "YouTube", "Youtub")
+    }
+
+    func testACorrectionToAnOrdinaryWordIsUnchanged() {
+        for correction in ["maison", "Maison", "phone", "the", "l'iphone", ""] {
+            XCTAssertEqual(CuratedNames.casing(of: correction), correction, correction)
+        }
+    }
+
+    func testACorrectionAlreadyInTheNamesCasingIsUnchanged() {
+        for correction in ["WhatsApp", "iPhone", "YouTube", "WHATSAPP", "telegram", "Discord"] {
+            XCTAssertEqual(CuratedNames.casing(of: correction), correction, correction)
+        }
+    }
+
+    /// A split correction holds the name next to another word.
+    func testEachWordOfASplitCorrectionIsRecased() {
+        XCTAssertEqual(CuratedNames.casing(of: "the whatsapp"), "the WhatsApp")
+        XCTAssertEqual(CuratedNames.casing(of: "mon iphone"), "mon iPhone")
+    }
+
+    func testTheProposalCarriesTheCasingToEveryWordTheBarShows() {
+        XCTAssertEqual(
+            CorrectionProposal.autocorrect("whatsapp", alternatives: ["whatsapps", "youtube"]).inCuratedCasing,
+            .autocorrect("WhatsApp", alternatives: ["whatsapps", "YouTube"])
+        )
+        XCTAssertEqual(
+            CorrectionProposal.suggest(["iphone", "phone"]).inCuratedCasing,
+            .suggest(["iPhone", "phone"])
+        )
+        XCTAssertEqual(
+            CorrectionProposal.autocorrect("maison", alternatives: []).inCuratedCasing,
+            .autocorrect("maison", alternatives: [])
+        )
+    }
+
     // MARK: - Through the lexicon
 
     func testCuratedCasingWinsOverAContact() {
