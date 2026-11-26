@@ -1,0 +1,11 @@
+[2026-11-25T22:50:18Z] DEBUG   [keyboard] <KBD> diagnosticProbe component=KeyboardViewController instanceID=A7479BF5 action=inputContext_settled details=fullAccess=false kbAppear=2 live=1
+[2026-11-25T22:50:18Z] DEBUG   [keyboard] <KBD> TJ SWITCHES spatial=off adaptive=off bilingual=on source=appGroup
+[2026-11-25T22:50:28Z] DEBUG   [keyboard] <KBD> diagnosticProbe component=KeyboardViewController instanceID=A7479BF5 action=viewDidDisappear details=animated=false memMB=31 live=1 beingDismissed=false movingFromParent=true hasParent=true hasWindow=false hasInputWindow=false fullAccess=false kbAppear=2 appPhase=background appPhaseAgeMs=94200 coldStart=false
+[2026-11-25T22:51:55Z] DEBUG   [keyboard] <KBD> diagnosticProbe component=KeyboardViewController instanceID=35E99585 action=inputContext_settled details=fullAccess=true kbAppear=2 live=1
+[2026-11-25T22:51:55Z] DEBUG   [keyboard] <KBD> TJ SWITCHES spatial=off adaptive=off bilingual=on source=appGroup
+[2026-11-25T22:52:12Z] DEBUG   [keyboard] <KBD> TJ WHY #1 AUTOCORRECT branch=trie orig="Its" corr="Ils" prev=nil
+[2026-11-25T22:52:12Z] DEBUG   [keyboard] <KBD> TJ WHY #1 APPLIED orig="Its" → "Ils" prev=nil
+[2026-11-25T22:52:49Z] DEBUG   [keyboard] <KBD> TJ WHY #3 AUTOCORRECT branch=split-boundary orig="franchement" corr="fra cement" prev="raining"
+[2026-11-25T22:52:49Z] DEBUG   [keyboard] <KBD> TJ WHY #3 AUTOCORRECT branch=bilingual.keptUnsplit.en orig="franchement" corr="franchement" prev="raining"
+[2026-11-25T22:53:05Z] DEBUG   [keyboard] <KBD> TJ WHY #5 AUTOCORRECT branch=elision-repair orig="its a" corr="it's a" prev=nil
+[2026-11-25T22:53:05Z] DEBUG   [keyboard] <KBD> TJ WHY #5 APPLIED orig="its a" → "it's a" prev=nil
