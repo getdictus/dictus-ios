@@ -1546,6 +1546,7 @@ extension DictusKeyboardBridge {
     /// spatial autocorrect here, then swipe typing. Called for every new keyboard view and
     /// at every appearance.
     func refreshExperiments(trigger: String) {
+        SuggestionBarLook.shared.refresh(.forKeyboard())
         let wasOn = SpatialAutocorrect.isOn
         let isOn = SpatialAutocorrect.refresh(.forKeyboard())
         // Taps recorded under the other answer belong to no decode now.
@@ -1553,7 +1554,6 @@ extension DictusKeyboardBridge {
         let channel = AppDistribution.recorded()?.rawValue ?? "none"
         PersistentLog.log(.spatialAutocorrectConfigured(on: isOn, channel: channel, trigger: trigger))
         refreshSwipeTyping(trigger: trigger)
-        SuggestionBarLook.shared.refresh(.forKeyboard())
     }
 }
 
