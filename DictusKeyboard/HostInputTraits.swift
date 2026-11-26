@@ -56,10 +56,12 @@ enum HostInputTraits {
             keyboard: "\(SupportedLanguage.active.rawValue)-\(LayoutType.active.rawValue)"
         )
     }
+    #endif
 
     /// What the typing journal's field gate reads (#1001): the content types that
     /// hold a secret. Every other one, and none, records.
-    /// Also Adaptive touch's gate (#1014): a field the journal skips never teaches it.
+    /// Also Adaptive touch's gate (#1014): a field the journal skips never teaches it. Outside
+    /// `#if DEBUG` for that reason: Adaptive touch runs in Release builds (TestFlight).
     static func journalContent(_ type: UITextContentType?) -> TypingJournalFieldGate.Content? {
         guard let type = type else { return nil }
         switch type {
@@ -71,7 +73,6 @@ enum HostInputTraits {
         default: return .other
         }
     }
-    #endif
 
     private static func contentKind(_ type: UITextContentType?) -> HostFieldPolicy.ContentKind {
         guard let type = type else { return .none }
