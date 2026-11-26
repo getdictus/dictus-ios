@@ -164,6 +164,17 @@ final class AdaptiveTouchStatusTests: XCTestCase {
                      "other rows never match")
     }
 
+    func testAShippedLetterPageIsIdentifiedAndNamesTheKeys() throws {
+        let touch = AdaptiveTouch(storage: .memory, defaults: nil)
+        learn(touch, sessions: 2)
+        let geometry = try XCTUnwrap(touch.geometry)
+        let match = try XCTUnwrap(AdaptiveTouchGeometry.identify(touch.model)[geometry.key])
+        XCTAssertEqual(match.page, "qwerty")
+        XCTAssertEqual(match.pitch, CGSize(width: 40, height: 54))
+        XCTAssertEqual(match.letters, geometry.letters, "the slots as the keyboard numbered them")
+        XCTAssertEqual(AdaptiveTouchGeometry.shippedLetterPages.map(\.name), ["azerty", "qwerty", "qwertz"])
+    }
+
     // MARK: - The keyboard's line
 
     func testTheRuntimeLineOffReadsTheFileOnReadsMemory() throws {

@@ -46,16 +46,26 @@ struct AdaptiveTouchExportSection: View {
     }
 
     private func run() {
-        switch Self.prepare(source: AdaptiveTouchStore.defaultURL, resetAt: AdaptiveTouchStore.resetAt(AppGroup.defaults)) {
-        case .success(let files):
-            message = nil
-            export = Export(files: files)
-        case .failure(let failure):
-            message = failure.message
+        let source = AdaptiveTouchStore.defaultURL
+        let resetAt = AdaptiveTouchStore.resetAt(AppGroup.defaults)
+        message = "Préparation…"
+        // Off the main thread: naming the keys tries every pitch of every letter page, about a
+        // second in a Debug build.
+        Task.detached(priority: .userInitiated) {
+            let result = Self.prepare(source: source, resetAt: resetAt)
+            await MainActor.run {
+                switch result {
+                case .success(let files):
+                    message = nil
+                    export = Export(files: files)
+                case .failure(let failure):
+                    message = failure.message
+                }
+            }
         }
     }
 
-    private enum Failure: Error {
+    private enum Failure: Error, Sendable {
         case noAppGroup
         case noFile(String)
         case notWritten(String)
@@ -74,7 +84,7 @@ struct AdaptiveTouchExportSection: View {
 
     /// Copies the file into a temporary folder under a dated name, with the report beside it.
     /// A file that does not decode is still shared, and the report says so.
-    private static func prepare(source: URL?, resetAt: TimeInterval, now: Date = Date()) -> Result<[URL], Failure> {
+    nonisolated private static func prepare(source: URL?, resetAt: TimeInterval, now: Date = Date()) -> Result<[URL], Failure> {
         guard let source else { return .failure(.noAppGroup) }
         let shown = "AdaptiveTouch/\(source.lastPathComponent)"
         guard let data = FileManager.default.contents(atPath: source.path) else { return .failure(.noFile(shown)) }
@@ -87,7 +97,14 @@ struct AdaptiveTouchExportSection: View {
         let txt = folder.appendingPathComponent("adaptive-touch-\(stamp).txt")
         var report = "Dictus adaptive touch export, \(stamp), \(shown), \(data.count) bytes\n"
         if let model = AdaptiveTouchModel(data: data) {
-            report += AdaptiveTouchStatus.report(model: model, resetAt: resetAt)
+            // The file holds no letters: its keys are named from the letter page whose rows give
+            // the geometry's hash, the same way the decode tool names them.
+            let matches = AdaptiveTouchGeometry.identify(model)
+            for (geometry, match) in matches.sorted(by: { $0.key < $1.key }) {
+                report += "geometry \(String(format: "%016llx", geometry)): \(match.page) letter page, key pitch "
+                    + "\(match.pitch.width) x \(match.pitch.height) pt\n"
+            }
+            report += AdaptiveTouchStatus.report(model: model, letters: matches.mapValues(\.letters), resetAt: resetAt)
         } else {
             report += "unreadable: not a whole version-1 file of \(AdaptiveTouchModel.byteCount) bytes with a valid checksum\n"
         }

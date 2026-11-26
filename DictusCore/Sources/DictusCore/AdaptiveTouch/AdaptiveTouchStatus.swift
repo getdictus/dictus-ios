@@ -171,6 +171,48 @@ extension AdaptiveTouchGeometry {
         return hash(signature)
     }
 
+    /// A letter page the keyboard ships, as `AdaptiveTouchGeometry` reads it: its letter rows,
+    /// top first, without the AZERTY accent key (`KeyboardView.spatialKeys` skips it).
+    public struct LetterPage: Equatable, Sendable {
+        public var name: String
+        public var rows: [[Character]]
+
+        public init(name: String, rows: [[Character]]) {
+            self.name = name
+            self.rows = rows
+        }
+    }
+
+    /// The letter pages of `KeyboardLayouts`: AZERTY, QWERTY, QWERTZ.
+    public static let shippedLetterPages: [LetterPage] = [
+        LetterPage(name: "azerty", rows: ["azertyuiop", "qsdfghjklm", "wxcvbn"].map(Array.init)),
+        LetterPage(name: "qwerty", rows: QWERTYLayout.lettersRows.prefix(3).map { $0.compactMap { $0.lowercased().first } }),
+        LetterPage(name: "qwertz", rows: QWERTZLayout.lowercasedLettersRows.map { $0.compactMap(\.first) })
+    ]
+
+    /// A context's geometry identified as a letter page at a pitch.
+    public struct Match: Equatable, Sendable {
+        public var page: String
+        public var pitch: CGSize
+        public var letters: [Character]
+    }
+
+    /// The letter page and pitch of every geometry `model` holds, among `pages`: what names an
+    /// exported file's slots. Measurement only (the export and the decode tool): up to some
+    /// 190 000 hashes per page and geometry.
+    public static func identify(_ model: AdaptiveTouchModel, pages: [LetterPage] = shippedLetterPages) -> [UInt64: Match] {
+        var found: [UInt64: Match] = [:]
+        for geometry in Set(model.contexts.map(\.geometry)) where geometry != 0 {
+            for page in pages {
+                guard let pitch = pitch(of: geometry, rows: page.rows) else { continue }
+                found[geometry] = Match(page: page.name, pitch: pitch,
+                                        letters: Array(page.rows.joined().prefix(AdaptiveTouchModel.slotLimit)))
+                break
+            }
+        }
+        return found
+    }
+
     /// The pitch, in points, at which a letter page holding `rows` has the geometry `key`: the
     /// check that an exported file was learned on those rows, so its slots may be named with
     /// them. Tries every quarter point from 10 to 120 pt on each axis (an iPhone's pitch is

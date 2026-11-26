@@ -16,11 +16,7 @@ import Foundation
 
 let usage = "usage: adaptive-touch-status <adaptive-touch.bin> [--rows \"row1 row2 row3\"] [--reset-at <seconds>]"
 var arguments = Array(CommandLine.arguments.dropFirst())
-var pages: [(name: String, rows: [[Character]])] = [
-    ("azerty", ["azertyuiop", "qsdfghjklm", "wxcvbn"].map(Array.init)),
-    ("qwerty", ["qwertyuiop", "asdfghjkl", "zxcvbnm"].map(Array.init)),
-    ("qwertz", QWERTZLayout.lowercasedLettersRows.map { $0.compactMap(\.first) })
-]
+var pages = AdaptiveTouchGeometry.shippedLetterPages
 var resetAt: TimeInterval = 0
 var path: String?
 while !arguments.isEmpty {
@@ -29,7 +25,7 @@ while !arguments.isEmpty {
     case "--rows":
         guard let value = arguments.first else { fatalError(usage) }
         arguments.removeFirst()
-        pages = [("rows", value.split(separator: " ").map(Array.init))]
+        pages = [AdaptiveTouchGeometry.LetterPage(name: "rows", rows: value.split(separator: " ").map(Array.init))]
     case "--reset-at":
         guard let value = arguments.first.flatMap(TimeInterval.init) else { fatalError(usage) }
         arguments.removeFirst()
@@ -51,18 +47,15 @@ guard let model = AdaptiveTouchModel(data: data) else {
     exit(1)
 }
 
-var letters: [UInt64: [Character]] = [:]
+let matches = AdaptiveTouchGeometry.identify(model, pages: pages)
 for geometry in Set(model.contexts.map(\.geometry)) where geometry != 0 {
-    for page in pages {
-        guard let pitch = AdaptiveTouchGeometry.pitch(of: geometry, rows: page.rows) else { continue }
-        letters[geometry] = Array(page.rows.joined().prefix(AdaptiveTouchModel.slotLimit))
-        print("geometry \(String(format: "%016llx", geometry)): \(page.name) letter page, key pitch "
-              + "\(pitch.width) x \(pitch.height) pt")
-        break
-    }
-    if letters[geometry] == nil {
-        print("geometry \(String(format: "%016llx", geometry)): no shipped letter page matches; slots are unnamed")
+    let hex = String(format: "%016llx", geometry)
+    if let match = matches[geometry] {
+        print("geometry \(hex): \(match.page) letter page, key pitch \(match.pitch.width) x \(match.pitch.height) pt")
+    } else {
+        print("geometry \(hex): no letter page matches; slots are unnamed")
     }
 }
+let letters = matches.mapValues(\.letters)
 print("")
 print(AdaptiveTouchStatus.report(model: model, letters: letters, resetAt: resetAt), terminator: "")
