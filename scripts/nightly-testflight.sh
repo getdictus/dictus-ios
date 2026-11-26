@@ -1,11 +1,15 @@
 #!/bin/bash
-# nightly-testflight.sh — build develop's tip each night and send it to internal TestFlight.
+# nightly-testflight.sh — build develop's tip and send it to internal TestFlight.
 #
-# Run by launchd at 22:00 (scripts/launchd/solutions.pivi.dictus.nightly-testflight.plist;
-# install, uninstall and logs in docs/nightly-testflight.md). Each night it builds, or
-# skips and says why, or fails and says where. Two outputs:
-#   ~/dev/proofs/nightly/<date>.md              the morning summary, one screen
-#   ~/Library/Logs/dictus-nightly/<date>.log    everything, credentials redacted
+# Two slots, run by launchd (install, uninstall and logs in docs/nightly-testflight.md):
+#   soir  22:00         scripts/launchd/solutions.pivi.dictus.nightly-testflight.plist
+#   midi  12:00, 12:30  scripts/launchd/solutions.pivi.dictus.midday-testflight.plist
+# Each run builds, or skips and says why, or fails and says where. Two outputs:
+#   ~/dev/proofs/nightly/<stem>.md              the summary, one screen
+#   ~/Library/Logs/dictus-nightly/<stem>.log    everything, credentials redacted
+# <stem> is <date> for soir (the names the first nightly used) and <date>-midi for midi.
+# A run that does not build never overwrites a summary of the same slot and day that
+# says built or uploaded: it writes <stem>.retry.md (the 12:30 attempt after 12:00).
 #
 # A real run, in order. Any skip or failure stops it at that step:
 #    1. lock; skip if another nightly, a cut/upload/promote script or an archive is running
@@ -15,19 +19,27 @@
 #    5. skip if HEAD's marketing version is the one on main (closed train, ASC refuses it)
 #    6. NN = max(highest build number in App Store Connect, highest build/NN tag) + 1
 #    7. detached worktree at HEAD; CFBundleVersion = NN in the four plists, never committed
-#    8. scripts/upload-testflight.sh from that worktree: archive, export, upload, wait
+#    8. scripts/upload-testflight.sh from that worktree: archive, export, upload, wait.
+#       Once the upload is committed the build exists in App Store Connect, so a
+#       processing wait that runs out is not a failure: the run waits T_PROCESS more,
+#       then goes on (status `uploaded` if App Store Connect is still processing)
 #    9. check the IPA: build NN, and DictusBuildInfo names HEAD in the app and the keyboard
 #   10. push the lightweight tag build/NN, alone
-#   11. What to Test in fr-FR and en-GB
-#   12. remove the worktree and its temp dirs; keep only tonight's IPA
+#   11. What to Test in fr-FR and en-GB, from each merged PR's `## TestFlight` block
+#   12. remove the worktree and its temp dirs; keep only the latest IPA
 #
-# Internal only. Team PIVI sees every build because that group has access to all builds.
-# This script adds no group, submits nothing to beta review and never touches the App Store.
+# Internal only, both slots. Team PIVI sees every build because that group has access to
+# all builds. This script adds no group, submits nothing to beta review and never touches
+# the App Store.
 #
 # Usage:
-#   scripts/nightly-testflight.sh             # a real run
-#   scripts/nightly-testflight.sh --dry-run   # steps 1-6 for real (fetch, tags, CI, ASC
-#                                             # reads), then prints 7-12 without doing them
+#   scripts/nightly-testflight.sh [--slot midi|soir] [--dry-run]
+#     --slot      soir (default) or midi: sets the file names and the What to Test
+#                 header, nothing else
+#     --dry-run   steps 1-6 for real (fetch, tags, CI, gh and ASC reads), then prints
+#                 7-12 without doing them
+#   NIGHTLY_CACHE_DIR, NIGHTLY_LOG_DIR and NIGHTLY_PROOF_DIR move the three directories,
+#   to try the script without touching the real ones.
 #
 # Written for /bin/bash 3.2, the one macOS ships: no associative arrays, no mapfile.
 set -Eeuo pipefail
@@ -47,39 +59,60 @@ T_READ=90        # one gh or asc read
 T_NOTES=120      # one What to Test write
 T_PROBE=30       # the signing probe
 T_UPLOAD=7200    # archive + export + upload + processing
+T_PROCESS=2700   # the extra processing wait, when upload-testflight.sh's own ran out
 
 export PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
 export GIT_TERMINAL_PROMPT=0
 export GIT_SSH_COMMAND="ssh -o BatchMode=yes -o ConnectTimeout=20"
 export GH_PROMPT_DISABLED=1
+# The limit of one asc request, for the reads. Not the processing wait, which
+# upload-testflight.sh bounds by ASC_PROCESSING_TIMEOUT (10 to 30 minutes in practice).
 export ASC_TIMEOUT=90s
+export ASC_PROCESSING_TIMEOUT=45m
 
 SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
 REPO=$(git -C "$SCRIPT_DIR" rev-parse --path-format=absolute --git-common-dir)
 REPO=$(dirname "$REPO")   # the main clone; worktrees share its refs and tags
 
 DATE=$(date +%F)
-CACHE_DIR="$HOME/Library/Caches/dictus-nightly"
-LOG_DIR="$HOME/Library/Logs/dictus-nightly"
-PROOF_DIR="$HOME/dev/proofs/nightly"
+CACHE_DIR="${NIGHTLY_CACHE_DIR:-$HOME/Library/Caches/dictus-nightly}"
+LOG_DIR="${NIGHTLY_LOG_DIR:-$HOME/Library/Logs/dictus-nightly}"
+PROOF_DIR="${NIGHTLY_PROOF_DIR:-$HOME/dev/proofs/nightly}"
 KEEP_DIR="$CACHE_DIR/ipa"
 KEEP_MANIFEST="$KEEP_DIR/created-by-nightly.txt"
 LOCK_DIR="$CACHE_DIR/lock"
 
 DRY_RUN=0
-case "${1:-}" in
-  "") ;;
-  --dry-run) DRY_RUN=1 ;;
-  -h|--help) sed -n '2,32p' "$0"; exit 0 ;;
-  *) echo "error: unknown argument '$1' (try --help)" >&2; exit 2 ;;
+SLOT="soir"
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --dry-run) DRY_RUN=1 ;;
+    --slot) [ $# -ge 2 ] || { echo "error: --slot needs midi or soir" >&2; exit 2; }
+            SLOT=$2; shift ;;
+    --slot=*) SLOT=${1#--slot=} ;;
+    -h|--help) sed -n '2,44p' "$0"; exit 0 ;;
+    *) echo "error: unknown argument '$1' (try --help)" >&2; exit 2 ;;
+  esac
+  shift
+done
+# What the slot sets, and nothing else: the file names, the titles, the notes header.
+case "$SLOT" in
+  soir) STEM="$DATE";      TITLE="Nightly TestFlight"
+        NOTES_HEAD_FR="Build du soir de develop"; NOTES_HEAD_EN="Nightly develop build" ;;
+  midi) STEM="$DATE-midi"; TITLE="Midday TestFlight"
+        NOTES_HEAD_FR="Build de midi de develop"; NOTES_HEAD_EN="Midday develop build" ;;
+  *) echo "error: --slot must be midi or soir, not '$SLOT'" >&2; exit 2 ;;
 esac
 
+# REAL_SUMMARY is where a real run of this slot writes; a dry run writes beside it, so
+# it never overwrites a real run.
+REAL_SUMMARY="$PROOF_DIR/$STEM.md"
 if [ "$DRY_RUN" -eq 1 ]; then
-  LOG="$LOG_DIR/$DATE.dry-run.log"
-  SUMMARY="$PROOF_DIR/$DATE.dry-run.md"
+  LOG="$LOG_DIR/$STEM.dry-run.log"
+  SUMMARY="$PROOF_DIR/$STEM.dry-run.md"
 else
-  LOG="$LOG_DIR/$DATE.log"
-  SUMMARY="$PROOF_DIR/$DATE.md"
+  LOG="$LOG_DIR/$STEM.log"
+  SUMMARY="$REAL_SUMMARY"
 fi
 
 # --- State the summary reports ----------------------------------------------
@@ -91,6 +124,11 @@ VERSION=""
 NN=""
 PREV_TAG=""
 PR_LINES=""
+PR_TABLE=""
+FR_NOTES=""
+EN_NOTES=""
+UPLOAD_STATE=""
+PROCESSED=0
 CI_STATE="not read"
 ASC_STATE="not read"
 BUILD_INFO_STATE="not checked"
@@ -177,10 +215,28 @@ fail() {
 on_err() { REASON="unexpected error at line $1 (exit $2); see the log"; }
 trap 'on_err "$LINENO" "$?"' ERR
 
+# summary_status FILE — the Status a summary reports; empty when the file is absent.
+summary_status() {
+  [ -f "$1" ] || return 0
+  sed -n 's/^- Status: \*\*\([a-z-]*\)\*\*$/\1/p' "$1" | head -1
+}
+
+# summary_target FILE — where a real run writes its summary. A run that did not build
+# (a skip, a failure, the 12:30 attempt finding the tag 12:00 pushed) never replaces a
+# summary of the same slot and day that reports a build: it writes <stem>.retry.md.
+summary_target() {
+  case "$STATUS" in built|uploaded) echo "$1"; return 0 ;; esac
+  case "$(summary_status "$1")" in
+    built|uploaded) echo "${1%.md}.retry.md" ;;
+    *) echo "$1" ;;
+  esac
+}
+
 write_summary() {
+  if [ "$DRY_RUN" -eq 0 ]; then SUMMARY=$(summary_target "$SUMMARY"); fi
   local tmp="$SUMMARY.tmp"
   {
-    if [ "$DRY_RUN" -eq 1 ]; then echo "# Nightly TestFlight, $DATE (dry run)"; else echo "# Nightly TestFlight, $DATE"; fi
+    if [ "$DRY_RUN" -eq 1 ]; then echo "# $TITLE, $DATE (dry run)"; else echo "# $TITLE, $DATE"; fi
     echo
     echo "- Status: **$STATUS**"
     echo "- Reason: $REASON"
@@ -188,6 +244,7 @@ write_summary() {
     echo "- Commit: ${SHORT:-unknown} (origin/develop${SHA:+, $SHA})"
     echo "- CI: $CI_STATE"
     echo "- App Store Connect: $ASC_STATE"
+    if [ -n "$UPLOAD_STATE" ]; then echo "- Upload: $UPLOAD_STATE"; fi
     echo "- DictusBuildInfo: $BUILD_INFO_STATE"
     [ -n "$IPA_KEPT" ] && echo "- IPA kept: $IPA_KEPT"
     echo "- Log: $LOG"
@@ -201,6 +258,18 @@ write_summary() {
     echo "## PRs merged since ${PREV_TAG:-the previous build tag}"
     echo
     if [ -n "$PR_LINES" ]; then printf '%s\n' "$PR_LINES" | sed 's/^/- /'; else echo "- none found"; fi
+    if [ -n "$FR_NOTES" ]; then
+      echo
+      echo "## What to Test"
+      echo
+      echo '```text'
+      printf '%s\n' "$FR_NOTES"
+      echo '```'
+      echo
+      echo '```text'
+      printf '%s\n' "$EN_NOTES"
+      echo '```'
+    fi
   } > "$tmp" && mv "$tmp" "$SUMMARY"
 }
 
@@ -223,12 +292,17 @@ cleanup() {
   if [ "$LOCK_HELD" -eq 1 ]; then rm -rf "$LOCK_DIR"; fi
   write_summary
   log "summary: $SUMMARY"
+  if [ "$DRY_RUN" -eq 1 ]; then
+    # The same rule a real run applies, on the real summary of this slot and day.
+    if [ "$STATUS" = "dry-run" ]; then RT="$REAL_SUMMARY"; else RT=$(summary_target "$REAL_SUMMARY"); fi
+    log "a real run would write its summary to $RT"
+  fi
   log "end: status=$STATUS reason=$REASON"
   exit "$rc"
 }
 trap cleanup EXIT
 
-log "start: nightly-testflight $([ "$DRY_RUN" -eq 1 ] && echo '--dry-run') from $SCRIPT_DIR (repo $REPO)"
+log "start: nightly-testflight --slot $SLOT $([ "$DRY_RUN" -eq 1 ] && echo '--dry-run') from $SCRIPT_DIR (repo $REPO)"
 
 # --- 1. Lock, and nothing else release-shaped running -----------------------
 take_lock() {
@@ -283,19 +357,32 @@ for n in $(git -C "$REPO" tag -l 'build/*' | grep -E '^build/[0-9]+$' | sed 's#^
 done
 log "3. highest build tag: build/$HIGHEST_TAG_N; previous build on this line: ${PREV_TAG:-none}"
 if [ -n "$TAGS_AT_HEAD" ]; then
+  KEPT=$(summary_status "$REAL_SUMMARY")
+  case "$KEPT" in
+    built|uploaded) log "   $REAL_SUMMARY says $KEPT: it is kept, this skip goes to ${REAL_SUMMARY%.md}.retry.md" ;;
+  esac
   skip "$(echo "$TAGS_AT_HEAD" | tr '\n' ' ')already points to $SHORT, nothing new on develop"
+  # Only a dry run gets here. So that it still shows the What to Test of this commit,
+  # count the PRs from the build before the one at HEAD.
+  for n in $(git -C "$REPO" tag -l 'build/*' | grep -E '^build/[0-9]+$' | sed 's#^build/##' | sort -rn); do
+    if [ "$(git -C "$REPO" rev-parse "build/$n^{commit}")" != "$SHA" ] \
+       && git -C "$REPO" merge-base --is-ancestor "build/$n" "$SHA"; then PREV_TAG="build/$n"; break; fi
+  done
+  log "   DRY-RUN: PRs and What to Test below are counted from $PREV_TAG, the build before HEAD's"
 fi
 
 # PRs merged since the previous build: GitHub's merge commit carries the PR number in
 # its subject and the PR title as the first line of its body. Read from git, no API.
+# PR_TABLE: one line per PR, the number, a tab, the title.
 if [ -n "$PREV_TAG" ]; then
-  PR_LINES=$(git -C "$REPO" log --first-parent --merges --format='%H%x1f%s%x1f%b%x1e' "$PREV_TAG..$SHA" \
+  PR_TABLE=$(git -C "$REPO" log --first-parent --merges --format='%H%x1f%s%x1f%b%x1e' "$PREV_TAG..$SHA" \
     | awk 'BEGIN { RS = "\036"; FS = "\037" }
            match($2, /^Merge pull request #[0-9]+/) {
              n = substr($2, 21, RLENGTH - 20); t = ""
              k = split($3, L, "\n"); for (i = 1; i <= k; i++) if (L[i] != "") { t = L[i]; break }
-             print t " (#" n ")"
+             print n "\t" t
            }')
+  PR_LINES=$(printf '%s\n' "$PR_TABLE" | awk -F '\t' 'NF { print $2 " (#" $1 ")" }')
 fi
 log "   PRs since ${PREV_TAG:-?}: $(printf '%s\n' "$PR_LINES" | grep -c . || true)"
 printf '%s\n' "$PR_LINES" | sed '/^$/d; s/^/     - /'
@@ -348,18 +435,95 @@ NN=$(( (ASC_LATEST > HIGHEST_TAG_N ? ASC_LATEST : HIGHEST_TAG_N) + 1 ))
 ASC_STATE="latest build in App Store Connect: $ASC_LATEST ($ASC_LATEST_STATE)"
 log "6. ASC latest build $ASC_LATEST ($ASC_LATEST_STATE), highest tag $HIGHEST_TAG_N -> next build $NN"
 
-FR_NOTES="Build du soir de develop ($SHORT)"
-EN_NOTES="Nightly develop build ($SHORT)"
-if [ -n "$PR_LINES" ]; then
-  TITLES=$(printf '%s\n' "$PR_LINES" | sed -E '/^$/d; s/ \(#[0-9]+\)$//; s/^/• /')
+# --- What to Test, from each merged PR ---------------------------------------
+# A PR may carry this block in its body (.github/pull_request_template.md):
+#   ## TestFlight
+#   fr: <one sentence for the tester>
+#   en: <one sentence for the tester>
+#   test: yes|no
+#   switch: <switch name, or none>
+# Read with `gh pr view N --json body`, read only, one call per PR under T_READ. A PR
+# without the block, a line left empty or as its <placeholder>, or a gh error: the PR's
+# title stands in. After one gh error the remaining PRs use their titles, so a dead
+# network costs one timeout, not one per PR.
+
+# parse_testflight_block — stdin: a PR body. Prints fr, en, test, switch, separated by \037.
+parse_testflight_block() {
+  tr -d '\r' | awk '
+    /^##[ \t]+TestFlight[ \t]*$/ { inb = 1; next }
+    inb && (/^#/ || /^[ \t]*<!--/) { inb = 0 }
+    inb {
+      line = $0; sub(/^[ \t]*([-*][ \t]+)?/, "", line)
+      if (line ~ /^(fr|en|test|switch)[ \t]*:/) {
+        k = line; sub(/[ \t]*:.*$/, "", k)
+        v = line; sub(/^[^:]*:[ \t]*/, "", v); sub(/[ \t]+$/, "", v)
+        if (v ~ /^</) v = ""
+        val[k] = v
+      }
+    }
+    END { printf "%s\037%s\037%s\037%s", val["fr"], val["en"], tolower(val["test"]), val["switch"] }'
+}
+
+FR_TEST=""; FR_NOTEST=""; EN_TEST=""; EN_NOTEST=""
+GH_BODIES=1
+while IFS=$'\t' read -r n t; do
+  [ -n "$n" ] || continue
+  block=""
+  if [ "$GH_BODIES" -eq 1 ]; then
+    if body=$(run_timeout "$T_READ" "gh pr view $n" gh pr view "$n" --repo "$GH_REPO" --json body --jq .body); then
+      block=$(printf '%s\n' "$body" | parse_testflight_block)
+    else
+      GH_BODIES=0
+      log "   gh pr view $n failed: this PR and the next ones use their titles"
+    fi
+  fi
+  IFS=$'\037' read -r fr en tst sw <<EOF_BLOCK || true
+$block
+EOF_BLOCK
+  src="block"
+  if [ -z "$fr" ] && [ -z "$en" ] && [ -z "$tst" ]; then src="title"; fi
+  fr=${fr:-$t}; en=${en:-$t}
+  case "$sw" in ""|none|None|NONE|-) sw="" ;; esac
+  if [ -n "$sw" ]; then
+    fl="• $fr (#$n, réglage : $sw)"; el="• $en (#$n, switch: $sw)"
+  else
+    fl="• $fr (#$n)"; el="• $en (#$n)"
+  fi
+  if [ "$tst" = "no" ]; then
+    FR_NOTEST="${FR_NOTEST:+$FR_NOTEST
+}$fl"; EN_NOTEST="${EN_NOTEST:+$EN_NOTEST
+}$el"
+  else
+    FR_TEST="${FR_TEST:+$FR_TEST
+}$fl"; EN_TEST="${EN_TEST:+$EN_TEST
+}$el"
+  fi
+  log "   #$n from its $src: test=${tst:-yes} switch=${sw:-none}"
+done <<EOF_PRS
+$PR_TABLE
+EOF_PRS
+
+FR_NOTES="$NOTES_HEAD_FR ($SHORT)"
+EN_NOTES="$NOTES_HEAD_EN ($SHORT)"
+if [ -n "$FR_TEST" ]; then
   FR_NOTES="$FR_NOTES
 
-Depuis le build ${PREV_TAG#build/} :
-$TITLES"
+À tester :
+$FR_TEST"
   EN_NOTES="$EN_NOTES
 
-Since build ${PREV_TAG#build/}:
-$TITLES"
+To test:
+$EN_TEST"
+fi
+if [ -n "$FR_NOTEST" ]; then
+  FR_NOTES="$FR_NOTES
+
+Sans test (interne) :
+$FR_NOTEST"
+  EN_NOTES="$EN_NOTES
+
+No test (internal):
+$EN_NOTEST"
 fi
 # TestFlight caps What to Test at 4000 characters: cut the whole text, by character.
 FR_NOTES=$(printf '%s' "$FR_NOTES" | perl -CSD -0777 -pe 'substr($_, 4000) = "" if length > 4000')
@@ -378,7 +542,7 @@ if [ "$DRY_RUN" -eq 1 ]; then
   would "git worktree add --detach $CACHE_DIR/run-$DATE.XXXXXX/worktree $SHORT"
   would "set CFBundleVersion $NN in $PLISTS (no commit; git update-index --skip-worktree on those four)"
   would "create the local tag build/$NN at $SHORT (upload-testflight.sh requires it)"
-  would "run <worktree>/scripts/upload-testflight.sh: archive $VERSION ($NN), export, upload, wait for processing"
+  would "run <worktree>/scripts/upload-testflight.sh: archive $VERSION ($NN), export, upload, wait for processing (up to $ASC_PROCESSING_TIMEOUT, then ${T_PROCESS}s more if still processing; after that: status uploaded, tag and notes anyway)"
   would "check the IPA: CFBundleVersion $NN, DictusBuildInfo GitCommitSHA $SHORT in DictusApp and DictusKeyboard"
   would "git push origin refs/tags/build/$NN (the tag alone)"
   would "asc builds test-notes create, build $NN, fr-FR:"
@@ -438,9 +602,40 @@ TAG_CREATED=1
 
 # --- 8. Archive, export, upload, wait ----------------------------------------
 # TMPDIR points into the run dir so xcodebuild's and asc's scratch files go with it.
-log "8. scripts/upload-testflight.sh (timeout ${T_UPLOAD}s)"
+#
+# Exit 75 from upload-testflight.sh means "Upload committed", then the processing wait
+# ran out: build NN is in App Store Connect and Apple finishes it on its own. That is
+# not a failure, and the run must not lose the build as it did on 2026-11-26 (build 46
+# uploaded, wait timed out, the cleanup deleted the unpushed tag, no notes). So the run
+# waits T_PROCESS more. Past that, it still checks the IPA, pushes the tag (the number
+# is used and names this commit) and sets What to Test (App Store Connect accepts notes
+# once the build is visible, before it is VALID), and reports status `uploaded`.
+log "8. scripts/upload-testflight.sh (timeout ${T_UPLOAD}s, processing wait $ASC_PROCESSING_TIMEOUT)"
+UPLOAD_RC=0
 run_timeout "$T_UPLOAD" "upload-testflight.sh" env TMPDIR="$RUN_DIR/tmp/" /bin/sh "$WT/scripts/upload-testflight.sh" \
-  || fail "scripts/upload-testflight.sh failed for build $NN (see the log)"
+  || UPLOAD_RC=$?
+case "$UPLOAD_RC" in
+  0) PROCESSED=1; UPLOAD_STATE="uploaded and processed" ;;
+  75)
+    log "8. build $NN is uploaded, App Store Connect is still processing it; waiting up to ${T_PROCESS}s more"
+    UPLOAD_STATE="uploaded; not processed after $ASC_PROCESSING_TIMEOUT"
+    if run_timeout "$((T_PROCESS + 120))" "asc builds wait" asc builds wait --app "$ASC_APP_ID" \
+         --build-number "$NN" --platform IOS --version "$VERSION" --timeout "${T_PROCESS}s" \
+         --poll-interval 30s --fail-on-invalid --output json >/dev/null; then
+      PROCESSED=1
+      UPLOAD_STATE="uploaded and processed (after the extra wait)"
+    else
+      P_STATE=$(run_timeout "$T_READ" "asc builds info" asc builds info --app "$ASC_APP_ID" \
+        --build-number "$NN" --platform IOS --output json 2>/dev/null \
+        | jq -r '.data.attributes.processingState // empty' 2>/dev/null || true)
+      case "$P_STATE" in
+        FAILED|INVALID) fail "App Store Connect reports build $NN as $P_STATE" ;;
+      esac
+      UPLOAD_STATE="uploaded; still ${P_STATE:-processing} after $ASC_PROCESSING_TIMEOUT + ${T_PROCESS}s. To wait again: asc builds wait --app $ASC_APP_ID --build-number $NN --platform IOS"
+      log "8. $UPLOAD_STATE"
+    fi ;;
+  *) fail "scripts/upload-testflight.sh failed for build $NN (see the log)" ;;
+esac
 IPA="$WT/.asc/artifacts/Dictus-$VERSION-$NN.ipa"
 [ -f "$IPA" ] || fail "upload reported success but $IPA is missing"
 
@@ -480,10 +675,13 @@ TAG_PUSHED=1
 log "10. pushed tag build/$NN"
 
 # --- 11. What to Test ---------------------------------------------------------
+# Build processed: any failure here is a failure. Still processing: a build App Store
+# Connect does not show yet leaves the notes unset (the text is in the summary).
 INFO=$(run_timeout "$T_READ" "asc builds info" asc builds info --app "$ASC_APP_ID" \
-  --build-number "$NN" --platform IOS --output json 2>>"$LOG") || fail "could not read build $NN back from App Store Connect"
-BUILD_ID=$(printf '%s' "$INFO" | jq -r '.data.id // empty')
-[ -n "$BUILD_ID" ] || fail "build $NN not found in App Store Connect after upload"
+  --build-number "$NN" --platform IOS --output json 2>>"$LOG") \
+  || { [ "$PROCESSED" -eq 0 ] || fail "could not read build $NN back from App Store Connect"; INFO=""; }
+BUILD_ID=$(printf '%s' "$INFO" | jq -r '.data.id // empty' 2>/dev/null || true)
+[ -n "$BUILD_ID" ] || [ "$PROCESSED" -eq 0 ] || fail "build $NN not found in App Store Connect after upload"
 # create, or update when App Store Connect already made that locale for the build.
 set_notes() {
   run_timeout "$T_NOTES" "test notes $1 create" asc builds test-notes create --build-id "$BUILD_ID" \
@@ -491,17 +689,31 @@ set_notes() {
   || run_timeout "$T_NOTES" "test notes $1 update" asc builds test-notes update --build-id "$BUILD_ID" \
     --locale "$1" --whats-new "$2" --output json >/dev/null
 }
-set_notes fr-FR "$FR_NOTES" || fail "What to Test fr-FR failed for build $NN"
-set_notes en-GB "$EN_NOTES" || fail "What to Test en-GB failed for build $NN"
-log "11. What to Test set in fr-FR and en-GB"
+NOTES_STATE="What to Test not set: build $NN not visible in App Store Connect yet (the text is below)"
+if [ -n "$BUILD_ID" ]; then
+  set_notes fr-FR "$FR_NOTES" || fail "What to Test fr-FR failed for build $NN"
+  set_notes en-GB "$EN_NOTES" || fail "What to Test en-GB failed for build $NN"
+  NOTES_STATE="What to Test fr-FR + en-GB"
+  log "11. What to Test set in fr-FR and en-GB"
+else
+  log "11. $NOTES_STATE"
+fi
 
 # --- ASC state for the summary ------------------------------------------------
-STATE=$(printf '%s' "$INFO" | jq -r '.data.attributes.processingState // "unknown"')
-BUILD_GROUPS=$(run_timeout "$T_READ" "asc builds groups list" asc builds groups list --build-id "$BUILD_ID" \
-  --output json 2>>"$LOG" | jq -r '[.groups[]? | "\(.name) (\(.type))"] | join(", ")' || echo "unread")
-ASC_STATE="build $NN $STATE, groups: ${BUILD_GROUPS:-none}, What to Test fr-FR + en-GB"
+STATE=$(printf '%s' "$INFO" | jq -r '.data.attributes.processingState // "unknown"' 2>/dev/null || echo unknown)
+BUILD_GROUPS="unread"
+if [ -n "$BUILD_ID" ]; then
+  BUILD_GROUPS=$(run_timeout "$T_READ" "asc builds groups list" asc builds groups list --build-id "$BUILD_ID" \
+    --output json 2>>"$LOG" | jq -r '[.groups[]? | "\(.name) (\(.type))"] | join(", ")' || echo "unread")
+fi
+ASC_STATE="build $NN ${STATE:-unknown}, groups: ${BUILD_GROUPS:-none}, $NOTES_STATE"
 case "$BUILD_GROUPS" in *"(external)"*) ASC_STATE="$ASC_STATE. WARNING: an external group has it; this script added none" ;; esac
 
-STATUS="built"
-REASON="build $NN of $SHORT uploaded to internal TestFlight"
+if [ "$PROCESSED" -eq 1 ]; then
+  STATUS="built"
+  REASON="build $NN of $SHORT uploaded to internal TestFlight"
+else
+  STATUS="uploaded"
+  REASON="build $NN of $SHORT uploaded, App Store Connect still processing it; Team PIVI gets it once it is VALID"
+fi
 log "done: $REASON"
