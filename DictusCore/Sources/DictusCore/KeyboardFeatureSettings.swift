@@ -34,10 +34,10 @@ public struct KeyboardFeatureSettings {
         public static let bilingualAutocorrect = false
         /// On: Pierre's decision, 2026-11-24 (#609).
         public static let deleteWordSwipe = true
+        public static let suggestionCapsules = false
         public static let swipeTyping = false
         /// On: the trail only shows while swipe typing, which is off by default.
         public static let swipeTrail = true
-        public static let suggestionCapsules = false
     }
 
     private let store: UserDefaults
@@ -79,6 +79,11 @@ public struct KeyboardFeatureSettings {
         nonmutating set { store.set(newValue, forKey: SharedKeys.keyboardDeleteWordSwipe) }
     }
 
+    public var suggestionCapsules: Bool {
+        get { bool(SharedKeys.keyboardSuggestionCapsules, default: Defaults.suggestionCapsules) }
+        nonmutating set { store.set(newValue, forKey: SharedKeys.keyboardSuggestionCapsules) }
+    }
+
     public var swipeTyping: Bool {
         get { bool(SharedKeys.keyboardSwipeTyping, default: Defaults.swipeTyping) }
         nonmutating set { store.set(newValue, forKey: SharedKeys.keyboardSwipeTyping) }
@@ -87,11 +92,6 @@ public struct KeyboardFeatureSettings {
     public var swipeTrail: Bool {
         get { bool(SharedKeys.keyboardSwipeTrail, default: Defaults.swipeTrail) }
         nonmutating set { store.set(newValue, forKey: SharedKeys.keyboardSwipeTrail) }
-    }
-
-    public var suggestionCapsules: Bool {
-        get { bool(SharedKeys.keyboardSuggestionCapsules, default: Defaults.suggestionCapsules) }
-        nonmutating set { store.set(newValue, forKey: SharedKeys.keyboardSuggestionCapsules) }
     }
 
     // MARK: - Rules
@@ -134,6 +134,12 @@ public struct KeyboardFeatureSettings {
         KeyboardFeatureSettings(store: store, channel: AppDistribution.recordedChannel(in: store))
     }
 
+    /// The capsule suggestion bar (#502), by the rule of `isSwipeTypingEffective` below. It changes how the bar draws its
+    /// words, never which words it offers or what space applies.
+    public var isSuggestionCapsulesEffective: Bool {
+        Self.experiment(suggestionCapsules, default: Defaults.suggestionCapsules, on: channel)
+    }
+
     /// Swipe typing as it acts: the stored switch on a test build, its default in the App
     /// Store build, where the Experiments page that set it does not exist (Pierre,
     /// 2026-11-24). A tester who switched it on in TestFlight and then installs the App
@@ -152,12 +158,6 @@ public struct KeyboardFeatureSettings {
     /// The trail, by the same rule. Meaningful only while `isSwipeTypingEffective`.
     public var isSwipeTrailEffective: Bool {
         Self.experiment(swipeTrail, default: Defaults.swipeTrail, on: channel)
-    }
-
-    /// The capsule suggestion bar (#502), by the same rule. It changes how the bar draws its
-    /// words, never which words it offers or what space applies.
-    public var isSuggestionCapsulesEffective: Bool {
-        Self.experiment(suggestionCapsules, default: Defaults.suggestionCapsules, on: channel)
     }
 
     /// An Experiments switch as it acts: `stored` where the page exists, `fallback` where it

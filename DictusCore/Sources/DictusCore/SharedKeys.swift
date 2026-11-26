@@ -77,13 +77,13 @@ public enum SharedKeys {
     public static let keyboardPartnerLanguage = "dictus.keyboard.partnerLanguage"
     /// Bool, default TRUE: sliding left from Delete erases word by word (#609).
     public static let keyboardDeleteWordSwipe = "dictus.keyboard.deleteWordSwipe"
+    /// Bool, default false: the suggestion bar drawn as Apple's, a capsule behind the word
+    /// space will apply and a capsule undo chip (#502). Display only.
+    public static let keyboardSuggestionCapsules = "dictus.keyboard.suggestionCapsules"
     /// Bool, default false: typing a word by sliding across the letters.
     public static let keyboardSwipeTyping = "dictus.keyboard.swipeTyping"
     /// Bool, default true: draws the finger's trail while swipe typing.
     public static let keyboardSwipeTrail = "dictus.keyboard.swipeTrail"
-    /// Bool, default false: the suggestion bar drawn as Apple's, a capsule behind the word
-    /// space will apply and a capsule undo chip (#502). Display only.
-    public static let keyboardSuggestionCapsules = "dictus.keyboard.suggestionCapsules"
     /// String, an `AppDistribution` raw value (`debug`, `testFlight`, `appStore`): where the
     /// app says it was installed from, written by the app at each activation. The keyboard
     /// reads it to know whether the Experiments page exists, which its own receipt cannot
