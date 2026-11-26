@@ -1,0 +1,14 @@
+== Debug ( "GitCommitSHA" => "8de16dd9"; keyboard  "GitCommitSHA" => "8de16dd9")
+  strings 'Exporter le toucher adaptatif': 1
+  strings 'settings.debug.exportAdaptiveTouch': 2
+  strings 'adaptive-touch-export': 1
+  strings 'AdaptiveTouchExportSection': 5
+  strings 'adaptiveTouchStatus': 12
+  nm symbols containing AdaptiveTouchExportSection: 434
+== Release ( "GitCommitSHA" => "8de16dd9"; keyboard  "GitCommitSHA" => "8de16dd9")
+  strings 'Exporter le toucher adaptatif': 0
+  strings 'settings.debug.exportAdaptiveTouch': 0
+  strings 'adaptive-touch-export': 0
+  strings 'AdaptiveTouchExportSection': 0
+  strings 'adaptiveTouchStatus': 12
+  nm symbols containing AdaptiveTouchExportSection: 0

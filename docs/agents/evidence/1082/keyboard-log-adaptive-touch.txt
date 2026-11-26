@@ -1,0 +1,52 @@
+[2026-11-26T14:38:14Z] INFO    [lifecycle] <APP> appLaunched version=2.1.0 protectedData=true activePrewarm=false appGroup=healthy
+[2026-11-26T14:49:18Z] DEBUG   [keyboard] <KBD> adaptiveTouchConfigured on=true trigger=newView
+[2026-11-26T14:49:18Z] DEBUG   [keyboard] <KBD> adaptiveTouchStatus on=true labelled=0 sessions=0 profile=no active=no promotions=0 maxShift=0
+[2026-11-26T14:49:18Z] DEBUG   [keyboard] <KBD> adaptiveTouchConfigured on=true trigger=viewWillAppear
+[2026-11-26T14:49:18Z] DEBUG   [keyboard] <KBD> adaptiveTouchStatus on=true labelled=0 sessions=0 profile=no active=no promotions=0 maxShift=0
+[2026-11-26T14:51:36Z] DEBUG   [keyboard] <KBD> adaptiveTouchConfigured on=true trigger=newView
+[2026-11-26T14:51:36Z] DEBUG   [keyboard] <KBD> adaptiveTouchStatus on=true labelled=86 sessions=1 profile=no active=no promotions=0 maxShift=0
+[2026-11-26T14:51:36Z] DEBUG   [keyboard] <KBD> adaptiveTouchConfigured on=true trigger=viewWillAppear
+[2026-11-26T14:51:36Z] DEBUG   [keyboard] <KBD> adaptiveTouchStatus on=true labelled=86 sessions=1 profile=no active=no promotions=0 maxShift=0
+[2026-11-26T14:53:39Z] DEBUG   [keyboard] <KBD> adaptiveTouchConfigured on=true trigger=newView
+[2026-11-26T14:53:39Z] DEBUG   [keyboard] <KBD> adaptiveTouchStatus on=true labelled=172 sessions=2 profile=yes active=no promotions=3 maxShift=0.187@a
+[2026-11-26T14:53:39Z] DEBUG   [keyboard] <KBD> adaptiveTouchConfigured on=true trigger=viewWillAppear
+[2026-11-26T14:53:39Z] DEBUG   [keyboard] <KBD> adaptiveTouchStatus on=true labelled=172 sessions=2 profile=yes active=no promotions=3 maxShift=0.187@a
+[2026-11-26T14:55:41Z] DEBUG   [keyboard] <KBD> adaptiveTouchConfigured on=true trigger=newView
+[2026-11-26T14:55:41Z] DEBUG   [keyboard] <KBD> adaptiveTouchStatus on=true labelled=258 sessions=3 profile=yes active=no promotions=7 maxShift=0.235@a
+[2026-11-26T14:55:41Z] DEBUG   [keyboard] <KBD> adaptiveTouchConfigured on=true trigger=viewWillAppear
+[2026-11-26T14:55:41Z] DEBUG   [keyboard] <KBD> adaptiveTouchStatus on=true labelled=258 sessions=3 profile=yes active=no promotions=7 maxShift=0.235@a
+[2026-11-26T14:57:44Z] DEBUG   [keyboard] <KBD> adaptiveTouchConfigured on=true trigger=newView
+[2026-11-26T14:57:44Z] DEBUG   [keyboard] <KBD> adaptiveTouchStatus on=true labelled=344 sessions=4 profile=yes active=no promotions=10 maxShift=0.238@a
+[2026-11-26T14:57:45Z] DEBUG   [keyboard] <KBD> adaptiveTouchConfigured on=true trigger=viewWillAppear
+[2026-11-26T14:57:45Z] DEBUG   [keyboard] <KBD> adaptiveTouchStatus on=true labelled=344 sessions=4 profile=yes active=no promotions=10 maxShift=0.238@a
+[2026-11-26T14:59:47Z] DEBUG   [keyboard] <KBD> adaptiveTouchConfigured on=true trigger=newView
+[2026-11-26T14:59:47Z] DEBUG   [keyboard] <KBD> adaptiveTouchStatus on=true labelled=430 sessions=5 profile=yes active=yes promotions=14 maxShift=0.240@a
+[2026-11-26T14:59:47Z] DEBUG   [keyboard] <KBD> adaptiveTouchConfigured on=true trigger=viewWillAppear
+[2026-11-26T14:59:47Z] DEBUG   [keyboard] <KBD> adaptiveTouchStatus on=true labelled=430 sessions=5 profile=yes active=yes promotions=14 maxShift=0.240@a
+[2026-11-26T15:01:49Z] DEBUG   [keyboard] <KBD> adaptiveTouchConfigured on=true trigger=newView
+[2026-11-26T15:01:49Z] DEBUG   [keyboard] <KBD> adaptiveTouchStatus on=true labelled=516 sessions=6 profile=yes active=yes promotions=17 maxShift=0.240@a
+[2026-11-26T15:01:49Z] DEBUG   [keyboard] <KBD> adaptiveTouchConfigured on=true trigger=viewWillAppear
+[2026-11-26T15:01:49Z] DEBUG   [keyboard] <KBD> adaptiveTouchStatus on=true labelled=516 sessions=6 profile=yes active=yes promotions=17 maxShift=0.240@a
+[2026-11-26T15:03:51Z] DEBUG   [keyboard] <KBD> adaptiveTouchConfigured on=true trigger=newView
+[2026-11-26T15:03:51Z] DEBUG   [keyboard] <KBD> adaptiveTouchStatus on=true labelled=602 sessions=7 profile=yes active=yes promotions=21 maxShift=0.241@a
+[2026-11-26T15:03:51Z] DEBUG   [keyboard] <KBD> adaptiveTouchConfigured on=true trigger=viewWillAppear
+[2026-11-26T15:03:51Z] DEBUG   [keyboard] <KBD> adaptiveTouchStatus on=true labelled=602 sessions=7 profile=yes active=yes promotions=21 maxShift=0.241@a
+[2026-11-26T15:06:04Z] INFO    [lifecycle] <APP> appLaunched version=2.1.0 protectedData=true activePrewarm=false appGroup=healthy
+[2026-11-26T15:06:13Z] DEBUG   [keyboard] <KBD> adaptiveTouchConfigured on=false trigger=newView
+[2026-11-26T15:06:13Z] DEBUG   [keyboard] <KBD> adaptiveTouchStatus on=false stored=yes labelled=400 sessions=5 profile=yes active=no promotions=13 maxShift=0.239@slot0
+[2026-11-26T15:06:13Z] DEBUG   [keyboard] <KBD> adaptiveTouchConfigured on=false trigger=viewWillAppear
+[2026-11-26T15:06:13Z] DEBUG   [keyboard] <KBD> adaptiveTouchStatus on=false stored=yes labelled=688 sessions=8 profile=yes active=yes promotions=24 maxShift=0.242@slot0
+[2026-11-26T15:07:53Z] INFO    [lifecycle] <APP> appLaunched version=2.1.0 protectedData=true activePrewarm=false appGroup=healthy
+[2026-11-26T15:08:03Z] DEBUG   [keyboard] <KBD> adaptiveTouchConfigured on=true trigger=newView
+[2026-11-26T15:08:03Z] DEBUG   [keyboard] <KBD> adaptiveTouchStatus on=true labelled=688 sessions=8 profile=yes active=yes promotions=24 maxShift=0.242@slot0
+[2026-11-26T15:08:04Z] DEBUG   [keyboard] <KBD> adaptiveTouchConfigured on=true trigger=viewWillAppear
+[2026-11-26T15:08:04Z] DEBUG   [keyboard] <KBD> adaptiveTouchStatus on=true labelled=688 sessions=8 profile=yes active=yes promotions=24 maxShift=0.242@slot0
+[2026-11-26T15:09:05Z] INFO    [lifecycle] <APP> appLaunched version=2.1.0 protectedData=true activePrewarm=false appGroup=healthy
+[2026-11-26T15:09:14Z] DEBUG   [keyboard] <KBD> adaptiveTouchConfigured on=false trigger=newView
+[2026-11-26T15:09:14Z] DEBUG   [keyboard] <KBD> adaptiveTouchStatus on=false stored=yes labelled=731 sessions=9 profile=yes active=yes promotions=26 maxShift=0.242@slot0
+[2026-11-26T15:09:14Z] DEBUG   [keyboard] <KBD> adaptiveTouchConfigured on=false trigger=viewWillAppear
+[2026-11-26T15:09:14Z] DEBUG   [keyboard] <KBD> adaptiveTouchStatus on=false stored=yes labelled=731 sessions=9 profile=yes active=yes promotions=26 maxShift=0.242@slot0
+[2026-11-26T15:09:28Z] INFO    [lifecycle] <APP> appLaunched version=2.1.0 protectedData=true activePrewarm=false appGroup=healthy
+[2026-11-26T15:13:10Z] INFO    [lifecycle] <APP> appLaunched version=2.1.0 protectedData=true activePrewarm=false appGroup=healthy
+[2026-11-26T15:15:02Z] INFO    [lifecycle] <APP> appLaunched version=2.1.0 protectedData=true activePrewarm=false appGroup=healthy
+[2026-11-26T15:21:48Z] INFO    [lifecycle] <APP> appLaunched version=2.1.0 protectedData=true activePrewarm=false appGroup=healthy

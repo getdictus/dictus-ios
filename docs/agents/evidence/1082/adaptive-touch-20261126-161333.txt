@@ -1,0 +1,36 @@
+Dictus adaptive touch export, 20261126-161333, AdaptiveTouch/adaptive-touch.bin, 23588 bytes
+geometry 4db779dcaad11650: azerty letter page, key pitch 43.0 x 56.5 pt
+adaptiveTouchStatus labelled=731 sessions=9 profile=yes active=yes promotions=26 maxShift=0.242@a
+file: 23588 bytes, session=9, generation=0.000
+gate: profile from 100 labelled taps, active from 400 taps over 3 sessions
+
+context 0: geometry=4db779dcaad11650 regime=0 learning=yes inUse=yes snapshot=yes eligible=yes keys=named
+  labelled=731 (weak=731 picked=0 strong=0) sessions=9 promotions=26 sincePromotion=6 bin=3 binFill=131
+  maxShift=0.242@a
+  slot	key	weight	dx	dy
+  0	a	102.0	+0.124	+0.207
+  1	z	0.0	+0.105	+0.205
+  2	e	70.0	+0.088	+0.207
+  3	r	25.0	+0.102	+0.206
+  4	t	33.0	+0.106	+0.207
+  5	y	0.0	+0.105	+0.205
+  6	u	58.0	+0.106	+0.207
+  7	i	33.0	+0.101	+0.207
+  8	o	60.0	+0.106	+0.207
+  9	p	9.0	+0.098	+0.206
+  10	q	8.0	+0.106	+0.167
+  11	s	58.0	+0.098	+0.166
+  12	d	25.0	+0.089	+0.166
+  13	f	8.0	+0.098	+0.167
+  14	g	18.0	+0.102	+0.166
+  15	h	9.0	+0.098	+0.167
+  16	j	8.0	+0.100	+0.167
+  17	k	0.0	+0.097	+0.167
+  18	l	58.0	+0.104	+0.166
+  19	m	53.0	+0.086	+0.166
+  20	w	0.0	+0.093	+0.170
+  21	x	0.0	+0.093	+0.170
+  22	c	18.0	+0.088	+0.168
+  23	v	9.0	+0.092	+0.168
+  24	b	8.0	+0.097	+0.168
+  25	n	61.0	+0.091	+0.166
