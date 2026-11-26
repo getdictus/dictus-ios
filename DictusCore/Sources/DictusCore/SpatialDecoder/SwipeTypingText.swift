@@ -108,10 +108,15 @@ public enum SwipeTypingText {
     }
 
     /// Whether `word` begins and ends on `letter`'s key ("lol" on l, "pop" on p): a word a
-    /// swipe that comes back to its key can mean.
+    /// swipe that comes back to its key can mean. An accented letter is on its base letter's
+    /// key, and ß on s, as German's model reads it ("saß" starts and ends on s).
     public static func word(_ word: String, startsAndEndsWith letter: String) -> Bool {
         func base(_ character: Character?) -> String? {
-            character.map { String($0).lowercased().decomposedStringWithCanonicalMapping.unicodeScalars.first.map(String.init) ?? "" }
+            character.map {
+                let lower = String($0).lowercased()
+                if lower == "ß" { return "s" }
+                return lower.decomposedStringWithCanonicalMapping.unicodeScalars.first.map(String.init) ?? ""
+            }
         }
         return word.count > 1 && base(word.first) == letter.lowercased() && base(word.last) == letter.lowercased()
     }
