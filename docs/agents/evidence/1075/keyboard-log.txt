@@ -1,0 +1,16 @@
+# From the App Group's dictus_debug.log, run 20261126-000852-9c3197a4 (build 9c3197a4), lines about swipe typing. Times UTC.
+# 23:12:44-23:13:31: the first attempt (axe batch, see README). 23:14:57-23:15:18: the seven swipes in swipe-de.mp4's run.
+[2026-11-25T23:11:49Z] DEBUG   [keyboard] <KBD> swipeTypingConfigured on=true channel=debug reason=newView:on
+[2026-11-25T23:11:50Z] DEBUG   [keyboard] <KBD> swipeTypingConfigured on=true channel=debug reason=viewWillAppear:on
+[2026-11-25T23:12:11Z] DEBUG   [keyboard] <KBD> swipeTypingConfigured on=true channel=debug reason=newView:on
+[2026-11-25T23:12:12Z] DEBUG   [keyboard] <KBD> swipeTypingConfigured on=true channel=debug reason=viewWillAppear:on
+[2026-11-25T23:12:44Z] DEBUG   [keyboard] <KBD> swipeEnded points=9 decodeMs=22.04 readings=8 outcome=word
+[2026-11-25T23:13:11Z] DEBUG   [keyboard] <KBD> swipeEnded points=42 decodeMs=48.99 readings=8 outcome=word
+[2026-11-25T23:13:31Z] DEBUG   [keyboard] <KBD> swipeEnded points=7 decodeMs=16.49 readings=8 outcome=word
+[2026-11-25T23:14:57Z] DEBUG   [keyboard] <KBD> swipeEnded points=35 decodeMs=28.40 readings=8 outcome=word
+[2026-11-25T23:15:01Z] DEBUG   [keyboard] <KBD> swipeEnded points=46 decodeMs=39.04 readings=8 outcome=word
+[2026-11-25T23:15:04Z] DEBUG   [keyboard] <KBD> swipeEnded points=24 decodeMs=37.45 readings=8 outcome=word
+[2026-11-25T23:15:07Z] DEBUG   [keyboard] <KBD> swipeEnded points=35 decodeMs=20.30 readings=8 outcome=word
+[2026-11-25T23:15:11Z] DEBUG   [keyboard] <KBD> swipeEnded points=67 decodeMs=41.38 readings=8 outcome=word
+[2026-11-25T23:15:14Z] DEBUG   [keyboard] <KBD> swipeEnded points=35 decodeMs=31.24 readings=8 outcome=word
+[2026-11-25T23:15:18Z] DEBUG   [keyboard] <KBD> swipeEnded points=57 decodeMs=49.02 readings=8 outcome=word
