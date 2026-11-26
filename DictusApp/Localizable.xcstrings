@@ -2581,29 +2581,6 @@
         }
       }
     },
-    "Automatic detection transcribes each voice note in the language it was spoken in." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Die automatische Erkennung transkribiert jede Sprachnachricht in der Sprache, in der sie gesprochen wurde."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "La detección automática transcribe cada mensaje de voz en el idioma en que se dijo."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "La détection automatique transcrit chaque message vocal dans la langue où il a été dit."
-          }
-        }
-      }
-    },
     "Available" : {
       "localizations" : {
         "de" : {
@@ -2949,6 +2926,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Changer"
+          }
+        }
+      }
+    },
+    "Change the voice note language" : {
+      "comment" : "Voice note card: link to the voice note settings, under the line saying the language was assumed (#1084).",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sprache der Sprachnachrichten ändern"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cambiar el idioma de los mensajes de voz"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Changer la langue des messages vocaux"
           }
         }
       }
@@ -5227,6 +5227,29 @@
         }
       }
     },
+    "Transcribed in %@, your dictation language. Apple's model does not detect the language." : {
+      "comment" : "Voice note card: Apple's model, which cannot detect the language, read the note in the dictation language standing in for automatic detection (#1084). The argument is a language name.",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auf %@ transkribiert, deiner Diktiersprache. Das Modell von Apple erkennt die Sprache nicht."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transcrito en %@, tu idioma de dictado. El modelo de Apple no detecta el idioma."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transcrit en %@, votre langue de dictée. Le modèle d'Apple ne détecte pas la langue."
+          }
+        }
+      }
+    },
     "Turn on spatial autocorrect first." : {
       "comment" : "Settings › Keyboard › Experiments: why Adaptive touch is greyed out.",
       "localizations" : {
@@ -6449,6 +6472,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Nouveautés"
+          }
+        }
+      }
+    },
+    "With a downloaded model (Parakeet or Whisper), automatic detection transcribes each voice note in the language it was spoken in. With Apple's model, voice notes are transcribed in your dictation language." : {
+      "comment" : "Voice note settings, footer of the language picker: automatic detection needs a downloaded model; Apple's model uses the dictation language (#1084).",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mit einem geladenen Modell (Parakeet oder Whisper) transkribiert die automatische Erkennung jede Sprachnachricht in der Sprache, in der sie gesprochen wurde. Mit dem Modell von Apple werden Sprachnachrichten in deiner Diktiersprache transkribiert."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Con un modelo descargado (Parakeet o Whisper), la detección automática transcribe cada mensaje de voz en el idioma en que se dijo. Con el modelo de Apple, los mensajes de voz se transcriben en tu idioma de dictado."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avec un modèle téléchargé (Parakeet ou Whisper), la détection automatique transcrit chaque message vocal dans la langue où il a été dit. Avec le modèle d'Apple, les messages vocaux sont transcrits dans votre langue de dictée."
           }
         }
       }
