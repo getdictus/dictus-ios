@@ -287,4 +287,38 @@ final class DeleteWordSwipeTests: XCTestCase {
         let slide = DeleteWordSwipe(editor: document, mirror: nil, startX: 10, step: 0)
         XCTAssertEqual(slide.move(toX: 8.5), DeleteWordSwipe.Change(deletedWords: 1))
     }
+
+    // MARK: - The setting (#609)
+
+    /// "Swipe to delete words" as the keyboard reads it, in a scratch store.
+    private func settings(deleteWordSwipe: Bool?) throws -> KeyboardFeatureSettings {
+        let suite = "dictus.tests.deleteWordSwipe"
+        let store = try XCTUnwrap(UserDefaults(suiteName: suite))
+        store.removePersistentDomain(forName: suite)
+        addTeardownBlock { store.removePersistentDomain(forName: suite) }
+        // The App Store build: a normal setting acts there too, unlike an experiment.
+        AppDistribution.record(.appStore, in: store)
+        if let deleteWordSwipe { store.set(deleteWordSwipe, forKey: SharedKeys.keyboardDeleteWordSwipe) }
+        return .forKeyboard(store: store)
+    }
+
+    func testWithTheSettingOffNoSlideStartsAndNothingMoreIsDeleted() throws {
+        let document = HostDocument(sentence)
+        let slide = DeleteWordSwipe.begin(
+            try settings(deleteWordSwipe: false), editor: document, mirror: nil, startX: start, step: key
+        )
+        XCTAssertNil(slide, "backspace stays the plain key")
+        XCTAssertEqual(document.text, sentence)
+    }
+
+    func testWithTheSettingOnOrUntouchedTheSlideDeletesWords() throws {
+        for stored in [true, nil] as [Bool?] {
+            let document = HostDocument(sentence)
+            let slide = try XCTUnwrap(DeleteWordSwipe.begin(
+                try settings(deleteWordSwipe: stored), editor: document, mirror: nil, startX: start, step: key
+            ), "stored \(String(describing: stored))")
+            XCTAssertEqual(slide.move(toX: x(words: 2)), DeleteWordSwipe.Change(deletedWords: 2))
+            XCTAssertEqual(document.text, "Dictus est le clavier qui écrit vraiment comme ")
+        }
+    }
 }

@@ -353,6 +353,13 @@ public enum AutocorrectDebugLog {
         words.sorted().map { "\"\($0)\"" }.joined(separator: ", ")
     }
 
+    /// The state of the keyboard's Debug-only switches (`DebugSwitches`), once per start
+    /// and once per change.
+    public static func switches(_ switches: DebugSwitches) {
+        guard enabled, DebugSwitches.shouldLog(switches) else { return }
+        write(switches.line)
+    }
+
     /// Free-form note (use sparingly — prefer typed events above).
     public static func note(_ message: String) {
         guard enabled else { return }

@@ -22,8 +22,9 @@ import Foundation
 /// Reading "absent means default" needs nobody to remember anything, and changing a
 /// default later reaches every install that never touched the switch.
 ///
-/// Nothing reads these settings yet: the keyboard's spatial, adaptive and bilingual code
-/// still reads its `debug.*` switches until a later PR moves it here.
+/// The keyboard reads swipe typing, spatial autocorrect, the bilingual check (with its
+/// partner language) and the delete swipe from here. Adaptive touch has no keyboard code
+/// reading its switch on this branch (#1018 adds it).
 public struct KeyboardFeatureSettings {
 
     /// The value of each switch on an install that never touched it. The single source of
@@ -134,6 +135,30 @@ public struct KeyboardFeatureSettings {
     /// Store build gets the App Store's behaviour.
     public var isSwipeTypingEffective: Bool {
         Self.experiment(swipeTyping, default: Defaults.swipeTyping, on: channel)
+    }
+
+    /// Spatial autocorrect as it acts, by the same rule: the Experiments switch on a test
+    /// build (Debug, TestFlight), its default (off) in the App Store build, whatever the
+    /// store holds there. The keyboard reads it at each appearance (`SpatialAutocorrect`).
+    public var isSpatialAutocorrectEffective: Bool {
+        Self.experiment(spatialAutocorrect, default: Defaults.spatialAutocorrect, on: channel)
+    }
+
+    /// The bilingual check (#1015) as it acts, by the same rule: the Experiments switch on a
+    /// test build (Debug, TestFlight), its default (off) in the App Store build, whatever
+    /// the store holds there. The keyboard reads it at each appearance (`BilingualAutocorrect`).
+    public var isBilingualAutocorrectEffective: Bool {
+        Self.experiment(bilingualAutocorrect, default: Defaults.bilingualAutocorrect, on: channel)
+    }
+
+    /// The pair the bilingual check types on a `keyboard` keyboard: the keyboard's language
+    /// and `partnerLanguage(for:)`. Nil — the monolingual keyboard — while the check does
+    /// not act (`isBilingualAutocorrectEffective`), or when that partner has no engine
+    /// pair with the keyboard's language yet (`KeyboardLanguagePair`: French and English
+    /// only), so a Spanish partner picked on the Experiments page changes nothing.
+    public func bilingualPair(for keyboard: SupportedLanguage) -> KeyboardLanguagePair? {
+        guard isBilingualAutocorrectEffective else { return nil }
+        return KeyboardLanguagePair(primary: keyboard, secondary: partnerLanguage(for: keyboard))
     }
 
     /// The trail, by the same rule. Meaningful only while `isSwipeTypingEffective`.
