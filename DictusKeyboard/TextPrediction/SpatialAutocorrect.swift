@@ -2,31 +2,36 @@
 //
 // Spatial autocorrect (#1011): Hex's noisy-channel decoder (github.com/anomalyco/hex,
 // MIT, Copyright (c) 2026 Christopher Langton), ported in DictusCore/SpatialDecoder.
-// This file is the keyboard's side of it: the switch, and the models in the bundle.
+// This file is the keyboard's side of it: the switch as it acts, and the models in the bundle.
 import DictusCore
 import Foundation
 
 /// Whether the space bar reads the taps, and the decoder for each language.
 enum SpatialAutocorrect {
-    /// App Group key of the switch. Debug builds only: a Release build never reads it,
-    /// so the decoder cannot run there whatever the store holds.
+    /// Whether the space bar consults the decoder: the Experiments page's "Spatial
+    /// autocorrect" switch (`SharedKeys.keyboardSpatialAutocorrect`) as it acts,
+    /// `KeyboardFeatureSettings.isSpatialAutocorrectEffective` — the switch on a test build
+    /// (Debug, TestFlight), off in the App Store build whatever the store holds.
     ///
-    /// WHY here and not in `SharedKeys`: the switch is an experiment of the keyboard's
-    /// and nothing else reads it. It moves to `SharedKeys`, with a row in the app's Debug
-    /// settings, once the decoder is measured on a device and earns a setting.
+    /// WHY a value set at each appearance (`refresh`) rather than a read of the store on
+    /// every tap: the switch lives in the app, where the keyboard is not on screen, so an
+    /// appearance is the first moment a change can be seen — the moment swipe typing is
+    /// configured too. Read per tap it would cost an App Group read and a channel read on
+    /// every keystroke for an answer that cannot have changed since the keyboard appeared.
     ///
-    /// Turn it on with the Debug app's launch argument, which writes it (`DictusApp`,
-    /// `applySpatialAutocorrectArgument`), then make the keyboard reappear:
-    /// `xcrun devicectl device process launch --device <id> com.pivi.dictus -DictusDebugSpatialAutocorrect YES`
-    /// (`xcrun simctl launch <udid> com.pivi.dictus -DictusDebugSpatialAutocorrect YES` on a simulator).
-    static let switchKey = "debug.spatialAutocorrect"
+    /// The Debug app's launch argument `-DictusDebugSpatialAutocorrect YES` (or `NO`) writes
+    /// the same switch (`DictusApp`, `applySpatialAutocorrectArgument`), then make the
+    /// keyboard reappear.
+    ///
+    /// Main thread only: set by the bridge's refresh, read by its keystroke handlers.
+    private(set) static var isOn = KeyboardFeatureSettings.Defaults.spatialAutocorrect
 
-    static var isOn: Bool {
-        #if DEBUG
-        return AppGroup.defaults.bool(forKey: switchKey)
-        #else
-        return false
-        #endif
+    /// Reads the switch from `settings`, the keyboard's view of the App Group
+    /// (`KeyboardFeatureSettings.forKeyboard()`). Returns the value now in force.
+    @discardableResult
+    static func refresh(_ settings: KeyboardFeatureSettings) -> Bool {
+        isOn = settings.isSpatialAutocorrectEffective
+        return isOn
     }
 
     /// A change to Hex's parameters, for the bench's sweeps; nil in the keyboard.

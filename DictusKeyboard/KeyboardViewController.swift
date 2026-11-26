@@ -484,9 +484,11 @@ class KeyboardViewController: UIInputViewController {
         // rebuild, if it ran, already refreshed the marker, so this never rebuilds twice.
         reloadIfOrientationChanged()
 
-        // Swipe typing (#948): its switches live in the app, so an appearance is the first
-        // moment a change can be seen. Off, this leaves the view with no swipe controller.
-        bridge?.refreshSwipeTyping(trigger: "viewWillAppear")
+        // Experiments (spatial autocorrect #1011, swipe typing #948): their switches live in
+        // the app, so an appearance is the first moment a change can be seen. Off, swipe
+        // typing leaves the view with no swipe controller and the space bar asks the spatial
+        // decoder nothing.
+        bridge?.refreshExperiments(trigger: "viewWillAppear")
 
         // (Re)subscribe to the keyboard area mode here, not in viewDidLoad.
         // WHY: iOS caches UIInputViewController instances across app-switches and
