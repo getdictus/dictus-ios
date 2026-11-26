@@ -30,6 +30,9 @@ struct KeyboardExperimentsView: View {
     @AppStorage(SharedKeys.keyboardSwipeTrail, store: UserDefaults(suiteName: AppGroup.identifier))
     private var swipeTrail = KeyboardFeatureSettings.Defaults.swipeTrail
 
+    @AppStorage(SharedKeys.keyboardSuggestionCapsules, store: UserDefaults(suiteName: AppGroup.identifier))
+    private var suggestionCapsules = KeyboardFeatureSettings.Defaults.suggestionCapsules
+
     /// Bumped when the partner picker writes. The partner is read through
     /// `KeyboardFeatureSettings.partnerLanguage(for:)`, which resolves a missing or
     /// colliding value to a default, so it is not an `@AppStorage` and redraws nothing by
@@ -77,6 +80,7 @@ struct KeyboardExperimentsView: View {
             adaptiveTouchSection
             bilingualSection
             swipeTypingSection
+            suggestionBarSection
         }
         .scrollContentBackground(.hidden)
         .background(Color.dictusBackground.ignoresSafeArea())
@@ -142,6 +146,16 @@ struct KeyboardExperimentsView: View {
                 .accessibilityIdentifier("settings.keyboard.experiments.swipeTrail")
         } footer: {
             Text("Slide your finger from letter to letter to type a word, then lift it. The trail draws the path under your finger.")
+        }
+    }
+
+    /// Display only (#502): the same suggestions, drawn as Apple's bar.
+    private var suggestionBarSection: some View {
+        Section {
+            Toggle("New suggestion bar", isOn: $suggestionCapsules)
+                .accessibilityIdentifier("settings.keyboard.experiments.suggestionCapsules")
+        } footer: {
+            Text("The word about to be corrected sits in a light capsule, and undoing a correction is a blue capsule. The suggestions themselves do not change.")
         }
     }
 }

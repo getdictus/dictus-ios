@@ -37,6 +37,7 @@ public struct KeyboardFeatureSettings {
         public static let swipeTyping = false
         /// On: the trail only shows while swipe typing, which is off by default.
         public static let swipeTrail = true
+        public static let suggestionCapsules = false
     }
 
     private let store: UserDefaults
@@ -86,6 +87,11 @@ public struct KeyboardFeatureSettings {
     public var swipeTrail: Bool {
         get { bool(SharedKeys.keyboardSwipeTrail, default: Defaults.swipeTrail) }
         nonmutating set { store.set(newValue, forKey: SharedKeys.keyboardSwipeTrail) }
+    }
+
+    public var suggestionCapsules: Bool {
+        get { bool(SharedKeys.keyboardSuggestionCapsules, default: Defaults.suggestionCapsules) }
+        nonmutating set { store.set(newValue, forKey: SharedKeys.keyboardSuggestionCapsules) }
     }
 
     // MARK: - Rules
@@ -146,6 +152,12 @@ public struct KeyboardFeatureSettings {
     /// The trail, by the same rule. Meaningful only while `isSwipeTypingEffective`.
     public var isSwipeTrailEffective: Bool {
         Self.experiment(swipeTrail, default: Defaults.swipeTrail, on: channel)
+    }
+
+    /// The capsule suggestion bar (#502), by the same rule. It changes how the bar draws its
+    /// words, never which words it offers or what space applies.
+    public var isSuggestionCapsulesEffective: Bool {
+        Self.experiment(suggestionCapsules, default: Defaults.suggestionCapsules, on: channel)
     }
 
     /// An Experiments switch as it acts: `stored` where the page exists, `fallback` where it

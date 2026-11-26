@@ -1553,6 +1553,7 @@ extension DictusKeyboardBridge {
         let channel = AppDistribution.recorded()?.rawValue ?? "none"
         PersistentLog.log(.spatialAutocorrectConfigured(on: isOn, channel: channel, trigger: trigger))
         refreshSwipeTyping(trigger: trigger)
+        SuggestionBarLook.shared.refresh(.forKeyboard())
     }
 }
 

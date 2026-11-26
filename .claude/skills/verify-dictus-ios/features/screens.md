@@ -67,7 +67,7 @@ Captures are in [`docs/agents/screens/`](../../../../docs/agents/screens/), one 
 | `kbd.emoji` | Emoji panel (Hex's, #1027), toolbar folded away: suggestions and search at the top, one four-row grid of every category, ABC · categories · delete | kbd emoji | keyboard.emoji | [oui](../../../../docs/agents/screens/kbd.emoji.png) |
 | `kbd.voice-note-reader` | Voice-note reader (empty: « Aucune note vocale récente ») | kbd menu | voice-notes | [oui](../../../../docs/agents/screens/kbd.voice-note-reader.png) |
 | `kbd.smart-mode-fan` | Smart Mode fan (greyed: no Apple Intelligence) | Pro on, kbd mic-fan, screenshot during the drag | smart-modes | [oui](../../../../docs/agents/screens/kbd.smart-mode-fan.png) |
-| `kbd.suggestions` | Suggestion bar above the keys (undo chip after a correction) | Rappels, `type bonjoru`, `space` (see typing.autocorrect) | typing.autocorrect | [oui](../../../../docs/agents/screens/kbd.suggestions.png) |
+| `kbd.suggestions` | Suggestion bar above the keys (undo chip after a correction); with « Nouvelle barre de suggestions » on (Experiments, #502), the capsule look of `typing.suggestion-capsules` | Rappels, `type bonjoru`, `space` (see typing.autocorrect) | typing.autocorrect | [oui](../../../../docs/agents/screens/kbd.suggestions.png) |
 | `sys.settings.full-access` | iOS Réglages → Claviers → Dictus, « Autoriser l'accès complet » on | full-access | dictation.keyboard | [oui](../../../../docs/agents/screens/sys.settings.full-access.png) |
 | `share.voice-note` | Share extension sheet | Partager → Dictus from a messaging app | voice-notes | non |
 | `widget.live-activity` | Live Activity in the Dynamic Island | leave Dictus with standby on (not reproduced) | live-activity | non |
