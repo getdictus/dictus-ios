@@ -43,6 +43,7 @@
 #
 # Usage:
 #   scripts/upload-testflight.sh          # after scripts/cut-testflight.sh
+#   ASC_PROCESSING_TIMEOUT=60m scripts/upload-testflight.sh   # a longer processing wait
 #
 # See docs/VERSIONING.md for where this sits in the release flow.
 set -eu
@@ -155,8 +156,41 @@ for BI in Payload/DictusApp.app/DictusBuildInfo.plist \
 done
 echo "→ build info: $HEAD_SHORT in the app and the keyboard"
 
-# --- 5. Upload and wait for processing --------------------------------------
-asc builds upload --app "$ASC_APP_ID" --ipa "$IPA" --wait
+# --- 5. Upload, then wait for processing ------------------------------------
+# Two calls, not `asc builds upload --wait`. With --wait, the upload bounds its wait
+# for the build by ASC_TIMEOUT, which is the limit of ONE request: the nightly exports
+# 90s for its reads, and on 2026-11-26 the wait for build 46 died 90 s after
+# "Upload committed" ("context deadline exceeded"), though the build then processed
+# fine. So the upload runs without ASC_TIMEOUT (asc's own limits; each part is bounded
+# by ASC_UPLOAD_TIMEOUT), and the processing wait has its own limit,
+# ASC_PROCESSING_TIMEOUT (default 45m; processing takes 10 to 30 minutes).
+#
+# Exit status: 0 uploaded and processed; 75 uploaded, not processed yet (the build is
+# in App Store Connect and finishes on its own: nothing is lost); 1 anything else.
+env -u ASC_TIMEOUT asc builds upload --app "$ASC_APP_ID" --ipa "$IPA"
+
+PROCESSING_TIMEOUT="${ASC_PROCESSING_TIMEOUT:-45m}"
+echo "→ uploaded; waiting for processing (up to $PROCESSING_TIMEOUT)"
+WAIT_RC=0
+asc builds wait --app "$ASC_APP_ID" --build-number "$BUILD" --platform IOS --version "$VERSION" \
+  --timeout "$PROCESSING_TIMEOUT" --poll-interval 30s --fail-on-invalid --report-pending \
+  || WAIT_RC=$?
+if [ "$WAIT_RC" -ne 0 ]; then
+  # 7 is --report-pending's "still processing". Any other status may be a failed build
+  # or a failed read: ask App Store Connect which.
+  STATE=$(asc builds info --app "$ASC_APP_ID" --build-number "$BUILD" --platform IOS \
+    --output json 2>/dev/null | jq -r '.data.attributes.processingState // empty' 2>/dev/null || true)
+  case "$STATE" in
+    FAILED|INVALID)
+      echo "error: App Store Connect reports build $BUILD as $STATE." >&2
+      exit 1 ;;
+  esac
+  echo ""
+  echo "⏳ $VERSION ($BUILD) is uploaded; App Store Connect is still processing it (state: ${STATE:-unknown})."
+  echo "   It finishes on its own. To wait again:"
+  echo "   asc builds wait --app $ASC_APP_ID --build-number $BUILD --platform IOS"
+  exit 75
+fi
 
 echo ""
 echo "✅ $VERSION ($BUILD) uploaded and processed."
