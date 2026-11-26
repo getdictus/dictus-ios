@@ -303,6 +303,9 @@ public final class UserDictionary {
         // never show that the mechanism still works, and "already done" and
         // "broken" read identically in an export forever after.
         AppGroup.defaults.removeObject(forKey: Self.prunedTrieDuplicatesKey)
+        // Where the user lands on each key is learned from their typing too (#1014):
+        // "Reset learned words" is its exit as well, file and running keyboards alike.
+        AdaptiveTouchStore.requestReset()
 
         PersistentLog.log(.userDictionaryReset(clearedCount: clearedCount))
         #if DEBUG

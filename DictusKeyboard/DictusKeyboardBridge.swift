@@ -166,7 +166,7 @@ final class DictusKeyboardBridge: NSObject, // swiftlint:disable:this type_body_
 
     /// Where the finger landed for each character of the word being typed, for the
     /// spatial decoder (#1011). Filled only while its Debug switch is on.
-    fileprivate var spatialTouches = SpatialTouchBuffer()
+    var spatialTouches = SpatialTouchBuffer()
 
     /// The document, behind the seam the counting sites are tested through (#530).
     /// Rebuilt on demand because `controller` is weak and may be swapped out.
@@ -395,6 +395,8 @@ final class DictusKeyboardBridge: NSObject, // swiftlint:disable:this type_body_
         // Moving the caret is what the undo check tests for, so drop the offer
         // here rather than wait for the host to report the selection change (#266).
         KeyboardState.shared.invalidateDictationUndo(reason: "cursor-moved")
+        // The word in front of the cursor is no longer the one being typed (#1014).
+        AdaptiveTouchSwitch.current?.forget()
 
         // Spacebar trackpad cursor movement, in UTF-16 units. No haptic per move: Apple's
         // keyboard asks for no feedback after the space bar's own (Hex's reading of iOS 27.2's
@@ -559,7 +561,7 @@ final class DictusKeyboardBridge: NSObject, // swiftlint:disable:this type_body_
         lastBackspaceDeletion = DeleteWordSwipe.touchDownDeletion(before: contextBefore, after: context)
         lastBackspaceSwipedWord = DeleteWordSwipe.touchDownWord(before: contextBefore, after: context, count: deleteCount)
         noteDeletion(before: contextBefore, after: context)
-        noteSpatialDeletion(context: context)
+        noteSpatialDeletion(before: contextBefore, after: context)
         suggestionState?.updateAsync(context: context)
     }
 
@@ -573,6 +575,7 @@ final class DictusKeyboardBridge: NSObject, // swiftlint:disable:this type_body_
     /// delete everything from cursor back to that boundary.
     private func handleWordDelete() {
         suggestionState?.pendingUndo = nil
+        AdaptiveTouchSwitch.current?.forget()
         guard let proxy = controller?.textDocumentProxy,
               let before = proxy.documentContextBeforeInput, !before.isEmpty else {
             // Fallback: single character delete if no text context.
@@ -991,6 +994,10 @@ final class DictusKeyboardBridge: NSObject, // swiftlint:disable:this type_body_
               let (prefix, freshWord) = AutocorrectRejectionMemory.wordAtCursor(context: context)
         else { return false }
 
+        // #1014: the word ends here, corrected or not, and the one before it stood.
+        var adaptiveEnd = AdaptiveWordEnd()
+        defer { noteAdaptiveFinish(before: context, adaptiveEnd) }
+
         // The user's text replacement shortcut (#1022) is looked up first: on Apple's
         // keyboard it expands where autocorrect never would, `adr1` included.
         let shortcutPhrase = state.textReplacement(for: freshWord)
@@ -1074,6 +1081,7 @@ final class DictusKeyboardBridge: NSObject, // swiftlint:disable:this type_body_
             #if DEBUG
             journalFinal = elision
             #endif
+            adaptiveEnd = AdaptiveWordEnd(correction: elision, revisesPrevious: true)
             return true
         }
 
@@ -1124,6 +1132,12 @@ final class DictusKeyboardBridge: NSObject, // swiftlint:disable:this type_body_
             ) {
             case .applied:
                 memory.correctionApplied(prefix: prefix, corrected: correction)
+                // #1031: a shortcut the user typed on purpose is no correction of a mistyped word.
+                if expansion != nil {
+                    adaptiveEnd.expansion = correction
+                } else {
+                    adaptiveEnd.correction = correction
+                }
                 #if DEBUG
                 journalFinal = correction
                 #endif
@@ -1516,49 +1530,6 @@ extension DictusKeyboardBridge {
 }
 #endif
 
-// MARK: - Spatial autocorrect (#1011)
-
-extension DictusKeyboardBridge {
-    /// Records where `typed` was tapped, for the spatial decoder. `context` is the
-    /// document after the keystroke: the buffer keeps the tap only while it agrees with
-    /// the token there.
-    fileprivate func noteSpatialTap(_ typed: String, context: String?, replacing: Bool = false) {
-        guard SpatialAutocorrect.isOn else { return }
-        spatialTouches.typed(
-            typed, at: keyboardView?.lastTriggerPoint, keys: keyboardView?.spatialKeys(),
-            token: SpatialTouchBuffer.token(before: context), replacing: replacing
-        )
-    }
-
-    /// A backspace, after which the document reads `context`.
-    fileprivate func noteSpatialDeletion(context: String?) {
-        guard SpatialAutocorrect.isOn else { return }
-        spatialTouches.deleted(token: SpatialTouchBuffer.token(before: context))
-    }
-
-    /// The taps of `word` and the keys they were made on, when the buffer holds them and
-    /// the switch is on. Nil otherwise, and the engine then never consults the decoder.
-    fileprivate func spatialInput(for word: String) -> SpatialCorrection.Input? {
-        spatialTouches.decoderInput(for: word, isOn: SpatialAutocorrect.isOn)
-    }
-
-    /// Reads the Experiments switches the app may have changed while the keyboard was away:
-    /// spatial autocorrect and the bilingual check here, then swipe typing. Called for every
-    /// new keyboard view and at every appearance.
-    func refreshExperiments(trigger: String) {
-        let settings = KeyboardFeatureSettings.forKeyboard()
-        let wasOn = SpatialAutocorrect.isOn
-        let isOn = SpatialAutocorrect.refresh(settings)
-        // The partner engine follows at the next `SuggestionState.setLanguage` (#1015).
-        BilingualAutocorrect.refresh(settings)
-        // Taps recorded under the other answer belong to no decode now.
-        if isOn != wasOn { spatialTouches.clear() }
-        let channel = AppDistribution.recorded()?.rawValue ?? "none"
-        PersistentLog.log(.spatialAutocorrectConfigured(on: isOn, channel: channel, trigger: trigger))
-        refreshSwipeTyping(trigger: trigger)
-    }
-}
-
 // MARK: - Delete swipe (#609)
 
 /// Press backspace and slide left to delete word by word, slide back right to get the words
@@ -1644,7 +1615,7 @@ extension DictusKeyboardBridge {
             state.clear()
         }
         let context = controller?.textDocumentProxy.documentContextBeforeInput
-        noteSpatialDeletion(context: context)
+        noteSpatialSlideEdit(after: context)
         suggestionState?.updateAsync(context: context)
     }
 }

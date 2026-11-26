@@ -40,7 +40,7 @@ import DictusCore
 /// notice asks to travel with the output) and Grammalecte's French dictionary (MPL 2.0,
 /// whose notice and source location travel with a derived file). Hex's per-language
 /// long-press accent lists are copied as data (`LongPressAccents`, #1042), under the same
-/// MIT notice.
+/// MIT notice. Adaptive touch (#1014) is ported Hex code too, and the entry names it.
 ///
 /// The bilingual check (#1015) reuses Hex's approach too, not its code: the second
 /// language's fallback, the tie-break by the last words and the partner check. Hex's
@@ -174,6 +174,9 @@ struct LicensesView: View {
         suggestions, shortcodes, skin tones and the builder of its emoji index.
 
         The spatial autocorrect decoder (SpatialDecoder) is ported from Hex's TypingDecoder.
+
+        Adaptive touch, which learns where you tap each key (#1014), is ported from Hex's \
+        AdaptiveTouch.
 
         The swipe typing decoder (SwipeDecoder) is ported from Hex's SwipeDecoder; the swipe \
         gesture, its trail and its text rules from Hex's SwipeTyping.

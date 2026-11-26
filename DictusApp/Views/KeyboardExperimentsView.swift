@@ -36,6 +36,8 @@ struct KeyboardExperimentsView: View {
     /// itself; same pattern as `layoutRevision` on the Keyboard page.
     @State private var partnerRevision = 0
 
+    @State private var showAdaptiveTouchResetConfirmation = false
+
     private var keyboardLanguage: SupportedLanguage {
         SupportedLanguage(rawValue: language) ?? .french
     }
@@ -95,11 +97,27 @@ struct KeyboardExperimentsView: View {
                 .disabled(!spatialAutocorrect)
                 .accessibilityIdentifier("settings.keyboard.experiments.adaptiveTouch")
 
-            // TODO(adaptive touch): a learning status line ("N taps learned" / "in use")
-            // and a "Reset touch learning" button belong here. DictusCore on develop has no
-            // API for either: the learner, its file and its reset (`AdaptiveTouchStore`,
-            // the `adaptiveTouch.resetAt` stamp) arrive with #1018, not merged. Wire both
-            // here once it lands.
+            // Enabled whatever the switches say: what was learned while they were on stays
+            // in the file until a reset, and forgetting it is always the user's to ask.
+            Button("Reset adaptive touch", role: .destructive) {
+                showAdaptiveTouchResetConfirmation = true
+            }
+            .accessibilityIdentifier("settings.keyboard.experiments.adaptiveTouchReset")
+            .confirmationDialog(
+                "Reset adaptive touch?",
+                isPresented: $showAdaptiveTouchResetConfirmation,
+                titleVisibility: .visible
+            ) {
+                Button("Forget what it learned", role: .destructive) {
+                    // Deletes the App Group file and bumps the `adaptiveTouch.resetAt`
+                    // stamp: a keyboard still holding the averages drops them at its next
+                    // session or save, and starts over.
+                    AdaptiveTouchStore.requestReset()
+                }
+                Button("Cancel", role: .cancel) {}
+            } message: {
+                Text("The keyboard forgets where you tap each key and starts learning again from your next words.")
+            }
         } footer: {
             VStack(alignment: .leading, spacing: 4) {
                 if adaptiveTouch && !KeyboardFeatureSettings.isAdaptiveTouchEffective(

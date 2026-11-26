@@ -59,7 +59,8 @@ enum HostInputTraits {
 
     /// What the typing journal's field gate reads (#1001): the content types that
     /// hold a secret. Every other one, and none, records.
-    private static func journalContent(_ type: UITextContentType?) -> TypingJournalFieldGate.Content? {
+    /// Also Adaptive touch's gate (#1014): a field the journal skips never teaches it.
+    static func journalContent(_ type: UITextContentType?) -> TypingJournalFieldGate.Content? {
         guard let type = type else { return nil }
         switch type {
         case .password: return .password
