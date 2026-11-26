@@ -1,15 +1,15 @@
 #!/bin/bash
 # nightly-testflight.sh — build develop's tip and send it to internal TestFlight.
 #
-# Two slots, run by launchd (install, uninstall and logs in docs/nightly-testflight.md):
-#   soir  22:00         scripts/launchd/solutions.pivi.dictus.nightly-testflight.plist
-#   midi  12:00, 12:30  scripts/launchd/solutions.pivi.dictus.midday-testflight.plist
+# One slot, matin, run by launchd at 06:00 and 06:30 (install, uninstall and logs in
+# docs/nightly-testflight.md; Pierre's rule of 2026-11-27: one internal build a day):
+#   matin  06:00, 06:30  scripts/launchd/solutions.pivi.dictus.morning-testflight.plist
 # Each run builds, or skips and says why, or fails and says where. Two outputs:
 #   ~/dev/proofs/nightly/<stem>.md              the summary, one screen
 #   ~/Library/Logs/dictus-nightly/<stem>.log    everything, credentials redacted
-# <stem> is <date> for soir (the names the first nightly used) and <date>-midi for midi.
+# <stem> is <date>-matin.
 # A run that does not build never overwrites a summary of the same slot and day that
-# says built or uploaded: it writes <stem>.retry.md (the 12:30 attempt after 12:00).
+# says built or uploaded: it writes <stem>.retry.md (the 06:30 attempt after 06:00).
 #
 # A real run, in order. Any skip or failure stops it at that step:
 #    1. lock; skip if another nightly, a cut/upload/promote script or an archive is running
@@ -28,14 +28,14 @@
 #   11. What to Test in fr-FR and en-GB, from each merged PR's `## TestFlight` block
 #   12. remove the worktree and its temp dirs; keep only the latest IPA
 #
-# Internal only, both slots. Team PIVI sees every build because that group has access to
+# Internal only. Team PIVI sees every build because that group has access to
 # all builds. This script adds no group, submits nothing to beta review and never touches
 # the App Store.
 #
 # Usage:
-#   scripts/nightly-testflight.sh [--slot midi|soir] [--dry-run]
-#     --slot      soir (default) or midi: sets the file names and the What to Test
-#                 header, nothing else
+#   scripts/nightly-testflight.sh [--slot matin] [--dry-run]
+#     --slot      matin, the default and the only slot: sets the file names and the
+#                 What to Test header, nothing else
 #     --dry-run   steps 1-6 for real (fetch, tags, CI, gh and ASC reads), then prints
 #                 7-12 without doing them
 #   NIGHTLY_CACHE_DIR, NIGHTLY_LOG_DIR and NIGHTLY_PROOF_DIR move the three directories,
@@ -83,11 +83,11 @@ KEEP_MANIFEST="$KEEP_DIR/created-by-nightly.txt"
 LOCK_DIR="$CACHE_DIR/lock"
 
 DRY_RUN=0
-SLOT="soir"
+SLOT="matin"
 while [ $# -gt 0 ]; do
   case "$1" in
     --dry-run) DRY_RUN=1 ;;
-    --slot) [ $# -ge 2 ] || { echo "error: --slot needs midi or soir" >&2; exit 2; }
+    --slot) [ $# -ge 2 ] || { echo "error: --slot needs matin" >&2; exit 2; }
             SLOT=$2; shift ;;
     --slot=*) SLOT=${1#--slot=} ;;
     -h|--help) sed -n '2,44p' "$0"; exit 0 ;;
@@ -97,11 +97,9 @@ while [ $# -gt 0 ]; do
 done
 # What the slot sets, and nothing else: the file names, the titles, the notes header.
 case "$SLOT" in
-  soir) STEM="$DATE";      TITLE="Nightly TestFlight"
-        NOTES_HEAD_FR="Build du soir de develop"; NOTES_HEAD_EN="Nightly develop build" ;;
-  midi) STEM="$DATE-midi"; TITLE="Midday TestFlight"
-        NOTES_HEAD_FR="Build de midi de develop"; NOTES_HEAD_EN="Midday develop build" ;;
-  *) echo "error: --slot must be midi or soir, not '$SLOT'" >&2; exit 2 ;;
+  matin) STEM="$DATE-matin"; TITLE="Morning TestFlight"
+         NOTES_HEAD_FR="Build du matin de develop"; NOTES_HEAD_EN="Morning develop build" ;;
+  *) echo "error: --slot must be matin, not '$SLOT'" >&2; exit 2 ;;
 esac
 
 # REAL_SUMMARY is where a real run of this slot writes; a dry run writes beside it, so
@@ -222,7 +220,7 @@ summary_status() {
 }
 
 # summary_target FILE — where a real run writes its summary. A run that did not build
-# (a skip, a failure, the 12:30 attempt finding the tag 12:00 pushed) never replaces a
+# (a skip, a failure, the 06:30 attempt finding the tag 06:00 pushed) never replaces a
 # summary of the same slot and day that reports a build: it writes <stem>.retry.md.
 summary_target() {
   case "$STATUS" in built|uploaded) echo "$1"; return 0 ;; esac
