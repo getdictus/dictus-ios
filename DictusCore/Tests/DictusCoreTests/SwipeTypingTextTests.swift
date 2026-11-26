@@ -39,6 +39,8 @@ final class SwipeTypingTextTests: XCTestCase {
     func testAWordCanStartAndEndOnTheSameKey() {
         XCTAssertTrue(SwipeTypingText.word("pop", startsAndEndsWith: "p"))
         XCTAssertTrue(SwipeTypingText.word("Été", startsAndEndsWith: "e"), "an accent sits on its base letter's key")
+        XCTAssertTrue(SwipeTypingText.word("saß", startsAndEndsWith: "s"), "ß is swiped through s (#1075)")
+        XCTAssertTrue(SwipeTypingText.word("süß", startsAndEndsWith: "s"))
         XCTAssertFalse(SwipeTypingText.word("as", startsAndEndsWith: "a"))
         XCTAssertFalse(SwipeTypingText.word("a", startsAndEndsWith: "a"), "one letter is a tap")
     }

@@ -1,6 +1,7 @@
 // DictusCore/OnDeviceSpeech/OnDeviceRecognizer.swift
 // Apple's on-device speech recognizer behind a small protocol, for the app's
-// "Apple (on-device)" engine (Models screen).
+// "Apple (on-device)" engine (Models screen), and for the share extension, which
+// transcribes a voice note with it when the app is closed (#1056).
 import AVFAudio
 import Foundation
 import Speech
@@ -135,7 +136,14 @@ public final class AppleSpeechRecognizer: OnDeviceRecognizer {
         let status = await AssetInventory.status(forModules: [module.transcriber])
         let installed = await SpeechTranscriber.installedLocales
         let listed = installed.contains { $0.identifier(.bcp47) == module.locale.identifier(.bcp47) }
-        OnDeviceSpeechLog.log("assetCheck", "locale=\(module.locale.identifier) status=\(status) inInstalledLocales=\(listed)")
+        // Whether THIS bundle holds a reservation (#992, #1056): the share extension's and
+        // the app's are separate, which is what a device log has to show when the model
+        // reads missing from the extension.
+        let reserved = await AssetInventory.reservedLocales.contains { $0.identifier(.bcp47) == module.locale.identifier(.bcp47) }
+        OnDeviceSpeechLog.log(
+            "assetCheck",
+            "locale=\(module.locale.identifier) status=\(status) inInstalledLocales=\(listed) reservedByThisBundle=\(reserved)"
+        )
         return status == .installed || listed
     }
 
@@ -241,7 +249,13 @@ public final class SimulatorHostRecognizer: OnDeviceRecognizer {
     public init() {}
 
     public let engineName = "simulator-host-speechanalyzer"
-    private let base = URL(string: "http://127.0.0.1:47811")
+    /// 47811 unless the App Group says otherwise (`dictus.debugSimulatorHostPort`, #1056):
+    /// two agents on one Mac each run their own helper, and every simulator shares the
+    /// Mac's loopback. Read per call, so the share extension sees a value set after launch.
+    private var base: URL? {
+        let port = AppGroup.defaults.integer(forKey: "dictus.debugSimulatorHostPort")
+        return URL(string: "http://127.0.0.1:\(port > 0 ? port : 47811)")
+    }
 
     /// The host's `SpeechTranscriber.supportedLocales`, one per line. Nil when no helper
     /// answers, which greys the card as `SpeechTranscriber.isAvailable == false` would.
@@ -298,7 +312,13 @@ public final class SimulatorHostRecognizer: OnDeviceRecognizer {
 
 /// Where the on-device recognizer's lines go.
 public enum OnDeviceSpeechLog {
+    /// The process's own name in the log (#992, #1056): the app writes
+    /// `AppleSpeechRecognizer` lines, the share extension `VoiceNoteShare` ones. Set once,
+    /// before the first line.
+    nonisolated(unsafe) public static var component = "AppleSpeechRecognizer"
+    nonisolated(unsafe) public static var instanceID = "app"
+
     public static func log(_ action: String, _ details: String) {
-        PersistentLog.log(.diagnosticProbe(component: "AppleSpeechRecognizer", instanceID: "app", action: action, details: details))
+        PersistentLog.log(.diagnosticProbe(component: component, instanceID: instanceID, action: action, details: details))
     }
 }

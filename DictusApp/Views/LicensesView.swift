@@ -10,11 +10,12 @@ import DictusCore
 /// Placing them in Settings > A propos > Licences follows the standard iOS
 /// convention (e.g., Settings > General > Legal & Regulatory).
 ///
-/// All 13 entries are listed alphabetically: DeviceKit, Dictus, DM Sans, FluidAudio,
-/// giellakbd-ios, Google Books Ngram, Grammalecte, Hex, Nemotron 3.5 ASR, SCOWL, Unicode emoji
-/// data and CLDR, VivaDicta, WhisperKit. FluidAudio uses Apache 2.0, Nemotron 3.5 ASR
-/// OpenMDW-1.1, DM Sans the SIL Open Font License, Google Books Ngram CC BY 3.0, Grammalecte
-/// MPL 2.0, SCOWL its own notice, the Unicode data the Unicode licence; all others use MIT.
+/// All 15 entries are listed alphabetically: DeviceKit, Dictus, DM Sans, FluidAudio, German
+/// wordlist, giellakbd-ios, Google Books Ngram, Grammalecte, Hex, Nemotron 3.5 ASR, RLA-ES,
+/// SCOWL, Unicode emoji data and CLDR, VivaDicta, WhisperKit. FluidAudio uses Apache 2.0,
+/// Nemotron 3.5 ASR OpenMDW-1.1, DM Sans the SIL Open Font License, the German wordlist CC0
+/// 1.0, Google Books Ngram CC BY 3.0, Grammalecte MPL 2.0, RLA-ES MPL 1.1, SCOWL its own
+/// notice, the Unicode data the Unicode licence; all others use MIT.
 ///
 /// Nemotron 3.5 ASR is a MODEL, not code (#558): NVIDIA's weights, converted to Core ML by
 /// FluidInference and downloaded by the user from HuggingFace. It is listed because its
@@ -34,12 +35,14 @@ import DictusCore
 /// Hex is listed for the keyboard's key geometry (`KeyPlaneGeometry`): no code is copied,
 /// but the approach is Hex's (MIT), and the entry says so. Its entry also covers the spatial
 /// decoder (#1011), the swipe decoder (#948), the emoji panel (#1027) and the delete swipe
-/// (`DeleteWordSwipe`, #609), which are ported Hex code. The decoder adds three entries for where its
+/// (`DeleteWordSwipe`, #609), which are ported Hex code. The decoder adds five entries for where its
 /// models come from: word and word-pair counts from Google Books Ngram (CC BY 3.0, which
 /// asks for the attribution), and the word lists that filter them, SCOWL for English (its
-/// notice asks to travel with the output) and Grammalecte's French dictionary (MPL 2.0,
-/// whose notice and source location travel with a derived file). Hex's per-language
-/// long-press accent lists are copied as data (`LongPressAccents`, #1042), under the same
+/// notice asks to travel with the output), Grammalecte's French dictionary (MPL 2.0,
+/// whose notice and source location travel with a derived file), RLA-ES's Spanish
+/// dictionaries (MPL 1.1, the same, for Hex's `es.hextm`, shipped unmodified) and Markus
+/// Enzenberger's German wordlist (CC0 1.0, which asks for nothing: credited anyway, #948).
+/// Hex's per-language long-press accent lists are copied as data (`LongPressAccents`, #1042), under the same
 /// MIT notice. Adaptive touch (#1014) is ported Hex code too, and the entry names it.
 struct LicensesView: View {
     var body: some View {
@@ -75,6 +78,13 @@ struct LicensesView: View {
                 )
 
                 licenseBlock(
+                    name: "German wordlist",
+                    author: "Markus Enzenberger and contributors",
+                    url: "https://github.com/enz/german-wordlist",
+                    license: Self.germanWordlistNotice
+                )
+
+                licenseBlock(
                     name: "giellakbd-ios",
                     author: "UiT The Arctic University of Norway",
                     url: "https://github.com/divvun/giellakbd-ios",
@@ -107,6 +117,10 @@ struct LicensesView: View {
                         + "Adaptive touch, which learns where you tap each key (#1014), is ported from Hex's AdaptiveTouch.\n\n"
                         + "The swipe typing decoder (SwipeDecoder) is ported from Hex's SwipeDecoder; "
                         + "the swipe gesture, its trail and its text rules from Hex's SwipeTyping.\n\n"
+                        + "The Spanish swipe typing and spatial autocorrect model (es.hextm) is Hex's file, "
+                        + "unmodified (Hex commit c14df5a4).\n\n"
+                        + "German's swipe capitals (GermanCapitals, de.capitals) are ported from Hex's "
+                        + "GermanCapitals and its build-german-capitals.py.\n\n"
                         + "The long-press accents of each keyboard language are Hex's lists (#1042), "
                         + "in the order Apple's keyboard shows them.\n\n"
                         + "Sliding left from the delete key to delete word by word, and back right to get "
@@ -123,6 +137,13 @@ struct LicensesView: View {
                             + "Core ML conversion by FluidInference "
                             + "(huggingface.co/FluidInference/Nemotron-3.5-ASR-Streaming-Multilingual-0.6b-CoreML)."
                     )
+                )
+
+                licenseBlock(
+                    name: "RLA-ES (diccionario español)",
+                    author: "Santiago Bosio and contributors",
+                    url: "https://github.com/sbosio/rla-es",
+                    license: Self.rlaESNotice
                 )
 
                 licenseBlock(
@@ -166,12 +187,23 @@ struct LicensesView: View {
 
     /// Legal notices, so they stay in English like the other licences on this screen.
     private static let googleBooksNgramNotice = """
-        The keyboard's spatial autocorrect models (fr.hextm, en.hextm) are built from the \
-        Google Books Ngram Viewer data, version 3 (2020-02-17), by Google, licensed under \
-        the Creative Commons Attribution 3.0 Unported License \
-        (https://creativecommons.org/licenses/by/3.0/). Word and word-pair counts are \
-        summed over 1980-2019 and kept only for words in the word lists below; the \
-        English model is Hex's, the French one Dictus's, built with Hex's script.
+        The keyboard's swipe typing and spatial autocorrect models (fr.hextm, en.hextm, \
+        es.hextm, de.hextm) and the German capitals table (de.capitals) are derived from \
+        the Google Books Ngram Viewer data, version 3 (2020-02-17), by Google, licensed \
+        under the Creative Commons Attribution 3.0 Unported License \
+        (https://creativecommons.org/licenses/by/3.0/). Changes: word and word-pair counts \
+        summed over 1980-2019, lowercased, kept only for words in the word lists on this \
+        screen, probabilities quantized; for German, the share of capitalised uses \
+        computed per word. The English and Spanish models are Hex's; the French and German \
+        ones are Dictus's, built with Hex's script.
+        """
+
+    private static let germanWordlistNotice = """
+        The German swipe typing and spatial autocorrect model (de.hextm) and its capitals \
+        table (de.capitals) keep only the words of "German wordlist" by Markus Enzenberger \
+        and contributors (https://github.com/enz/german-wordlist, commit 1071d87d), \
+        dedicated to the public domain under CC0 1.0 Universal \
+        (https://creativecommons.org/publicdomain/zero/1.0/).
         """
 
     private static let grammalecteNotice = """
@@ -181,6 +213,16 @@ struct LicensesView: View {
         License, version 2.0 (https://mozilla.org/MPL/2.0/). Its source form is \
         available at https://github.com/LibreOffice/dictionaries/tree/master/fr_FR. \
         The model file fr.hextm, derived from it, is offered under the same licence.
+        """
+
+    private static let rlaESNotice = """
+        The Spanish swipe typing and spatial autocorrect model (es.hextm) is Hex's file, \
+        unmodified (https://github.com/anomalyco/hex, commit c14df5a4). It keeps only \
+        the spellings of the RLA-ES Hunspell dictionaries (es_ES and es_MX), coordinated \
+        by Santiago Bosio, used under the Mozilla Public License, version 1.1 \
+        (https://www.mozilla.org/MPL/1.1/). Their source form is available at \
+        https://github.com/LibreOffice/dictionaries/tree/762abe74008b94b2ff06db6f4024b59a8254c467/es. \
+        The model file es.hextm, derived from them, is offered under the same licence.
         """
 
     private static let scowlNotice = """

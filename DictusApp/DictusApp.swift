@@ -360,6 +360,11 @@ struct DictusApp: App {
         // this app is ever launched again — so this call is only about doing it as early as
         // possible on the app side.
         KeyboardLayoutPreference.migrateToPerLanguageLayoutsIfNeeded()
+
+        // Apple's speech model for the voice-note language (#1056), reserved now so the
+        // share extension finds it with the app closed. Here, once the App Group reads can
+        // be trusted: before the first unlock the languages would read as defaults.
+        VoiceNoteSpeechAssets.refresh(context: "launch")
     }
 
     /// Run the launch work a boot launch deferred, and read the onboarding flag again
@@ -516,6 +521,10 @@ struct DictusApp: App {
                         // #620's cold path: a voice note shared while the app was not
                         // running starts now, with the list on screen.
                         VoiceNoteProcessor.shared.appBecameActive()
+                        // The keyboard's own language switch writes from another
+                        // process: a language changed there is seen here (#1056).
+                        // Nothing runs when neither language moved.
+                        VoiceNoteSpeechAssets.refresh(context: "didBecomeActive")
                         // Drop polish journal entries past 7 days (#946). The keyboard
                         // writes most of them and only ever appends, so without this they
                         // stay until the app happens to record a polish event itself.
@@ -573,6 +582,12 @@ struct DictusApp: App {
                     @unknown default:
                         break
                     }
+                }
+                .onChange(of: proStatus.isProActive) { _, _ in
+                    // A trial or purchase that starts while the app is on screen, the
+                    // end of onboarding among them, reserves the voice-note model now
+                    // rather than at the next activation (#1056).
+                    VoiceNoteSpeechAssets.refresh(context: "proStatus")
                 }
                 .onChange(of: hasCompletedOnboarding) { previous, current in
                     // Only the user finishing onboarding, `false` to `true`. A boot launch
