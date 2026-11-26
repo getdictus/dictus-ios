@@ -8,6 +8,7 @@
 ## Sub-features
 
 - `learned-words.learn`: A word kept where the user refused a correction (one refusal is enough, #872), or an unknown word typed twice, is learned and no longer corrected.
+- `learned-words.casing` (#1090): each learned word keeps the form it is typed in (`LearnedWordCasing`: a capital past the first letter or all lowercase is the user's; a capital first letter alone counts only when nothing better is known). Only swipe typing reads it (`typing.swipe-own-words`).
 - `learned-words.reset`: « Reset learned words » in Réglages → Clavier.
 
 ## How to get to it (user POV)

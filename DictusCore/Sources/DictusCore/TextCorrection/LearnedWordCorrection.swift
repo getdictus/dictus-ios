@@ -26,6 +26,14 @@ public enum LearnedWordCorrection {
     /// Uses a learned word needs before it can be a target. See the type comment.
     public static let minimumUses = 2
 
+    /// Whether a learned word used `uses` times is adopted: typed again since it was
+    /// learned, so no longer likely to be the typo one refusal can teach (#872). The one
+    /// rule for every path that puts a learned word in without a tap: this correction,
+    /// and swipe typing's readings (#1090, `SwipeOwnWords`).
+    public static func isAdopted(uses: Int) -> Bool {
+        uses >= minimumUses
+    }
+
     /// Shortest typed word a learned word may correct.
     public static let minimumTypedLength = 3
 
@@ -45,7 +53,7 @@ public enum LearnedWordCorrection {
         guard typed.count >= minimumTypedLength, !dictionaryKnows(typed) else { return nil }
 
         var best: (word: String, uses: Int)?
-        for (rawWord, uses) in learnedWords where uses >= minimumUses {
+        for (rawWord, uses) in learnedWords where isAdopted(uses: uses) {
             let word = rawWord.lowercased()
             guard abs(word.count - typed.count) <= 1,
                   SpellingSimilarity.editDistance(typed, word, atMost: 1) == 1

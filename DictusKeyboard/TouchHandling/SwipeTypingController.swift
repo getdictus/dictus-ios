@@ -28,9 +28,10 @@
 // What the port changed: touches are `UITouch` objects (Dictus's view is UIKit's
 // `touchesBegan/Moved/Ended`, not Hex's touch ids), the engine is `SwipeTypingOutput` (the
 // bridge), the keys are `GiellaKeyboardView.spatialKeys()`, and the text rules live in
-// DictusCore (`SwipeTypingText`). Left out: Hex's own words and never-suggest words (ADR
-// 0004 keeps learned words out of anything typed without a tap; no Hex data is copied), its
-// rare-name ranking and `SwipeRetries`.
+// DictusCore (`SwipeTypingText`). Hex's own words came later (#1090), on Dictus's stores and
+// under ADR 0004's adoption rule (`SwipeOwnWords`, `syncOwnWords` here after Hex's
+// `syncWords`). Left out: Hex's never-suggest words (no Hex data is copied), its rare-name
+// ranking and `SwipeRetries`.
 import DictusCore
 import QuartzCore
 import UIKit
@@ -47,6 +48,9 @@ protocol SwipeTypingOutput: AnyObject {
     func swipeTypingDidEnd(readings: [String])
     /// The system cancelled the swipe: nothing goes in.
     func swipeTypingDidCancel()
+    /// The user's own words the swipe reads beside its model (`SwipeOwnWords.words`),
+    /// asked as each swipe begins.
+    func swipeTypingOwnWords() -> [String]
 }
 
 /// Swipe typing (#948): slide from a letter through the letters of a word and lift, and the
@@ -78,8 +82,13 @@ final class SwipeTypingController {
     /// Whether the focused field takes swipes now; set by the bridge.
     var allowsSwipes: () -> Bool = { false }
 
-    private let decoder: SwipeDecoder
+    private var decoder: SwipeDecoder
     let language: String
+    /// What the decoder reads beside the model without the user's own words: English's
+    /// contractions, or nothing.
+    private let baseExtraWords: SwipeDecoder.ExtraWords
+    /// The own words the decoder has now (`syncOwnWords`).
+    private var ownWords: [String] = []
 
     /// A touch's points so far and when each came (`UITouch.timestamp`): the decoder reads
     /// where the finger paused from the times.
@@ -135,8 +144,21 @@ final class SwipeTypingController {
             )
         }
         self.decoder = decoder
+        baseExtraWords = decoder.extraWords
         language = model.language
         trail = showsTrail ? SwipeTrailView() : nil
+    }
+
+    /// Gives the decoder the user's own words as they are now (#1090): a word learned, a
+    /// contact added since the last swipe. Rebuilt only when the list changed; with no own
+    /// word the decoder reads exactly what it read before.
+    private func syncOwnWords() {
+        let words = output?.swipeTypingOwnWords() ?? []
+        guard words != ownWords else { return }
+        ownWords = words
+        var extra = baseExtraWords
+        SwipeOwnWords.add(words, to: &extra, model: decoder.model)
+        decoder.extraWords = extra
     }
 
     var isSwiping: Bool { active != nil }
@@ -204,6 +226,7 @@ final class SwipeTypingController {
               stroke.points.contains(where: { SwipeTypingText.isSwipe(from: first, to: $0, pitch: keys.pitch) })
         else { return false }
         pending[id] = nil
+        syncOwnWords()
         active = ActiveSwipe(touch: id, stroke: stroke, keys: keys)
         generation += 1
         lastPreviewAt = 0
