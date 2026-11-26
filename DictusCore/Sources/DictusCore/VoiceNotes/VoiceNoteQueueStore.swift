@@ -47,14 +47,18 @@ public final class VoiceNoteQueueStore: ObservableObject {
         return arrived
     }
 
-    /// Change the queue and write it.
-    public func mutate(_ change: (inout VoiceNoteQueue) -> Void) {
+    /// Change the queue and write it. Returns whether the write reached the disk, so a
+    /// caller can keep what it would otherwise delete until the queue holds it (#1056:
+    /// the share extension's result file).
+    @discardableResult
+    public func mutate(_ change: (inout VoiceNoteQueue) -> Void) -> Bool {
         change(&queue)
         // Sweep only what the queue on disk no longer references: after a failed
         // write the previous `queue.json` still points at audio the in-memory queue
         // dropped, and deleting it would lose a note on the next launch.
-        guard persist() else { return }
+        guard persist() else { return false }
         sweepUnreferencedAudio()
+        return true
     }
 
     /// Delete a note and its audio, whatever its state — except the one being

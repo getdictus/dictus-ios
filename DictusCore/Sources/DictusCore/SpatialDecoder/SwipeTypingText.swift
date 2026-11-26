@@ -50,13 +50,18 @@ public enum SwipeTypingText {
         /// The switch is on, but this is the App Store build, or the app recorded no
         /// distribution: the Experiments page that set it does not exist here.
         case appStore
-        /// No swipe model for the keyboard's language: only en and fr ship one (#1013).
+        /// No swipe model for the keyboard's language: en, fr, es and de ship one (#1013; es
+        /// from Hex unmodified, de is Dictus's, #948).
         case language
         case on
     }
 
-    /// The languages with a swipe model in the keyboard's bundle (`en.hextm`, `fr.hextm`).
-    public static let languages: Set<SupportedLanguage> = [.english, .french]
+    /// The languages with a swipe model in the keyboard's bundle (`en.hextm`, `fr.hextm`,
+    /// `es.hextm`, `de.hextm`). Spanish is read on Dictus's QWERTY, which has no ñ key: the
+    /// model gives ñ the base n, so a swipe through n reads "año" as well as "ano", the word
+    /// model choosing. German's model is lowercase: its nouns take their capital from
+    /// `GermanCapitals`, and ß is read on the s key, which no Dictus layout lacks.
+    public static let languages: Set<SupportedLanguage> = [.english, .french, .spanish, .german]
 
     /// Whether swipe typing acts, from the switches as the keyboard reads them and the
     /// keyboard's language.
@@ -105,10 +110,15 @@ public enum SwipeTypingText {
     }
 
     /// Whether `word` begins and ends on `letter`'s key ("lol" on l, "pop" on p): a word a
-    /// swipe that comes back to its key can mean.
+    /// swipe that comes back to its key can mean. An accented letter is on its base letter's
+    /// key, and ß on s, as German's model reads it ("saß" starts and ends on s).
     public static func word(_ word: String, startsAndEndsWith letter: String) -> Bool {
         func base(_ character: Character?) -> String? {
-            character.map { String($0).lowercased().decomposedStringWithCanonicalMapping.unicodeScalars.first.map(String.init) ?? "" }
+            character.map {
+                let lower = String($0).lowercased()
+                if lower == "ß" { return "s" }
+                return lower.decomposedStringWithCanonicalMapping.unicodeScalars.first.map(String.init) ?? ""
+            }
         }
         return word.count > 1 && base(word.first) == letter.lowercased() && base(word.last) == letter.lowercased()
     }

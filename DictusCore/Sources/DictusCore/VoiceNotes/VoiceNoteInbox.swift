@@ -97,6 +97,12 @@ public enum VoiceNoteInbox {
         return drop
     }
 
+    /// Where a pending drop's audio sits until the app ingests it (#1056: the share
+    /// extension transcribes it there when the app is closed).
+    public static func audioURL(of drop: VoiceNoteDrop, storage: VoiceNoteStorage) -> URL {
+        storage.inboxDirectory.appendingPathComponent(drop.audioFileName)
+    }
+
     /// Whether the extension's drop is still waiting in the inbox.
     public static func isPending(_ drop: VoiceNoteDrop, storage: VoiceNoteStorage) -> Bool {
         FileManager.default.fileExists(atPath: storage.inboxDirectory.appendingPathComponent(drop.sidecarFileName).path)

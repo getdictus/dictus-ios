@@ -25,8 +25,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //
-// What the port changed: the models are the two the keyboard ships (en, fr; Hex's
-// Spanish, German and Polish cases have no Dictus model and are left out), the keys are
+// What the port changed: the models are the four the keyboard ships (en, fr; es, Hex's
+// own file; and de, Dictus's own; Hex's Polish cases have no Dictus model and are left
+// out; the Spanish cases are Dictus's, on Dictus's QWERTY, which has no ñ key, and Hex
+// does not swipe German, so the German cases are Dictus's), the keys are
 // Dictus's letter pages laid out by `KeyPlaneGeometry`, English's contractions are
 // Dictus's own (`englishProfile`), and Hex's offensive-word cases became one test of the
 // never-suggest hook, since no Hex word list is copied. French words were added.
@@ -52,7 +54,8 @@ final class SwipeDecoderTests: XCTestCase {
         return Set(forms.map { $0.hasPrefix("i'") ? "I" + $0.dropFirst() : $0 }).sorted()
     }
 
-    private func decoder(_ language: String) throws -> (SwipeDecoder, SpatialDecoder.Keys) {
+    /// `language`'s decoder on its own letter page, or on `page`'s (German on QWERTY: "en").
+    private func decoder(_ language: String, page: String? = nil) throws -> (SwipeDecoder, SpatialDecoder.Keys) {
         let model = try XCTUnwrap(SpatialDecoderModel(path: Self.modelPath(language)), "no \(language).hextm")
         var decoder = SwipeDecoder(model: model)
         if language == "en" {
@@ -60,7 +63,7 @@ final class SwipeDecoderTests: XCTestCase {
                 Self.englishContractions(), cost: { _ in SwipeDecoder.contractionCost }, model: model, contractions: true
             )
         }
-        return (decoder, SwipeKeys.letterPage(language))
+        return (decoder, SwipeKeys.letterPage(page ?? language))
     }
 
     private func read(
@@ -103,6 +106,96 @@ final class SwipeDecoderTests: XCTestCase {
         let (fr, keys) = try decoder("fr")
         XCTAssertTrue(read("tres", fr, keys).prefix(2).contains("très"))
         XCTAssertTrue(read("ete", fr, keys).prefix(4).contains("été"))
+    }
+
+    /// Spanish (Hex's `es.hextm`, unmodified) on Dictus's QWERTY, which has no ñ key: the
+    /// model gives ñ the base n, so a swipe through n reads a word with ñ, and an accented
+    /// vowel is read on its plain key, as in French.
+    func testSpanishModelLoadsAndKnowsItsLetters() throws {
+        let model = try XCTUnwrap(SpatialDecoderModel(path: Self.modelPath("es")), "no es.hextm")
+        XCTAssertEqual(model.language, "es")
+        for word in ["mañana", "año", "niño", "español", "está", "también", "pingüino"] {
+            XCTAssertTrue(model.contains(word), word)
+        }
+        XCTAssertNil(SwipeKeys.letterPage("es").centres["ñ"], "Dictus's Spanish page has no ñ key")
+    }
+
+    func testSpanishWordsWithÑAreReadThroughN() throws {
+        let (es, keys) = try decoder("es")
+        // The path a-n-o is both "año" and "ano": the word model reads the commoner first.
+        XCTAssertEqual(read("ano", es, keys).first, "año")
+        for word in ["mañana", "niño", "español", "hola", "gracias"] {
+            XCTAssertEqual(read(word, es, keys).first, word)
+        }
+        XCTAssertEqual(read("manana", es, keys).first, "mañana", "a path through n, not ñ")
+    }
+
+    func testSpanishAccentsAreReadOnTheirBaseKeys() throws {
+        let (es, keys) = try decoder("es")
+        for word in ["también", "aquí", "después", "corazón"] {
+            XCTAssertEqual(read(word, es, keys).first, word)
+        }
+        XCTAssertEqual(read("tambien", es, keys).first, "también", "a path through the plain e")
+        // "esta" and "está" draw one path, both common: only the word model and the word
+        // before tell them apart, as "tres" and "très" in French.
+        XCTAssertTrue(read("esta", es, keys).prefix(2).contains("está"))
+    }
+
+    // MARK: - German (de.hextm, Dictus's, #948)
+
+    /// German on QWERTZ, Dictus's default for it, which has keys for ä ö ü and none for ß.
+    func testGermanModelLoadsAndKnowsItsLetters() throws {
+        let model = try XCTUnwrap(SpatialDecoderModel(path: Self.modelPath("de")), "no de.hextm")
+        XCTAssertEqual(model.language, "de")
+        for word in ["straße", "groß", "weiß", "schön", "über", "mädchen", "haus", "gehen", "krankenversicherung"] {
+            XCTAssertTrue(model.contains(word), word)
+        }
+        let page = SwipeKeys.letterPage("de")
+        for umlaut: Character in ["ä", "ö", "ü"] { XCTAssertNotNil(page.centres[umlaut], "QWERTZ has an \(umlaut) key") }
+        XCTAssertNil(page.centres["ß"], "no Dictus layout has an ß key")
+        // The model gives ß the base s, so the decoder reads it on the s key.
+        let sharp = try XCTUnwrap(model.encode("ß")?.first)
+        XCTAssertEqual(model.characters[Int(model.baseCodes[Int(sharp)])], "s")
+    }
+
+    /// ß is held on s and swiped through it: s-t-r-a-s-e reads "straße".
+    func testGermanßIsReadOnTheSKey() throws {
+        let (de, keys) = try decoder("de")
+        for word in ["straße", "groß", "weiß", "heißt", "fuß"] {
+            XCTAssertEqual(read(word, de, keys).first, word)
+        }
+        XCTAssertEqual(read("strasse", de, keys).first, "straße", "a path through s, not ß")
+    }
+
+    /// On QWERTZ an umlaut is swiped through its own key; on QWERTY or AZERTY, which German
+    /// may use, through its base letter's key.
+    func testGermanUmlautsAreReadOnTheirKeysOrTheirBaseKeys() throws {
+        let (qwertz, keys) = try decoder("de")
+        for word in ["schön", "über", "mädchen", "für", "möglich", "grün", "gehen", "zeit"] {
+            XCTAssertEqual(read(word, qwertz, keys).first, word, "QWERTZ")
+        }
+        XCTAssertNotEqual(read("schon", qwertz, keys).first, "schön", "through o, not ö")
+        let (qwerty, plain) = try decoder("de", page: "en")
+        for word in ["über", "für", "möglich", "grün"] {
+            XCTAssertEqual(read(word, qwerty, plain).first, word, "QWERTY")
+        }
+        // m-a-d-c on QWERTY: the straight line from a to c already runs over d, so the path
+        // is also the far commoner "machen", read first; "mädchen" waits in the bar.
+        XCTAssertTrue(read("mädchen", qwerty, plain).prefix(4).contains("mädchen"))
+        // One path for "schon" and "schön" without an ö key: both common, both offered.
+        XCTAssertTrue(read("schon", qwerty, plain).prefix(4).contains("schön"))
+    }
+
+    /// A long compound swipes like any word: the decoder's only length limit is 64 keys
+    /// (`scratch`), past the word list's longest (25 letters). A compound rarer than the
+    /// model's 95,000 words can't be read ("geschwindigkeitsbegrenzung", 26 letters, is
+    /// not in the list at all).
+    func testGermanCompoundsRead() throws {
+        let (de, keys) = try decoder("de")
+        for word in ["krankenversicherung", "bundesregierung", "bundesverfassungsgericht", "selbstverständlichkeit"] {
+            XCTAssertEqual(read(word, de, keys).first, word)
+        }
+        XCTAssertFalse(de.model.contains("geschwindigkeitsbegrenzung"))
     }
 
     /// Google Books splits "don't" into "do n't", so the model barely counts it: the decoder
@@ -185,7 +278,7 @@ final class SwipeDecoderTests: XCTestCase {
     }
 }
 
-/// Dictus's letter pages (`KeyboardLayouts.qwertyNormal`, `azertyNormal`) on an iPhone 17
+/// Dictus's letter pages (`KeyboardLayouts.qwertyNormal`, `azertyNormal`, QWERTZ for de) on an iPhone 17
 /// held upright (a 402 x 216 pt grid), laid out by `KeyPlaneGeometry`, and read as
 /// `GiellaKeyboardView.spatialKeys()` reads them (#1011): each letter at its touch target's
 /// centre, the key unit by the row's height, the bottom letter row, the space bar.
@@ -198,6 +291,11 @@ enum SwipeKeys {
         if language == "fr" {
             return [letters("azertyuiop"), letters("qsdfghjklm"),
                     [(nil, 1.5)] + letters("wxcvbn") + [(nil, 1), (nil, 1.5)], bottom]
+        }
+        if language == "de" {
+            // `QWERTZLayout`: eleven keys on the first two rows, shift and delete at 1.5.
+            let rows = QWERTZLayout.lowercasedLettersRows.map { $0.joined() }
+            return [letters(rows[0]), letters(rows[1]), [(nil, 1.5)] + letters(rows[2]) + [(nil, 1.5)], bottom]
         }
         return [letters("qwertyuiop"), [(nil, 0.5)] + letters("asdfghjkl") + [(nil, 0.5)],
                 [(nil, 1.5)] + letters("zxcvbnm") + [(nil, 1.5)], bottom]
@@ -234,11 +332,11 @@ enum SwipeKeys {
 /// Swipes for tests: straight strokes through the centres of a word's keys.
 enum SwipePath {
     /// The centres of `word`'s keys on `keys` (an accented letter on its base letter's key,
-    /// an apostrophe on none), repeats run together.
+    /// ß on s, an apostrophe on none), repeats run together.
     private static func centres(_ word: String, keys: SpatialDecoder.Keys) -> [CGPoint] {
         var centres: [CGPoint] = []
         for letter in word.lowercased() where letter != "'" {
-            let base = String(letter).decomposedStringWithCanonicalMapping.unicodeScalars.first.map(Character.init)
+            let base = letter == "ß" ? "s" : String(letter).decomposedStringWithCanonicalMapping.unicodeScalars.first.map(Character.init)
             guard let centre = keys.centres[letter] ?? base.flatMap({ keys.centres[$0] }) else { continue }
             if centres.last != centre { centres.append(centre) }
         }
