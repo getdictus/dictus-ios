@@ -99,7 +99,7 @@ class TextPredictionEngine {
         let lexicon = supplementaryLexicon
         lexiconLock.unlock()
         return lexicon.earlyAnswer(
-            for: word, previousWord: previousWord, context: context, profile: profile,
+            for: word, previousWord: previousWord, context: context, rules: contextRules,
             isDictionaryWord: aospTrieEngine.wordExists(word.lowercased())
         )
     }
@@ -130,6 +130,8 @@ class TextPredictionEngine {
             )
             #endif
             return .autocorrect(corrected, alternatives: [])
+        case .loneLetter(let decision):
+            return loneLetterProposal(decision, for: word, previousWord: previousWord)
         }
     }
 
@@ -1096,6 +1098,42 @@ extension TextPredictionEngine {
               frequencyDict.topCount > 0 else { return nil }
         return TrieLanguageEvidence(language: supported, trie: aospTrieEngine,
                                     scale: TrieFrequencyScale(topCount: Double(frequencyDict.topCount)))
+    }
+}
+
+// MARK: - Lone letters (#977)
+
+// WHY in an extension: the class body is at SwiftLint's 650-line budget (see below).
+extension TextPredictionEngine {
+    /// The language's rules for `SupplementaryLexicon.earlyAnswer`, with the layout in
+    /// use and the user's learned words for the lone-letter rule. Nil without a profile.
+    fileprivate var contextRules: SupplementaryLexicon.Rules? {
+        profile.map {
+            SupplementaryLexicon.Rules(
+                profile: $0, layout: loadedLayout ?? LayoutType.active, isLearned: UserDictionary.shared.isLearned
+            )
+        }
+    }
+
+    /// `LoneLetterCorrection`'s decision as `correctionProposal` returns it: a kept
+    /// letter is nil, a corrected one is applied at the space. It returns before the
+    /// trie and its bigram rerank, which could swap the `à` a homograph rule chose for a
+    /// neighbour, and before the spatial decoder.
+    fileprivate func loneLetterProposal(
+        _ decision: LoneLetterCorrection.Decision, for word: String, previousWord: String?
+    ) -> CorrectionProposal? {
+        switch decision {
+        case .correct(let letter):
+            #if DEBUG
+            AutocorrectDebugLog.autocorrectDecision(original: word, corrected: letter, branch: "lone-letter", prevWord: previousWord)
+            #endif
+            return .autocorrect(letter, alternatives: [])
+        case .keep:
+            #if DEBUG
+            AutocorrectDebugLog.autocorrectSkipped(word: word, reason: "lone-letter")
+            #endif
+            return nil
+        }
     }
 }
 

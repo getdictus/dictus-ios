@@ -41,7 +41,7 @@ enum SpatialAutocorrect {
     private static var decoders: [String: SpatialDecoder?] = [:]
 
     /// The decoder for `language`, its model mapped on first use; nil when the bundle has
-    /// no model for it (only `fr.hextm` and `en.hextm` ship).
+    /// no model for it (`fr.hextm`, `en.hextm`, `es.hextm` and `de.hextm` ship).
     static func decoder(for language: String) -> SpatialDecoder? {
         lock.lock()
         defer { lock.unlock() }
@@ -55,5 +55,22 @@ enum SpatialAutocorrect {
             }
         decoders[language] = decoder
         return decoder
+    }
+
+    private static var capitals: GermanCapitals??
+
+    /// German's capitals table (`de.capitals`, #948), read on first use beside the German
+    /// model: what tells a swiped noun ("Haus") from a verb ("gehen"), the model being
+    /// lowercase. Nil for any other language, or without the file.
+    static func capitals(for language: String) -> GermanCapitals? {
+        guard language == SupportedLanguage.german.rawValue,
+              let model = decoder(for: language)?.model else { return nil }
+        lock.lock()
+        defer { lock.unlock() }
+        if let cached = capitals { return cached }
+        let table = Bundle.main.path(forResource: language, ofType: "capitals")
+            .flatMap { GermanCapitals(path: $0, model: model) }
+        capitals = .some(table)
+        return table
     }
 }
