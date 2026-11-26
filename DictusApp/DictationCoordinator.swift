@@ -1543,13 +1543,12 @@ class DictationCoordinator: ObservableObject {
     }
 }
 
-// MARK: - Speech engine initialization
+// MARK: - Engine selection
 
-/// Engine initialization lives in its own extension so the coordinator class body
-/// stays within the SwiftLint `type_body_length` budget. These methods are still
-/// file-private members of the coordinator and touch the same stored properties.
+/// Internal, unlike the initializers it calls below, because
+/// `DictationCoordinator+EnginePolicy.swift` loads Apple's engine through it.
 @MainActor
-private extension DictationCoordinator {
+extension DictationCoordinator {
     /// Initialize the appropriate STT engine based on the active model.
     ///
     /// WHY engine-aware:
@@ -1587,7 +1586,15 @@ private extension DictationCoordinator {
             try await ensureWhisperKitEngineReady(modelName: modelName)
         }
     }
+}
 
+// MARK: - Speech engine initialization
+
+/// Engine initialization lives in its own extension so the coordinator class body
+/// stays within the SwiftLint `type_body_length` budget. These methods are still
+/// file-private members of the coordinator and touch the same stored properties.
+@MainActor
+private extension DictationCoordinator {
     /// Make Apple's recognizer the engine `TranscriptionService` calls.
     ///
     /// No lock, no Neural Engine gate, no warm inference: nothing is compiled or loaded in
