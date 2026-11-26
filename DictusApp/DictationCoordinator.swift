@@ -1937,13 +1937,21 @@ extension DictationCoordinator {
 
     /// The dictation's language policy with the engine that will actually transcribe it.
     ///
-    /// `TranscriptionLanguagePolicy.snapshot()` names the engine of `activeModel`, which
-    /// stays the downloaded model when Apple is picked. Apple is told the chosen language
-    /// and is polished as a forced-language engine, so its dictations carry `.apple`.
+    /// The policy names `ActiveSpeechEngine`, read from Apple's last recorded readiness
+    /// (#1083), and `ensureEngineReady` reads it fresh: the two disagree when Apple stopped
+    /// being ready in between, and the loaded engine is the one that transcribes. Apple is
+    /// told the chosen language and is polished as a forced-language engine, so its
+    /// dictations carry `.apple`.
     func languagePolicyForLoadedEngine(_ policy: TranscriptionLanguagePolicy) -> TranscriptionLanguagePolicy {
-        guard currentModelName == AppleSpeechEngineIdentity.identifier else { return policy }
+        let appleLoaded = currentModelName == AppleSpeechEngineIdentity.identifier
+        guard appleLoaded != (policy.engine == .apple) else { return policy }
+        let loaded = appleLoaded
+            ? ActiveSpeechEngine.apple
+            : ActiveSpeechEngine.resolve(choice: .downloadedModel, appleAvailability: .needsAsset(.unknown),
+                                         downloadedModel: currentModelName ?? defaults.string(forKey: SharedKeys.activeModel))
+        guard let loaded else { return policy }
         return TranscriptionLanguagePolicy(mode: policy.mode, keyboardLanguage: policy.keyboardLanguage,
-                                           engine: .apple, modelIdentifier: AppleSpeechEngineIdentity.identifier)
+                                           engine: loaded.engine, modelIdentifier: loaded.identifier)
     }
 }
 

@@ -291,8 +291,11 @@ final class VoiceNoteProcessor: ObservableObject {
         let duration = Double(samples.count) / SharedAudioDecoder.sampleRate
         store.mutate { $0.update(note.id) { $0.durationSeconds = Int(duration.rounded()) } }
         // Captured once per note, for #226's reason: the settings can change mid-queue.
+        // The engine that dictates now, Apple's included (#1083); the Whisper fallback is
+        // `ensureEngineReady`'s when nothing is elected.
         let policy = VoiceNoteSettings.load().languagePolicy(
-            activeModel: AppGroup.defaults.string(forKey: SharedKeys.activeModel) ?? "openai_whisper-small",
+            activeEngine: ActiveSpeechEngine.current()
+                ?? ActiveSpeechEngine(engine: .whisperKit, identifier: "openai_whisper-small"),
             keyboardLanguage: SupportedLanguage.active
         )
         let ranges = VoiceNoteChunker.ranges(for: samples)
@@ -485,7 +488,7 @@ final class VoiceNoteProcessor: ObservableObject {
                 : SupportedLanguage(rawValue: source.language).map(TranscriptionLanguageMode.explicit) ?? .autoDetect,
             keyboardLanguage: SupportedLanguage.active,
             engine: source.engine ?? .parakeet,
-            modelIdentifier: AppGroup.defaults.string(forKey: SharedKeys.activeModel) ?? ""
+            modelIdentifier: ActiveSpeechEngine.current()?.identifier ?? ""
         )
         // Its own slot (#648): a dictation started while this runs must not cancel it.
         // Keyed by note: a caller arriving while this note's mode is still running (the

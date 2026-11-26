@@ -233,14 +233,15 @@ public struct TranscriptionLanguagePolicy: Equatable, Sendable, Codable {
     /// and finalization.
     public static func snapshot() -> TranscriptionLanguagePolicy {
         let defaults = AppGroup.defaults
-        let modelIdentifier = defaults.string(forKey: SharedKeys.activeModel) ?? ""
+        // The engine that dictates now, Apple's included (#1083), not the downloaded model.
+        let active = ActiveSpeechEngine.current(defaults: defaults)
         return TranscriptionLanguagePolicy(
             mode: TranscriptionLanguageMode(
                 storedValue: defaults.string(forKey: SharedKeys.transcriptionLanguage)
             ),
             keyboardLanguage: SupportedLanguage.active,
-            engine: ModelInfo.forIdentifier(modelIdentifier)?.engine ?? .whisperKit,
-            modelIdentifier: modelIdentifier
+            engine: active?.engine ?? .whisperKit,
+            modelIdentifier: active?.identifier ?? ""
         )
     }
 
