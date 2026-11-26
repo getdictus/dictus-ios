@@ -15,10 +15,10 @@ with no French model installed and took 10 s to "install" it. The dictated audio
 | File | What it shows |
 |---|---|
 | `01-language-apple-parakeet-fr.png` | Language step: Apple's recognition, you can dictate at once, Parakeet (~483 Mo) downloads in the background |
-| `02-popup-dictate-now-fr.png` | Right after Continuer: the popup, new text « Vous pouvez déjà dicter… » |
+| `02-popup-dictate-now-fr.png` | Right after Continuer: the popup titled « Vous pouvez déjà dicter », text « Dictus télécharge Parakeet (~483 Mo), plus précis, en arrière-plan. Ça va plus vite si Dictus reste ouvert. » (second run, commit `d683707b`) |
 | `03-first-dictation-apple-fr.png` | First dictation step: the text from the Dictus keyboard, transcribed by Apple's engine |
 | `04-models-apple-selected-parakeet-downloaded-fr.png` | Models after the download: Parakeet downloaded, Apple still the selected engine |
-| `05-home-active-model-card-fr.png` | Home: its card reads « Modèle actif · Parakeet v3 » while Apple dictates (see below) |
+| `05-home-active-model-card-fr.png` | Home: its card reads « Modèle actif · Parakeet v3 » while Apple dictates: the bug of #1083, fixed by PR #1087 |
 
 **Not captured: the Models page with the download in progress.** On this Mac the 483 MB
 arrived in 11 s (10 % → 100 %, 21:57:42 → 21:57:53), before any screen past the popup could be
@@ -51,6 +51,6 @@ marker lets through.
 
 ## Home's card
 
-Home shows a ready downloaded model in its « Modèle actif » card whenever there is one (#1065's
-rule: Apple's card only when Apple is the sole engine). With Parakeet downloaded behind Apple, the
-card names Parakeet while dictations run on Apple. Not changed here.
+With Parakeet downloaded behind Apple, Home's « Modèle actif » card names Parakeet while
+dictations run on Apple. This is the bug of #1083, fixed by PR #1087 (one source of truth for the
+engine that dictates); this run predates that fix. Not changed here.
