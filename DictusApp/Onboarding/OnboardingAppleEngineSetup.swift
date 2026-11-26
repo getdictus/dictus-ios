@@ -67,10 +67,14 @@ final class OnboardingAppleEngineSetup: ObservableObject {
     /// Picks the stored route back up after a relaunch mid-onboarding.
     ///
     /// Only for a run past the language step whose stored choice is Apple and that has no
-    /// ready downloaded model. Apple read ready: picked, nothing to wait for. Otherwise the
-    /// install starts again, with the same fallback.
+    /// ready downloaded model, or only Parakeet's downloaded behind Apple (#1057). Apple
+    /// read ready: picked, nothing to wait for. Otherwise the install starts again, with
+    /// the same fallback.
     func resume(modelManager: ModelManager, onFallback: @escaping @MainActor () -> Void) {
-        guard route == nil, modelManager.speechEngineChoice == .apple, !modelManager.isModelReady,
+        // A ready downloaded model normally means today's route. Not when it is Parakeet
+        // downloaded behind Apple (#1057): that can finish before Apple's install did.
+        let behindApple = ParakeetHandoff.isPending(in: AppGroup.defaults)
+        guard route == nil, modelManager.speechEngineChoice == .apple, !modelManager.isModelReady || behindApple,
               let code = AppleSpeechLanguage.activeDictationLanguageCode() else { return }
         route = .apple(languageCode: code, needsInstall: true)
         AppleEngineAssets.log("onboardingRoute", "resumed lang=\(code)")
@@ -109,9 +113,12 @@ final class OnboardingAppleEngineSetup: ObservableObject {
             route = after
             installTask = nil
             if after.isApple {
-                modelManager.selectAppleEngine()
+                // Not the Models page: the Parakeet handoff the language step marked stays.
+                modelManager.selectAppleEngine(fromModelsPage: false)
                 phase = .ready
             } else {
+                // The download is the route now, not a handoff behind Apple (#1057).
+                ParakeetHandoff.cancel(in: AppGroup.defaults)
                 modelManager.chooseEngineDuringOnboarding(.downloadedModel)
                 phase = .idle
                 onFallback()

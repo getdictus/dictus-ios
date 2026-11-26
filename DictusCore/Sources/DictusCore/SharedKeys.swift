@@ -480,6 +480,10 @@ public enum SharedKeys {
     /// framework (the keyboard, Home, `startDictation`) ask whether a user with no
     /// downloaded model can dictate. See `AppleEngineReadinessRecord` (#1057).
     public static let appleEngineReadyLanguage = "dictus.appleEngineReadyLanguage"
+    /// Bool: the onboarding set up Apple's model AND started Parakeet's download behind it,
+    /// for Parakeet to take over once it is ready (#1057). Absent = false. Cleared as soon
+    /// as the user picks an engine on the Models page. See `ParakeetHandoff`.
+    public static let parakeetHandoffPending = "dictus.parakeetHandoffPending"
 
     // MARK: - Retired keys
     /// The #357 probe's arming flag, removed with the probe in #361. Kept as a

@@ -5,8 +5,8 @@ import Foundation
 /// The engine the onboarding sets up once the language step is confirmed (#1057, PR 2).
 ///
 /// - `apple`: the language is covered by Apple's on-device model, so confirming the
-///   language asks iOS for that model (`AssetInventory`) and Dictus downloads nothing.
-///   No "Keep Dictus open" popup either: that popup is about Dictus's own download.
+///   language asks iOS for that model (`AssetInventory`) and the user dictates with it.
+///   Whether Parakeet also downloads behind it is `OnboardingConfirmDownload`.
 /// - `downloadedModel`: today's route, unchanged: the recommended model for the language
 ///   and this device (`ModelInfo.recommendedIdentifier(forSpokenLanguage:on:)`) downloads.
 ///

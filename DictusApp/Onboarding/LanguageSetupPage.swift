@@ -244,9 +244,12 @@ struct LanguageSetupPage: View {
     /// changes with the language ("le français", "l'anglais"), which a format string cannot
     /// choose.
     private var modelLine: some View {
-        let info = ModelInfo.forIdentifier(setup.recommendedModel(on: capabilities))
-        // Apple's route (#1057): Confirm downloads nothing in Dictus, so the line must not
-        // promise a download. Same rule as the route itself (`OnboardingEngineRoute`).
+        let recommended = setup.recommendedModel(on: capabilities)
+        let info = ModelInfo.forIdentifier(recommended)
+        // Apple's route (#1057): the user dictates with Apple's model at once, so the line
+        // says so. Parakeet recommended: it downloads behind Apple, and the line says that
+        // too. Any other recommendation: nothing downloads. Same rules as Confirm
+        // (`OnboardingEngineRoute`, `OnboardingConfirmDownload`).
         let expectsApple = OnboardingEngineRoute.expectsApple(
             for: setup, systemMajorVersion: ProcessInfo.processInfo.operatingSystemVersion.majorVersion,
             supportedLocales: appleLocales, keyboardDictatesWithApple: !capabilities.isPreA14
@@ -257,7 +260,10 @@ struct LanguageSetupPage: View {
                 .foregroundStyle(.tertiary)
                 .accessibilityHidden(true)
             Group {
-                if expectsApple {
+                if expectsApple, let info, OnboardingConfirmDownload.downloadsBehindApple(recommendedModel: recommended) {
+                    Text("Apple's speech recognition for your language, built into iOS: you can dictate at once. Dictus downloads Parakeet (\(info.sizeLabel)), more accurate, in the background. You can change it in Models.",
+                         comment: "Onboarding language screen, small type, when Apple's on-device model covers the language and Parakeet is the recommended model (#1057): the user dictates with Apple while Parakeet downloads. The argument is Parakeet's size (~483 MB).")
+                } else if expectsApple {
                     Text("Apple's speech recognition for your language, built into iOS: Dictus downloads nothing. You can change it in Models.",
                          comment: "Onboarding language screen, small type, when Apple's on-device model covers the language (#1057): confirming downloads no Dictus model.")
                 } else if let info {

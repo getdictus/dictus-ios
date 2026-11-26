@@ -69,6 +69,10 @@ struct OnboardingView: View {
     /// popup is up (`keepOpenWarning`). nil otherwise.
     @State private var keepOpenWarningModel: String?
 
+    /// Whether that download is Parakeet's behind Apple's model (#1057), so the popup says
+    /// the user can already dictate. False on today's route, whose text is unchanged.
+    @State private var keepOpenWarningBehindApple = false
+
     /// Whether this iPhone could ever run Smart Modes, which decides whether the Pro steps
     /// are part of the flow (#677, #593 decision 2). Read once: hardware, OS and SDK do
     /// not change during an onboarding, and the progress bar must not change length.
@@ -360,10 +364,11 @@ struct OnboardingView: View {
     /// Writes the language setup, decides the engine route, and moves on (#649, #1057).
     ///
     /// THE ROUTE (#1057, `OnboardingEngineRoute`): where Apple's on-device model covers the
-    /// confirmed language on this iPhone, confirming asks iOS for that model and Dictus
-    /// downloads nothing, so there is no keep-open popup either. Anywhere else, today's
-    /// route below, unchanged. If Apple's install fails, the route falls back to the
-    /// download without stopping the user (`OnboardingAppleEngineSetup.start`).
+    /// confirmed language on this iPhone, confirming asks iOS for that model, which the
+    /// user dictates with. Parakeet recommended: its download starts behind Apple, with the
+    /// popup saying the user can already dictate (`startDownloadBehindApple`). Anywhere
+    /// else, today's route below, unchanged. If Apple's install fails, the route falls back
+    /// to the download without stopping the user (`OnboardingAppleEngineSetup.start`).
     ///
     /// WHY THE DOWNLOAD STARTS HERE: the microphone and keyboard steps take the user a
     /// minute or two, much of it in iOS Settings. Starting the transfer now spends that
@@ -382,16 +387,39 @@ struct OnboardingView: View {
             isDecidingRoute = false
             if case .apple(let code, _) = route {
                 appleSetup.start(languageCode: code, modelManager: modelManager, onFallback: startRecommendedDownload)
-                advance()
+                startDownloadBehindApple(OnboardingConfirmDownload.decide(route: route, recommendedModel: model))
             } else {
                 startTodaysRoute(model)
             }
         }
     }
 
+    /// Apple's route (#1057): Parakeet downloads behind Apple's model when it is the
+    /// recommendation, with the Parakeet handoff marked and a popup that says the user can
+    /// already dictate. Any other recommendation (Whisper Small on a 4 GB iPhone 12):
+    /// nothing downloads, no marker, no popup. Apple stays the engine either way: the
+    /// download's completion records the model as `activeModel` as it always did, but the
+    /// engine choice stays Apple (`ensureEngineReady` resolves Apple first).
+    private func startDownloadBehindApple(_ download: OnboardingConfirmDownload) {
+        if download.marksParakeetHandoff {
+            ParakeetHandoff.markPending(in: AppGroup.defaults)
+        } else {
+            ParakeetHandoff.cancel(in: AppGroup.defaults)
+        }
+        PersistentLog.log(.diagnosticProbe(component: "AppleEngine", instanceID: "app", action: "onboardingDownload",
+                                           details: "plan=\(download) handoff=\(download.marksParakeetHandoff)"))
+        if let model = download.model, startDownloadIfNeeded(model) {
+            keepOpenWarningBehindApple = true
+            keepOpenWarningModel = model
+        } else {
+            advance()
+        }
+    }
+
     /// Today's route: the recommended model's download, and the keep-open popup while its
     /// bytes transfer.
     private func startTodaysRoute(_ model: String) {
+        ParakeetHandoff.cancel(in: AppGroup.defaults)
         if startDownloadIfNeeded(model) {
             // The download is already running; the popup only asks the user to stay. Its
             // button moves on (`keepOpenWarning`), so the flow continues as before.
@@ -464,6 +492,7 @@ struct OnboardingView: View {
             set: { isPresented in
                 guard !isPresented, keepOpenWarningModel != nil else { return }
                 keepOpenWarningModel = nil
+                keepOpenWarningBehindApple = false
                 advance()
             }
         )
@@ -471,6 +500,13 @@ struct OnboardingView: View {
 
     /// The popup's message, with the real size of the model being downloaded.
     private var keepOpenWarningMessage: Text {
+        // Apple's route (#1057): the user dictates with Apple's model already; the popup
+        // still asks them to stay, because the same throttling slows Parakeet down.
+        if keepOpenWarningBehindApple, let identifier = keepOpenWarningModel,
+           let size = ModelInfo.forIdentifier(identifier)?.sizeLabel {
+            return Text("You can already dictate. Dictus is downloading Parakeet (\(size)), more accurate, in the background. It will be ready sooner if you stay in Dictus, except to turn on the keyboard in Settings.",
+                        comment: "Onboarding popup message on Apple's route (#1057): Apple's model dictates now, Parakeet downloads behind it. The argument is Parakeet's size (~483 MB). The next step sends the user to Settings, hence the exception.")
+        }
         if let identifier = keepOpenWarningModel, let size = ModelInfo.forIdentifier(identifier)?.sizeLabel {
             return Text("The model (\(size)) is downloading now. It continues if you leave the app, but iOS slows it down a lot. To have it ready sooner, stay in Dictus, except to turn on the keyboard in Settings.")
         }

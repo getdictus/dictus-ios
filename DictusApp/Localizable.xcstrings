@@ -1950,6 +1950,29 @@
         }
       }
     },
+    "Apple's speech recognition for your language, built into iOS: you can dictate at once. Dictus downloads Parakeet (%@), more accurate, in the background. You can change it in Models." : {
+      "comment" : "Onboarding language screen, small type, when Apple's on-device model covers the language and Parakeet is the recommended model (#1057): the user dictates with Apple while Parakeet downloads. The argument is Parakeet's size (~483 MB).",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apples Spracherkennung für deine Sprache, in iOS integriert: Du kannst sofort diktieren. Dictus lädt Parakeet (%@), genauer, im Hintergrund. Änderbar unter „Modelle“."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El reconocimiento de voz de Apple para tu idioma, integrado en iOS: puedes dictar enseguida. Dictus descarga Parakeet (%@), más preciso, en segundo plano. Puedes cambiarlo en Modelos."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La reconnaissance vocale d’Apple pour votre langue, intégrée à iOS : vous pouvez dicter tout de suite. Dictus télécharge Parakeet (%@), plus précis, en arrière-plan. Modifiable dans Modèles."
+          }
+        }
+      }
+    },
     "Apple's speech recognition, built into iOS. Dictus downloads nothing." : {
       "comment" : "Models screen: description of the Apple engine card.",
       "localizations" : {
@@ -6495,6 +6518,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Sans le journal, la plupart des bugs ne peuvent pas être analysés."
+          }
+        }
+      }
+    },
+    "You can already dictate. Dictus is downloading Parakeet (%@), more accurate, in the background. It will be ready sooner if you stay in Dictus, except to turn on the keyboard in Settings." : {
+      "comment" : "Onboarding popup message on Apple's route (#1057): Apple's model dictates now, Parakeet downloads behind it. The argument is Parakeet's size (~483 MB). The next step sends the user to Settings, hence the exception.",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Du kannst schon diktieren. Dictus lädt Parakeet (%@), genauer, im Hintergrund. Es ist schneller bereit, wenn du in Dictus bleibst, außer um die Tastatur in den Einstellungen zu aktivieren."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ya puedes dictar. Dictus descarga Parakeet (%@), más preciso, en segundo plano. Estará listo antes si te quedas en Dictus, salvo para activar el teclado en Ajustes."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vous pouvez déjà dicter. Dictus télécharge Parakeet (%@), plus précis, en arrière-plan. Il sera prêt plus vite si vous restez dans Dictus, sauf pour activer le clavier dans Réglages."
           }
         }
       }
