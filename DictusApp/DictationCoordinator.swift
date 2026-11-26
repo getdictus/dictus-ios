@@ -344,11 +344,16 @@ class DictationCoordinator: ObservableObject {
     /// `loadActiveModelIntoMemory` gives). Nothing here touches the dictation's
     /// status, its session or the App Group keys the keyboard reads: a voice note is
     /// invisible to the keyboard by construction.
-    func transcribeVoiceNoteChunk(_ samples: [Float], languagePolicy: TranscriptionLanguagePolicy) async throws -> String {
+    ///
+    /// Returns the policy the chunk really ran under (#1084): the voice-note settings name
+    /// `activeModel`'s engine, and only the loaded engine says it was Apple's, which is
+    /// what the record and the card need.
+    func transcribeVoiceNoteChunk(_ samples: [Float], languagePolicy: TranscriptionLanguagePolicy) async throws
+        -> (text: String, policy: TranscriptionLanguagePolicy) {
         try await ensureEngineReady()
-        let text = try await transcriptionService.transcribe(audioSamples: samples,
-                                                             languagePolicy: languagePolicyForLoadedEngine(languagePolicy))
-        return DictationTranscript.corrected(text).text
+        let policy = languagePolicyForLoadedEngine(languagePolicy)
+        let text = try await transcriptionService.transcribe(audioSamples: samples, languagePolicy: policy)
+        return (DictationTranscript.corrected(text).text, policy)
     }
 
     /// Keep the warm audio engine, and with it the process, alive while a voice note
