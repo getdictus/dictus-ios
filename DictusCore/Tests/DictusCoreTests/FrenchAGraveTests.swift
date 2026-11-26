@@ -170,7 +170,8 @@ final class FrenchAGraveTests: XCTestCase {
     ) -> SupplementaryLexicon.EarlyAnswer? {
         let words = context.split(separator: " ").map(String.init)
         return (lexicon ?? deviceLexicon).earlyAnswer(
-            for: word, previousWord: words.dropLast().last, context: context, profile: profile,
+            for: word, previousWord: words.dropLast().last, context: context,
+            rules: .init(profile: profile, layout: profile.defaultLayout, isLearned: { _ in false }),
             isDictionaryWord: isDictionaryWord
         )
     }

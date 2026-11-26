@@ -9,14 +9,16 @@ import DictusCore
 ///
 /// ### What it does, and what it deliberately does not
 ///
-/// It copies the shared audio into the App Group inbox and tells DictusApp. That is
-/// all. It never decodes or transcribes: the speech models live in DictusApp's own
-/// containers (#620 spike, finding 2), and a share extension's memory budget would
-/// not hold one anyway.
+/// It copies the shared audio into the App Group inbox and tells DictusApp. A live app
+/// takes the note and transcribes it with the user's model, which lives in DictusApp's
+/// own containers (#620 spike, finding 2).
 ///
 /// When DictusApp is not alive to take the note (#620's cold path), the extension
-/// opens it on the note — see `openDictus(on:)` for how, and for the risk that way
-/// carries. If opening fails, it says "Open Dictus, your voice note is waiting".
+/// transcribes it itself with Apple's on-device model when the device can
+/// (`ShareOnDeviceTranscription`, #1056: iOS 26+, the language covered, the model
+/// installed, 5 minutes at most). Otherwise it opens the app on the note, as before: see
+/// `openDictus(on:)` for how, and for the risk that way carries. If opening fails, it
+/// says "Open Dictus, your voice note is waiting".
 final class ShareViewController: UIViewController {
 
     private let model = ShareModel()
@@ -48,13 +50,22 @@ final class ShareViewController: UIViewController {
                 // The warm path: the note is in good hands, and the user goes straight
                 // back to the conversation they shared from (#620 decision 2). The
                 // haptic says "received"; 1.2 s is long enough to read the line and
-                // short enough to feel like the island took it (decision 6).
+                // short enough to feel like the island took it (decision 6). A note
+                // transcribed here (#1056) stays 2 s: its sheet carries one more line,
+                // the language it was transcribed in.
                 UINotificationFeedbackGenerator().notificationOccurred(.success)
-                try? await Task.sleep(nanoseconds: 1_200_000_000)
+                let transcribedHere: Bool
+                if case .transcribedHere = model.state { transcribedHere = true } else { transcribedHere = false }
+                try? await Task.sleep(nanoseconds: transcribedHere ? 2_000_000_000 : 1_200_000_000)
                 finish()
-            } else if case .waitingForApp = model.state {
+            } else if case .waitingForApp(_, let reason) = model.state {
                 // The cold path: open Dictus on the note. The "waiting" screen already
-                // on display stays as the fallback when opening fails.
+                // on display stays as the fallback when opening fails. Over the
+                // extension's 5-minute cap (#1056) it stays 2.5 s first, so the reason
+                // the app opens can be read.
+                if reason == .overExtensionCap {
+                    try? await Task.sleep(nanoseconds: 2_500_000_000)
+                }
                 if await openDictus(on: model.firstDropID) {
                     UINotificationFeedbackGenerator().notificationOccurred(.success)
                     finish()
@@ -136,10 +147,38 @@ enum ShareState: Equatable {
     /// DictusApp took the note and transcribes it now. `withActivity` says whether
     /// progress will be on the Live Activity.
     case transcribing(count: Int, withActivity: Bool)
+    /// Nobody answered and the extension transcribes the notes itself with Apple's
+    /// on-device model (#1056), in `language`.
+    case transcribingHere(count: Int, language: ShareTranscriptionLanguage)
+    /// The extension transcribed them: the text is in the keyboard (and History).
+    case transcribedHere(count: Int, language: ShareTranscriptionLanguage)
     /// Nobody answered: the note waits for the app to open (#620's cold path).
-    case waitingForApp(count: Int)
+    case waitingForApp(count: Int, reason: ShareWaitingReason)
     /// Refused, with the sentence to show.
     case refused(String)
+}
+
+/// The language a note transcribed in the extension was given to Apple's recognizer in,
+/// for the sheet to name (#1056: under automatic detection, the default, it is the
+/// dictation language, and the sheet says so).
+struct ShareTranscriptionLanguage: Equatable {
+    let code: String
+    /// True under automatic detection: the dictation (keyboard) language stood in.
+    let isDictationLanguage: Bool
+
+    /// The language's name in the reader's language, "français" / "French".
+    var name: String {
+        Locale.current.localizedString(forLanguageCode: code) ?? code
+    }
+}
+
+/// Why the note waits for the app.
+enum ShareWaitingReason: Equatable {
+    /// Today's cold path: the app is closed and the extension does not transcribe this
+    /// note (Apple's model not ready, iOS older than 26, language not covered, a failure).
+    case appClosed
+    /// Longer than the extension's 5-minute cap (#1056).
+    case overExtensionCap
 }
 
 /// The extension's work, off the view.
@@ -162,8 +201,10 @@ final class ShareModel: ObservableObject {
     private static let maximumAttachments = 10
 
     var closesByItself: Bool {
-        if case .transcribing = state { return true }
-        return false
+        switch state {
+        case .transcribing, .transcribedHere: return true
+        default: return false
+        }
     }
 
     func receive(_ providers: [NSItemProvider]) async {
@@ -218,10 +259,42 @@ final class ShareModel: ObservableObject {
         if taken {
             let withActivity = AppGroup.defaults.bool(forKey: SharedKeys.voiceNoteAcceptedWithActivity)
             state = .transcribing(count: drops.count, withActivity: withActivity)
-        } else {
-            state = .waitingForApp(count: drops.count)
+            log("warm", "count=\(drops.count)")
+            return
         }
-        log(taken ? "warm" : "cold", "count=\(drops.count)")
+        await transcribeHereOrWait(drops, storage: storage)
+    }
+
+    /// #1056: nobody took the notes. Transcribe them here when the device can, showing
+    /// the "transcribing" sheet with the language; otherwise today's cold path.
+    private func transcribeHereOrWait(_ drops: [VoiceNoteDrop], storage: VoiceNoteStorage) async {
+        let decision = await ShareOnDeviceTranscription.route(for: drops)
+        guard case .shareExtension(let code, let source) = decision.route, let recognizer = decision.recognizer else {
+            let reason: ShareWaitingReason
+            if case .openApp(.overExtensionCap) = decision.route { reason = .overExtensionCap } else { reason = .appClosed }
+            state = .waitingForApp(count: drops.count, reason: reason)
+            log("cold", "count=\(drops.count) route=\(decision.route.logName)")
+            return
+        }
+        let language = ShareTranscriptionLanguage(code: code, isDictationLanguage: source == .dictationLanguage)
+        state = .transcribingHere(count: drops.count, language: language)
+        let started = Date()
+        let outcome = await ShareOnDeviceTranscription.run(drops, storage: storage, recognizer: recognizer,
+                                                           languageCode: code)
+        let elapsed = Int(Date().timeIntervalSince(started) * 1000)
+        switch outcome {
+        case .done(let count):
+            state = .transcribedHere(count: count, language: language)
+            log("onDevice", "count=\(count) elapsedMs=\(elapsed)")
+        case .fellBack(let transcribed, let reason):
+            // The first note not transcribed is the one Dictus opens on.
+            let remaining = Array(drops.dropFirst(transcribed))
+            firstDropID = remaining.first?.id
+            let waiting: ShareWaitingReason
+            if case .overExtensionCap = reason { waiting = .overExtensionCap } else { waiting = .appClosed }
+            state = .waitingForApp(count: remaining.count, reason: waiting)
+            log("cold", "count=\(remaining.count) transcribedHere=\(transcribed) reason=\(waiting) elapsedMs=\(elapsed)")
+        }
     }
 
     /// The warm detection (#620 open question 3): a live DictusApp moves the drop

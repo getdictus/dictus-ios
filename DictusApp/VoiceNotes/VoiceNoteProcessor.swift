@@ -17,6 +17,11 @@ import DictusCore
 /// - **Cold.** The app is suspended or not running: nothing receives the post, the
 ///   extension says "Open Dictus, your voice note is waiting", and the queue starts
 ///   here the next time the app becomes active, with the list on screen.
+/// - **Cold, transcribed by the extension (#1056).** When Apple's on-device model is
+///   ready, the extension transcribes the note itself and leaves a result file. The
+///   queue *adopts* it (`adoptExtensionResult`) instead of transcribing again: one owner
+///   per note (`VoiceNoteClaim`), a result read before any claim, a result removed only
+///   once the queue holds the transcript on disk.
 ///
 /// ### The Smart Mode, right after the transcript (#627)
 ///
@@ -65,6 +70,9 @@ final class VoiceNoteProcessor: ObservableObject {
         DarwinNotificationCenter.addObserver(for: DarwinNotificationName.voiceNoteKeyboardReceipt) {
             Task { @MainActor in VoiceNoteProcessor.shared.reconcileKeyboardDeliveries(reason: "keyboardSignal") }
         }
+        // Claims of notes long finished (#1056). Safe at any age: a note the extension
+        // transcribed is recognised by its result file, read before any claim.
+        if let claims = VoiceNoteClaim.defaultDirectory { VoiceNoteClaim.prune(in: claims) }
         // Anything shared before this launch, and anything a dead process left
         // mid-transcription, is picked up now.
         store.ingestInbox()
@@ -88,7 +96,17 @@ final class VoiceNoteProcessor: ObservableObject {
         AppGroup.defaults.set(LiveActivityManager.shared.hasLiveActivity, forKey: SharedKeys.voiceNoteAcceptedWithActivity)
         AppGroup.defaults.synchronize()
         let arrived = store.ingestInbox()
-        guard !arrived.isEmpty else { return }
+        guard !arrived.isEmpty else {
+            // #992 review: the share extension posts the same signal when it has written
+            // its results. A note the loop left waiting for one has no new arrival to
+            // show for it; resume the loop anyway, or the result, its Smart Mode and the
+            // notes behind it wait for the next activation.
+            if store.queue.hasPendingWork {
+                log("resumed", "reason=queuedWithoutArrival waiting=\(store.queue.waitingCount)")
+                processQueue()
+            }
+            return
+        }
         DarwinNotificationCenter.post(DarwinNotificationName.voiceNoteAccepted)
         VoiceNoteIslandDriver.shared.arrived(arrived.map(\.id))
         let state = UIApplication.shared.applicationState
@@ -231,15 +249,28 @@ final class VoiceNoteProcessor: ObservableObject {
                 return
             }
             await transcribe(note)
+            // #1056: a note the share extension is still transcribing stays first in the
+            // queue; stop here, the extension's "queued" post brings the loop back.
+            if store.queue.next?.id == note.id { return }
         }
     }
 
     private func transcribe(_ note: VoiceNote) async {
+        switch claimForApp(note) {
+        case .adopt(let result):
+            return await adoptExtensionResult(note, result: result)
+        case .waitForExtension:
+            return
+        case .transcribe:
+            break
+        }
         let started = Date()
         store.mutate { $0.update(note.id) { $0.state = .transcribing(progress: 0) } }
         DictationCoordinator.shared.extendWarmWindowForVoiceNote()
 
-        guard AppGroup.defaults.bool(forKey: SharedKeys.modelReady) else {
+        // Apple's engine, picked with no downloaded model, transcribes too (#1057, #1056).
+        if !AppGroup.defaults.bool(forKey: SharedKeys.modelReady),
+           !(await AppleEngineAssets.dictatesWithAppleOnly(context: "voiceNote")) {
             return fail(note, .transcriptionFailed, detail: "no model downloaded")
         }
         guard let url = store.audioURL(for: note) else {
@@ -297,11 +328,22 @@ final class VoiceNoteProcessor: ObservableObject {
         guard !transcript.isEmpty else { return fail(note, .noSpeech, detail: "empty transcript") }
         let record = TranscriptionRecord(id: note.id, text: transcript, policy: policy, duration: duration,
                                          createdAt: note.receivedAt, source: .sharedFile)
-        let saved = TranscriptionHistoryStore.shared.append(record) != nil
+        // A share extension that saved this note to History and then failed to write its
+        // result handed the note back (#1056): replace that entry's text, never add a
+        // second one.
+        let history = TranscriptionHistoryStore.shared
+        let saved: Bool
+        if history.record(id: note.id) != nil {
+            history.updateText(id: note.id, to: transcript)
+            saved = true
+        } else {
+            saved = history.append(record) != nil
+        }
         var evicted: [UUID] = []
         store.mutate {
             evicted = $0.complete(note.id, transcript: transcript, language: record.language, savedToHistory: saved)
         }
+        releaseClaim(note.id)
         // Not counted in `DictationTally` (#726, decided 2026-10-21): a shared voice
         // note is often someone else's voice, so its words are not "words dictated"
         // and typing them was never time the user would have spent.
@@ -320,6 +362,87 @@ final class VoiceNoteProcessor: ObservableObject {
         await runSmartModeInBackground(noteID: note.id, source: SmartModeSource(
             transcript: transcript, language: record.language,
             engine: policy.engine, durationSeconds: Int(duration.rounded())
+        ))
+    }
+
+    // MARK: - The share extension's results (#1056)
+
+    private enum ClaimDecision {
+        /// The extension finished this note: complete it from its result.
+        case adopt(VoiceNoteExtensionResult)
+        /// The extension is transcribing it now: leave it first in the queue.
+        case waitForExtension
+        /// The app owns the note: transcribe it.
+        case transcribe
+    }
+
+    /// Who finishes `note`. The result file is read first (#992 review): the launch prunes
+    /// claims older than an hour, and a note transcribed by the extension yesterday must
+    /// still be adopted, not transcribed again.
+    private func claimForApp(_ note: VoiceNote) -> ClaimDecision {
+        let short = note.id.uuidString.prefix(8)
+        if let storage = store.storage, let result = VoiceNoteExtensionResult.read(note.id, from: storage) {
+            return .adopt(result)
+        }
+        // No App Group directory: nobody else can have claimed it either.
+        guard let claims = VoiceNoteClaim.defaultDirectory else { return .transcribe }
+        switch VoiceNoteClaim.claim(note.id, as: .app, in: claims) {
+        case .app, nil:
+            // nil: the claim could not be written. Transcribing is today's behaviour, and
+            // refusing over a filesystem error would be the worse failure.
+            return .transcribe
+        case .shareExtension:
+            // Read the result again: the extension may have written it since the first read.
+            if let storage = store.storage, let result = VoiceNoteExtensionResult.read(note.id, from: storage) {
+                return .adopt(result)
+            }
+            let age = VoiceNoteClaim.age(note.id, in: claims)
+            switch VoiceNoteClaim.extensionClaimState(age: age) {
+            case .inProgress:
+                log("adoptWaiting", "id=\(short) reason=extensionTranscribing claimAgeSeconds=\(age.map { String(Int($0)) } ?? "unknown")")
+                return .waitForExtension
+            case .abandoned:
+                // #992 review: a killed or suspended extension must not hold the queue.
+                let took = VoiceNoteClaim.takeOver(note.id, in: claims)
+                log("takenOver", "id=\(short) reason=extensionClaimAbandoned claimAgeSeconds=\(age.map { String(Int($0)) } ?? "unknown") owned=\(took)")
+                return took ? .transcribe : .waitForExtension
+            }
+        }
+    }
+
+    /// The note is finished: its claim has done its job.
+    private func releaseClaim(_ id: UUID) {
+        guard let claims = VoiceNoteClaim.defaultDirectory else { return }
+        VoiceNoteClaim.release(id, as: .app, in: claims)
+        VoiceNoteClaim.release(id, as: .shareExtension, in: claims)
+    }
+
+    /// Complete a note the share extension transcribed (#1056): its History entry and the
+    /// keyboard delivery exist already; the queue, the island and the Smart Mode are this
+    /// process's to finish.
+    private func adoptExtensionResult(_ note: VoiceNote, result: VoiceNoteExtensionResult) async {
+        let short = note.id.uuidString.prefix(8)
+        var evicted: [UUID] = []
+        let committed = store.mutate {
+            $0.update(note.id) { $0.durationSeconds = result.durationSeconds }
+            evicted = $0.complete(note.id, transcript: result.transcript, language: result.language,
+                                  savedToHistory: result.savedToHistory)
+        }
+        // #992 review: the result goes only once the queue holds the transcript on disk.
+        // After a failed write it stays, and the next launch adopts the note again.
+        if committed, let storage = store.storage {
+            VoiceNoteExtensionResult.remove(note.id, from: storage)
+            releaseClaim(note.id)
+        }
+        withdrawKeyboardDeliveries(evicted, reason: "evictedFromQueue")
+        log("adopted", "id=\(short) chars=\(result.transcript.count) engine=\(result.engine) lang=\(result.language) savedToHistory=\(result.savedToHistory) queueCommitted=\(committed)")
+        // History was written by another process: this copy is from before it.
+        TranscriptionHistoryStore.shared.reloadFromDisk()
+        VoiceNoteIslandDriver.shared.finished(note.id, succeeded: true)
+        evaluatePresentation()
+        await runSmartModeInBackground(noteID: note.id, source: SmartModeSource(
+            transcript: result.transcript, language: result.language,
+            engine: .apple, durationSeconds: result.durationSeconds
         ))
     }
 

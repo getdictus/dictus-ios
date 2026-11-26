@@ -1,5 +1,5 @@
 // DictusCore/Sources/DictusCore/History/TranscriptionHistoryStore.swift
-// The saved dictations (#70): one JSON file in the App Group, loaded once.
+// The saved dictations (#70): one JSON file in the App Group, written by more than one process.
 import Foundation
 import SwiftUI
 
@@ -15,21 +15,28 @@ import SwiftUI
 ///
 /// ### Why DictusCore and not DictusApp
 ///
-/// So the keyboard extension can read it later without a second implementation.
-/// **It does not write it in this issue** — every mutation below runs in DictusApp,
-/// which is also the only process that transcribes. That single-writer property is
-/// what lets this file skip `NSFileCoordinator`, unlike `PolishEventStore`, which
-/// really does have two writers. A second writer arriving later has to revisit this
-/// paragraph, not just add a call.
+/// So every process that needs it uses one implementation. DictusApp writes it, and
+/// the Share extension is about to (#1056: a voice note transcribed with the app
+/// closed has to land in History). Until #1056 the app was the only writer, and this
+/// type relied on that: it loaded the file once and wrote its own copy back, so a
+/// second writer's entries were erased at the app's next save.
 ///
-/// ### Load once, write whole
+/// ### The file is the truth, the copy is what is on screen
 ///
-/// `records` is the truth for the lifetime of the process; the file is read once,
-/// in `init`, and rewritten in full on every mutation. At the cap that is 200 short
+/// `records` is this process's copy, read in `init`, published for SwiftUI. Every
+/// mutation is a read-modify-write of the **file**, inside an `NSFileCoordinator`,
+/// which serialises the writes of every process (and of every thread) that goes
+/// through one: the change lands on what is on disk now, never on a copy loaded
+/// minutes ago. The result becomes the new copy. The app calls `reloadFromDisk()`
+/// when it comes to the foreground, so an entry another process wrote while it was
+/// suspended is on screen when the user looks.
+///
+/// The file is rewritten in full on every mutation. At the cap that is 200 short
 /// strings — cheap enough that the alternative (an append-only journal plus
-/// compaction, which is what `PolishEventStore` needs for its two writers) buys
+/// compaction, which is what `PolishEventStore` uses for its two writers) buys
 /// nothing here. The write is atomic, so a process killed mid-write leaves the
-/// previous file rather than a truncated one.
+/// previous file rather than a truncated one, and an uncoordinated read
+/// (`reloadFromDisk`, `init`) sees the old file or the new one, never half of each.
 ///
 /// WHY the read is eager and not deferred to the first access: `records` is
 /// `@Published`, so it has to be a stored property, and a lazy load would have to
@@ -63,9 +70,8 @@ import SwiftUI
 @MainActor
 public final class TranscriptionHistoryStore: ObservableObject {
 
-    /// The app-wide store. A singleton for the same reason `UserDictionary` is one:
-    /// the in-memory copy IS the truth, so two instances would silently overwrite
-    /// each other's writes.
+    /// The process-wide store. A singleton so every view of this process observes the
+    /// same copy; writes from other processes reach it through `reloadFromDisk()`.
     public static let shared = TranscriptionHistoryStore()
 
     /// Newest first. The order the history view renders directly — sorting at read
@@ -145,13 +151,15 @@ public final class TranscriptionHistoryStore: ObservableObject {
         guard !record.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
             return nil
         }
-        records.insert(record, at: 0)
         var evicted: [UUID] = []
-        if records.count > Self.maxRecords {
-            evicted = records.suffix(records.count - Self.maxRecords).map(\.id)
-            records.removeLast(records.count - Self.maxRecords)
+        mutate { records in
+            records.insert(record, at: 0)
+            if records.count > Self.maxRecords {
+                evicted = records.suffix(records.count - Self.maxRecords).map(\.id)
+                records.removeLast(records.count - Self.maxRecords)
+            }
+            return true
         }
-        persist()
         if !evicted.isEmpty { onEvicted?(evicted) }
         return record
     }
@@ -171,10 +179,12 @@ public final class TranscriptionHistoryStore: ObservableObject {
     /// standing where the polished text belongs, which serves nobody.
     public func updateText(id: UUID, to newText: String) {
         guard !newText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
-        guard let index = records.firstIndex(where: { $0.id == id }) else { return }
-        guard records[index].text != newText else { return }
-        records[index] = records[index].withText(newText)
-        persist()
+        mutate { records in
+            guard let index = records.firstIndex(where: { $0.id == id }),
+                  records[index].text != newText else { return false }
+            records[index] = records[index].withText(newText)
+            return true
+        }
     }
 
     /// Store the summary of a shared voice note (#620), computed when its result was
@@ -182,18 +192,22 @@ public final class TranscriptionHistoryStore: ObservableObject {
     /// already on disk. A record that has gone in between is left alone.
     public func updateSummary(id: UUID, to summary: String, modeIdentifier: String) {
         guard !summary.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
-        guard let index = records.firstIndex(where: { $0.id == id }) else { return }
-        records[index] = records[index].withSummary(summary, modeIdentifier: modeIdentifier)
-        persist()
+        mutate { records in
+            guard let index = records.firstIndex(where: { $0.id == id }) else { return false }
+            records[index] = records[index].withSummary(summary, modeIdentifier: modeIdentifier)
+            return true
+        }
     }
 
     /// Mark a voice note's result as opened (#620). Ungated for `updateText`'s reason.
     /// Only the first opening is recorded.
     public func markOpened(id: UUID, at date: Date = Date()) {
-        guard let index = records.firstIndex(where: { $0.id == id }),
-              records[index].openedAt == nil else { return }
-        records[index] = records[index].withOpened(at: date)
-        persist()
+        mutate { records in
+            guard let index = records.firstIndex(where: { $0.id == id }),
+                  records[index].openedAt == nil else { return false }
+            records[index] = records[index].withOpened(at: date)
+            return true
+        }
     }
 
     /// Voice notes never opened, oldest first: the order they were shared in.
@@ -214,30 +228,81 @@ public final class TranscriptionHistoryStore: ObservableObject {
     }
 
     public func delete(id: UUID) {
-        let remaining = records.filter { $0.id != id }
-        guard remaining.count != records.count else { return }
-        records = remaining
-        persist()
+        mutate { records in
+            let remaining = records.filter { $0.id != id }
+            guard remaining.count != records.count else { return false }
+            records = remaining
+            return true
+        }
     }
 
     /// Delete by row offsets, for `List`'s own swipe-to-delete.
     public func delete(atOffsets offsets: IndexSet) {
         guard !offsets.isEmpty else { return }
-        records.remove(atOffsets: offsets)
-        persist()
+        // Offsets point into the list on screen; the file may hold more by now. Resolve
+        // them to identities first, then remove those from the fresh copy.
+        let ids = Set(offsets.compactMap { records.indices.contains($0) ? records[$0].id : nil })
+        mutate { records in
+            let before = records.count
+            records.removeAll { ids.contains($0.id) }
+            return records.count != before
+        }
     }
 
     /// Empty the history. The destructive Settings row (brief decision 3).
     public func clear() {
-        guard !records.isEmpty else { return }
-        records = []
-        persist()
+        mutate { records in
+            guard !records.isEmpty else { return false }
+            records = []
+            return true
+        }
     }
 
     // MARK: - Disk
 
-    private func persist() {
-        Self.write(records, to: fileURL)
+    /// Re-read the file and publish it when it changed. The app calls this when it comes
+    /// to the foreground (#1056): another process may have written an entry while the
+    /// app was closed or suspended, and this process's copy is from before that.
+    public func reloadFromDisk() {
+        let fresh = Self.read(from: fileURL)
+        if fresh != records { records = fresh }
+    }
+
+    /// Read-modify-write against the file, not against this process's copy.
+    ///
+    /// WHY (#1056): more than one process writes this file. Each used to persist its own
+    /// in-memory array, loaded when its process started, so whichever wrote last erased
+    /// the other's entries. The change is applied to what is on disk now, inside a file
+    /// coordinator, which serialises the processes' writes. `change` returns whether it
+    /// changed anything, so a no-op does not rewrite the file.
+    ///
+    /// It runs on the main actor and blocks it while another process holds the file: a
+    /// write is a few kilobytes, so the wait is the other side's few milliseconds.
+    private func mutate(_ change: (inout [TranscriptionRecord]) -> Bool) {
+        guard let fileURL else {
+            var current = records
+            if change(&current) { records = current }
+            return
+        }
+        var result: [TranscriptionRecord]?
+        var coordinationError: NSError?
+        NSFileCoordinator(filePresenter: nil).coordinate(
+            writingItemAt: fileURL, options: .forMerging, error: &coordinationError
+        ) { url in
+            var current = Self.read(from: url)
+            if change(&current) { Self.write(current, to: url) }
+            result = current
+        }
+        if let result {
+            if result != records { records = result }
+        } else {
+            // Coordination failed: keep the old behaviour rather than lose the change.
+            var current = records
+            if change(&current) {
+                records = current
+                Self.write(current, to: fileURL)
+            }
+        }
     }
 
     static func read(from url: URL?) -> [TranscriptionRecord] {

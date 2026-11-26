@@ -118,7 +118,8 @@ struct HomeView: View {
             // rather than among the cards: it is within thumb reach, it stays put when
             // the last-transcription card comes and goes, and it sits where the
             // recording screen's own mic sits.
-            if modelManager.isModelReady {
+            // A downloaded model, or Apple's engine picked and ready (#1057).
+            if modelManager.canDictate {
                 micRow
                     // Above the hint below it, which the dial's line overlaps.
                     .zIndex(1)
@@ -205,6 +206,9 @@ struct HomeView: View {
             // Refresh model state every time HomeView appears.
             modelManager.loadState()
             refreshSmartMode()
+            // Apple's engine may have changed since (a language change, an install). Only
+            // read for a user who picked it (#1057).
+            Task { await modelManager.refreshAppleEngineReadiness() }
         }
         // The keyboard arms modes from another app, so the change lands while this
         // screen is in the background. Coming back to the foreground is when the badge
@@ -321,6 +325,8 @@ struct HomeView: View {
                 }
                 .padding()
                 .dictusGlass()
+            } else if modelManager.dictatesWithAppleOnly {
+                appleEngineStatusCard
             } else {
                 // No model — prompt to download
                 VStack(spacing: 12) {
@@ -339,6 +345,31 @@ struct HomeView: View {
                 .dictusGlass()
             }
         }
+    }
+
+    /// The active-model card when Apple's engine is the only one (#1057): no downloaded
+    /// model, Apple picked and ready. A user with a downloaded model keeps the card above,
+    /// unchanged. The strings are the Models screen's Apple card's.
+    private var appleEngineStatusCard: some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Active model")
+                    .font(.dictusCaption)
+                    .foregroundColor(.secondary)
+                Text("Apple (on-device)", comment: "Models screen: name of Apple's speech recognition as an engine the user can pick.")
+                    .font(.dictusSubheading)
+                Text("No download in Dictus", comment: "Apple engine card: where the size of a downloadable model is shown.")
+                    .font(.dictusCaption)
+                    .foregroundColor(.secondary)
+            }
+            Spacer()
+            Image(systemName: "checkmark.circle.fill")
+                .font(.title2)
+                .foregroundColor(.dictusSuccess)
+        }
+        .padding()
+        .dictusGlass()
+        .accessibilityIdentifier("home.activeModel.apple")
     }
 
     // MARK: - Last Transcription Card

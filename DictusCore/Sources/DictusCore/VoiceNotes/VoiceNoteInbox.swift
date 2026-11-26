@@ -60,8 +60,8 @@ public struct VoiceNoteDrop: Codable, Equatable, Sendable {
 ///
 /// ### Why a drop box and not a shared queue file
 ///
-/// The queue has one writer, DictusApp — the same single-writer property that lets
-/// `TranscriptionHistoryStore` skip `NSFileCoordinator`. The extension never touches
+/// The queue has one writer, DictusApp, which is what lets `VoiceNoteQueueStore`
+/// skip `NSFileCoordinator` (History no longer can, since #1056). The extension never touches
 /// the queue: it leaves the audio and a small sidecar in `Inbox/`, and the app moves
 /// them into the queue when it next runs. Two processes, two directories, no file
 /// either of them shares for writing.
@@ -95,6 +95,12 @@ public enum VoiceNoteInbox {
         let data = try JSONEncoder.voiceNotes.encode(drop)
         try data.write(to: storage.inboxDirectory.appendingPathComponent(drop.sidecarFileName), options: .atomic)
         return drop
+    }
+
+    /// Where a pending drop's audio sits until the app ingests it (#1056: the share
+    /// extension transcribes it there when the app is closed).
+    public static func audioURL(of drop: VoiceNoteDrop, storage: VoiceNoteStorage) -> URL {
+        storage.inboxDirectory.appendingPathComponent(drop.audioFileName)
     }
 
     /// Whether the extension's drop is still waiting in the inbox.

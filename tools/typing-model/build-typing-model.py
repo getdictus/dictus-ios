@@ -4,18 +4,23 @@ Books Ngram v3 (2020-02-17, CC BY 3.0) word and word-pair counts, keeping only w
 word list knows: SCOWL (sizes up to 70) for English, RLA-ES (LibreOffice's es_ES and
 es_MX Hunspell dictionaries, used under their MPL 1.1 option) for Spanish, and
 Grammalecte's "Classique" French Hunspell dictionary (LibreOffice's fr_FR, MPL 2.0) plus
-the elided clitics ("l'", "j'", "qu'") for French. Counts are summed over 1980-2019.
+the elided clitics ("l'", "j'", "qu'") for French, and Markus Enzenberger's German wordlist
+(github.com/enz/german-wordlist, CC0 1.0, pinned commit) for German. Counts are summed over
+1980-2019.
 
 Adapted from Hex's `ios/scripts/build-typing-model.py` (github.com/anomalyco/hex, branch
 dev, MIT, Copyright (c) 2026 Christopher Langton). Dictus adds French (#1011); the
 format and the English and Spanish paths are Hex's, unchanged, so `en.hextm` here is
-byte-identical to Hex's.
+byte-identical to Hex's. German (#948) mirrors Hex's German recipe
+(`android/benchmark/typing/build-layout-model.py`: shards "ger" 8 + 181, letters a-z ä ö
+ü ß, 95,000 words) but keeps only the words of the CC0 list, where Hex keeps every
+alphabetic token of the corpus, and gives ß the base s, since no Dictus layout has an ß key.
 
     python3 -m venv /tmp/venv && /tmp/venv/bin/pip install spylls   # Spanish and French
     /tmp/venv/bin/python tools/typing-model/build-typing-model.py fr <workdir> DictusKeyboard/Resources/fr.hextm
 
 Needs about 7 GB free in <workdir> while it runs (English downloads ~240 GB of ngrams,
-Spanish ~50 GB, French ~95 GB, each file deleted once counted) and a fast connection; every stage is
+Spanish ~50 GB, French ~95 GB, German ~150 GB, each file deleted once counted) and a fast connection; every stage is
 cached in <workdir>, so a rerun resumes. Deterministic for the same inputs.
 
 Format v3 (little-endian), memory-mapped by SpatialDecoderModel.swift:
@@ -28,10 +33,10 @@ Format v3 (little-endian), memory-mapped by SpatialDecoderModel.swift:
     each first word), u8[B] pair cost, blob (one code byte per letter)
 Costs are -ln(p) in eighths of a nat, clamped to 255: P(word), and P(second | first).
 """
-import gzip, math, multiprocessing, os, re, struct, subprocess, sys, tarfile, unicodedata, urllib.request
+import gzip, hashlib, math, multiprocessing, os, re, struct, subprocess, sys, tarfile, unicodedata, urllib.request
 
 BASE = "https://storage.googleapis.com/books/ngrams/books/20200217"
-FILES = {"en": ("eng", 24, 589), "es": ("spa", 3, 73), "fr": ("fre", 6, 115)}
+FILES = {"en": ("eng", 24, 589), "es": ("spa", 3, 73), "fr": ("fre", 6, 115), "de": ("ger", 8, 181)}
 SCOWL = "https://downloads.sourceforge.net/project/wordlist/SCOWL/2020.12.07/scowl-2020.12.07.tar.gz"
 RLA_ES = "https://raw.githubusercontent.com/LibreOffice/dictionaries/master/es/"
 RLA_ES_LOCALES = ("es_ES", "es_MX")
@@ -39,12 +44,21 @@ FR_FR = "https://raw.githubusercontent.com/LibreOffice/dictionaries/master/fr_FR
 # Google Books keeps most elisions whole ("j'ai", "qu'il") and splits off "l'" and "d'"
 # ("l'" + "homme"): those clitics are words of their own, which Hunspell does not list.
 FR_ELISIONS = {"c'", "d'", "j'", "l'", "m'", "n'", "s'", "t'", "qu'", "jusqu'", "lorsqu'", "puisqu'", "quoiqu'"}
+# German: Markus Enzenberger's list, CC0 1.0, at a pinned commit, checked by its SHA-256.
+# It writes each word as German does ("Haus", "gehen"); the model is lowercase, so a word is
+# kept when its lowercase form is any entry's lowercase form.
+DE_LIST = ("https://raw.githubusercontent.com/enz/german-wordlist/"
+           "1071d87d9535b57b80ec076c699f2578a28ee9dc/words",
+           "20095928ca70974fb5d86e44f10181cee16e2831b0d4b1a4ddd12c261aebc5e9")
 FIRST_YEAR = 1980
-MAX_WORDS = {"en": 90_000, "es": 110_000, "fr": 110_000}
+MAX_WORDS = {"en": 90_000, "es": 110_000, "fr": 110_000, "de": 95_000}
 MAX_BYTES = 3_600_000      # the whole model
 MIN_PAIR = 2_000           # pairs rarer than this (1980-2019) can't make the cut
 LETTERS = {"en": "abcdefghijklmnopqrstuvwxyz'", "es": "abcdefghijklmnopqrstuvwxyzñáéíóúü",
-           "fr": "abcdefghijklmnopqrstuvwxyzàâæçéèêëîïôœùûüÿ'"}
+           "fr": "abcdefghijklmnopqrstuvwxyzàâæçéèêëîïôœùûüÿ'", "de": "abcdefghijklmnopqrstuvwxyzäöüß"}
+# A letter with no key of its own and no canonical decomposition, read on another key: ß has
+# no key on any Dictus layout and is swiped through s ("straße" on s-t-r-a-s-e).
+BASE_LETTER = {"ß": "s"}
 
 
 def urls(lang, n):
@@ -57,6 +71,17 @@ def fetch(url, path):
     if not os.path.exists(path):
         subprocess.run(["curl", "-sSfL", "--http1.1", "--retry", "8", "--retry-all-errors", "-o", path + ".part", url], check=True)
         os.replace(path + ".part", path)
+
+
+def record_sha256(raw, out):
+    """Writes `<out>.sha256` (sha256, size, shard name) before the shard is deleted, so the
+    exact inputs of a model can be listed after the run (`cat <workdir>/*/*.sha256`)."""
+    h = hashlib.sha256()
+    with open(raw, "rb") as f:
+        for block in iter(lambda: f.read(1 << 22), b""):
+            h.update(block)
+    with open(out + ".sha256", "w") as f:
+        f.write(f"{h.hexdigest()}  {os.path.getsize(raw)}  {os.path.basename(raw)}\n")
 
 
 def lines(path):
@@ -99,6 +124,7 @@ def count_unigrams(job):
         for w, c in counts.items():
             if c:
                 f.write(w + b"\t" + str(c).encode() + b"\n")
+    record_sha256(raw, out)
     os.replace(out + ".part", out)
     os.remove(raw)
     return out
@@ -133,6 +159,7 @@ def count_pairs(job):
         for k, c in counts.items():
             if c >= MIN_PAIR // 4:
                 f.write(k + b"\t" + str(c).encode() + b"\n")
+    record_sha256(raw, out)
     os.replace(out + ".part", out)
     os.remove(raw)
     return out
@@ -153,6 +180,15 @@ def word_list(lang, work):
                     for w in t.extractfile(m).read().decode("latin-1").split():
                         if w == w.lower():
                             words.add(w)
+        return words.__contains__
+    if lang == "de":
+        url, sha256 = DE_LIST
+        path = os.path.join(work, "german-wordlist.txt")
+        fetch(url, path)
+        data = open(path, "rb").read()
+        if hashlib.sha256(data).hexdigest() != sha256:
+            sys.exit(f"{path}: SHA-256 is not {sha256}")
+        words = {w.lower() for w in data.decode("utf-8").split()}
         return words.__contains__
     from spylls.hunspell import Dictionary
     if lang == "fr":
@@ -221,7 +257,7 @@ def write_model(lang, vocab, total, pairs, out_path):
     scalars = sorted({c for w in vocab for c in w})
     code = {c: i + 1 for i, c in enumerate(scalars)}
     def base(c):
-        b = unicodedata.normalize("NFD", c)[0]
+        b = BASE_LETTER.get(c) or unicodedata.normalize("NFD", c)[0]
         return code.get(b, code[c])
     enc = {w: bytes(code[c] for c in w) for w in vocab}
     words = sorted(vocab, key=lambda w: enc[w])
