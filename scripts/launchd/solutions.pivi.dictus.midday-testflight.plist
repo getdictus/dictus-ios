@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Template for the midday TestFlight build of develop, internal only. Not loaded as is:
+  __REPO__ and __HOME__ are replaced at install time. Two attempts: 12:00, and 12:30 in
+  case 12:00 skipped (CI still running, a build in progress). When 12:00 built, 12:30
+  finds its tag and skips without touching its summary. Install, uninstall and logs:
+  docs/nightly-testflight.md.
+-->
+<plist version="1.0">
+<dict>
+	<key>Label</key>
+	<string>solutions.pivi.dictus.midday-testflight</string>
+	<key>ProgramArguments</key>
+	<array>
+		<string>/bin/bash</string>
+		<string>__REPO__/scripts/nightly-testflight.sh</string>
+		<string>--slot</string>
+		<string>midi</string>
+	</array>
+	<key>StartCalendarInterval</key>
+	<array>
+		<dict>
+			<key>Hour</key>
+			<integer>12</integer>
+			<key>Minute</key>
+			<integer>0</integer>
+		</dict>
+		<dict>
+			<key>Hour</key>
+			<integer>12</integer>
+			<key>Minute</key>
+			<integer>30</integer>
+		</dict>
+	</array>
+	<key>EnvironmentVariables</key>
+	<dict>
+		<key>PATH</key>
+		<string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+		<key>LANG</key>
+		<string>en_US.UTF-8</string>
+	</dict>
+	<key>WorkingDirectory</key>
+	<string>__REPO__</string>
+	<key>StandardOutPath</key>
+	<string>__HOME__/Library/Logs/dictus-nightly/launchd-midi.log</string>
+	<key>StandardErrorPath</key>
+	<string>__HOME__/Library/Logs/dictus-nightly/launchd-midi.log</string>
+	<key>RunAtLoad</key>
+	<false/>
+</dict>
+</plist>
