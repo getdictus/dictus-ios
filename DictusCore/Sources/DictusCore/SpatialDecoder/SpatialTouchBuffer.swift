@@ -73,6 +73,14 @@ public struct SpatialTouchBuffer: Equatable {
         return Array(points.suffix(w.count))
     }
 
+    /// The decoder's input for `word`: its taps and the keys they were made on, or nil.
+    /// Nil whenever `isOn` is false, whatever the buffer holds: the space bar then asks the
+    /// decoder nothing, since the engine consults it only with an input (#1011).
+    public func decoderInput(for word: String, isOn: Bool) -> SpatialCorrection.Input? {
+        guard isOn, let keys, let taps = taps(for: word) else { return nil }
+        return SpatialCorrection.Input(taps: taps, keys: keys)
+    }
+
     public mutating func clear() { reset([]) }
 
     /// Starts over. A token the buffer did not see being typed is marked by text without

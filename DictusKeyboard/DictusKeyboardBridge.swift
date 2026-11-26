@@ -91,7 +91,7 @@ final class DictusKeyboardBridge: NSObject, // swiftlint:disable:this type_body_
         didSet {
             refreshReturnKey()
             // A new view starts without swipe typing; it gets it back here when it acts (#948).
-            refreshSwipeTyping(trigger: "newView")
+            refreshExperiments(trigger: "newView")
         }
     }
 
@@ -1536,11 +1536,23 @@ extension DictusKeyboardBridge {
         spatialTouches.deleted(token: SpatialTouchBuffer.token(before: context))
     }
 
-    /// The taps of `word` and the keys they were made on, when the buffer holds them.
+    /// The taps of `word` and the keys they were made on, when the buffer holds them and
+    /// the switch is on. Nil otherwise, and the engine then never consults the decoder.
     fileprivate func spatialInput(for word: String) -> SpatialCorrection.Input? {
-        guard SpatialAutocorrect.isOn, let keys = spatialTouches.keys,
-              let taps = spatialTouches.taps(for: word) else { return nil }
-        return SpatialCorrection.Input(taps: taps, keys: keys)
+        spatialTouches.decoderInput(for: word, isOn: SpatialAutocorrect.isOn)
+    }
+
+    /// Reads the Experiments switches the app may have changed while the keyboard was away:
+    /// spatial autocorrect here, then swipe typing. Called for every new keyboard view and
+    /// at every appearance.
+    func refreshExperiments(trigger: String) {
+        let wasOn = SpatialAutocorrect.isOn
+        let isOn = SpatialAutocorrect.refresh(.forKeyboard())
+        // Taps recorded under the other answer belong to no decode now.
+        if isOn != wasOn { spatialTouches.clear() }
+        let channel = AppDistribution.recorded()?.rawValue ?? "none"
+        PersistentLog.log(.spatialAutocorrectConfigured(on: isOn, channel: channel, trigger: trigger))
+        refreshSwipeTyping(trigger: trigger)
     }
 }
 
@@ -1558,8 +1570,14 @@ extension DictusKeyboardBridge {
 
     /// Backspace went down at `x`, after its touch-down deletion. `step` is a letter key's
     /// width: one word per key width, as in Hex.
+    ///
+    /// Starts nothing when "Effacer en glissant" is off in the app's Keyboard settings: the
+    /// moves then delete nothing and leave the repeat running, so backspace is a plain held
+    /// key; the view still keeps the finger on it, so no other key is typed on lift. Read
+    /// here, at each touch-down, so a change in the app holds from the next press.
     func deleteSwipeBegan(atX x: CGFloat, step: CGFloat) {
-        deleteSwipe = DeleteWordSwipe(
+        deleteSwipe = DeleteWordSwipe.begin(
+            .forKeyboard(),
             editor: documentEditor,
             mirror: mirrorSync,
             startX: Double(x),

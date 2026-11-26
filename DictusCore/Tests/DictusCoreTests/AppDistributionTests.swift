@@ -1,6 +1,7 @@
 // DictusCore/Tests/DictusCoreTests/AppDistributionTests.swift
 // The distribution the app hands the keyboard, and swipe typing's switches as the keyboard
 // applies them on each one (#948).
+import CoreGraphics
 import XCTest
 @testable import DictusCore
 
@@ -114,7 +115,7 @@ final class AppDistributionTests: XCTestCase {
 
     /// The keyboard builds its swipe controller only on `.on`: every other answer is the
     /// keyboard without swipe typing.
-    func testTheKeyboardSwipesOnlyWithTheSwitchOnATestBuildInEnglishOrFrench() {
+    func testTheKeyboardSwipesOnlyWithTheSwitchOnATestBuildInEnglishFrenchSpanishOrGerman() {
         func availability(_ language: SupportedLanguage) -> SwipeTypingText.Availability {
             SwipeTypingText.availability(keyboard(), language: language)
         }
@@ -125,8 +126,8 @@ final class AppDistributionTests: XCTestCase {
         keyboard().swipeTyping = true
         XCTAssertEqual(availability(.english), .on)
         XCTAssertEqual(availability(.french), .on)
-        XCTAssertEqual(availability(.spanish), .language)
-        XCTAssertEqual(availability(.german), .language)
+        XCTAssertEqual(availability(.spanish), .on)
+        XCTAssertEqual(availability(.german), .on)
         AppDistribution.record(.appStore, in: defaults)
         XCTAssertEqual(availability(.english), .appStore)
         defaults.removeObject(forKey: SharedKeys.appDistribution)
@@ -134,6 +135,73 @@ final class AppDistributionTests: XCTestCase {
         keyboard().swipeTyping = false
         AppDistribution.record(.debug, in: defaults)
         XCTAssertEqual(availability(.english), .off)
+    }
+
+    // MARK: - Spatial autocorrect as the keyboard applies it
+
+    /// The buffer of a fully typed word, its taps on the key centres.
+    private func typedBuffer(_ word: String) -> SpatialTouchBuffer {
+        var buffer = SpatialTouchBuffer()
+        let keys = SpatialDecoder.Keys(
+            centres: ["a": CGPoint(x: 20, y: 27), "b": CGPoint(x: 60, y: 27)],
+            pitch: CGSize(width: 40, height: 54), bottomRowY: 135, space: CGRect(x: 100, y: 162, width: 200, height: 54)
+        )
+        var token = ""
+        for c in word {
+            token.append(c)
+            buffer.typed(String(c), at: CGPoint(x: token.count, y: 0), keys: keys, token: token)
+        }
+        return buffer
+    }
+
+    /// The Experiments switch off (its default) on every build: the space bar asks the
+    /// decoder nothing, though the buffer holds every tap of the word.
+    func testSpatialAutocorrectOffGivesTheDecoderNothing() {
+        let buffer = typedBuffer("ab")
+        XCTAssertNotNil(buffer.decoderInput(for: "ab", isOn: true), "the buffer holds the word")
+        for distribution in AppDistribution.allCases {
+            AppDistribution.record(distribution, in: defaults)
+            XCTAssertFalse(keyboard().isSpatialAutocorrectEffective, "untouched, \(distribution.rawValue)")
+            keyboard().spatialAutocorrect = false
+            XCTAssertFalse(keyboard().isSpatialAutocorrectEffective, "off, \(distribution.rawValue)")
+            XCTAssertNil(buffer.decoderInput(for: "ab", isOn: keyboard().isSpatialAutocorrectEffective))
+            defaults.removeObject(forKey: SharedKeys.keyboardSpatialAutocorrect)
+        }
+    }
+
+    /// Switched on in TestFlight, then the App Store build: ignored, as swipe typing is.
+    func testAnAppStoreBuildIgnoresSpatialAutocorrectSwitchedOn() {
+        let buffer = typedBuffer("ab")
+        keyboard().spatialAutocorrect = true
+        AppDistribution.record(.appStore, in: defaults)
+        XCTAssertTrue(keyboard().spatialAutocorrect, "the choice is kept")
+        XCTAssertFalse(keyboard().isSpatialAutocorrectEffective)
+        XCTAssertNil(buffer.decoderInput(for: "ab", isOn: keyboard().isSpatialAutocorrectEffective))
+        defaults.removeObject(forKey: SharedKeys.appDistribution)
+        XCTAssertFalse(keyboard().isSpatialAutocorrectEffective, "no distribution recorded")
+    }
+
+    func testATestBuildWithSpatialAutocorrectOnGivesTheDecoderTheTaps() {
+        let buffer = typedBuffer("ab")
+        keyboard().spatialAutocorrect = true
+        for distribution in [AppDistribution.debug, .testFlight] {
+            AppDistribution.record(distribution, in: defaults)
+            XCTAssertTrue(keyboard().isSpatialAutocorrectEffective, distribution.rawValue)
+            let input = buffer.decoderInput(for: "ab", isOn: keyboard().isSpatialAutocorrectEffective)
+            XCTAssertEqual(input?.taps, [CGPoint(x: 1, y: 0), CGPoint(x: 2, y: 0)], distribution.rawValue)
+        }
+    }
+
+    // MARK: - Delete swipe, a normal setting
+
+    func testDeleteWordSwipeActsAsStoredOnEveryBuild() {
+        for distribution in AppDistribution.allCases {
+            AppDistribution.record(distribution, in: defaults)
+            defaults.removeObject(forKey: SharedKeys.keyboardDeleteWordSwipe)
+            XCTAssertTrue(keyboard().deleteWordSwipe, "untouched, \(distribution.rawValue)")
+            keyboard().deleteWordSwipe = false
+            XCTAssertFalse(keyboard().deleteWordSwipe, "switched off, \(distribution.rawValue)")
+        }
     }
 
     func testTheExperimentRule() {

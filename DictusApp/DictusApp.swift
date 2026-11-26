@@ -360,6 +360,11 @@ struct DictusApp: App {
         // this app is ever launched again — so this call is only about doing it as early as
         // possible on the app side.
         KeyboardLayoutPreference.migrateToPerLanguageLayoutsIfNeeded()
+
+        // Apple's speech model for the voice-note language (#1056), reserved now so the
+        // share extension finds it with the app closed. Here, once the App Group reads can
+        // be trusted: before the first unlock the languages would read as defaults.
+        VoiceNoteSpeechAssets.refresh(context: "launch")
     }
 
     /// Run the launch work a boot launch deferred, and read the onboarding flag again
@@ -395,17 +400,19 @@ struct DictusApp: App {
 
     #if DEBUG
     /// `-DictusDebugSpatialAutocorrect YES` (or `NO`) on the launch line turns the keyboard's
-    /// spatial decoder on or off (#1011), for a device test of a Debug build:
-    /// `xcrun devicectl device process launch --device <id> com.pivi.dictus -DictusDebugSpatialAutocorrect YES`.
+    /// spatial decoder on or off (#1011), for a scripted test of a Debug build:
+    /// `xcrun devicectl device process launch --device <id> com.pivi.dictus -DictusDebugSpatialAutocorrect YES`
+    /// (`xcrun simctl launch <udid> com.pivi.dictus -DictusDebugSpatialAutocorrect YES` on a simulator).
     ///
-    /// WHY a launch argument: the switch has no row in the app's settings yet (#992 owns
-    /// SettingsView), and the keyboard, which reads it, gets no launch arguments. Written
-    /// here, with the launch's other App Group writes, once protected data is available.
+    /// It writes the Experiments page's own switch (`SharedKeys.keyboardSpatialAutocorrect`),
+    /// so the page shows what the argument set and the keyboard reads it at its next
+    /// appearance, like a tap on the switch. WHY keep an argument at all: a script reaches
+    /// the switch without driving the Experiments page. Written with the launch's other App
+    /// Group writes, once protected data is available.
     private static func applySpatialAutocorrectArgument() {
         let argument = "DictusDebugSpatialAutocorrect"
         guard ProcessInfo.processInfo.arguments.contains("-\(argument)") else { return }
-        // The key is `SpatialAutocorrect.switchKey` in DictusKeyboard, where it is read.
-        AppGroup.defaults.set(UserDefaults.standard.bool(forKey: argument), forKey: "debug.spatialAutocorrect")
+        KeyboardFeatureSettings().spatialAutocorrect = UserDefaults.standard.bool(forKey: argument)
     }
     #endif
 
@@ -495,6 +502,10 @@ struct DictusApp: App {
                         // #620's cold path: a voice note shared while the app was not
                         // running starts now, with the list on screen.
                         VoiceNoteProcessor.shared.appBecameActive()
+                        // The keyboard's own language switch writes from another
+                        // process: a language changed there is seen here (#1056).
+                        // Nothing runs when neither language moved.
+                        VoiceNoteSpeechAssets.refresh(context: "didBecomeActive")
                         // Drop polish journal entries past 7 days (#946). The keyboard
                         // writes most of them and only ever appends, so without this they
                         // stay until the app happens to record a polish event itself.
@@ -552,6 +563,12 @@ struct DictusApp: App {
                     @unknown default:
                         break
                     }
+                }
+                .onChange(of: proStatus.isProActive) { _, _ in
+                    // A trial or purchase that starts while the app is on screen, the
+                    // end of onboarding among them, reserves the voice-note model now
+                    // rather than at the next activation (#1056).
+                    VoiceNoteSpeechAssets.refresh(context: "proStatus")
                 }
                 .onChange(of: hasCompletedOnboarding) { previous, current in
                     // Only the user finishing onboarding, `false` to `true`. A boot launch
