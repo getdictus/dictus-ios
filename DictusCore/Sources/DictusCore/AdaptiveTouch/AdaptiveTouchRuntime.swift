@@ -60,6 +60,9 @@ public final class AdaptiveTouchRuntime {
                                              resetAt: resetAt)
             return .adaptiveTouchStatus(on: true, stored: .notRead, status: status)
         }
+        // Turning off just queued the dropped learner's save (`refresh`): read the file once it
+        // landed, or this line reports the file before it. Nothing queued, nothing to wait for.
+        AdaptiveTouch.waitForWrites()
         let data = url.flatMap { FileManager.default.fileExists(atPath: $0.path) ? try? Data(contentsOf: $0) : nil }
         let (stored, status) = AdaptiveTouchStatus.stored(data: data, resetAt: resetAt)
         return .adaptiveTouchStatus(on: false, stored: stored, status: status)

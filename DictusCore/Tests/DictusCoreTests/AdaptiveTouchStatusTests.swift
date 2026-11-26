@@ -199,12 +199,13 @@ final class AdaptiveTouchStatusTests: XCTestCase {
         XCTAssertTrue(on.hasPrefix("on=true labelled="))
         XCTAssertTrue(on.contains("profile=yes active=yes"))
 
+        // No wait here: the line itself must read the file after the save turning off queued.
+        let expected = AdaptiveTouchStatus(model: learner.model).logFields
         settings.adaptiveTouch = false
         runtime.refresh(settings)
-        AdaptiveTouch.waitForWrites()
         let off = runtime.statusEvent(file: url, defaults: defaults).message
         XCTAssertTrue(off.hasPrefix("on=false stored=yes labelled="), off)
-        XCTAssertTrue(off.contains("active=yes"), "what the file holds, as the keyboard would read it")
+        XCTAssertEqual(off, "on=false stored=yes \(expected)", "the file as the learner just wrote it")
         XCTAssertEqual(made, 1)
 
         AdaptiveTouchStore.requestReset(defaults: defaults, url: nil)
