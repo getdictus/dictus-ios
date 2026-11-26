@@ -69,6 +69,9 @@ extension DictusKeyboardBridge {
         let channel = AppDistribution.recorded()?.rawValue ?? "none"
         PersistentLog.log(.spatialAutocorrectConfigured(on: isOn, channel: channel, trigger: trigger))
         PersistentLog.log(.adaptiveTouchConfigured(on: adaptiveOn, trigger: trigger))
+        // #1081: what it learned, from the learner in memory (the App Group file while off),
+        // once per appearance and never per keystroke.
+        PersistentLog.log(AdaptiveTouchSwitch.statusEvent())
         refreshSwipeTyping(trigger: trigger)
     }
 }

@@ -37,6 +37,12 @@ enum AdaptiveTouchSwitch {
         runtime.refresh(settings)
     }
 
+    /// The `adaptiveTouchStatus` line (#1081): the learner's counts while on, the App Group
+    /// file's while off. Logged at each appearance with `adaptiveTouchConfigured`.
+    static func statusEvent() -> LogEvent {
+        runtime.statusEvent(file: AdaptiveTouchStore.defaultURL, defaults: AppGroup.defaults)
+    }
+
     /// Writes what was learned, when the keyboard goes away.
     static func save() {
         runtime.save()

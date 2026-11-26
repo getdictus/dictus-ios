@@ -352,6 +352,12 @@ public enum LogEvent: Sendable {
     /// (#1014). `on` is `KeyboardFeatureSettings.isAdaptiveTouchEffective`, read with the
     /// line above; `trigger` as above.
     case adaptiveTouchConfigured(on: Bool, trigger: String)
+    /// What Adaptive touch has learned, logged after the line above (#1081): the learning
+    /// context's labelled taps and sessions, whether it has a profile and the decoder reads
+    /// one, its promotions and its largest centre offset in keycaps with that key
+    /// (`AdaptiveTouchStatus.logFields`). Counts and one key name, never a typed letter. Off,
+    /// `stored` says what the App Group file holds and `status` summarizes it when it is valid.
+    case adaptiveTouchStatus(on: Bool, stored: AdaptiveTouchStatus.Stored, status: AdaptiveTouchStatus?)
     /// A swipe ended. `points` is the stroke's touch count, `decodeMs` how long the decode on
     /// lift took, `readings` how many words it read, `outcome` what went in (`word`,
     /// `slidTap`, `none`, `cancelled`).
@@ -833,7 +839,7 @@ public enum LogEvent: Sendable {
              .audioEngineStopped,
              .keyboardDidDisappear, .keyboardTextInserted,
              .keyRepeatStarted, .keyRepeatStopped, .deleteSwipeEnded,
-             .swipeTypingConfigured, .spatialAutocorrectConfigured, .adaptiveTouchConfigured, .swipeEnded,
+             .swipeTypingConfigured, .spatialAutocorrectConfigured, .adaptiveTouchConfigured, .adaptiveTouchStatus, .swipeEnded,
              .appDidBecomeActive, .appWillResignActive, .appDidEnterBackground,
              .rapidTapRejected,
              .engineWarmUpAttempt, .engineWarmUpSuccess,
@@ -1040,6 +1046,9 @@ public enum LogEvent: Sendable {
             return "on=\(on) channel=\(channel) trigger=\(trigger)"
         case .adaptiveTouchConfigured(let on, let trigger):
             return "on=\(on) trigger=\(trigger)"
+        case .adaptiveTouchStatus(let on, let stored, let status):
+            let fields = status.map { " " + $0.logFields } ?? ""
+            return on ? "on=true\(fields)" : "on=false stored=\(stored.rawValue)\(fields)"
         case .swipeEnded(let points, let decodeMs, let readings, let outcome):
             return "points=\(points) decodeMs=\(String(format: "%.2f", decodeMs)) readings=\(readings) outcome=\(outcome)"
         case .deleteSwipeEnded(let words, let frozen):
@@ -1324,7 +1333,7 @@ extension LogEvent {
         case .keyboardDidAppear, .keyboardDidDisappear, .keyboardMicTapped, .keyboardTextInserted,
              .hostReturn,
              .keyRepeatStarted, .keyRepeatStopped, .deleteSwipeEnded,
-             .swipeTypingConfigured, .spatialAutocorrectConfigured, .adaptiveTouchConfigured, .swipeEnded,
+             .swipeTypingConfigured, .spatialAutocorrectConfigured, .adaptiveTouchConfigured, .adaptiveTouchStatus, .swipeEnded,
              .overlayShown, .overlayHidden, .rapidTapRejected,
              .dictationMessageSet, .dictationMessageDisplayed, .dictationMessageCleared,
              .waveformAppeared, .waveformDisappeared, .waveformHeartbeat, .waveformStall,
@@ -1432,6 +1441,7 @@ extension LogEvent {
         case .swipeTypingConfigured: return "swipeTypingConfigured"
         case .spatialAutocorrectConfigured: return "spatialAutocorrectConfigured"
         case .adaptiveTouchConfigured: return "adaptiveTouchConfigured"
+        case .adaptiveTouchStatus: return "adaptiveTouchStatus"
         case .swipeEnded: return "swipeEnded"
         case .deleteSwipeEnded: return "deleteSwipeEnded"
         case .engineWarmUpAttempt: return "engineWarmUpAttempt"

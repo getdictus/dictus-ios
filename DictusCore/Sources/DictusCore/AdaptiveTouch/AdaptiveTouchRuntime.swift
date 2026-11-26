@@ -48,6 +48,23 @@ public final class AdaptiveTouchRuntime {
         return made
     }
 
+    /// The `adaptiveTouchStatus` line for this appearance (#1081), read from the learner in
+    /// memory while on. Off, from the App Group file at `url` when there is one (about 24 KB,
+    /// once per appearance, never per tap), so a switch turned off still says what is stored.
+    /// `defaults` holds the reset generation.
+    public func statusEvent(file url: URL?, defaults: UserDefaults?) -> LogEvent {
+        let resetAt = AdaptiveTouchStore.resetAt(defaults)
+        if let learner = current {
+            let letters = learner.geometry.map { [$0.key: $0.letters] } ?? [:]
+            let status = AdaptiveTouchStatus(model: learner.model, geometry: learner.geometry?.key, letters: letters,
+                                             resetAt: resetAt)
+            return .adaptiveTouchStatus(on: true, stored: .notRead, status: status)
+        }
+        let data = url.flatMap { FileManager.default.fileExists(atPath: $0.path) ? try? Data(contentsOf: $0) : nil }
+        let (stored, status) = AdaptiveTouchStatus.stored(data: data, resetAt: resetAt)
+        return .adaptiveTouchStatus(on: false, stored: stored, status: status)
+    }
+
     /// Writes what was learned (the keyboard going away).
     public func save() {
         learner?.save()

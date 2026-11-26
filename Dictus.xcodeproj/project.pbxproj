@@ -18,6 +18,7 @@
 		AA0000L0 /* ModelInfo+Localized.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000L0 /* ModelInfo+Localized.swift */; };
 		SS000001 /* SubscriptionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = SS100001 /* SubscriptionManager.swift */; };
 		RT5930000004 /* ProTrialDebugSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = RT5930100004 /* ProTrialDebugSection.swift */; };
+		AT1081000001 /* AdaptiveTouchExportSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = AT1081100001 /* AdaptiveTouchExportSection.swift */; };
 		RT5930000003 /* ProTrialPaywallSections.swift in Sources */ = {isa = PBXBuildFile; fileRef = RT5930100003 /* ProTrialPaywallSections.swift */; };
 		PH2160000001 /* ProHubSections.swift in Sources */ = {isa = PBXBuildFile; fileRef = PH2160100001 /* ProHubSections.swift */; };
 		AA000687 /* ProFeatureSceneSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100687 /* ProFeatureSceneSheet.swift */; };
@@ -468,6 +469,7 @@
 		AA1000G0 /* KeyTapSignposter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyTapSignposter.swift; sourceTree = "<group>"; };
 		SS100001 /* SubscriptionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionManager.swift; sourceTree = "<group>"; };
 		RT5930100004 /* ProTrialDebugSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProTrialDebugSection.swift; sourceTree = "<group>"; };
+		AT1081100001 /* AdaptiveTouchExportSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdaptiveTouchExportSection.swift; sourceTree = "<group>"; };
 		RT5930100003 /* ProTrialPaywallSections.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProTrialPaywallSections.swift; sourceTree = "<group>"; };
 		PH2160100001 /* ProHubSections.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProHubSections.swift; sourceTree = "<group>"; };
 		AA100687 /* ProFeatureSceneSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProFeatureSceneSheet.swift; sourceTree = "<group>"; };
@@ -851,6 +853,7 @@
 				AA700172 /* SwipeUpHintView.swift */,
 				SS100003 /* ProBannerView.swift */,
 				RT5930100004 /* ProTrialDebugSection.swift */,
+				AT1081100001 /* AdaptiveTouchExportSection.swift */,
 				RT5930100003 /* ProTrialPaywallSections.swift */,
 				PH2160100001 /* ProHubSections.swift */,
 				AA100687 /* ProFeatureSceneSheet.swift */,
@@ -1561,6 +1564,7 @@
 				AA0000L0 /* ModelInfo+Localized.swift in Sources */,
 				SS000001 /* SubscriptionManager.swift in Sources */,
 				RT5930000004 /* ProTrialDebugSection.swift in Sources */,
+				AT1081000001 /* AdaptiveTouchExportSection.swift in Sources */,
 				RT5930000003 /* ProTrialPaywallSections.swift in Sources */,
 				PH2160000001 /* ProHubSections.swift in Sources */,
 				AA000687 /* ProFeatureSceneSheet.swift in Sources */,

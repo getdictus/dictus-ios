@@ -41,8 +41,12 @@
 # learns as the run types, `frozen` reads a profile and learns nothing, `monitor` reads it and
 # only watches how it fits. --adaptive-load starts from a profile another run saved with
 # --adaptive-save (learn on one device session, score on the other). Writes <dir>/adaptive.tsv:
-# what the profile holds per key, as offsets in keycaps (no text). --adaptive-tune changes
-# Hex's activation gate for a sweep (`activeTaps=100,activeSessions=1`).
+# what the profile holds per key, as offsets in keycaps (no text), and <dir>/adaptive-status.txt:
+# the keyboard's `adaptiveTouchStatus` summary and per-context report (#1081). --adaptive-tune
+# changes Hex's activation gate for a sweep (`activeTaps=100,activeSessions=1`).
+#
+# A file exported from a Debug build's Developer section decodes on the Mac, no simulator:
+# `swift run --package-path DictusCore -c release adaptive-touch-status <file.bin>`.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"

@@ -559,6 +559,8 @@ let adaptive: AdaptiveTouch? = {
     }
     return touch
 }()
+/// The letters of each letter page replayed, by geometry key, to name the keys of the report.
+var adaptiveLetters: [UInt64: [Character]] = [:]
 var adaptiveReport = ["lang\tcontext\tin_use\taccepted\tsessions\tweak\tpicked\tstrong\tpromotions\tletter\tweight\tdx\tdy"]
 
 /// What the profile holds for each key of `keys`, in keycaps: one row per letter per context.
@@ -669,10 +671,16 @@ for code in langs {
     // phys_footprint, what iOS holds the keyboard's ~50 MB to. The spatial models are mapped
     // clean pages, which it does not count (#1011).
     FileHandle.standardError.write(Data("\(code): footprint \(MemoryFootprint.residentKB()) KB\n".utf8))
-    if let adaptive { adaptiveReport.append(contentsOf: adaptiveRows(adaptive, code: code, keys: spatialKeys(cells))) }
+    if let adaptive {
+        adaptiveReport.append(contentsOf: adaptiveRows(adaptive, code: code, keys: spatialKeys(cells)))
+        if let geometry = AdaptiveTouchGeometry(keys: spatialKeys(cells)) { adaptiveLetters[geometry.key] = geometry.letters }
+    }
 }
 if let adaptive {
     try? (adaptiveReport.joined(separator: "\n") + "\n").write(toFile: "\(outDir)/adaptive.tsv", atomically: true, encoding: .utf8)
+    // #1081: the summary the keyboard logs at each appearance, and the Debug export's report.
+    try? AdaptiveTouchStatus.report(model: adaptive.model, letters: adaptiveLetters)
+        .write(toFile: "\(outDir)/adaptive-status.txt", atomically: true, encoding: .utf8)
     if let path = env["KB_ADAPTIVE_SAVE"], !path.isEmpty {
         do {
             try adaptive.model.serialized().write(to: URL(fileURLWithPath: path))

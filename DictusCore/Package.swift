@@ -6,7 +6,8 @@ let package = Package(
     platforms: [.iOS(.v17), .macOS("26.0")],
     products: [
         .library(name: "DictusCore", targets: ["DictusCore"]),
-        .executable(name: "polish-harness", targets: ["polish-harness"])
+        .executable(name: "polish-harness", targets: ["polish-harness"]),
+        .executable(name: "adaptive-touch-status", targets: ["adaptive-touch-status"])
     ],
     targets: [
         // The emoji panel's search indexes (#1027): memory-mapped at run time, so their pages
@@ -43,6 +44,13 @@ let package = Package(
             // first line of every committed capture in docs/research/.
             exclude: ["README.md"],
             resources: [.copy("fixtures")]
+        ),
+        // Decodes an Adaptive touch file exported from a Debug build (#1081) and prints the
+        // summary the keyboard logs. Measurement code: nothing links it into the app.
+        .executableTarget(
+            name: "adaptive-touch-status",
+            dependencies: ["DictusCore"],
+            path: "Sources/adaptive-touch-status"
         ),
         .testTarget(
             name: "DictusCoreTests",
