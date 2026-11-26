@@ -205,7 +205,7 @@ struct OnboardingView: View {
                 .id(step) // Force SwiftUI to treat each page as a unique view for transitions
             }
         }
-        .alert(Text("Keep Dictus open"), isPresented: keepOpenWarning) {
+        .alert(keepOpenWarningTitle, isPresented: keepOpenWarning) {
             Button("Got it") {}
         } message: {
             keepOpenWarningMessage
@@ -498,14 +498,24 @@ struct OnboardingView: View {
         )
     }
 
+    /// The popup's title. Apple's route (#1057): the user dictates with Apple's model
+    /// already, so the title says that rather than asking them to keep Dictus open.
+    private var keepOpenWarningTitle: Text {
+        if keepOpenWarningBehindApple {
+            return Text("You can already dictate",
+                        comment: "Onboarding popup title on Apple's route (#1057): Apple's model dictates now while Parakeet downloads.")
+        }
+        return Text("Keep Dictus open")
+    }
+
     /// The popup's message, with the real size of the model being downloaded.
     private var keepOpenWarningMessage: Text {
-        // Apple's route (#1057): the user dictates with Apple's model already; the popup
-        // still asks them to stay, because the same throttling slows Parakeet down.
+        // Apple's route (#1057): Parakeet downloads behind Apple's model; staying in Dictus
+        // still speeds it up, because iOS throttles a backgrounded transfer.
         if keepOpenWarningBehindApple, let identifier = keepOpenWarningModel,
            let size = ModelInfo.forIdentifier(identifier)?.sizeLabel {
-            return Text("You can already dictate. Dictus is downloading Parakeet (\(size)), more accurate, in the background. It will be ready sooner if you stay in Dictus, except to turn on the keyboard in Settings.",
-                        comment: "Onboarding popup message on Apple's route (#1057): Apple's model dictates now, Parakeet downloads behind it. The argument is Parakeet's size (~483 MB). The next step sends the user to Settings, hence the exception.")
+            return Text("Dictus is downloading Parakeet (\(size)), more accurate, in the background. It goes faster if Dictus stays open.",
+                        comment: "Onboarding popup message on Apple's route (#1057), under the title « You can already dictate ». The argument is Parakeet's size (~483 MB).")
         }
         if let identifier = keepOpenWarningModel, let size = ModelInfo.forIdentifier(identifier)?.sizeLabel {
             return Text("The model (\(size)) is downloading now. It continues if you leave the app, but iOS slows it down a lot. To have it ready sooner, stay in Dictus, except to turn on the keyboard in Settings.")

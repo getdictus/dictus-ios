@@ -3978,6 +3978,29 @@
         }
       }
     },
+    "Dictus is downloading Parakeet (%@), more accurate, in the background. It goes faster if Dictus stays open." : {
+      "comment" : "Onboarding popup message on Apple's route (#1057), under the title « You can already dictate ». The argument is Parakeet's size (~483 MB).",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dictus lädt Parakeet (%@), genauer, im Hintergrund. Es geht schneller, wenn Dictus geöffnet bleibt."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dictus descarga Parakeet (%@), más preciso, en segundo plano. Va más rápido si Dictus sigue abierto."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dictus télécharge Parakeet (%@), plus précis, en arrière-plan. Ça va plus vite si Dictus reste ouvert."
+          }
+        }
+      }
+    },
     "Dictus is open source: anyone can read its code on GitHub." : {
       "comment" : "Full Access explainer sheet, third point, detail (#704).",
       "localizations" : {
@@ -6522,25 +6545,25 @@
         }
       }
     },
-    "You can already dictate. Dictus is downloading Parakeet (%@), more accurate, in the background. It will be ready sooner if you stay in Dictus, except to turn on the keyboard in Settings." : {
-      "comment" : "Onboarding popup message on Apple's route (#1057): Apple's model dictates now, Parakeet downloads behind it. The argument is Parakeet's size (~483 MB). The next step sends the user to Settings, hence the exception.",
+    "You can already dictate" : {
+      "comment" : "Onboarding popup title on Apple's route (#1057): Apple's model dictates now while Parakeet downloads.",
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Du kannst schon diktieren. Dictus lädt Parakeet (%@), genauer, im Hintergrund. Es ist schneller bereit, wenn du in Dictus bleibst, außer um die Tastatur in den Einstellungen zu aktivieren."
+            "value" : "Du kannst schon diktieren"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ya puedes dictar. Dictus descarga Parakeet (%@), más preciso, en segundo plano. Estará listo antes si te quedas en Dictus, salvo para activar el teclado en Ajustes."
+            "value" : "Ya puedes dictar"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Vous pouvez déjà dicter. Dictus télécharge Parakeet (%@), plus précis, en arrière-plan. Il sera prêt plus vite si vous restez dans Dictus, sauf pour activer le clavier dans Réglages."
+            "value" : "Vous pouvez déjà dicter"
           }
         }
       }
