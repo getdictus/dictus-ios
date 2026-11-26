@@ -115,6 +115,8 @@ struct KeyboardSettingsView: View {
                 if let lang = SupportedLanguage(rawValue: newLang) {
                     SupportedLanguage.activate(lang)
                 }
+                // Under automatic detection, voice notes use this language (#1056).
+                VoiceNoteSpeechAssets.refresh(context: "keyboardSettings")
             }
 
             Picker("Layout", selection: layoutSelection) {

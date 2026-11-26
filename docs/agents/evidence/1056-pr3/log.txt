@@ -1,0 +1,56 @@
+<APP> appLaunched version=2.1.0 protectedData=true activePrewarm=false appGroup=healthy
+<APP> VoiceNote launch pending=false
+<SHARE> VoiceNoteShare dropped count=1
+<SHARE> VoiceNoteShare hostLocales count=45
+<SHARE> VoiceNoteShare assetCheck module=simulator-host locale=fr-FR ready=true
+<SHARE> VoiceNoteShare route route=shareExtension lang=fr source=dictationLanguage engine=simulator-host-speechanalyzer voiceNoteLanguage=auto keyboard=fr ios=27 speechTranscriberAvailable=true installed=true count=1 longestKnownSeconds=13 cap=300 footprintKB=20034 liveKB=5720 availableKB=0
+<SHARE> VoiceNoteShare claim id=D90B4CE9 owner=shareExtension
+<SHARE> VoiceNoteShare decoded id=D90B4CE9 seconds=12 ms=817 footprintKB=25026 liveKB=8847 availableKB=0
+<SHARE> vocabularyApplied enabled=yes entries=0 replacements=0 chars=213
+<SHARE> VoiceNoteShare finished id=D90B4CE9 seconds=12 chars=213 lang=fr engine=simulator-host-speechanalyzer savedToHistory=true decodeMs=817 transcribeMs=413 totalMs=1231 peakFootprintKB=25282 minAvailableKB=0 samples=3
+<SHARE> VoiceNoteShare onDevice count=1 elapsedMs=1231
+<APP> appLaunched version=2.1.0 protectedData=true activePrewarm=false appGroup=healthy
+<APP> VoiceNote launch pending=true
+<APP> VoiceNote adopted id=D90B4CE9 chars=213 engine=simulator-host-speechanalyzer lang=fr savedToHistory=true queueCommitted=true
+<SHARE> VoiceNoteShare dropped count=1
+<SHARE> VoiceNoteShare hostLocales count=45
+<SHARE> VoiceNoteShare assetCheck module=simulator-host locale=fr-FR ready=true
+<SHARE> VoiceNoteShare route route=openApp reason=overExtensionCap(330s) engine=simulator-host-speechanalyzer voiceNoteLanguage=auto keyboard=fr ios=27 speechTranscriberAvailable=true installed=true count=1 longestKnownSeconds=330 cap=300 footprintKB=19938 liveKB=5717 availableKB=0
+<SHARE> VoiceNoteShare cold count=1 route=openApp
+<SHARE> VoiceNoteShare open via=responderChain result=true
+<APP> appLaunched version=2.1.0 protectedData=true activePrewarm=false appGroup=healthy
+<APP> VoiceNote launch pending=true
+<APP> VoiceNote failed id=F7B1E8C1 failure=transcriptionFailed detail=no model downloaded
+<SHARE> VoiceNoteShare dropped count=1
+<SHARE> VoiceNoteShare hostLocales host=unreachable
+<SHARE> VoiceNoteShare route route=openApp reason=speechTranscriberUnavailable engine=simulator-host-speechanalyzer voiceNoteLanguage=auto keyboard=fr ios=27 speechTranscriberAvailable=false installed=notAsked count=1 longestKnownSeconds=13 cap=300 footprintKB=19954 liveKB=5621 availableKB=0
+<SHARE> VoiceNoteShare cold count=1 route=openApp
+<SHARE> VoiceNoteShare open via=responderChain result=true
+<APP> appLaunched version=2.1.0 protectedData=true activePrewarm=false appGroup=healthy
+<APP> VoiceNote launch pending=true
+<APP> VoiceNote failed id=E77E973E failure=transcriptionFailed detail=no model downloaded
+<SHARE> VoiceNoteShare dropped count=1
+<SHARE> VoiceNoteShare hostLocales count=45
+<SHARE> VoiceNoteShare assetCheck module=simulator-host locale=fr-FR ready=true
+<SHARE> VoiceNoteShare route route=shareExtension lang=fr source=dictationLanguage engine=simulator-host-speechanalyzer voiceNoteLanguage=auto keyboard=fr ios=27 speechTranscriberAvailable=true installed=true count=1 longestKnownSeconds=13 cap=300 footprintKB=20050 liveKB=5712 availableKB=0
+<SHARE> VoiceNoteShare claim id=60D40E9A owner=shareExtension
+<SHARE> VoiceNoteShare decoded id=60D40E9A seconds=12 ms=737 footprintKB=25058 liveKB=8802 availableKB=0
+<SHARE> vocabularyApplied enabled=yes entries=0 replacements=0 chars=213
+<SHARE> VoiceNoteShare finished id=60D40E9A seconds=12 chars=213 lang=fr engine=simulator-host-speechanalyzer savedToHistory=true decodeMs=737 transcribeMs=358 totalMs=1095 peakFootprintKB=25746 minAvailableKB=0 samples=3
+<SHARE> VoiceNoteShare onDevice count=1 elapsedMs=1096
+<SHARE> VoiceNoteShare dropped count=1
+<SHARE> VoiceNoteShare hostLocales count=45
+<SHARE> VoiceNoteShare assetCheck module=simulator-host locale=fr-FR ready=true
+<SHARE> VoiceNoteShare route route=openApp reason=overExtensionCap(330s) engine=simulator-host-speechanalyzer voiceNoteLanguage=auto keyboard=fr ios=27 speechTranscriberAvailable=true installed=true count=1 longestKnownSeconds=330 cap=300 footprintKB=19970 liveKB=5693 availableKB=0
+<SHARE> VoiceNoteShare cold count=1 route=openApp
+<SHARE> VoiceNoteShare open via=responderChain result=true
+<SHARE> VoiceNoteShare dropped count=1
+<SHARE> VoiceNoteShare hostLocales host=unreachable
+<SHARE> VoiceNoteShare route route=openApp reason=speechTranscriberUnavailable engine=simulator-host-speechanalyzer voiceNoteLanguage=auto keyboard=fr ios=27 speechTranscriberAvailable=false installed=notAsked count=1 longestKnownSeconds=13 cap=300 footprintKB=19970 liveKB=5614 availableKB=0
+<SHARE> VoiceNoteShare cold count=1 route=openApp
+<SHARE> VoiceNoteShare open via=responderChain result=true
+<APP> appLaunched version=2.1.0 protectedData=true activePrewarm=false appGroup=healthy
+<APP> VoiceNote launch pending=true
+<APP> VoiceNote adopted id=60D40E9A chars=213 engine=simulator-host-speechanalyzer lang=fr savedToHistory=true queueCommitted=true
+<APP> VoiceNote failed id=8C5CD0B0 failure=transcriptionFailed detail=no model downloaded
+<APP> VoiceNote failed id=0620A939 failure=transcriptionFailed detail=no model downloaded

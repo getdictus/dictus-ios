@@ -44,6 +44,12 @@ struct VoiceNoteSettingsView: View {
         .navigationBarTitleDisplayMode(.inline)
         .onChange(of: settings) { _, updated in
             updated.save()
+            // A new voice-note language gets its Apple model now (#1056).
+            VoiceNoteSpeechAssets.refresh(context: "voiceNoteSettings")
+        }
+        .onChange(of: isAvailable) { _, _ in
+            // The feature's switch turned on: same, for the language already set.
+            VoiceNoteSpeechAssets.refresh(context: "voiceNoteSwitch")
         }
     }
 }

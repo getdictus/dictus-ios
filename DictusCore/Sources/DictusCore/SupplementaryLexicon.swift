@@ -125,12 +125,32 @@ extension SupplementaryLexicon {
         case homograph(String)
         /// A previous-word override (#500): `il ma` -> `m'a`.
         case contextOverride(String)
+        /// A lone letter that is not a word on its own (#977): `il t` -> `y`, or kept.
+        case loneLetter(LoneLetterCorrection.Decision)
+    }
+
+    /// What the context rules read beyond the word and its context: the language's
+    /// rules, and for the lone-letter rule (#977) the layout the word was typed on,
+    /// which decides the neighbouring keys, and whether the user taught the keyboard a
+    /// lowercase word.
+    public struct Rules {
+        public let profile: LanguageProfile
+        public let layout: LayoutType
+        public let isLearned: (String) -> Bool
+
+        public init(profile: LanguageProfile, layout: LayoutType, isLearned: @escaping (String) -> Bool) {
+            self.profile = profile
+            self.layout = layout
+            self.isLearned = isLearned
+        }
     }
 
     /// The one path that orders the lexicon and the context rules:
     /// 1. A shortcut, or a contact's casing, replaces the word.
     /// 2. A lexicon word the dictionary does not know, a name, is kept as typed.
     ///    (1 and 2 are `Decision.outranksContextRules`.)
+    /// 2½. A lone letter the language does not have as a word is corrected to the
+    ///    neighbouring key that is one, or kept (`LoneLetterCorrection`, #977).
     /// 3. A contextual homograph reads the sentence in `context` (`a` or `à`).
     /// 4. A previous-word override reads `previousWord` (`il ma` -> `il m'a`).
     /// 5. Any other lexicon word is kept.
@@ -142,16 +162,30 @@ extension SupplementaryLexicon {
     ///
     /// 3 before 4 only fixes the order: the homographs fire on `a`, the overrides
     /// on `ma`/`ta`, so no word reaches both.
+    ///
+    /// WHY 2½ comes before 5 too: the dictionary knows every French letter but `h`, `p`
+    /// and `r`, and an iPhone's lexicon holds single letters, a contact's initial among
+    /// them. A `T` there kept the `t` of `il t a` (device test of #1061, 2026-11-25), and
+    /// the `a` after the kept `t` then took the accent. The rule never sees `a`, `à` or
+    /// `y`, so it does not reach a word of 3 or 4.
     public func earlyAnswer(
         for word: String,
         previousWord: String?,
         context: String?,
-        profile: LanguageProfile?,
+        rules: Rules?,
         isDictionaryWord: @autoclosure () -> Bool
     ) -> EarlyAnswer? {
         let lexiconDecision = decision(for: word, isDictionaryWord: isDictionaryWord())
         if let lexiconDecision, lexiconDecision.outranksContextRules(isDictionaryWord: isDictionaryWord()) {
             return .lexicon(lexiconDecision)
+        }
+        let profile = rules?.profile
+        if let rules, let decision = LoneLetterCorrection.decision(
+            for: word, words: rules.profile.loneLetterWords, layout: rules.layout, context: context,
+            markers: rules.profile.loneLetterMarkers, homographs: rules.profile.contextualHomographs,
+            isLearned: rules.isLearned
+        ) {
+            return .loneLetter(decision)
         }
         if let context, let profile,
            let spelling = profile.contextualHomographs.lazy

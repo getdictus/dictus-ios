@@ -3,8 +3,8 @@
 
   python3 -I tools/swipe-bench/make_sentences.py LANG SENTENCES.tsv.bz2 user_languages.csv OUTDIR
 
-LANG is en or fr. The exports are
-https://downloads.tatoeba.org/exports/per_language/{eng,fra}/{eng,fra}_sentences_detailed.tsv.bz2
+LANG is en, fr, es or de. The exports are
+https://downloads.tatoeba.org/exports/per_language/{eng,fra,spa,deu}/{eng,fra,spa,deu}_sentences_detailed.tsv.bz2
 and https://downloads.tatoeba.org/exports/user_languages.tar.bz2 (CC BY 2.0 FR). Writes
 OUTDIR/LANG-dev.tsv (500 sentences) and OUTDIR/LANG-test.tsv (2,000). Deterministic for the
 same exports.
@@ -12,8 +12,8 @@ same exports.
 Kept, as Hex's held-out sets and docs/research/multilingual-autocorrect/corpus.md pick theirs:
 - an author who declares the language at level 5 (native) in user_languages.csv;
 - 3 to 14 words once normalized (NFC, lowercase, ’ read as ', hyphens as spaces, the
-  punctuation . , ! ? ; : " « » ( ) … – — dropped), every character in the language's model
-  alphabet, no word starting or ending with an apostrophe (a quotation mark);
+  punctuation . , ! ? ; : " « » ( ) … – — dropped, and in Spanish ¿ ¡ too), every character
+  in the language's model alphabet, no word starting or ending with an apostrophe (a quotation mark);
 - the first sentence (by Tatoeba id) of each normalized text.
 Then shuffled with seed 948: the first 500 are the dev split, the next 2,000 the test split.
 The bench reports on the test split only and nothing is tuned on it; the dev split is there
@@ -28,15 +28,23 @@ import unicodedata
 ALPHABET = {
     "en": set("abcdefghijklmnopqrstuvwxyz'"),
     "fr": set("abcdefghijklmnopqrstuvwxyz'àâæçèéêëîïôùûüœ"),
+    # es.hextm's letters (Hex's model): no apostrophe, Spanish has none.
+    "es": set("abcdefghijklmnopqrstuvwxyzáéíñóúü"),
+    # de.hextm's letters: no apostrophe, so "geht's" and "gibt's" leave their sentence out.
+    "de": set("abcdefghijklmnopqrstuvwxyzäöüß"),
 }
-TATOEBA = {"en": "eng", "fr": "fra"}
+TATOEBA = {"en": "eng", "fr": "fra", "es": "spa", "de": "deu"}
+EXPORT_DATE = {"en": "2026-11-21", "fr": "2026-11-21", "es": "2026-11-25", "de": "2026-11-21"}
 DROP = dict.fromkeys(map(ord, '.,!?;:"«»()…–—'), " ")
+# Only Spanish drops ¿ and ¡: dropping them for en, fr and de too would let in sentences their
+# exports of 2026-11-21 left out, and change their committed sets.
+DROP_ES = {**DROP, **dict.fromkeys(map(ord, "¿¡"), " ")}
 DEV, TEST, SEED = 500, 2000, 948
 
 
-def normalize(text):
+def normalize(text, lang):
     text = unicodedata.normalize("NFC", text).lower()
-    text = text.replace("’", "'").replace("‘", "'").replace("-", " ").translate(DROP)
+    text = text.replace("’", "'").replace("‘", "'").replace("-", " ").translate(DROP_ES if lang == "es" else DROP)
     return " ".join(text.split())
 
 
@@ -60,7 +68,7 @@ def main():
     for sid, author, text in rows:
         if author not in natives:
             continue
-        sentence = normalize(text)
+        sentence = normalize(text, lang)
         words = sentence.split(" ")
         if not 3 <= len(words) <= 14 or not set(sentence) - {" "} <= ALPHABET[lang]:
             continue
@@ -72,7 +80,7 @@ def main():
     os.makedirs(out, exist_ok=True)
     for split, chosen in (("dev", picked[:DEV]), ("test", picked[DEV:DEV + TEST])):
         with open(os.path.join(out, f"{lang}-{split}.tsv"), "w", encoding="utf-8", newline="\n") as f:
-            f.write(f"# Tatoeba ({TATOEBA[lang]}_sentences_detailed.tsv, export of 2026-11-21), CC BY 2.0 FR,"
+            f.write(f"# Tatoeba ({TATOEBA[lang]}_sentences_detailed.tsv, export of {EXPORT_DATE[lang]}), CC BY 2.0 FR,"
                     f" https://tatoeba.org/en/sentences/show/<id>. {split} split, picked by make_sentences.py.\n")
             f.write("# id\tauthor\tsentence (normalized)\n")
             for sid, author, sentence in chosen:

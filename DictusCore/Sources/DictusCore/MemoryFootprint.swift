@@ -29,6 +29,21 @@ public enum MemoryFootprint {
         return Int(bytes / 1024)
     }
 
+    /// Bytes held by live malloc allocations, in KB: what the process has allocated and not
+    /// freed, across every malloc zone. Returns -1 when the zones report nothing.
+    ///
+    /// WHY beside `residentKB` (#992, taken for #1056's share extension log):
+    /// `phys_footprint` also counts pages malloc has freed but not yet returned to the
+    /// system, and that part swings by several MB with no object retained. Measured on the
+    /// simulator (2026-11-20, eight 9 s dictations): live heap 15.64 → 15.68 MB while the
+    /// footprint went 37 → 36 → 43 MB.
+    public static func liveHeapKB() -> Int {
+        var stats = malloc_statistics_t()
+        malloc_zone_statistics(nil, &stats)
+        guard stats.size_in_use > 0 else { return -1 }
+        return stats.size_in_use / 1024
+    }
+
     /// `phys_footprint` in bytes, or -1 when the task info read fails.
     ///
     /// phys_footprint is what iOS uses for the jetsam budget — closer to the "real" number

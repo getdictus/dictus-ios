@@ -28,8 +28,14 @@ struct ShareStatusView: View {
                     .foregroundColor(.secondary)
                     .multilineTextAlignment(.center)
             }
+            if let languageLine {
+                Text(languageLine)
+                    .font(.dictusCaption)
+                    .foregroundColor(.secondary)
+                    .multilineTextAlignment(.center)
+            }
             Spacer(minLength: 0)
-            if model.state != .sending {
+            if showsButton {
                 Button(action: close) {
                     Text(isWarm ? "OK" : "Close")
                         .font(.dictusBody.weight(.semibold))
@@ -50,13 +56,24 @@ struct ShareStatusView: View {
 
     private var isWarm: Bool { model.closesByItself }
 
+    /// No button while sending, nor while this extension transcribes (#1056): closing the
+    /// sheet then would end the process mid-note. It closes itself when done.
+    private var showsButton: Bool {
+        switch model.state {
+        case .sending, .transcribingHere: return false
+        default: return true
+        }
+    }
+
     @ViewBuilder
     private var icon: some View {
         switch model.state {
         case .sending:
             ProgressView().controlSize(.large).tint(.white)
-        case .transcribing:
+        case .transcribing, .transcribingHere:
             Image(systemName: "waveform").foregroundColor(.dictusAccentHighlight)
+        case .transcribedHere:
+            Image(systemName: "checkmark.circle.fill").foregroundColor(.dictusSuccess)
         case .waitingForApp:
             Image(systemName: "tray.and.arrow.down.fill").foregroundColor(.dictusAccentHighlight)
         case .refused:
@@ -68,11 +85,15 @@ struct ShareStatusView: View {
         switch model.state {
         case .sending:
             return String(localized: "Sending to Dictus…", comment: "Share extension: copying the voice note (#620).")
-        case .transcribing(let count, _):
+        case .transcribing(let count, _), .transcribingHere(let count, _):
             return count > 1
                 ? String(localized: "Transcribing your voice notes", comment: "Share extension, warm path, several notes (#620).")
                 : String(localized: "Transcribing your voice note", comment: "Share extension, warm path (#620).")
-        case .waitingForApp(let count):
+        case .transcribedHere(let count, _):
+            return count > 1
+                ? String(localized: "Voice notes transcribed", comment: "Share extension: several notes transcribed in the extension with Apple's model, app closed (#1056).")
+                : String(localized: "Voice note transcribed", comment: "Share extension: the note was transcribed in the extension with Apple's model, app closed (#1056).")
+        case .waitingForApp(let count, _):
             return count > 1
                 ? String(localized: "Open Dictus, your voice notes are waiting", comment: "Share extension, cold path, several notes (#620).")
                 : String(localized: "Open Dictus, your voice note is waiting", comment: "Share extension, cold path: the app is not running and cannot be opened from here (#620).")
@@ -91,11 +112,44 @@ struct ShareStatusView: View {
                          comment: "Share extension, warm path with a Live Activity (#620).")
                 : String(localized: "Open Dictus when you want to read it.",
                          comment: "Share extension, warm path without a Live Activity (#620).")
-        case .waitingForApp:
+        case .transcribingHere:
+            // Said once, under the title; the language line below names the language.
+            return nil
+        case .transcribedHere:
+            return String(localized: "The text is in the Dictus keyboard.",
+                          comment: "Share extension: the note was transcribed with the app closed; the Dictus keyboard offers the text (#1056).")
+        case .waitingForApp(_, .appClosed):
             return String(localized: "The transcription starts as soon as you open the app.",
                           comment: "Share extension, cold path (#620).")
+        case .waitingForApp(_, .overExtensionCap):
+            return String(localized: "Longer than 5 minutes: Dictus transcribes it in the app, as soon as you open it.",
+                          comment: "Share extension: the note is over the 5-minute limit of transcription with the app closed, so the app transcribes it (#1056).")
         case .refused(let reason):
             return reason
+        }
+    }
+
+    /// The language Apple's model was given (#1056). Under automatic detection, the
+    /// default, it is the dictation language, and the line says so: Apple's recognizer
+    /// does not detect the language.
+    private var languageLine: String? {
+        switch model.state {
+        case .transcribingHere(_, let language):
+            let name = language.name
+            return language.isDictationLanguage
+                ? String(localized: "With Apple's on-device model, in \(name), your dictation language.",
+                         comment: "Share extension, app closed: the note is transcribed by Apple's model in the dictation language, standing in for automatic detection (#1056). The argument is a language name.")
+                : String(localized: "With Apple's on-device model, in \(name).",
+                         comment: "Share extension, app closed: the note is transcribed by Apple's model in the voice-note language the user set (#1056). The argument is a language name.")
+        case .transcribedHere(_, let language):
+            let name = language.name
+            return language.isDictationLanguage
+                ? String(localized: "Transcribed in \(name), your dictation language.",
+                         comment: "Share extension, app closed: done, in the dictation language, standing in for automatic detection (#1056). The argument is a language name.")
+                : String(localized: "Transcribed in \(name).",
+                         comment: "Share extension, app closed: done, in the voice-note language the user set (#1056). The argument is a language name.")
+        default:
+            return nil
         }
     }
 }
