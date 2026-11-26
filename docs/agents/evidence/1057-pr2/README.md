@@ -1,5 +1,7 @@
 # #1057 PR 2 — the onboarding picks its route from the language
 
+> Superseded in part: Apple's route now also downloads Parakeet behind Apple when it is the recommended model. See `../1057-parakeet-behind-apple/README.md`.
+
 Simulator: iPhone 17 Pro, iOS 27.2, Debug, branch `feature/1057-onboarding-language-route`
 (`a755fb01`), created for this run and deleted after it. Every run starts from an erased device
 (the Dictus keyboard listed, Full Access granted in Settings, the microphone pre-granted with
