@@ -31,7 +31,8 @@ protocol GiellaKeyboardViewDelegate: AnyObject {
     func didMoveCursor(_ movement: Int)
     /// The text the host shares around its cursor, for the space-bar trackpad (#950).
     func trackpadTextContext() -> (before: String, after: String)
-    /// Delete swipe (#609): backspace went down at `x`; `step` is one word's slide.
+    /// Delete swipe (#609): backspace went down at `x`; `step` is one word's slide. With
+    /// the setting off the delegate starts no slide, and its moves then never claim it.
     func deleteSwipeBegan(atX x: CGFloat, step: CGFloat)
     /// The backspace finger moved; true once the slide owns it, which stops the repeat.
     func deleteSwipeMoved(toX x: CGFloat) -> Bool
@@ -861,6 +862,11 @@ final internal class GiellaKeyboardView: UIView,
     private var deleteSwipeTouch: UITouch?
 
     private func beginDeleteSwipe(_ touch: UITouch, atX x: CGFloat) {
+        // Held whatever the setting: with "Effacer en glissant" off the delegate starts no
+        // slide, so the moves delete nothing and never stop the repeat, but the finger still
+        // stays on backspace. Released to the key handling below, as before #1047, a slide
+        // onto a letter retargets the active key and types that letter on lift, which
+        // Apple's keyboard never does (#1066, seen in the simulator).
         deleteSwipeTouch = touch
         // One word per letter key's width, as in Hex: every layout has ten letters on its
         // top row, edge to edge.

@@ -129,6 +129,7 @@ final class LogPrivacyTests: XCTestCase {
             .keyRepeatStopped(ticks: 12, reason: "touch"),
             // Swipe typing (#948): counts and names, never the word the finger wrote.
             .swipeTypingConfigured(on: true, channel: "testFlight", reason: "on"),
+            .spatialAutocorrectConfigured(on: true, channel: "debug", trigger: "viewWillAppear"),
             .swipeEnded(points: 84, decodeMs: 2.41, readings: 4, outcome: "word"),
             .deleteSwipeEnded(words: 3, frozen: false),
             .appLaunched(version: "1.2"),
