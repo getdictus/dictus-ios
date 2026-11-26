@@ -25,8 +25,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 //
-// What the port changed: the models are the two the keyboard ships (en, fr; Hex's
-// Spanish, German and Polish cases have no Dictus model and are left out), the keys are
+// What the port changed: the models are the three the keyboard ships (en, fr, and es,
+// Hex's own file; Hex's German and Polish cases have no Dictus model and are left out;
+// the Spanish cases are Dictus's, on Dictus's QWERTY, which has no ñ key), the keys are
 // Dictus's letter pages laid out by `KeyPlaneGeometry`, English's contractions are
 // Dictus's own (`englishProfile`), and Hex's offensive-word cases became one test of the
 // never-suggest hook, since no Hex word list is copied. French words were added.
@@ -103,6 +104,39 @@ final class SwipeDecoderTests: XCTestCase {
         let (fr, keys) = try decoder("fr")
         XCTAssertTrue(read("tres", fr, keys).prefix(2).contains("très"))
         XCTAssertTrue(read("ete", fr, keys).prefix(4).contains("été"))
+    }
+
+    /// Spanish (Hex's `es.hextm`, unmodified) on Dictus's QWERTY, which has no ñ key: the
+    /// model gives ñ the base n, so a swipe through n reads a word with ñ, and an accented
+    /// vowel is read on its plain key, as in French.
+    func testSpanishModelLoadsAndKnowsItsLetters() throws {
+        let model = try XCTUnwrap(SpatialDecoderModel(path: Self.modelPath("es")), "no es.hextm")
+        XCTAssertEqual(model.language, "es")
+        for word in ["mañana", "año", "niño", "español", "está", "también", "pingüino"] {
+            XCTAssertTrue(model.contains(word), word)
+        }
+        XCTAssertNil(SwipeKeys.letterPage("es").centres["ñ"], "Dictus's Spanish page has no ñ key")
+    }
+
+    func testSpanishWordsWithÑAreReadThroughN() throws {
+        let (es, keys) = try decoder("es")
+        // The path a-n-o is both "año" and "ano": the word model reads the commoner first.
+        XCTAssertEqual(read("ano", es, keys).first, "año")
+        for word in ["mañana", "niño", "español", "hola", "gracias"] {
+            XCTAssertEqual(read(word, es, keys).first, word)
+        }
+        XCTAssertEqual(read("manana", es, keys).first, "mañana", "a path through n, not ñ")
+    }
+
+    func testSpanishAccentsAreReadOnTheirBaseKeys() throws {
+        let (es, keys) = try decoder("es")
+        for word in ["también", "aquí", "después", "corazón"] {
+            XCTAssertEqual(read(word, es, keys).first, word)
+        }
+        XCTAssertEqual(read("tambien", es, keys).first, "también", "a path through the plain e")
+        // "esta" and "está" draw one path, both common: only the word model and the word
+        // before tell them apart, as "tres" and "très" in French.
+        XCTAssertTrue(read("esta", es, keys).prefix(2).contains("está"))
     }
 
     /// Google Books splits "don't" into "do n't", so the model barely counts it: the decoder

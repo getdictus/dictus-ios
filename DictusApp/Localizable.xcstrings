@@ -3373,25 +3373,25 @@
         }
       }
     },
-    "Corrects a word from where your fingers landed on the keys, not only from the letters typed. French and English only." : {
+    "Corrects a word from where your fingers landed on the keys, not only from the letters typed. French, English and Spanish only." : {
       "comment" : "Settings › Keyboard › Experiments: footer under Spatial autocorrect.",
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Korrigiert ein Wort danach, wo deine Finger die Tasten getroffen haben, nicht nur nach den getippten Buchstaben. Nur Französisch und Englisch."
+            "value" : "Korrigiert ein Wort danach, wo deine Finger die Tasten getroffen haben, nicht nur nach den getippten Buchstaben. Nur Französisch, Englisch und Spanisch."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Corrige una palabra según dónde tocaron tus dedos las teclas, no solo según las letras escritas. Solo francés e inglés."
+            "value" : "Corrige una palabra según dónde tocaron tus dedos las teclas, no solo según las letras escritas. Solo francés, inglés y español."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Corrige un mot d’après l’endroit où vos doigts ont touché les touches, pas seulement d’après les lettres tapées. Français et anglais uniquement."
+            "value" : "Corrige un mot d’après l’endroit où vos doigts ont touché les touches, pas seulement d’après les lettres tapées. Français, anglais et espagnol uniquement."
           }
         }
       }

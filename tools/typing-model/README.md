@@ -1,7 +1,7 @@
 # Spatial decoder models (#1011)
 
-The two `.hextm` files in `DictusKeyboard/Resources/` are what the spatial decoder
-(`DictusCore/Sources/DictusCore/SpatialDecoder/`) reads: a word list with each word's
+The three `.hextm` files in `DictusKeyboard/Resources/` are what the spatial and swipe
+decoders (`DictusCore/Sources/DictusCore/SpatialDecoder/`) read: a word list with each word's
 frequency and the word pairs that tell the most over it, memory-mapped read-only. The
 format is Hex's "HXTM" v3 ([github.com/anomalyco/hex](https://github.com/anomalyco/hex),
 MIT), described at the top of `build-typing-model.py`.
@@ -10,12 +10,17 @@ MIT), described at the top of `build-typing-model.py`.
 |---|---:|---:|---:|---|---|
 | `en.hextm` | 90,000 | budget-bound | 3.60 MB | `14370569c747a7ef…` | Hex's own file, byte-identical (`ios/HEXKeyboard/TypingModel/en.hextm`) |
 | `fr.hextm` | 110,000 | 322,885 of 1,336,964 useful | 3.60 MB | `62d0cb3b6a9c6e12…` | this script, 2026-11-21 |
+| `es.hextm` | 110,000 | 326,366 | 3.60 MB | `02ffcac185eb832d…` | Hex's own file, byte-identical (`ios/HEXKeyboard/TypingModel/es.hextm` at anomalyco/hex@c14df5a4), not rebuilt here: see `DictusKeyboard/Resources/README.md` |
 
 ## Sources and licences
 
 - **Google Books Ngram Viewer, version 3 (2020-02-17)**, by Google, under
   [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/): word and word-pair counts,
   summed over 1980-2019. Attribution is required; it is in the app's Licences screen.
+- **Spanish word list (Hex's, for `es.hextm`):** the RLA-ES Hunspell dictionaries (es_ES and
+  es_MX), coordinated by Santiago Bosio, under the [MPL 1.1](https://www.mozilla.org/MPL/1.1/),
+  as Hex credits them. `es.hextm` is offered under the MPL 1.1 likewise; its notice and
+  the dictionaries' source location are in the Licences screen.
 - **English word list:** SCOWL and VarCon, sizes up to 70, by Kevin Atkinson. Its notice
   asks to travel with the output, and does, in the Licences screen.
 - **French word list:** Grammalecte's "Classique" French dictionary, version 7.7, as

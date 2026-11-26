@@ -50,13 +50,16 @@ public enum SwipeTypingText {
         /// The switch is on, but this is the App Store build, or the app recorded no
         /// distribution: the Experiments page that set it does not exist here.
         case appStore
-        /// No swipe model for the keyboard's language: only en and fr ship one (#1013).
+        /// No swipe model for the keyboard's language: en, fr and es ship one (#1013, es from
+        /// Hex unmodified); German has none yet.
         case language
         case on
     }
 
-    /// The languages with a swipe model in the keyboard's bundle (`en.hextm`, `fr.hextm`).
-    public static let languages: Set<SupportedLanguage> = [.english, .french]
+    /// The languages with a swipe model in the keyboard's bundle (`en.hextm`, `fr.hextm`,
+    /// `es.hextm`). Spanish is read on Dictus's QWERTY, which has no ñ key: the model gives ñ
+    /// the base n, so a swipe through n reads "año" as well as "ano", the word model choosing.
+    public static let languages: Set<SupportedLanguage> = [.english, .french, .spanish]
 
     /// Whether swipe typing acts, from the switches as the keyboard reads them and the
     /// keyboard's language.

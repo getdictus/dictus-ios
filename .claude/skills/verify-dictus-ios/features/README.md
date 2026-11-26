@@ -138,6 +138,7 @@ Every ID in this map, in one table: the 19 features first, then their 131 sub-fe
 | `typing.swipe-readings` | Gratuit | non |
 | `typing.swipe-take-back` | Gratuit | non |
 | `typing.swipe-toggle` | Gratuit | non |
+| `typing.swipe-spanish` | Gratuit | non |
 | `keyboard.language-switch` | Gratuit | non |
 | `keyboard.layout` | Gratuit | non |
 | `keyboard.number-row` | Gratuit | non |
