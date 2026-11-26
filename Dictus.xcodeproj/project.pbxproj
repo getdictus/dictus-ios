@@ -207,6 +207,8 @@
 		SD1011A2 /* fr.hextm in Resources */ = {isa = PBXBuildFile; fileRef = SD1011B2 /* fr.hextm */; };
 		SD1011A3 /* en.hextm in Resources */ = {isa = PBXBuildFile; fileRef = SD1011B3 /* en.hextm */; };
 		SD948A04 /* es.hextm in Resources */ = {isa = PBXBuildFile; fileRef = SD948B04 /* es.hextm */; };
+		SD948A05 /* de.hextm in Resources */ = {isa = PBXBuildFile; fileRef = SD948B05 /* de.hextm */; };
+		SD948A06 /* de.capitals in Resources */ = {isa = PBXBuildFile; fileRef = SD948B06 /* de.capitals */; };
 		EE0ES001 /* es_spellcheck.dict in Resources */ = {isa = PBXBuildFile; fileRef = EE1ES001 /* es_spellcheck.dict */; };
 		EE0ES002 /* es_ngrams.dict in Resources */ = {isa = PBXBuildFile; fileRef = EE1ES002 /* es_ngrams.dict */; };
 		EE0DE001 /* de_spellcheck.dict in Resources */ = {isa = PBXBuildFile; fileRef = EE1DE001 /* de_spellcheck.dict */; };
@@ -544,6 +546,8 @@
 		SD1011B2 /* fr.hextm */ = {isa = PBXFileReference; lastKnownFileType = "compiled"; path = fr.hextm; sourceTree = "<group>"; };
 		SD1011B3 /* en.hextm */ = {isa = PBXFileReference; lastKnownFileType = "compiled"; path = en.hextm; sourceTree = "<group>"; };
 		SD948B04 /* es.hextm */ = {isa = PBXFileReference; lastKnownFileType = "compiled"; path = es.hextm; sourceTree = "<group>"; };
+		SD948B05 /* de.hextm */ = {isa = PBXFileReference; lastKnownFileType = "compiled"; path = de.hextm; sourceTree = "<group>"; };
+		SD948B06 /* de.capitals */ = {isa = PBXFileReference; lastKnownFileType = text; path = de.capitals; sourceTree = "<group>"; };
 		EE1ES001 /* es_spellcheck.dict */ = {isa = PBXFileReference; lastKnownFileType = "compiled"; path = es_spellcheck.dict; sourceTree = "<group>"; };
 		EE1ES002 /* es_ngrams.dict */ = {isa = PBXFileReference; lastKnownFileType = "compiled"; path = es_ngrams.dict; sourceTree = "<group>"; };
 		EE1DE001 /* de_spellcheck.dict */ = {isa = PBXFileReference; lastKnownFileType = "compiled"; path = de_spellcheck.dict; sourceTree = "<group>"; };
@@ -966,6 +970,8 @@
 				SD1011B2 /* fr.hextm */,
 				SD1011B3 /* en.hextm */,
 				SD948B04 /* es.hextm */,
+				SD948B05 /* de.hextm */,
+				SD948B06 /* de.capitals */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -1355,6 +1361,8 @@
 				SD1011A2 /* fr.hextm in Resources */,
 				SD1011A3 /* en.hextm in Resources */,
 				SD948A04 /* es.hextm in Resources */,
+				SD948A05 /* de.hextm in Resources */,
+				SD948A06 /* de.capitals in Resources */,
 				EE0ES002 /* es_ngrams.dict in Resources */,
 				EE0DE002 /* de_ngrams.dict in Resources */,
 			);

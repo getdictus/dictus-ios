@@ -18,8 +18,8 @@ extension DictusKeyboardBridge: SwipeTypingOutput {
     /// otherwise. Called for every new keyboard view and at every appearance, which is when
     /// a switch changed in the app can first be seen.
     ///
-    /// With the switch off (its default), in the App Store build, outside English, French
-    /// and Spanish, or without the language's model, the view holds no controller: the keyboard
+    /// With the switch off (its default), in the App Store build, outside English, French,
+    /// Spanish and German, or without the language's model, the view holds no controller: the keyboard
     /// is exactly the keyboard without swipe typing. The line logged says which.
     func refreshSwipeTyping(trigger: String) {
         guard let view = keyboardView else { return }
@@ -65,8 +65,10 @@ extension DictusKeyboardBridge: SwipeTypingOutput {
 
     func swipeTypingPreview(_ readings: [String]) {
         guard let first = readings.first else { return }
-        let casing = swipeCasing(before: swipeTypingContextBefore())
-        suggestionState?.showSwipePreview(SwipeTypingText.cased(first, capital: casing.capital, capsLock: casing.capsLock))
+        let before = swipeTypingContextBefore()
+        let casing = swipeCasing(before: before)
+        let written = nounsCapitalised([first], before: before)[0]
+        suggestionState?.showSwipePreview(SwipeTypingText.cased(written, capital: casing.capital, capsLock: casing.capsLock))
     }
 
     /// The swipe lifted: its best reading goes in, after a space unless the text before
@@ -86,7 +88,7 @@ extension DictusKeyboardBridge: SwipeTypingOutput {
 
         let before = proxy.documentContextBeforeInput
         let casing = swipeCasing(before: before)
-        let cased = SwipeTypingText.unique(readings.map {
+        let cased = SwipeTypingText.unique(nounsCapitalised(readings, before: before).map {
             SwipeTypingText.cased($0, capital: casing.capital, capsLock: casing.capsLock)
         })
         let record = SwipedWord(word: cased[0], addedSpace: casing.addsSpace, alternatives: Array(cased.dropFirst()))
@@ -190,6 +192,15 @@ extension DictusKeyboardBridge: SwipeTypingOutput {
     }
 
     // MARK: - Helpers
+
+    /// German readings as German writes them: a noun with its capital ("Haus", "Straße"),
+    /// a verb or an adjective in lowercase ("gehen", "groß"), from `de.capitals` and the word
+    /// before. The readings of any other language are returned as they are.
+    private func nounsCapitalised(_ readings: [String], before: String?) -> [String] {
+        guard let language = keyboardView?.swipeTyping?.language,
+              let capitals = SpatialAutocorrect.capitals(for: language) else { return readings }
+        return capitals.written(readings, before: before)
+    }
 
     /// How a swiped word goes in at the cursor.
     private struct SwipeCasing {

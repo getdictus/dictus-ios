@@ -4,7 +4,7 @@ import CoreGraphics
 import DictusCore
 
 /// The letter page of a language's default layout (`KeyboardLayouts.qwertyNormal` for en
-/// and es, which has no ñ key, `azertyNormal` for fr: the key widths restated here, since those builders live in the
+/// and es, which has no ñ key, `azertyNormal` for fr, `QWERTZLayout` for de, with its ä ö ü keys: the key widths restated here, since those builders live in the
 /// keyboard target and import UIKit) on a `width` x `height` grid laid out by
 /// `KeyPlaneGeometry`, as `GiellaKeyboardView.keyPlaneSlots` does. The default grid is an
 /// iPhone 17 held upright, as `tools/keyboard-bench` uses.
@@ -28,6 +28,10 @@ struct LetterPage {
         if language == "fr" {
             return [letters("azertyuiop"), letters("qsdfghjklm"),
                     [(nil, 1.5)] + letters("wxcvbn") + [(nil, 1), (nil, 1.5)], bottom]
+        }
+        if language == "de" {
+            let rows = QWERTZLayout.lowercasedLettersRows.map { $0.joined() }
+            return [letters(rows[0]), letters(rows[1]), [(nil, 1.5)] + letters(rows[2]) + [(nil, 1.5)], bottom]
         }
         return [letters("qwertyuiop"), [(nil, 0.5)] + letters("asdfghjkl") + [(nil, 0.5)],
                 [(nil, 1.5)] + letters("zxcvbnm") + [(nil, 1.5)], bottom]

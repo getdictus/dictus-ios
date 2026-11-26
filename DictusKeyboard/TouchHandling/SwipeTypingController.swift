@@ -121,7 +121,8 @@ final class SwipeTypingController {
     private let clock: () -> TimeInterval = { CACurrentMediaTime() }
 
     /// - Parameters:
-    ///   - model: the keyboard language's swipe model (`en.hextm`, `fr.hextm` or `es.hextm`).
+    ///   - model: the keyboard language's swipe model (`en.hextm`, `fr.hextm`, `es.hextm` or
+    ///     `de.hextm`).
     ///   - showsTrail: whether the finger's trail draws (`swipeTrail`).
     init(model: SpatialDecoderModel, showsTrail: Bool) {
         var decoder = SwipeDecoder(model: model)

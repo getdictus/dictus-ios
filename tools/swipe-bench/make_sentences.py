@@ -3,8 +3,8 @@
 
   python3 -I tools/swipe-bench/make_sentences.py LANG SENTENCES.tsv.bz2 user_languages.csv OUTDIR
 
-LANG is en, fr or es. The exports are
-https://downloads.tatoeba.org/exports/per_language/{eng,fra,spa}/{eng,fra,spa}_sentences_detailed.tsv.bz2
+LANG is en, fr, es or de. The exports are
+https://downloads.tatoeba.org/exports/per_language/{eng,fra,spa,deu}/{eng,fra,spa,deu}_sentences_detailed.tsv.bz2
 and https://downloads.tatoeba.org/exports/user_languages.tar.bz2 (CC BY 2.0 FR). Writes
 OUTDIR/LANG-dev.tsv (500 sentences) and OUTDIR/LANG-test.tsv (2,000). Deterministic for the
 same exports.
@@ -30,11 +30,13 @@ ALPHABET = {
     "fr": set("abcdefghijklmnopqrstuvwxyz'àâæçèéêëîïôùûüœ"),
     # es.hextm's letters (Hex's model): no apostrophe, Spanish has none.
     "es": set("abcdefghijklmnopqrstuvwxyzáéíñóúü"),
+    # de.hextm's letters: no apostrophe, so "geht's" and "gibt's" leave their sentence out.
+    "de": set("abcdefghijklmnopqrstuvwxyzäöüß"),
 }
-TATOEBA = {"en": "eng", "fr": "fra", "es": "spa"}
-EXPORT_DATE = {"en": "2026-11-21", "fr": "2026-11-21", "es": "2026-11-25"}
+TATOEBA = {"en": "eng", "fr": "fra", "es": "spa", "de": "deu"}
+EXPORT_DATE = {"en": "2026-11-21", "fr": "2026-11-21", "es": "2026-11-25", "de": "2026-11-21"}
 DROP = dict.fromkeys(map(ord, '.,!?;:"«»()…–—'), " ")
-# Only Spanish drops ¿ and ¡: dropping them for en and fr too would let in sentences their
+# Only Spanish drops ¿ and ¡: dropping them for en, fr and de too would let in sentences their
 # exports of 2026-11-21 left out, and change their committed sets.
 DROP_ES = {**DROP, **dict.fromkeys(map(ord, "¿¡"), " ")}
 DEV, TEST, SEED = 500, 2000, 948
