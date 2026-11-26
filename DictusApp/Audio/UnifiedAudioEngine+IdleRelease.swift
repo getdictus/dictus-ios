@@ -89,7 +89,7 @@ extension UnifiedAudioEngine {
     /// Cancel a pending idle release. Safe to call when none is armed.
     ///
     /// WHY it also clears `lastIdleStartTime`: the anchor is only meaningful while
-    /// a release is armed. Every caller here (`startRecording`, `stopEngine`,
+    /// a release is armed. Every caller here (`startRecording`,
     /// `deactivateSession`, `forceRestart`, interruption and media-services-reset
     /// handling) is leaving the warm-idle state, so keeping the old timestamp let
     /// the wall-clock backstop measure an idle age that had already ended — most
