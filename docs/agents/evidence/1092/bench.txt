@@ -1,0 +1,24 @@
+#954 keyboard bench, fr,en,en-typos, iPhone 17 Pro simulator (iOS 27.2), SWIFT_DETERMINISTIC_HASHING=1 (run.sh)
+command: tools/keyboard-bench/run.sh --udid <udid> --langs fr,en,en-typos --out <dir>
+develop  = origin/develop 3ea25a16fbbbd690f48be956d1c4a6a7e45d6da0 (git archive)
+final-off = feature/502-suggestion-bar 852e2af6, App Group dictus.keyboard.suggestionCapsules = 0
+final-on  = feature/502-suggestion-bar 852e2af6, App Group dictus.keyboard.suggestionCapsules = 1
+
+505e6ac3ecf720dd6f9c7eef1b729745e51f75d29cac3c5d748f981a8b64b2d1  develop/texts.tsv
+2bab5de30dcbbe13ea4b156ce48f22feb477e2892dbd80cd909ecbf8c7ab1657  develop/commits.tsv
+a14de79ab21311d56399dac0e7bb5a8fb67578004e41391a5043b2711d313ccf  develop/register.tsv
+505e6ac3ecf720dd6f9c7eef1b729745e51f75d29cac3c5d748f981a8b64b2d1  final-off/texts.tsv
+2bab5de30dcbbe13ea4b156ce48f22feb477e2892dbd80cd909ecbf8c7ab1657  final-off/commits.tsv
+a14de79ab21311d56399dac0e7bb5a8fb67578004e41391a5043b2711d313ccf  final-off/register.tsv
+505e6ac3ecf720dd6f9c7eef1b729745e51f75d29cac3c5d748f981a8b64b2d1  final-on/texts.tsv
+2bab5de30dcbbe13ea4b156ce48f22feb477e2892dbd80cd909ecbf8c7ab1657  final-on/commits.tsv
+a14de79ab21311d56399dac0e7bb5a8fb67578004e41391a5043b2711d313ccf  final-on/register.tsv
+
+cmp develop/texts.tsv final-off/texts.tsv: identical
+cmp develop/commits.tsv final-off/commits.tsv: identical
+cmp develop/register.tsv final-off/register.tsv: identical
+cmp develop/texts.tsv final-on/texts.tsv: identical
+cmp develop/commits.tsv final-on/commits.tsv: identical
+cmp develop/register.tsv final-on/register.tsv: identical
+
+rows: 60 sentences (20 fr, 20 en, 20 en-typos), 435 commits
