@@ -918,12 +918,32 @@ class DictationCoordinator: ObservableObject {
         // still being that session (#267) -- see `mayReport`.
         let session = sessionGeneration.current
 
+        // The post-roll counts from the tap (#1085): the keyboard's, carried by the trace,
+        // or this call for a stop tapped in the app or on the Dynamic Island.
+        let now = Date().timeIntervalSince1970
+        let postRoll = StopPostRoll(tapEpoch: stopTrace?.tapEpoch ?? now, startEpoch: now)
+
+        // `.transcribing` before the post-roll, not after it (#1085): the keyboard and the
+        // Dynamic Island leave the recording screen on this status, so the tap is answered
+        // at once and the 300 ms the microphone stays open read as transcription. The
+        // estimate only sizes the stage watchdog, which is within a buffer of the truth.
+        enterTranscription(audioSeconds: Double(audioEngine.currentSampleCount) / 16000.0 + StopPostRoll.margin)
+        stopTrace?.log("statusTranscribing")
+        LiveActivityManager.shared.transitionToTranscribing()
+        // Arm watchdog: if DI fails to leave .recording, force recovery after 10s.
+        // If transitionToTranscribing succeeded, the watchdog's guard exits harmlessly.
+        LiveActivityManager.shared.startRecordingWatchdog()
+
         dictationTask = Task {
             defer { self.isTranscribingInFlight = false }
             do {
                 // Also where the engine goes quiet: it stays warm, and `collectSamples`
                 // mutes its input (#430), so there is no separate engine-stop step.
-                let samples = audioEngine.collectSamples()
+                // Nil is a cancel (or another teardown) that took the recording during the
+                // post-roll: that path owns the status and the cleanup.
+                guard let samples = await audioEngine.collectSamples(
+                    after: postRoll, sessionID: stopTrace?.sessionID ?? "app"
+                ) else { return }
                 stopTrace?.log("samplesCollected")
 
                 guard !samples.isEmpty else {
@@ -954,12 +974,7 @@ class DictationCoordinator: ObservableObject {
                     DictusLogger.app.info("Recording stopped. Samples: \(samples.count, privacy: .public), Duration: \(String(format: "%.1f", audioDuration), privacy: .public)s")
                 }
 
-                enterTranscription(audioSeconds: audioDuration)
-                stopTrace?.log("statusTranscribing")
-                LiveActivityManager.shared.transitionToTranscribing()
-                // Arm watchdog: if DI fails to leave .recording, force recovery after 10s.
-                // If transitionToTranscribing succeeded, the watchdog's guard exits harmlessly.
-                LiveActivityManager.shared.startRecordingWatchdog()
+                // After the collection, so the stop sound is never in the recording (#1085).
                 if playsStopSound { SoundFeedbackService.playRecordStop() }
                 stopTrace?.log("stopFeedbackDone")
 
