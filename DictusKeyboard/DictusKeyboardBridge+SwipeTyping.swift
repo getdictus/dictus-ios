@@ -18,8 +18,8 @@ extension DictusKeyboardBridge: SwipeTypingOutput {
     /// otherwise. Called for every new keyboard view and at every appearance, which is when
     /// a switch changed in the app can first be seen.
     ///
-    /// With the switch off (its default), in the App Store build, outside English, French
-    /// and German, or without the language's model, the view holds no controller: the keyboard
+    /// With the switch off (its default), in the App Store build, outside English, French,
+    /// Spanish and German, or without the language's model, the view holds no controller: the keyboard
     /// is exactly the keyboard without swipe typing. The line logged says which.
     func refreshSwipeTyping(trigger: String) {
         guard let view = keyboardView else { return }

@@ -36,7 +36,7 @@ enum SpatialAutocorrect {
     private static var decoders: [String: SpatialDecoder?] = [:]
 
     /// The decoder for `language`, its model mapped on first use; nil when the bundle has
-    /// no model for it (`fr.hextm`, `en.hextm` and `de.hextm` ship).
+    /// no model for it (`fr.hextm`, `en.hextm`, `es.hextm` and `de.hextm` ship).
     static func decoder(for language: String) -> SpatialDecoder? {
         lock.lock()
         defer { lock.unlock() }

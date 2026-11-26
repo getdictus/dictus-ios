@@ -96,6 +96,30 @@
         }
       }
     },
+    "Longer than 5 minutes: Dictus transcribes it in the app, as soon as you open it." : {
+      "comment" : "Share extension: the note is over the 5-minute limit of transcription with the app closed, so the app transcribes it (#1056).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Länger als 5 Minuten: Dictus transkribiert sie in der App, sobald du sie öffnest."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Más de 5 minutos: Dictus lo transcribe en la app en cuanto la abras."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plus de 5 minutes : Dictus le transcrit dans l'app, dès que vous l'ouvrez."
+          }
+        }
+      }
+    },
     "OK" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -203,6 +227,30 @@
         }
       }
     },
+    "The text is in the Dictus keyboard." : {
+      "comment" : "Share extension: the note was transcribed with the app closed; the Dictus keyboard offers the text (#1056).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Text ist in der Dictus-Tastatur."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El texto está en el teclado Dictus."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le texte est dans le clavier Dictus."
+          }
+        }
+      }
+    },
     "The transcription starts as soon as you open the app." : {
       "comment" : "Share extension, cold path (#620).",
       "extractionState" : "manual",
@@ -271,6 +319,54 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ce message vocal dépasse 10 minutes, la durée maximale que Dictus transcrit."
+          }
+        }
+      }
+    },
+    "Transcribed in %@, your dictation language." : {
+      "comment" : "Share extension, app closed: done, in the dictation language, standing in for automatic detection (#1056). The argument is a language name.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auf %@ transkribiert, deiner Diktiersprache."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transcrito en %@, tu idioma de dictado."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transcrit en %@, votre langue de dictée."
+          }
+        }
+      }
+    },
+    "Transcribed in %@." : {
+      "comment" : "Share extension, app closed: done, in the voice-note language the user set (#1056). The argument is a language name.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auf %@ transkribiert."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transcrito en %@."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transcrit en %@."
           }
         }
       }
@@ -371,6 +467,30 @@
         }
       }
     },
+    "Voice note transcribed" : {
+      "comment" : "Share extension: the note was transcribed in the extension with Apple's model, app closed (#1056).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sprachnachricht transkribiert"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mensaje de voz transcrito"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Message vocal transcrit"
+          }
+        }
+      }
+    },
     "Voice notes are switched off. Turn them back on in Dictus, under Dictus Pro." : {
       "comment" : "Share extension: a Pro user switched voice notes off in the Dictus Pro hub (#216).",
       "extractionState" : "manual",
@@ -391,6 +511,78 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Les messages vocaux sont désactivés. Réactivez-les dans Dictus, rubrique Dictus Pro."
+          }
+        }
+      }
+    },
+    "Voice notes transcribed" : {
+      "comment" : "Share extension: several notes transcribed in the extension with Apple's model, app closed (#1056).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sprachnachrichten transkribiert"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mensajes de voz transcritos"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Messages vocaux transcrits"
+          }
+        }
+      }
+    },
+    "With Apple's on-device model, in %@, your dictation language." : {
+      "comment" : "Share extension, app closed: the note is transcribed by Apple's model in the dictation language, standing in for automatic detection (#1056). The argument is a language name.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mit dem Modell von Apple auf dem Gerät, auf %@, deiner Diktiersprache."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Con el modelo de Apple en el dispositivo, en %@, tu idioma de dictado."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avec le modèle d'Apple, sur l'appareil, en %@, votre langue de dictée."
+          }
+        }
+      }
+    },
+    "With Apple's on-device model, in %@." : {
+      "comment" : "Share extension, app closed: the note is transcribed by Apple's model in the voice-note language the user set (#1056). The argument is a language name.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mit dem Modell von Apple auf dem Gerät, auf %@."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Con el modelo de Apple en el dispositivo, en %@."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avec le modèle d'Apple, sur l'appareil, en %@."
           }
         }
       }

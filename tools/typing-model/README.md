@@ -10,6 +10,7 @@ MIT), described at the top of `build-typing-model.py`.
 |---|---:|---:|---:|---|---|
 | `en.hextm` | 90,000 | budget-bound | 3.60 MB | `14370569c747a7ef…` | Hex's own file, byte-identical (`ios/HEXKeyboard/TypingModel/en.hextm`) |
 | `fr.hextm` | 110,000 | 322,885 of 1,336,964 useful | 3.60 MB | `62d0cb3b6a9c6e12…` | this script, 2026-11-21 |
+| `es.hextm` | 110,000 | 326,366 | 3.60 MB | `02ffcac185eb832d…` | Hex's own file, byte-identical (`ios/HEXKeyboard/TypingModel/es.hextm` at anomalyco/hex@c14df5a4), not rebuilt here: see `DictusKeyboard/Resources/README.md` |
 | `de.hextm` | 95,000 | 356,665 of 1,784,994 useful | 3.60 MB | `564c1b05c62dc26f…` | this script, 2026-11-25 (#948) |
 
 German also ships `de.capitals` (738,275 bytes, SHA-256 `16c5c71b3cb4c386…`), the share of
@@ -21,6 +22,10 @@ same shards: the model is lowercase, and German writes its nouns with a capital.
 - **Google Books Ngram Viewer, version 3 (2020-02-17)**, by Google, under
   [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/): word and word-pair counts,
   summed over 1980-2019. Attribution is required; it is in the app's Licences screen.
+- **Spanish word list (Hex's, for `es.hextm`):** the RLA-ES Hunspell dictionaries (es_ES and
+  es_MX), coordinated by Santiago Bosio, under the [MPL 1.1](https://www.mozilla.org/MPL/1.1/),
+  as Hex credits them. `es.hextm` is offered under the MPL 1.1 likewise; its notice and
+  the dictionaries' source location are in the Licences screen.
 - **German word list:** "German wordlist" by Markus Enzenberger and contributors
   ([github.com/enz/german-wordlist](https://github.com/enz/german-wordlist), commit
   `1071d87d9535b57b80ec076c699f2578a28ee9dc`, file `words`, 685,829 entries, SHA-256

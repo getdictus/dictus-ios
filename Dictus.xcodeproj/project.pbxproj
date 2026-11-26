@@ -206,6 +206,7 @@
 		SD1011A1 /* SpatialAutocorrect.swift in Sources */ = {isa = PBXBuildFile; fileRef = SD1011B1 /* SpatialAutocorrect.swift */; };
 		SD1011A2 /* fr.hextm in Resources */ = {isa = PBXBuildFile; fileRef = SD1011B2 /* fr.hextm */; };
 		SD1011A3 /* en.hextm in Resources */ = {isa = PBXBuildFile; fileRef = SD1011B3 /* en.hextm */; };
+		SD948A04 /* es.hextm in Resources */ = {isa = PBXBuildFile; fileRef = SD948B04 /* es.hextm */; };
 		SD948A05 /* de.hextm in Resources */ = {isa = PBXBuildFile; fileRef = SD948B05 /* de.hextm */; };
 		SD948A06 /* de.capitals in Resources */ = {isa = PBXBuildFile; fileRef = SD948B06 /* de.capitals */; };
 		EE0ES001 /* es_spellcheck.dict in Resources */ = {isa = PBXBuildFile; fileRef = EE1ES001 /* es_spellcheck.dict */; };
@@ -236,12 +237,14 @@
 		SW0948A3 /* SwipeTrailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = SW0948B3 /* SwipeTrailView.swift */; };
 		CC000040 /* HostInputTraits.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC100040 /* HostInputTraits.swift */; };
 		VN6200000001 /* VoiceNoteProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = VN6201000001 /* VoiceNoteProcessor.swift */; };
+		VN1056000001 /* VoiceNoteSpeechAssets.swift in Sources */ = {isa = PBXBuildFile; fileRef = VN1056010001 /* VoiceNoteSpeechAssets.swift */; };
 		VN6200000002 /* VoiceNoteCopy.swift in Sources */ = {isa = PBXBuildFile; fileRef = VN6201000002 /* VoiceNoteCopy.swift */; };
 		VN6200000003 /* VoiceNoteSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = VN6201000003 /* VoiceNoteSettingsView.swift */; };
 		VN6200000004 /* VoiceNoteResultView.swift in Sources */ = {isa = PBXBuildFile; fileRef = VN6201000004 /* VoiceNoteResultView.swift */; };
 		VN6200000005 /* VoiceNoteStackView.swift in Sources */ = {isa = PBXBuildFile; fileRef = VN6201000005 /* VoiceNoteStackView.swift */; };
 		DS6200000001 /* ShareViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DS6201000001 /* ShareViewController.swift */; };
 		DS6200000002 /* ShareStatusView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DS6201000002 /* ShareStatusView.swift */; };
+		DS6200000005 /* ShareOnDeviceTranscription.swift in Sources */ = {isa = PBXBuildFile; fileRef = DS6201000007 /* ShareOnDeviceTranscription.swift */; };
 		DS6200000003 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = DS6201000005 /* Localizable.xcstrings */; };
 		DS6200000004 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = DS6201000006 /* PrivacyInfo.xcprivacy */; };
 		DS6200000010 /* DictusCore in Frameworks */ = {isa = PBXBuildFile; productRef = DS6209000010 /* DictusCore */; };
@@ -542,6 +545,7 @@
 		SD1011B1 /* SpatialAutocorrect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpatialAutocorrect.swift; sourceTree = "<group>"; };
 		SD1011B2 /* fr.hextm */ = {isa = PBXFileReference; lastKnownFileType = "compiled"; path = fr.hextm; sourceTree = "<group>"; };
 		SD1011B3 /* en.hextm */ = {isa = PBXFileReference; lastKnownFileType = "compiled"; path = en.hextm; sourceTree = "<group>"; };
+		SD948B04 /* es.hextm */ = {isa = PBXFileReference; lastKnownFileType = "compiled"; path = es.hextm; sourceTree = "<group>"; };
 		SD948B05 /* de.hextm */ = {isa = PBXFileReference; lastKnownFileType = "compiled"; path = de.hextm; sourceTree = "<group>"; };
 		SD948B06 /* de.capitals */ = {isa = PBXFileReference; lastKnownFileType = text; path = de.capitals; sourceTree = "<group>"; };
 		EE1ES001 /* es_spellcheck.dict */ = {isa = PBXFileReference; lastKnownFileType = "compiled"; path = es_spellcheck.dict; sourceTree = "<group>"; };
@@ -549,12 +553,14 @@
 		EE1DE001 /* de_spellcheck.dict */ = {isa = PBXFileReference; lastKnownFileType = "compiled"; path = de_spellcheck.dict; sourceTree = "<group>"; };
 		EE1DE002 /* de_ngrams.dict */ = {isa = PBXFileReference; lastKnownFileType = "compiled"; path = de_ngrams.dict; sourceTree = "<group>"; };
 		VN6201000001 /* VoiceNoteProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceNoteProcessor.swift; sourceTree = "<group>"; };
+		VN1056010001 /* VoiceNoteSpeechAssets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceNoteSpeechAssets.swift; sourceTree = "<group>"; };
 		VN6201000002 /* VoiceNoteCopy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceNoteCopy.swift; sourceTree = "<group>"; };
 		VN6201000003 /* VoiceNoteSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceNoteSettingsView.swift; sourceTree = "<group>"; };
 		VN6201000004 /* VoiceNoteResultView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceNoteResultView.swift; sourceTree = "<group>"; };
 		VN6201000005 /* VoiceNoteStackView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceNoteStackView.swift; sourceTree = "<group>"; };
 		DS6201000001 /* ShareViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareViewController.swift; sourceTree = "<group>"; };
 		DS6201000002 /* ShareStatusView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareStatusView.swift; sourceTree = "<group>"; };
+		DS6201000007 /* ShareOnDeviceTranscription.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareOnDeviceTranscription.swift; sourceTree = "<group>"; };
 		DS6201000003 /* DictusShare.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = DictusShare.entitlements; sourceTree = "<group>"; };
 		DS6201000004 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		DS6201000005 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
@@ -963,6 +969,7 @@
 				EE1DE002 /* de_ngrams.dict */,
 				SD1011B2 /* fr.hextm */,
 				SD1011B3 /* en.hextm */,
+				SD948B04 /* es.hextm */,
 				SD948B05 /* de.hextm */,
 				SD948B06 /* de.capitals */,
 			);
@@ -1102,6 +1109,7 @@
 			isa = PBXGroup;
 			children = (
 				VN6201000001 /* VoiceNoteProcessor.swift */,
+				VN1056010001 /* VoiceNoteSpeechAssets.swift */,
 				VN6201000002 /* VoiceNoteCopy.swift */,
 				VN6201000003 /* VoiceNoteSettingsView.swift */,
 				VN6201000004 /* VoiceNoteResultView.swift */,
@@ -1117,6 +1125,7 @@
 			children = (
 				DS6201000001 /* ShareViewController.swift */,
 				DS6201000002 /* ShareStatusView.swift */,
+				DS6201000007 /* ShareOnDeviceTranscription.swift */,
 				DS6201000005 /* Localizable.xcstrings */,
 				DS6201000006 /* PrivacyInfo.xcprivacy */,
 				DS6201000003 /* DictusShare.entitlements */,
@@ -1351,6 +1360,7 @@
 				EE00000A /* en_ngrams.dict in Resources */,
 				SD1011A2 /* fr.hextm in Resources */,
 				SD1011A3 /* en.hextm in Resources */,
+				SD948A04 /* es.hextm in Resources */,
 				SD948A05 /* de.hextm in Resources */,
 				SD948A06 /* de.capitals in Resources */,
 				EE0ES002 /* es_ngrams.dict in Resources */,
@@ -1585,6 +1595,7 @@
 				AA700072 /* SwipeUpHintView.swift in Sources */,
 				SS000003 /* ProBannerView.swift in Sources */,
 				VN6200000001 /* VoiceNoteProcessor.swift in Sources */,
+				VN1056000001 /* VoiceNoteSpeechAssets.swift in Sources */,
 				VN6200000002 /* VoiceNoteCopy.swift in Sources */,
 				VN6200000003 /* VoiceNoteSettingsView.swift in Sources */,
 				VN6200000004 /* VoiceNoteResultView.swift in Sources */,
@@ -1678,6 +1689,7 @@
 			files = (
 				DS6200000001 /* ShareViewController.swift in Sources */,
 				DS6200000002 /* ShareStatusView.swift in Sources */,
+				DS6200000005 /* ShareOnDeviceTranscription.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

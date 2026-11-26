@@ -6,7 +6,7 @@
 // decode takes. Words of one key are tapped, not swiped, and words the decoder cannot read
 // (not in the model, not one of English's contractions) are left out and counted.
 //
-//   swipe-bench [--langs en,fr,de] [--styles clean,neat,typical,sloppy] [--split test]
+//   swipe-bench [--langs en,fr,es,de] [--styles clean,neat,typical,sloppy] [--split test]
 //               [--limit N] [--seed 1] [--out DIR] [--keys targets|keyboard|caps]
 //   swipe-bench --memory [--langs en] [--styles typical]
 //   swipe-bench --hex-paths FILE.tsv --langs en [--models DIR]   (local cross-check, see README)
@@ -17,7 +17,7 @@ import Foundation
 // MARK: - Arguments
 
 struct Options {
-    var langs = ["en", "fr", "de"]
+    var langs = ["en", "fr", "es", "de"]
     var styles = ["clean", "neat", "typical", "sloppy"]
     var split = "test"
     var limit = Int.max
@@ -62,8 +62,8 @@ func parse() -> Options {
 
 // MARK: - Inputs
 
-/// Added to seed * 7919 for the sentence loop, as Hex's generator has it (en 0, de 29, fr 37).
-let seedOffset = ["en": 0, "de": 29, "fr": 37]
+/// Added to seed * 7919 for the sentence loop, as Hex's generator has it (en 0, es 17, de 29, fr 37).
+let seedOffset = ["en": 0, "es": 17, "de": 29, "fr": 37]
 
 func sentences(_ o: Options, _ lang: String) -> [String] {
     let url = o.root.appendingPathComponent("tools/swipe-bench/sentences/\(lang)-\(o.split).tsv")
