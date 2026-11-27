@@ -116,14 +116,15 @@ public struct VoiceNoteSettings: Equatable, Sendable {
     }
 
     /// The language policy one voice note is transcribed under: these settings for
-    /// the language, the user's active model for everything else. Captured once per
-    /// note, for #226's reason — the settings can change while a queue runs.
-    public func languagePolicy(activeModel: String, keyboardLanguage: SupportedLanguage) -> TranscriptionLanguagePolicy {
+    /// the language, the engine that dictates now for everything else (`ActiveSpeechEngine`,
+    /// Apple's included since #1083). Captured once per note, for #226's reason — the
+    /// settings can change while a queue runs.
+    public func languagePolicy(activeEngine: ActiveSpeechEngine, keyboardLanguage: SupportedLanguage) -> TranscriptionLanguagePolicy {
         TranscriptionLanguagePolicy(
             mode: language.transcriptionMode,
             keyboardLanguage: keyboardLanguage,
-            engine: ModelInfo.forIdentifier(activeModel)?.engine ?? .whisperKit,
-            modelIdentifier: activeModel
+            engine: activeEngine.engine,
+            modelIdentifier: activeEngine.identifier
         )
     }
 

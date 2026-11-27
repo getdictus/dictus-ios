@@ -32,7 +32,7 @@ Out of the map on purpose: the "Developer" section of Réglages (Debug builds on
 
 ## All IDs
 
-Every ID in this map, in one table: the 19 features first, then their 134 sub-features (in the order of the feature files), then the 58 screens of [screens.md](screens.md) — 211 IDs in all. **Gratuit/Pro** is the tier of the feature the ID belongs to. **Spécifique iOS** is « oui » when the ID has no Android equivalent to compare against: the keyboard-to-app hand-off and Full Access (an iOS keyboard extension cannot record and must ask for Full Access), return to the host app, Apple Intelligence (polish), the Dynamic Island (Live Activity, stopping standby), and the App Group check.
+Every ID in this map, in one table: the 19 features first, then their 135 sub-features (in the order of the feature files), then the 58 screens of [screens.md](screens.md) — 212 IDs in all. **Gratuit/Pro** is the tier of the feature the ID belongs to. **Spécifique iOS** is « oui » when the ID has no Android equivalent to compare against: the keyboard-to-app hand-off and Full Access (an iOS keyboard extension cannot record and must ask for Full Access), return to the host app, Apple Intelligence (polish), the Dynamic Island (Live Activity, stopping standby), and the App Group check.
 
 | ID | Gratuit/Pro | Spécifique iOS |
 | --- | --- | --- |
@@ -129,6 +129,7 @@ Every ID in this map, in one table: the 19 features first, then their 134 sub-fe
 | `typing.contacts-and-replacements` | Gratuit | non |
 | `typing.curated-names` | Gratuit | non |
 | `typing.spatial-autocorrect` | Gratuit | non |
+| `typing.bilingual-autocorrect` | Gratuit | non |
 | `typing.cursor-trackpad` | Gratuit | non |
 | `typing.delete-swipe` | Gratuit | non |
 | `learned-words.learn` | Gratuit | non |
