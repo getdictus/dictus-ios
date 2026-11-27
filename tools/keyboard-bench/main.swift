@@ -110,7 +110,7 @@ func grid(_ page: [[KeyDefinition]], width: CGFloat, height: CGFloat) -> [Cell] 
 ///
 /// Then `GiellaKeyboardView.keyIndexPath(at:)`: a tap high on Return, under the AZERTY
 /// apostrophe key, after a word French elides is the apostrophe's (#1080).
-func hitTest(_ point: CGPoint, cells: [Cell], width: CGFloat, height: CGFloat, textBefore: String) -> Cell? {
+func hitTest(_ point: CGPoint, cells: [Cell], width: CGFloat, height: CGFloat, textBefore: () -> String) -> Cell? {
     guard CGRect(x: 0, y: 0, width: width, height: height).contains(point) else { return nil }
     let margin: CGFloat = 4
     let p = CGPoint(x: min(max(point.x, margin), width - margin), y: min(max(point.y, margin), height - margin))
@@ -121,7 +121,7 @@ func hitTest(_ point: CGPoint, cells: [Cell], width: CGFloat, height: CGFloat, t
               return false
           }) else { return hit }
     let takes = ApostropheReturnBorder.takesApostrophe(
-        p, apostrophe: apostrophe.frame, returnKey: hit.frame, rowPitch: hit.rowHeight, textBeforeCursor: { textBefore }
+        p, apostrophe: apostrophe.frame, returnKey: hit.frame, rowPitch: hit.rowHeight, textBeforeCursor: textBefore
     )
     return takes ? apostrophe : hit
 }
@@ -402,7 +402,7 @@ func replay(_ taps: [Tap], cells: [Cell], width: CGFloat, height: CGFloat, picke
         let word = current.split(separator: "'", omittingEmptySubsequences: false).last.map(String.init) ?? ""
 
         let start = DispatchTime.now().uptimeNanoseconds
-        let plain = hitTest(point, cells: cells, width: width, height: height, textBefore: field.text)
+        let plain = hitTest(point, cells: cells, width: width, height: height) { field.text }
         var hit = plain
         var visited = 0
         // A touch outside the grid never reaches the keyboard view: no model sees it.
