@@ -119,11 +119,12 @@ extension DictusKeyboardBridge: SwipeTypingOutput {
     }
 
     /// The user's own words for the swipe (#1090): adopted learned words, contact names and
-    /// text replacements, by the rules of `SwipeOwnWords.words`.
-    func swipeTypingOwnWords() -> [String] {
+    /// text replacements, and `language`'s brand names, by the rules of `SwipeOwnWords.words`.
+    func swipeTypingOwnWords(language: String) -> [String] {
         SwipeOwnWords.words(
             learnedUses: UserDictionary.shared.allLearnedWords,
-            lexiconWords: TextPredictionEngine.shared.lexiconWords
+            lexiconWords: TextPredictionEngine.shared.lexiconWords,
+            brands: SwipeBrands.names(for: language)
         )
     }
 

@@ -48,9 +48,9 @@ protocol SwipeTypingOutput: AnyObject {
     func swipeTypingDidEnd(readings: [String])
     /// The system cancelled the swipe: nothing goes in.
     func swipeTypingDidCancel()
-    /// The user's own words the swipe reads beside its model (`SwipeOwnWords.words`),
-    /// asked as each swipe begins.
-    func swipeTypingOwnWords() -> [String]
+    /// The user's own words the swipe reads beside its model, with `language`'s brand names
+    /// (`SwipeOwnWords.words`), asked as each swipe begins.
+    func swipeTypingOwnWords(language: String) -> [String]
 }
 
 /// Swipe typing (#948): slide from a letter through the letters of a word and lift, and the
@@ -150,10 +150,11 @@ final class SwipeTypingController {
     }
 
     /// Gives the decoder the user's own words as they are now (#1090): a word learned, a
-    /// contact added since the last swipe. Rebuilt only when the list changed; with no own
-    /// word the decoder reads exactly what it read before.
+    /// contact added since the last swipe, and the language's brand names. Rebuilt only when
+    /// the list changed; the words go in only where the model lacks them, so a swipe of a
+    /// dictionary word is ranked against the same words as before.
     private func syncOwnWords() {
-        let words = output?.swipeTypingOwnWords() ?? []
+        let words = output?.swipeTypingOwnWords(language: language) ?? []
         guard words != ownWords else { return }
         ownWords = words
         var extra = baseExtraWords

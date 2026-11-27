@@ -36,8 +36,8 @@
 import Foundation
 
 /// The user's own words for swipe typing (#1090): words the keyboard learned, contact names
-/// and text replacements, and the app names `CuratedNames` spells, read beside the model's
-/// words, and written as the user writes them.
+/// and text replacements, the app names `CuratedNames` spells and the language's brand
+/// names (`SwipeBrands`), read beside the model's words, and written as the user writes them.
 ///
 /// WHY only adopted learned words (ADR 0004, amended by #1090): a swipe types its reading
 /// without a tap, as space applies a correction. So a learned word reaches a swipe under the
@@ -50,18 +50,26 @@ import Foundation
 /// and recases them on their first use too.
 public enum SwipeOwnWords {
 
-    /// The words a swipe reads beside its model, lowercased, once each and sorted, so the
-    /// keyboard can tell when they changed: the adopted learned words (`learnedUses`, each
-    /// word's usage count, `UserDictionary.allLearnedWords`), the lexicon's words
-    /// (`SupplementaryLexicon.lowercasedWords`) and `CuratedNames`. Words of one letter are
-    /// tapped, never swiped.
-    public static func words(learnedUses: [String: Int], lexiconWords: [String]) -> [String] {
+    /// The words a swipe reads beside its model, once each and sorted, so the keyboard can
+    /// tell when they changed: the adopted learned words (`learnedUses`, each word's usage
+    /// count, `UserDictionary.allLearnedWords`), the lexicon's words
+    /// (`SupplementaryLexicon.lowercasedWords`) and `CuratedNames`, lowercased, then the
+    /// language's brand names (`brands`, `SwipeBrands.names(for:)`) in their casing. Words of
+    /// one letter are tapped, never swiped.
+    ///
+    /// A brand goes in in its casing because the decoder hands back the text it was given
+    /// (« Apple »), and `written` leaves a reading that is not lowercase as it is. It goes in
+    /// only when none of the user's words is the same word: a learned « apple » or a contact
+    /// is the user's own, and is written as the user writes it.
+    public static func words(learnedUses: [String: Int], lexiconWords: [String], brands: [String] = []) -> [String] {
         var words = Set<String>()
         for (word, uses) in learnedUses where LearnedWordCorrection.isAdopted(uses: uses) {
             words.insert(word.lowercased())
         }
         for word in lexiconWords { words.insert(word.lowercased()) }
         for name in CuratedNames.recased { words.insert(name.lowercased()) }
+        let own = words
+        for name in brands where !own.contains(name.lowercased()) { words.insert(name) }
         return words.filter { $0.count >= 2 }.sorted()
     }
 
@@ -73,7 +81,7 @@ public enum SwipeOwnWords {
     /// and a swipe of a dictionary word must read as it did before (#1090's bench). How it is
     /// written still follows the user (`written`).
     public static func add(_ words: [String], to extra: inout SwipeDecoder.ExtraWords, model: SpatialDecoderModel) {
-        extra.add(words.filter { !model.contains($0) }, cost: SwipeDecoder.ownWordCost, model: model)
+        extra.add(words.filter { !model.contains($0.lowercased()) }, cost: SwipeDecoder.ownWordCost, model: model)
     }
 
     /// What a learned word is to a swipe: its usage count and the form it is typed in.

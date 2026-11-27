@@ -10,12 +10,15 @@ import DictusCore
 /// Placing them in Settings > A propos > Licences follows the standard iOS
 /// convention (e.g., Settings > General > Legal & Regulatory).
 ///
-/// All 15 entries are listed alphabetically: DeviceKit, Dictus, DM Sans, FluidAudio, German
+/// All 16 entries are listed alphabetically: DeviceKit, Dictus, DM Sans, FluidAudio, German
 /// wordlist, giellakbd-ios, Google Books Ngram, Grammalecte, Hex, Nemotron 3.5 ASR, RLA-ES,
-/// SCOWL, Unicode emoji data and CLDR, VivaDicta, WhisperKit. FluidAudio uses Apache 2.0,
-/// Nemotron 3.5 ASR OpenMDW-1.1, DM Sans the SIL Open Font License, the German wordlist CC0
-/// 1.0, Google Books Ngram CC BY 3.0, Grammalecte MPL 2.0, RLA-ES MPL 1.1, SCOWL its own
-/// notice, the Unicode data the Unicode licence; all others use MIT.
+/// SCOWL, Unicode emoji data and CLDR, VivaDicta, WhisperKit, Wikidata. FluidAudio uses
+/// Apache 2.0, Nemotron 3.5 ASR OpenMDW-1.1, DM Sans the SIL Open Font License, the German
+/// wordlist and Wikidata CC0 1.0, Google Books Ngram CC BY 3.0, Grammalecte MPL 2.0, RLA-ES
+/// MPL 1.1, SCOWL its own notice, the Unicode data the Unicode licence; all others use MIT.
+///
+/// Wikidata is the source of the brand names swipe typing reads (`SwipeBrands`, #1090). CC0
+/// asks for no attribution; it is credited anyway, as the German wordlist is.
 ///
 /// Nemotron 3.5 ASR is a MODEL, not code (#558): NVIDIA's weights, converted to Core ML by
 /// FluidInference and downloaded by the user from HuggingFace. It is listed because its
@@ -164,6 +167,13 @@ struct LicensesView: View {
                     license: mitLicense(copyright: "Copyright (c) 2024 Argmax, Inc.")
                 )
 
+                licenseBlock(
+                    name: "Wikidata",
+                    author: "Wikidata contributors",
+                    url: "https://www.wikidata.org",
+                    license: Self.wikidataNotice
+                )
+
                 Spacer(minLength: 32)
             }
             .padding()
@@ -192,6 +202,13 @@ struct LicensesView: View {
         and contributors (https://github.com/enz/german-wordlist, commit 1071d87d), \
         dedicated to the public domain under CC0 1.0 Universal \
         (https://creativecommons.org/publicdomain/zero/1.0/).
+        """
+
+    private static let wikidataNotice = """
+        The brand names swipe typing reads in their casing (Apple, Samsung, GitHub…) come \
+        from Wikidata (https://www.wikidata.org), queried on 2026-11-27 at \
+        https://query.wikidata.org/sparql. Wikidata's data is dedicated to the public domain \
+        under CC0 1.0 Universal (https://creativecommons.org/publicdomain/zero/1.0/).
         """
 
     private static let hexNotice = """
