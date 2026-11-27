@@ -682,6 +682,9 @@ final internal class GiellaKeyboardView: UIView,
         let indexPath: IndexPath
         /// Where the finger is, in the collection view, clamped as the hit test clamps it (#1011).
         var point: CGPoint = .zero
+        /// The finger slid onto this key from another: its point says nothing about where
+        /// the user aims, so Adaptive touch does not learn from it (#1014).
+        var slid = false
     }
 
     // MARK: - Spatial autocorrect (#1011)
@@ -691,6 +694,8 @@ final internal class GiellaKeyboardView: UIView,
     /// `didTriggerKey`; nil for a key picked in a long-press popup. Only the spatial
     /// decoder reads it, through `DictusKeyboardBridge`.
     private(set) var lastTriggerPoint: CGPoint?
+    /// Whether the finger slid onto that key from another (#1014).
+    private(set) var lastTriggerSlid = false
 
     private var spatialKeysCache: (size: CGSize, rows: Int, keys: SpatialDecoder.Keys)?
 
@@ -927,6 +932,7 @@ final internal class GiellaKeyboardView: UIView,
             if key.type.triggersOnTouchUp {
                 if let delegate = delegate {
                     lastTriggerPoint = active.point
+                    lastTriggerSlid = active.slid
                     delegate.didTriggerKey(key)
                 }
             }
@@ -980,6 +986,7 @@ final internal class GiellaKeyboardView: UIView,
                 if key.type.triggersOnTouchDown {
                     if let delegate = delegate {
                         lastTriggerPoint = touchPoint
+                        lastTriggerSlid = false
                         delegate.didTriggerKey(key)
                     }
                 }
@@ -1117,7 +1124,8 @@ final internal class GiellaKeyboardView: UIView,
                 let movePoint = clampedPoint(touch.location(in: collectionView))
                 if let indexPath = collectionView.indexPathForItem(at: movePoint) {
                     let key = currentPage[indexPath.section][indexPath.row]
-                    activeKey = ActiveKey(key: key, indexPath: indexPath, point: movePoint)
+                    let slid = activeKey.map { $0.slid || $0.indexPath != indexPath } ?? true
+                    activeKey = ActiveKey(key: key, indexPath: indexPath, point: movePoint, slid: slid)
                 } else {
                     activeKey = nil
                 }
@@ -1168,6 +1176,7 @@ final internal class GiellaKeyboardView: UIView,
                     delegate?.didSwipeKey(activeKey.key)
                 } else {
                     lastTriggerPoint = activeKey.point
+                    lastTriggerSlid = activeKey.slid
                     delegate?.didTriggerKey(activeKey.key)
                 }
             }

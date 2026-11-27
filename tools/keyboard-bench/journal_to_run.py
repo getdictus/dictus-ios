@@ -31,6 +31,10 @@ device committed it, unless the typist undid it or deleted into it afterwards, w
 they meant is unknown and the slot reads "-", which score.py leaves out. A sentence that
 holds something a replay cannot type is left out the same way, every slot "-".
 --name names the runs `<lang>-<name>` (default `journal`).
+
+--session N (#1014) keeps the sentences of the Nth exported log only (a file holding several
+exports starts each with a "Dictus Debug Log" line), so Adaptive touch can learn on one
+device session and be scored on another.
 """
 import os
 import re
@@ -54,8 +58,9 @@ def unescape(word):
 
 
 class Sentence:
-    def __init__(self, lang):
+    def __init__(self, lang, session=0):
         self.lang = lang
+        self.session = session
         self.taps = []  # (key, dx, dy, t_ms)
         self.words = []
         # One per word: (session, journal id, typed, previous, final), None for a bar tap.
@@ -97,7 +102,7 @@ def parse(lines):
             lang = kb.split("-")[0]
             if current is None or current.lang != lang or current.ended:
                 close()
-                current = Sentence(lang)
+                current = Sentence(lang, session)
             current.elapsed += 0 if dt == "-" else float(dt)
             if key == "123":
                 symbols = not symbols
@@ -213,7 +218,7 @@ def write(sentences, source, out_dir, table=None, suffix="journal"):
 def main():
     args = sys.argv[1:]
     options = {}
-    while len(args) > 2 and args[-2] in ("--intended", "--name"):
+    while len(args) > 2 and args[-2] in ("--intended", "--name", "--session"):
         options[args[-2]] = args[-1]
         args = args[:-2]
     if len(args) != 2:
@@ -223,6 +228,8 @@ def main():
     with open(source, encoding="utf-8") as f:
         lines = f.read().splitlines()
     sentences, skipped = parse(lines)
+    if "--session" in options:
+        sentences = [s for s in sentences if s.session == int(options["--session"])]
     if not sentences:
         sys.exit(f"no TJ TAP line in {source}: was the journal on, in a Debug build?")
     by_lang, names = write(sentences, source, out_dir, table, options.get("--name", "journal"))

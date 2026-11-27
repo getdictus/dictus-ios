@@ -348,6 +348,10 @@ public enum LogEvent: Sendable {
     /// the effective value (`KeyboardFeatureSettings.isSpatialAutocorrectEffective`),
     /// `channel` as above, `trigger` the moment it was read (`newView`, `viewWillAppear`).
     case spatialAutocorrectConfigured(on: Bool, channel: String, trigger: String)
+    /// The keyboard read whether Adaptive touch learns and moves the decoder's key centres
+    /// (#1014). `on` is `KeyboardFeatureSettings.isAdaptiveTouchEffective`, read with the
+    /// line above; `trigger` as above.
+    case adaptiveTouchConfigured(on: Bool, trigger: String)
     /// A swipe ended. `points` is the stroke's touch count, `decodeMs` how long the decode on
     /// lift took, `readings` how many words it read, `outcome` what went in (`word`,
     /// `slidTap`, `none`, `cancelled`).
@@ -833,7 +837,7 @@ public enum LogEvent: Sendable {
              .audioEngineStopped,
              .keyboardDidDisappear, .keyboardTextInserted,
              .keyRepeatStarted, .keyRepeatStopped, .deleteSwipeEnded,
-             .swipeTypingConfigured, .spatialAutocorrectConfigured, .swipeEnded,
+             .swipeTypingConfigured, .spatialAutocorrectConfigured, .adaptiveTouchConfigured, .swipeEnded,
              .appDidBecomeActive, .appWillResignActive, .appDidEnterBackground,
              .rapidTapRejected,
              .engineWarmUpAttempt, .engineWarmUpSuccess,
@@ -1038,6 +1042,8 @@ public enum LogEvent: Sendable {
             return "on=\(on) channel=\(channel) reason=\(reason)"
         case .spatialAutocorrectConfigured(let on, let channel, let trigger):
             return "on=\(on) channel=\(channel) trigger=\(trigger)"
+        case .adaptiveTouchConfigured(let on, let trigger):
+            return "on=\(on) trigger=\(trigger)"
         case .swipeEnded(let points, let decodeMs, let readings, let outcome):
             return "points=\(points) decodeMs=\(String(format: "%.2f", decodeMs)) readings=\(readings) outcome=\(outcome)"
         case .deleteSwipeEnded(let words, let frozen):
@@ -1325,7 +1331,7 @@ extension LogEvent {
         case .keyboardDidAppear, .keyboardDidDisappear, .keyboardMicTapped, .keyboardTextInserted,
              .hostReturn,
              .keyRepeatStarted, .keyRepeatStopped, .deleteSwipeEnded,
-             .swipeTypingConfigured, .spatialAutocorrectConfigured, .swipeEnded,
+             .swipeTypingConfigured, .spatialAutocorrectConfigured, .adaptiveTouchConfigured, .swipeEnded,
              .overlayShown, .overlayHidden, .rapidTapRejected,
              .dictationMessageSet, .dictationMessageDisplayed, .dictationMessageCleared,
              .waveformAppeared, .waveformDisappeared, .waveformHeartbeat, .waveformStall,
@@ -1432,6 +1438,7 @@ extension LogEvent {
         case .keyRepeatStopped: return "keyRepeatStopped"
         case .swipeTypingConfigured: return "swipeTypingConfigured"
         case .spatialAutocorrectConfigured: return "spatialAutocorrectConfigured"
+        case .adaptiveTouchConfigured: return "adaptiveTouchConfigured"
         case .swipeEnded: return "swipeEnded"
         case .deleteSwipeEnded: return "deleteSwipeEnded"
         case .engineWarmUpAttempt: return "engineWarmUpAttempt"
