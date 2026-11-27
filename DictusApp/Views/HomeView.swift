@@ -85,11 +85,6 @@ struct HomeView: View {
     /// while reaching for one of them must not open another screen.
     private let swipeUpThreshold: CGFloat = 60
 
-    /// Read active model name from App Group for display.
-    private var activeModelName: String? {
-        AppGroup.defaults.string(forKey: SharedKeys.activeModel)
-    }
-
     var body: some View {
         VStack(spacing: 24) {
             // The cards scroll only when they do not fit: a short screen (iPhone SE, or
@@ -300,7 +295,11 @@ struct HomeView: View {
     /// The card makes the first required action obvious (navigate to Models tab).
     private var modelStatusCard: some View {
         Group {
-            if modelManager.isModelReady, let modelName = activeModelName {
+            // The engine that dictates now (#1083): Apple's when it is picked and ready,
+            // even with a downloaded model on disk, which `activeModel` keeps naming.
+            if modelManager.activeSpeechEngine?.engine == .apple {
+                appleEngineStatusCard
+            } else if let modelName = modelManager.activeSpeechEngine?.identifier {
                 // Active model display using ModelInfo for human-readable name/size.
                 // WHY ModelInfo.forIdentifier: The raw identifier (e.g. "openai_whisper-small")
                 // is not user-friendly. ModelInfo maps it to "Small" + "~250 MB".
@@ -325,8 +324,6 @@ struct HomeView: View {
                 }
                 .padding()
                 .dictusGlass()
-            } else if modelManager.dictatesWithAppleOnly {
-                appleEngineStatusCard
             } else {
                 // No model — prompt to download
                 VStack(spacing: 12) {
@@ -347,9 +344,9 @@ struct HomeView: View {
         }
     }
 
-    /// The active-model card when Apple's engine is the only one (#1057): no downloaded
-    /// model, Apple picked and ready. A user with a downloaded model keeps the card above,
-    /// unchanged. The strings are the Models screen's Apple card's.
+    /// The active-model card when Apple's engine dictates: picked and ready, with or
+    /// without a downloaded model (#1057, #1083). The strings are the Models screen's
+    /// Apple card's.
     private var appleEngineStatusCard: some View {
         HStack {
             VStack(alignment: .leading, spacing: 4) {

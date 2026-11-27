@@ -400,6 +400,10 @@ public enum LogEvent: Sendable {
     /// (#862), in milliseconds since the tap. Both processes write it against the same
     /// tap, read from the App Group; see `StopTimingTrace`.
     case stopTiming(step: String, sinceTapMs: Int, sessionID: String)
+    /// The audio a stop kept after its tap (#1085), one line per stop that waited for it.
+    /// Named `stopTiming` with `step=postRoll`, so it reads in line with the steps above.
+    /// `keptAfterTapMs` is nil when no buffer arrived at all; see `StopPostRoll`.
+    case stopPostRoll(keptAfterTapMs: Int?, buffers: Int, ended: String, sessionID: String)
     case watchdogReset(source: String, staleState: String)
     /// The app's stage watchdog fired late, after a suspension, and was armed again
     /// instead of cancelling the dictation (#851).
@@ -813,7 +817,7 @@ public enum LogEvent: Sendable {
              .liveActivityStarted, .liveActivityTransition, .liveActivityEnded,
              .liveActivityStandbySkipped,
              .coldStartURLReceived, .coldStartFlagSet, .coldStartRetry,
-             .overlayShown, .overlayHidden, .statusChanged, .stopTiming,
+             .overlayShown, .overlayHidden, .statusChanged, .stopTiming, .stopPostRoll,
              .waveformAppeared, .waveformDisappeared, .waveformRefreshIDChanged,
              .waveformEnergyTransition, .overlayBodyEvaluated, .overlayRecreated,
              .audioInterruptionEnded, .audioRouteChanged,
@@ -1132,6 +1136,9 @@ public enum LogEvent: Sendable {
             return "from=\(from) to=\(to) source=\(source)"
         case .stopTiming(let step, let sinceTapMs, let sessionID):
             return "step=\(step) sinceTapMs=\(sinceTapMs) sessionID=\(sessionID)"
+        case .stopPostRoll(let keptAfterTapMs, let buffers, let ended, let sessionID):
+            let kept = keptAfterTapMs.map(String.init) ?? "none"
+            return "step=postRoll keptAfterTapMs=\(kept) buffers=\(buffers) ended=\(ended) sessionID=\(sessionID)"
         case .watchdogReset(let source, let staleState):
             return "source=\(source) staleState=\(staleState)"
         case .stageWatchdogRearmed(let status, let lateBy, let sinceStart):
@@ -1328,7 +1335,7 @@ extension LogEvent {
              .userDictionaryWordLearned, .userDictionaryEvicted, .userDictionaryReset,
              .userDictionaryMigrated, .userDictionaryStaleDiscarded, .userDictionaryPruned:
             return .keyboard
-        case .statusChanged, .stopTiming, .watchdogReset, .stageWatchdogRearmed, .idleInvariantViolation:
+        case .statusChanged, .stopTiming, .stopPostRoll, .watchdogReset, .stageWatchdogRearmed, .idleInvariantViolation:
             return .dictation
         case .engineWarmUpAttempt, .engineWarmUpSuccess, .engineWarmUpFailed,
              .engineWarmUpSkipped,
@@ -1469,7 +1476,7 @@ extension LogEvent {
         case .overlayShown: return "overlayShown"
         case .overlayHidden: return "overlayHidden"
         case .statusChanged: return "statusChanged"
-        case .stopTiming: return "stopTiming"
+        case .stopTiming, .stopPostRoll: return "stopTiming"
         case .watchdogReset: return "watchdogReset"
         case .stageWatchdogRearmed: return "stageWatchdogRearmed"
         case .idleInvariantViolation: return "idleInvariantViolation"
