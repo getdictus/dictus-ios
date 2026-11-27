@@ -93,12 +93,17 @@ enum ShareOnDeviceTranscription {
 
     /// Transcribe every drop here, in order. Stops at the first one that cannot be done,
     /// so the caller sends that one and the rest down today's route.
+    ///
+    /// - Parameter languageWasAssumed: the voice notes detect the language and the
+    ///   dictation language stands in (#1084), recorded so the app's card says so.
     static func run(_ drops: [VoiceNoteDrop], storage: VoiceNoteStorage,
-                    recognizer: OnDeviceRecognizer, languageCode: String) async -> Outcome {
+                    recognizer: OnDeviceRecognizer, languageCode: String,
+                    languageWasAssumed: Bool) async -> Outcome {
         var transcribed = 0
         var outcome = Outcome.done(count: drops.count)
         for drop in drops {
-            if let reason = await transcribe(drop, storage: storage, recognizer: recognizer, languageCode: languageCode) {
+            if let reason = await transcribe(drop, storage: storage, recognizer: recognizer, languageCode: languageCode,
+                                             languageWasAssumed: languageWasAssumed) {
                 outcome = .fellBack(transcribed: transcribed, reason: reason)
                 break
             }
@@ -112,7 +117,8 @@ enum ShareOnDeviceTranscription {
 
     /// Transcribe one drop. Returns nil when it is done, or why it goes back to the app.
     private static func transcribe(_ drop: VoiceNoteDrop, storage: VoiceNoteStorage,
-                                   recognizer: OnDeviceRecognizer, languageCode: String) async -> FallbackReason? {
+                                   recognizer: OnDeviceRecognizer, languageCode: String,
+                                   languageWasAssumed: Bool) async -> FallbackReason? {
         let started = Date()
         let id = drop.id
         let short = id.uuidString.prefix(8)
@@ -183,13 +189,15 @@ enum ShareOnDeviceTranscription {
         let durationSeconds = Int(duration.rounded())
         let record = TranscriptionRecord(id: id, text: transcript, language: languageCode,
                                          durationSeconds: durationSeconds, createdAt: drop.receivedAt,
-                                         sttProvider: SpeechEngine.apple.rawValue, source: .sharedFile)
+                                         sttProvider: SpeechEngine.apple.rawValue, source: .sharedFile,
+                                         languageWasAssumed: languageWasAssumed)
         // Pro rules unchanged: `append` refuses without the History entitlement.
         let saved = TranscriptionHistoryStore.shared.append(record) != nil
         do {
             try VoiceNoteExtensionResult(id: id, transcript: transcript, language: languageCode,
                                          durationSeconds: durationSeconds, savedToHistory: saved,
-                                         engine: recognizer.engineName).write(to: storage)
+                                         engine: recognizer.engineName,
+                                         languageWasAssumed: languageWasAssumed).write(to: storage)
         } catch {
             // #992 review: no result, no success. The History entry stays; the app's
             // transcription replaces its text instead of adding a second one.
@@ -210,7 +218,7 @@ enum ShareOnDeviceTranscription {
         }
         log(
             "finished",
-            "id=\(short) seconds=\(Int(duration)) chars=\(transcript.count) lang=\(languageCode) engine=\(recognizer.engineName) savedToHistory=\(saved) decodeMs=\(Int(decodedAt.timeIntervalSince(started) * 1000)) transcribeMs=\(milliseconds(since: decodedAt)) totalMs=\(milliseconds(since: started)) \(peak.summary())"
+            "id=\(short) seconds=\(Int(duration)) chars=\(transcript.count) lang=\(languageCode) assumed=\(languageWasAssumed) engine=\(recognizer.engineName) savedToHistory=\(saved) decodeMs=\(Int(decodedAt.timeIntervalSince(started) * 1000)) transcribeMs=\(milliseconds(since: decodedAt)) totalMs=\(milliseconds(since: started)) \(peak.summary())"
         )
         return nil
     }

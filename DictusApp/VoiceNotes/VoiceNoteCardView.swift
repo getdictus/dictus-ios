@@ -70,6 +70,10 @@ struct VoiceNoteCardView: View {
         let durationSeconds: Int?
         let date: Date
         let engine: SpeechEngine?
+        /// `TranscriptionRecord.languageWasAssumed` (#1084).
+        let languageWasAssumed: Bool
+        /// `TranscriptionRecord.languageWasDetected` (#1084, PR 2).
+        let languageWasDetected: Bool
     }
 
     private enum Resolution {
@@ -85,7 +89,8 @@ struct VoiceNoteCardView: View {
                                    summaryModeIdentifier: record.summaryModeIdentifier,
                                    language: record.language, durationLabel: record.durationLabel,
                                    durationSeconds: record.durationSeconds, date: record.createdAt,
-                                   engine: record.engine))
+                                   engine: record.engine, languageWasAssumed: record.languageWasAssumed,
+                                   languageWasDetected: record.languageWasDetected))
         }
         guard let note = queueStore.queue.note(id: noteID) else { return .missing }
         switch note.state {
@@ -95,7 +100,9 @@ struct VoiceNoteCardView: View {
                                    summaryModeIdentifier: note.summaryModeIdentifier,
                                    language: note.language ?? TranscriptionRecord.autoDetectedCode,
                                    durationLabel: note.durationLabel, durationSeconds: note.durationSeconds,
-                                   date: note.receivedAt, engine: nil))
+                                   date: note.receivedAt, engine: nil,
+                                   languageWasAssumed: note.languageWasAssumed == true,
+                                   languageWasDetected: note.languageWasDetected == true))
         case .failed(let failure):
             return .failed(note, failure)
         case .waiting, .transcribing:
@@ -122,6 +129,9 @@ struct VoiceNoteCardView: View {
                 switch resolution {
                 case .result(let content):
                     metadata(date: content.date, language: content.language, duration: content.durationLabel)
+                    if content.languageWasAssumed {
+                        assumedLanguageNotice(languageCode: content.language)
+                    }
                     summarySection(content)
                     textBlock(title: Text("Transcript"), text: content.transcript, target: "transcript",
                               offersVocabulary: true)
@@ -188,6 +198,31 @@ struct VoiceNoteCardView: View {
         }
         .font(.dictusCaption)
         .foregroundColor(.secondary)
+    }
+
+    /// Apple's model read the note in the dictation language because it cannot detect one
+    /// (#1084). Said on the card, where a transcript in the wrong language is read, with
+    /// the way to fix the language for the next notes.
+    private func assumedLanguageNotice(languageCode: String) -> some View {
+        // "français", "French": the name in the reader's language, lowercase in French
+        // mid-sentence, as the share sheet names it (`ShareTranscriptionLanguage`).
+        let name = Locale.current.localizedString(forLanguageCode: languageCode) ?? languageCode
+        return VStack(alignment: .leading, spacing: 6) {
+            Text("Transcribed in \(name), your dictation language. Apple's model does not detect the language.",
+                 comment: "Voice note card: Apple's model, which cannot detect the language, read the note in the dictation language standing in for automatic detection (#1084). The argument is a language name.")
+                .foregroundColor(.secondary)
+            NavigationLink {
+                VoiceNoteSettingsView()
+            } label: {
+                Text("Change the voice note language",
+                     comment: "Voice note card: link to the voice note settings, under the line saying the language was assumed (#1084).")
+                    .foregroundColor(.dictusAccent)
+            }
+            .accessibilityIdentifier("voiceNote.assumedLanguage.settings")
+        }
+        .font(.dictusCaption)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .accessibilityIdentifier("voiceNote.assumedLanguage")
     }
 
     @ViewBuilder
@@ -444,6 +479,7 @@ struct VoiceNoteCardView: View {
             noteID: noteID,
             source: VoiceNoteProcessor.SmartModeSource(
                 transcript: content.transcript, language: content.language,
+                languageWasDetected: content.languageWasDetected,
                 engine: content.engine, durationSeconds: content.durationSeconds
             ),
             trigger: .open

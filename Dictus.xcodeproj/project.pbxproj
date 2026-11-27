@@ -54,6 +54,7 @@
 		AA001083 /* DictationCoordinator+EnginePolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA101083 /* DictationCoordinator+EnginePolicy.swift */; };
 		AA000775 /* DictationCoordinator+SessionActivation.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100775 /* DictationCoordinator+SessionActivation.swift */; };
 		AA000380 /* DictationCoordinator+WarmEngineTimeout.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100380 /* DictationCoordinator+WarmEngineTimeout.swift */; };
+		AA001084 /* DictationCoordinator+VoiceNoteEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA101084 /* DictationCoordinator+VoiceNoteEngine.swift */; };
 		AA000851 /* DictationCoordinator+StageWatchdog.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100851 /* DictationCoordinator+StageWatchdog.swift */; };
 		AE0E0006 /* DictationCoordinator+KeyboardSignals.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE0E0005 /* DictationCoordinator+KeyboardSignals.swift */; };
 		AA000007 /* KeyboardState.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA10000B /* KeyboardState.swift */; };
@@ -240,6 +241,7 @@
 		CC000040 /* HostInputTraits.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC100040 /* HostInputTraits.swift */; };
 		VN6200000001 /* VoiceNoteProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = VN6201000001 /* VoiceNoteProcessor.swift */; };
 		VN1056000001 /* VoiceNoteSpeechAssets.swift in Sources */ = {isa = PBXBuildFile; fileRef = VN1056010001 /* VoiceNoteSpeechAssets.swift */; };
+		VN1084000001 /* VoiceNoteModelCompile.swift in Sources */ = {isa = PBXBuildFile; fileRef = VN1084010001 /* VoiceNoteModelCompile.swift */; };
 		VN6200000002 /* VoiceNoteCopy.swift in Sources */ = {isa = PBXBuildFile; fileRef = VN6201000002 /* VoiceNoteCopy.swift */; };
 		VN6200000003 /* VoiceNoteSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = VN6201000003 /* VoiceNoteSettingsView.swift */; };
 		VN6200000004 /* VoiceNoteResultView.swift in Sources */ = {isa = PBXBuildFile; fileRef = VN6201000004 /* VoiceNoteResultView.swift */; };
@@ -335,6 +337,7 @@
 		AA101083 /* DictationCoordinator+EnginePolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DictationCoordinator+EnginePolicy.swift"; sourceTree = "<group>"; };
 		AA100775 /* DictationCoordinator+SessionActivation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DictationCoordinator+SessionActivation.swift"; sourceTree = "<group>"; };
 		AA100380 /* DictationCoordinator+WarmEngineTimeout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DictationCoordinator+WarmEngineTimeout.swift"; sourceTree = "<group>"; };
+		AA101084 /* DictationCoordinator+VoiceNoteEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DictationCoordinator+VoiceNoteEngine.swift"; sourceTree = "<group>"; };
 		AA100851 /* DictationCoordinator+StageWatchdog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DictationCoordinator+StageWatchdog.swift"; sourceTree = "<group>"; };
 		AE0E0005 /* DictationCoordinator+KeyboardSignals.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DictationCoordinator+KeyboardSignals.swift"; sourceTree = "<group>"; };
 		AA10000B /* KeyboardState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardState.swift; sourceTree = "<group>"; };
@@ -558,6 +561,7 @@
 		EE1DE002 /* de_ngrams.dict */ = {isa = PBXFileReference; lastKnownFileType = "compiled"; path = de_ngrams.dict; sourceTree = "<group>"; };
 		VN6201000001 /* VoiceNoteProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceNoteProcessor.swift; sourceTree = "<group>"; };
 		VN1056010001 /* VoiceNoteSpeechAssets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceNoteSpeechAssets.swift; sourceTree = "<group>"; };
+		VN1084010001 /* VoiceNoteModelCompile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceNoteModelCompile.swift; sourceTree = "<group>"; };
 		VN6201000002 /* VoiceNoteCopy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceNoteCopy.swift; sourceTree = "<group>"; };
 		VN6201000003 /* VoiceNoteSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceNoteSettingsView.swift; sourceTree = "<group>"; };
 		VN6201000004 /* VoiceNoteResultView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceNoteResultView.swift; sourceTree = "<group>"; };
@@ -665,6 +669,7 @@
 				AA101083 /* DictationCoordinator+EnginePolicy.swift */,
 				AA100775 /* DictationCoordinator+SessionActivation.swift */,
 				AA100380 /* DictationCoordinator+WarmEngineTimeout.swift */,
+				AA101084 /* DictationCoordinator+VoiceNoteEngine.swift */,
 				AA100851 /* DictationCoordinator+StageWatchdog.swift */,
 				AE0E0005 /* DictationCoordinator+KeyboardSignals.swift */,
 				AA1000F5 /* LiveActivityManager.swift */,
@@ -1116,6 +1121,7 @@
 			children = (
 				VN6201000001 /* VoiceNoteProcessor.swift */,
 				VN1056010001 /* VoiceNoteSpeechAssets.swift */,
+				VN1084010001 /* VoiceNoteModelCompile.swift */,
 				VN6201000002 /* VoiceNoteCopy.swift */,
 				VN6201000003 /* VoiceNoteSettingsView.swift */,
 				VN6201000004 /* VoiceNoteResultView.swift */,
@@ -1496,6 +1502,7 @@
 				AA001083 /* DictationCoordinator+EnginePolicy.swift in Sources */,
 				AA000775 /* DictationCoordinator+SessionActivation.swift in Sources */,
 				AA000380 /* DictationCoordinator+WarmEngineTimeout.swift in Sources */,
+				AA001084 /* DictationCoordinator+VoiceNoteEngine.swift in Sources */,
 				AA000851 /* DictationCoordinator+StageWatchdog.swift in Sources */,
 				AE0E0006 /* DictationCoordinator+KeyboardSignals.swift in Sources */,
 				AA0000F5 /* LiveActivityManager.swift in Sources */,
@@ -1604,6 +1611,7 @@
 				SS000003 /* ProBannerView.swift in Sources */,
 				VN6200000001 /* VoiceNoteProcessor.swift in Sources */,
 				VN1056000001 /* VoiceNoteSpeechAssets.swift in Sources */,
+				VN1084000001 /* VoiceNoteModelCompile.swift in Sources */,
 				VN6200000002 /* VoiceNoteCopy.swift in Sources */,
 				VN6200000003 /* VoiceNoteSettingsView.swift in Sources */,
 				VN6200000004 /* VoiceNoteResultView.swift in Sources */,
