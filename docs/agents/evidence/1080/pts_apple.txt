@@ -1,0 +1,8 @@
+# Pierre's TJ TAP #69 and #74 rebuilt on the iPhone 17 grid (Return keycap centre 350.25,779)
+c 320.7 756.3
+c 331.4 754.2
+bonjour 320.7 756.3
+bonjour 331.4 754.2
+# control: return centre, apostrophe centre
+c 350.2 779.0
+c 320.5 725.0

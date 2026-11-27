@@ -1,0 +1,8 @@
+# Pierre's TJ TAP #69 and #74 on the Dictus grid (iPhone 17, grid top 583.2, Return keycap centre 359.0,774.7)
+c 320.7 752.0
+c 331.4 749.9
+bonjour 320.7 752.0
+bonjour 331.4 749.9
+# controls: Return keycap centre, apostrophe keycap centre
+c 359.0 774.7
+c 319.5 720.7

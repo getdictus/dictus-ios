@@ -1,0 +1,8 @@
+c	320.7	756.3	before='C'	after='C'	keyboard_up=False
+c	331.4	754.2	before='C'	after='C'	keyboard_up=False
+bonjour	320.7	756.3	before='Bonjour'	after='Bonjour'	keyboard_up=False
+bonjour	331.4	754.2	before='Bonjour'	after='Bonjour'	keyboard_up=False
+c	350.2	779.0	before='C'	after='C'	keyboard_up=False
+c	320.5	725.0	before='C'	after='C’'	keyboard_up=True
+
+[exited with code 0]

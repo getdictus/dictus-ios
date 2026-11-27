@@ -1,0 +1,6 @@
+c	320.7	752.0	before='C'	after='C'	keyboard_up=False
+c	331.4	749.9	before='C'	after='C'	keyboard_up=False
+bonjour	320.7	752.0	before='Bonjour'	after='Bonjour'	keyboard_up=False
+bonjour	331.4	749.9	before='Bonjour'	after='Bonjour'	keyboard_up=False
+c	359.0	774.7	before='C'	after='C'	keyboard_up=False
+c	319.5	720.7	before='C'	after="C'"	keyboard_up=True
