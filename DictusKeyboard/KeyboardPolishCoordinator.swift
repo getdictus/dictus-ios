@@ -118,7 +118,7 @@ final class KeyboardPolishCoordinator {
         Task { await run(pending) }
     }
 
-    /// End a hand-off nobody claimed in time without typing it (#881).
+    /// End a hand-off whose raw arrived too late to type, without typing it (#881).
     ///
     /// The hand-off is taken off the App Group the way `handle(raw:)` takes it, then
     /// concluded as a refusal: DictusApp learns the dictation is over and keeps the raw on

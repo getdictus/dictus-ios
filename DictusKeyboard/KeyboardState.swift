@@ -2091,19 +2091,15 @@ extension KeyboardState {
     /// whenever a controller appears, so the banner is back in any app the user types in.
     ///
     /// The pill (#881) also re-reads itself at the end of its window, so a keyboard left
-    /// open does not keep offering a text past its ten minutes. Several of these may be
-    /// queued by successive refreshes; each one only re-reads, so the extra ones cost
-    /// nothing.
+    /// open does not keep offering a text past its ten minutes.
     func refreshRecoveredTranscription() {
         let offer = RecoveredTranscriptionChannel.offer(
             pastes: KeyboardFeatureSettings.forKeyboard().isPasteTranscriptionEffective
         )
         if offer != recoveredTranscriptionOffer { recoveredTranscriptionOffer = offer }
-        if offer == .paste, let remaining = RecoveredTranscriptionChannel.remainingPasteTime() {
-            DispatchQueue.main.asyncAfter(deadline: .now() + remaining + 0.1) { [weak self] in
-                self?.refreshRecoveredTranscription()
-            }
-        }
+        scheduleRecoveredTranscriptionExpiry(
+            in: offer == .paste ? RecoveredTranscriptionChannel.remainingPasteTime() : nil
+        )
     }
 
     /// The banner was tapped: open DictusApp on the text.

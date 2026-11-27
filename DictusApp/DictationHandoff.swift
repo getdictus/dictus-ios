@@ -484,6 +484,15 @@ extension DictationCoordinator {
         // Through the shared rule since #467, which gave the same write to the ending
         // that normally happens. The two conclusions of one hand-off have to leave the
         // same thing behind.
+        //
+        // No keyboard ever claimed the raw (#881): iOS killed it before the post
+        // arrived. Left here, the next keyboard to appear, in any app, would type it.
+        // With the paste pill on it goes to the pill instead, and stays on the card.
+        // Before the idle post: the keyboard re-reads the pill on that post.
+        let offeredUnclaimed = PendingDictationChannel.current == nil
+            && KeyboardFeatureSettings().isPasteTranscriptionEffective
+            ? UnclaimedHandoff.withdraw(in: defaults)
+            : nil
         if PolishHandoffConclusion.returnsToIdle(from: status) {
             updateStatus(.idle)
         }
@@ -502,11 +511,7 @@ extension DictationCoordinator {
             PersistentLog.log(.polishHandoff(
                 step: "watchdog", outcome: "withdrawn", chars: pending.raw.count
             ))
-        } else if KeyboardFeatureSettings().isPasteTranscriptionEffective,
-                  let raw = UnclaimedHandoff.withdraw(in: defaults) {
-            // No keyboard ever claimed the raw (#881): iOS killed it before the post
-            // arrived. Left here, the next keyboard to appear, in any app, would type it.
-            // With the paste pill on it goes to the pill instead, and stays on the card.
+        } else if let raw = offeredUnclaimed {
             PersistentLog.log(.polishHandoff(
                 step: "watchdog", outcome: "unclaimed-offered", chars: raw.count
             ))

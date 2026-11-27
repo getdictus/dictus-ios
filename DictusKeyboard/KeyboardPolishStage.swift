@@ -175,9 +175,7 @@ extension KeyboardState {
     /// Group before the claim, exactly as the Darwin path does, and both run on the
     /// main queue in this one process.
     ///
-    /// **Never typed once it is more than seconds old, with the paste pill on (#881).**
-    /// No field is recorded for this raw, so this keyboard may be in another app minutes
-    /// later. `UnclaimedHandoff` decides; an old raw goes to the pill instead.
+    /// The age rule of the paste pill (#881) applies here through `takeTranscription`.
     @MainActor
     func claimUnclaimedHandoff() {
         let defaults = AppGroup.defaults
@@ -185,15 +183,6 @@ extension KeyboardState {
               let raw = UnclaimedHandoff.waitingRaw(in: defaults) else { return }
         defaults.removeObject(forKey: SharedKeys.lastTranscription)
         defaults.synchronize()
-        let disposition = UnclaimedHandoff.disposition(
-            handedOffAt: UnclaimedHandoff.handedOffAt(in: defaults),
-            pastes: KeyboardFeatureSettings.forKeyboard().isPasteTranscriptionEffective
-        )
-        guard disposition == .type else {
-            logProbe("claimedMissedHandoff", details: "chars=\(raw.count) outcome=offered")
-            KeyboardPolishCoordinator.shared.offerUnclaimed(raw: raw)
-            return
-        }
         logProbe("claimedMissedHandoff", details: "chars=\(raw.count)")
         takeTranscription(raw)
     }
@@ -206,6 +195,12 @@ extension KeyboardState {
     /// keyboard on screen has always typed them — and re-running the pipeline over it
     /// put app-origin events into the `<KBD>` half of the debug ring, which is the one
     /// thing the writer marker exists to keep clean.
+    ///
+    /// **A hand-off raw more than seconds old is never typed, with the paste pill on
+    /// (#881).** Both ways in can deliver one: the appearance claim above, and a
+    /// `transcriptionReady` a suspended keyboard receives late. No field is recorded for
+    /// it yet, so this keyboard may be in another app by now. `UnclaimedHandoff` decides;
+    /// an old raw goes to the pill instead.
     @MainActor
     func takeTranscription(_ transcription: String) {
         guard handoffIsOutstanding else {
@@ -213,6 +208,15 @@ extension KeyboardState {
                 step: "claimed", outcome: "not-a-handoff", chars: transcription.count
             ))
             insertDictation(transcription)
+            return
+        }
+        let disposition = UnclaimedHandoff.disposition(
+            handedOffAt: UnclaimedHandoff.handedOffAt(),
+            pastes: KeyboardFeatureSettings.forKeyboard().isPasteTranscriptionEffective
+        )
+        guard disposition == .type else {
+            logProbe("staleHandoffOffered", details: "chars=\(transcription.count)")
+            KeyboardPolishCoordinator.shared.offerUnclaimed(raw: transcription)
             return
         }
         KeyboardPolishCoordinator.shared.handle(raw: transcription)

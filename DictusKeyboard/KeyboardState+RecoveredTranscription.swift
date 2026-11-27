@@ -1,11 +1,12 @@
 // DictusKeyboard/KeyboardState+RecoveredTranscription.swift
 // Clearing the waiting dictation text, and pasting it from the pill (#860, #881).
 
+import Foundation
 import DictusCore
 
-/// The two actions on the waiting text that write the App Group first and then re-read
-/// it, so they need no access to the `private(set)` offer. In their own file because
-/// `KeyboardState.swift` is at the `file_length` budget.
+/// The actions on the waiting text that write the App Group first and then re-read it, so
+/// they need no access to the `private(set)` offer, and the pill's expiry timer. In their
+/// own file because `KeyboardState.swift` is at the `file_length` budget.
 extension KeyboardState {
 
     /// A new dictation is the user moving on: the banner describes the previous one.
@@ -33,5 +34,20 @@ extension KeyboardState {
         refreshRecoveredTranscription()
         logProbe("recoveredTranscriptionPasted", details: "outcome=inserted chars=\(text.count)")
         insertDictation(text)
+    }
+
+    /// The one re-read queued for the pill's expiry. Static because `KeyboardState` is a
+    /// single shared instance and an extension cannot hold an instance property.
+    private static var recoveredTranscriptionExpiry: DispatchWorkItem?
+
+    /// Queue a re-read of the pill `remaining` seconds from now, replacing any queued one;
+    /// nil cancels it.
+    func scheduleRecoveredTranscriptionExpiry(in remaining: TimeInterval?) {
+        Self.recoveredTranscriptionExpiry?.cancel()
+        Self.recoveredTranscriptionExpiry = nil
+        guard let remaining else { return }
+        let reread = DispatchWorkItem { [weak self] in self?.refreshRecoveredTranscription() }
+        Self.recoveredTranscriptionExpiry = reread
+        DispatchQueue.main.asyncAfter(deadline: .now() + max(remaining, 0) + 0.1, execute: reread)
     }
 }
