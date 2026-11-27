@@ -52,6 +52,7 @@
 		AA000311 /* ColdStartResolution.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100311 /* ColdStartResolution.swift */; };
 		AA000361 /* DictationHandoff.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100361 /* DictationHandoff.swift */; };
 		AA000428 /* DictationCoordinator+ModelLoad.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100428 /* DictationCoordinator+ModelLoad.swift */; };
+		AA001083 /* DictationCoordinator+EnginePolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA101083 /* DictationCoordinator+EnginePolicy.swift */; };
 		AA000775 /* DictationCoordinator+SessionActivation.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100775 /* DictationCoordinator+SessionActivation.swift */; };
 		AA000380 /* DictationCoordinator+WarmEngineTimeout.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100380 /* DictationCoordinator+WarmEngineTimeout.swift */; };
 		AA000851 /* DictationCoordinator+StageWatchdog.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100851 /* DictationCoordinator+StageWatchdog.swift */; };
@@ -75,6 +76,7 @@
 		AA000043 /* RecordingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100043 /* RecordingView.swift */; };
 		AA000045 /* UnifiedAudioEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100045 /* UnifiedAudioEngine.swift */; };
 		AA000390 /* UnifiedAudioEngine+IdleRelease.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100390 /* UnifiedAudioEngine+IdleRelease.swift */; };
+		AA001085 /* UnifiedAudioEngine+PostRoll.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA101085 /* UnifiedAudioEngine+PostRoll.swift */; };
 		AA000200 /* ObjCExceptionCatcher.m in Sources */ = {isa = PBXBuildFile; fileRef = AA100200 /* ObjCExceptionCatcher.m */; };
 		AA361002 /* TextProxyIdentity.m in Sources */ = {isa = PBXBuildFile; fileRef = AA361001 /* TextProxyIdentity.m */; };
 		AA023004 /* HostArbiterActivation.m in Sources */ = {isa = PBXBuildFile; fileRef = AA023003 /* HostArbiterActivation.m */; };
@@ -207,6 +209,8 @@
 		SD1011A1 /* SpatialAutocorrect.swift in Sources */ = {isa = PBXBuildFile; fileRef = SD1011B1 /* SpatialAutocorrect.swift */; };
 		AT1014A1 /* AdaptiveTouchSwitch.swift in Sources */ = {isa = PBXBuildFile; fileRef = AT1014B1 /* AdaptiveTouchSwitch.swift */; };
 		AT1014A2 /* DictusKeyboardBridge+SpatialTouch.swift in Sources */ = {isa = PBXBuildFile; fileRef = AT1014B2 /* DictusKeyboardBridge+SpatialTouch.swift */; };
+		BC1015A1 /* BilingualAutocorrect.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC1015B1 /* BilingualAutocorrect.swift */; };
+		BC1015A2 /* TrieLanguageEvidence.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC1015B2 /* TrieLanguageEvidence.swift */; };
 		SD1011A2 /* fr.hextm in Resources */ = {isa = PBXBuildFile; fileRef = SD1011B2 /* fr.hextm */; };
 		SD1011A3 /* en.hextm in Resources */ = {isa = PBXBuildFile; fileRef = SD1011B3 /* en.hextm */; };
 		SD948A04 /* es.hextm in Resources */ = {isa = PBXBuildFile; fileRef = SD948B04 /* es.hextm */; };
@@ -333,6 +337,7 @@
 		AA100311 /* ColdStartResolution.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColdStartResolution.swift; sourceTree = "<group>"; };
 		AA100361 /* DictationHandoff.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DictationHandoff.swift; sourceTree = "<group>"; };
 		AA100428 /* DictationCoordinator+ModelLoad.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DictationCoordinator+ModelLoad.swift"; sourceTree = "<group>"; };
+		AA101083 /* DictationCoordinator+EnginePolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DictationCoordinator+EnginePolicy.swift"; sourceTree = "<group>"; };
 		AA100775 /* DictationCoordinator+SessionActivation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DictationCoordinator+SessionActivation.swift"; sourceTree = "<group>"; };
 		AA100380 /* DictationCoordinator+WarmEngineTimeout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DictationCoordinator+WarmEngineTimeout.swift"; sourceTree = "<group>"; };
 		AA100851 /* DictationCoordinator+StageWatchdog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DictationCoordinator+StageWatchdog.swift"; sourceTree = "<group>"; };
@@ -352,6 +357,7 @@
 		AA100043 /* RecordingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingView.swift; sourceTree = "<group>"; };
 		AA100045 /* UnifiedAudioEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnifiedAudioEngine.swift; sourceTree = "<group>"; };
 		AA100390 /* UnifiedAudioEngine+IdleRelease.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UnifiedAudioEngine+IdleRelease.swift"; sourceTree = "<group>"; };
+		AA101085 /* UnifiedAudioEngine+PostRoll.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UnifiedAudioEngine+PostRoll.swift"; sourceTree = "<group>"; };
 		AA100200 /* ObjCExceptionCatcher.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ObjCExceptionCatcher.m; sourceTree = "<group>"; };
 		AA361001 /* TextProxyIdentity.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TextProxyIdentity.m; sourceTree = "<group>"; };
 		AA023003 /* HostArbiterActivation.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = HostArbiterActivation.m; sourceTree = "<group>"; };
@@ -549,6 +555,8 @@
 		SD1011B1 /* SpatialAutocorrect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpatialAutocorrect.swift; sourceTree = "<group>"; };
 		AT1014B1 /* AdaptiveTouchSwitch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdaptiveTouchSwitch.swift; sourceTree = "<group>"; };
 		AT1014B2 /* DictusKeyboardBridge+SpatialTouch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DictusKeyboardBridge+SpatialTouch.swift"; sourceTree = "<group>"; };
+		BC1015B1 /* BilingualAutocorrect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BilingualAutocorrect.swift; sourceTree = "<group>"; };
+		BC1015B2 /* TrieLanguageEvidence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrieLanguageEvidence.swift; sourceTree = "<group>"; };
 		SD1011B2 /* fr.hextm */ = {isa = PBXFileReference; lastKnownFileType = "compiled"; path = fr.hextm; sourceTree = "<group>"; };
 		SD1011B3 /* en.hextm */ = {isa = PBXFileReference; lastKnownFileType = "compiled"; path = en.hextm; sourceTree = "<group>"; };
 		SD948B04 /* es.hextm */ = {isa = PBXFileReference; lastKnownFileType = "compiled"; path = es.hextm; sourceTree = "<group>"; };
@@ -664,6 +672,7 @@
 				AA100361 /* DictationHandoff.swift */,
 				AA423003 /* SmartModeDisplayName.swift */,
 				AA100428 /* DictationCoordinator+ModelLoad.swift */,
+				AA101083 /* DictationCoordinator+EnginePolicy.swift */,
 				AA100775 /* DictationCoordinator+SessionActivation.swift */,
 				AA100380 /* DictationCoordinator+WarmEngineTimeout.swift */,
 				AA100851 /* DictationCoordinator+StageWatchdog.swift */,
@@ -795,6 +804,7 @@
 				AA100041 /* TranscriptionService.swift */,
 				AA100045 /* UnifiedAudioEngine.swift */,
 				AA100390 /* UnifiedAudioEngine+IdleRelease.swift */,
+				AA101085 /* UnifiedAudioEngine+PostRoll.swift */,
 				AA1003A1 /* WhisperComputeOptions.swift */,
 				AA1003B0 /* DictationFailureMessage.swift */,
 				AA100201 /* ObjCExceptionCatcher.h */,
@@ -957,6 +967,8 @@
 				EE100005 /* AOSPTrieEngine.swift */,
 				SD1011B1 /* SpatialAutocorrect.swift */,
 				AT1014B1 /* AdaptiveTouchSwitch.swift */,
+				BC1015B1 /* BilingualAutocorrect.swift */,
+				BC1015B2 /* TrieLanguageEvidence.swift */,
 			);
 			path = TextPrediction;
 			sourceTree = "<group>";
@@ -1496,6 +1508,7 @@
 				AA000361 /* DictationHandoff.swift in Sources */,
 				AA423004 /* SmartModeDisplayName.swift in Sources */,
 				AA000428 /* DictationCoordinator+ModelLoad.swift in Sources */,
+				AA001083 /* DictationCoordinator+EnginePolicy.swift in Sources */,
 				AA000775 /* DictationCoordinator+SessionActivation.swift in Sources */,
 				AA000380 /* DictationCoordinator+WarmEngineTimeout.swift in Sources */,
 				AA000851 /* DictationCoordinator+StageWatchdog.swift in Sources */,
@@ -1508,6 +1521,7 @@
 				AA00P207 /* PolishDebugExporter.swift in Sources */,
 				AA000045 /* UnifiedAudioEngine.swift in Sources */,
 				AA000390 /* UnifiedAudioEngine+IdleRelease.swift in Sources */,
+				AA001085 /* UnifiedAudioEngine+PostRoll.swift in Sources */,
 				AA000200 /* ObjCExceptionCatcher.m in Sources */,
 				AA000041 /* TranscriptionService.swift in Sources */,
 				AA0003A1 /* WhisperComputeOptions.swift in Sources */,
@@ -1651,6 +1665,8 @@
 				AA0000D1 /* SuggestionState.swift in Sources */,
 				SD1011A1 /* SpatialAutocorrect.swift in Sources */,
 				AT1014A1 /* AdaptiveTouchSwitch.swift in Sources */,
+				BC1015A1 /* BilingualAutocorrect.swift in Sources */,
+				BC1015A2 /* TrieLanguageEvidence.swift in Sources */,
 				AA0000D4 /* SuggestionBarView.swift in Sources */,
 				AA0000G0 /* KeyTapSignposter.swift in Sources */,
 				CC000030 /* KeyboardMetrics.swift in Sources */,

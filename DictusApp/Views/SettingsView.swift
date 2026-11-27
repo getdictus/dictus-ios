@@ -33,6 +33,10 @@ struct SettingsView: View {
     @AppStorage(SharedKeys.activeModel, store: UserDefaults(suiteName: AppGroup.identifier))
     private var activeModel = "openai_whisper-small"
 
+    /// Observed so picking Apple's engine on the Models screen redraws the language footer.
+    @AppStorage(SharedKeys.speechEngineChoice, store: UserDefaults(suiteName: AppGroup.identifier))
+    private var speechEngineChoice = SpeechEngineChoice.downloadedModel.rawValue
+
     @AppStorage(SharedKeys.liveActivityEnabled, store: UserDefaults(suiteName: AppGroup.identifier))
     private var liveActivityEnabled = true
 
@@ -81,14 +85,21 @@ struct SettingsView: View {
     /// setting forces Nemotron's language, so the "only applies to Whisper models" caveat
     /// this drives must not show while it is active.
     private var isParakeetActive: Bool {
-        ModelInfo.forIdentifier(activeModel)?.engine == .parakeet
+        activeEngine == .parakeet
+    }
+
+    /// The engine that dictates now, Apple's included (#1083). Reads the three stored
+    /// values it depends on so that a change to any of them redraws the footer.
+    private var activeEngine: SpeechEngine? {
+        _ = (activeModel, speechEngineChoice, transcriptionLanguage)
+        return ActiveSpeechEngine.current()?.engine
     }
 
     /// Whether Auto-detect's "any language Whisper supports" sentence describes the active
     /// engine. Only Whisper's, or no model at all, which is how the footer read before #558.
     /// Parakeet already has its caveat, and Nemotron's auto-detect is not Whisper's.
     private var describesWhisperAutoDetect: Bool {
-        switch ModelInfo.forIdentifier(activeModel)?.engine {
+        switch activeEngine {
         case .whisperKit, nil:
             return true
         case .parakeet, .nemotron, .apple:

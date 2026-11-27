@@ -130,6 +130,7 @@ Every ID in this map, in one table: the 19 features first, then their 133 sub-fe
 | `typing.curated-names` | Gratuit | non |
 | `typing.spatial-autocorrect` | Gratuit | non |
 | `typing.adaptive-touch` | Gratuit | non |
+| `typing.bilingual-autocorrect` | Gratuit | non |
 | `typing.cursor-trackpad` | Gratuit | non |
 | `typing.delete-swipe` | Gratuit | non |
 | `learned-words.learn` | Gratuit | non |
