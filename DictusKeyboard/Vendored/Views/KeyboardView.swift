@@ -1060,9 +1060,15 @@ final internal class GiellaKeyboardView: UIView,
     /// after « c », « l », « qu »... is the apostrophe's (`ApostropheReturnBorder`, #1080).
     /// The touch's first point and its moves both go through here, so a finger that wobbles
     /// keeps the key it went down on.
+    ///
+    /// Only while the adaptive key shows an apostrophe: the bridge types what the key shows
+    /// (`handleAdaptiveAccentKey` reads the same last-typed characters as its label), and those
+    /// are not reset by a cursor move. After « e », a cursor moved behind « c » still has the
+    /// key showing « é », and a border tap there would replace the « c »; it stays Return.
     private func keyIndexPath(at point: CGPoint) -> IndexPath? {
         guard let indexPath = collectionView.indexPathForItem(at: point) else { return nil }
         guard case .returnkey = currentPage[indexPath.section][indexPath.row].type, indexPath.section > 0,
+              accentKeyLabel == "'",
               let row = currentPage[indexPath.section - 1].firstIndex(where: { key in
                   if case .input(_, let alternate) = key.type { return alternate == "accent" }
                   return false
