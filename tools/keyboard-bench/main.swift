@@ -201,11 +201,13 @@ func wait(_ what: String, timeout: TimeInterval = 30, until condition: () -> Boo
     }
 }
 
-let engine = TextPredictionEngine.shared
+/// The keyboard's engine. Computed so that the bilingual replay, which holds an engine
+/// per language, never loads it.
+var engine: TextPredictionEngine { TextPredictionEngine.shared }
 
 /// Same readiness checks as tools/split-pass-bench: the trie and the n-grams load on
 /// a background queue and report on the main one.
-func waitUntilLoaded(_ what: String) {
+func waitUntilLoaded(_ engine: TextPredictionEngine, _ what: String) {
     wait("trie \(what)") { engine.isUnknownToDictionary("qzxqzxwq") }
     let fallback = engine.predictNextWords(after: ["qzxqzxwq"])
     wait("n-grams \(what)") {
@@ -223,7 +225,7 @@ func load(_ lang: SupportedLanguage) {
         KeyboardLayoutPreference.setLayout(layout, for: lang)
     }
     engine.setLanguage(lang.rawValue)
-    waitUntilLoaded(lang.rawValue)
+    waitUntilLoaded(engine, lang.rawValue)
 }
 
 // `run.sh --lexicon a,ma`: those words as the iPhone's contacts and text replacements.
@@ -258,10 +260,43 @@ func microseconds(_ work: () -> Void) -> Int {
 
 // MARK: - Replay
 
+/// What the keyboard asks while a word is typed, and what the space bar proposes. The
+/// keyboard has one engine; the bilingual replay (#1009) routes between two.
+protocol Corrector: AnyObject {
+    /// The language the last committed word was corrected in, and the next one is typed in.
+    var language: SupportedLanguage { get }
+    /// Serves the correction preview and the suggestions while a word is typed, and the
+    /// next-word prediction after a space.
+    var typingEngine: TextPredictionEngine { get }
+    /// What the space bar decides for `word`: its autocorrection is applied, a suggestion
+    /// only offered. `spatial` is the word's taps when the spatial decoder is on (#1011).
+    /// `context` is the document before the space (#501's `a` / `à`).
+    func proposal(for word: String, previous: String?, isAtSentenceStart: Bool,
+                  spatial: SpatialCorrection.Input?, context: String) -> CorrectionProposal?
+}
+
+/// The keyboard as it ships: one engine for everything.
+final class SingleEngine: Corrector {
+    let language: SupportedLanguage
+    let typingEngine: TextPredictionEngine
+
+    init(_ engine: TextPredictionEngine, language: SupportedLanguage) {
+        typingEngine = engine
+        self.language = language
+    }
+
+    func proposal(for word: String, previous: String?, isAtSentenceStart: Bool,
+                  spatial: SpatialCorrection.Input?, context: String) -> CorrectionProposal? {
+        typingEngine.correctionProposal(for: word, previousWord: previous, isAtSentenceStart: isAtSentenceStart,
+                                        spatial: spatial, context: context)
+    }
+}
+
 struct Commit {
     let intendedWords: [Int]
     let typed: String
     let final: String
+    let language: SupportedLanguage
     /// The next-word predictions the bar shows after this commit, best first.
     let predicted: [String]
 }
@@ -313,7 +348,8 @@ struct PickCost {
 /// triggers the suggestion work `SuggestionState.updateAsync` does, every space the
 /// autocorrect `DictusKeyboardBridge.autocorrectBeforeCursor` does.
 func replay(_ taps: [Tap], cells: [Cell], width: CGFloat, height: CGFloat, picker: Picker?, journal: Journal?,
-            spatial: Bool, tapRow: (Tap, String, CGPoint, Int, PickCost, Int) -> Void) -> (text: String, commits: [Commit]) {
+            corrector: Corrector, spatial: Bool,
+            tapRow: (Tap, String, CGPoint, Int, PickCost, Int) -> Void) -> (text: String, commits: [Commit]) {
     let field = Field()
     // #1011: what `DictusKeyboardBridge` keeps for the spatial decoder while its switch is on.
     var touches = SpatialTouchBuffer()
@@ -376,6 +412,7 @@ func replay(_ taps: [Tap], cells: [Cell], width: CGFloat, height: CGFloat, picke
                 }
             }
             let context = field.text
+            let engine = corrector.typingEngine
             cost = microseconds {
                 guard let (_, partial) = AutocorrectRejectionMemory.wordAtCursor(context: context) else { return }
                 let previous = words(context).dropLast().last
@@ -405,8 +442,8 @@ func replay(_ taps: [Tap], cells: [Cell], width: CGFloat, height: CGFloat, picke
                 // `spellCheck` is this proposal's autocorrection; the journal also needs to
                 // know when corrections were only offered, as the keyboard's commit does.
                 let input = spatial ? touches.taps(for: word).map { SpatialCorrection.Input(taps: $0, keys: keys) } : nil
-                let checked = engine.correctionProposal(
-                    for: word, previousWord: previous,
+                let checked = corrector.proposal(
+                    for: word, previous: previous,
                     isAtSentenceStart: ProperNounGuard.isAtSentenceStart(context: field.text, word: word),
                     spatial: input, context: field.text
                 )
@@ -422,10 +459,11 @@ func replay(_ taps: [Tap], cells: [Cell], width: CGFloat, height: CGFloat, picke
                     applied = true
                 }
                 if !applied { field.insertText(" ") }
-                predicted = engine.predictNextWords(after: Array(words(field.text).suffix(2)))
+                predicted = corrector.typingEngine.predictNextWords(after: Array(words(field.text).suffix(2)))
             }
             if !typed.isEmpty {
-                commits.append(Commit(intendedWords: tokenWords, typed: typed, final: final, predicted: predicted))
+                commits.append(Commit(intendedWords: tokenWords, typed: typed, final: final, language: corrector.language,
+                                      predicted: predicted))
             }
             tokenWords = []
         case .backspace?:
@@ -489,6 +527,22 @@ if let tune = env["KB_SPATIAL_TUNE"], !tune.isEmpty {
     }
 }
 
+// #1009: a bilingual keyboard instead of the shipping one. KB_PAIR is "primary,secondary".
+if let pairArg = env["KB_PAIR"] {
+    let codes = pairArg.components(separatedBy: ",").compactMap(SupportedLanguage.init(rawValue:))
+    guard codes.count == 2, let pair = KeyboardLanguagePair(primary: codes[0], secondary: codes[1]) else {
+        fatalError("KB_PAIR \(pairArg) is not a pair the keyboard offers")
+    }
+    restoringKeyboardPreferences {
+        if let probe = env["KB_PROBE"] {
+            probePair(pair, probe)
+        } else {
+            replayPair(pair, runs: langs, corpusDir: corpusDir, runsDir: runsDir, outDir: outDir, width: w, height: h)
+        }
+    }
+    exit(0)
+}
+
 var tapsOut = ["lang\tsentence\ttap\tintended\tresolved\tx\ty\tengine_us\tplain\thit_ns\tvisited\tjournal_ns"]
 var commitsOut = ["lang\tsentence\tintended\ttyped\tfinal\tnext\tpredicted"]
 var textsOut = ["lang\tsentence\tintended\tfinal"]
@@ -505,7 +559,7 @@ let layoutsBefore = [SharedKeys.keyboardLayoutsByLanguage, SharedKeys.keyboardLa
 // The engine starts loading French as soon as it exists. A `setLanguage` issued before
 // that load lands overlaps it: in an English-only run the French load then reported
 // the English trie's word count (40000; the French file holds 39627).
-waitUntilLoaded("initial")
+waitUntilLoaded(engine, "initial")
 
 for code in langs {
     // "fr-learned" is the French keyboard on the fr-learned corpus and its learned words.
@@ -541,6 +595,7 @@ for code in langs {
         { (m.pick($0, plain: $1, cells: cells, word: $2, previous: $3), m.visited) }
     }
 
+    let corrector = SingleEngine(engine, language: lang)
     var order: [Int] = []
     for tap in run where order.last != tap.sentence { order.append(tap.sentence) }
     for s in order {
@@ -549,7 +604,8 @@ for code in langs {
         let intendedWords = intended.components(separatedBy: " ")
         journal?.startSentence(keyboard: "\(langCode)-\(LayoutType.active.rawValue)", document: "\(code)-\(s)")
         let (text, commits) = replay(run.filter { $0.sentence == s }, cells: cells, width: w, height: h,
-                                     picker: picker, journal: journal, spatial: spatialOn) { tap, resolved, p, us, pick, journalNs in
+                                     picker: picker, journal: journal, corrector: corrector,
+                                     spatial: spatialOn) { tap, resolved, p, us, pick, journalNs in
             tapsOut.append("\(code)\t\(s)\t\(tap.index)\t\(tap.key)\t\(resolved)\t\(String(format: "%.2f", p.x))\t"
                            + "\(String(format: "%.2f", p.y))\t\(us)\t\(pick.plain)\t\(pick.ns)\t\(pick.visited)\t\(journalNs)")
         }
