@@ -107,6 +107,8 @@ public struct VoiceNote: Identifiable, Codable, Equatable, Sendable {
     /// See `TranscriptionRecord.languageWasAssumed`; the same, for a note kept here.
     /// Nil in every note written before #1084.
     public var languageWasAssumed: Bool?
+    /// See `TranscriptionRecord.languageWasDetected`; the same, for a note kept here.
+    public var languageWasDetected: Bool?
     /// When the user first saw this note's outcome — its result, or why it failed.
     /// A finished note the history did not take lives here until then; see
     /// `VoiceNoteQueue.removeOpenedFinished`.
@@ -214,7 +216,8 @@ public struct VoiceNoteQueue: Equatable, Sendable {
     ///   `removeOpenedFinished`, which report nothing.
     @discardableResult
     public mutating func complete(_ id: UUID, transcript: String, language: String,
-                                  languageWasAssumed: Bool = false, savedToHistory: Bool) -> [UUID] {
+                                  languageWasAssumed: Bool = false, languageWasDetected: Bool = false,
+                                  savedToHistory: Bool) -> [UUID] {
         if savedToHistory {
             remove(id)
             return []
@@ -224,6 +227,7 @@ public struct VoiceNoteQueue: Equatable, Sendable {
             $0.transcript = transcript
             $0.language = language
             $0.languageWasAssumed = languageWasAssumed ? true : nil
+            $0.languageWasDetected = languageWasDetected ? true : nil
             $0.audioFileName = nil
             // A result is unread when it arrives, whatever was seen of the note before.
             $0.openedAt = nil

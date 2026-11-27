@@ -31,3 +31,30 @@ public enum VoiceNoteModelCompileGate {
         return nil
     }
 }
+
+/// Which downloaded model waits to be compiled for the voice notes (#1084, PR 2).
+///
+/// A value, so its one subtle rule is tested: a compile that finishes clears the schedule
+/// only when it compiled the model still scheduled. The user can pick another model while a
+/// compile runs, a cold note then schedules that one, and it must stay scheduled
+/// (PR #1095 review).
+public struct VoiceNoteCompileSchedule: Equatable, Sendable {
+    public private(set) var model: String?
+
+    public init(model: String? = nil) {
+        self.model = model
+    }
+
+    /// Returns false when `model` was already the one scheduled.
+    @discardableResult
+    public mutating func schedule(_ model: String) -> Bool {
+        guard self.model != model else { return false }
+        self.model = model
+        return true
+    }
+
+    /// `compiled` finished and is warm.
+    public mutating func finished(_ compiled: String) {
+        if model == compiled { model = nil }
+    }
+}

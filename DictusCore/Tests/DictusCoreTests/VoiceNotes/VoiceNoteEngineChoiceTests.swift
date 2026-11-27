@@ -9,7 +9,8 @@ final class VoiceNoteEngineChoiceTests: XCTestCase {
                         covered: Bool) -> VoiceNoteEngineChoice.Decision {
         VoiceNoteEngineChoice.decide(language: language,
                                      dictationEngine: apple ? .apple(languageCode: "fr") : .downloadedModel,
-                                     downloadedModelReady: modelReady, downloadedModelWarm: warm,
+                                     downloadedModel: modelReady ? "parakeet-tdt-0.6b-v3" : nil,
+                                     downloadedModelWarm: warm,
                                      appleCoversFixedLanguage: covered)
     }
 
@@ -170,7 +171,7 @@ final class VoiceNoteEngineChoiceTests: XCTestCase {
     private func recorded(_ language: VoiceNoteLanguage, engine: SpeechEngine, transcript: String) -> String {
         let policy = TranscriptionLanguagePolicy(mode: language.transcriptionMode, keyboardLanguage: .french,
                                                  engine: engine, modelIdentifier: "m")
-        return VoiceNoteEngineChoice.recordedLanguageCode(policy: policy, transcript: transcript)
+        return VoiceNoteEngineChoice.recordedLanguage(policy: policy, transcript: transcript).code
     }
 
     func testParakeetUnderAutoDetectRecordsTheDetectedLanguage() {
@@ -188,5 +189,86 @@ final class VoiceNoteEngineChoiceTests: XCTestCase {
 
     func testNothingMeasuredKeepsAuto() {
         XCTAssertEqual(recorded(.autoDetect, engine: .parakeet, transcript: ""), TranscriptionRecord.autoDetectedCode)
+    }
+
+    // MARK: - PR #1095 review
+
+    /// Comment 1: the note keeps the model its warmth was checked for.
+    func testTheDecisionKeepsTheCheckedModelForEveryChunk() {
+        let warm = decide(.autoDetect, apple: true, modelReady: true, warm: true, covered: true)
+        XCTAssertEqual(warm.downloadedModel, "parakeet-tdt-0.6b-v3")
+        XCTAssertEqual(warm.modelToLoad, "parakeet-tdt-0.6b-v3")
+
+        // Cold: the identity is the one to compile, never one to load.
+        let cold = decide(.autoDetect, apple: true, modelReady: true, warm: false, covered: true)
+        XCTAssertEqual(cold.downloadedModel, "parakeet-tdt-0.6b-v3")
+        XCTAssertNil(cold.modelToLoad)
+
+        // The dictation's engine: nothing to load.
+        XCTAssertNil(decide(.fixed(.spanish), apple: true, modelReady: true, covered: true).modelToLoad)
+        XCTAssertNil(decide(.autoDetect, apple: false, modelReady: true, covered: true).modelToLoad)
+    }
+
+    /// Comment 2: a model scheduled while another compiles stays scheduled.
+    func testAFinishedCompileClearsOnlyTheModelItCompiled() {
+        var schedule = VoiceNoteCompileSchedule()
+        XCTAssertTrue(schedule.schedule("parakeet-tdt-0.6b-v3"))
+        XCTAssertFalse(schedule.schedule("parakeet-tdt-0.6b-v3"))
+        // The user picks Whisper while Parakeet compiles; a cold note schedules it.
+        XCTAssertTrue(schedule.schedule("openai_whisper-small"))
+        schedule.finished("parakeet-tdt-0.6b-v3")
+        XCTAssertEqual(schedule.model, "openai_whisper-small")
+        schedule.finished("openai_whisper-small")
+        XCTAssertNil(schedule.model)
+    }
+
+    /// Comment 4: a detected language is shown, not a Smart Mode target.
+    func testADetectedLanguageKeepsTheAutomaticSmartModePolicy() {
+        XCTAssertEqual(VoiceNoteEngineChoice.smartModeLanguageMode(recordedLanguage: "es", languageWasDetected: true),
+                       .autoDetect)
+    }
+
+    func testAFixedOrAssumedLanguageKeepsItsExplicitTarget() {
+        XCTAssertEqual(VoiceNoteEngineChoice.smartModeLanguageMode(recordedLanguage: "es", languageWasDetected: false),
+                       .explicit(.spanish))
+    }
+
+    func testAutoAndUnknownCodesStayAutomatic() {
+        XCTAssertEqual(VoiceNoteEngineChoice.smartModeLanguageMode(
+            recordedLanguage: TranscriptionRecord.autoDetectedCode, languageWasDetected: false), .autoDetect)
+        XCTAssertEqual(VoiceNoteEngineChoice.smartModeLanguageMode(recordedLanguage: "it", languageWasDetected: false),
+                       .autoDetect)
+    }
+
+    func testTheRecordSaysWhenItsLanguageWasDetected() {
+        let policy = TranscriptionLanguagePolicy(mode: .autoDetect, keyboardLanguage: .french,
+                                                 engine: .parakeet, modelIdentifier: "m")
+        let recorded = VoiceNoteEngineChoice.recordedLanguage(policy: policy, transcript: spanish)
+        XCTAssertEqual(recorded.code, "es")
+        XCTAssertTrue(recorded.detected)
+
+        let fixed = TranscriptionLanguagePolicy(mode: .explicit(.german), keyboardLanguage: .french,
+                                                engine: .parakeet, modelIdentifier: "m")
+        XCTAssertFalse(VoiceNoteEngineChoice.recordedLanguage(policy: fixed, transcript: spanish).detected)
+        XCTAssertFalse(VoiceNoteEngineChoice.recordedLanguage(policy: policy, transcript: "").detected)
+    }
+
+    func testTheDetectedMarkerSurvivesTheHistoryFileAndIsAbsentOtherwise() throws {
+        let detected = TranscriptionRecord(text: "Hola", language: "es", durationSeconds: 3, sttProvider: "PK",
+                                           source: .sharedFile, languageWasDetected: true)
+        let decoded = try JSONDecoder().decode(TranscriptionRecord.self, from: JSONEncoder().encode(detected))
+        XCTAssertTrue(decoded.languageWasDetected)
+
+        let plain = TranscriptionRecord(text: "Hola", language: "es", durationSeconds: 3, sttProvider: "PK")
+        let json = String(decoding: try JSONEncoder().encode(plain), as: UTF8.self)
+        XCTAssertFalse(json.contains("languageDetected"))
+        XCTAssertFalse(try JSONDecoder().decode(TranscriptionRecord.self, from: Data(json.utf8)).languageWasDetected)
+    }
+
+    func testTheQueueKeepsTheDetectedMarkerForANoteHistoryDidNotTake() {
+        let note = VoiceNote(audioFileName: "a.m4a", format: .mpeg4)
+        var queue = VoiceNoteQueue(notes: [note])
+        queue.complete(note.id, transcript: "Hola", language: "es", languageWasDetected: true, savedToHistory: false)
+        XCTAssertEqual(queue.note(id: note.id)?.languageWasDetected, true)
     }
 }

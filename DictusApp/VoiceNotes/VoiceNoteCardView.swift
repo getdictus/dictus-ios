@@ -72,6 +72,8 @@ struct VoiceNoteCardView: View {
         let engine: SpeechEngine?
         /// `TranscriptionRecord.languageWasAssumed` (#1084).
         let languageWasAssumed: Bool
+        /// `TranscriptionRecord.languageWasDetected` (#1084, PR 2).
+        let languageWasDetected: Bool
     }
 
     private enum Resolution {
@@ -87,7 +89,8 @@ struct VoiceNoteCardView: View {
                                    summaryModeIdentifier: record.summaryModeIdentifier,
                                    language: record.language, durationLabel: record.durationLabel,
                                    durationSeconds: record.durationSeconds, date: record.createdAt,
-                                   engine: record.engine, languageWasAssumed: record.languageWasAssumed))
+                                   engine: record.engine, languageWasAssumed: record.languageWasAssumed,
+                                   languageWasDetected: record.languageWasDetected))
         }
         guard let note = queueStore.queue.note(id: noteID) else { return .missing }
         switch note.state {
@@ -98,7 +101,8 @@ struct VoiceNoteCardView: View {
                                    language: note.language ?? TranscriptionRecord.autoDetectedCode,
                                    durationLabel: note.durationLabel, durationSeconds: note.durationSeconds,
                                    date: note.receivedAt, engine: nil,
-                                   languageWasAssumed: note.languageWasAssumed == true))
+                                   languageWasAssumed: note.languageWasAssumed == true,
+                                   languageWasDetected: note.languageWasDetected == true))
         case .failed(let failure):
             return .failed(note, failure)
         case .waiting, .transcribing:
@@ -475,6 +479,7 @@ struct VoiceNoteCardView: View {
             noteID: noteID,
             source: VoiceNoteProcessor.SmartModeSource(
                 transcript: content.transcript, language: content.language,
+                languageWasDetected: content.languageWasDetected,
                 engine: content.engine, durationSeconds: content.durationSeconds
             ),
             trigger: .open

@@ -231,6 +231,9 @@ final class VoiceNoteProcessor: ObservableObject {
             await self?.runLoop()
             await self?.restoreDictationEngineIfSwapped()
             self?.runTask = nil
+            // A note enqueued while the restore waited on the gate found the loop still
+            // running and returned; start it now (PR #1095 review). No-op on an empty queue.
+            self?.processQueue()
             // A cold model a note asked for compiles now if the app is in front (#1084).
             VoiceNoteModelCompile.shared.runSoon(context: "queueDrained")
             // The queue was what still needed the engine (#380).
@@ -259,7 +262,7 @@ final class VoiceNoteProcessor: ObservableObject {
         }
         let model = AppGroup.defaults.string(forKey: SharedKeys.activeModel) ?? "openai_whisper-small"
         return VoiceNoteEngineChoice.decide(language: language, dictationEngine: dictationEngine,
-                                            downloadedModelReady: AppGroup.defaults.bool(forKey: SharedKeys.modelReady),
+                                            downloadedModel: AppGroup.defaults.bool(forKey: SharedKeys.modelReady) ? model : nil,
                                             downloadedModelWarm: VoiceNoteModelWarmth.isWarm(model),
                                             appleCoversFixedLanguage: covered)
     }
@@ -336,10 +339,8 @@ final class VoiceNoteProcessor: ObservableObject {
         log("voiceNoteEngine", "choice=\(runsDownloadedModel ? "downloadedModel" : "apple") reason=\(engine.reason.rawValue) id=\(note.id.uuidString.prefix(8))")
         // Cold Core ML cache: this note stays on Apple's model, the compile waits for the app
         // to be in front and idle (`VoiceNoteModelCompile`), so no dictation waits behind it.
-        if engine.compilesDownloadedModel {
-            // `activeModel`, not the policy's identifier: since #1083 that names Apple's engine.
-            VoiceNoteModelCompile.shared.schedule(model: AppGroup.defaults.string(forKey: SharedKeys.activeModel)
-                                                  ?? "openai_whisper-small")
+        if engine.compilesDownloadedModel, let model = engine.downloadedModel {
+            VoiceNoteModelCompile.shared.schedule(model: model)
         }
         let ranges = VoiceNoteChunker.ranges(for: samples)
         // `activeModelEngine`, not `engine` (#1084): Apple's, when picked, is only known once
@@ -356,7 +357,7 @@ final class VoiceNoteProcessor: ObservableObject {
             let chunk = Array(samples[range])
             do {
                 let chunkResult = try await EngineAccessGate.shared.withAccess(.voiceNote) {
-                    try await DictationCoordinator.shared.transcribeVoiceNoteChunk(chunk, languagePolicy: requested, engine: engine.choice)
+                    try await DictationCoordinator.shared.transcribeVoiceNoteChunk(chunk, languagePolicy: requested, downloadedModel: engine.modelToLoad)
                 }
                 policy = chunkResult.policy
                 let trimmed = chunkResult.text.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -379,11 +380,12 @@ final class VoiceNoteProcessor: ObservableObject {
         let transcript = parts.joined(separator: " ")
         guard !transcript.isEmpty else { return fail(note, .noSpeech, detail: "empty transcript") }
         // The language a detecting model heard, not `auto` (#1084, PR 2).
+        let language = VoiceNoteEngineChoice.recordedLanguage(policy: policy, transcript: transcript)
         let record = TranscriptionRecord(
-            id: note.id, text: transcript,
-            language: VoiceNoteEngineChoice.recordedLanguageCode(policy: policy, transcript: transcript),
+            id: note.id, text: transcript, language: language.code,
             durationSeconds: Int(duration.rounded()), createdAt: note.receivedAt,
-            sttProvider: policy.engine.rawValue, source: .sharedFile, languageWasAssumed: policy.languageIsAssumed)
+            sttProvider: policy.engine.rawValue, source: .sharedFile, languageWasAssumed: policy.languageIsAssumed,
+            languageWasDetected: language.detected)
         // A share extension that saved this note to History and then failed to write its
         // result handed the note back (#1056): replace that entry's text, never add a
         // second one.
@@ -398,7 +400,8 @@ final class VoiceNoteProcessor: ObservableObject {
         var evicted: [UUID] = []
         store.mutate {
             evicted = $0.complete(note.id, transcript: transcript, language: record.language,
-                                  languageWasAssumed: record.languageWasAssumed, savedToHistory: saved)
+                                  languageWasAssumed: record.languageWasAssumed,
+                                  languageWasDetected: record.languageWasDetected, savedToHistory: saved)
         }
         releaseClaim(note.id)
         // Not counted in `DictationTally` (#726, decided 2026-10-21): a shared voice
@@ -417,7 +420,7 @@ final class VoiceNoteProcessor: ObservableObject {
         // before the user opens the card (#627). The island already shows the note as
         // ready; a card opened meanwhile attaches to this run rather than starting one.
         await runSmartModeInBackground(noteID: note.id, source: SmartModeSource(
-            transcript: transcript, language: record.language,
+            transcript: transcript, language: record.language, languageWasDetected: record.languageWasDetected,
             engine: policy.engine, durationSeconds: Int(duration.rounded())
         ))
     }
@@ -498,8 +501,9 @@ final class VoiceNoteProcessor: ObservableObject {
         TranscriptionHistoryStore.shared.reloadFromDisk()
         VoiceNoteIslandDriver.shared.finished(note.id, succeeded: true)
         evaluatePresentation()
+        // Apple's model never detects: `languageWasDetected` is false by construction.
         await runSmartModeInBackground(noteID: note.id, source: SmartModeSource(
-            transcript: result.transcript, language: result.language,
+            transcript: result.transcript, language: result.language, languageWasDetected: false,
             engine: .apple, durationSeconds: result.durationSeconds
         ))
     }
@@ -511,6 +515,8 @@ final class VoiceNoteProcessor: ObservableObject {
         let transcript: String
         /// `TranscriptionRecord.language`: a language code, or the auto-detected marker.
         let language: String
+        /// `TranscriptionRecord.languageWasDetected`: `language` is shown, not a target.
+        let languageWasDetected: Bool
         let engine: SpeechEngine?
         let durationSeconds: Int?
     }
@@ -538,9 +544,8 @@ final class VoiceNoteProcessor: ObservableObject {
                       trigger: VoiceNoteSmartModeTrigger) async -> PolishCoordinator.VoiceNoteModeRun? {
         guard let mode = VoiceNoteSettings.load().mode.smartMode else { return nil }
         let policy = TranscriptionLanguagePolicy(
-            mode: source.language == TranscriptionRecord.autoDetectedCode
-                ? .autoDetect
-                : SupportedLanguage(rawValue: source.language).map(TranscriptionLanguageMode.explicit) ?? .autoDetect,
+            mode: VoiceNoteEngineChoice.smartModeLanguageMode(recordedLanguage: source.language,
+                                                              languageWasDetected: source.languageWasDetected),
             keyboardLanguage: SupportedLanguage.active,
             engine: source.engine ?? .parakeet,
             modelIdentifier: ActiveSpeechEngine.current()?.identifier ?? ""

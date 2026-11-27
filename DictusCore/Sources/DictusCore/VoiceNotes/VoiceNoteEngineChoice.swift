@@ -51,38 +51,53 @@ public enum VoiceNoteEngineChoice: Equatable, Sendable {
         /// Compile the downloaded model once the app is in front and idle, so later notes
         /// get it. True only with `reason == .coldCache`.
         public let compilesDownloadedModel: Bool
+        /// The downloaded model whose readiness and warmth this decision read, when it loads
+        /// or compiles it; nil otherwise. The note keeps THIS identity for every chunk, never
+        /// a fresh read of `activeModel`: a model selected mid-note was never checked warm,
+        /// and a cold one must not load under `EngineAccessGate` (PR #1095 review).
+        public let downloadedModel: String?
 
-        init(_ choice: VoiceNoteEngineChoice, _ reason: Reason) {
+        init(_ choice: VoiceNoteEngineChoice, _ reason: Reason, model: String?) {
             self.choice = choice
             self.reason = reason
             self.compilesDownloadedModel = reason == .coldCache
+            self.downloadedModel = choice == .downloadedModel || reason == .coldCache ? model : nil
+        }
+
+        /// The model each chunk of the note loads, nil for the dictation's engine.
+        public var modelToLoad: String? {
+            choice == .downloadedModel ? downloadedModel : nil
         }
     }
 
     /// - Parameters:
     ///   - language: the voice-note language setting.
     ///   - dictationEngine: what a dictation would run now (`AppleEngineAssets.effectiveEngine`).
-    ///   - downloadedModelReady: a downloaded model is on the device (`SharedKeys.modelReady`).
+    ///   - downloadedModel: `SharedKeys.activeModel`, read once for the note, when a downloaded
+    ///     model is on the device (`SharedKeys.modelReady`); nil when there is none.
     ///   - downloadedModelWarm: its Core ML cache is compiled on this install (`ModelWarmth`).
     ///   - appleCoversFixedLanguage: Apple's model lists the fixed language and is installed
     ///     for it. Only read for a fixed language.
     public static func decide(language: VoiceNoteLanguage, dictationEngine: EffectiveSpeechEngine,
-                              downloadedModelReady: Bool, downloadedModelWarm: Bool,
+                              downloadedModel: String?, downloadedModelWarm: Bool,
                               appleCoversFixedLanguage: Bool) -> Decision {
-        guard case .apple = dictationEngine else { return Decision(.dictationEngine, .dictationRunsDownloadedModel) }
+        func decision(_ choice: VoiceNoteEngineChoice, _ reason: Reason) -> Decision {
+            Decision(choice, reason, model: downloadedModel)
+        }
+        guard case .apple = dictationEngine else { return decision(.dictationEngine, .dictationRunsDownloadedModel) }
         let wanted: Reason
         switch language {
         case .autoDetect:
-            guard downloadedModelReady else { return Decision(.dictationEngine, .autoDetectWithoutDownloadedModel) }
+            guard downloadedModel != nil else { return decision(.dictationEngine, .autoDetectWithoutDownloadedModel) }
             wanted = .autoDetectUsesDownloadedModel
         case .fixed:
-            if appleCoversFixedLanguage { return Decision(.dictationEngine, .fixedLanguageCoveredByApple) }
-            guard downloadedModelReady else {
-                return Decision(.dictationEngine, .fixedLanguageNotCoveredWithoutDownloadedModel)
+            if appleCoversFixedLanguage { return decision(.dictationEngine, .fixedLanguageCoveredByApple) }
+            guard downloadedModel != nil else {
+                return decision(.dictationEngine, .fixedLanguageNotCoveredWithoutDownloadedModel)
             }
             wanted = .fixedLanguageNotCoveredUsesDownloadedModel
         }
-        return downloadedModelWarm ? Decision(.downloadedModel, wanted) : Decision(.dictationEngine, .coldCache)
+        return downloadedModelWarm ? decision(.downloadedModel, wanted) : decision(.dictationEngine, .coldCache)
     }
 
     /// The language a voice note in automatic detection is recorded under, once a model
@@ -98,9 +113,29 @@ public enum VoiceNoteEngineChoice: Equatable, Sendable {
     /// What a voice note's record says its language is, once read under `policy`:
     /// `TranscriptionRecord.languageCode(for:)`, except that a note in automatic detection
     /// read by a model that detects gets the language measured in its transcript.
-    public static func recordedLanguageCode(policy: TranscriptionLanguagePolicy, transcript: String) -> String {
+    ///
+    /// `detected` says the code came from that measure: the History shows it, but the
+    /// note's Smart Mode stays on the automatic policy (`smartModeLanguageMode`).
+    public static func recordedLanguage(policy: TranscriptionLanguagePolicy,
+                                        transcript: String) -> (code: String, detected: Bool) {
         let fromPolicy = TranscriptionRecord.languageCode(for: policy)
-        guard policy.mode == .autoDetect, !policy.languageIsAssumed else { return fromPolicy }
-        return detectedLanguageCode(in: transcript) ?? fromPolicy
+        guard policy.mode == .autoDetect, !policy.languageIsAssumed,
+              let detected = detectedLanguageCode(in: transcript) else { return (fromPolicy, false) }
+        return (detected, true)
+    }
+
+    /// The language mode a voice note's Smart Mode runs under, from its record.
+    ///
+    /// A detected language is shown, never a target (PR #1095 review): the note was in
+    /// automatic detection, so the mode keeps the language-agnostic automatic prompt and
+    /// does not rewrite foreign passages into the dominant language. A language the user
+    /// fixed, or one Apple's model was given (`languageWasAssumed`), stays explicit, as
+    /// before; `auto` and an unknown code stay automatic.
+    public static func smartModeLanguageMode(recordedLanguage: String,
+                                             languageWasDetected: Bool) -> TranscriptionLanguageMode {
+        guard !languageWasDetected, let language = SupportedLanguage(rawValue: recordedLanguage) else {
+            return .autoDetect
+        }
+        return .explicit(language)
     }
 }

@@ -350,10 +350,10 @@ class DictationCoordinator: ObservableObject {
     /// `activeModel`'s engine, and only the loaded engine says it was Apple's, which is
     /// what the record and the card need.
     ///
-    /// `engine` may name the downloaded model while Apple's dictates (#1084, PR 2): see
+    /// `downloadedModel` is loaded even while Apple's dictates (#1084, PR 2): see
     /// `DictationCoordinator+VoiceNoteEngine.swift`.
-    func transcribeVoiceNoteChunk(_ samples: [Float], languagePolicy: TranscriptionLanguagePolicy, engine: VoiceNoteEngineChoice) async throws -> (text: String, policy: TranscriptionLanguagePolicy) {
-        try await prepareVoiceNoteEngine(engine)
+    func transcribeVoiceNoteChunk(_ samples: [Float], languagePolicy: TranscriptionLanguagePolicy, downloadedModel: String?) async throws -> (text: String, policy: TranscriptionLanguagePolicy) {
+        try await prepareVoiceNoteEngine(downloadedModel: downloadedModel)
         let policy = languagePolicyForLoadedEngine(languagePolicy)
         let text = try await transcriptionService.transcribe(audioSamples: samples, languagePolicy: policy)
         return (DictationTranscript.corrected(text).text, policy)

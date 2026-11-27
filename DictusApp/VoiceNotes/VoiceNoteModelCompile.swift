@@ -20,7 +20,8 @@ import UIKit
 final class VoiceNoteModelCompile {
     static let shared = VoiceNoteModelCompile()
 
-    private var scheduledModel: String?
+    /// Which model waits; `finished` clears it only for the model that compiled.
+    private var schedule = VoiceNoteCompileSchedule()
     private var isCompiling = false
     private var activationObserver: NSObjectProtocol?
 
@@ -37,14 +38,13 @@ final class VoiceNoteModelCompile {
                 Task { @MainActor in VoiceNoteModelCompile.shared.runSoon(context: "didBecomeActive") }
             }
         }
-        guard scheduledModel != model else { return }
-        scheduledModel = model
+        guard schedule.schedule(model) else { return }
         log("scheduled", "model=\(model)")
     }
 
     /// Read the gate after the settle, and compile if it allows.
     func runSoon(context: String) {
-        guard scheduledModel != nil else { return }
+        guard schedule.model != nil else { return }
         Task { @MainActor in
             try? await Task.sleep(nanoseconds: Self.settleNanoseconds)
             await runIfAllowed(context: context)
@@ -52,7 +52,7 @@ final class VoiceNoteModelCompile {
     }
 
     private func runIfAllowed(context: String) async {
-        guard !isCompiling, let model = scheduledModel else { return }
+        guard !isCompiling, let model = schedule.model else { return }
         let coordinator = DictationCoordinator.shared
         if let refusal = VoiceNoteModelCompileGate.refusal(
             scheduled: true,
@@ -70,8 +70,12 @@ final class VoiceNoteModelCompile {
         log("started", "context=\(context) model=\(model)")
         do {
             try await coordinator.compileDownloadedModelAside(model)
-            scheduledModel = nil
+            // Not a blind reset: the user may have picked another model meanwhile, and a cold
+            // note scheduled it; that one stays (PR #1095 review).
+            schedule.finished(model)
             log("finished", "model=\(model) ms=\(Int(Date().timeIntervalSince(started) * 1000)) warm=\(VoiceNoteModelWarmth.isWarm(model))")
+            // The model scheduled meanwhile, if any, gets its turn behind the same gate.
+            runSoon(context: "afterCompile")
         } catch {
             log("failed", "model=\(model) error=\(DictationFailureMessage.diagnostic(for: error))")
         }

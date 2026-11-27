@@ -6476,25 +6476,25 @@
         }
       }
     },
-    "With a downloaded model (Parakeet or Whisper), automatic detection transcribes each voice note in the language it was spoken in. With Apple's model, voice notes are transcribed in your dictation language." : {
-      "comment" : "Voice note settings, footer of the language picker: automatic detection needs a downloaded model; Apple's model uses the dictation language (#1084).",
+    "With a downloaded model (Parakeet or Whisper), automatic detection transcribes each voice note in the language it was spoken in. Without one, Apple's model transcribes voice notes set to automatic detection in your dictation language." : {
+      "comment" : "Voice note settings, footer of the language picker: automatic detection needs a downloaded model; without one, Apple's model reads auto-detect voice notes in the dictation language (#1084).",
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mit einem geladenen Modell (Parakeet oder Whisper) transkribiert die automatische Erkennung jede Sprachnachricht in der Sprache, in der sie gesprochen wurde. Mit dem Modell von Apple werden Sprachnachrichten in deiner Diktiersprache transkribiert."
+            "value" : "Mit einem geladenen Modell (Parakeet oder Whisper) transkribiert die automatische Erkennung jede Sprachnachricht in der Sprache, in der sie gesprochen wurde. Ohne geladenes Modell transkribiert das Modell von Apple Sprachnachrichten mit automatischer Erkennung in deiner Diktiersprache."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Con un modelo descargado (Parakeet o Whisper), la detección automática transcribe cada mensaje de voz en el idioma en que se dijo. Con el modelo de Apple, los mensajes de voz se transcriben en tu idioma de dictado."
+            "value" : "Con un modelo descargado (Parakeet o Whisper), la detección automática transcribe cada mensaje de voz en el idioma en que se dijo. Sin un modelo descargado, el modelo de Apple transcribe los mensajes de voz con detección automática en tu idioma de dictado."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Avec un modèle téléchargé (Parakeet ou Whisper), la détection automatique transcrit chaque message vocal dans la langue où il a été dit. Avec le modèle d'Apple, les messages vocaux sont transcrits dans votre langue de dictée."
+            "value" : "Avec un modèle téléchargé (Parakeet ou Whisper), la détection automatique transcrit chaque message vocal dans la langue où il a été dit. Sans modèle téléchargé, le modèle d'Apple transcrit les messages vocaux en détection automatique dans votre langue de dictée."
           }
         }
       }

@@ -54,6 +54,10 @@ public struct TranscriptionRecord: Identifiable, Codable, Hashable, Sendable {
     /// and in every record whose language was chosen or detected.
     private let languageAssumedMarker: Bool?
 
+    /// Written only when true: the voice note was in automatic detection and `language` is
+    /// what was measured in its transcript (#1084, PR 2). Absent everywhere else.
+    private let languageDetectedMarker: Bool?
+
     /// What the result screen shows above the transcript of a shared voice note: the
     /// output of the mode that ran on it (`Résumé` by default). Nil until it has run,
     /// and for every dictation. Computed in the foreground when the result is first
@@ -80,7 +84,8 @@ public struct TranscriptionRecord: Identifiable, Codable, Hashable, Sendable {
                 createdAt: Date = Date(),
                 sttProvider: String,
                 source: TranscriptionSource = .dictation,
-                languageWasAssumed: Bool = false) {
+                languageWasAssumed: Bool = false,
+                languageWasDetected: Bool = false) {
         self.id = id
         self.text = text
         self.language = language
@@ -89,6 +94,7 @@ public struct TranscriptionRecord: Identifiable, Codable, Hashable, Sendable {
         self.sttProvider = sttProvider
         self.sourceMarker = source == .dictation ? nil : source.rawValue
         self.languageAssumedMarker = languageWasAssumed ? true : nil
+        self.languageDetectedMarker = languageWasDetected ? true : nil
         self.summary = nil
         self.summaryModeIdentifier = nil
         self.openedAt = nil
@@ -129,6 +135,7 @@ public struct TranscriptionRecord: Identifiable, Codable, Hashable, Sendable {
         case sourceMarker = "source"
         case summary, summaryModeIdentifier, openedAt
         case languageAssumedMarker = "languageAssumed"
+        case languageDetectedMarker = "languageDetected"
     }
 
     /// What to record as the language of a dictation run under `policy`.
@@ -174,6 +181,13 @@ public struct TranscriptionRecord: Identifiable, Codable, Hashable, Sendable {
     /// card says so.
     public var languageWasAssumed: Bool {
         languageAssumedMarker ?? false
+    }
+
+    /// True when the note was in automatic detection and `language` was measured in its
+    /// transcript (#1084, PR 2): shown, but not a Smart Mode target
+    /// (`VoiceNoteEngineChoice.smartModeLanguageMode`).
+    public var languageWasDetected: Bool {
+        languageDetectedMarker ?? false
     }
 
     /// Short uppercase badge for the card: "FR", "EN", "AUTO".

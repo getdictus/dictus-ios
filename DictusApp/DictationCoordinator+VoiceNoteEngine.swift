@@ -11,17 +11,20 @@ extension DictationCoordinator {
 
     /// Load the engine `VoiceNoteEngineChoice` picked for a voice note, before a chunk.
     ///
-    /// `.downloadedModel` loads `activeModel` even though Apple's model dictates. It is a load
-    /// like any other (`ensureEngineReady(preferredModel:)`): the init lock, the Neural Engine
-    /// gate, the warm inference. Nothing switches under a dictation: the queue calls this
-    /// inside `EngineAccessGate`, after `waitForDictationToEnd`.
+    /// `downloadedModel` (`Decision.modelToLoad`) is loaded even though Apple's model
+    /// dictates; nil keeps the dictation's engine. It is the identity the note's decision
+    /// checked warm, passed down for every chunk and never re-read from `activeModel`: a model
+    /// selected mid-note was never checked, and a cold one would compile for minutes under
+    /// `EngineAccessGate` (PR #1095 review). The load is like any other
+    /// (`ensureEngineReady(preferredModel:)`): the init lock, the Neural Engine gate, the warm
+    /// inference. Nothing switches under a dictation: the queue calls this inside
+    /// `EngineAccessGate`, after `waitForDictationToEnd`.
     ///
-    /// A downloaded model that fails to load hands the note to the dictation's engine, Apple's,
-    /// which reads it as before this choice existed (in the dictation language, said on the
-    /// card) rather than failing a note Apple can read.
-    func prepareVoiceNoteEngine(_ engine: VoiceNoteEngineChoice) async throws {
-        guard engine == .downloadedModel else { return try await ensureEngineReady() }
-        let model = AppGroup.defaults.string(forKey: SharedKeys.activeModel) ?? "openai_whisper-small"
+    /// A downloaded model that fails to load (deleted mid-note included) hands the note to the
+    /// dictation's engine, Apple's, which reads it as before this choice existed (in the
+    /// dictation language, said on the card) rather than failing a note Apple can read.
+    func prepareVoiceNoteEngine(downloadedModel model: String?) async throws {
+        guard let model else { return try await ensureEngineReady() }
         guard currentModelName != model else { return }
         let before = currentModelName ?? "none"
         let started = Date()
