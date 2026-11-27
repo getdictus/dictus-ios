@@ -5,11 +5,12 @@ import XCTest
 /// Which engine reads a voice note in the app (#1084, PR 2): every row of the rule.
 final class VoiceNoteEngineChoiceTests: XCTestCase {
 
-    private func decide(_ language: VoiceNoteLanguage, apple: Bool, modelReady: Bool,
-                        covered: Bool) -> (choice: VoiceNoteEngineChoice, reason: VoiceNoteEngineChoice.Reason) {
+    private func decide(_ language: VoiceNoteLanguage, apple: Bool, modelReady: Bool, warm: Bool = true,
+                        covered: Bool) -> VoiceNoteEngineChoice.Decision {
         VoiceNoteEngineChoice.decide(language: language,
                                      dictationEngine: apple ? .apple(languageCode: "fr") : .downloadedModel,
-                                     downloadedModelReady: modelReady, appleCoversFixedLanguage: covered)
+                                     downloadedModelReady: modelReady, downloadedModelWarm: warm,
+                                     appleCoversFixedLanguage: covered)
     }
 
     // MARK: - The dictation runs the downloaded model: nothing changes
@@ -65,6 +66,76 @@ final class VoiceNoteEngineChoiceTests: XCTestCase {
         let result = decide(.fixed(.german), apple: true, modelReady: false, covered: false)
         XCTAssertEqual(result.choice, .dictationEngine)
         XCTAssertEqual(result.reason, .fixedLanguageNotCoveredWithoutDownloadedModel)
+    }
+
+    // MARK: - A downloaded model whose Core ML cache is cold
+
+    func testColdModelUnderAutoDetectStaysOnAppleAndSchedulesTheCompile() {
+        let result = decide(.autoDetect, apple: true, modelReady: true, warm: false, covered: true)
+        XCTAssertEqual(result.choice, .dictationEngine)
+        XCTAssertEqual(result.reason, .coldCache)
+        XCTAssertTrue(result.compilesDownloadedModel)
+    }
+
+    func testWarmModelUnderAutoDetectIsUsedWithNoCompile() {
+        let result = decide(.autoDetect, apple: true, modelReady: true, warm: true, covered: true)
+        XCTAssertEqual(result.choice, .downloadedModel)
+        XCTAssertFalse(result.compilesDownloadedModel)
+    }
+
+    func testColdModelForAFixedLanguageAppleCannotReadStaysOnAppleAndSchedulesTheCompile() {
+        let result = decide(.fixed(.german), apple: true, modelReady: true, warm: false, covered: false)
+        XCTAssertEqual(result.choice, .dictationEngine)
+        XCTAssertEqual(result.reason, .coldCache)
+        XCTAssertTrue(result.compilesDownloadedModel)
+    }
+
+    func testWarmthIsNotReadWhereTheModelIsNotWanted() {
+        // Apple covers the language, there is no model, or the dictation runs the model:
+        // nothing to compile for a voice note.
+        let rows = [
+            decide(.fixed(.spanish), apple: true, modelReady: true, warm: false, covered: true),
+            decide(.autoDetect, apple: true, modelReady: false, warm: false, covered: true),
+            decide(.autoDetect, apple: false, modelReady: true, warm: false, covered: true)
+        ]
+        for row in rows {
+            XCTAssertNotEqual(row.reason, .coldCache)
+            XCTAssertFalse(row.compilesDownloadedModel)
+        }
+    }
+
+    // MARK: - When the compile may run
+
+    private func refusal(scheduled: Bool = true, active: Bool = true, status: DictationStatus = .idle,
+                         pending: Bool = false, noteRunning: Bool = false) -> VoiceNoteModelCompileGate.Refusal? {
+        VoiceNoteModelCompileGate.refusal(scheduled: scheduled, appIsActive: active, dictationStatus: status,
+                                          keyboardDictationPending: pending, voiceNoteRunning: noteRunning)
+    }
+
+    func testCompileRunsInTheForegroundWhenNothingElseDoes() {
+        XCTAssertNil(refusal())
+    }
+
+    func testCompileNeverRunsInTheBackground() {
+        XCTAssertEqual(refusal(active: false), .appNotActive)
+    }
+
+    func testCompileNeverRunsDuringADictation() {
+        for status in [DictationStatus.requested, .recording, .transcribing, .processing, .ready, .failed] {
+            XCTAssertEqual(refusal(status: status), .dictationInProgress, "\(status)")
+        }
+    }
+
+    func testCompileNeverRunsBeforeAKeyboardLaunchedDictation() {
+        XCTAssertEqual(refusal(pending: true), .keyboardDictationPending)
+    }
+
+    func testCompileNeverRunsWhileAVoiceNoteTranscribes() {
+        XCTAssertEqual(refusal(noteRunning: true), .voiceNoteInProgress)
+    }
+
+    func testNothingScheduledNothingRuns() {
+        XCTAssertEqual(refusal(scheduled: false), .nothingScheduled)
     }
 
     // MARK: - The language a detecting model's note is recorded under

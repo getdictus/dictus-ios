@@ -231,6 +231,8 @@ final class VoiceNoteProcessor: ObservableObject {
             await self?.runLoop()
             await self?.restoreDictationEngineIfSwapped()
             self?.runTask = nil
+            // A cold model a note asked for compiles now if the app is in front (#1084).
+            VoiceNoteModelCompile.shared.runSoon(context: "queueDrained")
             // The queue was what still needed the engine (#380).
             DictationCoordinator.shared.releaseWarmStateIfImmediate(after: "voiceNotes")
         }
@@ -249,15 +251,16 @@ final class VoiceNoteProcessor: ObservableObject {
     }
 
     /// `VoiceNoteEngineChoice` read on the device, once per note (#1084, PR 2).
-    private static func engineChoice(for language: VoiceNoteLanguage)
-        async -> (choice: VoiceNoteEngineChoice, reason: VoiceNoteEngineChoice.Reason) {
+    private static func engineChoice(for language: VoiceNoteLanguage) async -> VoiceNoteEngineChoice.Decision {
         let dictationEngine = await AppleEngineAssets.effectiveEngine()
         var covered = false
         if case .apple = dictationEngine, case .fixed(let fixed) = language {
             covered = await AppleEngineAssets.canRead(languageCode: fixed.rawValue)
         }
+        let model = AppGroup.defaults.string(forKey: SharedKeys.activeModel) ?? "openai_whisper-small"
         return VoiceNoteEngineChoice.decide(language: language, dictationEngine: dictationEngine,
                                             downloadedModelReady: AppGroup.defaults.bool(forKey: SharedKeys.modelReady),
+                                            downloadedModelWarm: VoiceNoteModelWarmth.isWarm(model),
                                             appleCoversFixedLanguage: covered)
     }
 
@@ -326,6 +329,13 @@ final class VoiceNoteProcessor: ObservableObject {
         // when there is one, even while Apple's dictates.
         let engine = await Self.engineChoice(for: settings.language)
         if engine.choice == .downloadedModel { swappedDictationEngine = true }
+        let runsDownloadedModel = engine.choice == .downloadedModel || engine.reason == .dictationRunsDownloadedModel
+        log("voiceNoteEngine", "choice=\(runsDownloadedModel ? "downloadedModel" : "apple") reason=\(engine.reason.rawValue) id=\(note.id.uuidString.prefix(8))")
+        // Cold Core ML cache: this note stays on Apple's model, the compile waits for the app
+        // to be in front and idle (`VoiceNoteModelCompile`), so no dictation waits behind it.
+        if engine.compilesDownloadedModel {
+            VoiceNoteModelCompile.shared.schedule(model: requested.modelIdentifier)
+        }
         let ranges = VoiceNoteChunker.ranges(for: samples)
         // `activeModelEngine`, not `engine` (#1084): Apple's, when picked, is only known once
         // loaded, and `finished` names it.

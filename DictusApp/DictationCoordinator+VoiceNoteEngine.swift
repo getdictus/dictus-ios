@@ -5,6 +5,7 @@
 // the reason `DictationCoordinator+WarmEngineTimeout.swift` exists.
 import DictusCore
 import Foundation
+import WhisperKit
 
 extension DictationCoordinator {
 
@@ -48,6 +49,43 @@ extension DictationCoordinator {
                                     "from=\(before) to=\(currentModelName ?? "none") elapsedMs=\(Self.milliseconds(since: started))")
         } catch {
             Self.logVoiceNoteEngine("restoreFailed", "from=\(before) error=\(DictationFailureMessage.diagnostic(for: error))")
+        }
+    }
+
+    /// Compile `model`'s Core ML cache and run its warm inference, which records it warm
+    /// (`ModelWarmth.markWarm`), then drop the engine (#1084, PR 2, cold-cache variant).
+    ///
+    /// WHY ASIDE and not through `ensureEngineReady`: that publishes the engine into
+    /// `TranscriptionService`, so a keyboard dictation running on Apple's engine meanwhile
+    /// could find the downloaded model under it, and a load holds `EngineAccessGate` for the
+    /// length of a compile. This touches neither: Apple's engine stays installed, and a
+    /// dictation on it takes no Neural Engine lock. It does take that lock, so it never
+    /// compiles beside another load. `VoiceNoteModelCompile` decides when it runs.
+    func compileDownloadedModelAside(_ model: String) async throws {
+        let holder = "VoiceNoteCompile:\(model)"
+        try await acquireNeuralEngine(for: holder)
+        defer { releaseNeuralEngine(from: holder) }
+        switch ModelInfo.forIdentifier(model)?.engine ?? .whisperKit {
+        case .parakeet:
+            guard ParakeetEngine.installedModelCacheDirectory() != nil else {
+                throw SpeechModelError.modelNotInstalled(identifier: model)
+            }
+            _ = try await warmedParakeetEngine(modelName: model)
+        case .nemotron:
+            guard NemotronEngine.installedModelDirectory() != nil else {
+                throw SpeechModelError.modelNotInstalled(identifier: model)
+            }
+            _ = try await warmedNemotronEngine(modelName: model)
+        case .whisperKit, .apple:
+            guard let folder = WhisperModelRepository.installedModelFolderURL(for: model) else {
+                throw SpeechModelError.modelNotInstalled(identifier: model)
+            }
+            // The configuration `ensureWhisperKitEngineReady` loads with, so the cache it
+            // compiles is the one a later load reads.
+            let kit = try await WhisperKit(WhisperKitConfig(model: model, modelFolder: folder.path,
+                                                            computeOptions: WhisperComputeOptions.current(),
+                                                            verbose: false, prewarm: true, load: true, download: false))
+            _ = await warmedWhisperKitEngine(for: kit, modelName: model)
         }
     }
 
