@@ -13,8 +13,8 @@
 #
 # A real run, in order. Any skip or failure stops it at that step:
 #    1. lock; skip if another nightly, a cut/upload/promote script or an archive is running;
-#       skip if today already has a build: today's summary says built or uploaded, or a
-#       build/NN tag was created today (Europe/Paris), on any commit
+#       skip if today already has a build: <stem>.uploaded exists (an upload App Store
+#       Connect accepted today), or today's summary says built or uploaded
 #    2. git fetch; HEAD = origin/develop
 #    3. skip if a build/NN tag already points to HEAD
 #    4. skip unless the CI run of HEAD on develop has every job of CI_JOBS green (read only)
@@ -348,18 +348,15 @@ log "1. lock held, no release or archive running"
 # One internal build a day (Pierre's rule, 2026-11-27). The tag on HEAD (step 3) is not
 # enough: when 06:00 built commit A and commit B passes CI before 06:30, HEAD is B and
 # carries no tag. So, whatever HEAD is, a day that already has a build gets no other one.
-# Three sources, in this order:
+# Two sources, in this order:
 #   - <stem>.uploaded: App Store Connect accepted an upload today, even if a later step
 #     (IPA check, tag push) failed, set the summary to failed and deleted the tag;
-#   - today's summary says built or uploaded (its Build line gives NN);
-#   - a build/NN tag created today, Europe/Paris date, on any commit. A lightweight tag
-#     has no date of its own: the date is the mtime of its loose ref in the main clone,
-#     written by `git tag` (step 7, or cut-testflight.sh) or by the fetch that brought it
-#     in. A packed tag has no such date and is not counted.
-# A 06:00 run that failed before the upload was accepted leaves none of them: no marker,
-# its summary says failed and the cleanup deleted the tag it had not pushed, so 06:30
-# still builds.
-TODAY_PARIS=$(TZ=Europe/Paris date +%F)
+#   - today's summary says built or uploaded (its Build line gives NN).
+# A tag's date is not a source: a lightweight tag has none, and the mtime of its loose
+# ref is also the time a fetch brought it in, which would block a retry for a build made
+# on another day.
+# A 06:00 run that failed before the upload was accepted leaves neither, so 06:30 still
+# builds.
 TODAY_NN=""
 TODAY_FROM=""
 TODAY_STATUS=$(summary_status "$REAL_SUMMARY")
@@ -372,22 +369,12 @@ fi
     TODAY_NN=$(sed -n 's/^- Build: \([0-9][0-9]*\).*$/\1/p' "$REAL_SUMMARY" | head -1)
     TODAY_FROM="$REAL_SUMMARY says $TODAY_STATUS" ;;
 esac
-if [ -z "$TODAY_FROM" ]; then
-  for n in $(git -C "$REPO" tag -l 'build/*' | grep -E '^build/[0-9]+$' | sed 's#^build/##' | sort -rn); do
-    f=$(git -C "$REPO" rev-parse --path-format=absolute --git-path "refs/tags/build/$n")
-    if [ -f "$f" ] && [ "$(TZ=Europe/Paris stat -f %Sm -t %F "$f")" = "$TODAY_PARIS" ]; then
-      TODAY_NN=$n
-      TODAY_FROM="the tag build/$n was created today ($TODAY_PARIS, Europe/Paris)"
-      break
-    fi
-  done
-fi
 if [ -n "$TODAY_FROM" ]; then
   log "1. today already has a build: $TODAY_FROM"
   KEEP_SUMMARY=1
   skip "already built today (build ${TODAY_NN:-unknown})"
 else
-  log "1. no build today yet: no $UPLOAD_MARKER, $REAL_SUMMARY is ${TODAY_STATUS:-absent}, no build/NN tag created on $TODAY_PARIS"
+  log "1. no build today yet: no $UPLOAD_MARKER, $REAL_SUMMARY is ${TODAY_STATUS:-absent}"
 fi
 
 # --- 2. Fetch; HEAD = origin/develop ----------------------------------------

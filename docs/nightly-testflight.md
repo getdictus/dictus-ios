@@ -201,7 +201,7 @@ rm ~/Library/LaunchAgents/solutions.pivi.dictus.morning-testflight.plist
 
 - another run holds the lock (06:30 while 06:00 is still running), an `xcodebuild` is running, or an
   `asc` has been running for over a minute (an upload or a processing wait);
-- today already has a build, whatever `develop`'s tip is now: `<stem>.uploaded` exists (written the moment App Store Connect accepts an upload, before any later step can fail), the day's summary says `built` or `uploaded`, or a `build/NN` tag was created today (Europe/Paris, the mtime of its loose ref), on any commit. It writes `end: status=skipped reason=already built today (build NN)` and goes to `<stem>.retry.md`;
+- today already has a build, whatever `develop`'s tip is now: `<stem>.uploaded` exists (written the moment App Store Connect accepts an upload, before any later step can fail), or the day's summary says `built` or `uploaded`. A tag's date does not count (a fetch stamps it too). It writes `end: status=skipped reason=already built today (build NN)` and goes to `<stem>.retry.md`;
 - a `build/NN` tag already points to `develop`'s tip;
 - the CI run of that commit on `develop` does not have its two jobs green (`SwiftLint`,
   `iOS (build + DictusCore + App Tests)`, the names in `CI_JOBS`). It reads the run and
