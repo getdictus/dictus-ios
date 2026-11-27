@@ -370,6 +370,10 @@ struct SettingsView: View {
             // weeks or losing the Keychain record for good (#593).
             ProTrialDebugSection()
 
+            // #1081: what the keyboard learned of where this user taps, out of the App Group
+            // container, which devicectl cannot copy from the Mac.
+            AdaptiveTouchExportSection()
+
             // #637 decision 3: one build, both behaviours, for the device verdict.
             // Deleted with the losing branch once the verdict is in.
             Section {

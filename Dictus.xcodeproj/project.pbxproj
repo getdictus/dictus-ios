@@ -18,6 +18,7 @@
 		AA0000L0 /* ModelInfo+Localized.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000L0 /* ModelInfo+Localized.swift */; };
 		SS000001 /* SubscriptionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = SS100001 /* SubscriptionManager.swift */; };
 		RT5930000004 /* ProTrialDebugSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = RT5930100004 /* ProTrialDebugSection.swift */; };
+		AT1081000001 /* AdaptiveTouchExportSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = AT1081100001 /* AdaptiveTouchExportSection.swift */; };
 		RT5930000003 /* ProTrialPaywallSections.swift in Sources */ = {isa = PBXBuildFile; fileRef = RT5930100003 /* ProTrialPaywallSections.swift */; };
 		PH2160000001 /* ProHubSections.swift in Sources */ = {isa = PBXBuildFile; fileRef = PH2160100001 /* ProHubSections.swift */; };
 		AA000687 /* ProFeatureSceneSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100687 /* ProFeatureSceneSheet.swift */; };
@@ -206,6 +207,8 @@
 		EE000009 /* fr_ngrams.dict in Resources */ = {isa = PBXBuildFile; fileRef = EE100009A /* fr_ngrams.dict */; };
 		EE00000A /* en_ngrams.dict in Resources */ = {isa = PBXBuildFile; fileRef = EE10000AA /* en_ngrams.dict */; };
 		SD1011A1 /* SpatialAutocorrect.swift in Sources */ = {isa = PBXBuildFile; fileRef = SD1011B1 /* SpatialAutocorrect.swift */; };
+		AT1014A1 /* AdaptiveTouchSwitch.swift in Sources */ = {isa = PBXBuildFile; fileRef = AT1014B1 /* AdaptiveTouchSwitch.swift */; };
+		AT1014A2 /* DictusKeyboardBridge+SpatialTouch.swift in Sources */ = {isa = PBXBuildFile; fileRef = AT1014B2 /* DictusKeyboardBridge+SpatialTouch.swift */; };
 		BC1015A1 /* BilingualAutocorrect.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC1015B1 /* BilingualAutocorrect.swift */; };
 		BC1015A2 /* TrieLanguageEvidence.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC1015B2 /* TrieLanguageEvidence.swift */; };
 		SD1011A2 /* fr.hextm in Resources */ = {isa = PBXBuildFile; fileRef = SD1011B2 /* fr.hextm */; };
@@ -477,6 +480,7 @@
 		AA1000G0 /* KeyTapSignposter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyTapSignposter.swift; sourceTree = "<group>"; };
 		SS100001 /* SubscriptionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionManager.swift; sourceTree = "<group>"; };
 		RT5930100004 /* ProTrialDebugSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProTrialDebugSection.swift; sourceTree = "<group>"; };
+		AT1081100001 /* AdaptiveTouchExportSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdaptiveTouchExportSection.swift; sourceTree = "<group>"; };
 		RT5930100003 /* ProTrialPaywallSections.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProTrialPaywallSections.swift; sourceTree = "<group>"; };
 		PH2160100001 /* ProHubSections.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProHubSections.swift; sourceTree = "<group>"; };
 		AA100687 /* ProFeatureSceneSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProFeatureSceneSheet.swift; sourceTree = "<group>"; };
@@ -549,6 +553,8 @@
 		EE100009A /* fr_ngrams.dict */ = {isa = PBXFileReference; lastKnownFileType = "compiled"; path = fr_ngrams.dict; sourceTree = "<group>"; };
 		EE10000AA /* en_ngrams.dict */ = {isa = PBXFileReference; lastKnownFileType = "compiled"; path = en_ngrams.dict; sourceTree = "<group>"; };
 		SD1011B1 /* SpatialAutocorrect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpatialAutocorrect.swift; sourceTree = "<group>"; };
+		AT1014B1 /* AdaptiveTouchSwitch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdaptiveTouchSwitch.swift; sourceTree = "<group>"; };
+		AT1014B2 /* DictusKeyboardBridge+SpatialTouch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DictusKeyboardBridge+SpatialTouch.swift"; sourceTree = "<group>"; };
 		BC1015B1 /* BilingualAutocorrect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BilingualAutocorrect.swift; sourceTree = "<group>"; };
 		BC1015B2 /* TrieLanguageEvidence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrieLanguageEvidence.swift; sourceTree = "<group>"; };
 		SD1011B2 /* fr.hextm */ = {isa = PBXFileReference; lastKnownFileType = "compiled"; path = fr.hextm; sourceTree = "<group>"; };
@@ -721,6 +727,7 @@
 				CC100010 /* KeyboardLayouts.swift */,
 				CC100020 /* DictusKeyboardBridge.swift */,
 				SW0948B1 /* DictusKeyboardBridge+SwipeTyping.swift */,
+				AT1014B2 /* DictusKeyboardBridge+SpatialTouch.swift */,
 				CC100040 /* HostInputTraits.swift */,
 				CC400001 /* Vendored */,
 				AA400005 /* Views */,
@@ -866,6 +873,7 @@
 				AA700172 /* SwipeUpHintView.swift */,
 				SS100003 /* ProBannerView.swift */,
 				RT5930100004 /* ProTrialDebugSection.swift */,
+				AT1081100001 /* AdaptiveTouchExportSection.swift */,
 				RT5930100003 /* ProTrialPaywallSections.swift */,
 				PH2160100001 /* ProHubSections.swift */,
 				AA100687 /* ProFeatureSceneSheet.swift */,
@@ -958,6 +966,7 @@
 				AA1000D1 /* SuggestionState.swift */,
 				EE100005 /* AOSPTrieEngine.swift */,
 				SD1011B1 /* SpatialAutocorrect.swift */,
+				AT1014B1 /* AdaptiveTouchSwitch.swift */,
 				BC1015B1 /* BilingualAutocorrect.swift */,
 				BC1015B2 /* TrieLanguageEvidence.swift */,
 			);
@@ -1587,6 +1596,7 @@
 				AA0000L0 /* ModelInfo+Localized.swift in Sources */,
 				SS000001 /* SubscriptionManager.swift in Sources */,
 				RT5930000004 /* ProTrialDebugSection.swift in Sources */,
+				AT1081000001 /* AdaptiveTouchExportSection.swift in Sources */,
 				RT5930000003 /* ProTrialPaywallSections.swift in Sources */,
 				PH2160000001 /* ProHubSections.swift in Sources */,
 				AA000687 /* ProFeatureSceneSheet.swift in Sources */,
@@ -1654,6 +1664,7 @@
 				AA0000D0 /* TextPredictionEngine.swift in Sources */,
 				AA0000D1 /* SuggestionState.swift in Sources */,
 				SD1011A1 /* SpatialAutocorrect.swift in Sources */,
+				AT1014A1 /* AdaptiveTouchSwitch.swift in Sources */,
 				BC1015A1 /* BilingualAutocorrect.swift in Sources */,
 				BC1015A2 /* TrieLanguageEvidence.swift in Sources */,
 				AA0000D4 /* SuggestionBarView.swift in Sources */,
@@ -1663,6 +1674,7 @@
 				CC000010 /* KeyboardLayouts.swift in Sources */,
 				CC000020 /* DictusKeyboardBridge.swift in Sources */,
 				SW0948A1 /* DictusKeyboardBridge+SwipeTyping.swift in Sources */,
+				AT1014A2 /* DictusKeyboardBridge+SpatialTouch.swift in Sources */,
 				SW0948A2 /* SwipeTypingController.swift in Sources */,
 				SW0948A3 /* SwipeTrailView.swift in Sources */,
 				CC000040 /* HostInputTraits.swift in Sources */,

@@ -366,12 +366,16 @@ struct PickCost {
 /// triggers the suggestion work `SuggestionState.updateAsync` does, every space the
 /// autocorrect `DictusKeyboardBridge.autocorrectBeforeCursor` does.
 func replay(_ taps: [Tap], cells: [Cell], width: CGFloat, height: CGFloat, picker: Picker?, journal: Journal?,
-            spatial: Bool, corrector: Corrector,
-            tapRow: (Tap, String, CGPoint, Int, PickCost, Int) -> Void) -> (text: String, commits: [Commit]) {
+            spatial: Bool, corrector: Corrector, adaptive: AdaptiveTouch?,
+            tapRow: (Tap, String, CGPoint, Int, PickCost, Int, Int) -> Void) -> (text: String, commits: [Commit]) {
     let field = Field()
     // #1011: what `DictusKeyboardBridge` keeps for the spatial decoder while its switch is on.
     var touches = SpatialTouchBuffer()
     let keys = spatialKeys(cells)
+    // #1014: Adaptive touch, as the bridge drives it: a session per field, the run's clock.
+    let sentenceStart = benchClock
+    adaptive?.clock = { benchClock }
+    adaptive?.beginSession()
     let memory = AutocorrectRejectionMemory()
     let mirror = MirrorSyncState()
     var commits: [Commit] = []
@@ -400,6 +404,13 @@ func replay(_ taps: [Tap], cells: [Cell], width: CGFloat, height: CGFloat, picke
         let pickCost = PickCost(plain: label(plain), ns: Int(DispatchTime.now().uptimeNanoseconds - start),
                                 visited: visited)
         let resolved = label(hit)
+        benchClock = sentenceStart + tap.ms / 1000
+        var adaptiveNs = 0
+        func timedAdaptive(_ work: () -> Void) {
+            let start = DispatchTime.now().uptimeNanoseconds
+            work()
+            adaptiveNs += Int(DispatchTime.now().uptimeNanoseconds - start)
+        }
         if tap.key != "space", tokenWords.last != wordIndex { tokenWords.append(wordIndex) }
         // The keyboard records a tap where the touch resolves to a key, from the touch point.
         let journalNs = hit.map { journal?.tap($0, at: point, ms: tap.ms) ?? 0 } ?? 0
@@ -427,6 +438,12 @@ func replay(_ taps: [Tap], cells: [Cell], width: CGFloat, height: CGFloat, picke
                 if spatial {
                     touches.typed(typed, at: clamped(point, width: width, height: height), keys: keys,
                                   token: SpatialTouchBuffer.token(before: field.text))
+                }
+                // `noteSpatialTap`: a letter key's letter, never the accent key's.
+                if let adaptive, typed.count == 1, typed.first?.isLetter == true {
+                    timedAdaptive {
+                        adaptive.typed(typed, at: clamped(point, width: width, height: height), slid: false, keys: keys)
+                    }
                 }
             }
             let context = field.text
@@ -473,7 +490,14 @@ func replay(_ taps: [Tap], cells: [Cell], width: CGFloat, height: CGFloat, picke
                 }
                 // `spellCheck` is this proposal's autocorrection; the journal also needs to
                 // know when corrections were only offered, as the keyboard's commit does.
-                let input = spatial ? touches.taps(for: word).map { SpatialCorrection.Input(taps: $0, keys: keys) } : nil
+                // #1014: `spatialInput(for:)` reads the taps with the personal centres when a
+                // profile is in use, the stock ones as the baseline.
+                let personal = adaptive?.personalKeys(for: keys)
+                let input = spatial ? touches.taps(for: word).map {
+                    SpatialCorrection.Input(taps: $0, keys: personal ?? keys,
+                                            baseline: personal == nil || !adaptiveGate ? nil : keys)
+                } : nil
+                let before = field.text
                 let checked = corrector.proposal(
                     for: word, previous: previous,
                     isAtSentenceStart: ProperNounGuard.isAtSentenceStart(context: field.text, word: word),
@@ -492,6 +516,10 @@ func replay(_ taps: [Tap], cells: [Cell], width: CGFloat, height: CGFloat, picke
                 }
                 if !applied { field.insertText(" ") }
                 predicted = corrector.typingEngine.predictNextWords(after: Array(words(field.text).suffix(2)))
+                // The defer at the end of `autocorrectBeforeCursor`.
+                if let adaptive {
+                    timedAdaptive { adaptive.finish(corrected: applied ? final : nil, before: before) }
+                }
             }
             if let revisedPrevious, !commits.isEmpty { commits[commits.count - 1].final = revisedPrevious }
             if !typed.isEmpty {
@@ -500,6 +528,10 @@ func replay(_ taps: [Tap], cells: [Cell], width: CGFloat, height: CGFloat, picke
             }
             tokenWords = []
         case .backspace?:
+            if let adaptive {
+                let before = field.text
+                timedAdaptive { adaptive.willDelete(before: before) }
+            }
             field.deleteBackward()
             if spatial { touches.deleted(token: SpatialTouchBuffer.token(before: field.text)) }
         default:
@@ -507,7 +539,7 @@ func replay(_ taps: [Tap], cells: [Cell], width: CGFloat, height: CGFloat, picke
             break
         }
         if tap.key == "space" { wordIndex += 1 }
-        tapRow(tap, resolved, point, cost, pickCost, journalNs)
+        tapRow(tap, resolved, point, cost, pickCost, journalNs, adaptiveNs)
     }
     return (field.text.trimmingCharacters(in: .whitespaces), commits)
 }
@@ -562,6 +594,62 @@ if let tune = env["KB_SPATIAL_TUNE"], !tune.isEmpty {
     }
 }
 
+// #1014: Adaptive touch, as its Debug switch turns it on in the keyboard. KB_ADAPTIVE is
+// learn (learns as the run types, from nothing or from KB_ADAPTIVE_LOAD), frozen (reads the
+// profile of KB_ADAPTIVE_LOAD and learns nothing) or monitor. KB_ADAPTIVE_SAVE writes the
+// profile at the end, and adaptive.tsv says what it learned per key (offsets, no text).
+var benchClock: TimeInterval = 0
+var adaptiveGate = true
+let adaptive: AdaptiveTouch? = {
+    guard let raw = env["KB_ADAPTIVE"], !raw.isEmpty else { return nil }
+    var touch = AdaptiveTouch(storage: .memory, defaults: nil)
+    if let path = env["KB_ADAPTIVE_LOAD"], !path.isEmpty {
+        guard let data = FileManager.default.contents(atPath: path), let model = AdaptiveTouchModel(data: data) else {
+            fatalError("cannot read the profile \(path)")
+        }
+        touch = AdaptiveTouch(model: model)
+    }
+    // KB_ADAPTIVE_TUNE changes the activation gate for a sweep: `activeTaps=100,activeSessions=1`,
+    // and `gate=0` drops the stock-centre baseline.
+    for pair in (env["KB_ADAPTIVE_TUNE"] ?? "").components(separatedBy: ",").map({ $0.components(separatedBy: "=") })
+    where pair.count == 2 {
+        guard let value = Int(pair[1]) else { fatalError("bad KB_ADAPTIVE_TUNE value \(pair[1])") }
+        switch pair[0] {
+        case "activeTaps": touch.activeTaps = value
+        case "activeSessions": touch.activeSessions = value
+        // gate=0 reads the personal centres alone, without Hex's baseline: a measurement of the
+        // gate, never what the keyboard does.
+        case "gate": adaptiveGate = value != 0
+        default: fatalError("unknown KB_ADAPTIVE_TUNE parameter \(pair[0])")
+        }
+    }
+    switch raw {
+    case "learn": touch.mode = .learn
+    case "frozen": touch.mode = .frozen
+    case "monitor": touch.mode = .monitor
+    default: fatalError("KB_ADAPTIVE must be learn, frozen or monitor")
+    }
+    return touch
+}()
+/// The letters of each letter page replayed, by geometry key, to name the keys of the report.
+var adaptiveLetters: [UInt64: [Character]] = [:]
+var adaptiveReport = ["lang\tcontext\tin_use\taccepted\tsessions\tweak\tpicked\tstrong\tpromotions\tletter\tweight\tdx\tdy"]
+
+/// What the profile holds for each key of `keys`, in keycaps: one row per letter per context.
+func adaptiveRows(_ touch: AdaptiveTouch, code: String, keys: SpatialDecoder.Keys) -> [String] {
+    guard let geometry = AdaptiveTouchGeometry(keys: keys) else { return [] }
+    var rows: [String] = []
+    for (c, ctx) in touch.model.contexts.enumerated() where ctx.geometry == geometry.key {
+        for (slot, letter) in geometry.letters.enumerated() {
+            let o = touch.model.offset(context: c, slot: slot)
+            rows.append("\(code)\t\(c)\t\(ctx.inUse)\t\(ctx.accepted)\t\(ctx.sessions)\t\(ctx.weak)\t\(ctx.picked)\t"
+                        + "\(ctx.strong)\t\(ctx.promotions)\t\(letter)\t\(String(format: "%.1f", touch.model.weight(context: c, slot: slot)))\t"
+                        + "\(String(format: "%+.3f", o.x))\t\(String(format: "%+.3f", o.y))")
+        }
+    }
+    return rows
+}
+
 // #1009: a bilingual keyboard instead of the shipping one. KB_PAIR is "primary,secondary".
 if let pairArg = env["KB_PAIR"] {
     let codes = pairArg.components(separatedBy: ",").compactMap(SupportedLanguage.init(rawValue:))
@@ -578,7 +666,7 @@ if let pairArg = env["KB_PAIR"] {
     exit(0)
 }
 
-var tapsOut = ["lang\tsentence\ttap\tintended\tresolved\tx\ty\tengine_us\tplain\thit_ns\tvisited\tjournal_ns"]
+var tapsOut = ["lang\tsentence\ttap\tintended\tresolved\tx\ty\tengine_us\tplain\thit_ns\tvisited\tjournal_ns\tadaptive_ns"]
 var commitsOut = ["lang\tsentence\tintended\ttyped\tfinal\tnext\tpredicted"]
 var textsOut = ["lang\tsentence\tintended\tfinal"]
 var registerOut = ["lang\tbefore\ttyped\texpected\treported\tlexicon\tfinal"]
@@ -651,10 +739,12 @@ for code in langs {
         journal?.startSentence(keyboard: "\(langCode)-\(LayoutType.active.rawValue)", document: "\(code)-\(s)")
         let (text, commits) = replay(run.filter { $0.sentence == s }, cells: cells, width: w, height: h,
                                      picker: picker, journal: journal, spatial: spatialOn,
-                                     corrector: corrector) { tap, resolved, p, us, pick, journalNs in
+                                     corrector: corrector, adaptive: adaptive) { tap, resolved, p, us, pick, journalNs, adaptiveNs in
             tapsOut.append("\(code)\t\(s)\t\(tap.index)\t\(tap.key)\t\(resolved)\t\(String(format: "%.2f", p.x))\t"
-                           + "\(String(format: "%.2f", p.y))\t\(us)\t\(pick.plain)\t\(pick.ns)\t\(pick.visited)\t\(journalNs)")
+                           + "\(String(format: "%.2f", p.y))\t\(us)\t\(pick.plain)\t\(pick.ns)\t\(pick.visited)\t\(journalNs)\t\(adaptiveNs)")
         }
+        // A gap between two fields, longer than the labels' timeout.
+        benchClock += 60
         for c in commits {
             let meant = c.intendedWords.map { intendedWords[$0] }.joined(separator: " ")
             // The word the typist types next, which the prediction bar should offer.
@@ -681,6 +771,23 @@ for code in langs {
     // phys_footprint, what iOS holds the keyboard's ~50 MB to. The spatial models are mapped
     // clean pages, which it does not count (#1011).
     FileHandle.standardError.write(Data("\(code): footprint \(MemoryFootprint.residentKB()) KB\n".utf8))
+    if let adaptive {
+        adaptiveReport.append(contentsOf: adaptiveRows(adaptive, code: code, keys: spatialKeys(cells)))
+        if let geometry = AdaptiveTouchGeometry(keys: spatialKeys(cells)) { adaptiveLetters[geometry.key] = geometry.letters }
+    }
+}
+if let adaptive {
+    try? (adaptiveReport.joined(separator: "\n") + "\n").write(toFile: "\(outDir)/adaptive.tsv", atomically: true, encoding: .utf8)
+    // #1081: the summary the keyboard logs at each appearance, and the Debug export's report.
+    try? AdaptiveTouchStatus.report(model: adaptive.model, letters: adaptiveLetters)
+        .write(toFile: "\(outDir)/adaptive-status.txt", atomically: true, encoding: .utf8)
+    if let path = env["KB_ADAPTIVE_SAVE"], !path.isEmpty {
+        do {
+            try adaptive.model.serialized().write(to: URL(fileURLWithPath: path))
+        } catch {
+            fatalError("cannot write \(path): \(error)")
+        }
+    }
 }
 
 // The user dictionary is the simulator's App Group store: leave it as empty as it was found.

@@ -6,8 +6,9 @@
 // Kept as Hex has it: the tap costs, the beam search, the edits, the split readings, the
 // margins and Hex's tuned parameters. Left out for now: your own words (Hex searches
 // Contacts and learned words too; Dictus keeps learned words immune and never a target,
-// ADR 0004), the never-suggest list, the space-as-letter merge, and adaptive touch
-// (Hex's `AdaptiveTouch`, a second PR).
+// ADR 0004), the never-suggest list and the space-as-letter merge. Hex's adaptive touch
+// reads the taps with personal centres (DictusCore/AdaptiveTouch, #1014), gated by
+// `replaces(with:)` with the stock ones.
 import CoreGraphics
 import Foundation
 
@@ -369,6 +370,40 @@ public struct SpatialDecoder {
         guard let spatial = search(OneWord(codes: codes), costs, range: 0..<costs.count, limit: 1,
                                    maxEdits: parameters.maxEdits).first?.1 else { return nil }
         return spatial + parameters.lmWeight * lmCost(index, after: prev)
+    }
+
+    /// Whether `decide` with `keys` would put `reading` (one word) in place of what you typed:
+    /// it beats the literal by the margin. Nil for a two-word reading, which only `decide`
+    /// can tell. Ported from Hex's `replaces(with:)` (#1014): Adaptive touch asks it with the
+    /// stock centres, so a correction it applies is one the keyboard would apply anyway.
+    /// It takes `decide`'s arguments plus the reading, hence one parameter over the lint's
+    /// limit: a struct for this call alone would hide the parallel with `decide`.
+    public func replaces( // swiftlint:disable:this function_parameter_count
+        with reading: String, taps: [CGPoint], typed: String, literal: String? = nil, previous: String?,
+        literalIsValid: Bool, keys: Keys
+    ) -> Bool? {
+        guard !reading.contains(" ") else { return nil }
+        let literal = literal ?? typed
+        guard taps.count == typed.count, !typed.isEmpty, let letters = model.encode(typed),
+              !letters.contains(where: { $0 == model.apostropheCode }) else { return false }
+        let centres = codeCentres(keys)
+        let costs = taps.map { tapCosts($0, centres: centres, keys: keys) }
+        let prev = previous.flatMap { model.index(of: $0) }
+        var literalCost = 0.0
+        for (i, code) in letters.enumerated() {
+            let c = costs[i][Int(code)]
+            guard c.isFinite else { return false }
+            literalCost += c
+        }
+        let literalIndex = model.index(of: literal)
+        literalCost += parameters.lmWeight * (literalIndex.map { lmCost($0, after: prev) }
+            ?? (literalIsValid ? parameters.unknownValidCost : parameters.unknownCost))
+        guard let readingCost = cost(of: reading, taps: taps, previous: previous, keys: keys) else { return false }
+        var margin = (literalIndex != nil || literalIsValid) ? parameters.validMargin : parameters.autoMargin
+        if Self.withoutAccents(reading) == Self.withoutAccents(literal) {
+            margin = min(margin, parameters.accentMargin)
+        }
+        return literalCost - readingCost >= margin
     }
 
     /// One word, searched as a word list.

@@ -130,6 +130,10 @@ final class LogPrivacyTests: XCTestCase {
             // Swipe typing (#948): counts and names, never the word the finger wrote.
             .swipeTypingConfigured(on: true, channel: "testFlight", reason: "on"),
             .spatialAutocorrectConfigured(on: true, channel: "debug", trigger: "viewWillAppear"),
+            .adaptiveTouchConfigured(on: true, trigger: "viewWillAppear"),
+            // #1081: counts and one key name, never a typed letter.
+            .adaptiveTouchStatus(on: true, stored: .notRead, status: AdaptiveTouchStatus(model: AdaptiveTouchModel())),
+            .adaptiveTouchStatus(on: false, stored: .none, status: nil),
             .swipeEnded(points: 84, decodeMs: 2.41, readings: 4, outcome: "word"),
             .deleteSwipeEnded(words: 3, frozen: false),
             .appLaunched(version: "1.2"),
