@@ -556,6 +556,10 @@ final internal class GiellaKeyboardView: UIView,
         return bounds
     }
 
+    func longpressHeldKeyFrame() -> CGRect? {
+        activeKey.flatMap { collectionView.layoutAttributesForItem(at: $0.indexPath)?.frame }
+    }
+
     func longpressKeySize() -> CGSize {
         switch currentlyLongpressedKey?.type {
         case .returnkey(name: _):
