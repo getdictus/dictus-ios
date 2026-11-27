@@ -12,7 +12,9 @@
 # says built or uploaded: it writes <stem>.retry.md (the 06:30 attempt after 06:00).
 #
 # A real run, in order. Any skip or failure stops it at that step:
-#    1. lock; skip if another nightly, a cut/upload/promote script or an archive is running
+#    1. lock; skip if another nightly, a cut/upload/promote script or an archive is running;
+#       skip if today already has a build: today's summary says built or uploaded, or a
+#       build/NN tag was created today (Europe/Paris), on any commit
 #    2. git fetch; HEAD = origin/develop
 #    3. skip if a build/NN tag already points to HEAD
 #    4. skip unless the CI run of HEAD on develop has every job of CI_JOBS green (read only)
@@ -90,7 +92,7 @@ while [ $# -gt 0 ]; do
     --slot) [ $# -ge 2 ] || { echo "error: --slot needs matin" >&2; exit 2; }
             SLOT=$2; shift ;;
     --slot=*) SLOT=${1#--slot=} ;;
-    -h|--help) sed -n '2,44p' "$0"; exit 0 ;;
+    -h|--help) sed -n '2,46p' "$0"; exit 0 ;;
     *) echo "error: unknown argument '$1' (try --help)" >&2; exit 2 ;;
   esac
   shift
@@ -132,6 +134,7 @@ ASC_STATE="not read"
 BUILD_INFO_STATE="not checked"
 DRY_SKIPS=""
 LOCK_HELD=0
+KEEP_SUMMARY=0
 RUN_DIR=""
 WT=""
 TAG_CREATED=0
@@ -222,8 +225,11 @@ summary_status() {
 # summary_target FILE — where a real run writes its summary. A run that did not build
 # (a skip, a failure, the 06:30 attempt finding the tag 06:00 pushed) never replaces a
 # summary of the same slot and day that reports a build: it writes <stem>.retry.md.
+# The "already built today" skip sets KEEP_SUMMARY: it never replaces the day's summary,
+# whatever that summary says.
 summary_target() {
   case "$STATUS" in built|uploaded) echo "$1"; return 0 ;; esac
+  if [ "$KEEP_SUMMARY" -eq 1 ] && [ -f "$1" ]; then echo "${1%.md}.retry.md"; return 0; fi
   case "$(summary_status "$1")" in
     built|uploaded) echo "${1%.md}.retry.md" ;;
     *) echo "$1" ;;
@@ -335,6 +341,44 @@ if [ -n "$BUSY" ]; then
   skip "a build, archive or upload is in progress: $BUSY"
 fi
 log "1. lock held, no release or archive running"
+
+# One internal build a day (Pierre's rule, 2026-11-27). The tag on HEAD (step 3) is not
+# enough: when 06:00 built commit A and commit B passes CI before 06:30, HEAD is B and
+# carries no tag. So, whatever HEAD is, a day that already has a build gets no other one.
+# Two sources:
+#   - today's summary says built or uploaded (its Build line gives NN);
+#   - a build/NN tag created today, Europe/Paris date, on any commit. A lightweight tag
+#     has no date of its own: the date is the mtime of its loose ref in the main clone,
+#     written by `git tag` (step 7, or cut-testflight.sh) or by the fetch that brought it
+#     in. A packed tag has no such date and is not counted.
+# A 06:00 run that failed leaves neither: its summary says failed and the cleanup deleted
+# the tag it had not pushed, so 06:30 still builds.
+TODAY_PARIS=$(TZ=Europe/Paris date +%F)
+TODAY_NN=""
+TODAY_FROM=""
+TODAY_STATUS=$(summary_status "$REAL_SUMMARY")
+case "$TODAY_STATUS" in
+  built|uploaded)
+    TODAY_NN=$(sed -n 's/^- Build: \([0-9][0-9]*\).*$/\1/p' "$REAL_SUMMARY" | head -1)
+    TODAY_FROM="$REAL_SUMMARY says $TODAY_STATUS" ;;
+esac
+if [ -z "$TODAY_FROM" ]; then
+  for n in $(git -C "$REPO" tag -l 'build/*' | grep -E '^build/[0-9]+$' | sed 's#^build/##' | sort -rn); do
+    f=$(git -C "$REPO" rev-parse --path-format=absolute --git-path "refs/tags/build/$n")
+    if [ -f "$f" ] && [ "$(TZ=Europe/Paris stat -f %Sm -t %F "$f")" = "$TODAY_PARIS" ]; then
+      TODAY_NN=$n
+      TODAY_FROM="the tag build/$n was created today ($TODAY_PARIS, Europe/Paris)"
+      break
+    fi
+  done
+fi
+if [ -n "$TODAY_FROM" ]; then
+  log "1. today already has a build: $TODAY_FROM"
+  KEEP_SUMMARY=1
+  skip "already built today (build ${TODAY_NN:-unknown})"
+else
+  log "1. no build today yet: $REAL_SUMMARY is ${TODAY_STATUS:-absent}, no build/NN tag created on $TODAY_PARIS"
+fi
 
 # --- 2. Fetch; HEAD = origin/develop ----------------------------------------
 run_timeout "$T_NET" "git fetch" git -C "$REPO" fetch --quiet --tags origin \
@@ -550,7 +594,9 @@ if [ "$DRY_RUN" -eq 1 ]; then
   would "add no TestFlight group, submit nothing to beta review (Team PIVI has access to all builds)"
   would "keep $KEEP_DIR/Dictus-$VERSION-$NN.ipa, delete the IPAs listed in $KEEP_MANIFEST by exact name"
   would "git worktree remove --force <worktree>; rm -rf <run dir>"
-  if [ -n "$DRY_SKIPS" ]; then STATUS="skipped"; REASON="dry run; a real run would skip (see below)"
+  if [ -n "$DRY_SKIPS" ]; then
+    STATUS="skipped"
+    REASON="dry run; a real run would skip: $(printf '%s' "$DRY_SKIPS" | sed -n '1s/^- //p')"
   else STATUS="dry-run"; REASON="dry run; a real run would build $NN"; fi
   exit 0
 fi
