@@ -30,8 +30,10 @@ file says what each piece is.
 | `Journal.swift` | The typing journal's calls during a replay, at the moments the keyboard makes them. Only a bench built with `run.sh --debug` has the journal: `--journal` turns it on, writes `journal.log` beside the report, and adds the journal's cost per tap to it. |
 | `key_targets.sh` + `compare_hits.py` | The #949 spike in one command: draws held-out runs, replays them through both hit tests, and compares them tap by tap. Results: [`docs/research/949-key-targets/`](../../docs/research/949-key-targets/README.md). |
 | `corpus/mixed.txt`, `corpus/mixed.lang`, `runs/mixed.tsv` | 20 sentences that mix French and English, the gold language of every word (`f` or `e`), and their touch run (#1009). The run the bilingual detection was designed on in #1007. |
-| `corpus/mixed-heldout.txt`, `corpus/mixed-heldout.lang`, `runs/mixed-heldout.tsv` | 20 more mixed sentences, written before the bilingual replay first ran. Nothing is ever tuned on them: a change judged on this run needs a new held-out run. |
+| `corpus/mixed-heldout.txt`, `corpus/mixed-heldout.lang`, `runs/mixed-heldout.tsv` | 20 more mixed sentences, written before the bilingual replay first ran. Nothing is ever tuned on them: a change judged on this run needs a new held-out run. #1015's rules were changed after it was read, so for the bilingual check it is a second tuning run. |
+| `corpus/mixed-heldout-2.txt`, `corpus/mixed-heldout-2.lang`, `runs/mixed-heldout-2.tsv` | 20 mixed sentences written for #1015 and committed before the bilingual check first typed them (`192f660d`). The held-out run of the check's final rules. |
 | `corpus/mixed-device.txt`, `corpus/mixed-device.lang`, `runs/mixed-device.tsv` | Words Pierre typed on his iPhone on 2026-11-23 that the bilingual keyboard got wrong, replayed from the keys and offsets of the session's `TJ TAP` lines (times evened to 170 ms): `test bug`, which flipped a fresh French window to English, then `j'ai hâte` typed `jaihate`, `j'aihate` and `j'ainhate`, and `oui` typed `oji`; then `its` as a possessive and before a verb, typed on the key centres. Not in the default runs: `run.sh --pair fr,en --langs mixed-device`. |
+| `corpus/en-its.txt`, `runs/en-its.tsv` | 8 English sentences with `its`, typed on the key centres: possessive ("the dog wagged its tail") and the contraction typed without its apostrophe before a word no possessive takes ("its raining", "its a good idea"), #1015. Not in the default runs: `run.sh --spatial --bilingual --langs en-its`. |
 | `Bilingual.swift` + `score_pair.py` | The bilingual replay (`run.sh --pair fr,en`): the same taps through one engine per language and the DictusCore language detection, then its report. |
 
 ## Run
@@ -50,9 +52,9 @@ About two minutes, most of it compiling DictusCore. Writes `taps.tsv`, `commits.
 tools/keyboard-bench/run.sh --udid <udid> --pair fr,en > report.md
 ```
 
-Replays `fr`, `en` on QWERTY, `en`, `mixed` and `mixed-heldout` (the layout is the
+Replays `fr`, `en` on QWERTY, `en`, `mixed`, `mixed-heldout` and `mixed-heldout-2` (the layout is the
 primary's, AZERTY here, unless `--langs` gives one as `en:qwerty`). Each run goes through
-three keyboards on the same taps:
+four keyboards on the same taps:
 
 - `mono-fr` and `mono-en`: today's keyboard set to one language, one engine.
 - `detect`: two engines, one per language, both loaded for the run's layout. At every
@@ -60,6 +62,13 @@ three keyboards on the same taps:
   language's engine corrects the word, and `BilingualKeepRule` may keep it as typed.
   Letters ask the window's language only. The window carries over from one sentence to
   the next and starts each run in the primary language.
+- `check` (#1015): the keyboard's bilingual check, `BilingualKeyboard` in
+  `DictusKeyboard/TextPrediction/BilingualAutocorrect.swift`, compiled as shipped. The same
+  window, then `BilingualCheck` in DictusCore: the keep rules, Hex's fallback to the other
+  language and its tie-break by the last four words. It reads the engines' own tries, not
+  a second copy, and asks the full `correctionProposal` of each engine, so with
+  `--spatial` both decoders read the same taps (the `mono-*` keyboards read them too;
+  `detect` keeps #1010's spell check, without taps).
 
 The keystroke work is the in-process replay's, through the same `replay`. The vote reads
 a second trie per language, mounted from the same files as the engine's, which keeps its
@@ -67,6 +76,16 @@ own private. Writes `pair.tsv` (one row per committed word: gold and decided lan
 intended, typed, final) and `pair-cost.tsv`, and prints the report: wrong words per run
 and keyboard, the language decided per word, the words left wrong, and the time per
 keystroke.
+
+`--bilingual` types the monolingual runs (no `--pair`) on the bilingual check, the run's
+language primary and the other of French and English its partner, as the keyboard's Debug
+switch does: `run.sh --spatial --bilingual --langs fr,en` against `run.sh --spatial --langs fr,en`
+is the check's monolingual guard, with `score.py`'s report. `KB_TRACE=1` before `run.sh`
+prints each word the check commits on stderr: `TRACE <language> <rule> <typed> -> <written>`.
+
+The report also counts, per run and keyboard, the words typed right (the letters that
+reached the field are the intended word) that the keyboard changed, by the word's language:
+French words broken by the English keyboard, and English words by the French one.
 
 `--probe "word,previous|word"` prints what both dictionaries answer for single words
 (log-frequency, expansions, correction, bigram) and the vote, without replaying. The

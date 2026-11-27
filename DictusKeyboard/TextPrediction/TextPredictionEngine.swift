@@ -715,11 +715,17 @@ class TextPredictionEngine {
     /// `spatial` is where the finger landed for each character of `word` (#1011). With
     /// it, the spatial decoder reads the taps before the trie reads the letters; without
     /// it, nothing changes.
+    ///
+    /// `otherLanguageKnowsWord`: on a bilingual keyboard (#1015), the other language has
+    /// the word as typed. The decoder then treats it as a known word, which it changes
+    /// only on its larger margin, as Hex does: without this, the English decoder read
+    /// French words typed right as typos (study of 2026-11-21, section 7).
     func correctionProposal(
         for word: String,
         previousWord: String?,
         isAtSentenceStart: Bool = true,
         spatial: SpatialCorrection.Input? = nil,
+        otherLanguageKnowsWord: Bool = false,
         context: String? = nil
     ) -> CorrectionProposal? {
         // The space bar replaces both words with the elision (#1006). A correction of
@@ -739,7 +745,8 @@ class TextPredictionEngine {
         // curated name it proposes for a misspelling takes its casing here, in the one
         // place every dictionary branch returns through: `whatsap` -> "WhatsApp".
         return dictionaryProposal(
-            for: word, previousWord: previousWord, isAtSentenceStart: isAtSentenceStart, spatial: spatial
+            for: word, previousWord: previousWord, isAtSentenceStart: isAtSentenceStart, spatial: spatial,
+            otherLanguageKnowsWord: otherLanguageKnowsWord
         )?.inCuratedCasing
     }
 
@@ -1075,6 +1082,25 @@ class TextPredictionEngine {
 
 }
 
+// MARK: - Bilingual check (#1015)
+
+// WHY an extension: the class body is at SwiftLint's 650-line budget since #1017. In the
+// same file, the extension still reads the engine's private trie and frequencies.
+extension TextPredictionEngine {
+    /// The language this engine's dictionaries are for.
+    var languageCode: String { language }
+
+    /// This engine's trie, as the bilingual check questions it (#1015), or nil while it
+    /// is not loaded. Built on every call: it is two references and a number, and the
+    /// language and its frequency file change with `setLanguage`.
+    var languageEvidence: TrieLanguageEvidence? {
+        guard aospTrieEngine.isReady, let supported = SupportedLanguage(rawValue: language),
+              frequencyDict.topCount > 0 else { return nil }
+        return TrieLanguageEvidence(language: supported, trie: aospTrieEngine,
+                                    scale: TrieFrequencyScale(topCount: Double(frequencyDict.topCount)))
+    }
+}
+
 // MARK: - Lone letters (#977)
 
 // WHY in an extension: the class body is at SwiftLint's 650-line budget (see below).
@@ -1122,7 +1148,8 @@ extension TextPredictionEngine {
         for word: String,
         previousWord: String?,
         isAtSentenceStart: Bool,
-        spatial: SpatialCorrection.Input?
+        spatial: SpatialCorrection.Input?,
+        otherLanguageKnowsWord: Bool
     ) -> CorrectionProposal? {
         let applied = { (result: (correction: String, alternatives: [String])?) -> CorrectionProposal? in
             result.map { .autocorrect($0.correction, alternatives: $0.alternatives) }
@@ -1163,7 +1190,8 @@ extension TextPredictionEngine {
         // which only has the letters. When it keeps the word, the trie decides.
         let trie = trieProposal(for: word, previousWord: previousWord, isAtSentenceStart: isAtSentenceStart)
         guard let spatial else { return trie }
-        return spatialProposal(for: word, previousWord: previousWord, spatial: spatial, trie: trie)
+        return spatialProposal(for: word, previousWord: previousWord, spatial: spatial,
+                               otherLanguageKnowsWord: otherLanguageKnowsWord, trie: trie)
     }
 }
 
@@ -1194,8 +1222,12 @@ extension TextPredictionEngine {
 extension TextPredictionEngine {
     /// The spatial decoder's reading of `word`'s taps, weighed against the trie's `trie`
     /// proposal: the decoder's correction when it has one the trie does not, else `trie`.
+    ///
+    /// `otherLanguageKnowsWord`: see `correctionProposal`; the decoder then treats the word as
+    /// known (#1015).
     fileprivate func spatialProposal(
-        for word: String, previousWord: String?, spatial: SpatialCorrection.Input, trie: CorrectionProposal?
+        for word: String, previousWord: String?, spatial: SpatialCorrection.Input,
+        otherLanguageKnowsWord: Bool, trie: CorrectionProposal?
     ) -> CorrectionProposal? {
         guard let decoder = SpatialAutocorrect.decoder(for: language) else { return trie }
         let trieCorrection = trie?.autocorrection?.correction
@@ -1205,7 +1237,7 @@ extension TextPredictionEngine {
         guard let read = SpatialCorrection.correct(
                   word, previousWord: previousWord, input: spatial, with: decoder,
                   facts: SpatialCorrection.Facts(
-                      isKnown: !isUnknownToDictionary(word),
+                      isKnown: otherLanguageKnowsWord || !isUnknownToDictionary(word),
                       isLearned: UserDictionary.shared.isLearned(word.lowercased()),
                       trieCorrection: trieCorrection
                   )

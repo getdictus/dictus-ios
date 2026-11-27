@@ -84,13 +84,32 @@ def main():
     print(f"# Bilingual replay, pair {args.pair}" + (f", commit {args.commit[:8]}" if args.commit else ""))
     print()
     print("Wrong words in the final text, per committed word, case ignored. `mono-<lang>` is today's "
-          "keyboard set to that language; `detect` is the bilingual keyboard.")
+          "keyboard set to that language; `detect` is #1010's bilingual keyboard (window and keep rule); "
+          "`check` is #1015's bilingual check (window, keep rule, Hex's partner fallback and lean, both "
+          "engines on the same taps).")
     print()
     print("| run | words | " + " | ".join(f"`{p}`" for p in policies) + " |")
     print("|---|---:|" + "---:|" * len(policies))
     for run in runs:
         words = len(by[(run, policies[0])])
         print(f"| {run} | {words} | " + " | ".join(str(len(wrong(by[(run, p)]))) for p in policies) + " |")
+
+    languages = args.pair.split(",")
+    print()
+    print("Words typed right that the keyboard changed (broken), by the word's language. A word is typed "
+          "right when the letters that reached the field are the intended word, case ignored.")
+    print()
+    print("| run | policy | " + " | ".join(f"broken `{lang}` words" for lang in languages) + " |")
+    print("|---|---|" + "---:|" * len(languages))
+    for run in runs:
+        for policy in policies:
+            rows = by[(run, policy)]
+            cells = []
+            for lang in languages:
+                right = [r for r in rows if r["gold"] == lang and r["typed"].lower() == r["meant"].lower()]
+                broken = [r for r in right if r["final"].lower() != r["meant"].lower()]
+                cells.append(f"{len(broken)} of {len(right)}")
+            print(f"| {run} | `{policy}` | " + " | ".join(cells) + " |")
 
     print()
     print("Language decided per word, `detect`:")
@@ -129,15 +148,16 @@ def main():
                   f"| {statistics.median(spaces):.0f} | {percentile(spaces, 0.95)} |")
 
     print()
-    print("<details><summary>Mixed runs, word by word, <code>detect</code>: sentence, gold, decided, "
-          "typed -> final</summary>")
+    shown = [p for p in ("detect", "check") if p in policies]
+    print("<details><summary>Mixed runs, word by word, " + ", ".join(f"<code>{p}</code>" for p in shown)
+          + ": sentence, gold, decided, typed -> final</summary>")
     print()
     print("```")
-    for run in runs:
+    for run, policy in [(run, policy) for run in runs for policy in shown]:
         if not run.startswith("mixed"):
             continue
-        print(run)
-        for r in by[(run, "detect")]:
+        print(f"{run} {policy}")
+        for r in by[(run, policy)]:
             mark = "" if r["decided"] == r["gold"] else "  <- language"
             miss = "" if r["final"].lower() == r["meant"].lower() else f"  (meant {r['meant']})"
             print(f"  {int(r['sentence']):2d} {r['gold']} {r['decided']} {r['typed']} -> {r['final']}{mark}{miss}")

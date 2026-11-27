@@ -43,7 +43,7 @@ import unicodedata
 # (#498); the mixed runs type French and English in one message (#1007). Each run seeds
 # its own random stream, so adding one leaves the others unchanged.
 LANGS = ["fr", "en", "fr-learned", "en-learned", "es", "de",
-         "en-typos", "es-typos", "de-typos", "mixed", "mixed-heldout"]
+         "en-typos", "es-typos", "de-typos", "mixed", "mixed-heldout", "mixed-heldout-2"]
 SEED = 954
 # Spread of the landing point around the key centre, in key units.
 SIGMA_X = 0.22

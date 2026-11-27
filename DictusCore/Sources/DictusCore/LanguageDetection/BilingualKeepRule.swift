@@ -19,17 +19,21 @@ import Foundation
 /// Measured in #1007: without this rule the mixed run leaves 21 wrong words, with it 10.
 public enum BilingualKeepRule {
 
+    /// `margin`: how many nats more likely the other language must find the typed word
+    /// than the active language finds its correction. 0 in #1010; the bilingual check
+    /// (#1015) asks for more when the correction only puts accents back.
     public static func keepsTyped(
         _ word: String,
         over correction: String,
         active: some LanguageEvidenceSource,
-        other: some LanguageEvidenceSource
+        other: some LanguageEvidenceSource,
+        margin: Double = 0
     ) -> Bool {
         let typed = WordLanguageVote.lastSegment(of: word)
         let corrected = WordLanguageVote.lastSegment(of: correction)
         guard active.logFrequency(of: typed) == nil,
               let typedInOther = other.logFrequency(of: typed),
               let correctedInActive = active.logFrequency(of: corrected) else { return false }
-        return typedInOther >= correctedInActive
+        return typedInOther >= correctedInActive + margin
     }
 }
