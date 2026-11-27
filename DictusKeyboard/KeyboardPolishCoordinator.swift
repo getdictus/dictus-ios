@@ -118,6 +118,26 @@ final class KeyboardPolishCoordinator {
         Task { await run(pending) }
     }
 
+    /// End a hand-off nobody claimed in time without typing it (#881).
+    ///
+    /// The hand-off is taken off the App Group the way `handle(raw:)` takes it, then
+    /// concluded as a refusal: DictusApp learns the dictation is over and keeps the raw on
+    /// its card, and the paste pill offers it.
+    func offerUnclaimed(raw: String) {
+        handoffToken = defaults.string(forKey: SharedKeys.handoffToken)
+        for key in [
+            SharedKeys.lastTranscriptionPolicy, SharedKeys.lastTranscriptionEngineRaw,
+            SharedKeys.lastTranscriptionDuration, SharedKeys.lastTranscriptionSmartMode,
+            SharedKeys.lastTranscriptionSmartModeSkipped, SharedKeys.handoffToken
+        ] {
+            defaults.removeObject(forKey: key)
+        }
+        let ageMs = UnclaimedHandoff.handedOffAt(in: defaults)
+            .map { Int(Date().timeIntervalSince($0) * 1000) } ?? -1
+        PersistentLog.log(.polishInsertionRefused(reason: "unclaimed-stale", ageMs: ageMs))
+        finish(reporting: raw, inserting: nil)
+    }
+
     /// Give up on the previous dictation because a new one is starting
     /// (decision 15: N+1 cancels N and takes its place).
     ///

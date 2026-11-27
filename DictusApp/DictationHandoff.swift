@@ -502,6 +502,14 @@ extension DictationCoordinator {
             PersistentLog.log(.polishHandoff(
                 step: "watchdog", outcome: "withdrawn", chars: pending.raw.count
             ))
+        } else if KeyboardFeatureSettings().isPasteTranscriptionEffective,
+                  let raw = UnclaimedHandoff.withdraw(in: defaults) {
+            // No keyboard ever claimed the raw (#881): iOS killed it before the post
+            // arrived. Left here, the next keyboard to appear, in any app, would type it.
+            // With the paste pill on it goes to the pill instead, and stays on the card.
+            PersistentLog.log(.polishHandoff(
+                step: "watchdog", outcome: "unclaimed-offered", chars: raw.count
+            ))
         }
     }
 }

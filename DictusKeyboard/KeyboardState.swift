@@ -252,11 +252,12 @@ class KeyboardState: ObservableObject {
     /// that dictation posts, and again whenever a controller appears.
     @Published private(set) var polishUnavailable = false
 
-    /// Whether a dictation the document refused has its text waiting in DictusApp
-    /// (#860). A state like `polishUnavailable`, not a `statusMessage`: it has no timer
-    /// and stays until tapped or until the next dictation starts. See the extension at
-    /// the bottom of this file.
-    @Published private(set) var recoveredTranscriptionPending = false
+    /// What the toolbar offers for a dictation the document refused: the #860 banner
+    /// that opens DictusApp, or, with the Experiments switch on, the #881 paste pill. A
+    /// state like `polishUnavailable`, not a `statusMessage`: it stays until tapped or
+    /// until the next dictation starts, and the pill also goes when its ten minutes are
+    /// up. See the extension at the bottom of this file.
+    @Published private(set) var recoveredTranscriptionOffer: RecoveredTranscriptionOffer = .none
 
     /// Whether this keyboard can dictate with the active model (#635, #963). Written
     /// by `refreshFromDefaults()`; see `KeyboardState+DictationSupport.swift`.
@@ -2088,17 +2089,21 @@ extension KeyboardState {
 
     /// Re-read the pending state from the App Group. Called on every refresh, which runs
     /// whenever a controller appears, so the banner is back in any app the user types in.
+    ///
+    /// The pill (#881) also re-reads itself at the end of its window, so a keyboard left
+    /// open does not keep offering a text past its ten minutes. Several of these may be
+    /// queued by successive refreshes; each one only re-reads, so the extra ones cost
+    /// nothing.
     func refreshRecoveredTranscription() {
-        recoveredTranscriptionPending = RecoveredTranscriptionChannel.current() != nil
-    }
-
-    /// A new dictation is the user moving on: the banner describes the previous one.
-    /// DictusApp clears it too, in `startDictation`, for dictations started in the app.
-    func clearRecoveredTranscriptionForNewDictation() {
-        guard recoveredTranscriptionPending || RecoveredTranscriptionChannel.current() != nil else { return }
-        RecoveredTranscriptionChannel.clear()
-        recoveredTranscriptionPending = false
-        logProbe("recoveredTranscriptionCleared", details: "reason=new-dictation")
+        let offer = RecoveredTranscriptionChannel.offer(
+            pastes: KeyboardFeatureSettings.forKeyboard().isPasteTranscriptionEffective
+        )
+        if offer != recoveredTranscriptionOffer { recoveredTranscriptionOffer = offer }
+        if offer == .paste, let remaining = RecoveredTranscriptionChannel.remainingPasteTime() {
+            DispatchQueue.main.asyncAfter(deadline: .now() + remaining + 0.1) { [weak self] in
+                self?.refreshRecoveredTranscription()
+            }
+        }
     }
 
     /// The banner was tapped: open DictusApp on the text.
@@ -2107,7 +2112,7 @@ extension KeyboardState {
     /// failed, the next appearance draws the banner again rather than losing the only
     /// pointer to the text. Hidden locally so the tap reads as answered.
     func openRecoveredTranscription() {
-        recoveredTranscriptionPending = false
+        recoveredTranscriptionOffer = .none
         openDictusApp(intent: .transcription)
     }
 }

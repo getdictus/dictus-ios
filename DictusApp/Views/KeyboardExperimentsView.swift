@@ -30,6 +30,9 @@ struct KeyboardExperimentsView: View {
     @AppStorage(SharedKeys.keyboardSwipeTrail, store: UserDefaults(suiteName: AppGroup.identifier))
     private var swipeTrail = KeyboardFeatureSettings.Defaults.swipeTrail
 
+    @AppStorage(SharedKeys.keyboardPasteTranscription, store: UserDefaults(suiteName: AppGroup.identifier))
+    private var pasteTranscription = KeyboardFeatureSettings.Defaults.pasteTranscription
+
     /// Bumped when the partner picker writes. The partner is read through
     /// `KeyboardFeatureSettings.partnerLanguage(for:)`, which resolves a missing or
     /// colliding value to a default, so it is not an `@AppStorage` and redraws nothing by
@@ -77,6 +80,7 @@ struct KeyboardExperimentsView: View {
             adaptiveTouchSection
             bilingualSection
             swipeTypingSection
+            pasteTranscriptionSection
         }
         .scrollContentBackground(.hidden)
         .background(Color.dictusBackground.ignoresSafeArea())
@@ -142,6 +146,15 @@ struct KeyboardExperimentsView: View {
                 .accessibilityIdentifier("settings.keyboard.experiments.swipeTrail")
         } footer: {
             Text("Slide your finger from letter to letter to type a word, then lift it. The trail draws the path under your finger.")
+        }
+    }
+
+    private var pasteTranscriptionSection: some View {
+        Section {
+            Toggle("Paste transcription", isOn: $pasteTranscription)
+                .accessibilityIdentifier("settings.keyboard.experiments.pasteTranscription")
+        } footer: {
+            Text("When a dictation could not be typed, the keyboard offers it for 10 minutes as a pill that pastes it into the current field. It is never typed later on its own.")
         }
     }
 }
