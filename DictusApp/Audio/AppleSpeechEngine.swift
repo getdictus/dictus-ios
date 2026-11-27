@@ -125,6 +125,16 @@ enum AppleEngineAssets {
         return resolved
     }
 
+    /// Whether Apple's model can read `languageCode` on this device now: Apple lists it and its
+    /// model is installed (#1084, PR 2). For a voice note fixed to a language other than the
+    /// dictation's, the one `availability()` does not look at.
+    static func canRead(languageCode: String) async -> Bool {
+        guard let recognizer = OnDeviceRecognizerFactory.make(),
+              let supported = await recognizer.supportedLocaleIdentifiers(),
+              AppleSpeechLanguage.isLanguageCovered(languageCode, bySupportedLocales: supported) else { return false }
+        return await recognizer.hasModelInstalled(languageCode: languageCode)
+    }
+
     /// Whether Apple's engine is the only one there is and can dictate now (#1057): no
     /// downloaded model, Apple picked, and ready on a fresh reading. For the gates that can
     /// await (launch preload, foreground warm-up, voice notes); a user with a downloaded

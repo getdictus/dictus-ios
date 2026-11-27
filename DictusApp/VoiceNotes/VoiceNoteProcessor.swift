@@ -229,10 +229,36 @@ final class VoiceNoteProcessor: ObservableObject {
         guard store.queue.next != nil else { return }
         runTask = Task { [weak self] in
             await self?.runLoop()
+            await self?.restoreDictationEngineIfSwapped()
             self?.runTask = nil
             // The queue was what still needed the engine (#380).
             DictationCoordinator.shared.releaseWarmStateIfImmediate(after: "voiceNotes")
         }
+    }
+
+    /// A note of this run loaded the downloaded model while Apple's model dictates (#1084, PR 2).
+    private var swappedDictationEngine = false
+
+    /// Once the queue drained, Apple's engine goes back in, under the gate a chunk takes.
+    private func restoreDictationEngineIfSwapped() async {
+        guard swappedDictationEngine else { return }
+        swappedDictationEngine = false
+        await EngineAccessGate.shared.withAccess(.voiceNote) {
+            await DictationCoordinator.shared.restoreDictationEngineAfterVoiceNotes()
+        }
+    }
+
+    /// `VoiceNoteEngineChoice` read on the device, once per note (#1084, PR 2).
+    private static func engineChoice(for language: VoiceNoteLanguage)
+        async -> (choice: VoiceNoteEngineChoice, reason: VoiceNoteEngineChoice.Reason) {
+        let dictationEngine = await AppleEngineAssets.effectiveEngine()
+        var covered = false
+        if case .apple = dictationEngine, case .fixed(let fixed) = language {
+            covered = await AppleEngineAssets.canRead(languageCode: fixed.rawValue)
+        }
+        return VoiceNoteEngineChoice.decide(language: language, dictationEngine: dictationEngine,
+                                            downloadedModelReady: AppGroup.defaults.bool(forKey: SharedKeys.modelReady),
+                                            appleCoversFixedLanguage: covered)
     }
 
     /// Whether the queue is transcribing, so an Immediately release waits for it (#380).
@@ -291,14 +317,19 @@ final class VoiceNoteProcessor: ObservableObject {
         let duration = Double(samples.count) / SharedAudioDecoder.sampleRate
         store.mutate { $0.update(note.id) { $0.durationSeconds = Int(duration.rounded()) } }
         // Captured once per note, for #226's reason: the settings can change mid-queue.
-        let requested = VoiceNoteSettings.load().languagePolicy(
+        let settings = VoiceNoteSettings.load()
+        let requested = settings.languagePolicy(
             activeModel: AppGroup.defaults.string(forKey: SharedKeys.activeModel) ?? "openai_whisper-small",
             keyboardLanguage: SupportedLanguage.active
         )
+        // Automatic detection needs an engine that detects (#1084, PR 2): the downloaded model
+        // when there is one, even while Apple's dictates.
+        let engine = await Self.engineChoice(for: settings.language)
+        if engine.choice == .downloadedModel { swappedDictationEngine = true }
         let ranges = VoiceNoteChunker.ranges(for: samples)
         // `activeModelEngine`, not `engine` (#1084): Apple's, when picked, is only known once
         // loaded, and `finished` names it.
-        log("started", "id=\(note.id.uuidString.prefix(8)) seconds=\(Int(duration)) chunks=\(ranges.count) mode=\(requested.mode.telemetryDescription) activeModelEngine=\(requested.engine.rawValue)")
+        log("started", "id=\(note.id.uuidString.prefix(8)) seconds=\(Int(duration)) chunks=\(ranges.count) mode=\(requested.mode.telemetryDescription) activeModelEngine=\(requested.engine.rawValue) engineChoice=\(engine.choice) reason=\(engine.reason.rawValue)")
 
         var parts: [String] = []
         // With the engine that read it (#1084): Apple's, when picked, records `AP` and the
@@ -310,7 +341,7 @@ final class VoiceNoteProcessor: ObservableObject {
             let chunk = Array(samples[range])
             do {
                 let chunkResult = try await EngineAccessGate.shared.withAccess(.voiceNote) {
-                    try await DictationCoordinator.shared.transcribeVoiceNoteChunk(chunk, languagePolicy: requested)
+                    try await DictationCoordinator.shared.transcribeVoiceNoteChunk(chunk, languagePolicy: requested, engine: engine.choice)
                 }
                 policy = chunkResult.policy
                 let trimmed = chunkResult.text.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -332,8 +363,12 @@ final class VoiceNoteProcessor: ObservableObject {
 
         let transcript = parts.joined(separator: " ")
         guard !transcript.isEmpty else { return fail(note, .noSpeech, detail: "empty transcript") }
-        let record = TranscriptionRecord(id: note.id, text: transcript, policy: policy, duration: duration,
-                                         createdAt: note.receivedAt, source: .sharedFile)
+        // The language a detecting model heard, not `auto` (#1084, PR 2).
+        let record = TranscriptionRecord(
+            id: note.id, text: transcript,
+            language: VoiceNoteEngineChoice.recordedLanguageCode(policy: policy, transcript: transcript),
+            durationSeconds: Int(duration.rounded()), createdAt: note.receivedAt,
+            sttProvider: policy.engine.rawValue, source: .sharedFile, languageWasAssumed: policy.languageIsAssumed)
         // A share extension that saved this note to History and then failed to write its
         // result handed the note back (#1056): replace that entry's text, never add a
         // second one.

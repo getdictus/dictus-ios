@@ -63,7 +63,7 @@ class DictationCoordinator: ObservableObject {
     var stageWatchdogStageStart = Date()
 
     private var whisperKit: WhisperKit?
-    private var currentModelName: String?
+    private(set) var currentModelName: String?
     private var dictationTask: Task<Void, Never>?
 
     /// Fires ~1.5s into a recording to prewarm the Apple FM polish model (#141).
@@ -348,9 +348,11 @@ class DictationCoordinator: ObservableObject {
     /// Returns the policy the chunk really ran under (#1084): the voice-note settings name
     /// `activeModel`'s engine, and only the loaded engine says it was Apple's, which is
     /// what the record and the card need.
-    func transcribeVoiceNoteChunk(_ samples: [Float], languagePolicy: TranscriptionLanguagePolicy) async throws
-        -> (text: String, policy: TranscriptionLanguagePolicy) {
-        try await ensureEngineReady()
+    ///
+    /// `engine` may name the downloaded model while Apple's dictates (#1084, PR 2): see
+    /// `DictationCoordinator+VoiceNoteEngine.swift`.
+    func transcribeVoiceNoteChunk(_ samples: [Float], languagePolicy: TranscriptionLanguagePolicy, engine: VoiceNoteEngineChoice) async throws -> (text: String, policy: TranscriptionLanguagePolicy) {
+        try await prepareVoiceNoteEngine(engine)
         let policy = languagePolicyForLoadedEngine(languagePolicy)
         let text = try await transcriptionService.transcribe(audioSamples: samples, languagePolicy: policy)
         return (DictationTranscript.corrected(text).text, policy)
@@ -1569,44 +1571,6 @@ class DictationCoordinator: ObservableObject {
 /// file-private members of the coordinator and touch the same stored properties.
 @MainActor
 private extension DictationCoordinator {
-    /// Initialize the appropriate STT engine based on the active model.
-    ///
-    /// WHY engine-aware:
-    /// The user can select a WhisperKit, Parakeet or Nemotron model. This method
-    /// checks the active model's engine type and initializes the correct engine.
-    ///
-    /// Falls back to the active model from App Group, then to "openai_whisper-small".
-    func ensureEngineReady(preferredModel: String? = nil) async throws {
-        // Apple's on-device recognizer first, when the user picked it on the Models screen
-        // and it is ready for the chosen language right now; otherwise the downloaded model,
-        // as before the choice existed (`EffectiveSpeechEngine`). A preferred model is an
-        // explicit request for that model, so it never resolves to Apple.
-        if preferredModel == nil, case .apple(let code) = await AppleEngineAssets.effectiveEngine() {
-            installAppleEngine(languageCode: code)
-            return
-        }
-
-        let modelName = preferredModel
-            ?? defaults.string(forKey: SharedKeys.activeModel)
-            ?? "openai_whisper-small"
-
-        let modelInfo = ModelInfo.forIdentifier(modelName)
-        let engine = modelInfo?.engine ?? .whisperKit
-
-        switch engine {
-        case .parakeet:
-            try await ensureParakeetReady(modelName: modelName)
-        case .nemotron:
-            // No iOS 16 fallback to write: the app's floor is iOS 17, which is also
-            // FluidAudio 0.15.7's, and the catalogue hides Nemotron below it (#558).
-            try await ensureNemotronReady(modelName: modelName)
-        case .whisperKit, .apple:
-            // `.apple` is unreachable here: no catalogue entry has that engine, and the
-            // Apple choice was resolved above, before any model name.
-            try await ensureWhisperKitEngineReady(modelName: modelName)
-        }
-    }
-
     /// Make Apple's recognizer the engine `TranscriptionService` calls.
     ///
     /// No lock, no Neural Engine gate, no warm inference: nothing is compiled or loaded in
@@ -1940,6 +1904,48 @@ private extension DictationCoordinator {
 // MARK: - Apple's engine (Models screen)
 
 extension DictationCoordinator {
+    /// Initialize the appropriate STT engine based on the active model.
+    ///
+    /// WHY engine-aware:
+    /// The user can select a WhisperKit, Parakeet or Nemotron model. This method
+    /// checks the active model's engine type and initializes the correct engine.
+    ///
+    /// Falls back to the active model from App Group, then to "openai_whisper-small".
+    ///
+    /// Internal, out of the private engine extension, since #1084 PR 2: the voice-note
+    /// queue loads the downloaded model with it while Apple's dictates, from
+    /// `DictationCoordinator+VoiceNoteEngine.swift`, and this file has no line left for a seam.
+    func ensureEngineReady(preferredModel: String? = nil) async throws {
+        // Apple's on-device recognizer first, when the user picked it on the Models screen
+        // and it is ready for the chosen language right now; otherwise the downloaded model,
+        // as before the choice existed (`EffectiveSpeechEngine`). A preferred model is an
+        // explicit request for that model, so it never resolves to Apple.
+        if preferredModel == nil, case .apple(let code) = await AppleEngineAssets.effectiveEngine() {
+            installAppleEngine(languageCode: code)
+            return
+        }
+
+        let modelName = preferredModel
+            ?? defaults.string(forKey: SharedKeys.activeModel)
+            ?? "openai_whisper-small"
+
+        let modelInfo = ModelInfo.forIdentifier(modelName)
+        let engine = modelInfo?.engine ?? .whisperKit
+
+        switch engine {
+        case .parakeet:
+            try await ensureParakeetReady(modelName: modelName)
+        case .nemotron:
+            // No iOS 16 fallback to write: the app's floor is iOS 17, which is also
+            // FluidAudio 0.15.7's, and the catalogue hides Nemotron below it (#558).
+            try await ensureNemotronReady(modelName: modelName)
+        case .whisperKit, .apple:
+            // `.apple` is unreachable here: no catalogue entry has that engine, and the
+            // Apple choice was resolved above, before any model name.
+            try await ensureWhisperKitEngineReady(modelName: modelName)
+        }
+    }
+
     /// Load Apple's engine right after the user picks it, so the next dictation does not
     /// have to. Unlike `preloadActiveModel` it leaves `modelLoadState` alone: there is no
     /// model preparation to show, and a `.loading` state would put the downloaded model's
