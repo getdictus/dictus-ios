@@ -189,6 +189,16 @@ class UnifiedAudioEngine: ObservableObject {
     /// Accumulated audio samples in 16kHz mono Float32 (WhisperKit/Parakeet expected format).
     private var audioSamples: [Float] = []
 
+    /// When the newest accumulated buffer's audio ends, seconds since 1970, and how many
+    /// buffers this recording accumulated. What a stop's post-roll waits on (#1085).
+    /// `private(set)` rather than private: the post-roll lives in `+PostRoll`.
+    private(set) var lastAccumulatedBufferEndEpoch: TimeInterval?
+    private(set) var accumulatedBufferCount = 0
+
+    /// Bumped by every `startRecording` and every collection, so a post-roll can tell that
+    /// its recording was collected or replaced while it waited (#1085).
+    private(set) var recordingEpoch = 0
+
     /// Converter from the hardware format (typically 48kHz mono) to 16kHz mono.
     ///
     /// WHY nonisolated(unsafe): `startEngine()` pre-builds one from the format the input
@@ -321,7 +331,7 @@ class UnifiedAudioEngine: ObservableObject {
 
     /// Sample gating flag read from the audio thread.
     /// WHY nonisolated(unsafe): Read from audio callback thread (single reader pattern).
-    /// Written from main thread via startRecording()/collectSamples()/stopEngine().
+    /// Written from main thread via startRecording()/collectSamples()/deactivateSession().
     /// The flag is a simple Bool — partial reads are impossible on ARM64.
     private nonisolated(unsafe) var isRecordingFlag = false
 
@@ -947,6 +957,7 @@ class UnifiedAudioEngine: ObservableObject {
             try startEngine(context: "startRecording")
         }
         purgeState()
+        recordingEpoch += 1
         isRecording = true
         isRecordingFlag = true
 
@@ -968,6 +979,7 @@ class UnifiedAudioEngine: ObservableObject {
     ///
     /// - Returns: Audio samples ready for transcription. Engine keeps running.
     func collectSamples() -> [Float] {
+        recordingEpoch += 1
         isRecording = false
         isRecordingFlag = false
 
@@ -991,31 +1003,6 @@ class UnifiedAudioEngine: ObservableObject {
         // Arm the idle-release timer (issue #106 Phase B). If the user starts a
         // new recording or warms up before the timer fires, it gets cancelled.
         scheduleIdleRelease(context: "collectSamples")
-
-        return samples
-    }
-
-    /// Stop the engine completely and return all accumulated samples.
-    /// After this, the next recording requires warmUp() or startRecording().
-    ///
-    /// - Returns: Audio samples ready for transcription.
-    func stopEngine() -> [Float] {
-        cancelIdleRelease()
-        isRecording = false
-        isRecordingFlag = false
-
-        engine.inputNode.removeTap(onBus: 0)
-        engine.stop()
-
-        let samples = audioSamples
-        audioSamples = []
-
-        if #available(iOS 14.0, *) {
-            DictusLogger.app.info("UnifiedAudioEngine stopped. Samples: \(samples.count, privacy: .public), Duration: \(String(format: "%.1f", Double(samples.count) / 16000.0), privacy: .public)s")
-        }
-
-        bufferEnergy = []
-        bufferSeconds = 0
 
         return samples
     }
@@ -1273,10 +1260,10 @@ class UnifiedAudioEngine: ObservableObject {
         let installedGeneration = engineGeneration
         do {
             try ObjCExceptionCatcher.catchException {
-                inputNode.installTap(onBus: 0, bufferSize: 4096, format: nil) { [weak self] buffer, _ in
+                inputNode.installTap(onBus: 0, bufferSize: 4096, format: nil) { [weak self] buffer, when in
                     guard let self else { return }
                     guard installedGeneration == self.engineGeneration else { return }
-                    self.processBuffer(buffer)
+                    self.processBuffer(buffer, at: when)
                 }
             }
         } catch {
@@ -1448,6 +1435,8 @@ class UnifiedAudioEngine: ObservableObject {
     /// Reset recording state without stopping the engine.
     private func purgeState() {
         audioSamples = []
+        lastAccumulatedBufferEndEpoch = nil
+        accumulatedBufferCount = 0
         bufferEnergy = []
         bufferSeconds = 0
         audioThreadEnergy = []
@@ -1478,7 +1467,7 @@ class UnifiedAudioEngine: ObservableObject {
     /// A 10s throttle let transcriptions longer than 5s falsely trip the watchdog.
     /// 3s keeps us safely below the threshold; the per-buffer drain reduction comes
     /// from skipping conversion + waveform compute, not from the heartbeat cadence.
-    private nonisolated func processBuffer(_ buffer: AVAudioPCMBuffer) {
+    private nonisolated func processBuffer(_ buffer: AVAudioPCMBuffer, at when: AVAudioTime) {
         let now = Date().timeIntervalSince1970
 
         // Idle fast path — sparse heartbeat only.
@@ -1578,6 +1567,8 @@ class UnifiedAudioEngine: ObservableObject {
         // Track sample count on audio thread (needed for elapsed time in App Group writes)
         audioThreadSampleCount += samples.count
 
+        let bufferEndEpoch = Self.wallClockEnd(of: buffer, at: when, now: now)
+
         // === Main thread dispatch (for in-app UI: RecordingView, SwiftUI) ===
 
         DispatchQueue.main.async { [weak self] in
@@ -1585,6 +1576,8 @@ class UnifiedAudioEngine: ObservableObject {
             // SAMPLE GATE: only accumulate when recording
             guard self.isRecording else { return }
             self.audioSamples.append(contentsOf: samples)
+            self.lastAccumulatedBufferEndEpoch = bufferEndEpoch
+            self.accumulatedBufferCount += 1
             self.bufferSeconds = Double(self.audioSamples.count) / 16000.0
 
             // Maintain a rolling window of energy values (last 30 = matches barCount in BrandWaveform)
@@ -1925,7 +1918,7 @@ extension UnifiedAudioEngine: InterruptionResumeTarget {
     ///
     /// The armed idle release is the state we own: it is armed only on entering warm-idle
     /// (`warmUp`, `collectSamples`), and every path of ours that stops the engine cancels
-    /// it first (`stopEngine`, `deactivateSession`, `forceRestart`, `releaseWarmState`,
+    /// it first (`deactivateSession`, `forceRestart`, `releaseWarmState`,
     /// the interruption and media-services teardowns). Armed means we left the engine
     /// running muted, whatever iOS has done to its I/O since; not armed means cold.
     var engineStateForInterruption: InterruptedEngineState {
