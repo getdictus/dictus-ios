@@ -38,6 +38,7 @@ public struct KeyboardFeatureSettings {
         public static let swipeTyping = false
         /// On: the trail only shows while swipe typing, which is off by default.
         public static let swipeTrail = true
+        public static let pasteTranscription = false
     }
 
     private let store: UserDefaults
@@ -87,6 +88,11 @@ public struct KeyboardFeatureSettings {
     public var swipeTrail: Bool {
         get { bool(SharedKeys.keyboardSwipeTrail, default: Defaults.swipeTrail) }
         nonmutating set { store.set(newValue, forKey: SharedKeys.keyboardSwipeTrail) }
+    }
+
+    public var pasteTranscription: Bool {
+        get { bool(SharedKeys.keyboardPasteTranscription, default: Defaults.pasteTranscription) }
+        nonmutating set { store.set(newValue, forKey: SharedKeys.keyboardPasteTranscription) }
     }
 
     // MARK: - Rules
@@ -164,6 +170,13 @@ public struct KeyboardFeatureSettings {
     /// The trail, by the same rule. Meaningful only while `isSwipeTypingEffective`.
     public var isSwipeTrailEffective: Bool {
         Self.experiment(swipeTrail, default: Defaults.swipeTrail, on: channel)
+    }
+
+    /// The paste pill (#881) as it acts, by the same rule. Read by both processes: the
+    /// keyboard for the pill and for an unclaimed hand-off it finds, DictusApp for the one
+    /// its watchdog gives up on (`UnclaimedHandoff`). Off is the #860 banner, unchanged.
+    public var isPasteTranscriptionEffective: Bool {
+        Self.experiment(pasteTranscription, default: Defaults.pasteTranscription, on: channel)
     }
 
     /// An Experiments switch as it acts: `stored` where the page exists, `fallback` where it

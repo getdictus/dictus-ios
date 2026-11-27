@@ -10,7 +10,7 @@ final class ToolbarCentreSlotTests: XCTestCase {
     /// case in isolation would pass against any order at all.
     private func resolve(isChoosingMode: Bool = false,
                          errorMessage: String? = nil,
-                         recoveredTranscriptionPending: Bool = false,
+                         recoveredTranscription: RecoveredTranscriptionOffer = .none,
                          offersDictationUndo: Bool = false,
                          hasSuggestions: Bool = false,
                          offersPaste: Bool = false,
@@ -23,7 +23,7 @@ final class ToolbarCentreSlotTests: XCTestCase {
         ToolbarCentreSlot.resolve(
             isChoosingMode: isChoosingMode,
             errorMessage: errorMessage,
-            recoveredTranscriptionPending: recoveredTranscriptionPending,
+            recoveredTranscription: recoveredTranscription,
             offersDictationUndo: offersDictationUndo,
             hasSuggestions: hasSuggestions,
             offersPaste: offersPaste,
@@ -66,17 +66,42 @@ final class ToolbarCentreSlotTests: XCTestCase {
     func testRecoveredTranscriptionOutranksUndoAndSuggestions() {
         XCTAssertEqual(
             resolve(
-                recoveredTranscriptionPending: true, offersDictationUndo: true,
+                recoveredTranscription: .openInApp, offersDictationUndo: true,
                 hasSuggestions: true, polishUnavailable: true, armedModeName: "List",
                 offersDiscoveryHint: true
             ),
             .recoveredTranscription
         )
         XCTAssertEqual(
-            resolve(errorMessage: "boom", recoveredTranscriptionPending: true),
+            resolve(errorMessage: "boom", recoveredTranscription: .openInApp),
             .error("boom")
         )
         XCTAssertTrue(ToolbarCentreSlot.recoveredTranscription.evictsHamburger)
+    }
+
+    /// The paste pill (#881) takes the banner's rung: above the undo it arms once
+    /// pasted, and above the suggestions, which it costs for its ten minutes.
+    func testPastePillOutranksUndoAndSuggestions() {
+        XCTAssertEqual(
+            resolve(
+                recoveredTranscription: .paste, offersDictationUndo: true,
+                hasSuggestions: true, offersPaste: true, polishUnavailable: true,
+                armedModeName: "List", offersDiscoveryHint: true
+            ),
+            .pasteTranscription
+        )
+        XCTAssertEqual(resolve(errorMessage: "boom", recoveredTranscription: .paste), .error("boom"))
+        XCTAssertEqual(resolve(isChoosingMode: true, recoveredTranscription: .paste), .choosingMode)
+        XCTAssertTrue(ToolbarCentreSlot.pasteTranscription.evictsHamburger)
+    }
+
+    /// Once pasted the pill is gone and the undo it armed shows, then the suggestions.
+    func testWithoutThePillUndoThenSuggestionsShow() {
+        XCTAssertEqual(
+            resolve(recoveredTranscription: .none, offersDictationUndo: true, hasSuggestions: true),
+            .dictationUndo
+        )
+        XCTAssertEqual(resolve(recoveredTranscription: .none, hasSuggestions: true), .suggestions)
     }
 
     func testUndoOutranksSuggestions() {
