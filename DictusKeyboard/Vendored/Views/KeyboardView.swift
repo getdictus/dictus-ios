@@ -945,7 +945,7 @@ final internal class GiellaKeyboardView: UIView,
     private func handleTouches(_ touches: Set<UITouch>) {
         for touch in touches {
             let touchPoint = clampedPoint(touch.location(in: collectionView))
-            if let indexPath = collectionView.indexPathForItem(at: touchPoint) {
+            if let indexPath = keyIndexPath(at: touchPoint) {
                 let key = currentPage[indexPath.section][indexPath.row]
                 #if DEBUG
                 recordJournalTap(touch, key: key, at: indexPath)
@@ -1055,6 +1055,29 @@ final internal class GiellaKeyboardView: UIView,
     }
     #endif
 
+    /// The key a touch at `point` (already clamped) types: the cell under it, except at the
+    /// border between the AZERTY apostrophe key and Return, where a tap low on the apostrophe
+    /// after « c », « l », « qu »... is the apostrophe's (`ApostropheReturnBorder`, #1080).
+    /// The touch's first point and its moves both go through here, so a finger that wobbles
+    /// keeps the key it went down on.
+    private func keyIndexPath(at point: CGPoint) -> IndexPath? {
+        guard let indexPath = collectionView.indexPathForItem(at: point) else { return nil }
+        guard case .returnkey = currentPage[indexPath.section][indexPath.row].type, indexPath.section > 0,
+              let row = currentPage[indexPath.section - 1].firstIndex(where: { key in
+                  if case .input(_, let alternate) = key.type { return alternate == "accent" }
+                  return false
+              }) else { return indexPath }
+        let apostrophePath = IndexPath(row: row, section: indexPath.section - 1)
+        guard let apostrophe = collectionView.layoutAttributesForItem(at: apostrophePath)?.frame,
+              let returnKey = collectionView.layoutAttributesForItem(at: indexPath)?.frame else { return indexPath }
+        let rowPitch = planeSlots != nil ? (planeGeometry?.rowPitch ?? returnKey.height) : returnKey.height
+        let takesApostrophe = ApostropheReturnBorder.takesApostrophe(
+            point, apostrophe: apostrophe, returnKey: returnKey, rowPitch: rowPitch,
+            textBeforeCursor: { delegate?.trackpadTextContext().before ?? "" }
+        )
+        return takesApostrophe ? apostrophePath : indexPath
+    }
+
     /// Clamp a touch point into the collection view's content area.
     ///
     /// WHY: `indexPathForItem(at:)` returns nil if the point is even 1pt outside any
@@ -1115,7 +1138,7 @@ final internal class GiellaKeyboardView: UIView,
         if activeKey != nil {
             for touch in touches {
                 let movePoint = clampedPoint(touch.location(in: collectionView))
-                if let indexPath = collectionView.indexPathForItem(at: movePoint) {
+                if let indexPath = keyIndexPath(at: movePoint) {
                     let key = currentPage[indexPath.section][indexPath.row]
                     activeKey = ActiveKey(key: key, indexPath: indexPath, point: movePoint)
                 } else {

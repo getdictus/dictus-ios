@@ -107,11 +107,23 @@ func grid(_ page: [[KeyDefinition]], width: CGFloat, height: CGFloat) -> [Cell] 
 /// `GiellaKeyboardView.handleTouches`: clamp 4 pt inside the view, then the cell under
 /// the point, if any. The clamp only applies to touches the view receives: one above
 /// the grid lands in the toolbar, and on the simulator typed nothing.
-func hitTest(_ point: CGPoint, cells: [Cell], width: CGFloat, height: CGFloat) -> Cell? {
+///
+/// Then `GiellaKeyboardView.keyIndexPath(at:)`: a tap high on Return, under the AZERTY
+/// apostrophe key, after a word French elides is the apostrophe's (#1080).
+func hitTest(_ point: CGPoint, cells: [Cell], width: CGFloat, height: CGFloat, textBefore: String) -> Cell? {
     guard CGRect(x: 0, y: 0, width: width, height: height).contains(point) else { return nil }
     let margin: CGFloat = 4
     let p = CGPoint(x: min(max(point.x, margin), width - margin), y: min(max(point.y, margin), height - margin))
-    return cells.first { $0.frame.contains(p) }
+    guard let hit = cells.first(where: { $0.frame.contains(p) }) else { return nil }
+    guard case .returnkey = hit.key.type,
+          let apostrophe = cells.first(where: { cell in
+              if case .input(_, let alternate) = cell.key.type { return alternate == "accent" }
+              return false
+          }) else { return hit }
+    let takes = ApostropheReturnBorder.takesApostrophe(
+        p, apostrophe: apostrophe.frame, returnKey: hit.frame, rowPitch: hit.rowHeight, textBeforeCursor: { textBefore }
+    )
+    return takes ? apostrophe : hit
 }
 
 /// The letter keys as `GiellaKeyboardView.spatialKeys()` reads them off the collection
@@ -390,7 +402,7 @@ func replay(_ taps: [Tap], cells: [Cell], width: CGFloat, height: CGFloat, picke
         let word = current.split(separator: "'", omittingEmptySubsequences: false).last.map(String.init) ?? ""
 
         let start = DispatchTime.now().uptimeNanoseconds
-        let plain = hitTest(point, cells: cells, width: width, height: height)
+        let plain = hitTest(point, cells: cells, width: width, height: height, textBefore: field.text)
         var hit = plain
         var visited = 0
         // A touch outside the grid never reaches the keyboard view: no model sees it.
