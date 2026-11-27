@@ -1,0 +1,16 @@
+[2026-11-26T23:23:12Z] DEBUG   [keyboard] <KBD> swipeTypingConfigured on=true channel=debug reason=newView:on
+[2026-11-26T23:23:13Z] INFO    [keyboard] <KBD> userDictionaryPruned removed=0 learnedCount=0
+[2026-11-26T23:23:13Z] DEBUG   [keyboard] <KBD> swipeTypingConfigured on=true channel=debug reason=viewWillAppear:on
+[2026-11-26T23:25:18Z] DEBUG   [keyboard] <KBD> userDictionaryWordLearned learnedCount=1
+[2026-11-26T23:25:47Z] DEBUG   [keyboard] <KBD> swipeTypingConfigured on=true channel=debug reason=newView:on
+[2026-11-26T23:25:47Z] DEBUG   [keyboard] <KBD> swipeTypingConfigured on=true channel=debug reason=viewWillAppear:on
+[2026-11-26T23:26:18Z] DEBUG   [keyboard] <KBD> swipeEnded points=123 decodeMs=59.45 readings=8 outcome=word
+[2026-11-26T23:26:42Z] DEBUG   [keyboard] <KBD> swipeTypingConfigured on=true channel=debug reason=newView:on
+[2026-11-26T23:26:42Z] DEBUG   [keyboard] <KBD> swipeTypingConfigured on=true channel=debug reason=viewWillAppear:on
+[2026-11-26T23:26:59Z] DEBUG   [keyboard] <KBD> swipeEnded points=82 decodeMs=76.02 readings=8 outcome=word
+[2026-11-26T23:27:22Z] DEBUG   [keyboard] <KBD> swipeTypingConfigured on=true channel=debug reason=newView:on
+[2026-11-26T23:27:22Z] DEBUG   [keyboard] <KBD> swipeTypingConfigured on=true channel=debug reason=viewWillAppear:on
+[2026-11-26T23:27:39Z] DEBUG   [keyboard] <KBD> swipeEnded points=82 decodeMs=73.99 readings=8 outcome=word
+[2026-11-26T23:27:48Z] DEBUG   [keyboard] <KBD> swipeEnded points=123 decodeMs=58.61 readings=8 outcome=word
+[2026-11-26T23:28:17Z] DEBUG   [keyboard] <KBD> swipeTypingConfigured on=false channel=debug reason=newView:off
+[2026-11-26T23:28:17Z] DEBUG   [keyboard] <KBD> swipeTypingConfigured on=false channel=debug reason=viewWillAppear:off

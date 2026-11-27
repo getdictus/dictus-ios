@@ -1,0 +1,18 @@
+    "dictus.userDictionary" =     {
+        apple = 2;
+        wisprflow = 2;
+    };
+    "dictus.userDictionary.casing" =     {
+        apple = Apple;
+        wisprflow = WisprFlow;
+    };
+    "dictus.userDictionary.lastUsed" =     {
+        apple = 1795735596;
+        wisprflow = 1795735518;
+    };
+    "dictus.userDictionary.pending" =     {
+    };
+    "dictus.userDictionary.prunedTrieDuplicates" = 1;
+    "dictus.voiceNotesEnabled" = 1;
+    ngramDiagnostic = "lang=fr ok=true size=6045533";
+}
