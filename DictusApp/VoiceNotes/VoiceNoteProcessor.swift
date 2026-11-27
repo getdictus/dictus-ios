@@ -321,8 +321,11 @@ final class VoiceNoteProcessor: ObservableObject {
         store.mutate { $0.update(note.id) { $0.durationSeconds = Int(duration.rounded()) } }
         // Captured once per note, for #226's reason: the settings can change mid-queue.
         let settings = VoiceNoteSettings.load()
+        // The engine that dictates now, Apple's included (#1083); the Whisper fallback is
+        // `ensureEngineReady`'s when nothing is elected.
         let requested = settings.languagePolicy(
-            activeModel: AppGroup.defaults.string(forKey: SharedKeys.activeModel) ?? "openai_whisper-small",
+            activeEngine: ActiveSpeechEngine.current()
+                ?? ActiveSpeechEngine(engine: .whisperKit, identifier: "openai_whisper-small"),
             keyboardLanguage: SupportedLanguage.active
         )
         // Automatic detection needs an engine that detects (#1084, PR 2): the downloaded model
@@ -334,7 +337,9 @@ final class VoiceNoteProcessor: ObservableObject {
         // Cold Core ML cache: this note stays on Apple's model, the compile waits for the app
         // to be in front and idle (`VoiceNoteModelCompile`), so no dictation waits behind it.
         if engine.compilesDownloadedModel {
-            VoiceNoteModelCompile.shared.schedule(model: requested.modelIdentifier)
+            // `activeModel`, not the policy's identifier: since #1083 that names Apple's engine.
+            VoiceNoteModelCompile.shared.schedule(model: AppGroup.defaults.string(forKey: SharedKeys.activeModel)
+                                                  ?? "openai_whisper-small")
         }
         let ranges = VoiceNoteChunker.ranges(for: samples)
         // `activeModelEngine`, not `engine` (#1084): Apple's, when picked, is only known once
@@ -538,7 +543,7 @@ final class VoiceNoteProcessor: ObservableObject {
                 : SupportedLanguage(rawValue: source.language).map(TranscriptionLanguageMode.explicit) ?? .autoDetect,
             keyboardLanguage: SupportedLanguage.active,
             engine: source.engine ?? .parakeet,
-            modelIdentifier: AppGroup.defaults.string(forKey: SharedKeys.activeModel) ?? ""
+            modelIdentifier: ActiveSpeechEngine.current()?.identifier ?? ""
         )
         // Its own slot (#648): a dictation started while this runs must not cancel it.
         // Keyed by note: a caller arriving while this note's mode is still running (the

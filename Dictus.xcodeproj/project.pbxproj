@@ -51,6 +51,7 @@
 		AA000311 /* ColdStartResolution.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100311 /* ColdStartResolution.swift */; };
 		AA000361 /* DictationHandoff.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100361 /* DictationHandoff.swift */; };
 		AA000428 /* DictationCoordinator+ModelLoad.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100428 /* DictationCoordinator+ModelLoad.swift */; };
+		AA001083 /* DictationCoordinator+EnginePolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA101083 /* DictationCoordinator+EnginePolicy.swift */; };
 		AA000775 /* DictationCoordinator+SessionActivation.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100775 /* DictationCoordinator+SessionActivation.swift */; };
 		AA000380 /* DictationCoordinator+WarmEngineTimeout.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100380 /* DictationCoordinator+WarmEngineTimeout.swift */; };
 		AA001084 /* DictationCoordinator+VoiceNoteEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA101084 /* DictationCoordinator+VoiceNoteEngine.swift */; };
@@ -333,6 +334,7 @@
 		AA100311 /* ColdStartResolution.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColdStartResolution.swift; sourceTree = "<group>"; };
 		AA100361 /* DictationHandoff.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DictationHandoff.swift; sourceTree = "<group>"; };
 		AA100428 /* DictationCoordinator+ModelLoad.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DictationCoordinator+ModelLoad.swift"; sourceTree = "<group>"; };
+		AA101083 /* DictationCoordinator+EnginePolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DictationCoordinator+EnginePolicy.swift"; sourceTree = "<group>"; };
 		AA100775 /* DictationCoordinator+SessionActivation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DictationCoordinator+SessionActivation.swift"; sourceTree = "<group>"; };
 		AA100380 /* DictationCoordinator+WarmEngineTimeout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DictationCoordinator+WarmEngineTimeout.swift"; sourceTree = "<group>"; };
 		AA101084 /* DictationCoordinator+VoiceNoteEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DictationCoordinator+VoiceNoteEngine.swift"; sourceTree = "<group>"; };
@@ -664,6 +666,7 @@
 				AA100361 /* DictationHandoff.swift */,
 				AA423003 /* SmartModeDisplayName.swift */,
 				AA100428 /* DictationCoordinator+ModelLoad.swift */,
+				AA101083 /* DictationCoordinator+EnginePolicy.swift */,
 				AA100775 /* DictationCoordinator+SessionActivation.swift */,
 				AA100380 /* DictationCoordinator+WarmEngineTimeout.swift */,
 				AA101084 /* DictationCoordinator+VoiceNoteEngine.swift */,
@@ -1496,6 +1499,7 @@
 				AA000361 /* DictationHandoff.swift in Sources */,
 				AA423004 /* SmartModeDisplayName.swift in Sources */,
 				AA000428 /* DictationCoordinator+ModelLoad.swift in Sources */,
+				AA001083 /* DictationCoordinator+EnginePolicy.swift in Sources */,
 				AA000775 /* DictationCoordinator+SessionActivation.swift in Sources */,
 				AA000380 /* DictationCoordinator+WarmEngineTimeout.swift in Sources */,
 				AA001084 /* DictationCoordinator+VoiceNoteEngine.swift in Sources */,

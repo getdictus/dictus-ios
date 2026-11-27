@@ -63,6 +63,7 @@ class DictationCoordinator: ObservableObject {
     var stageWatchdogStageStart = Date()
 
     private var whisperKit: WhisperKit?
+    /// Readable from `DictationCoordinator+EnginePolicy.swift`; written only here.
     private(set) var currentModelName: String?
     private var dictationTask: Task<Void, Never>?
 
@@ -1564,6 +1565,51 @@ class DictationCoordinator: ObservableObject {
     }
 }
 
+// MARK: - Engine selection
+
+/// Internal, unlike the initializers it calls below, because
+/// `DictationCoordinator+EnginePolicy.swift` loads Apple's engine through it.
+@MainActor
+extension DictationCoordinator {
+    /// Initialize the appropriate STT engine based on the active model.
+    ///
+    /// WHY engine-aware:
+    /// The user can select a WhisperKit, Parakeet or Nemotron model. This method
+    /// checks the active model's engine type and initializes the correct engine.
+    ///
+    /// Falls back to the active model from App Group, then to "openai_whisper-small".
+    func ensureEngineReady(preferredModel: String? = nil) async throws {
+        // Apple's on-device recognizer first, when the user picked it on the Models screen
+        // and it is ready for the chosen language right now; otherwise the downloaded model,
+        // as before the choice existed (`EffectiveSpeechEngine`). A preferred model is an
+        // explicit request for that model, so it never resolves to Apple.
+        if preferredModel == nil, case .apple(let code) = await AppleEngineAssets.effectiveEngine() {
+            installAppleEngine(languageCode: code)
+            return
+        }
+
+        let modelName = preferredModel
+            ?? defaults.string(forKey: SharedKeys.activeModel)
+            ?? "openai_whisper-small"
+
+        let modelInfo = ModelInfo.forIdentifier(modelName)
+        let engine = modelInfo?.engine ?? .whisperKit
+
+        switch engine {
+        case .parakeet:
+            try await ensureParakeetReady(modelName: modelName)
+        case .nemotron:
+            // No iOS 16 fallback to write: the app's floor is iOS 17, which is also
+            // FluidAudio 0.15.7's, and the catalogue hides Nemotron below it (#558).
+            try await ensureNemotronReady(modelName: modelName)
+        case .whisperKit, .apple:
+            // `.apple` is unreachable here: no catalogue entry has that engine, and the
+            // Apple choice was resolved above, before any model name.
+            try await ensureWhisperKitEngineReady(modelName: modelName)
+        }
+    }
+}
+
 // MARK: - Speech engine initialization
 
 /// Engine initialization lives in its own extension so the coordinator class body
@@ -1898,78 +1944,6 @@ private extension DictationCoordinator {
             ))
             throw wrapped
         }
-    }
-}
-
-// MARK: - Apple's engine (Models screen)
-
-extension DictationCoordinator {
-    /// Initialize the appropriate STT engine based on the active model.
-    ///
-    /// WHY engine-aware:
-    /// The user can select a WhisperKit, Parakeet or Nemotron model. This method
-    /// checks the active model's engine type and initializes the correct engine.
-    ///
-    /// Falls back to the active model from App Group, then to "openai_whisper-small".
-    ///
-    /// Internal, out of the private engine extension, since #1084 PR 2: the voice-note
-    /// queue loads the downloaded model with it while Apple's dictates, from
-    /// `DictationCoordinator+VoiceNoteEngine.swift`, and this file has no line left for a seam.
-    func ensureEngineReady(preferredModel: String? = nil) async throws {
-        // Apple's on-device recognizer first, when the user picked it on the Models screen
-        // and it is ready for the chosen language right now; otherwise the downloaded model,
-        // as before the choice existed (`EffectiveSpeechEngine`). A preferred model is an
-        // explicit request for that model, so it never resolves to Apple.
-        if preferredModel == nil, case .apple(let code) = await AppleEngineAssets.effectiveEngine() {
-            installAppleEngine(languageCode: code)
-            return
-        }
-
-        let modelName = preferredModel
-            ?? defaults.string(forKey: SharedKeys.activeModel)
-            ?? "openai_whisper-small"
-
-        let modelInfo = ModelInfo.forIdentifier(modelName)
-        let engine = modelInfo?.engine ?? .whisperKit
-
-        switch engine {
-        case .parakeet:
-            try await ensureParakeetReady(modelName: modelName)
-        case .nemotron:
-            // No iOS 16 fallback to write: the app's floor is iOS 17, which is also
-            // FluidAudio 0.15.7's, and the catalogue hides Nemotron below it (#558).
-            try await ensureNemotronReady(modelName: modelName)
-        case .whisperKit, .apple:
-            // `.apple` is unreachable here: no catalogue entry has that engine, and the
-            // Apple choice was resolved above, before any model name.
-            try await ensureWhisperKitEngineReady(modelName: modelName)
-        }
-    }
-
-    /// Load Apple's engine right after the user picks it, so the next dictation does not
-    /// have to. Unlike `preloadActiveModel` it leaves `modelLoadState` alone: there is no
-    /// model preparation to show, and a `.loading` state would put the downloaded model's
-    /// preparation screen over the Models screen for a load that is not happening.
-    func adoptAppleEngine() {
-        Task {
-            do {
-                try await ensureEngineReady()
-                AppleEngineAssets.log("adopted", "engine=\(self.currentModelName ?? "none")")
-            } catch {
-                AppleEngineAssets.log("adoptFailed", "error=\(DictationFailureMessage.diagnostic(for: error))")
-            }
-        }
-    }
-
-    /// The dictation's language policy with the engine that will actually transcribe it.
-    ///
-    /// `TranscriptionLanguagePolicy.snapshot()` names the engine of `activeModel`, which
-    /// stays the downloaded model when Apple is picked. Apple is told the chosen language
-    /// and is polished as a forced-language engine, so its dictations carry `.apple`.
-    func languagePolicyForLoadedEngine(_ policy: TranscriptionLanguagePolicy) -> TranscriptionLanguagePolicy {
-        guard currentModelName == AppleSpeechEngineIdentity.identifier else { return policy }
-        return TranscriptionLanguagePolicy(mode: policy.mode, keyboardLanguage: policy.keyboardLanguage,
-                                           engine: .apple, modelIdentifier: AppleSpeechEngineIdentity.identifier)
     }
 }
 

@@ -114,11 +114,11 @@ final class VoiceNoteRulesTests: XCTestCase {
     }
 
     func testThePolicyNeverFollowsTheKeyboard() {
-        let auto = VoiceNoteSettings().languagePolicy(activeModel: "parakeet-tdt-0.6b-v3", keyboardLanguage: .french)
+        let auto = VoiceNoteSettings().languagePolicy(activeEngine: ActiveSpeechEngine(engine: .parakeet, identifier: "parakeet-tdt-0.6b-v3"), keyboardLanguage: .french)
         XCTAssertEqual(auto.mode, .autoDetect)
         XCTAssertEqual(auto.engine, .parakeet)
         let fixed = VoiceNoteSettings(language: .fixed(.english))
-            .languagePolicy(activeModel: "openai_whisper-small", keyboardLanguage: .french)
+            .languagePolicy(activeEngine: ActiveSpeechEngine(engine: .whisperKit, identifier: "openai_whisper-small"), keyboardLanguage: .french)
         XCTAssertEqual(fixed.mode, .explicit(.english))
         XCTAssertEqual(fixed.sttLanguageCode, "en")
     }
@@ -200,7 +200,7 @@ final class VoiceNoteRulesTests: XCTestCase {
     @MainActor
     func testASharedFileRecordKeepsItsSourceAndSummary() throws {
         let id = UUID()
-        let policy = VoiceNoteSettings().languagePolicy(activeModel: "parakeet-tdt-0.6b-v3", keyboardLanguage: .french)
+        let policy = VoiceNoteSettings().languagePolicy(activeEngine: ActiveSpeechEngine(engine: .parakeet, identifier: "parakeet-tdt-0.6b-v3"), keyboardLanguage: .french)
         let record = TranscriptionRecord(id: id, text: "Long message", policy: policy, duration: 61, source: .sharedFile)
             .withSummary("Court", modeIdentifier: SmartModeCatalogue.summaryIdentifier)
         let data = try TranscriptionHistoryStore.encoder.encode(record)
