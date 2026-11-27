@@ -29,6 +29,10 @@ file says what each piece is.
 | `journal_to_run.py` | Turns a typing journal exported from a Debug build (#1001) into `runs/<lang>-journal.tsv` and `corpus/<lang>-journal.txt`, so a session typed on a device replays here. Tests: `python3 -I -m unittest discover -s tools/keyboard-bench/tests`. |
 | `Journal.swift` | The typing journal's calls during a replay, at the moments the keyboard makes them. Only a bench built with `run.sh --debug` has the journal: `--journal` turns it on, writes `journal.log` beside the report, and adds the journal's cost per tap to it. |
 | `key_targets.sh` + `compare_hits.py` | The #949 spike in one command: draws held-out runs, replays them through both hit tests, and compares them tap by tap. Results: [`docs/research/949-key-targets/`](../../docs/research/949-key-targets/README.md). |
+| `corpus/mixed.txt`, `corpus/mixed.lang`, `runs/mixed.tsv` | 20 sentences that mix French and English, the gold language of every word (`f` or `e`), and their touch run (#1009). The run the bilingual detection was designed on in #1007. |
+| `corpus/mixed-heldout.txt`, `corpus/mixed-heldout.lang`, `runs/mixed-heldout.tsv` | 20 more mixed sentences, written before the bilingual replay first ran. Nothing is ever tuned on them: a change judged on this run needs a new held-out run. |
+| `corpus/mixed-device.txt`, `corpus/mixed-device.lang`, `runs/mixed-device.tsv` | Words Pierre typed on his iPhone on 2026-11-23 that the bilingual keyboard got wrong, replayed from the keys and offsets of the session's `TJ TAP` lines (times evened to 170 ms): `test bug`, which flipped a fresh French window to English, then `j'ai hâte` typed `jaihate`, `j'aihate` and `j'ainhate`, and `oui` typed `oji`; then `its` as a possessive and before a verb, typed on the key centres. Not in the default runs: `run.sh --pair fr,en --langs mixed-device`. |
+| `Bilingual.swift` + `score_pair.py` | The bilingual replay (`run.sh --pair fr,en`): the same taps through one engine per language and the DictusCore language detection, then its report. |
 
 ## Run
 
@@ -39,6 +43,35 @@ tools/keyboard-bench/run.sh --udid <udid> > report.md
 
 About two minutes, most of it compiling DictusCore. Writes `taps.tsv`, `commits.tsv`,
 `texts.tsv` and `register.tsv` to `build/keyboard-bench/out/` and prints the report.
+
+## Bilingual replay (#1009)
+
+```bash
+tools/keyboard-bench/run.sh --udid <udid> --pair fr,en > report.md
+```
+
+Replays `fr`, `en` on QWERTY, `en`, `mixed` and `mixed-heldout` (the layout is the
+primary's, AZERTY here, unless `--langs` gives one as `en:qwerty`). Each run goes through
+three keyboards on the same taps:
+
+- `mono-fr` and `mono-en`: today's keyboard set to one language, one engine.
+- `detect`: two engines, one per language, both loaded for the run's layout. At every
+  space, `WordLanguageVote` scores the word, `LanguageWindow` decides the language, that
+  language's engine corrects the word, and `BilingualKeepRule` may keep it as typed.
+  Letters ask the window's language only. The window carries over from one sentence to
+  the next and starts each run in the primary language.
+
+The keystroke work is the in-process replay's, through the same `replay`. The vote reads
+a second trie per language, mounted from the same files as the engine's, which keeps its
+own private. Writes `pair.tsv` (one row per committed word: gold and decided language,
+intended, typed, final) and `pair-cost.tsv`, and prints the report: wrong words per run
+and keyboard, the language decided per word, the words left wrong, and the time per
+keystroke.
+
+`--probe "word,previous|word"` prints what both dictionaries answer for single words
+(log-frequency, expansions, correction, bigram) and the vote, without replaying. The
+detection tests' dictionaries (`DictusCore/Tests/DictusCoreTests/LanguageDetectionStubs.swift`)
+were read off it.
 
 ## What the replay runs
 
