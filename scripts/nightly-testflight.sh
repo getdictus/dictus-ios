@@ -107,6 +107,9 @@ esac
 # REAL_SUMMARY is where a real run of this slot writes; a dry run writes beside it, so
 # it never overwrites a real run.
 REAL_SUMMARY="$PROOF_DIR/$STEM.md"
+# Written by a real run the moment App Store Connect accepts the upload (step 8), before
+# any later step can fail. It holds the build number; the same-day check reads it first.
+UPLOAD_MARKER="$PROOF_DIR/$STEM.uploaded"
 if [ "$DRY_RUN" -eq 1 ]; then
   LOG="$LOG_DIR/$STEM.dry-run.log"
   SUMMARY="$PROOF_DIR/$STEM.dry-run.md"
@@ -345,19 +348,26 @@ log "1. lock held, no release or archive running"
 # One internal build a day (Pierre's rule, 2026-11-27). The tag on HEAD (step 3) is not
 # enough: when 06:00 built commit A and commit B passes CI before 06:30, HEAD is B and
 # carries no tag. So, whatever HEAD is, a day that already has a build gets no other one.
-# Two sources:
+# Three sources, in this order:
+#   - <stem>.uploaded: App Store Connect accepted an upload today, even if a later step
+#     (IPA check, tag push) failed, set the summary to failed and deleted the tag;
 #   - today's summary says built or uploaded (its Build line gives NN);
 #   - a build/NN tag created today, Europe/Paris date, on any commit. A lightweight tag
 #     has no date of its own: the date is the mtime of its loose ref in the main clone,
 #     written by `git tag` (step 7, or cut-testflight.sh) or by the fetch that brought it
 #     in. A packed tag has no such date and is not counted.
-# A 06:00 run that failed leaves neither: its summary says failed and the cleanup deleted
-# the tag it had not pushed, so 06:30 still builds.
+# A 06:00 run that failed before the upload was accepted leaves none of them: no marker,
+# its summary says failed and the cleanup deleted the tag it had not pushed, so 06:30
+# still builds.
 TODAY_PARIS=$(TZ=Europe/Paris date +%F)
 TODAY_NN=""
 TODAY_FROM=""
 TODAY_STATUS=$(summary_status "$REAL_SUMMARY")
-case "$TODAY_STATUS" in
+if [ -f "$UPLOAD_MARKER" ]; then
+  TODAY_NN=$(sed -n '1s/^\([0-9][0-9]*\)$/\1/p' "$UPLOAD_MARKER")
+  TODAY_FROM="$UPLOAD_MARKER says App Store Connect accepted an upload today"
+fi
+[ -n "$TODAY_FROM" ] || case "$TODAY_STATUS" in
   built|uploaded)
     TODAY_NN=$(sed -n 's/^- Build: \([0-9][0-9]*\).*$/\1/p' "$REAL_SUMMARY" | head -1)
     TODAY_FROM="$REAL_SUMMARY says $TODAY_STATUS" ;;
@@ -377,7 +387,7 @@ if [ -n "$TODAY_FROM" ]; then
   KEEP_SUMMARY=1
   skip "already built today (build ${TODAY_NN:-unknown})"
 else
-  log "1. no build today yet: $REAL_SUMMARY is ${TODAY_STATUS:-absent}, no build/NN tag created on $TODAY_PARIS"
+  log "1. no build today yet: no $UPLOAD_MARKER, $REAL_SUMMARY is ${TODAY_STATUS:-absent}, no build/NN tag created on $TODAY_PARIS"
 fi
 
 # --- 2. Fetch; HEAD = origin/develop ----------------------------------------
@@ -658,6 +668,11 @@ log "8. scripts/upload-testflight.sh (timeout ${T_UPLOAD}s, processing wait $ASC
 UPLOAD_RC=0
 run_timeout "$T_UPLOAD" "upload-testflight.sh" env TMPDIR="$RUN_DIR/tmp/" /bin/sh "$WT/scripts/upload-testflight.sh" \
   || UPLOAD_RC=$?
+# Exit 0 or 75: build NN is in App Store Connect. Record it now, before any step below
+# can fail: from here on, today has its build.
+case "$UPLOAD_RC" in
+  0|75) echo "$NN" > "$UPLOAD_MARKER" && log "8. upload of build $NN accepted, recorded in $UPLOAD_MARKER" ;;
+esac
 case "$UPLOAD_RC" in
   0) PROCESSED=1; UPLOAD_STATE="uploaded and processed" ;;
   75)
