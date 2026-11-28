@@ -53,13 +53,16 @@ struct ToolbarView: View {
     /// away only when a fresh app process clears it.
     var showsPolishUnavailable: Bool = false
 
-    /// Whether a dictation the document refused has its text waiting in DictusApp
-    /// (#860). A state like the one above: no timer, gone on tap or on the next
-    /// dictation.
-    var showsRecoveredTranscription: Bool = false
+    /// What to offer for a dictation the document refused (#860, #881): the banner that
+    /// opens DictusApp, the paste pill, or nothing. A state like the one above: gone on
+    /// tap or on the next dictation, and the pill also after its ten minutes.
+    var recoveredTranscription: RecoveredTranscriptionOffer = .none
 
     /// Opens DictusApp on the recovered text.
     var onRecoveredTranscriptionTap: (() -> Void)?
+
+    /// Types the recovered text into the current field (#881).
+    var onPasteTranscriptionTap: (() -> Void)?
 
     var suggestions: [String] = []
     var suggestionMode: SuggestionMode = .idle
@@ -298,7 +301,7 @@ struct ToolbarView: View {
         ToolbarCentreSlot.resolve(
             isChoosingMode: isSmartModeFanOpen,
             errorMessage: statusMessage,
-            recoveredTranscriptionPending: showsRecoveredTranscription,
+            recoveredTranscription: recoveredTranscription,
             offersDictationUndo: showsDictationUndo,
             hasSuggestions: !suggestions.isEmpty,
             offersPaste: offersPaste,
@@ -320,6 +323,10 @@ struct ToolbarView: View {
             errorMessage(message)
         case .recoveredTranscription:
             recoveredTranscriptionBanner
+        case .pasteTranscription:
+            Spacer()
+            pasteTranscriptionPill
+            Spacer()
         case .dictationUndo:
             dictationUndoButton
             Spacer()
@@ -911,6 +918,42 @@ struct ToolbarView: View {
         }
         .buttonStyle(GlassPressStyle())
         .accessibilityIdentifier("keyboard.recoveredTranscriptionBanner")
+    }
+
+    /// The banner's text offered as a pill whose tap types it here (#881).
+    ///
+    /// Centred and as wide as its label rather than the banner's full width: Pierre's
+    /// shape, the place in the bar the middle suggestion would take. Its tokens are the
+    /// dictation undo's above (accent at 12 %, `iconDiameter` tall inside a 44 pt hit
+    /// area, 15 pt semibold), which is also the blue undo capsule #1092 draws inside
+    /// `SuggestionBarView`: the pill and that capsule are the two halves of one gesture,
+    /// paste and then undo, in the same strip.
+    ///
+    /// It never shows the text: the user may be in another app, or sharing the screen.
+    private var pasteTranscriptionPill: some View {
+        Button {
+            HapticFeedback.keyTapped()
+            onPasteTranscriptionTap?()
+        } label: {
+            HStack(spacing: 5) {
+                Image(systemName: "doc.on.clipboard")
+                    .font(.system(size: 13, weight: .semibold))
+
+                Text("Paste transcription")
+                    .font(.system(size: 15, weight: .semibold))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.85)
+            }
+            .foregroundColor(.dictusAccent)
+            .padding(.horizontal, 14)
+            .frame(height: iconDiameter)
+            .background(Capsule().fill(Color.dictusAccent.opacity(0.12)))
+            .frame(height: 44)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(GlassPressStyle())
+        .accessibilityLabel(Text("Paste the transcription that could not be typed"))
+        .accessibilityIdentifier("keyboard.pasteTranscriptionPill")
     }
 
     /// Polish is not running, and will not run again until DictusApp restarts (#315).

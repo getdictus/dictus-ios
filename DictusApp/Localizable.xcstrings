@@ -4974,6 +4974,29 @@
         }
       }
     },
+    "Paste transcription" : {
+      "comment" : "Settings › Keyboard › Experiments: toggle for the keyboard pill that pastes a dictation the keyboard could not insert (#881).",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diktat einfügen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pegar transcripción"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Coller la transcription"
+          }
+        }
+      }
+    },
     "Preparing…" : {
       "comment" : "Apple engine card: iOS is installing Apple's speech model after the user picked it.",
       "localizations" : {
@@ -6449,6 +6472,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Nouveautés"
+          }
+        }
+      }
+    },
+    "When a dictation could not be typed, the keyboard offers it for 10 minutes as a pill that pastes it into the current field. It is never typed later on its own." : {
+      "comment" : "Settings › Keyboard › Experiments: footer under the « Paste transcription » toggle (#881).",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Konnte ein Diktat nicht eingegeben werden, bietet die Tastatur es 10 Minuten lang als Taste an, die es in das aktuelle Feld einfügt. Es wird nie später von selbst eingegeben."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Si un dictado no se pudo escribir, el teclado lo ofrece durante 10 minutos con un botón que lo pega en el campo actual. Nunca se escribe más tarde por sí solo."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quand une dictée n’a pas pu être insérée, le clavier la propose pendant 10 minutes dans une pastille qui la colle dans le champ en cours. Elle n’est jamais tapée plus tard toute seule."
           }
         }
       }

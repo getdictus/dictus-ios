@@ -406,6 +406,12 @@ class DictationCoordinator: ObservableObject {
             PendingDictationChannel.clear()
             PersistentLog.log(.polishHandoff(step: "swept", outcome: "expired", chars: pending.raw.count))
         }
+        // The text the keyboard could not type (#881), on the "Last transcription" card
+        // of a process launched since: the paste pill offers it for ten minutes, and past
+        // them this card is where it stays readable.
+        if KeyboardFeatureSettings().isPasteTranscriptionEffective, lastResult == nil {
+            lastResult = RecoveredTranscriptionChannel.current(in: defaults)
+        }
 
         // Audit the shared dictation state before anything reads it (issue #261).
         reconcileOrphanedDictationState()

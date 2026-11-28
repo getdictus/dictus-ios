@@ -82,6 +82,7 @@
 		AA361004 /* KeyboardPolishCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA361003 /* KeyboardPolishCoordinator.swift */; };
 		AA361008 /* KeyboardPolishStage.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA361007 /* KeyboardPolishStage.swift */; };
 		AA963002 /* KeyboardState+DictationSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA963001 /* KeyboardState+DictationSupport.swift */; };
+		AA881002 /* KeyboardState+RecoveredTranscription.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA881001 /* KeyboardState+RecoveredTranscription.swift */; };
 		AA361010 /* KeyboardSmartModeFan.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA361009 /* KeyboardSmartModeFan.swift */; };
 		AA637002 /* KeyboardVoiceNotes.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA637001 /* KeyboardVoiceNotes.swift */; };
 		AA423004 /* SmartModeDisplayName.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA423003 /* SmartModeDisplayName.swift */; };
@@ -363,6 +364,7 @@
 		AA361003 /* KeyboardPolishCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardPolishCoordinator.swift; sourceTree = "<group>"; };
 		AA361007 /* KeyboardPolishStage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardPolishStage.swift; sourceTree = "<group>"; };
 		AA963001 /* KeyboardState+DictationSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "KeyboardState+DictationSupport.swift"; sourceTree = "<group>"; };
+		AA881001 /* KeyboardState+RecoveredTranscription.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "KeyboardState+RecoveredTranscription.swift"; sourceTree = "<group>"; };
 		AA361009 /* KeyboardSmartModeFan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardSmartModeFan.swift; sourceTree = "<group>"; };
 		AA637001 /* KeyboardVoiceNotes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardVoiceNotes.swift; sourceTree = "<group>"; };
 		AA423003 /* SmartModeDisplayName.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmartModeDisplayName.swift; sourceTree = "<group>"; };
@@ -708,6 +710,7 @@
 				AA361003 /* KeyboardPolishCoordinator.swift */,
 				AA361007 /* KeyboardPolishStage.swift */,
 				AA963001 /* KeyboardState+DictationSupport.swift */,
+				AA881001 /* KeyboardState+RecoveredTranscription.swift */,
 				AA361009 /* KeyboardSmartModeFan.swift */,
 				AA637001 /* KeyboardVoiceNotes.swift */,
 				AA423001 /* SmartModeDisplayName.swift */,
@@ -1632,6 +1635,7 @@
 				AA361004 /* KeyboardPolishCoordinator.swift in Sources */,
 				AA361008 /* KeyboardPolishStage.swift in Sources */,
 				AA963002 /* KeyboardState+DictationSupport.swift in Sources */,
+				AA881002 /* KeyboardState+RecoveredTranscription.swift in Sources */,
 				AA361010 /* KeyboardSmartModeFan.swift in Sources */,
 				AA637002 /* KeyboardVoiceNotes.swift in Sources */,
 				AA423002 /* SmartModeDisplayName.swift in Sources */,
