@@ -35,6 +35,7 @@ public struct KeyboardFeatureSettings {
         public static let bilingualAutocorrect = false
         /// On: Pierre's decision, 2026-11-24 (#609).
         public static let deleteWordSwipe = true
+        public static let suggestionCapsules = false
         public static let swipeTyping = false
         /// On: the trail only shows while swipe typing, which is off by default.
         public static let swipeTrail = true
@@ -77,6 +78,11 @@ public struct KeyboardFeatureSettings {
     public var deleteWordSwipe: Bool {
         get { bool(SharedKeys.keyboardDeleteWordSwipe, default: Defaults.deleteWordSwipe) }
         nonmutating set { store.set(newValue, forKey: SharedKeys.keyboardDeleteWordSwipe) }
+    }
+
+    public var suggestionCapsules: Bool {
+        get { bool(SharedKeys.keyboardSuggestionCapsules, default: Defaults.suggestionCapsules) }
+        nonmutating set { store.set(newValue, forKey: SharedKeys.keyboardSuggestionCapsules) }
     }
 
     public var swipeTyping: Bool {
@@ -127,6 +133,12 @@ public struct KeyboardFeatureSettings {
     /// wrote (`AppDistribution.recordedChannel`), since the extension cannot read its own.
     public static func forKeyboard(store: UserDefaults = AppGroup.defaults) -> KeyboardFeatureSettings {
         KeyboardFeatureSettings(store: store, channel: AppDistribution.recordedChannel(in: store))
+    }
+
+    /// The capsule suggestion bar (#502), by the rule of `isSwipeTypingEffective` below. It changes how the bar draws its
+    /// words, never which words it offers or what space applies.
+    public var isSuggestionCapsulesEffective: Bool {
+        Self.experiment(suggestionCapsules, default: Defaults.suggestionCapsules, on: channel)
     }
 
     /// Swipe typing as it acts: the stored switch on a test build, its default in the App

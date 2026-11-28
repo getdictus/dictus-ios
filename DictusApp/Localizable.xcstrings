@@ -10090,6 +10090,29 @@
         }
       }
     },
+    "New suggestion bar" : {
+      "comment" : "Settings › Keyboard › Experiments: toggle for the suggestion bar drawn as Apple's, with capsules (#502).",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Neue Vorschlagsleiste"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nueva barra de sugerencias"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nouvelle barre de suggestions"
+          }
+        }
+      }
+    },
     "New term" : {
       "comment" : "Title of the sheet that creates a vocabulary entry.",
       "localizations" : {
@@ -13816,6 +13839,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Le modèle vocal n’a pas pu être préparé."
+          }
+        }
+      }
+    },
+    "The word about to be corrected sits in a light capsule, and undoing a correction is a blue capsule. The suggestions themselves do not change." : {
+      "comment" : "Settings › Keyboard › Experiments: footer explaining the new suggestion bar (#502).",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das Wort, das gleich korrigiert wird, steht in einer hellen Kapsel, und das Rückgängigmachen einer Korrektur ist eine blaue Kapsel. Die Vorschläge selbst ändern sich nicht."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La palabra que se va a corregir aparece en una cápsula clara, y deshacer una corrección es una cápsula azul. Las sugerencias en sí no cambian."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le mot qui sera corrigé apparaît dans une pastille claire, et l’annulation d’une correction est une capsule bleue. Les suggestions elles-mêmes ne changent pas."
           }
         }
       }

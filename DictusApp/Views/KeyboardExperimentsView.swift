@@ -24,6 +24,9 @@ struct KeyboardExperimentsView: View {
     @AppStorage(SharedKeys.keyboardBilingualAutocorrect, store: UserDefaults(suiteName: AppGroup.identifier))
     private var bilingualAutocorrect = KeyboardFeatureSettings.Defaults.bilingualAutocorrect
 
+    @AppStorage(SharedKeys.keyboardSuggestionCapsules, store: UserDefaults(suiteName: AppGroup.identifier))
+    private var suggestionCapsules = KeyboardFeatureSettings.Defaults.suggestionCapsules
+
     @AppStorage(SharedKeys.keyboardSwipeTyping, store: UserDefaults(suiteName: AppGroup.identifier))
     private var swipeTyping = KeyboardFeatureSettings.Defaults.swipeTyping
 
@@ -76,6 +79,7 @@ struct KeyboardExperimentsView: View {
 
             adaptiveTouchSection
             bilingualSection
+            suggestionBarSection
             swipeTypingSection
         }
         .scrollContentBackground(.hidden)
@@ -128,6 +132,16 @@ struct KeyboardExperimentsView: View {
             .accessibilityIdentifier("settings.keyboard.experiments.partnerLanguage")
         } footer: {
             Text("Corrects and suggests in your keyboard language and a second one at the same time, without switching keyboards. French and English only for now.")
+        }
+    }
+
+    /// Display only (#502): the same suggestions, drawn as Apple's bar.
+    private var suggestionBarSection: some View {
+        Section {
+            Toggle("New suggestion bar", isOn: $suggestionCapsules)
+                .accessibilityIdentifier("settings.keyboard.experiments.suggestionCapsules")
+        } footer: {
+            Text("The word about to be corrected sits in a light capsule, and undoing a correction is a blue capsule. The suggestions themselves do not change.")
         }
     }
 
