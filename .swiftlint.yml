@@ -94,6 +94,11 @@ force_unwrapping:
 # (set the number above the largest offender, with modest headroom) keeps the rule
 # doing its job everywhere, this file included.
 #
+# Raised again from 900 to 1000 on 2026-11-28, when ModelManager reached 902 once
+# #1083 (`activeSpeechEngine`) and #1057 (`chooseEngineDuringOnboarding`) met in the
+# same extension; each side alone stayed under 900. Same protocol: above the
+# largest offender (ModelManager, 902) with modest headroom (+11%).
+#
 # cyclomatic_complexity gets proportionally less headroom on purpose: it counts
 # branches, not lines, so a single added `if` is a far bigger relative step than
 # a handful of added lines.
@@ -110,7 +115,7 @@ type_body_length:
   error: 900
 
 file_length:
-  warning: 900
+  warning: 1000
   error: 1200
   ignore_comment_only_lines: true
 
