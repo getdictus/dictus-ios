@@ -184,8 +184,10 @@ enum PolishDebugExporter {
         )
 
         let defaults = AppGroup.defaults
-        let activeModelID = defaults.string(forKey: SharedKeys.activeModel)
-        let activeEngine = activeModelID.flatMap { ModelInfo.forIdentifier($0)?.engine.rawValue }
+        // The engine that dictates now, Apple's included (#1083).
+        let active = ActiveSpeechEngine.current(defaults: defaults)
+        let activeModelID = active?.identifier
+        let activeEngine = active?.engine.rawValue
         let settings = PolishDebugExport.SettingsInfo(
             polishEnabled: defaults.bool(forKey: SharedKeys.polishEnabled),
             keyboardLanguage: SupportedLanguage.active.rawValue,

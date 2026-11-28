@@ -9,7 +9,9 @@ import Foundation
 /// is meant.
 ///
 /// The space bar decides before the next word exists, so the context is the
-/// sentence position and the previous word.
+/// sentence position and the previous word. A rule may also name the words that,
+/// typed next, call for the contraction (`before`): the space after that word then
+/// writes both (`contextualContraction(profile:word:before:)`).
 public struct ContextualContraction: Sendable, Equatable {
     /// Which previous words call for the contraction.
     public enum PreviousWords: Sendable, Equatable {
@@ -27,12 +29,19 @@ public struct ContextualContraction: Sendable, Equatable {
     public let atSentenceStart: Bool
     /// Where the contraction is meant mid-sentence.
     public let after: PreviousWords
+    /// The next words, lowercase, after which the typed word was the contraction: words
+    /// the typed word is never followed by when it is meant (`its` is never followed by
+    /// `a`: "its a good idea" is "it's a good idea").
+    public let before: Set<String>
 
-    public init(word: String, contraction: String, atSentenceStart: Bool, after: PreviousWords) {
+    public init(
+        word: String, contraction: String, atSentenceStart: Bool, after: PreviousWords, before: Set<String> = []
+    ) {
         self.word = word
         self.contraction = contraction
         self.atSentenceStart = atSentenceStart
         self.after = after
+        self.before = before
     }
 }
 
@@ -69,4 +78,46 @@ public func contextualContraction(
 
     guard word.first?.isUppercase == true, let first = rule.contraction.first else { return rule.contraction }
     return first.uppercased() + rule.contraction.dropFirst()
+}
+
+/// The contraction `word` stood for, now that `nextWord` follows it, or `nil` when
+/// the next word leaves the typed word meant. Both as typed, any case; the contraction
+/// takes the case of `word`'s first letter ("Its raining" -> "It's").
+///
+/// WHY from the next word: `its` is possessive mid-sentence far more often than not
+/// ("the dog wagged its tail"), so the space bar keeps it (#995), but the word after it
+/// tells: no possessive is followed by an article, a pronoun, a preposition, a negation
+/// or a verb in -ing. Apple's keyboard makes the same revision once that word is typed.
+public func contextualContraction(profile: LanguageProfile, word: String, before nextWord: String) -> String? {
+    let lowered = word.lowercased()
+    guard let rule = profile.contextualContractions.first(where: { $0.word == lowered }),
+          rule.before.contains(nextWord.lowercased()) else { return nil }
+    guard word.first?.isUppercase == true, let first = rule.contraction.first else { return rule.contraction }
+    return first.uppercased() + rule.contraction.dropFirst()
+}
+
+extension KeyboardLanguagePair {
+    /// The two words the space bar writes on this bilingual keyboard (#1015) in place of
+    /// `previousWord` and `word`, when `previousWord` was a contraction `word` now shows:
+    /// `its raining` -> "it's raining". Either language of the pair may have the rule,
+    /// whatever the window says: `its` is no French word. Nil leaves both words.
+    ///
+    /// `isLearned`: whether the user taught `previousWord` (ADR 0004), which is never
+    /// rewritten. The keyboard passes `UserDictionary.shared.isLearned`.
+    ///
+    /// WHY on the pair: Pierre's device test of #1015 (2026-11-23) found that `its` never
+    /// became `it's`. The English keyboard alone restores it at a sentence's start only
+    /// (#995), and a French window keeps it as a word of English. Only a bilingual keyboard
+    /// has a pair, so the monolingual keyboards are unchanged.
+    public func contractionAcrossSpace(
+        previousWord: String, word: String, isLearned: (String) -> Bool
+    ) -> String? {
+        guard !isLearned(previousWord.lowercased()) else { return nil }
+        for language in [primary, secondary] {
+            if let contraction = contextualContraction(profile: language.profile, word: previousWord, before: word) {
+                return "\(contraction) \(word)"
+            }
+        }
+        return nil
+    }
 }

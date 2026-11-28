@@ -63,7 +63,8 @@ class DictationCoordinator: ObservableObject {
     var stageWatchdogStageStart = Date()
 
     private var whisperKit: WhisperKit?
-    private var currentModelName: String?
+    /// Readable from `DictationCoordinator+EnginePolicy.swift`; written only here.
+    private(set) var currentModelName: String?
     private var dictationTask: Task<Void, Never>?
 
     /// Fires ~1.5s into a recording to prewarm the Apple FM polish model (#141).
@@ -1562,13 +1563,12 @@ class DictationCoordinator: ObservableObject {
     }
 }
 
-// MARK: - Speech engine initialization
+// MARK: - Engine selection
 
-/// Engine initialization lives in its own extension so the coordinator class body
-/// stays within the SwiftLint `type_body_length` budget. These methods are still
-/// file-private members of the coordinator and touch the same stored properties.
+/// Internal, unlike the initializers it calls below, because
+/// `DictationCoordinator+EnginePolicy.swift` loads Apple's engine through it.
 @MainActor
-private extension DictationCoordinator {
+extension DictationCoordinator {
     /// Initialize the appropriate STT engine based on the active model.
     ///
     /// WHY engine-aware:
@@ -1606,7 +1606,15 @@ private extension DictationCoordinator {
             try await ensureWhisperKitEngineReady(modelName: modelName)
         }
     }
+}
 
+// MARK: - Speech engine initialization
+
+/// Engine initialization lives in its own extension so the coordinator class body
+/// stays within the SwiftLint `type_body_length` budget. These methods are still
+/// file-private members of the coordinator and touch the same stored properties.
+@MainActor
+private extension DictationCoordinator {
     /// Make Apple's recognizer the engine `TranscriptionService` calls.
     ///
     /// No lock, no Neural Engine gate, no warm inference: nothing is compiled or loaded in
@@ -1934,36 +1942,6 @@ private extension DictationCoordinator {
             ))
             throw wrapped
         }
-    }
-}
-
-// MARK: - Apple's engine (Models screen)
-
-extension DictationCoordinator {
-    /// Load Apple's engine right after the user picks it, so the next dictation does not
-    /// have to. Unlike `preloadActiveModel` it leaves `modelLoadState` alone: there is no
-    /// model preparation to show, and a `.loading` state would put the downloaded model's
-    /// preparation screen over the Models screen for a load that is not happening.
-    func adoptAppleEngine() {
-        Task {
-            do {
-                try await ensureEngineReady()
-                AppleEngineAssets.log("adopted", "engine=\(self.currentModelName ?? "none")")
-            } catch {
-                AppleEngineAssets.log("adoptFailed", "error=\(DictationFailureMessage.diagnostic(for: error))")
-            }
-        }
-    }
-
-    /// The dictation's language policy with the engine that will actually transcribe it.
-    ///
-    /// `TranscriptionLanguagePolicy.snapshot()` names the engine of `activeModel`, which
-    /// stays the downloaded model when Apple is picked. Apple is told the chosen language
-    /// and is polished as a forced-language engine, so its dictations carry `.apple`.
-    func languagePolicyForLoadedEngine(_ policy: TranscriptionLanguagePolicy) -> TranscriptionLanguagePolicy {
-        guard currentModelName == AppleSpeechEngineIdentity.identifier else { return policy }
-        return TranscriptionLanguagePolicy(mode: policy.mode, keyboardLanguage: policy.keyboardLanguage,
-                                           engine: .apple, modelIdentifier: AppleSpeechEngineIdentity.identifier)
     }
 }
 
