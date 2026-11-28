@@ -1341,8 +1341,10 @@ class ModelManager: ObservableObject {
 
         activeModel = identifier
         // Picking a downloaded model is also leaving Apple's engine, if it was the choice.
+        // Called by the Models page only, so it also ends the onboarding's Parakeet
+        // handoff (#1057): the user's choice wins.
         speechEngineChoice = .downloadedModel
-        SpeechEngineChoice.write(.downloadedModel, to: defaults)
+        ParakeetHandoff.recordModelsPageChoice(.downloadedModel, in: defaults)
         persistState()
         PersistentLog.log(.modelSelected(name: identifier))
         // Trigger an eager load so the model is in RAM before the next mic tap.
@@ -1520,11 +1522,19 @@ extension ModelManager {
     /// Dictate with Apple's on-device recognizer. Called by the Apple card once its model
     /// is installed for the chosen language. `activeModel` is kept, as the engine the app
     /// falls back to whenever Apple cannot run.
-    func selectAppleEngine() {
+    ///
+    /// `fromModelsPage`: the Apple card's pick also ends the onboarding's Parakeet handoff
+    /// (#1057), like any engine the user picks there. The onboarding itself picks Apple
+    /// with `false`, so the handoff it has just marked stays.
+    func selectAppleEngine(fromModelsPage: Bool = true) {
         speechEngineChoice = .apple
         // The card has just read Apple's availability, which wrote the record.
         appleEngineReadyLanguage = AppleEngineReadinessRecord.readyLanguage(in: defaults)
-        SpeechEngineChoice.write(.apple, to: defaults)
+        if fromModelsPage {
+            ParakeetHandoff.recordModelsPageChoice(.apple, in: defaults)
+        } else {
+            SpeechEngineChoice.write(.apple, to: defaults)
+        }
         PersistentLog.log(.modelSelected(name: AppleSpeechEngineIdentity.identifier))
         DictationCoordinator.shared.adoptAppleEngine()
     }
@@ -1534,6 +1544,16 @@ extension ModelManager {
     var activeSpeechEngine: ActiveSpeechEngine? {
         ActiveSpeechEngine.resolve(choice: speechEngineChoice, appleAvailability: appleEngineRecordedAvailability,
                                    downloadedModel: isModelReady ? activeModel : nil)
+    }
+
+    /// Stores the engine the onboarding's route decided (#1057), without picking a model
+    /// or adopting an engine: Apple's install has not finished when the route is decided,
+    /// and on today's route no model is downloaded yet. The choice is what lets a run
+    /// killed by iOS mid-onboarding resume on the same route
+    /// (`OnboardingAppleEngineSetup.resume`).
+    func chooseEngineDuringOnboarding(_ choice: SpeechEngineChoice) {
+        speechEngineChoice = choice
+        SpeechEngineChoice.write(choice, to: defaults)
     }
 
     /// Whether the user can dictate now: a downloaded model, or Apple's engine picked and

@@ -43,6 +43,11 @@ struct LanguageSetupPage: View {
 
     @State private var setup: LanguageSetup
 
+    /// Apple's speech locales on this iPhone, read once when the page appears, for the
+    /// model line (#1057). nil until read, and where Apple's recognizer is unavailable:
+    /// the line then names the download, which is what Confirm does there.
+    @State private var appleLocales: [String]?
+
     init(draft: Binding<LanguageSetup?>, onConfirm: @escaping (LanguageSetup) -> Void) {
         _draft = draft
         self.onConfirm = onConfirm
@@ -239,14 +244,29 @@ struct LanguageSetupPage: View {
     /// changes with the language ("le français", "l'anglais"), which a format string cannot
     /// choose.
     private var modelLine: some View {
-        let info = ModelInfo.forIdentifier(setup.recommendedModel(on: capabilities))
+        let recommended = setup.recommendedModel(on: capabilities)
+        let info = ModelInfo.forIdentifier(recommended)
+        // Apple's route (#1057): the user dictates with Apple's model at once, so the line
+        // says so. Parakeet recommended: it downloads behind Apple, and the line says that
+        // too. Any other recommendation: nothing downloads. Same rules as Confirm
+        // (`OnboardingEngineRoute`, `OnboardingConfirmDownload`).
+        let expectsApple = OnboardingEngineRoute.expectsApple(
+            for: setup, systemMajorVersion: ProcessInfo.processInfo.operatingSystemVersion.majorVersion,
+            supportedLocales: appleLocales, keyboardDictatesWithApple: !capabilities.isPreA14
+        )
         return HStack(alignment: .top, spacing: 10) {
             Image(systemName: "cpu")
                 .font(.body)
                 .foregroundStyle(.tertiary)
                 .accessibilityHidden(true)
             Group {
-                if let info {
+                if expectsApple, let info, OnboardingConfirmDownload.downloadsBehindApple(recommendedModel: recommended) {
+                    Text("Apple's speech recognition for your language, built into iOS: you can dictate at once. Dictus downloads Parakeet (\(info.sizeLabel)), more accurate, in the background. You can change it in Models.",
+                         comment: "Onboarding language screen, small type, when Apple's on-device model covers the language and Parakeet is the recommended model (#1057): the user dictates with Apple while Parakeet downloads. The argument is Parakeet's size (~483 MB).")
+                } else if expectsApple {
+                    Text("Apple's speech recognition for your language, built into iOS: Dictus downloads nothing. You can change it in Models.",
+                         comment: "Onboarding language screen, small type, when Apple's on-device model covers the language (#1057): confirming downloads no Dictus model.")
+                } else if let info {
                     // Both arguments arrive already localized (name qualifier #665, size
                     // unit #661).
                     Text("\(info.localizedDisplayName) model, the best for your language on this \(DeviceNoun.current). \(info.sizeLabel), downloaded as soon as you continue. You can change it in Models.")
@@ -257,7 +277,9 @@ struct LanguageSetupPage: View {
             .font(.footnote)
             .foregroundStyle(.secondary)
             .fixedSize(horizontal: false, vertical: true)
+            .accessibilityIdentifier(expectsApple ? "onboarding.language.modelLine.apple" : "onboarding.language.modelLine")
         }
+        .task { appleLocales = await AppleEngineAssets.supportedLocaleIdentifiers() }
     }
 }
 

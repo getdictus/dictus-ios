@@ -1927,6 +1927,52 @@
         }
       }
     },
+    "Apple's speech recognition for your language, built into iOS: Dictus downloads nothing. You can change it in Models." : {
+      "comment" : "Onboarding language screen, small type, when Apple's on-device model covers the language (#1057): confirming downloads no Dictus model.",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apples Spracherkennung für deine Sprache, in iOS integriert: Dictus lädt nichts herunter. Änderbar unter „Modelle“."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El reconocimiento de voz de Apple para tu idioma, integrado en iOS: Dictus no descarga nada. Puedes cambiarlo en Modelos."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La reconnaissance vocale d’Apple pour votre langue, intégrée à iOS : Dictus ne télécharge rien. Modifiable dans Modèles."
+          }
+        }
+      }
+    },
+    "Apple's speech recognition for your language, built into iOS: you can dictate at once. Dictus downloads Parakeet (%@), more accurate, in the background. You can change it in Models." : {
+      "comment" : "Onboarding language screen, small type, when Apple's on-device model covers the language and Parakeet is the recommended model (#1057): the user dictates with Apple while Parakeet downloads. The argument is Parakeet's size (~483 MB).",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apples Spracherkennung für deine Sprache, in iOS integriert: Du kannst sofort diktieren. Dictus lädt Parakeet (%@), genauer, im Hintergrund. Änderbar unter „Modelle“."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El reconocimiento de voz de Apple para tu idioma, integrado en iOS: puedes dictar enseguida. Dictus descarga Parakeet (%@), más preciso, en segundo plano. Puedes cambiarlo en Modelos."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La reconnaissance vocale d’Apple pour votre langue, intégrée à iOS : vous pouvez dicter tout de suite. Dictus télécharge Parakeet (%@), plus précis, en arrière-plan. Modifiable dans Modèles."
+          }
+        }
+      }
+    },
     "Apple's speech recognition, built into iOS. Dictus downloads nothing." : {
       "comment" : "Models screen: description of the Apple engine card.",
       "localizations" : {
@@ -3928,6 +3974,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Dictus n’a pas pu joindre le serveur. Votre message est conservé."
+          }
+        }
+      }
+    },
+    "Dictus is downloading Parakeet (%@), more accurate, in the background. It goes faster if Dictus stays open." : {
+      "comment" : "Onboarding popup message on Apple's route (#1057), under the title « You can already dictate ». The argument is Parakeet's size (~483 MB).",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dictus lädt Parakeet (%@), genauer, im Hintergrund. Es geht schneller, wenn Dictus geöffnet bleibt."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dictus descarga Parakeet (%@), más preciso, en segundo plano. Va más rápido si Dictus sigue abierto."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dictus télécharge Parakeet (%@), plus précis, en arrière-plan. Ça va plus vite si Dictus reste ouvert."
           }
         }
       }
@@ -6472,6 +6541,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Sans le journal, la plupart des bugs ne peuvent pas être analysés."
+          }
+        }
+      }
+    },
+    "You can already dictate" : {
+      "comment" : "Onboarding popup title on Apple's route (#1057): Apple's model dictates now while Parakeet downloads.",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Du kannst schon diktieren"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ya puedes dictar"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vous pouvez déjà dicter"
           }
         }
       }
