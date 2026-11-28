@@ -12,6 +12,9 @@ protocol LongPressOverlayDelegate: AnyObject {
 
     func longpressFrameOfReference() -> CGRect
     func longpressKeySize() -> CGSize
+    /// The held key's frame, in the coordinates the popup's touches arrive in, or nil when
+    /// no key is held.
+    func longpressHeldKeyFrame() -> CGRect?
 }
 
 protocol LongPressCursorMovementDelegate: AnyObject {
@@ -353,7 +356,27 @@ class LongPressOverlayController: NSObject,
         return point
     }
 
+    /// The popup's own option for the held letter: the key's own, which the iPhone popup
+    /// adds in front of its accents (`KeyboardView.longpressKeys`). Nil on iPad, whose popup
+    /// lists only the accents, and for the keyboard-mode popup.
+    private lazy var heldLetterOption: KeyDefinition? = {
+        guard case let .input(held, _) = key.type else { return nil }
+        return longpressValues.first { option in
+            if case let .input(letter, _) = option.type { return letter == held }
+            return false
+        }
+    }()
+
+    /// On none of the accents, the finger still chooses the held letter, highlighted and
+    /// typed on release, everywhere but half a key below it, as on Apple's (#1089).
+    private func keepsHeldLetter(at point: CGPoint) -> Bool {
+        guard let frame = delegate?.longpressHeldKeyFrame() else { return false }
+        return AccentPopupRelease.keepsHeldLetter(
+            fingerY: Double(point.y), keyBottom: Double(frame.maxY), keyHeight: Double(frame.height))
+    }
+
     private func pointUpdated(_ point: CGPoint) {
+        let fingerPoint = point
         let cellSize = delegate?.longpressKeySize() ?? CGSize(width: 20, height: 30.0)
         let bigFrame = delegate!.longpressFrameOfReference()
         var superView: UIView? = collectionView
@@ -369,6 +392,8 @@ class LongPressOverlayController: NSObject,
 
         if let indexPath = collectionView.indexPathForItem(at: point) {
             selectedKey = longpressValues[indexPath.row + Int(ceil(Double(longpressValues.count) / 2.0)) * indexPath.section]
+        } else if let heldLetterOption, keepsHeldLetter(at: fingerPoint) {
+            selectedKey = heldLetterOption
         } else {
             selectedKey = nil
         }

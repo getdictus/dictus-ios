@@ -1543,10 +1543,12 @@ extension DictusKeyboardBridge {
     }
 
     /// Reads the Experiments switches the app may have changed while the keyboard was away:
-    /// spatial autocorrect and the bilingual check here, then swipe typing. Called for every
-    /// new keyboard view and at every appearance.
+    /// the suggestion bar's look, spatial autocorrect and the bilingual check here, from the
+    /// same settings, then swipe typing. Called for every new keyboard view and at every
+    /// appearance.
     func refreshExperiments(trigger: String) {
         let settings = KeyboardFeatureSettings.forKeyboard()
+        SuggestionBarLook.shared.refresh(settings)
         let wasOn = SpatialAutocorrect.isOn
         let isOn = SpatialAutocorrect.refresh(settings)
         // The partner engine follows at the next `SuggestionState.setLanguage` (#1015).

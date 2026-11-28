@@ -24,11 +24,17 @@ struct KeyboardExperimentsView: View {
     @AppStorage(SharedKeys.keyboardBilingualAutocorrect, store: UserDefaults(suiteName: AppGroup.identifier))
     private var bilingualAutocorrect = KeyboardFeatureSettings.Defaults.bilingualAutocorrect
 
+    @AppStorage(SharedKeys.keyboardSuggestionCapsules, store: UserDefaults(suiteName: AppGroup.identifier))
+    private var suggestionCapsules = KeyboardFeatureSettings.Defaults.suggestionCapsules
+
     @AppStorage(SharedKeys.keyboardSwipeTyping, store: UserDefaults(suiteName: AppGroup.identifier))
     private var swipeTyping = KeyboardFeatureSettings.Defaults.swipeTyping
 
     @AppStorage(SharedKeys.keyboardSwipeTrail, store: UserDefaults(suiteName: AppGroup.identifier))
     private var swipeTrail = KeyboardFeatureSettings.Defaults.swipeTrail
+
+    @AppStorage(SharedKeys.keyboardPasteTranscription, store: UserDefaults(suiteName: AppGroup.identifier))
+    private var pasteTranscription = KeyboardFeatureSettings.Defaults.pasteTranscription
 
     /// Bumped when the partner picker writes. The partner is read through
     /// `KeyboardFeatureSettings.partnerLanguage(for:)`, which resolves a missing or
@@ -76,7 +82,9 @@ struct KeyboardExperimentsView: View {
 
             adaptiveTouchSection
             bilingualSection
+            suggestionBarSection
             swipeTypingSection
+            pasteTranscriptionSection
         }
         .scrollContentBackground(.hidden)
         .background(Color.dictusBackground.ignoresSafeArea())
@@ -131,6 +139,16 @@ struct KeyboardExperimentsView: View {
         }
     }
 
+    /// Display only (#502): the same suggestions, drawn as Apple's bar.
+    private var suggestionBarSection: some View {
+        Section {
+            Toggle("New suggestion bar", isOn: $suggestionCapsules)
+                .accessibilityIdentifier("settings.keyboard.experiments.suggestionCapsules")
+        } footer: {
+            Text("The word about to be corrected sits in a light capsule, and undoing a correction is a blue capsule. The suggestions themselves do not change.")
+        }
+    }
+
     private var swipeTypingSection: some View {
         Section {
             Toggle("Swipe typing", isOn: $swipeTyping)
@@ -142,6 +160,15 @@ struct KeyboardExperimentsView: View {
                 .accessibilityIdentifier("settings.keyboard.experiments.swipeTrail")
         } footer: {
             Text("Slide your finger from letter to letter to type a word, then lift it. The trail draws the path under your finger.")
+        }
+    }
+
+    private var pasteTranscriptionSection: some View {
+        Section {
+            Toggle("Paste transcription", isOn: $pasteTranscription)
+                .accessibilityIdentifier("settings.keyboard.experiments.pasteTranscription")
+        } footer: {
+            Text("When a dictation could not be typed, the keyboard offers it for 10 minutes as a pill that pastes it into the current field. It is never typed later on its own.")
         }
     }
 }

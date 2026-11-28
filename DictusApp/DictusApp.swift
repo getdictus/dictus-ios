@@ -385,6 +385,7 @@ struct DictusApp: App {
         #if DEBUG
         Self.applyKeyboardDebugArgument("DictusDebugSpatialAutocorrect") { KeyboardFeatureSettings().spatialAutocorrect = $0 }
         Self.applyKeyboardDebugArgument("DictusDebugBilingualAutocorrect") { KeyboardFeatureSettings().bilingualAutocorrect = $0 }
+        Self.applyKeyboardDebugArgument("DictusDebugPasteTranscription") { KeyboardFeatureSettings().pasteTranscription = $0 }
         DictationCoordinator.shared.applyInjectedFailureArgument()
         #endif
     }
@@ -406,7 +407,8 @@ struct DictusApp: App {
     /// (`xcrun simctl launch <udid> com.pivi.dictus -DictusDebugSpatialAutocorrect YES` on a simulator).
     ///
     /// - `DictusDebugSpatialAutocorrect`: the spatial decoder (#1011);
-    /// - `DictusDebugBilingualAutocorrect`: the bilingual check (#1015).
+    /// - `DictusDebugBilingualAutocorrect`: the bilingual check (#1015);
+    /// - `DictusDebugPasteTranscription`: the paste pill (#881).
     ///
     /// It writes the Experiments page's own switch (`KeyboardFeatureSettings`), so the page
     /// shows what the argument set and the keyboard reads it at its next appearance, like a
