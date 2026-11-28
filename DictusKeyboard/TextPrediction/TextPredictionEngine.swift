@@ -82,6 +82,15 @@ class TextPredictionEngine {
         lexiconLock.unlock()
     }
 
+    /// The lexicon's single words, lowercased: what swipe typing reads beside its model
+    /// (#1090, `SwipeOwnWords`).
+    var lexiconWords: [String] {
+        lexiconLock.lock()
+        let lexicon = supplementaryLexicon
+        lexiconLock.unlock()
+        return lexicon.lowercasedWords
+    }
+
     /// The lexicon's verdict on `word`, or nil when the lexicon does not know it.
     func lexiconDecision(for word: String) -> SupplementaryLexicon.Decision? {
         lexiconLock.lock()

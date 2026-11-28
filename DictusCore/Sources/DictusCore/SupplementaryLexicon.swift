@@ -75,6 +75,11 @@ public struct SupplementaryLexicon: Equatable {
     public var shortcutCount: Int { shortcuts.count }
     public var wordCount: Int { words.count }
 
+    /// Every single-word phrase, lowercased: contact names and phrase-only replacements,
+    /// the words swipe typing reads beside its model (#1090). How one is written is still
+    /// `decision(for:isDictionaryWord:)`'s call, as for a tapped word.
+    public var lowercasedWords: [String] { Array(words.keys) }
+
     /// The phrase that replaces `word` when it is one of the user's text replacement
     /// shortcuts, or nil. A leading capital (sentence autocap) capitalizes the phrase:
     /// `Qqc` -> "Quelque chose".

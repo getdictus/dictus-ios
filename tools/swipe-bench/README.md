@@ -7,6 +7,7 @@ keyboard calls the decoder yet (the gesture is PR B, the setting PR C).
 ```bash
 tools/swipe-bench/run.sh                                   # the table below, about 2 min on an M1 Pro
 tools/swipe-bench/run.sh --memory --langs fr --styles typical
+tools/swipe-bench/run.sh --own-words                       # #1090: the user's words, below
 ```
 
 It runs on the Mac, with no simulator: the decoder is in DictusCore and needs nothing from
@@ -153,6 +154,55 @@ So:
   draw a path shorter than the 0.6 key the decoder reads as a swipe, and reads as nothing.
   On the keyboard such a stroke would be taken as a tap anyway.
 - **œ and æ** have no key, so "cœur" can't be swiped (as in Hex).
+
+## The user's own words (#1090)
+
+`run.sh --own-words` reads the words the user taught the keyboard beside the model, as the
+keyboard does (`SwipeOwnWords`, `OwnWords.swift`): six adopted learned words (« Apple »,
+« WisprFlow », « Titus », « Gwendal », « Kubernetes », « Figma »), three contacts (« Zofiak »,
+« Maëlle », « Oriane »), `CuratedNames`, fourteen adopted typos picked to be as harmful as a
+learned word can be (most draw the very path of a common word: « realy », « tambien »,
+« vieleicht », « quil », « dont »), and six typos learned on one refusal, which no swipe
+may read. It prints two tables:
+
+- **The dictionary's words, without and with the own words**, the same swipes (same seed):
+  what the own words cost the words the bench always swiped, and how many first readings an
+  own word took.
+- **The own words themselves, mid-sentence**: each swiped after the middle word of the first
+  200 test sentences, right only when it comes out with its casing (« Apple », not « apple »).
+  *Before* is the decoder as develop ships it, *after* with the own words.
+
+Results (2026-11-27, develop 3ea25a16 + feature/1090-swipe-learned-words, M1, shared):
+
+| Language | Style | Dictionary words, first / top 4, without | With own words | First taken by an own word | Own words, first with casing / top 4, before | After |
+|---|---|---:|---:|---:|---:|---:|
+| en | typical | 96.3% / 99.6% | 96.3% / 99.6% | 0 of 12,735 | 0% / 0% | 90.5% / 91.4% |
+| en | sloppy | 80.9% / 91.6% | 80.9% / 91.6% | 1 | 0% / 0% | 79.7% / 84.8% |
+| fr | typical | 95.5% / 99.3% | 95.5% / 99.3% | 0 of 12,543 | 0% / 0% | 98.7% / 99.6% |
+| fr | sloppy | 82.6% / 92.2% | 82.6% / 92.2% | 1 | 0% / 0% | 86.0% / 91.3% |
+| es | typical | 93.9% / 99.4% | 93.9% / 99.4% | 0 of 12,163 | 0% / 0% | 90.5% / 91.5% |
+| es | sloppy | 82.0% / 92.7% | 82.0% / 92.7% | 3 | 0% / 0% | 79.0% / 84.6% |
+| de | typical | 96.7% / 99.6% | 96.7% / 99.6% | 0 of 13,028 | 0% / 0% | 89.2% / 91.0% |
+| de | sloppy | 82.9% / 93.2% | 82.9% / 93.2% | 0 | 0% / 0% | 82.2% / 86.6% |
+
+Clean and neat fingers: no first reading taken in any language, dictionary figures unchanged
+to the tenth.
+
+- **The words learned once are never read**: 0 times in any of the first four readings, over
+  every dictionary swipe and every own-word swipe, in the four languages and styles.
+- **The adopted typos almost never take a dictionary word's place**, though most share its
+  path: the model's cost of a common word is far below an own word's (11 nats, about a word
+  ranked 20,000th). Five first readings in 201,876 swipes, all sloppy: « world » read
+  « airpods », « rivière » « thier », « aquí » and « el » « quil », « ningún » « nich ». The
+  dictionary word was then in the bar.
+- **8.3% of the own-word swipes cannot be read outside French**: « Maëlle » (200 of 2,400)
+  has a letter the en, es and de models lack, so it cannot be encoded; the other own words
+  come out first with their casing 99.6–100% of the time with clean or neat fingers. In French,
+  which has ë, all of them: 100%.
+- **« Apple » is the hardest**: English and German have « apple » in the model, so the swipe
+  reads it at the model's cost, among the model's words on its path (German, typical: 52 of
+  200 missed, « apple » losing to commoner words), and writes it « Apple » when it wins. In
+  French and Spanish it is an own word and misses 16 and 10 times of 200 (typical).
 
 ## Memory
 

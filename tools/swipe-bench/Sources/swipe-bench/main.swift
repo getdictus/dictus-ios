@@ -10,6 +10,7 @@
 //               [--limit N] [--seed 1] [--out DIR] [--keys targets|keyboard|caps]
 //   swipe-bench --memory [--langs en] [--styles typical]
 //   swipe-bench --hex-paths FILE.tsv --langs en [--models DIR]   (local cross-check, see README)
+//   swipe-bench --own-words [--langs …] [--styles …] [--own-sentences 200]   (#1090, OwnWords.swift)
 import CoreGraphics
 import DictusCore
 import Foundation
@@ -27,6 +28,8 @@ struct Options {
     var memory = false
     var hexPaths: String?
     var models: String?
+    var ownWords = false
+    var ownSentences = 200
     var root = URL(fileURLWithPath: #filePath)
         .deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent()
         .deletingLastPathComponent().deletingLastPathComponent()
@@ -54,6 +57,8 @@ func parse() -> Options {
         case "--hex-paths": o.hexPaths = value()
         case "--root": o.root = URL(fileURLWithPath: value())
         case "--models": o.models = value()
+        case "--own-words": o.ownWords = true
+        case "--own-sentences": o.ownSentences = Int(value()) ?? 200
         default: fatalError("unknown argument \(a)")
         }
     }
@@ -174,7 +179,8 @@ func score(_ swipe: Swipe, _ decoder: SwipeDecoder, _ page: LetterPage, _ tally:
 
 /// Every word of the sentences, swiped as `style`'s finger would, one at a time: each path
 /// is drawn, read and dropped, so nothing but the tally outlives a swipe.
-func run(_ o: Options, lang: String, style: String, decoder: SwipeDecoder, page: LetterPage, log: inout [String]) -> Tally {
+func run(_ o: Options, lang: String, style: String, decoder: SwipeDecoder, page: LetterPage, log: inout [String],
+         logging: Bool? = nil, readableBy: SwipeDecoder? = nil) -> Tally {
     guard let noise = Noise.named(style) else { fatalError("unknown style \(style)") }
     let centres = page.capsInPitches
     var rng = SplitMix64(seed: UInt64(o.seed * 7919 + (seedOffset[lang] ?? 0)))
@@ -196,14 +202,15 @@ func run(_ o: Options, lang: String, style: String, decoder: SwipeDecoder, page:
             }
             let (points, times) = SwipePaths.swipeTimed(sequence.compactMap { centres[$0] }, noise: noise, sloppiness: sloppiness,
                                                         rng: &rng, onLetter: page.onLetter)
-            guard readable(word, decoder) else {
+            guard readable(word, readableBy ?? decoder) else {
                 tally.unreadable += 1
                 continue
             }
             let cgPoints = points.map {
                 CGPoint(x: min(max($0.0 * Double(page.pitch.width), 0), Double(page.width)), y: $0.1 * Double(page.pitch.height))
             }
-            score(Swipe(points: cgPoints, times: times, word: word, previous: previous), decoder, page, &tally, log: &log, logging: o.out != nil)
+            score(Swipe(points: cgPoints, times: times, word: word, previous: previous), decoder, page, &tally, log: &log,
+                  logging: logging ?? (o.out != nil))
         }
     }
     return tally
@@ -271,6 +278,56 @@ if options.memory {
         - heap in use before the swipes \(kb(heap)), after \(kb(heapAfter)): \(kb(heapAfter - heap)) more, \
         the tally's \(tally.ms.count) times reserved ahead (128 KB); nothing of the decoder's
         """)
+    exit(0)
+}
+
+if options.ownWords {
+    // #1090: the dictionary's words with and without the user's own words, the same swipes
+    // (same seed), then the own words themselves, mid-sentence, with and without.
+    var dictionary = ["| Language | Style | Words swiped | First word right | Top 4 | With own words: first | Top 4 | First taken by an own word |",
+                      "|---|---|---:|---:|---:|---:|---:|---:|"]
+    var own = ["| Language | Style | Own words swiped | Before #1090: first, with casing | Top 4 | After: first, with casing | Top 4 |",
+               "|---|---|---:|---:|---:|---:|---:|"]
+    var notes: [String] = []
+    print("own words read: \(OwnWordsSet.words.count) (\(OwnWordsSet.words.joined(separator: ", ")))")
+    for lang in options.langs {
+        let plain = decoder(options, lang)
+        let mine = plain.withOwnWords(OwnWordsSet.words)
+        guard let page = LetterPage(lang, source: options.keys) else { fatalError("no layout for \(lang)") }
+        for style in options.styles {
+            var logPlain: [String] = [], logMine: [String] = []
+            let a = run(options, lang: lang, style: style, decoder: plain, page: page, log: &logPlain, logging: true)
+            // The same words as the plain run: a sentence word the own words make readable is
+            // left out of both, so the two runs score the same swipes.
+            let b = run(options, lang: lang, style: style, decoder: mine, page: page, log: &logMine, logging: true, readableBy: plain)
+            precondition(a.swiped == b.swiped, "the same swipes")
+            let (stolen, once) = stolenFirsts(without: logPlain, with: logMine)
+            let n = Double(max(1, a.swiped))
+            dictionary.append(String(
+                format: "| %@ | %@ | %d | %.1f%% | %.1f%% | %.1f%% | %.1f%% | %d |", lang, style, a.swiped,
+                100 * Double(a.first) / n, 100 * Double(a.top4) / n, 100 * Double(b.first) / n, 100 * Double(b.top4) / n,
+                stolen.values.reduce(0, +)
+            ))
+            // Before #1090: the model's readings as the model spells them, nothing of the user's.
+            let before = runOwnTargets(options, lang: lang, style: style, decoder: plain, page: page,
+                                       sentences: options.ownSentences, writes: false)
+            let after = runOwnTargets(options, lang: lang, style: style, decoder: mine, page: page,
+                                      sentences: options.ownSentences, writes: true)
+            own.append("| \(lang) | \(style) | \(after.swiped) | " + before.row.split(separator: "|").dropFirst().joined(separator: "|")
+                       + " | " + after.row.split(separator: "|").dropFirst().joined(separator: "|") + " |")
+            let worst = stolen.sorted { $0.value > $1.value }.prefix(6).map { "\($0.key) \($0.value)" }
+            let missed = after.missed.sorted { $0.value > $1.value }.map { "\($0.key) \($0.value)" }
+            let found = before.found.sorted { $0.value > $1.value }.map { "\($0.key) \($0.value)" }
+            notes.append("\(lang) \(style): before #1090 found " + (found.isEmpty ? "none" : found.joined(separator: ", ")) + "; first taken \(worst.isEmpty ? "never" : worst.joined(separator: ", ")); "
+                         + "learned-once words read: \(once + after.learnedOnceRead); own words missed: "
+                         + (missed.isEmpty ? "none" : missed.joined(separator: ", ")))
+        }
+    }
+    print(dictionary.joined(separator: "\n"))
+    print("")
+    print(own.joined(separator: "\n"))
+    print("")
+    print(notes.map { "- " + $0 }.joined(separator: "\n"))
     exit(0)
 }
 

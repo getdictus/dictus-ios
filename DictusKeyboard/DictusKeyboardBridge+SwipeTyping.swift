@@ -67,7 +67,7 @@ extension DictusKeyboardBridge: SwipeTypingOutput {
         guard let first = readings.first else { return }
         let before = swipeTypingContextBefore()
         let casing = swipeCasing(before: before)
-        let written = nounsCapitalised([first], before: before)[0]
+        let written = nounsCapitalised(ownWordsWritten([first]), before: before)[0]
         suggestionState?.showSwipePreview(SwipeTypingText.cased(written, capital: casing.capital, capsLock: casing.capsLock))
     }
 
@@ -88,7 +88,7 @@ extension DictusKeyboardBridge: SwipeTypingOutput {
 
         let before = proxy.documentContextBeforeInput
         let casing = swipeCasing(before: before)
-        let cased = SwipeTypingText.unique(nounsCapitalised(readings, before: before).map {
+        let cased = SwipeTypingText.unique(nounsCapitalised(ownWordsWritten(readings), before: before).map {
             SwipeTypingText.cased($0, capital: casing.capital, capsLock: casing.capsLock)
         })
         let record = SwipedWord(word: cased[0], addedSpace: casing.addsSpace, alternatives: Array(cased.dropFirst()))
@@ -116,6 +116,16 @@ extension DictusKeyboardBridge: SwipeTypingOutput {
 
     func swipeTypingDidCancel() {
         restoreBarAfterDroppedSwipe()
+    }
+
+    /// The user's own words for the swipe (#1090): adopted learned words, contact names and
+    /// text replacements, and `language`'s brand names, by the rules of `SwipeOwnWords.words`.
+    func swipeTypingOwnWords(language: String) -> [String] {
+        SwipeOwnWords.words(
+            learnedUses: UserDictionary.shared.allLearnedWords,
+            lexiconWords: TextPredictionEngine.shared.lexiconWords,
+            brands: SwipeBrands.names(for: language)
+        )
     }
 
     /// A swipe that typed nothing gives the bar back: the readings of the word a swipe typed
@@ -192,6 +202,23 @@ extension DictusKeyboardBridge: SwipeTypingOutput {
     }
 
     // MARK: - Helpers
+
+    /// The readings as the user writes them (#1090, `SwipeOwnWords.written`): a contact or an
+    /// app name in its casing, by the lexicon's decision tap typing uses, an adopted learned
+    /// word as the user types it (« Apple » mid-sentence).
+    private func ownWordsWritten(_ readings: [String]) -> [String] {
+        let dictionary = UserDictionary.shared
+        let learned = dictionary.allLearnedWords
+        return readings.map { reading in
+            SwipeOwnWords.written(
+                reading,
+                lexiconDecision: { TextPredictionEngine.shared.lexiconDecision(for: $0) },
+                learned: { word in
+                    learned[word].map { SwipeOwnWords.Learned(uses: $0, casing: dictionary.casing(of: word)) }
+                }
+            )
+        }
+    }
 
     /// German readings as German writes them: a noun with its capital ("Haus", "Straße"),
     /// a verb or an adjective in lowercase ("gehen", "groß"), from `de.capitals` and the word
