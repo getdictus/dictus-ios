@@ -32,6 +32,11 @@ import Foundation
 /// - entries the base dictionary already knows are pruned once, on the first
 ///   load that can ask a loaded dictionary — see `pruneTrieDuplicatesIfNeeded`.
 ///
+/// HOW A WORD IS WRITTEN (#1090):
+/// Beside each learned word, the form the user types it in (`LearnedWordCasing`), for
+/// swipe typing, which has no typed letters to copy a capital from. Tap typing reads
+/// none of it: its completions still copy the capital of the typed prefix (ADR 0004).
+///
 /// HOW THE LIFECYCLE IS REPORTED (#307):
 /// Every event above — learning, eviction, reset, the load-time migration, the
 /// stale discard and the duplicate prune — writes two lines: a count to
@@ -80,6 +85,15 @@ public final class UserDictionary {
     /// serialise, which matters because `saveToDefaults()` runs on every word
     /// boundary.
     static let lastUsedKey = "dictus.userDictionary.lastUsed"
+
+    /// Key for the casing each learned word was typed in (#1090).
+    /// Stored as [String: String] where key = lowercase word, value = the form
+    /// `LearnedWordCasing` keeps ("Apple", "WisprFlow", or the word itself).
+    ///
+    /// WHY a parallel key, as `lastUsedKey` is: `storageKey` keeps its word → count
+    /// shape for #103 and for older builds, which ignore this key. Only swipe
+    /// typing reads it: a swipe has no typed letters to copy a capital from.
+    static let casingKey = "dictus.userDictionary.casing"
 
     /// Key for the one-shot flag recording that the trie-duplicate prune has run.
     /// See `pruneTrieDuplicatesIfNeeded(using:)`.
@@ -143,6 +157,17 @@ public final class UserDictionary {
     /// Temporary counter for words being observed (not yet learned).
     private var pendingWords: [String: Int] = [:]
 
+    /// The form each learned word was typed in, as `LearnedWordCasing` keeps it (#1090).
+    ///
+    /// INVARIANT: its keys are learned words. Every path that drops a learned word
+    /// drops its casing, and the load repairs the rest.
+    private var casings: [String: String] = [:]
+
+    /// Whether `casings` changed since it was last written. Typing a learned word
+    /// in the form already kept changes nothing, and is the common case on every
+    /// word boundary, so it costs no write.
+    private var casingsChanged = false
+
     private init() {
         loadFromDefaults()
     }
@@ -175,6 +200,12 @@ public final class UserDictionary {
     /// Number of learned words.
     public var count: Int { learnedWords.count }
 
+    /// How the learned word `word` is written, as the user typed it (`LearnedWordCasing`),
+    /// or nil when it is not learned or was learned before casings were kept (#1090).
+    public func casing(of word: String) -> String? {
+        casings[word.lowercased()]
+    }
+
     /// Whether the one-shot duplicate prune has already run on this install.
     ///
     /// WHY it is public: the prune needs a loaded base dictionary, which only the
@@ -206,6 +237,7 @@ public final class UserDictionary {
         learnedWords[key, default: 0] += 1
         let usageCount = learnedWords[key] ?? 1
         lastUsed[key] = Self.nowStamp()
+        noteCasing(of: key, typed: word)
         // Remove from pending if it was being tracked
         pendingWords.removeValue(forKey: key)
         saveToDefaults()
@@ -234,6 +266,7 @@ public final class UserDictionary {
         if let learnedCount = learnedWords[key] {
             learnedWords[key] = learnedCount + 1
             lastUsed[key] = Self.nowStamp()
+            noteCasing(of: key, typed: word)
             saveToDefaults()
             return false
         }
@@ -246,6 +279,7 @@ public final class UserDictionary {
             // Threshold reached — promote to learned
             learnedWords[key] = pendingCount
             lastUsed[key] = Self.nowStamp()
+            noteCasing(of: key, typed: word)
             pendingWords.removeValue(forKey: key)
             saveToDefaults()
             logLearned(key, usageCount: pendingCount)
@@ -269,12 +303,29 @@ public final class UserDictionary {
         pendingWords.removeAll()
     }
 
+    /// Keeps the form `typed` was written in for the learned word `key` (#1090).
+    private func noteCasing(of key: String, typed: String) {
+        let merged = LearnedWordCasing.merged(kept: casings[key], typed: typed)
+        guard merged != casings[key] else { return }
+        casings[key] = merged
+        casingsChanged = true
+    }
+
+    /// Drops the casings of words no longer learned. Called by every path that
+    /// removes learned words, so `casings` cannot outgrow the dictionary.
+    private func dropCasings(of words: some Sequence<String>) {
+        for word in words where casings.removeValue(forKey: word) != nil {
+            casingsChanged = true
+        }
+    }
+
     /// Remove a learned word (e.g., user removes it from dictionary management UI).
     public func forget(_ word: String) {
         let key = word.lowercased()
         learnedWords.removeValue(forKey: key)
         lastUsed.removeValue(forKey: key)
         pendingWords.removeValue(forKey: key)
+        dropCasings(of: [key])
         saveToDefaults()
     }
 
@@ -292,6 +343,8 @@ public final class UserDictionary {
         learnedWords.removeAll()
         lastUsed.removeAll()
         pendingWords.removeAll()
+        casings.removeAll()
+        casingsChanged = true
         saveToDefaults()
         // The prune flag describes the stored dictionary — "this one has been
         // cleaned" — so destroying that dictionary leaves it describing nothing,
@@ -353,8 +406,21 @@ public final class UserDictionary {
         learnedWords = defaults.dictionary(forKey: Self.storageKey) as? [String: Int] ?? [:]
         pendingWords = defaults.dictionary(forKey: Self.pendingKey) as? [String: Int] ?? [:]
         lastUsed = defaults.dictionary(forKey: Self.lastUsedKey) as? [String: Int] ?? [:]
+        casings = defaults.dictionary(forKey: Self.casingKey) as? [String: String] ?? [:]
+        casingsChanged = false
         stampEntriesMissingATimestamp()
         discardStaleEntries()
+        dropCasingsOfWordsNoLongerLearned()
+    }
+
+    /// Repairs `casings`' invariant on load: an older build of the other process
+    /// may have dropped a word without knowing about its casing. Writes only when
+    /// something was dropped.
+    private func dropCasingsOfWordsNoLongerLearned() {
+        dropCasings(of: casings.keys.filter { learnedWords[$0] == nil })
+        guard casingsChanged else { return }
+        AppGroup.defaults.set(casings, forKey: Self.casingKey)
+        casingsChanged = false
     }
 
     /// Drops entries unused for `staleAfterDays` (#287 decision 7).
@@ -384,6 +450,8 @@ public final class UserDictionary {
             learnedWords.removeValue(forKey: word)
             lastUsed.removeValue(forKey: word)
         }
+        // Their casings go with them in `dropCasingsOfWordsNoLongerLearned`, which
+        // the load runs next.
         let defaults = AppGroup.defaults
         defaults.set(learnedWords, forKey: Self.storageKey)
         defaults.set(lastUsed, forKey: Self.lastUsedKey)
@@ -429,6 +497,7 @@ public final class UserDictionary {
             learnedWords.removeValue(forKey: word)
             lastUsed.removeValue(forKey: word)
         }
+        dropCasings(of: duplicates)
         // The pad holds the same class of entry and is subject to the same rule,
         // so a word about to be promoted into a duplicate is dropped with them.
         pendingWords = pendingWords.filter { !provider.knowsWord($0.key) }
@@ -437,6 +506,10 @@ public final class UserDictionary {
         defaults.set(learnedWords, forKey: Self.storageKey)
         defaults.set(lastUsed, forKey: Self.lastUsedKey)
         defaults.set(pendingWords, forKey: Self.pendingKey)
+        if casingsChanged {
+            defaults.set(casings, forKey: Self.casingKey)
+            casingsChanged = false
+        }
 
         PersistentLog.log(.userDictionaryPruned(
             removed: duplicates.count,
@@ -584,6 +657,7 @@ public final class UserDictionary {
                 learnedWords.removeValue(forKey: key)
                 lastUsed.removeValue(forKey: key)
             }
+            dropCasings(of: evicted)
             PersistentLog.log(.userDictionaryEvicted(
                 removed: evicted.count,
                 learnedCount: learnedWords.count,
@@ -598,6 +672,10 @@ public final class UserDictionary {
         defaults.set(learnedWords, forKey: Self.storageKey)
         defaults.set(lastUsed, forKey: Self.lastUsedKey)
         defaults.set(pendingWords, forKey: Self.pendingKey)
+        if casingsChanged {
+            defaults.set(casings, forKey: Self.casingKey)
+            casingsChanged = false
+        }
     }
 
     private func savePendingToDefaults() {

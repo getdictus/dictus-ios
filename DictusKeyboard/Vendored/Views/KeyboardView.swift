@@ -556,6 +556,10 @@ final internal class GiellaKeyboardView: UIView,
         return bounds
     }
 
+    func longpressHeldKeyFrame() -> CGRect? {
+        activeKey.flatMap { collectionView.layoutAttributesForItem(at: $0.indexPath)?.frame }
+    }
+
     func longpressKeySize() -> CGSize {
         switch currentlyLongpressedKey?.type {
         case .returnkey(name: _):
@@ -682,6 +686,11 @@ final internal class GiellaKeyboardView: UIView,
         let indexPath: IndexPath
         /// Where the finger is, in the collection view, clamped as the hit test clamps it (#1011).
         var point: CGPoint = .zero
+        /// The finger pressing the key: the only one that moves it or types it (#1089).
+        let touch: UITouch
+
+        /// This key as `PendingKey` sees it, whose rule says which finger may move or type it.
+        var pending: PendingKey<UITouch, ActiveKey> { PendingKey(key: self, finger: touch) }
     }
 
     // MARK: - Spatial autocorrect (#1011)
@@ -990,7 +999,7 @@ final internal class GiellaKeyboardView: UIView,
                                          key.type.triggersOnTouchDown) && !isSymbolsKey
 
                 if shouldSetActiveKey {
-                    activeKey = ActiveKey(key: key, indexPath: indexPath, point: touchPoint)
+                    activeKey = ActiveKey(key: key, indexPath: indexPath, point: touchPoint, touch: touch)
                 }
                 // A letter's touch may become a swipe (#948); any other key's never does.
                 swipeTyping?.began(touch, at: touchPoint, key: key)
@@ -1120,11 +1129,16 @@ final internal class GiellaKeyboardView: UIView,
             if touches.isEmpty { return }
         }
 
+        // Only the finger pressing the pending key moves it. Another finger's tremor, such
+        // as the first thumb's while the second is down, used to move it under that finger,
+        // whose lift then typed its letter a second time (#1089).
+        let ownTouch = activeKey?.pending.ownFinger(among: touches)
+
         if let activeKey = activeKey,
             let cell = collectionView.cellForItem(at: activeKey.indexPath) as? KeyCell,
             let swipeKeyView = cell.keyView,
             swipeKeyView.isSwipeKey,
-            let touchLocation = touches.first?.location(in: cell.superview) {
+            let touchLocation = ownTouch?.location(in: cell.superview) {
             let deadZone: CGFloat = 20.0
             let delta: CGFloat = 60.0
             let yOffset = touchLocation.y - cell.center.y
@@ -1141,16 +1155,12 @@ final internal class GiellaKeyboardView: UIView,
             return
         }
 
-        if activeKey != nil {
-            for touch in touches {
-                let movePoint = clampedPoint(touch.location(in: collectionView))
-                if let indexPath = keyIndexPath(at: movePoint) {
-                    let key = currentPage[indexPath.section][indexPath.row]
-                    activeKey = ActiveKey(key: key, indexPath: indexPath, point: movePoint)
-                } else {
-                    activeKey = nil
-                }
+        if let active = activeKey, let touch = ownTouch {
+            let movePoint = clampedPoint(touch.location(in: collectionView))
+            let keyUnder = keyIndexPath(at: movePoint).map { indexPath in
+                ActiveKey(key: currentPage[indexPath.section][indexPath.row], indexPath: indexPath, point: movePoint, touch: touch)
             }
+            activeKey = active.pending.moved(touch, onto: keyUnder)?.key
         }
     }
 
@@ -1186,25 +1196,24 @@ final internal class GiellaKeyboardView: UIView,
             swipe.forget(touches)
         }
 
-        if let activeKey = activeKey {
-            if activeKey.key.type.triggersOnTouchUp {
-                if let cell = collectionView.cellForItem(at: activeKey.indexPath) as? KeyCell,
-                    let swipeKeyView = cell.keyView,
-                    swipeKeyView.isSwipeKey,
-                    swipeKeyView.percentageAlternative > 0.5 {
-                    // A swiped key is not read from where it was touched (#1011).
-                    lastTriggerPoint = nil
-                    delegate?.didSwipeKey(activeKey.key)
-                } else {
-                    lastTriggerPoint = activeKey.point
-                    delegate?.didTriggerKey(activeKey.key)
-                }
+        // Only the finger pressing the pending key types it. Another finger lifting, such as
+        // the first thumb after the second landed and typed its key, leaves it pending (#1089).
+        guard let active = activeKey, active.pending.isTyped(byLifting: touches) else { return }
+
+        if active.key.type.triggersOnTouchUp {
+            if let cell = collectionView.cellForItem(at: active.indexPath) as? KeyCell,
+                let swipeKeyView = cell.keyView,
+                swipeKeyView.isSwipeKey,
+                swipeKeyView.percentageAlternative > 0.5 {
+                // A swiped key is not read from where it was touched (#1011).
+                lastTriggerPoint = nil
+                delegate?.didSwipeKey(active.key)
+            } else {
+                lastTriggerPoint = active.point
+                delegate?.didTriggerKey(active.key)
             }
         }
-
-        if activeKey != nil {
-            activeKey = nil
-        }
+        activeKey = nil
     }
 
     private func showKeyboardModeOverlay(_ longpressGestureRecognizer: UILongPressGestureRecognizer, key: KeyDefinition) {

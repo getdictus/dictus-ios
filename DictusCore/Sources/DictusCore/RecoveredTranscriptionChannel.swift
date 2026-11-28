@@ -4,7 +4,8 @@
 import Foundation
 
 /// The text of the last keyboard dictation the document refused, kept until the user
-/// either opens it in DictusApp or starts another dictation.
+/// opens it in DictusApp, pastes it from the keyboard's pill (#881), or starts another
+/// dictation.
 ///
 /// WHY THIS EXISTS: an interrupted dictation (a call, another app taking the mic) is
 /// transcribed when DictusApp comes back to the foreground, and by then the keyboard
@@ -27,9 +28,15 @@ public enum RecoveredTranscriptionChannel {
     /// Record how a dictation ended. Only a refusal creates the pending state: an
     /// insertion put the text where the user wanted it, and `.nothing` carries no text
     /// (the raw DictusApp holds is that dictation's whole story, told by its own error).
-    public static func note(_ ending: PolishedTextChannel.Ending, in defaults: UserDefaults = AppGroup.defaults) {
+    ///
+    /// The time is stored beside the text: the paste pill (#881) offers it for
+    /// `pasteWindow` from that moment.
+    public static func note(_ ending: PolishedTextChannel.Ending,
+                            in defaults: UserDefaults = AppGroup.defaults,
+                            now: Date = Date()) {
         guard case .refused(let text) = ending, !text.isEmpty else { return }
         defaults.set(text, forKey: SharedKeys.recoveredTranscription)
+        defaults.set(now.timeIntervalSince1970, forKey: SharedKeys.recoveredTranscriptionStoredAt)
         defaults.synchronize()
     }
 
@@ -42,6 +49,7 @@ public enum RecoveredTranscriptionChannel {
     /// previous one, and a new dictation is the user moving on.
     public static func clear(in defaults: UserDefaults = AppGroup.defaults) {
         defaults.removeObject(forKey: SharedKeys.recoveredTranscription)
+        defaults.removeObject(forKey: SharedKeys.recoveredTranscriptionStoredAt)
         defaults.synchronize()
     }
 
@@ -52,4 +60,52 @@ public enum RecoveredTranscriptionChannel {
         if text != nil { clear(in: defaults) }
         return text
     }
+
+    // MARK: - The paste pill (#881)
+
+    /// How long the keyboard offers to paste the text. Hex's figure, and a choice rather
+    /// than a measurement: long enough for a short call, short enough that the text does
+    /// not follow the user into an unrelated app for the rest of the day. Past it the text
+    /// stays in the channel, and DictusApp's "Last transcription" card still shows it.
+    public static let pasteWindow: TimeInterval = 600
+
+    /// The text the pill may paste, or nil when there is none or it is older than
+    /// `pasteWindow`. A text with no stored time predates the pill and is never offered.
+    public static func pasteable(in defaults: UserDefaults = AppGroup.defaults, now: Date = Date()) -> String? {
+        guard let remaining = remainingPasteTime(in: defaults, now: now), remaining > 0 else { return nil }
+        return current(in: defaults)
+    }
+
+    /// Seconds until the pill expires, nil when no text with a stored time is waiting.
+    /// Negative once it has expired.
+    public static func remainingPasteTime(in defaults: UserDefaults = AppGroup.defaults,
+                                          now: Date = Date()) -> TimeInterval? {
+        guard current(in: defaults) != nil,
+              let storedAt = defaults.object(forKey: SharedKeys.recoveredTranscriptionStoredAt) as? Double
+        else { return nil }
+        return storedAt + pasteWindow - now.timeIntervalSince1970
+    }
+
+    /// What the keyboard's centre slot offers for the waiting text.
+    ///
+    /// - Parameter pastes: `KeyboardFeatureSettings.isPasteTranscriptionEffective`. Off,
+    ///   the #860 banner as it always was: no time limit, a tap opens the app.
+    public static func offer(in defaults: UserDefaults = AppGroup.defaults,
+                             pastes: Bool,
+                             now: Date = Date()) -> RecoveredTranscriptionOffer {
+        if pastes {
+            return pasteable(in: defaults, now: now) == nil ? .none : .paste
+        }
+        return current(in: defaults) == nil ? .none : .openInApp
+    }
+}
+
+/// What the keyboard shows for a dictation it could not type.
+public enum RecoveredTranscriptionOffer: Equatable, Sendable {
+    /// Nothing is waiting, or the paste window has passed.
+    case none
+    /// "Dictation interrupted. Your text is in the Dictus app." (#860).
+    case openInApp
+    /// "Paste transcription" (#881): a tap types the text into the current field.
+    case paste
 }

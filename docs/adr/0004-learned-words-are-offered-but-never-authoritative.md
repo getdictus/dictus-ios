@@ -1,7 +1,7 @@
 # 0004 — Learned words are offered but never authoritative
 
 - **Date:** 2026-08-13
-- **Status:** Accepted; amended 2026-11-17 by #498, which makes a learned word an autocorrect target (L3) under the rule below
+- **Status:** Accepted; amended 2026-11-17 by #498, which makes a learned word an autocorrect target (L3) under the rule below, and 2026-11-26 by #1090, which lets swipe typing read a learned word under the same rule
 - **Context:** Issue #346, decided in the grilling session of 2026-08-13. Implements decision 5 of the #287 session of 2026-08-11, which established the L1/L2/L3 vocabulary. Depends on #287 block A (PR #347), which is what makes the learned set small enough to be worth offering.
 
 ## Decision
@@ -29,7 +29,7 @@ This is the load-bearing fact of the whole decision, and it is the thing to re-c
 - **No language filter.** The store has no language tag, so a word learned in German is offered while typing French. Accepted: the cost is one slot on a prefix the user typed, and L2 immunity already crosses languages invisibly. Tagging is a schema change that #103 (iCloud KVS) builds its merge strategy against; if it becomes necessary, #288 will make it necessary first.
 - **A fully typed learned word leaves the bar empty** until space is pressed. There is nothing longer to complete, and echoing the word back costs a slot for a tap that changes nothing. Predictions after the space are unaffected.
 - **Autocorrect disabled still offers previously learned words.** #287 decision 8 blocks *learning* in that configuration because nothing vets a new word there; an existing entry was vetted when it was learned, and the bar imposes nothing.
-- **Casing is reconstructed from the typed prefix**, not stored. `UserDictionary` lowercases its keys, and the same rule already governs the accent path in `spellCheck`.
+- **Casing is reconstructed from the typed prefix**, not stored. `UserDictionary` lowercases its keys, and the same rule already governs the accent path in `spellCheck`. (Still true of tap typing. Since #1090 the store also keeps the form each learned word is typed in, for swipe typing only: see the amendment below.)
 
 ## Amendment (#498): a learned word is an autocorrect target, by a separate rule
 
@@ -43,4 +43,16 @@ Typed with a typo, a learned word used to be corrected toward a dictionary word 
 6. **The bigram rerank keeps it.** A learned word has no bigrams, so `spellCheck(_:previousWord:)` returns it before the rerank, as it does for the language overrides.
 
 On space, slot 1 of the corrections row previews it like any other correction, so the user sees it before it is applied and can refuse it the usual way. Measured with the keyboard bench (#954): no change on the `fr` and `en` runs, and the `fr-learned` / `en-learned` runs correct the four mistyped learned words they contain toward the learned word, with no correctly typed word broken. The PR for #498 carries the table.
+
+## Amendment (#1090): swipe typing reads an adopted learned word, in its casing
+
+Swipe typing (#948) types its best reading on lift, with no tap: on this ADR's terms it is a second route by which something reaches the document without the user choosing it, beside `spellCheck`. Until #1090 it read no learned word at all. It now reads them, under #498's rule and through the same store, so the two ways of typing agree:
+
+1. **The source is `UserDictionary`.** No second list: `SwipeOwnWords.words` reads `allLearnedWords`, as `LearnedWordCorrection` does.
+2. **Only an adopted word: used at least twice** (`LearnedWordCorrection.isAdopted`, the one predicate both paths call). A word learned on one refusal, often the typo itself (#872), is still offered (L1) and immune (L2), and no swipe reads it, even one drawn exactly through its keys. The unit test `SwipeOwnWordsTests.testATypoLearnedOnceNeverWinsASwipeAndAnAdoptedWordDoes` holds the line.
+3. **A model word keeps the model's cost.** A learned word the swipe model already has is not read a second time; the others are read beside the model at Hex's cost of an own word (`SwipeDecoder.ownWordCost`, about a word ranked 20,000th), so a common word on the same path still wins. Measured with the swipe bench (#1090, `tools/swipe-bench/README.md`): fourteen adopted typos, most drawn on the very path of a common word (« realy », « tambien », « vieleicht », « quil »), took the first reading of a dictionary word 5 times in 201,876 swipes, all with sloppy fingers, and never with clean, neat or typical ones; the six typos learned once were read 0 times.
+4. **The casing is stored.** A swipe has no typed letters to copy a capital from, so `UserDictionary` now keeps, under a parallel key (`dictus.userDictionary.casing`, as `lastUsed` is), the form each learned word is typed in, by `LearnedWordCasing`'s rule: a capital past the first letter or an all-lowercase form is the user's, a capital first letter alone may be the sentence's and counts only when nothing better is known. An adopted word is written so mid-sentence (« Apple », « WisprFlow »); the sentence's capital still applies to a lowercase one. Tap typing reads none of it.
+5. **Contacts and text replacements** (`SupplementaryLexicon`, #873) are read too, and written by the lexicon's own decision, the one a tapped word gets. They are the user's writing, not something learned, so no adoption applies, as on tap. A text replacement's shortcut is not expanded by a swipe.
+
+All of it lives behind the swipe switch (Expériences): with it off there is no swipe controller and nothing reads the casings. The store keeps them either way, so a word learned before the switch is turned on comes out in its casing.
 

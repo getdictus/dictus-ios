@@ -30,8 +30,10 @@
 // What the port changed: Hex's engine methods are free functions on values here, so the
 // keyboard's bridge and the tests call the same rules. The automatic capital the swipe's own
 // space brings follows Dictus's autocapitalisation (`DictusKeyboardBridge
-// .updateCapitalization`), not Hex's. Left out: Hex's rare-name ranking and name casing
-// (they need Hex's dictionary check), its text-replacement readings, and `SwipeRetries`.
+// .updateCapitalization`), not Hex's. Left out: Hex's rare-name ranking and its name casing
+// from the system dictionary (they need Hex's dictionary check), its text-replacement
+// readings, and `SwipeRetries`. The user's own words and their casing came later, after
+// Hex's, in `SwipeOwnWords` (#1090).
 import CoreGraphics
 import Foundation
 
@@ -197,10 +199,15 @@ public enum SwipeTypingText {
     }
 
     /// A reading as it goes in: all capitals with caps lock, a capital first letter with
-    /// `capital`, else as the model or the extra words spell it ("I'm" keeps its capital).
+    /// `capital`, else as the model or the extra words spell it ("I'm" keeps its capital,
+    /// and an own word its casing, `SwipeOwnWords.written`: « Apple » mid-sentence).
+    ///
+    /// A word with a capital past its first letter (« iPhone », « WisprFlow ») is written so
+    /// at the start of a sentence too, as `CuratedNames` writes a tapped « iPhone »: no
+    /// model word has one, so only an own word meets this.
     public static func cased(_ word: String, capital: Bool, capsLock: Bool) -> String {
         if capsLock { return word.uppercased() }
-        guard capital, let first = word.first else { return word }
+        guard capital, let first = word.first, !LearnedWordCasing.hasInnerCapital(word) else { return word }
         return first.uppercased() + word.dropFirst()
     }
 

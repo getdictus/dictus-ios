@@ -28,7 +28,10 @@ import Foundation
 ///    dictation, so it sits above the suggestions: below them it would vanish at the
 ///    first letter typed, and the user would never learn the text exists. It costs the
 ///    suggestions for that long, and that is the price of a dictation not being lost
-///    in silence. Below the error, which is the newer and more urgent fact.
+///    in silence. Below the error, which is the newer and more urgent fact. With the
+///    Experiments switch on, the same rung holds the **paste pill** (#881) instead:
+///    same text, a tap types it here, and it is gone ten minutes after the text was
+///    stored (`RecoveredTranscriptionChannel.pasteWindow`).
 /// 2. **Undo** (#266) — expires in seconds and on the first keystroke, and it is the
 ///    only alternative to holding backspace on a two-minute dictation.
 /// 3. **Suggestions** — the keyboard's core job, and the reason the left slot yields
@@ -82,6 +85,10 @@ public enum ToolbarCentreSlot: Equatable, Sendable {
     /// "Dictation interrupted. Your text is in the Dictus app." (#860), a tappable
     /// banner that opens the app on that text.
     case recoveredTranscription
+
+    /// "Paste transcription" (#881), the same waiting text offered as a pill whose tap
+    /// types it into the current field.
+    case pasteTranscription
 
     /// The undo-insertion control (#266).
     case dictationUndo
@@ -140,8 +147,8 @@ public enum ToolbarCentreSlot: Equatable, Sendable {
     /// - Parameter isChoosingMode: whether the long-press fan is on screen.
     /// - Parameter offersPaste: whether a recent copy is waiting to be pasted —
     ///   `ClipboardPasteOffer.isOffered` (#634).
-    /// - Parameter recoveredTranscriptionPending: whether a refused dictation's text is
-    ///   waiting in DictusApp — `RecoveredTranscriptionChannel.current` (#860).
+    /// - Parameter recoveredTranscription: what to offer for a refused dictation's text —
+    ///   `RecoveredTranscriptionChannel.offer` (#860, #881).
     /// - Parameter armedModeName: the armed mode's display name, or nil for Normal.
     /// - Parameter armedModeIsEffective: whether a dictation starting now would
     ///   actually run that mode — `SmartModeAvailability.forDictation` (#423). No
@@ -156,7 +163,7 @@ public enum ToolbarCentreSlot: Equatable, Sendable {
     ///   teaching (#639) — the caller owns that policy, see `MenuPanelDiscovery`.
     public static func resolve(isChoosingMode: Bool,
                                errorMessage: String?,
-                               recoveredTranscriptionPending: Bool,
+                               recoveredTranscription: RecoveredTranscriptionOffer,
                                offersDictationUndo: Bool,
                                hasSuggestions: Bool,
                                offersPaste: Bool,
@@ -168,7 +175,11 @@ public enum ToolbarCentreSlot: Equatable, Sendable {
                                offersDiscoveryHint: Bool) -> ToolbarCentreSlot {
         if isChoosingMode { return .choosingMode }
         if let errorMessage { return .error(errorMessage) }
-        if recoveredTranscriptionPending { return .recoveredTranscription }
+        switch recoveredTranscription {
+        case .openInApp: return .recoveredTranscription
+        case .paste: return .pasteTranscription
+        case .none: break
+        }
         if offersDictationUndo { return .dictationUndo }
         if hasSuggestions { return .suggestions }
         if offersPaste { return .paste }
@@ -193,7 +204,7 @@ public enum ToolbarCentreSlot: Equatable, Sendable {
     /// teaches is on the ☰.
     public var evictsHamburger: Bool {
         switch self {
-        case .error, .recoveredTranscription, .dictationUndo, .suggestions: return true
+        case .error, .recoveredTranscription, .pasteTranscription, .dictationUndo, .suggestions: return true
         case .choosingMode, .paste, .dictationUnavailable, .polishUnavailable, .armedMode, .armedModeInactive,
              .panelHint, .discoveryHint, .empty:
             return false

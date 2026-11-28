@@ -77,10 +77,17 @@ public enum SharedKeys {
     public static let keyboardPartnerLanguage = "dictus.keyboard.partnerLanguage"
     /// Bool, default TRUE: sliding left from Delete erases word by word (#609).
     public static let keyboardDeleteWordSwipe = "dictus.keyboard.deleteWordSwipe"
+    /// Bool, default false: the suggestion bar drawn as Apple's, a capsule behind the word
+    /// space will apply and a capsule undo chip (#502). Display only.
+    public static let keyboardSuggestionCapsules = "dictus.keyboard.suggestionCapsules"
     /// Bool, default false: typing a word by sliding across the letters.
     public static let keyboardSwipeTyping = "dictus.keyboard.swipeTyping"
     /// Bool, default true: draws the finger's trail while swipe typing.
     public static let keyboardSwipeTrail = "dictus.keyboard.swipeTrail"
+    /// Bool, default false: a dictation the keyboard could not type is offered as a
+    /// "Paste transcription" pill, and a hand-off nobody claimed in time is never typed on
+    /// its own (#881). See `KeyboardFeatureSettings.isPasteTranscriptionEffective`.
+    public static let keyboardPasteTranscription = "dictus.keyboard.pasteTranscription"
     /// String, an `AppDistribution` raw value (`debug`, `testFlight`, `appStore`): where the
     /// app says it was installed from, written by the app at each activation. The keyboard
     /// reads it to know whether the Experiments page exists, which its own receipt cannot
@@ -301,6 +308,9 @@ public enum SharedKeys {
     /// only through `RecoveredTranscriptionChannel`; the keyboard's banner is drawn
     /// from it.
     public static let recoveredTranscription = "dictus.recoveredTranscription"
+    /// Double, seconds since 1970: when `recoveredTranscription` was stored. The paste
+    /// pill's ten minutes run from it (#881).
+    public static let recoveredTranscriptionStoredAt = "dictus.recoveredTranscriptionStoredAt"
 
     // MARK: - Smart Modes (issue #79)
     /// String: identifier of the armed Smart Mode, or absent for Normal. Sticky —

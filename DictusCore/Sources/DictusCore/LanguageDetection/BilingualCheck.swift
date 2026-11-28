@@ -23,6 +23,7 @@ import Foundation
 /// | `afraid`, after `I'm` | `aurais` | an English word after English words (Hex) | `afraid` |
 /// | `teh` | nothing | English alone fixes it (Hex's fallback) | `the` |
 /// | `wprk` | `porc` | both fix it; the words before are English (Hex's lean) | `work` |
+/// | `tonight`, after `je sors` | `to light` | a split of a word English has (#1071) | `tonight` |
 ///
 /// WHY two keep rules. Hex keeps every word the other language knows. Measured on the
 /// mixed bench of #1010 with both spatial decoders (study of 2026-11-21, section 7), that
@@ -57,6 +58,9 @@ public enum BilingualCheck {
         /// The typed word stays: a word of the other language, after words of the other
         /// language, would become a different word (Hex).
         case keptOtherWord
+        /// The typed word stays: the active language would split a word the other language
+        /// has (#1071: `franchement` after English words is no `fra cement`).
+        case keptUnsplit
         /// Only the other language fixes the word.
         case otherFixes
         /// Both fix it differently; the words before lean the other language.
@@ -116,6 +120,15 @@ public enum BilingualCheck {
                 return Decision(proposal: ownProposal, rule: .active)
             }
             return Decision(proposal: theirProposal, rule: .otherFixes)
+        }
+        // #1071: a word the other language has is never split by the active one. The keep
+        // rules below cannot see a split (no dictionary has `fra cement`), so after `its
+        // raining`, English wrote `fra cement` for French `franchement`. Hex does not split
+        // it either: `cautiousReplacement` (dev `4f3a45e0`) asks its own guesses, where its
+        // splits come from (`usableGuess`), for a word the partner knows only when that word
+        // has two letters or is a sure fix; the rule here is that part of it, for splits.
+        if otherKnows, isSplit(fix, of: word) {
+            return Decision(proposal: nil, rule: .keptUnsplit)
         }
         let lean = LanguageLean.lean(before: before, word: word, active: active, other: other)
         // Hex's exception: a two-letter word is mostly an abbreviation or a slip in the other
@@ -184,6 +197,12 @@ public enum BilingualCheck {
     private static func isNameGuess(_ fix: String, for word: String) -> Bool {
         guard let fixFirst = fix.first, let typedFirst = word.first else { return false }
         return fixFirst.isUppercase && !typedFirst.isUppercase
+    }
+
+    /// Whether `fix` writes the typed `word` as several words: the engine's split of a
+    /// missed space (`GluedWordSplit`). An elision is no split: `j'ai` has no space.
+    private static func isSplit(_ fix: String, of word: String) -> Bool {
+        fix.contains(" ") && !word.contains(" ")
     }
 
     /// Whether `proposal` offers `word` in the bar, accents and case aside.

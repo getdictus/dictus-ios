@@ -1031,6 +1031,64 @@
         }
       }
     },
+    "Paste the transcription that could not be typed" : {
+      "comment" : "Accessibility label of the keyboard toolbar pill that types a dictation the keyboard could not insert into the current field (#881).",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das Diktat einfügen, das nicht eingegeben werden konnte"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Paste the transcription that could not be typed"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pegar la transcripción que no se pudo escribir"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Coller la transcription qui n’a pas pu être insérée"
+          }
+        }
+      }
+    },
+    "Paste transcription" : {
+      "comment" : "Keyboard toolbar pill shown when a dictation could not be inserted. Tapping it types the text into the current field (#881). Short: it sits in the middle of the suggestion bar.",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diktat einfügen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Paste transcription"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pegar transcripción"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Coller la transcription"
+          }
+        }
+      }
+    },
     "People" : {
       "comment" : "Emoji picker section header, shown uppercased above the grid.",
       "localizations" : {
