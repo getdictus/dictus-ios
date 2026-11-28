@@ -1539,6 +1539,13 @@ extension ModelManager {
         DictationCoordinator.shared.adoptAppleEngine()
     }
 
+    /// The engine that dictates now, Apple's included (#1083): what Home's "Active model"
+    /// card names. Nil when there is none to dictate with. See `ActiveSpeechEngine`.
+    var activeSpeechEngine: ActiveSpeechEngine? {
+        ActiveSpeechEngine.resolve(choice: speechEngineChoice, appleAvailability: appleEngineRecordedAvailability,
+                                   downloadedModel: isModelReady ? activeModel : nil)
+    }
+
     /// Stores the engine the onboarding's route decided (#1057), without picking a model
     /// or adopting an engine: Apple's install has not finished when the route is decided,
     /// and on today's route no model is downloaded yet. The choice is what lets a run

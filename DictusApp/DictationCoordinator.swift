@@ -63,7 +63,8 @@ class DictationCoordinator: ObservableObject {
     var stageWatchdogStageStart = Date()
 
     private var whisperKit: WhisperKit?
-    private var currentModelName: String?
+    /// Readable from `DictationCoordinator+EnginePolicy.swift`; written only here.
+    private(set) var currentModelName: String?
     private var dictationTask: Task<Void, Never>?
 
     /// Fires ~1.5s into a recording to prewarm the Apple FM polish model (#141).
@@ -918,12 +919,32 @@ class DictationCoordinator: ObservableObject {
         // still being that session (#267) -- see `mayReport`.
         let session = sessionGeneration.current
 
+        // The post-roll counts from the tap (#1085): the keyboard's, carried by the trace,
+        // or this call for a stop tapped in the app or on the Dynamic Island.
+        let now = Date().timeIntervalSince1970
+        let postRoll = StopPostRoll(tapEpoch: stopTrace?.tapEpoch ?? now, startEpoch: now)
+
+        // `.transcribing` before the post-roll, not after it (#1085): the keyboard and the
+        // Dynamic Island leave the recording screen on this status, so the tap is answered
+        // at once and the 300 ms the microphone stays open read as transcription. The
+        // estimate only sizes the stage watchdog, which is within a buffer of the truth.
+        enterTranscription(audioSeconds: Double(audioEngine.currentSampleCount) / 16000.0 + StopPostRoll.margin)
+        stopTrace?.log("statusTranscribing")
+        LiveActivityManager.shared.transitionToTranscribing()
+        // Arm watchdog: if DI fails to leave .recording, force recovery after 10s.
+        // If transitionToTranscribing succeeded, the watchdog's guard exits harmlessly.
+        LiveActivityManager.shared.startRecordingWatchdog()
+
         dictationTask = Task {
             defer { self.isTranscribingInFlight = false }
             do {
                 // Also where the engine goes quiet: it stays warm, and `collectSamples`
                 // mutes its input (#430), so there is no separate engine-stop step.
-                let samples = audioEngine.collectSamples()
+                // Nil is a cancel (or another teardown) that took the recording during the
+                // post-roll: that path owns the status and the cleanup.
+                guard let samples = await audioEngine.collectSamples(
+                    after: postRoll, sessionID: stopTrace?.sessionID ?? "app"
+                ) else { return }
                 stopTrace?.log("samplesCollected")
 
                 guard !samples.isEmpty else {
@@ -954,12 +975,7 @@ class DictationCoordinator: ObservableObject {
                     DictusLogger.app.info("Recording stopped. Samples: \(samples.count, privacy: .public), Duration: \(String(format: "%.1f", audioDuration), privacy: .public)s")
                 }
 
-                enterTranscription(audioSeconds: audioDuration)
-                stopTrace?.log("statusTranscribing")
-                LiveActivityManager.shared.transitionToTranscribing()
-                // Arm watchdog: if DI fails to leave .recording, force recovery after 10s.
-                // If transitionToTranscribing succeeded, the watchdog's guard exits harmlessly.
-                LiveActivityManager.shared.startRecordingWatchdog()
+                // After the collection, so the stop sound is never in the recording (#1085).
                 if playsStopSound { SoundFeedbackService.playRecordStop() }
                 stopTrace?.log("stopFeedbackDone")
 
@@ -1542,13 +1558,12 @@ class DictationCoordinator: ObservableObject {
     }
 }
 
-// MARK: - Speech engine initialization
+// MARK: - Engine selection
 
-/// Engine initialization lives in its own extension so the coordinator class body
-/// stays within the SwiftLint `type_body_length` budget. These methods are still
-/// file-private members of the coordinator and touch the same stored properties.
+/// Internal, unlike the initializers it calls below, because
+/// `DictationCoordinator+EnginePolicy.swift` loads Apple's engine through it.
 @MainActor
-private extension DictationCoordinator {
+extension DictationCoordinator {
     /// Initialize the appropriate STT engine based on the active model.
     ///
     /// WHY engine-aware:
@@ -1586,7 +1601,15 @@ private extension DictationCoordinator {
             try await ensureWhisperKitEngineReady(modelName: modelName)
         }
     }
+}
 
+// MARK: - Speech engine initialization
+
+/// Engine initialization lives in its own extension so the coordinator class body
+/// stays within the SwiftLint `type_body_length` budget. These methods are still
+/// file-private members of the coordinator and touch the same stored properties.
+@MainActor
+private extension DictationCoordinator {
     /// Make Apple's recognizer the engine `TranscriptionService` calls.
     ///
     /// No lock, no Neural Engine gate, no warm inference: nothing is compiled or loaded in
@@ -1914,36 +1937,6 @@ private extension DictationCoordinator {
             ))
             throw wrapped
         }
-    }
-}
-
-// MARK: - Apple's engine (Models screen)
-
-extension DictationCoordinator {
-    /// Load Apple's engine right after the user picks it, so the next dictation does not
-    /// have to. Unlike `preloadActiveModel` it leaves `modelLoadState` alone: there is no
-    /// model preparation to show, and a `.loading` state would put the downloaded model's
-    /// preparation screen over the Models screen for a load that is not happening.
-    func adoptAppleEngine() {
-        Task {
-            do {
-                try await ensureEngineReady()
-                AppleEngineAssets.log("adopted", "engine=\(self.currentModelName ?? "none")")
-            } catch {
-                AppleEngineAssets.log("adoptFailed", "error=\(DictationFailureMessage.diagnostic(for: error))")
-            }
-        }
-    }
-
-    /// The dictation's language policy with the engine that will actually transcribe it.
-    ///
-    /// `TranscriptionLanguagePolicy.snapshot()` names the engine of `activeModel`, which
-    /// stays the downloaded model when Apple is picked. Apple is told the chosen language
-    /// and is polished as a forced-language engine, so its dictations carry `.apple`.
-    func languagePolicyForLoadedEngine(_ policy: TranscriptionLanguagePolicy) -> TranscriptionLanguagePolicy {
-        guard currentModelName == AppleSpeechEngineIdentity.identifier else { return policy }
-        return TranscriptionLanguagePolicy(mode: policy.mode, keyboardLanguage: policy.keyboardLanguage,
-                                           engine: .apple, modelIdentifier: AppleSpeechEngineIdentity.identifier)
     }
 }
 

@@ -46,6 +46,22 @@ final class ContextualContractionTests: XCTestCase {
         XCTAssertNil(contraction("its", after: "of"))
     }
 
+    /// What Apple's keyboard writes once the next word is typed: "the dog wagged its tail"
+    /// keeps the possessive, "its raining" and "its a good idea" are "it's".
+    func test_its_beforeAWordNoPossessiveTakes_isItIs() {
+        XCTAssertEqual(contextualContraction(profile: englishProfile, word: "its", before: "raining"), "it's")
+        XCTAssertEqual(contextualContraction(profile: englishProfile, word: "its", before: "a"), "it's")
+        XCTAssertEqual(contextualContraction(profile: englishProfile, word: "Its", before: "Not"), "It's")
+    }
+
+    func test_its_beforeANounOrAdjective_staysPossessive() {
+        for next in ["tail", "own", "new", "true", "collar", "employees", "best"] {
+            XCTAssertNil(contextualContraction(profile: englishProfile, word: "its", before: next), next)
+        }
+        XCTAssertNil(contextualContraction(profile: englishProfile, word: "ill", before: "a"))
+        XCTAssertNil(contextualContraction(profile: frenchProfile, word: "its", before: "a"))
+    }
+
     // MARK: - were / we're
 
     func test_were_afterAClauseWord_isWeAre() {
