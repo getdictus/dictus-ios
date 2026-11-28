@@ -1,0 +1,121 @@
+# a / à corpus (#501 research). One sentence per line, as the writer means it.
+# Every token that is "a" or "à", alone or after an elision (qu'à, m'a), is scored.
+# The typist types it lowercase, no accent, apostrophes typed, a space after every word.
+case	sentence
+start	à demain
+start	à bientôt
+start	à plus tard
+start	à tout à l'heure
+start	à vendredi alors
+start	à ce soir chez toi
+start	à mon avis c'est trop cher
+start	à quelle heure tu arrives
+cap-start	à deux on ira plus vite
+cap-start	à midi je mange avec paul
+cap-start	à la maison tout va bien
+cap-start	à table les enfants
+cap-start	à part ça tout va bien
+cap-start	à partir de lundi je travaille
+noun-a	le problème a été réglé
+noun-a	ma voiture a calé ce matin
+noun-a	le chien a aboyé toute la nuit
+noun-a	mon frère a appelé hier
+noun-a	la réunion a commencé sans moi
+noun-a	le train a du retard
+noun-a	le médecin a dit de rester au lit
+noun-a	la boulangerie a fermé plus tôt
+noun-a	mon téléphone a encore planté
+noun-a	le colis a bien été livré
+noun-à	une machine à laver
+noun-à	un sac à dos
+noun-à	une brosse à dents
+noun-à	la salle à manger
+noun-à	un verre à vin
+noun-à	une cuillère à soupe
+noun-à	un fer à repasser
+noun-à	j'ai un cours à midi
+noun-à	il reste du travail à faire
+noun-à	on a une maison à vendre
+adj-à	c'est facile à faire
+adj-à	je suis prêt à partir
+adj-à	c'est difficile à dire
+adj-à	c'est bon à savoir
+adj-à	elle est la première à arriver
+verb-à	je pense à toi
+verb-à	jouer à deux mains
+verb-à	il faut penser à tout
+verb-à	j'ai du mal à dormir
+verb-à	je commence à comprendre
+verb-à	elle apprend à nager
+verb-à	on arrive à la gare
+verb-à	je vais à paris demain
+verb-à	il habite à lyon
+verb-à	j'ai parlé à ta mère
+verb-à	tu as répondu à son message
+verb-à	je joue à la console
+verb-à	elle a réussi à le convaincre
+verb-à	je t'invite à dîner
+verb-à	on s'est mis à courir
+phrase	je rentre à pied
+phrase	il habite à côté
+phrase	c'est à cause de la pluie
+phrase	j'ai à peine dormi
+phrase	on passe à travers le parc
+phrase	je viens à vélo
+phrase	il est arrivé à l'heure
+phrase	c'est à peu près fini
+phrase	j'ai lu le livre à moitié
+phrase	on se voit à la fin du cours
+phrase	je serai là à huit heures
+phrase	on travaille à deux sur ce projet
+il-a	il a faim
+il-a	elle a froid
+il-a	il a beaucoup mangé
+il-a	elle a déjà fini
+il-a	il a toujours raison
+il-a	on a gagné le match
+il-a	il a dit oui
+il-a	elle a vingt ans
+il-a	il a bien dormi
+il-a	elle a une voiture rouge
+il-a	il a peur du noir
+il-a	on a cours demain
+pronoun-a	tout le monde a compris
+pronoun-a	ça a marché du premier coup
+pronoun-a	cela a pris trois heures
+pronoun-a	chacun a son avis
+pronoun-a	personne n'a répondu
+relative	ce que tu as fait a marché
+relative	ce qu'il a dit a choqué tout le monde
+relative	le livre que je lis a trois cents pages
+relative	la maison où j'habite a un grand jardin
+relative	l'homme qui parle a raison
+relative	la fille dont je parle a déménagé
+name	marie a appelé ce matin
+name	paul a raison
+name	julie a fini son travail
+name	pierre a faim
+name	j'ai écrit à marie
+name	je vais chez thomas à midi
+elision	il m'a dit non
+elision	elle l'a vu hier
+elision	je sais qu'il a tort
+elision	jusqu'à demain
+elision	c'est à toi de jouer
+elision	il n'a pas le temps
+elision	il n'y a qu'à demander
+elision	je l'ai donné à julie
+elision	il m'a appris à nager
+y-a	il y a du monde
+y-a	y a pas de souci
+y-a	il n'y a rien à manger
+y-a	il y a deux jours
+y-a	y a quelqu'un
+question	à qui tu parles
+question	à quoi tu penses
+question	qui a appelé
+question	il a quel âge
+question	tu penses à quoi
+question	qui a fait ça
+question	tu vas à la plage
+question	tu as pensé à prendre le pain

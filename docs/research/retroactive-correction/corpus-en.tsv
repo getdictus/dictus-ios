@@ -1,0 +1,30 @@
+# Retroactive-correction probes, English. The typist types the sentence as written
+# (lowercase, no apostrophes). "target" is the 0-based index of the word whose right
+# form depends on the word after it; "expected" is that right form.
+case	sentence	target	expected
+pronoun-i	i think so	0	I
+contraction	its raining again	0	it's
+contraction	its a good idea	0	it's
+contraction	were going home now	0	we're
+contraction	your welcome	0	you're
+contraction	id like a coffee	0	I'd
+contraction	ill be there soon	0	I'll
+contraction	well be late	0	we'll
+contraction	shell be back tomorrow	0	she'll
+contraction	hell be fine	0	he'll
+contraction	lets go now	0	let's
+contraction	wont you come	0	won't
+contraction	cant wait	0	can't
+contraction	dont worry	0	don't
+homophone	their is a problem	0	there
+homophone	there car is red	0	their
+homophone	better then nothing	1	than
+homophone	i dont want to loose it	4	lose
+homophone	it was to late	2	too
+typo	teh car is red	0	the
+contraction	shed be back soon	0	she'd
+contraction	wed like to come	0	we'd
+keep	its own way	0	its
+keep	were here yesterday	0	were
+keep	well done	0	well
+keep	hell no	0	hell
