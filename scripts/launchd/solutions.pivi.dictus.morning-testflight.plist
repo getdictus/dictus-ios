@@ -1,34 +1,34 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <!--
-  Template for the midday TestFlight build of develop, internal only. Not loaded as is:
-  __REPO__ and __HOME__ are replaced at install time. Two attempts: 12:00, and 12:30 in
-  case 12:00 skipped (CI still running, a build in progress). When 12:00 built, 12:30
-  finds its tag and skips without touching its summary. Install, uninstall and logs:
-  docs/nightly-testflight.md.
+  Template for the morning TestFlight build of develop, internal only, the one build a
+  day (Pierre's rule, 2026-11-27). Not loaded as is: __REPO__ and __HOME__ are replaced
+  at install time. Two attempts: 06:00, and 06:30 in case 06:00 skipped (CI still
+  running, a build in progress). When 06:00 built, 06:30 finds its tag and skips without
+  touching its summary. Install, uninstall and logs: docs/nightly-testflight.md.
 -->
 <plist version="1.0">
 <dict>
 	<key>Label</key>
-	<string>solutions.pivi.dictus.midday-testflight</string>
+	<string>solutions.pivi.dictus.morning-testflight</string>
 	<key>ProgramArguments</key>
 	<array>
 		<string>/bin/bash</string>
 		<string>__REPO__/scripts/nightly-testflight.sh</string>
 		<string>--slot</string>
-		<string>midi</string>
+		<string>matin</string>
 	</array>
 	<key>StartCalendarInterval</key>
 	<array>
 		<dict>
 			<key>Hour</key>
-			<integer>12</integer>
+			<integer>6</integer>
 			<key>Minute</key>
 			<integer>0</integer>
 		</dict>
 		<dict>
 			<key>Hour</key>
-			<integer>12</integer>
+			<integer>6</integer>
 			<key>Minute</key>
 			<integer>30</integer>
 		</dict>
@@ -43,9 +43,9 @@
 	<key>WorkingDirectory</key>
 	<string>__REPO__</string>
 	<key>StandardOutPath</key>
-	<string>__HOME__/Library/Logs/dictus-nightly/launchd-midi.log</string>
+	<string>__HOME__/Library/Logs/dictus-nightly/launchd-matin.log</string>
 	<key>StandardErrorPath</key>
-	<string>__HOME__/Library/Logs/dictus-nightly/launchd-midi.log</string>
+	<string>__HOME__/Library/Logs/dictus-nightly/launchd-matin.log</string>
 	<key>RunAtLoad</key>
 	<false/>
 </dict>

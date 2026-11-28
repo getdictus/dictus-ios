@@ -1529,6 +1529,13 @@ extension ModelManager {
         DictationCoordinator.shared.adoptAppleEngine()
     }
 
+    /// The engine that dictates now, Apple's included (#1083): what Home's "Active model"
+    /// card names. Nil when there is none to dictate with. See `ActiveSpeechEngine`.
+    var activeSpeechEngine: ActiveSpeechEngine? {
+        ActiveSpeechEngine.resolve(choice: speechEngineChoice, appleAvailability: appleEngineRecordedAvailability,
+                                   downloadedModel: isModelReady ? activeModel : nil)
+    }
+
     /// Whether the user can dictate now: a downloaded model, or Apple's engine picked and
     /// ready for the dictation language (#1057). What Home's mic reads.
     var canDictate: Bool {

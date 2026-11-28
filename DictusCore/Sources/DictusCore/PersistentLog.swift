@@ -257,7 +257,7 @@ public enum PersistentLog {
         let deviceModel = UIDevice.current.model
         let appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "?"
         let buildNumber = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "?"
-        let activeModel = AppGroup.defaults.string(forKey: SharedKeys.activeModel) ?? "none"
+        let activeModel = headerModel(defaults: AppGroup.defaults)
         let engineChoice = SpeechEngineChoice.read(from: AppGroup.defaults)
 
         let content = read()
@@ -275,6 +275,13 @@ public enum PersistentLog {
         return header + content
     }
     #endif
+
+    /// The header's `Model:` field: the engine that dictates now, Apple's included (#1083),
+    /// not the downloaded model `SharedKeys.activeModel` keeps naming once Apple is picked.
+    static func headerModel(defaults: UserDefaults,
+                            dictationLanguageCode: String? = AppleSpeechLanguage.activeDictationLanguageCode()) -> String {
+        ActiveSpeechEngine.current(defaults: defaults, dictationLanguageCode: dictationLanguageCode)?.identifier ?? "none"
+    }
 
     /// Testable header builder — accepts injected values so tests don't need UIDevice.
     static func buildExportHeader(

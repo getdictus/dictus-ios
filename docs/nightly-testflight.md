@@ -1,29 +1,33 @@
-# Internal TestFlight builds of develop: soir and midi
+# Internal TestFlight build of develop: one a day, in the morning
 
 `scripts/nightly-testflight.sh` builds `origin/develop` and uploads it to **internal**
-TestFlight (`Team PIVI`, which has access to every build). It runs in two slots, on this
+TestFlight (`Team PIVI`, which has access to every build). It runs once a day, on this
 Mac, through launchd:
 
 | Slot | When | LaunchAgent template |
 | --- | --- | --- |
-| `soir` (default) | 22:00 | `scripts/launchd/solutions.pivi.dictus.nightly-testflight.plist` |
-| `midi` | 12:00, and 12:30 as a second attempt | `scripts/launchd/solutions.pivi.dictus.midday-testflight.plist` (`--slot midi`) |
+| `matin` (default, the only slot) | 06:00, and 06:30 as a second attempt | `scripts/launchd/solutions.pivi.dictus.morning-testflight.plist` (`--slot matin`) |
 
-Both slots are internal only: the script adds no group, submits nothing to beta review and
+**Pierre's rule, 2026-11-27: one internal TestFlight build per day, at 06:00, with a retry
+at 06:30.** The earlier `soir` (22:00) and `midi` (12:00, 12:30) slots are gone, with their
+templates.
+
+The build is internal only: the script adds no group, submits nothing to beta review and
 never touches the App Store. The slot sets the file names and the What to Test header, and
 nothing else. The steps and what makes a run skip are listed in the script's header.
 
 ## Read the result
 
-`<stem>` is `<date>` for `soir`, the names the first nightly used, so whatever reads
-`<date>.log` (the `end: status=` line) keeps working as is. For `midi` it is `<date>-midi`.
+`<stem>` is `<date>-matin`. Before this slot, the daily log was `<date>.log` (the `soir`
+slot, which ran without `--slot`); whatever read that file must now read
+`<date>-matin.log`.
 
 | What | Where |
 | --- | --- |
 | Summary: status, reason, build, sha, CI, App Store Connect state, PRs, What to Test | `~/dev/proofs/nightly/<stem>.md` |
 | Full log, credentials redacted; its last line is `end: status=<status> reason=…` | `~/Library/Logs/dictus-nightly/<stem>.log` |
-| A run that did not build, while the slot's summary already says `built` or `uploaded` | `~/dev/proofs/nightly/<stem>.retry.md` |
-| What launchd itself printed (before the script's log opens) | `~/Library/Logs/dictus-nightly/launchd.log` (soir), `launchd-midi.log` (midi) |
+| A run that did not build, while the day's summary already says `built` or `uploaded` | `~/dev/proofs/nightly/<stem>.retry.md` |
+| What launchd itself printed (before the script's log opens) | `~/Library/Logs/dictus-nightly/launchd-matin.log` |
 | The latest IPA (only that one is kept) | `~/Library/Caches/dictus-nightly/ipa/` |
 
 The status is one of:
@@ -35,11 +39,11 @@ The status is one of:
 - `skipped`: the reason says why; nothing was built.
 - `failed`: the reason says where.
 
-**The 12:30 attempt never hides the 12:00 one.** When 12:00 built, 12:30 finds the tag
+**The 06:30 attempt never hides the 06:00 one.** When 06:00 built, 06:30 finds the tag
 `build/NN` on `develop`'s tip and skips. A skip or failure never overwrites a summary of
-the same slot and day that says `built` or `uploaded`: it goes to `<stem>.retry.md`, and
-the log (appended, one file per slot and day) holds both runs. When 12:00 is still
-uploading at 12:30, 12:30 finds the lock and writes `<stem>.md.concurrent`.
+the same day that says `built` or `uploaded`: it goes to `<stem>.retry.md`, and the log
+(appended, one file per day) holds both runs. When 06:00 is still uploading at 06:30,
+06:30 finds the lock and writes `<stem>.md.concurrent`.
 
 A dry run writes `<stem>.dry-run.log` and `<stem>.dry-run.md`, so it never overwrites a
 real run.
@@ -47,8 +51,7 @@ real run.
 ## Try it without building
 
 ```sh
-scripts/nightly-testflight.sh --dry-run             # soir
-scripts/nightly-testflight.sh --dry-run --slot midi
+scripts/nightly-testflight.sh --dry-run
 ```
 
 It runs the reads for real (git fetch, tags, the CI of `develop`'s tip, each merged PR's
@@ -56,13 +59,13 @@ body, App Store Connect's latest build) and prints the rest: the worktree, the b
 number, the archive, the tag and the What to Test text. It writes only its own log and
 summary. When a tag already points to the tip, it says so, still prints the What to Test
 counted from the build before, and names the file a real run would write (`.retry.md`
-when the slot's summary says `built`).
+when the day's summary says `built`).
 
 To try it without touching the real directories (and without taking the real lock):
 
 ```sh
 NIGHTLY_CACHE_DIR=/tmp/n/cache NIGHTLY_LOG_DIR=/tmp/n/logs NIGHTLY_PROOF_DIR=/tmp/n/proofs \
-  scripts/nightly-testflight.sh --dry-run --slot midi
+  scripts/nightly-testflight.sh --dry-run
 ```
 
 ## What to Test, from each PR
@@ -86,10 +89,10 @@ switch: none
 The script reads it with `gh pr view N --json body`, read only, one call per PR under the
 90-second read timeout. A PR without the block, a line left empty, or a `gh` error: the
 PR's title stands in, under « À tester ». After one `gh` error the remaining PRs use their
-titles, so a dead network costs one timeout. The result, for both slots:
+titles, so a dead network costs one timeout. The result:
 
 ```text
-Build de midi de develop (aaa7c06d)
+Build du matin de develop (aaa7c06d)
 
 À tester :
 • Glissez depuis la touche Supprimer pour effacer mot par mot. (#1047)
@@ -99,8 +102,8 @@ Sans test (interne) :
 • CI: run build and tests in a single macOS job (#1045)
 ```
 
-The soir header is « Build du soir de develop » / "Nightly develop build". Both slots are
-internal, so the notes keep the PR numbers. The public beta has its own text (last
+The English header is "Morning develop build (sha)". The build is internal, so the notes
+keep the PR numbers. The public beta has its own text (last
 section).
 
 ## Upload and processing
@@ -126,64 +129,59 @@ run.
 ## Install
 
 Wait until the script is on `develop`. An agent runs the copy in the checkout it points
-to, so that checkout must be on `develop` and pulled. The main clone is the obvious choice.
+to, so that checkout must be on `develop` and pulled.
 
-### Soir (22:00)
+The morning agent replaces the evening one (`solutions.pivi.dictus.nightly-testflight`),
+and the midday one (`solutions.pivi.dictus.midday-testflight`) if it is still installed.
+Take them out first; `bootout` of an agent that is not loaded prints an error and changes
+nothing:
+
+```sh
+launchctl bootout gui/$(id -u)/solutions.pivi.dictus.nightly-testflight
+rm -f ~/Library/LaunchAgents/solutions.pivi.dictus.nightly-testflight.plist
+launchctl bootout gui/$(id -u)/solutions.pivi.dictus.midday-testflight
+rm -f ~/Library/LaunchAgents/solutions.pivi.dictus.midday-testflight.plist
+```
+
+Then the morning one:
 
 ```sh
 REPO=$HOME/dev/dictus
-PLIST=solutions.pivi.dictus.nightly-testflight.plist
+PLIST=solutions.pivi.dictus.morning-testflight.plist
 mkdir -p ~/Library/Logs/dictus-nightly
 sed -e "s#__REPO__#$REPO#g" -e "s#__HOME__#$HOME#g" \
   "$REPO/scripts/launchd/$PLIST" > ~/Library/LaunchAgents/$PLIST
 plutil -lint ~/Library/LaunchAgents/$PLIST
 launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/$PLIST
-launchctl print gui/$(id -u)/solutions.pivi.dictus.nightly-testflight | head -20
+launchctl print gui/$(id -u)/solutions.pivi.dictus.morning-testflight | sed -n '/calendar/,/}/p'
 ```
 
-### Midi (12:00 and 12:30)
-
-```sh
-REPO=$HOME/dev/dictus
-PLIST=solutions.pivi.dictus.midday-testflight.plist
-mkdir -p ~/Library/Logs/dictus-nightly
-sed -e "s#__REPO__#$REPO#g" -e "s#__HOME__#$HOME#g" \
-  "$REPO/scripts/launchd/$PLIST" > ~/Library/LaunchAgents/$PLIST
-plutil -lint ~/Library/LaunchAgents/$PLIST
-launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/$PLIST
-launchctl print gui/$(id -u)/solutions.pivi.dictus.midday-testflight | sed -n '/calendar/,/}/p'
-```
-
-The last line should show two entries, 12:00 and 12:30. macOS shows a "Background Items
+The last line should show two entries, 06:00 and 06:30. macOS shows a "Background Items
 Added" notification the first time. That is expected.
 
 Run one now, instead of waiting:
 
 ```sh
-launchctl kickstart gui/$(id -u)/solutions.pivi.dictus.nightly-testflight   # soir
-launchctl kickstart gui/$(id -u)/solutions.pivi.dictus.midday-testflight    # midi
+launchctl kickstart gui/$(id -u)/solutions.pivi.dictus.morning-testflight
 ```
 
-### The no-build windows: 11:55 and 21:55
+### The no-build window: from 05:55 until the run ends
 
 A run skips when an `xcodebuild` is running or an `asc` has been running for over a
-minute. So from **11:55** (midi) and **21:55** (soir), do not start an archive, a cut, an
-upload or a device build on this Mac, and let the slot's run finish first: midi needs
-about 10 minutes of build, then the upload and Apple's processing (up to 45 minutes, plus
-45 more in the worst case). A build started at 11:55 makes 12:00 skip. 12:30 then tries
-again, and if that skips too, there is no midday build that day; the summary says why.
+minute. So from **05:55**, do not start an archive, a cut, an upload or a device build on
+this Mac until the last line of `~/Library/Logs/dictus-nightly/<date>-matin.log` reads
+`end: status=…`. The run needs about 10 minutes of build, then the upload and Apple's
+processing (up to 45 minutes, plus 45 more in the worst case). A build started at 05:55
+makes 06:00 skip. 06:30 then tries again, and if that skips too, there is no build that
+day; the summary says why. After a 06:00 that built, the 06:30 attempt skips within
+seconds and appends its own `end: status=skipped` line: wait for that one too.
 
 ## Uninstall
 
 ```sh
-launchctl bootout gui/$(id -u)/solutions.pivi.dictus.midday-testflight
-rm ~/Library/LaunchAgents/solutions.pivi.dictus.midday-testflight.plist
-
-launchctl bootout gui/$(id -u)/solutions.pivi.dictus.nightly-testflight
-rm ~/Library/LaunchAgents/solutions.pivi.dictus.nightly-testflight.plist
+launchctl bootout gui/$(id -u)/solutions.pivi.dictus.morning-testflight
+rm ~/Library/LaunchAgents/solutions.pivi.dictus.morning-testflight.plist
 ```
-
-Each pair removes one slot; the other keeps running.
 
 ## What it needs
 
@@ -201,8 +199,9 @@ Each pair removes one slot; the other keeps running.
 
 ## When it skips
 
-- another run holds the lock (both slots share it), an `xcodebuild` is running, or an
+- another run holds the lock (06:30 while 06:00 is still running), an `xcodebuild` is running, or an
   `asc` has been running for over a minute (an upload or a processing wait);
+- today already has a build, whatever `develop`'s tip is now: `<stem>.uploaded` exists (written the moment App Store Connect accepts an upload, before any later step can fail), or the day's summary says `built` or `uploaded`. A tag's date does not count (a fetch stamps it too). It writes `end: status=skipped reason=already built today (build NN)` and goes to `<stem>.retry.md`;
 - a `build/NN` tag already points to `develop`'s tip;
 - the CI run of that commit on `develop` does not have its two jobs green (`SwiftLint`,
   `iOS (build + DictusCore + App Tests)`, the names in `CI_JOBS`). It reads the run and
@@ -223,9 +222,9 @@ flag with it, is deleted at the end of the run. `DictusBuildInfo.plist` reads
 
 ## Public beta (manual, not automated)
 
-Neither slot gives a build to the `Public Beta` group or submits it to beta review. That
-stays a decision someone takes, by hand, on a build that is already processed and was
-tried internally. Below: the commands, the tester text, and the same steps in App Store
+The morning run never gives a build to the `Public Beta` group or submits it to beta
+review. That stays a decision someone takes, by hand, on a build that is already
+processed and was tried internally. Below: the commands, the tester text, and the same steps in App Store
 Connect. Nothing here runs on its own.
 
 **What to Test is one text per build and locale, seen by every group that has the build.**

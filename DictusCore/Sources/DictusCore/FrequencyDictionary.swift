@@ -14,6 +14,11 @@ public struct FrequencyDictionary {
 
     private var counts: [String: Int] = [:]
 
+    /// The highest count in the loaded file: its most frequent word's. The trie's
+    /// frequencies are normalised by this same count (`tools/dict_builder.py`), which
+    /// is what `TrieFrequencyScale` needs to compare two languages (#1015).
+    public private(set) var topCount = 0
+
     /// Maximum words to keep in memory. Only the most frequent words are retained.
     /// This dictionary is only used for ranking UITextChecker completions —
     /// we don't need rare words for ranking purposes.
@@ -63,6 +68,7 @@ public struct FrequencyDictionary {
             print("[FrequencyDictionary] Failed to decode frequency data: \(error)")
             counts = [:]
         }
+        topCount = counts.values.max() ?? 0
     }
 
     /// Loads frequency data for the given language from a JSON file in the specified bundle.
@@ -72,6 +78,7 @@ public struct FrequencyDictionary {
         guard let url = bundle.url(forResource: "\(language)_frequency", withExtension: "json") else {
             print("[FrequencyDictionary] Missing \(language)_frequency.json in bundle")
             counts = [:]
+            topCount = 0
             return
         }
         do {
@@ -80,6 +87,7 @@ public struct FrequencyDictionary {
         } catch {
             print("[FrequencyDictionary] Failed to read \(language)_frequency.json: \(error)")
             counts = [:]
+            topCount = 0
         }
     }
 
