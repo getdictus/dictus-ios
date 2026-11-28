@@ -1,0 +1,418 @@
+lang	sentence	intended	typed	final	next	predicted
+en-us	0	i	I	I	don't	was,'m,do
+en-us	0	don't	dont	don't	think	know,think,want
+en-us	0	think	think	think	i'm	so,i,you
+en-us	0	i'm	im	i'm	gonna	gonna,going,a
+en-us	0	gonna	gonna	gonna	make	be,get,have
+en-us	0	make	make	make	it	up,them,it
+en-us	0	it	it	it	tonight	is,was,'s
+en-us	0	tonight	tonight	tonight		i,and,show
+en-us	1	can't	Cant	Can't	wait	do,believe,be
+en-us	1	wait	wait	wait	to	to,a,wait
+en-us	1	to	to	to	see	the,a,do
+en-us	1	see	see	see	you	the,if,you
+en-us	1	you	you	you	guys	can,'re,know
+en-us	1	guys	guys	guys	this	are,have,doing
+en-us	1	this	this	this	weekend	is,was,time
+en-us	1	weekend	weekend	weekend		in,and,to
+en-us	2	you're	Youre	You're	gonna	right,not,welcome
+en-us	2	gonna	gonna	gonna	love	be,have,get
+en-us	2	love	love	love	the	and,with,to
+en-us	2	the	the	the	new	first,time,two
+en-us	2	new	new	new	taylor	york,testament,zealand
+en-us	2	taylor	taylor	taylor	swift	coleridge,and,swift
+en-us	2	swift	swift	swift	album	and,polite,as
+en-us	2	album	album	album		dies,and,of
+en-us	3	i'll	Ill	I'll	be	be,see,take
+en-us	3	be	be	be	there	used,seen,made
+en-us	3	there	there	there	in	was,were,'s
+en-us	3	in	in	in	like	the,which,her
+en-us	3	like	like	like	ten	to,you,he
+en-us	3	ten	ten	ten	minutes	years,minutes,seconds
+en-us	3	minutes	minutes	minutes		later,of,to
+en-us	4	my	My	My	grandma	own,life,father
+en-us	4	grandma	grandma	grandma	is	moses,and,cordelia
+en-us	4	is	is	is	ill	a,the,not
+en-us	4	ill	ill	ill	so	and,of,will
+en-us	4	so	so	so	i'm	that,much,i
+en-us	4	i'm	im	i'm	staying	not,gonna,going
+en-us	4	staying	staying	staying	home	here,in,at
+en-us	4	home	home	home		and,to,in
+en-us	5	it's	Its	It's	raining	okay,not,all
+en-us	5	raining	raining	raining	so	down,and,in
+en-us	5	so	so	so	we're	that,much,i
+en-us	5	we're	were	were	taking	not,the,in
+en-us	5	taking	taking	taking	an	the,a,me
+en-us	5	an	an	an	uber	important,hour,example
+en-us	5	uber	uber	uber		driver,london,kirchners
+en-us	6	the	The	The	dog	same,first,other
+en-us	6	dog	dog	dog	hurt	and,is,in
+en-us	6	hurt	hurt	hurt	its	you,me,him
+en-us	6	its	its	its	paw	own,way,first
+en-us	6	paw	paw	paw	at	on,and,prints
+en-us	6	at	at	at	the	the,least,a
+en-us	6	the	the	the	park	same,end,time
+en-us	6	park	parl	park		and,is,with
+en-us	7	we	We	We	were	have,can,are
+en-us	7	were	were	were	at	in,all,just
+en-us	7	at	at	at	chipotle	her,him,his
+en-us	7	chipotle	chipotle	chipotle	when	the,of,and
+en-us	7	when	whne	when	you	the,he,i
+en-us	7	you	you	you	called	're,are,were
+en-us	7	called	called	called		a,me,the
+en-us	8	lol	Lol	Lol	that	the,of,and
+en-us	8	that	that	that	was	the,is,he
+en-us	8	was	was	was	the	the,not,a
+en-us	8	the	the	the	funniest	first,only,most
+en-us	8	funniest	funniest	funniest	thing	thing,women,things
+en-us	8	thing	thign	thing	ever	to,that,i
+en-us	8	ever	ever	ever		since,seen,been
+en-us	9	tbh	Tbh	Tbh	i	the,of,and
+en-us	9	i	i	i	didn't	was,'m,do
+en-us	9	didn't	didnt	didn't	even	know,want,have
+en-us	9	even	even	even	like	if,though,the
+en-us	9	like	like	like	the	i,he,what
+en-us	9	the	the	the	movie	same,most,time
+en-us	9	movie	moive	movie		is,the,was
+en-us	10	can	Can	Can	you	be,not,also
+en-us	10	you	you	you	venmo	can,'re,are
+en-us	10	venmo	venmo	venom	me	and,of,is
+en-us	10	me	me	me	for	to,and,that
+en-us	10	for	for	for	the	example,her,you
+en-us	10	the	the	the	pizza	first,next,purpose
+en-us	10	pizza	pizza	pizza		and,delivery,cats
+en-us	11	she	She	She	said	was,had,'d
+en-us	11	said	siad	said	she	that,as,with
+en-us	11	she	she	she	would	'd,'s,knew
+en-us	11	would	would	would	text	not,have,be
+en-us	11	text	text	text	me	online,of,revision
+en-us	11	me	me	me	back	to,and,that
+en-us	11	back	back	back		of,to,my
+en-us	12	i	I	I	have	was,'m,do
+en-us	12	have	hvae	have	to	to,not,a
+en-us	12	to	to	to	go	be,do,go
+en-us	12	go	go	go	to	to,back,on
+en-us	12	to	ro	to	target	the,be,do
+en-us	12	target	target	target	after	of,four,for
+en-us	12	after	after	after	work	the,a,all
+en-us	12	work	work	work		of,in,on
+en-us	13	what	What	What	time	is,i,you
+en-us	13	time	time	time	does	to,and,in
+en-us	13	does	does	does	the	not,the,it
+en-us	13	the	the	the	game	first,other,time
+en-us	13	game	game	game	start	is,was,and
+en-us	13	start	strat	strat	tomorrow	the,of,and
+en-us	13	tomorrow	tommorow	tomorrow		night,morning,and
+en-us	14	i	I	I	really	was,'m,do
+en-us	14	really	realy	really	appreciate	don't,do,like
+en-us	14	appreciate	appreciate	appreciate	it	it,that,the
+en-us	14	it	it	it	thank	is,was,'s
+en-us	14	thank	thank	thank	you	you,god,goodness
+en-us	14	you	you	you	so	for,can,'re
+en-us	14	so	so	so	much	much,the,he
+en-us	14	much	much	much		as,to,more
+en-us	15	that's	Thats	That's	definitely	it,not,all
+en-us	15	definitely	definitly	definitely	the	not,be,a
+en-us	15	the	the	the	best	same,first,other
+en-us	15	best	best	best	pizza	of,way,thing
+en-us	15	pizza	pizza	pizza	in	and,delivery,cats
+en-us	15	in	in	in	town	the,a,this
+en-us	15	town	town	town		and,for,hall
+en-us	16	my	My	My	coworker	own,life,father
+en-us	16	coworker	coworker	coworkers	jaxon	who,at,seymour
+en-us	16	jaxon	jaxon	jax on	said	the,a,his
+en-us	16	said	said	said	the	to,that,the
+en-us	16	the	the	the	meeting	most,world,time
+en-us	16	meeting	meetign	meeting	got	of,was,with
+en-us	16	got	got	got	moved	to,a,the
+en-us	16	moved	moved	moved		to,by,in
+en-us	17	kayla	Kayla	Kayla	is	the,of,and
+en-us	17	is	is	is	coming	a,the,not
+en-us	17	coming	comming	coming	over	to,from,up
+en-us	17	over	over	over	later	the,to,a
+en-us	17	later	later	later	with	in,on,the
+en-us	17	with	with	with	her	the,a,his
+en-us	17	her	her	her	sister	to,face,a
+en-us	17	sister	sister	sister		and,of,mary
+en-us	18	did	Did	Did	you	not,you,the
+en-us	18	you	you	you	see	know,get,do
+en-us	18	see	see	see	what	the,that,also
+en-us	18	what	what	what	brandon	's,are,do
+en-us	18	brandon	brandon	brandon	posted	souris,flowers,shaw
+en-us	18	posted	posted	posted	on	on,a,to
+en-us	18	on	on	on	instagram	this,my,to
+en-us	18	instagram	instagram	instagram		instagram,august,account
+en-us	19	ok	Ok	Ok	i'll	ok,let's,then
+en-us	19	i'll	ill	I'll	call	be,see,take
+en-us	19	call	call	call	you	you,the,me
+en-us	19	you	you	you	when	can,'re,are
+en-us	19	when	when	when	i	a,you,there
+en-us	19	i	i	i	get	was,'m,do
+en-us	19	get	get	get	home	it,to,a
+en-us	19	home	hime	home		in,and,to
+en-us	20	are	Are	Are	u	not,the,you
+en-us	20	u	u	u	still	v,and,of
+en-us	20	still	still	still	at	in,be,a
+en-us	20	at	at	at	the	all,her,this
+en-us	20	the	the	the	gym	same,end,time
+en-us	20	gym	gym	gym		teacher,class,and
+en-us	21	i'm	Im	I'm	so	not,sorry,so
+en-us	21	so	so	so	tired	that,sorry,much
+en-us	21	tired	tirwd	tired	i	of,and,i
+en-us	21	i	i	i	could	was,'m,do
+en-us	21	could	could	could	sleep	not,see,have
+en-us	21	sleep	sleep	sleep	for	well,tight,with
+en-us	21	for	for	for	days	the,a,example
+en-us	21	days	days	days		and,on,in
+en-us	22	we	We	We	should	have,can,are
+en-us	22	should	shoudl	should	get	be,have,not
+en-us	22	get	get	get	coffee	it,in,up
+en-us	22	coffee	coffee	coffee	at	and,shop,table
+en-us	22	at	at	at	starbucks	the,least,a
+en-us	22	starbucks	starbucks	starbucks	before	coffee,and,the
+en-us	22	before	before	before	class	the,he,i
+en-us	22	class	class	class		of,and,is
+en-us	23	he's	Hes	He's	not	dead,not,right
+en-us	23	not	not	not	answering	be,have,know
+en-us	23	answering	answering	answering	his	the,machine,a
+en-us	23	his	his	his	phone	own,head,eyes
+en-us	23	phone	phonr	phone	again	rings,call,and
+en-us	23	again	again	again		and,in,the
+en-us	24	is	Is	Is	it	a,the,not
+en-us	24	it	it	it	ok	was,'s,that
+en-us	24	ok	ok	ok	if	ok,let's,then
+en-us	24	if	if	if	i	you,the,he
+en-us	24	i	i	i	bring	had,could,was
+en-us	24	bring	brign	bring	my	you,the,a
+en-us	24	my	my	my	friend	own,life,father
+en-us	24	friend	freind	friend		and,is,the
+en-us	25	that's	Thats	That's	so	it,not,all
+en-us	25	so	so	so	weird	that,much,i
+en-us	25	weird	wierd	weird	i	and,tales,but
+en-us	25	i	i	i	never	was,'m,do
+en-us	25	never	never	never	got	thought,had,knew
+en-us	25	got	got	got	the	up,to,a
+en-us	25	the	the	the	email	first,other,world
+en-us	25	email	email	email		to,from,and
+en-us	26	let's	Lets	Lets	grab	go,out,you
+en-us	26	grab	grab	grab	lunch	him,it,my
+en-us	26	lunch	lunch	lunch	at	with,and,break
+en-us	26	at	at	at	noon	the,least,a
+en-us	26	noon	noon	noon	tomorrow	and,on,in
+en-us	26	tomorrow	tomorrow	tomorrow		night,morning,and
+en-us	27	he	He	He	lets	was,had,said
+en-us	27	lets	lets	lets	his	go,out,you
+en-us	27	his	his	his	kids	own,head,eyes
+en-us	27	kids	kids	kids	stay	are,and,in
+en-us	27	stay	stay	stay	up	in,here,with
+en-us	27	up	up	up	late	to,the,and
+en-us	27	late	late	late		for,s,additions
+en-us	28	i	I	I	won't	was,'m,do
+en-us	28	won't	wont	wont	be	to,be,let
+en-us	28	be	be	be	able	a,the,used
+en-us	28	able	able	able	to	to,and,in
+en-us	28	to	to	to	make	do,the,a
+en-us	28	make	make	make	it	a,the,sure
+en-us	28	it	it	it	sorry	is,was,'s
+en-us	28	sorry	sorry	sorry		about,sir,i'm
+en-us	29	i'd	Id	Id	love	card,law,and
+en-us	29	love	love	love	to	you,and,with
+en-us	29	to	to	to	come	make,her,his
+en-us	29	come	come	come	but	to,back,out
+en-us	29	but	but	but	i	the,i,it
+en-us	29	i	i	i	have	do,'m,was
+en-us	29	have	have	have	work	to,not,a
+en-us	29	work	work	work		of,in,on
+en-us	30	we'll	Well	Well	see	as,i,done
+en-us	30	see	see	see	how	the,also,that
+en-us	30	how	how	how	it	to,do,can
+en-us	30	it	it	it	goes	's,to,had
+en-us	30	goes	goes	goes	next	on,without,to
+en-us	30	next	next	next	week	to,day,morning
+en-us	30	week	week	week		and,in,to
+en-us	31	well	Well	Well	that	as,i,done
+en-us	31	that	that	that	went	's,she,are
+en-us	31	went	went	went	better	back,on,to
+en-us	31	better	better	better	than	than,idea,go
+en-us	31	than	than	than	expected	the,a,that
+en-us	31	expected	expectd	expected		to,that,in
+en-us	32	omg	Omg	Omg	did	the,of,and
+en-us	32	did	did	did	you	not,you,the
+en-us	32	you	you	you	hear	know,get,do
+en-us	32	hear	hear	hear	about	me,that,the
+en-us	32	about	about	about	the	to,her,his
+en-us	32	the	the	the	new	year,first,other
+en-us	32	new	new	new	iphone	york,testament,zealand
+en-us	32	iphone	iphpne	iPhone		and,was,g
+en-us	33	idk	Idk	Idl	what	the,of,and
+en-us	33	what	what	what	he	is,i,you
+en-us	33	he	he	he	wants	was,had,'d
+en-us	33	wants	wnats	whats	for	the,going,this
+en-us	33	for	for	for	his	the,a,example
+en-us	33	his	his	his	birthday	head,eyes,hand
+en-us	33	birthday	birthday	birthday		to,party,of
+en-us	34	a	A	A	lot	few,little,new
+en-us	34	lot	lot	lot	of	of,more,to
+en-us	34	of	of	of	people	people,a,his
+en-us	34	people	peopel	people	were	who,in,'s
+en-us	34	were	were	were	there	killed,the,a
+en-us	34	there	there	there	last	is,was,are
+en-us	34	last	last	last	night	night,time,chance
+en-us	34	night	nigth	night		i,and,in
+en-us	35	i	I	I	was	was,'m,do
+en-us	35	was	was	was	gonna	not,a,in
+en-us	35	gonna	gonna	gonna	say	be,say,do
+en-us	35	say	say	say	the	it,that,so
+en-us	35	the	hte	the	same	other,time,way
+en-us	35	same	same	same	thing	time,way,as
+en-us	35	thing	thing	thing		as,to,in
+en-us	36	can	Can	Can	you	be,not,also
+en-us	36	you	yoi	you	send	can,'re,are
+en-us	36	send	send	send	me	me,a,your
+en-us	36	me	me	me	the	and,that,in
+en-us	36	the	the	the	address	time,two,following
+en-us	36	address	address	address	again	the,to,at
+en-us	36	again	again	again		and,in,the
+en-us	37	my	My	My	mom	own,life,father
+en-us	37	mom	mon	mom	wants	and,was,is
+en-us	37	wants	wants	wants	us	to,a,you
+en-us	37	us	us	us	to	that,and,a
+en-us	37	to	to	to	come	her,his,me
+en-us	37	come	come	come	for	to,back,out
+en-us	37	for	for	for	thanksgiving	example,his,an
+en-us	37	thanksgiving	thanksgiving	thanksgiving		day,and,is
+en-us	38	the	The	The	package	same,first,other
+en-us	38	package	pacakge	package	from	of,to,was
+en-us	38	from	from	from	amazon	the,a,his
+en-us	38	amazon	amazon	amazon	should	river,rainforest,and
+en-us	38	should	should	should	arrive	be,not,have
+en-us	38	arrive	arrive	arrive	friday	at,in,and
+en-us	38	friday	friday	friday		june,march,april
+en-us	39	ngl	Ngl	Ngl	that	the,of,and
+en-us	39	that	that	that	test	the,is,he
+en-us	39	test	test	test	was	of,the,and
+en-us	39	was	was	was	really	a,not,the
+en-us	39	really	reallly	really	hard	a,the,sorry
+en-us	39	hard	hard	hard		to,for,feelings
+en-us	40	where	Wher	Where	are	the,he,they
+en-us	40	are	are	are	you	you,not,a
+en-us	40	you	you	you	guys	doing,going,sure
+en-us	40	guys	guys	guys	sitting	are,have,doing
+en-us	40	sitting	sitting	sitting		on,in,there
+en-us	41	just	Just	Just	got	as,a,the
+en-us	41	got	got	got	out	to,a,you
+en-us	41	out	out	out	of	in,that,for
+en-us	41	of	of	of	the	the,his,her
+en-us	41	the	the	the	shower	world,most,first
+en-us	41	shower	shoqer	shower	be	of,and,with
+en-us	41	be	be	be	right	a,the,used
+en-us	41	right	right	right	there	of,hand,back
+en-us	41	there	there	there		were,'s,will
+en-us	42	i	I	I	think	was,'m,do
+en-us	42	think	think	think	it's	i,it,you
+en-us	42	it's	its	its	in	own,way,first
+en-us	42	in	in	in	the	the,a,this
+en-us	42	the	the	the	top	united,same,world
+en-us	42	top	top	top	drawer	of,ranked,movie
+en-us	42	drawer	drawer	drawer		and,of,in
+en-us	43	is	Is	Is	netflix	a,the,not
+en-us	43	netflix	netflix	netflix	down	and,star,has
+en-us	43	down	down	down	for	the,to,and
+en-us	43	for	for	for	you	example,her,him
+en-us	43	you	yuo	you	too	to,can,'re
+en-us	43	too	too	too		late,much,bad
+en-us	44	sounds	Sounds	Sounds	good	good,great,like
+en-us	44	good	good	good	see	to,for,and
+en-us	44	see	see	see	you	the,also,that
+en-us	44	you	you	you	at	can,'re,know
+en-us	44	at	st	at	six	her,him,his
+en-us	44	six	six	six		months,seven,years
+en-us	45	they're	Theyre	They're	already	coming,here,not
+en-us	45	already	already	already	at	been,did,have
+en-us	45	at	at	at	the	the,least,a
+en-us	45	the	the	the	restaurant	same,end,time
+en-us	45	restaurant	restaurant	restaurant	waiting	and,was,at
+en-us	45	waiting	waiting	waiting		for,to,in
+en-us	46	i	I	I	just	was,'m,do
+en-us	46	just	just	just	can't	want,don't,wanted
+en-us	46	can't	cant	can't	believe	get,believe,do
+en-us	46	believe	belive	believe	it's	it,you,in
+en-us	46	it's	its	its	already	own,way,first
+en-us	46	already	already	already	december	been,did,have
+en-us	46	december	december	december		december,utc,the
+en-us	47	my	My	My	brother	own,life,father
+en-us	47	brother	brother	brother	mike	and,was,is
+en-us	47	mike	mike	mike	is	nelson,as,and
+en-us	47	is	is	is	in	a,the,not
+en-us	47	in	jn	in	town	the,a,which
+en-us	47	town	town	town	this	and,for,hall
+en-us	47	this	thsi	this	week	is,was,time
+en-us	47	week	week	week		in,the,with
+en-us	48	do	Do	Do	you	not,you,it
+en-us	48	you	you	you	want	think,know,want
+en-us	48	want	want	want	to	to,me,a
+en-us	48	to	to	to	watch	be,know,go
+en-us	48	watch	watch	watch	something	the,him,a
+en-us	48	something	somethign	something	on	that,to,else
+en-us	48	on	on	on	hulu	her,their,to
+en-us	48	hulu	hulu	july		th,and,the
+en-us	49	thanks	Thansk	Thanks	for	to,for,a
+en-us	49	for	for	for	the	a,example,her
+en-us	49	the	the	the	ride	first,next,purpose
+en-us	49	ride	ride	ride	last	the,on,in
+en-us	49	last	last	last	night	night,time,chance
+en-us	49	night	night	night		i,and,in
+en-us	50	k	K	K	see	l,p,a
+en-us	50	see	see	see	you	the,also,that
+en-us	50	you	you	you	there	can,'re,know
+en-us	50	there	there	there	in	's,has,had
+en-us	50	in	in	in	a	the,which,her
+en-us	50	a	a	a	bit	way,few,small
+en-us	50	bit	bit	bit		of,more,like
+en-us	51	i	I	I	didn't	was,'m,do
+en-us	51	didn't	didnt	didn't	know	know,want,have
+en-us	51	know	know	know	you	what,you,that
+en-us	51	you	you	you	were	're,to,'ll
+en-us	51	were	were	were	coming	not,a,the
+en-us	51	coming	cominf	coming	too	through,to,right
+en-us	51	too	too	too		much,many,late
+en-us	52	the	The	The	food	same,first,other
+en-us	52	food	food	food	at	and,of,is
+en-us	52	at	at	at	that	the,least,a
+en-us	52	that	that	that	place	time,moment,the
+en-us	52	place	place	place	was	for,is,where
+en-us	52	was	was	was	so	a,not,the
+en-us	52	so	so	so	good	that,i,many
+en-us	52	good	goood	good		at,to,morning
+en-us	53	ur	Ur	Ur	sister	iii,of,a
+en-us	53	sister	sister	sister	just	and,of,mary
+en-us	53	just	just	just	texted	as,a,the
+en-us	53	texted	texted	tested	me	positive,and,by
+en-us	53	me	me	me		to,and,that
+en-us	54	why	Hwy	Hwy	are	the,of,and
+en-us	54	are	are	are	you	not,the,you
+en-us	54	you	you	you	up	doing,going,sure
+en-us	54	up	up	up	so	his,from,of
+en-us	54	so	so	so	early	it,on,long
+en-us	54	early	early	early		in,s,as
+en-us	55	we're	Were	Were	going	not,the,in
+en-us	55	going	going	going	to	to,anywhere,down
+en-us	55	to	to	to	coachella	be,do,have
+en-us	55	coachella	coachella	coachella	with	the,of,and
+en-us	55	with	with	with	priya	the,a,his
+en-us	55	priya	priya	prima	and	facie,donna,tv
+en-us	55	and	and	and	dev	the,a,i
+en-us	55	dev	dev	dev		ji,guru,and
+en-us	56	i'm	Im	I'm	afraid	not,sorry,so
+en-us	56	afraid	afraid	afraid	that	i,of,that
+en-us	56	that	thzg	that	you're	's,was,she
+en-us	56	you're	youre	you're	correct	not,a,going
+en-us	56	correct	correct	correct	on	the,and,answer
+en-us	56	on	on	on	this	the,a,his
+en-us	56	this	tgis	this		story,is,was
+en-us	57	hope	Hope	Hope	you're	that,so,not
+en-us	57	you're	youre	you're	doing	not,welcome,kidding
+en-us	57	doing	doidn	doidn	well	the,of,and
+en-us	57	well	well	well	my	as,i,done
+en-us	57	my	my	my	friend	own,life,father
+en-us	57	friend	ftiend	friend		and,is,the
