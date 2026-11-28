@@ -50,6 +50,10 @@ public struct TranscriptionRecord: Identifiable, Codable, Hashable, Sendable {
     /// which all are dictations.
     private let sourceMarker: String?
 
+    /// Written only when true, like `sourceMarker`: absent in every record before #1084
+    /// and in every record whose language was chosen or detected.
+    private let languageAssumedMarker: Bool?
+
     /// What the result screen shows above the transcript of a shared voice note: the
     /// output of the mode that ran on it (`Résumé` by default). Nil until it has run,
     /// and for every dictation. Computed in the foreground when the result is first
@@ -75,7 +79,8 @@ public struct TranscriptionRecord: Identifiable, Codable, Hashable, Sendable {
                 durationSeconds: Int,
                 createdAt: Date = Date(),
                 sttProvider: String,
-                source: TranscriptionSource = .dictation) {
+                source: TranscriptionSource = .dictation,
+                languageWasAssumed: Bool = false) {
         self.id = id
         self.text = text
         self.language = language
@@ -83,6 +88,7 @@ public struct TranscriptionRecord: Identifiable, Codable, Hashable, Sendable {
         self.createdAt = createdAt
         self.sttProvider = sttProvider
         self.sourceMarker = source == .dictation ? nil : source.rawValue
+        self.languageAssumedMarker = languageWasAssumed ? true : nil
         self.summary = nil
         self.summaryModeIdentifier = nil
         self.openedAt = nil
@@ -108,7 +114,8 @@ public struct TranscriptionRecord: Identifiable, Codable, Hashable, Sendable {
             durationSeconds: Int(duration.rounded()),
             createdAt: createdAt,
             sttProvider: policy.engine.rawValue,
-            source: source
+            source: source,
+            languageWasAssumed: policy.languageIsAssumed
         )
     }
 
@@ -121,6 +128,7 @@ public struct TranscriptionRecord: Identifiable, Codable, Hashable, Sendable {
         case id, text, language, durationSeconds, createdAt, sttProvider
         case sourceMarker = "source"
         case summary, summaryModeIdentifier, openedAt
+        case languageAssumedMarker = "languageAssumed"
     }
 
     /// What to record as the language of a dictation run under `policy`.
@@ -129,7 +137,11 @@ public struct TranscriptionRecord: Identifiable, Codable, Hashable, Sendable {
     /// hand the engine", which for Parakeet is always the keyboard language even
     /// though Parakeet auto-detects and ignores it. Here the question is what to
     /// show the user, and the keyboard language is a guess in that case.
-    static func languageCode(for policy: TranscriptionLanguagePolicy) -> String {
+    ///
+    /// Apple's engine in auto-detect is the exception (#1084): it was given the keyboard
+    /// language and read the audio in it, so that is the language, flagged as assumed.
+    public static func languageCode(for policy: TranscriptionLanguagePolicy) -> String {
+        if policy.languageIsAssumed { return policy.keyboardLanguage.rawValue }
         switch policy.mode {
         case .explicit(let language):
             return language.rawValue
@@ -155,6 +167,13 @@ public struct TranscriptionRecord: Identifiable, Codable, Hashable, Sendable {
     /// Where the text came from. See `TranscriptionSource` for the unknown case.
     public var source: TranscriptionSource {
         sourceMarker.flatMap(TranscriptionSource.init(rawValue:)) ?? .dictation
+    }
+
+    /// True when the user asked for automatic detection and the engine could not detect
+    /// (#1084): `language` is the dictation language that stood in, and the voice-note
+    /// card says so.
+    public var languageWasAssumed: Bool {
+        languageAssumedMarker ?? false
     }
 
     /// Short uppercase badge for the card: "FR", "EN", "AUTO".

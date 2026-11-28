@@ -153,9 +153,13 @@ public struct VoiceNoteExtensionResult: Codable, Equatable, Sendable {
     public let savedToHistory: Bool
     public let engine: String
     public let transcribedAt: Date
+    /// `TranscriptionRecord.languageWasAssumed` (#1084). Nil in every result written
+    /// before it, and when the user fixed the voice-note language.
+    public let languageWasAssumed: Bool?
 
     public init(id: UUID, transcript: String, language: String, durationSeconds: Int,
-                savedToHistory: Bool, engine: String, transcribedAt: Date = Date()) {
+                savedToHistory: Bool, engine: String, transcribedAt: Date = Date(),
+                languageWasAssumed: Bool = false) {
         self.id = id
         self.transcript = transcript
         self.language = language
@@ -163,6 +167,7 @@ public struct VoiceNoteExtensionResult: Codable, Equatable, Sendable {
         self.savedToHistory = savedToHistory
         self.engine = engine
         self.transcribedAt = transcribedAt
+        self.languageWasAssumed = languageWasAssumed ? true : nil
     }
 
     static func directory(in storage: VoiceNoteStorage) -> URL {

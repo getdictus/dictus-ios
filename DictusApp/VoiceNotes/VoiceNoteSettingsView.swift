@@ -81,7 +81,9 @@ struct VoiceNoteSettingsSections: View {
                 }
             }
         } footer: {
-            Text("Automatic detection transcribes each voice note in the language it was spoken in.")
+            // True for the downloaded models only (#1084): Apple's recognizer takes one
+            // language, and a note read by it uses the dictation language.
+            Text("With a downloaded model (Parakeet or Whisper), automatic detection transcribes each voice note in the language it was spoken in. With Apple's model, voice notes are transcribed in your dictation language.")
         }
         .proFeatureContent(isAvailable: isAvailable)
 

@@ -252,9 +252,26 @@ public struct TranscriptionLanguagePolicy: Equatable, Sendable, Codable {
     /// Nemotron resolves exactly as Whisper does (#558): the keyboard language in
     /// `.followKeyboard`, the chosen language in `.explicit`, and `nil` in `.autoDetect`,
     /// which `NemotronLanguagePrompt` turns into the model's `"auto"` prompt.
+    ///
+    /// Apple's recognizer under `.autoDetect` gets the keyboard language (#1084): see
+    /// `languageIsAssumed`.
     public var sttLanguageCode: String? {
         guard sttLanguageIsEffective else { return keyboardLanguage.rawValue }
+        if languageIsAssumed { return keyboardLanguage.rawValue }
         return mode.resolvedLanguageCode(keyboardLanguageCode: keyboardLanguage.rawValue)
+    }
+
+    /// True when the user asked for automatic detection and the engine cannot detect
+    /// (#1084): Apple's recognizer takes exactly one locale. The keyboard (dictation)
+    /// language stands in, the one `VoiceNoteSpeechAssetPlan` reserves Apple's model for
+    /// (Pierre, 2026-11-25). Only a voice note gets here: a dictation in `.autoDetect`
+    /// never runs Apple's engine (`AppleSpeechLanguage.evaluate`).
+    ///
+    /// WHY it is spelled out rather than left to the engine: `AppleSpeechEngine` used to
+    /// receive `nil` and fall back on its own language in silence, so the record said
+    /// `auto` over a Spanish note read as French, and nothing told the user.
+    public var languageIsAssumed: Bool {
+        engine == .apple && mode == .autoDetect
     }
 
     /// Polish-stage prompt selection (#239, resolution order fixed in #332).
@@ -394,7 +411,8 @@ public struct TranscriptionLanguagePolicy: Equatable, Sendable, Codable {
     /// punctuation to e.g. CJK text would corrupt it. Whisper and, since #558,
     /// Nemotron, whose `"auto"` prompt can land on any of its languages. Parakeet
     /// never, as before: its Auto mode changes nothing at the STT stage.
+    /// Apple's engine never: its language is known (`languageIsAssumed`).
     public var insertsTranscriptionAsIs: Bool {
-        sttLanguageIsEffective && mode == .autoDetect
+        sttLanguageIsEffective && mode == .autoDetect && !languageIsAssumed
     }
 }

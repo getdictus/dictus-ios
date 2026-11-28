@@ -280,7 +280,8 @@ final class ShareModel: ObservableObject {
         state = .transcribingHere(count: drops.count, language: language)
         let started = Date()
         let outcome = await ShareOnDeviceTranscription.run(drops, storage: storage, recognizer: recognizer,
-                                                           languageCode: code)
+                                                           languageCode: code,
+                                                           languageWasAssumed: language.isDictationLanguage)
         let elapsed = Int(Date().timeIntervalSince(started) * 1000)
         switch outcome {
         case .done(let count):

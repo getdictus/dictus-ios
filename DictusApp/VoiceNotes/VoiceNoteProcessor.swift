@@ -293,24 +293,30 @@ final class VoiceNoteProcessor: ObservableObject {
         // Captured once per note, for #226's reason: the settings can change mid-queue.
         // The engine that dictates now, Apple's included (#1083); the Whisper fallback is
         // `ensureEngineReady`'s when nothing is elected.
-        let policy = VoiceNoteSettings.load().languagePolicy(
+        let requested = VoiceNoteSettings.load().languagePolicy(
             activeEngine: ActiveSpeechEngine.current()
                 ?? ActiveSpeechEngine(engine: .whisperKit, identifier: "openai_whisper-small"),
             keyboardLanguage: SupportedLanguage.active
         )
         let ranges = VoiceNoteChunker.ranges(for: samples)
-        log("started", "id=\(note.id.uuidString.prefix(8)) seconds=\(Int(duration)) chunks=\(ranges.count) mode=\(policy.mode.telemetryDescription) engine=\(policy.engine.rawValue)")
+        // `activeModelEngine`, not `engine` (#1084): Apple's, when picked, is only known once
+        // loaded, and `finished` names it.
+        log("started", "id=\(note.id.uuidString.prefix(8)) seconds=\(Int(duration)) chunks=\(ranges.count) mode=\(requested.mode.telemetryDescription) activeModelEngine=\(requested.engine.rawValue)")
 
         var parts: [String] = []
+        // With the engine that read it (#1084): Apple's, when picked, records `AP` and the
+        // dictation language it was given, not the downloaded model's `PK` and `auto`.
+        var policy = requested
         for (index, range) in ranges.enumerated() {
             await waitForDictationToEnd()
             DictationCoordinator.shared.extendWarmWindowForVoiceNote()
             let chunk = Array(samples[range])
             do {
-                let text = try await EngineAccessGate.shared.withAccess(.voiceNote) {
-                    try await DictationCoordinator.shared.transcribeVoiceNoteChunk(chunk, languagePolicy: policy)
+                let chunkResult = try await EngineAccessGate.shared.withAccess(.voiceNote) {
+                    try await DictationCoordinator.shared.transcribeVoiceNoteChunk(chunk, languagePolicy: requested)
                 }
-                let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+                policy = chunkResult.policy
+                let trimmed = chunkResult.text.trimmingCharacters(in: .whitespacesAndNewlines)
                 if !trimmed.isEmpty { parts.append(trimmed) }
             } catch let error as TranscriptionError {
                 // A chunk of silence inside a note is not a failure of the note.
@@ -344,7 +350,8 @@ final class VoiceNoteProcessor: ObservableObject {
         }
         var evicted: [UUID] = []
         store.mutate {
-            evicted = $0.complete(note.id, transcript: transcript, language: record.language, savedToHistory: saved)
+            evicted = $0.complete(note.id, transcript: transcript, language: record.language,
+                                  languageWasAssumed: record.languageWasAssumed, savedToHistory: saved)
         }
         releaseClaim(note.id)
         // Not counted in `DictationTally` (#726, decided 2026-10-21): a shared voice
@@ -353,7 +360,7 @@ final class VoiceNoteProcessor: ObservableObject {
         // History off: the queue's cap may have pushed an older transcript out, and the
         // keyboard must not keep offering it (#639, decision C).
         withdrawKeyboardDeliveries(evicted, reason: "evictedFromQueue")
-        log("finished", "id=\(note.id.uuidString.prefix(8)) chars=\(transcript.count) savedToHistory=\(saved) elapsedMs=\(Int(Date().timeIntervalSince(started) * 1000))")
+        log("finished", "id=\(note.id.uuidString.prefix(8)) chars=\(transcript.count) engine=\(record.sttProvider) lang=\(record.language) assumed=\(record.languageWasAssumed) savedToHistory=\(saved) elapsedMs=\(Int(Date().timeIntervalSince(started) * 1000))")
         publishToKeyboard(note: note, transcript: transcript, language: record.language,
                           durationSeconds: Int(duration.rounded()))
         VoiceNoteIslandDriver.shared.finished(note.id, succeeded: true)
@@ -429,6 +436,7 @@ final class VoiceNoteProcessor: ObservableObject {
         let committed = store.mutate {
             $0.update(note.id) { $0.durationSeconds = result.durationSeconds }
             evicted = $0.complete(note.id, transcript: result.transcript, language: result.language,
+                                  languageWasAssumed: result.languageWasAssumed == true,
                                   savedToHistory: result.savedToHistory)
         }
         // #992 review: the result goes only once the queue holds the transcript on disk.
@@ -438,7 +446,7 @@ final class VoiceNoteProcessor: ObservableObject {
             releaseClaim(note.id)
         }
         withdrawKeyboardDeliveries(evicted, reason: "evictedFromQueue")
-        log("adopted", "id=\(short) chars=\(result.transcript.count) engine=\(result.engine) lang=\(result.language) savedToHistory=\(result.savedToHistory) queueCommitted=\(committed)")
+        log("adopted", "id=\(short) chars=\(result.transcript.count) engine=\(result.engine) lang=\(result.language) assumed=\(result.languageWasAssumed == true) savedToHistory=\(result.savedToHistory) queueCommitted=\(committed)")
         // History was written by another process: this copy is from before it.
         TranscriptionHistoryStore.shared.reloadFromDisk()
         VoiceNoteIslandDriver.shared.finished(note.id, succeeded: true)
