@@ -1,0 +1,9 @@
+# vmmap of the dictionary files after typing, columns [virtual resident dirty swapped]
+## one language (trial 5)
+mapped file              10689c000-106900000 [  400K    32K     0K     0K] r--/rwx SM=COW          fr_spellcheck.dict
+mapped file              10b8bc000-10be80000 [ 5904K   576K     0K     0K] r--/rwx SM=COW          fr_ngrams.dict
+## French + English (trial 6)
+mapped file              10309c000-103100000 [  400K   368K     0K     0K] r--/rwx SM=COW          fr_spellcheck.dict
+mapped file              103100000-1036c4000 [ 5904K  1120K     0K     0K] r--/rwx SM=COW          fr_ngrams.dict
+mapped file              1078bc000-107920000 [  400K   384K     0K     0K] r--/rwx SM=COW          en_spellcheck.dict
+mapped file              112800000-112de0000 [ 6016K   672K     0K     0K] r--/rwx SM=COW          en_ngrams.dict

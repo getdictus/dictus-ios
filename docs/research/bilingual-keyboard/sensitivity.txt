@@ -1,0 +1,24 @@
+== THETA=1.5
+| fr@azerty | detect | 152 | 9 | 2 | 0 | 100.0% | 100.0% | - |
+| en@qwerty | detect | 155 | 9 | 9 | 1 | 99.4% | 99.4% | - |
+| mixed@azerty | detect | 127 | 9 | 6 | 1 | 80.3% | 89.0% | 0 of 15 |
+== THETA=4.5
+| fr@azerty | detect | 152 | 9 | 2 | 0 | 100.0% | 100.0% | - |
+| en@qwerty | detect | 155 | 9 | 9 | 1 | 98.7% | 98.7% | - |
+| mixed@azerty | detect | 127 | 12 | 9 | 4 | 70.1% | 81.9% | 0 of 15 |
+== LAMBDA=0.4
+| fr@azerty | detect | 152 | 9 | 2 | 0 | 100.0% | 100.0% | - |
+| en@qwerty | detect | 155 | 10 | 10 | 2 | 97.4% | 97.4% | - |
+| mixed@azerty | detect | 127 | 9 | 6 | 1 | 79.5% | 89.8% | 1 of 15 |
+== LAMBDA=0.8
+| fr@azerty | detect | 152 | 9 | 2 | 0 | 100.0% | 100.0% | - |
+| en@qwerty | detect | 155 | 8 | 8 | 0 | 99.4% | 99.4% | - |
+| mixed@azerty | detect | 127 | 13 | 10 | 5 | 69.3% | 81.1% | 0 of 15 |
+== VETO=-2
+| fr@azerty | detect | 152 | 11 | 2 | 0 | 100.0% | 100.0% | - |
+| en@qwerty | detect | 155 | 8 | 8 | 0 | 99.4% | 99.4% | - |
+| mixed@azerty | detect | 127 | 9 | 6 | 1 | 78.0% | 88.2% | 1 of 15 |
+== VETO=2
+| fr@azerty | detect | 152 | 9 | 2 | 0 | 100.0% | 100.0% | - |
+| en@qwerty | detect | 155 | 8 | 8 | 0 | 99.4% | 99.4% | - |
+| mixed@azerty | detect | 127 | 14 | 11 | 6 | 78.0% | 88.2% | 1 of 15 |
